@@ -1,0 +1,914 @@
+urn: urn:intuitem:risk:library:bs-it-gs-2023-isms-sicherheitsmanagement
+locale: de
+ref_id: bs-it-gs-2023-isms-sicherheitsmanagement
+name: "IT-Grundschutz-Kompendium \u2013 Werkzeug f\xFCr Informationssicherheit - ISMS:\
+  \ Sicherheitsmanagement"
+description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlichung\
+  \ des IT-Grundschutzes. Zusammen mit den BSI-Standards bildet es die Basis f\xFC\
+  r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6chten."
+copyright: Deutschland BSI
+version: 1
+provider: BSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:bs-it-gs-2023-isms-sicherheitsmanagement
+    ref_id: bs-it-gs-2023-isms-sicherheitsmanagement
+    name: "IT-Grundschutz-Kompendium \u2013 Werkzeug f\xFCr Informationssicherheit\
+      \ - ISMS: Sicherheitsmanagement"
+    description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlichung\
+      \ des IT-Grundschutzes. Zusammen mit den BSI-Standards bildet es die Basis f\xFC\
+      r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6\
+      chten."
+    implementation_groups_definition:
+    - ref_id: B
+      name: Basis
+      description: null
+    - ref_id: S
+      name: Standard
+      description: null
+    - ref_id: E
+      name: "Erh\xF6hter Schutzbedarf"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      assessable: false
+      depth: 1
+      ref_id: ISMS.1
+      name: Sicherheitsmanagement
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A1
+      name: "\xDCbernahme der Gesamtverantwortung f\xFCr Informationssicherheit durch\
+        \ die Leitung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.1
+      description: "Die Institutionsleitung MUSS die Gesamtverantwortung f\xFCr Informationssicherheit\
+        \ in der Institution \xFCbernehmen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.2
+      description: "Dies MUSS f\xFCr alle Beteiligten deutlich erkennbar sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.3
+      description: Die Institutionsleitung MUSS den Sicherheitsprozess initiieren,
+        steuern und kontrollieren.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.4
+      description: Die Institutionsleitung MUSS Informationssicherheit vorleben.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.5
+      description: "Die Institutionsleitung MUSS die Zust\xE4ndigkeiten f\xFCr Informationssicherheit\
+        \ festlegen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.6
+      description: "Die zust\xE4ndigen Mitarbeitenden M\xDCSSEN mit den erforderlichen\
+        \ Kompetenzen und Ressourcen ausgestattet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.7
+      description: "Die Institutionsleitung MUSS sich regelm\xE4\xDFig \xFCber den\
+        \ Status der Informationssicherheit informieren lassen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a1
+      ref_id: ISMS.1.A1.8
+      description: "Insbesondere MUSS sich die Institutionsleitung \xFCber m\xF6gliche\
+        \ Risiken und Konsequenzen aufgrund fehlender Sicherheitsma\xDFnahmen informieren\
+        \ lassen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A2
+      name: Festlegung der Sicherheitsziele und -strategie
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2
+      ref_id: ISMS.1.A2.1
+      description: Die Institutionsleitung MUSS den Sicherheitsprozess initiieren
+        und etablieren.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2
+      ref_id: ISMS.1.A2.2
+      description: "Daf\xFCr MUSS die Institutionsleitung angemessene Sicherheitsziele\
+        \ sowie eine Strategie f\xFCr Informationssicherheit festlegen und dokumentieren."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2
+      ref_id: ISMS.1.A2.3
+      description: "Es M\xDCSSEN konzeptionelle Vorgaben erarbeitet und organisatorische\
+        \ Rahmenbedingungen geschaffen werden, um den ordnungsgem\xE4\xDFen und sicheren\
+        \ Umgang mit Informationen innerhalb aller Gesch\xE4ftsprozesse des Unternehmens\
+        \ oder Fachaufgaben der Beh\xF6rde zu erm\xF6glichen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2
+      ref_id: ISMS.1.A2.4
+      description: Die Institutionsleitung MUSS die Sicherheitsstrategie und die Sicherheitsziele
+        tragen und verantworten.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a2
+      ref_id: ISMS.1.A2.5
+      description: "Die Institutionsleitung MUSS die Sicherheitsziele und die Sicherheitsstrategie\
+        \ regelm\xE4\xDFig dahingehend \xFCberpr\xFCfen, ob sie noch aktuell und angemessen\
+        \ sind und wirksam umgesetzt werden k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A3
+      name: Erstellung einer Leitlinie zur Informationssicherheit
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      ref_id: ISMS.1.A3.1
+      description: "Die Institutionsleitung MUSS eine \xFCbergeordnete Leitlinie zur\
+        \ Informationssicherheit verabschieden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      ref_id: ISMS.1.A3.2
+      description: "Diese MUSS den Stellenwert der Informationssicherheit, die Sicherheitsziele,\
+        \ die wichtigsten Aspekte der Sicherheitsstrategie sowie die Organisationsstruktur\
+        \ f\xFCr Informationssicherheit beschreiben."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      ref_id: ISMS.1.A3.3
+      description: "F\xFCr die Sicherheitsleitlinie MUSS ein klarer Geltungsbereich\
+        \ festgelegt sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      ref_id: ISMS.1.A3.4
+      description: "In der Leitlinie zur Informationssicherheit M\xDCSSEN die Sicherheitsziele\
+        \ und der Bezug der Sicherheitsziele zu den Gesch\xE4ftszielen und Aufgaben\
+        \ der Institution erl\xE4utert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      ref_id: ISMS.1.A3.5
+      description: Die Institutionsleitung MUSS die Leitlinie zur Informationssicherheit
+        allen Mitarbeitenden und sonstigen Mitgliedern der Institution bekannt geben.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a3
+      ref_id: ISMS.1.A3.6
+      description: "Die Leitlinie zur Informationssicherheit SOLLTE regelm\xE4\xDF\
+        ig aktualisiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A4
+      name: Benennung eines oder einer Informationssicherheitsbeauftragten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4
+      ref_id: ISMS.1.A4.1
+      description: Die Institutionsleitung MUSS einen oder eine ISB benennen.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4
+      ref_id: ISMS.1.A4.2
+      description: "Der oder die ISB MUSS die Informationssicherheit in der Institution\
+        \ f\xF6rdern und den Sicherheitsprozess mitsteuern und koordinieren."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4
+      ref_id: ISMS.1.A4.3
+      description: Die Institutionsleitung MUSS den oder die ISB mit angemessenen
+        Ressourcen ausstatten.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4
+      ref_id: ISMS.1.A4.4
+      description: "Die Institutionsleitung MUSS dem oder der ISB die M\xF6glichkeit\
+        \ einr\xE4umen, bei Bedarf direkt an sie selbst zu berichten."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a4
+      ref_id: ISMS.1.A4.5
+      description: "Der oder die ISB MUSS bei allen gr\xF6\xDFeren Projekten sowie\
+        \ bei der Einf\xFChrung neuer Anwendungen und IT-Systeme fr\xFChzeitig beteiligt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A5
+      name: Vertragsgestaltung bei Bestellung eines oder einer externen Informationssicherheitsbeauftragten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5
+      ref_id: ISMS.1.A5.1
+      description: Die Institutionsleitung MUSS einen externen oder eine externe ISB
+        bestellen, wenn die Rolle des oder der ISB nicht durch einen internen Mitarbeitenden
+        besetzt werden kann.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5
+      ref_id: ISMS.1.A5.2
+      description: Der Vertrag mit einem oder einer externen ISB MUSS alle Aufgaben
+        des oder der ISB sowie die damit verbundenen Rechte und Pflichten umfassen.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5
+      ref_id: ISMS.1.A5.3
+      description: Der Vertrag MUSS eine geeignete Vertraulichkeitsvereinbarung umfassen.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a5
+      ref_id: ISMS.1.A5.4
+      description: "Der Vertrag MUSS eine kontrollierte Beendigung des Vertragsverh\xE4\
+        ltnisses, einschlie\xDFlich der \xDCbergabe der Aufgaben an die Auftraggebenden,\
+        \ gew\xE4hrleisten."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A6
+      name: "Aufbau einer geeigneten Organisationsstruktur f\xFCr Informationssicherheit"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.1
+      description: "Eine geeignete \xFCbergreifende Organisationsstruktur f\xFCr Informationssicherheit\
+        \ MUSS vorhanden sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.2
+      description: "Daf\xFCr M\xDCSSEN Rollen definiert sein, die konkrete Aufgaben\
+        \ \xFCbernehmen, um die Sicherheitsziele zu erreichen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.3
+      description: "Au\xDFerdem M\xDCSSEN qualifizierte Personen benannt werden, denen\
+        \ ausreichend Ressourcen zur Verf\xFCgung stehen, um diese Rollen zu \xFC\
+        bernehmen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.4
+      description: "Die Aufgaben, Rollen, Verantwortungen und Kompetenzen im Sicherheitsmanagement\
+        \ M\xDCSSEN nachvollziehbar definiert und zugewiesen sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.5
+      description: "F\xFCr alle wichtigen Funktionen der Organisation f\xFCr Informationssicherheit\
+        \ MUSS es wirksame Vertretungsregelungen geben."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.6
+      description: "Kommunikationswege M\xDCSSEN geplant, beschrieben, eingerichtet\
+        \ und bekannt gemacht werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.7
+      description: "Es MUSS f\xFCr alle Aufgaben und Rollen festgelegt sein, wer wen\
+        \ informiert und wer bei welchen Aktionen in welchem Umfang informiert werden\
+        \ muss."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a6
+      ref_id: ISMS.1.A6.8
+      description: "Es MUSS regelm\xE4\xDFig gepr\xFCft werden, ob die Organisationsstruktur\
+        \ f\xFCr Informationssicherheit noch angemessen ist oder ob sie an neue Rahmenbedingungen\
+        \ angepasst werden muss."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A7
+      name: "Festlegung von Sicherheitsma\xDFnahmen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7
+      ref_id: ISMS.1.A7.1
+      description: "Im Rahmen des Sicherheitsprozesses M\xDCSSEN f\xFCr die gesamte\
+        \ Informationsverarbeitung ausf\xFChrliche und angemessene Sicherheitsma\xDF\
+        nahmen festgelegt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7
+      ref_id: ISMS.1.A7.2
+      description: "Alle Sicherheitsma\xDFnahmen SOLLTEN systematisch in Sicherheitskonzepten\
+        \ dokumentiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a7
+      ref_id: ISMS.1.A7.3
+      description: "Die Sicherheitsma\xDFnahmen SOLLTEN regelm\xE4\xDFig aktualisiert\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A8
+      name: Integration der Mitarbeitenden in den Sicherheitsprozess
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.1
+      description: "Alle Mitarbeitenden M\xDCSSEN in den Sicherheitsprozess integriert\
+        \ sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.2
+      description: "Hierf\xFCr M\xDCSSEN sie \xFCber Hintergr\xFCnde und die f\xFC\
+        r sie relevanten Gef\xE4hrdungen informiert sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.3
+      description: "Sie M\xDCSSEN Sicherheitsma\xDFnahmen kennen und umsetzen, die\
+        \ ihren Arbeitsplatz betreffen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.4
+      description: "Alle Mitarbeitenden M\xDCSSEN in die Lage versetzt werden, Sicherheit\
+        \ aktiv mitzugestalten."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.5
+      description: "Daher SOLLTEN die Mitarbeitenden fr\xFChzeitig beteiligt werden,\
+        \ wenn Sicherheitsma\xDFnahmen zu planen oder organisatorische Regelungen\
+        \ zu gestalten sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.6
+      description: "Bei der Einf\xFChrung von Sicherheitsrichtlinien und Sicherheitswerkzeugen\
+        \ M\xDCSSEN die Mitarbeitenden ausreichend informiert sein, wie diese anzuwenden\
+        \ sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a8
+      ref_id: ISMS.1.A8.7
+      description: "Die Mitarbeitenden M\xDCSSEN dar\xFCber aufgekl\xE4rt werden,\
+        \ welche Konsequenzen eine Verletzung der Sicherheitsvorgaben haben kann."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A9
+      name: "Integration der Informationssicherheit in organisationsweite Abl\xE4\
+        ufe und Prozesse"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9
+      ref_id: ISMS.1.A9.1
+      description: "Informationssicherheit MUSS in alle Gesch\xE4ftsprozesse sowie\
+        \ Fachaufgaben integriert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9
+      ref_id: ISMS.1.A9.2
+      description: "Es MUSS dabei gew\xE4hrleistet sein, dass nicht nur bei neuen\
+        \ Prozessen und Projekten, sondern auch bei laufenden Aktivit\xE4ten alle\
+        \ erforderlichen Sicherheitsaspekte ber\xFCcksichtigt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9
+      ref_id: ISMS.1.A9.3
+      description: Der oder die Informationssicherheitsbeauftragte (ISB) MUSS an sicherheitsrelevanten
+        Entscheidungen ausreichend beteiligt werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a9
+      ref_id: ISMS.1.A9.4
+      description: "Informationssicherheit SOLLTE au\xDFerdem mit anderen Bereichen\
+        \ in der Institution, die sich mit Sicherheit und Risikomanagement besch\xE4\
+        ftigen, abgestimmt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A10
+      name: Erstellung eines Sicherheitskonzepts
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      ref_id: ISMS.1.A10.1
+      description: "F\xFCr den festgelegten Geltungsbereich (Informationsverbund)\
+        \ SOLLTE ein angemessenes Sicherheitskonzept als das zentrale Dokument im\
+        \ Sicherheitsprozess erstellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      ref_id: ISMS.1.A10.2
+      description: "Es SOLLTE entschieden werden, ob das Sicherheitskonzept aus einem\
+        \ oder aus mehreren Teilkonzepten bestehen soll, die sukzessive erstellt werden,\
+        \ um zun\xE4chst in ausgew\xE4hlten Bereichen das erforderliche Sicherheitsniveau\
+        \ herzustellen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      ref_id: ISMS.1.A10.3
+      description: "Im Sicherheitskonzept M\xDCSSEN aus den Sicherheitszielen der\
+        \ Institution, dem identifizierten Schutzbedarf und der Risikobewertung konkrete\
+        \ Sicherheitsma\xDFnahmen passend zum betrachteten Informationsverbund abgeleitet\
+        \ werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      ref_id: ISMS.1.A10.4
+      description: "Sicherheitsprozess und Sicherheitskonzept M\xDCSSEN die individuell\
+        \ geltenden Vorschriften und Regelungen ber\xFCcksichtigen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      ref_id: ISMS.1.A10.5
+      description: "Die im Sicherheitskonzept vorgesehenen Ma\xDFnahmen M\xDCSSEN\
+        \ zeitnah in die Praxis umgesetzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a10
+      ref_id: ISMS.1.A10.6
+      description: Dies MUSS geplant und die Umsetzung MUSS kontrolliert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A11
+      name: Aufrechterhaltung der Informationssicherheit
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.1
+      description: "Der Sicherheitsprozess, die Sicherheitskonzepte, die Leitlinie\
+        \ zur Informationssicherheit und die Organisationsstruktur f\xFCr Informationssicherheit\
+        \ SOLLTEN regelm\xE4\xDFig auf Wirksamkeit und Angemessenheit \xFCberpr\xFC\
+        ft und aktualisiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.2
+      description: "Dazu SOLLTEN regelm\xE4\xDFig Vollst\xE4ndigkeits- bzw. Aktualisierungspr\xFC\
+        fungen des Sicherheitskonzeptes durchgef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.3
+      description: "Ebenso SOLLTEN regelm\xE4\xDFig Sicherheitsrevisionen durchgef\xFC\
+        hrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.4
+      description: "Dazu SOLLTE geregelt sein, welche Bereiche und Sicherheitsma\xDF\
+        nahmen wann und von wem zu \xFCberpr\xFCfen sind."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.5
+      description: "\xDCberpr\xFCfungen des Sicherheitsniveaus SOLLTEN regelm\xE4\xDF\
+        ig (mindestens j\xE4hrlich) sowie anlassbezogen durchgef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.6
+      description: "Die Pr\xFCfungen SOLLTEN von qualifizierten und unabh\xE4ngigen\
+        \ Personen durchgef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.7
+      description: "Die Ergebnisse der \xDCberpr\xFCfungen SOLLTEN nachvollziehbar\
+        \ dokumentiert sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a11
+      ref_id: ISMS.1.A11.8
+      description: "Darauf aufbauend SOLLTEN M\xE4ngel beseitigt und Korrekturma\xDF\
+        nahmen ergriffen werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A12
+      name: Management-Berichte zur Informationssicherheit
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.1
+      description: "Die Institutionsleitung SOLLTE sich regelm\xE4\xDFig \xFCber den\
+        \ Stand der Informationssicherheit informieren, insbesondere \xFCber die aktuelle\
+        \ Gef\xE4hrdungslage sowie die Wirksamkeit und Effizienz des Sicherheitsprozesses."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.2
+      description: "Dazu SOLLTEN Management-Berichte geschrieben werden, welche die\
+        \ wesentlichen relevanten Informationen \xFCber den Sicherheitsprozess enthalten,\
+        \ insbesondere \xFCber Probleme, Erfolge und Verbesserungsm\xF6glichkeiten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.3
+      description: "Die Management-Berichte SOLLTEN klar priorisierte Ma\xDFnahmenvorschl\xE4\
+        ge enthalten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.4
+      description: "Die Ma\xDFnahmenvorschl\xE4ge SOLLTEN mit realistischen Absch\xE4\
+        tzungen zum erwarteten Umsetzungsaufwand versehen sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.5
+      description: Die Management-Berichte SOLLTEN revisionssicher archiviert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.6
+      description: "Die Management-Entscheidungen \xFCber erforderliche Aktionen,\
+        \ den Umgang mit Restrisiken und mit Ver\xE4nderungen von sicherheitsrelevanten\
+        \ Prozessen SOLLTEN dokumentiert sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a12
+      ref_id: ISMS.1.A12.7
+      description: Die Management-Entscheidungen SOLLTEN revisionssicher archiviert
+        werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A13
+      name: Dokumentation des Sicherheitsprozesses
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      ref_id: ISMS.1.A13.1
+      description: Der Ablauf des Sicherheitsprozesses SOLLTE dokumentiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      ref_id: ISMS.1.A13.2
+      description: "Wichtige Entscheidungen und die Arbeitsergebnisse der einzelnen\
+        \ Phasen wie Sicherheitskonzept, Richtlinien oder Untersuchungsergebnisse\
+        \ von Sicherheitsvorf\xE4llen SOLLTEN ausreichend dokumentiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      ref_id: ISMS.1.A13.3
+      description: "Es SOLLTE eine geregelte Vorgehensweise f\xFCr die Erstellung\
+        \ und Archivierung von Dokumentationen im Rahmen des Sicherheitsprozesses\
+        \ geben."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      ref_id: ISMS.1.A13.4
+      description: "Regelungen SOLLTEN existieren, um die Aktualit\xE4t und Vertraulichkeit\
+        \ der Dokumentationen zu wahren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      ref_id: ISMS.1.A13.5
+      description: "Von den vorhandenen Dokumenten SOLLTE die jeweils aktuelle Version\
+        \ kurzfristig zug\xE4nglich sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a13
+      ref_id: ISMS.1.A13.6
+      description: "Au\xDFerdem SOLLTEN alle Vorg\xE4ngerversionen zentral archiviert\
+        \ werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A15
+      name: "Wirtschaftlicher Einsatz von Ressourcen f\xFCr Informationssicherheit"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15
+      ref_id: ISMS.1.A15.1
+      description: "Die Sicherheitsstrategie SOLLTE wirtschaftliche Aspekte ber\xFC\
+        cksichtigen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15
+      ref_id: ISMS.1.A15.2
+      description: "Werden Sicherheitsma\xDFnahmen festgelegt, SOLLTEN die daf\xFC\
+        r erforderlichen Ressourcen beziffert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15
+      ref_id: ISMS.1.A15.3
+      description: "Die f\xFCr Informationssicherheit eingeplanten Ressourcen SOLLTEN\
+        \ termingerecht bereitgestellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a15
+      ref_id: ISMS.1.A15.4
+      description: "Bei Arbeitsspitzen oder besonderen Aufgaben SOLLTEN zus\xE4tzliche\
+        \ interne Mitarbeitenden eingesetzt oder externe Expertise hinzugezogen werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A16
+      name: Erstellung von zielgruppengerechten Sicherheitsrichtlinien
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a16
+      ref_id: ISMS.1.A16.1
+      description: Neben den allgemeinen SOLLTE es auch zielgruppenorientierte Sicherheitsrichtlinien
+        geben, die jeweils bedarfsgerecht die relevanten Sicherheitsthemen abbilden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1
+      ref_id: ISMS.1.A17
+      name: "Abschlie\xDFen von Versicherungen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a17
+      ref_id: ISMS.1.A17.1
+      description: "Es SOLLTE gepr\xFCft werden, ob f\xFCr Restrisiken Versicherungen\
+        \ abgeschlossen werden k\xF6nnen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-isms-sicherheitsmanagement:isms.1.a17
+      ref_id: ISMS.1.A17.2
+      description: "Es SOLLTE regelm\xE4\xDFig \xFCberpr\xFCft werden, ob die bestehenden\
+        \ Versicherungen der aktuellen Lage entsprechen."
+      implementation_groups:
+      - E
