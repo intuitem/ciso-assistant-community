@@ -8,6 +8,7 @@ import zipfile
 from datetime import datetime
 from typing import Any
 from uuid import UUID
+from datetime import date, timedelta
 
 import django_filters as df
 from ciso_assistant.settings import (
@@ -236,6 +237,10 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
+    @action(detail=False, name="Get threats count")
+    def threats_count(self, request):
+        return Response({"results": threats_count_per_name(request.user)})
+
 
 class AssetViewSet(BaseModelViewSet):
     """
@@ -279,14 +284,25 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
-        _used_matrices = RiskMatrix.objects.filter(
-            riskassessment__isnull=False
-        ).distinct()
+        viewable_matrices = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        viewable_assessments = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )[0]
+        _used_matrices = (
+            RiskMatrix.objects.filter(riskassessment__isnull=False)
+            .filter(id__in=viewable_matrices)
+            .filter(riskassessment__id__in=viewable_assessments)
+            .distinct()
+        )
         used_matrices = _used_matrices.values("id", "name")
         for i in range(len(used_matrices)):
-            used_matrices[i]["risk_assessments_count"] = _used_matrices.get(
-                id=used_matrices[i]["id"]
-            ).riskassessment_set.count()
+            used_matrices[i]["risk_assessments_count"] = (
+                RiskAssessment.objects.filter(risk_matrix=_used_matrices[i].id)
+                .filter(id__in=viewable_assessments)
+                .count()
+            )
         return Response({"results": used_matrices})
 
 
@@ -574,7 +590,8 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         measures = sorted(
             AppliedControl.objects.filter(id__in=object_ids_view)
-            .exclude(status="done")
+            .filter(eta__lte=date.today() + timedelta(days=30))
+            .exclude(status="active")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
@@ -610,9 +627,6 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get the secuity measures to review")
     def to_review(self, request):
         measures = measures_to_review(request.user)
-
-        """print("ODZFFHZ")
-        print(measures[0].get_ranking_score())"""
 
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
@@ -772,7 +786,6 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
         submitted = False
-        print(risk_acceptance)
         if risk_acceptance.get("approver"):
             submitted = True
         for scenario in risk_acceptance.get("risk_scenarios"):
@@ -1056,14 +1069,25 @@ class FrameworkViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
-        _used_frameworks = Framework.objects.filter(
-            complianceassessment__isnull=False
-        ).distinct()
+        viewable_framework = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Framework
+        )[0]
+        viewable_assessments = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )[0]
+        _used_frameworks = (
+            Framework.objects.filter(complianceassessment__isnull=False)
+            .filter(id__in=viewable_framework)
+            .filter(complianceassessment__id__in=viewable_assessments)
+            .distinct()
+        )
         used_frameworks = _used_frameworks.values("id", "name")
         for i in range(len(used_frameworks)):
-            used_frameworks[i]["compliance_assessments_count"] = _used_frameworks.get(
-                id=used_frameworks[i]["id"]
-            ).complianceassessment_set.count()
+            used_frameworks[i]["compliance_assessments_count"] = (
+                ComplianceAssessment.objects.filter(framework=_used_frameworks[i].id)
+                .filter(id__in=viewable_assessments)
+                .count()
+            )
         return Response({"results": used_frameworks})
 
 
@@ -1183,6 +1207,92 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for group in implementation_groups_definiition
         }
         return Response(implementation_group_choices)
+
+    @action(detail=True, methods=["get"], name="Get action plan data")
+    def action_plan(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=ComplianceAssessment,
+        )
+        if UUID(pk) in viewable_objects:
+            response = {
+                "planned": list(),
+                "active": list(),
+                "inactive": list(),
+                "none": list(),
+            }
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = AppliedControlReadSerializer(
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                ).distinct(),
+                many=True,
+            ).data
+            for applied_control in applied_controls:
+                applied_control["requirements_count"] = (
+                    RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment_object
+                    )
+                    .filter(applied_controls=applied_control["id"])
+                    .count()
+                )
+                response[applied_control["status"].lower()].append(
+                    applied_control
+                ) if applied_control["status"] else response["none"].append(
+                    applied_control
+                )
+        return Response(response)
+
+    @action(detail=True, name="Get action plan PDF")
+    def action_plan_pdf(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            context = {
+                "planned": list(),
+                "active": list(),
+                "inactive": list(),
+                "no status": list(),
+            }
+            color_map = {
+                "planned": "#93c5fd",
+                "active": "#86efac",
+                "inactive": "#fca5a5",
+                "no status": "#e5e7eb",
+            }
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = (
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                )
+                .distinct()
+                .order_by("eta")
+            )
+            for applied_control in applied_controls:
+                context[applied_control.status].append(
+                    applied_control
+                ) if applied_control.status else context["no status"].append(
+                    applied_control
+                )
+            data = {
+                "color_map": color_map,
+                "context": context,
+                "compliance_assessment": compliance_assessment_object,
+            }
+            html = render_to_string("core/action_plan_pdf.html", data)
+            pdf_file = HTML(string=html).write_pdf()
+            response = HttpResponse(pdf_file, content_type="application/pdf")
+            return response
+        else:
+            return Response({"error": "Permission denied"})
 
     def perform_create(self, serializer):
         """
@@ -1356,8 +1466,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
-        # How to add ranking_score directly in the serializer ?
-
         for i in range(len(measures)):
             measures[i]["ranking_score"] = ranking_scores[measures[i]["id"]]
 
@@ -1370,10 +1478,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get the secuity measures to review")
     def to_review(self, request):
         measures = measures_to_review(request.user)
-
-        """print("ODZFFHZ")
-        print(measures[0].get_ranking_score())"""
-
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
