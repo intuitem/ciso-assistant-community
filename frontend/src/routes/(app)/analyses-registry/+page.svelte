@@ -23,7 +23,7 @@
 		<ModelTable source={data.table} URLModel={data.URLModel}>
 			<span slot="actions" let:meta class="space-x-2 whitespace-nowrap">
 				<a
-					href="/risk-assessments/{meta.id}/plan"
+					href="/risk-assessments/{meta.id}/remediation-plan"
 					class="unstyled cursor-pointer text-xl text-slate-500 hover:text-indigo-700"
 					on:click={stopPropagation}><i class="fa-solid fa-heart-pulse" /></a
 				>
@@ -49,12 +49,12 @@
 					>
 					<p class="block px-4 py-2 text-sm text-gray-800">Treatment plan</p>
 					<a
-						href="/risk-assessments/{meta.id}/plan/export/pdf"
+						href="/risk-assessments/{meta.id}/remediation-plan/export/pdf"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 						on:click={stopPropagation}>... as PDF</a
 					>
 					<a
-						href="/risk-assessments/{meta.id}/plan/export/csv"
+						href="/risk-assessments/{meta.id}/remediation-plan/export/csv"
 						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 						on:click={stopPropagation}>... as csv</a
 					>
