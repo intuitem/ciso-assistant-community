@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -43,9 +44,17 @@
 			category: 'category',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
-			eta: 'eta'
+			eta: 'eta',
+			state: 'state'
 		},
-		body: tableSourceMapper(data.measures, ['name', 'category', 'folder', 'ranking_score', 'eta']),
+		body: tableSourceMapper(data.measures, [
+			'name',
+			'category',
+			'folder',
+			'ranking_score',
+			'eta',
+			'state'
+		]),
 		meta: data.measures
 	};
 
@@ -55,25 +64,33 @@
 			category: 'category',
 			folder: 'domain',
 			eta: 'eta',
-			expiry_date: 'expiryDate'
+			expiry_date: 'expiryDate',
+			state: 'state'
 		},
 		body: tableSourceMapper(data.measures_to_review, [
 			'name',
 			'category',
 			'folder',
 			'eta',
-			'expiry_date'
+			'expiry_date',
+			'state'
 		]),
-		meta: data.measures
+		meta: data.measures_to_review
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
 		head: {
 			name: 'name',
 			risk_scenarios: 'riskScenarios',
-			expiry_date: 'expiryDate'
+			expiry_date: 'expiryDate',
+			state: 'state'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date']),
+		body: tableSourceMapper(data.acceptances_to_review, [
+			'name',
+			'risk_scenarios',
+			'expiry_date',
+			'state'
+		]),
 		meta: data.acceptances_to_review
 	};
 
@@ -243,7 +260,23 @@
 					</div>
 				</section>
 			{:else if tabSet === 1}
+				<!-- Risk tab -->
+
 				<section>
+					{#if data.threats_count.results.labels.length > 0}
+						<div class=" h-96 my-2">
+							<RadarChart
+								name="threatRadar"
+								title={m.threatRadarChart()}
+								labels={data.threats_count.results.labels}
+								values={data.threats_count.results.values}
+							/>
+						</div>
+					{:else}
+						<div class="py-4 flex items-center justify-center">
+							<p class="">{m.noThreatsMapped()}</p>
+						</div>
+					{/if}
 					<div class="flex">
 						<div class="h-96 flex-1">
 							<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>

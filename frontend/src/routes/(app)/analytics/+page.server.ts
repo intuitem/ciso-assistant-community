@@ -4,6 +4,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { Project } from '$lib/utils/types';
+import { TODAY } from '$lib/utils/constants';
 
 const REQUIREMENT_ASSESSMENT_STATUS = [
 	'compliant',
@@ -52,6 +53,21 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_ord_applied_controls = await fetch(`${BASE_API_URL}/applied-controls/todo/`);
 	const ord_applied_controls = await req_ord_applied_controls.json();
 
+	function timeState(date: string) {
+		const eta = new Date(date);
+		if (eta.getDate() > TODAY.getDate()) {
+			return { name: 'incoming', hexcolor: '#93c5fd' };
+		} else if (eta.getDate() < TODAY.getDate()) {
+			return { name: 'outdated', hexcolor: '#f87171' };
+		} else {
+			return { name: 'today', hexcolor: '#fbbf24' };
+		}
+	}
+
+	for (const applied_control of ord_applied_controls.results) {
+		applied_control.state = timeState(applied_control.eta);
+	}
+
 	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
 	const counters = await req_get_counters.json();
 
@@ -71,11 +87,23 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		residual: Record<string, any>[];
 	} = await req_get_risks_count_per_level.json().then((res) => res.results);
 
+	const threats_count = await fetch(`${BASE_API_URL}/threats/threats_count/`).then((res) =>
+		res.json()
+	);
+
 	const req_get_measures_to_review = await fetch(`${BASE_API_URL}/applied-controls/to_review/`);
 	const measures_to_review = await req_get_measures_to_review.json();
 
+	for (const measure of measures_to_review.results) {
+		measure.state = timeState(measure.expiry_date);
+	}
+
 	const req_get_acceptances_to_review = await fetch(`${BASE_API_URL}/risk-acceptances/to_review/`);
 	const acceptances_to_review = await req_get_acceptances_to_review.json();
+
+	for (const acceptance of acceptances_to_review.results) {
+		acceptance.state = timeState(acceptance.expiry_date);
+	}
 
 	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
 	const risk_assessments = await req_risk_assessments.json();
@@ -194,6 +222,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		complianceAssessmentsPerStatus,
 		riskScenariosPerStatus,
 		risks_count_per_level,
+		threats_count,
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
 		risk_assessments: risk_assessments.results,

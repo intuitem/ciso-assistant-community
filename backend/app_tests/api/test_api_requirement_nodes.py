@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
-from core.models import RequirementNode, Framework
+from app_tests.test_vars import TEST_FRAMEWORK_URN
+from core.models import RequirementNode, Framework, StoredLibrary
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries, EndpointTestsUtils
@@ -76,7 +77,9 @@ class TestRequirementNodesAuthenticated:
             test.client,
             "Requirement nodes",
             EndpointTestsUtils.get_endpoint_url("Requirement nodes"),
-            EndpointTestsUtils.get_object_urn("Framework"),
+            EndpointTestsUtils.get_stored_library_content(
+                test.client, TEST_FRAMEWORK_URN
+            ),
             [
                 "name",
                 "description",
