@@ -9,11 +9,12 @@ repos:
     rev: v0.4.1
     hooks:
       # Run the linter.
-      - id: ruff
-        args: [--fix backend]
+      # - id: ruff
+      #   args: [--fix, backend]
       # Run the formatter.
       - id: ruff-format
         args: [backend]
+        exclude: (migrations)
   - repo: local
     hooks:
       - id: format-frontend

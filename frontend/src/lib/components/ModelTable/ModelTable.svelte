@@ -36,6 +36,7 @@
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
+	export let tags = true;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
@@ -72,7 +73,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
 	}
 
 	// Row Keydown Handler
@@ -84,11 +85,10 @@
 	}
 
 	export let identifierField = 'id';
-
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-
 	export let URLModel: urlModel | undefined = undefined;
-	$: model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
+	export let detailQueryParameter: string | undefined;
+	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
 
@@ -109,6 +109,7 @@
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
@@ -127,13 +128,17 @@
 	});
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	// const field_component_map = FIELD_MAP;
 
 	const tagMap = FIELD_COLORED_TAG_MAP[URLModel] ?? {};
 	const taggedKeys = new Set(Object.keys(tagMap));
 
-	// tagged_keys tag_map[key][value]
+	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
+
+	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
+	const preventDelete = (row: TableSource) =>
+		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 </script>
 
 <div class="table-container {classesBase}">
@@ -180,7 +185,7 @@
 		<!-- Body -->
 		<tbody class="table-body {regionBody}">
 			{#each $rows as row, rowIndex}
-				{@const meta = source.meta ? source.meta[rowIndex] : source.body[rowIndex]}
+				{@const meta = row.meta ? row.meta : row}
 				<!-- Row -->
 				<!-- prettier-ignore -->
 				<tr
@@ -202,7 +207,7 @@
 								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
 								{#each tagList as tag}
 									{@const tagData = tag.values[meta[tag.key]]}
-									{#if tagData}
+									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
 											{localItems(languageTag())[text]}
@@ -241,7 +246,13 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">
+					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+						{localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+					{:else}
+						{value.name ?? value.str ?? '-'}
+					{/if}
+				</p>
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
@@ -264,16 +275,17 @@
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
               {@const actionsComponent = field_component_map['actions']}
+              {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
               <TableRowActions
-                deleteForm={!row.meta.builtin ? deleteForm : undefined}
-                model={URL_MODEL_MAP[URLModel]}
-                {URLModel}
-                detailURL={`/${URLModel}/${row.meta[identifierField]}`}
-                editURL={!(row.meta.builtin || row.meta.urn) ? `/${URLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
+                deleteForm={deleteForm}
+                {model}
+                URLModel={actionsURLModel}
+                detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+                editURL={!(row.meta.builtin || row.meta.urn) ? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
-                preventDelete={(row.meta.builtin || (row.meta.urn ?? false)) && !(row.meta.allowDeleteLibrary ?? false)}
+                preventDelete={preventDelete(row)}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}

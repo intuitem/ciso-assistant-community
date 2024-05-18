@@ -31,6 +31,8 @@ export const MONTH_LIST = [
 	'December'
 ];
 
+export const TODAY = new Date();
+
 export const UUID_REGEX = '([0-9a-f]{8}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{12})';
 export const UUID_LIST_REGEX = new RegExp(`^${UUID_REGEX}(,${UUID_REGEX})*$`);
 
@@ -39,7 +41,8 @@ export const URN_REGEX =
 
 export const LOCALE_DISPLAY_MAP = {
 	en: '🇬🇧 English',
-	fr: '🇫🇷 Français'
+	fr: '🇫🇷 Français',
+	de: '🇩🇪 Deutsch'
 };
 
 export const ISO_8601_REGEX =

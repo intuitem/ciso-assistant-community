@@ -11,43 +11,48 @@
 	export let data;
 
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
-	let tabSet: number = data.importedLibrariesTable.body.length > 0 ? 0 : 1;
-	$: if (data.importedLibrariesTable.body.length === 0) tabSet = 1;
+	let tabSet: number = data.loadedLibrariesTable.body.length > 0 ? 0 : 1;
+	$: if (data.loadedLibrariesTable.body.length === 0) tabSet = 0;
 </script>
 
 <div class="card bg-white shadow">
 	<TabGroup>
-		{#if data.importedLibrariesTable.body.length > 0}
-			<Tab bind:group={tabSet} value={0}>{m.importedLibraries()}</Tab>
-			<Tab bind:group={tabSet} value={1}>{m.librariesStore()}</Tab>
+		<!-- data.loadedLibrariesTable.body.length > 0 -->
+		{#if data.loadedLibrariesTable.body.length > 0}
+			<Tab bind:group={tabSet} value={0}>{m.librariesStore()}</Tab>
+			<Tab bind:group={tabSet} value={1}>{m.loadedLibraries()}</Tab>
 		{:else}
 			<div class="card p-4 variant-soft-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2" />
-				{m.currentlyNoImportedLibraries()}.
+				{m.currentlyNoLoadedLibraries()}.
 			</div>
 		{/if}
 		<svelte:fragment slot="panel">
+			<!-- storedlibraries -->
 			{#if tabSet === 0}
 				<ModelTable
-					source={data.importedLibrariesTable}
+					source={data.storedLibrariesTable}
 					URLModel="libraries"
 					identifierField="urn"
-					deleteForm={data.deleteForm}
 					pagination={false}
+					deleteForm={data.deleteForm}
 				/>
 			{/if}
 			{#if tabSet === 1}
+				<!-- loadedlibraries -->
 				<ModelTable
-					source={data.defaultLibrariesTable}
+					source={data.loadedLibrariesTable}
 					URLModel="libraries"
 					identifierField="urn"
 					pagination={false}
+					deleteForm={data.deleteForm}
+					detailQueryParameter="loaded"
 				/>
 			{/if}
 		</svelte:fragment>
 	</TabGroup>
 </div>
-{#if tabSet === 1}
+{#if tabSet === 0}
 	<div class="card bg-white p-4 mt-4 shadow">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>
@@ -60,6 +65,7 @@
 				let:form
 				validators={zod(LibraryUploadSchema)}
 				action="?/upload"
+				useFocusTrap={false}
 				onSubmit={() => {
 					const fileInput = document.querySelector(`input[type="file"]`);
 					console.log(fileInput);
@@ -71,13 +77,13 @@
 					{form}
 					helpText={m.libraryFileInYaml()}
 					field="file"
-					label={m.uploadYourLibrary()}
+					label={m.addYourLibrary()}
 				/>
 
 				<button
 					class="btn variant-filled-primary font-semibold w-full"
 					data-testid="save-button"
-					type="submit">{m.upload()}</button
+					type="submit">{m.add()}</button
 				>
 			</SuperForm>
 		{:catch err}

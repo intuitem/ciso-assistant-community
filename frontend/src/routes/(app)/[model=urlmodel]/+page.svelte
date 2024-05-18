@@ -44,13 +44,11 @@
 		}
 		modalStore.trigger(modal);
 	}
-
-	$: search = data.model?.search !== false;
 </script>
 
 {#if data.table}
 	<div class="shadow-lg">
-		<ModelTable source={data.table} deleteForm={data.deleteForm} URLModel={data.URLModel} {search}>
+		<ModelTable source={data.table} deleteForm={data.deleteForm} URLModel={data.URLModel}>
 			<div slot="addButton">
 				{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(data.URLModel)}
 					<button
