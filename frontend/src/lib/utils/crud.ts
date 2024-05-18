@@ -38,7 +38,7 @@ function getValue(object: { [key: string]: any }, keys: string | string[]) {
 export const getOptions = ({
 	objects,
 	suggestions,
-	label = 'name',
+	label,
 	value = 'id',
 	extra_fields = [],
 	self = undefined,
@@ -52,6 +52,9 @@ export const getOptions = ({
 }[] => {
 	const options = objects
 		.map((object) => {
+			let append = (x, y) => (!y) ? x : (x == '' ? y : x + " - " + y);
+			let my_label = label ? object[label] :
+				append(append(append('', object['ref_id']), object['name']), object['description']);
 			return {
 				label:
 					extra_fields.length > 0
@@ -60,8 +63,8 @@ export const getOptions = ({
 								.map((string) => `${string}`)
 								.join('/') +
 						  '/' +
-						  object[label]
-						: object[label],
+						  my_label
+						: my_label,
 				value: object[value],
 				suggested: false
 			};

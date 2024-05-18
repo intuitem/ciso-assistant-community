@@ -55,7 +55,7 @@ for tab in dataframe:
         for row in tab:
             (measure_id, _, objective, so_level, _, description) = (r.value for r in row[0:6])
             if measure_id and re.match(r'M\d+', measure_id):
-                measures[measure_id] = (objective, so_level, description)
+                measures["5G-"+measure_id] = (objective, so_level, description)
     if title in ("5GControls"):
         for row in tab:
             (ref_id, description, evidence, _, _, _, domain_id) = (r.value for r in row[0:7])
