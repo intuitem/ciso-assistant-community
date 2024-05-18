@@ -108,6 +108,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
 38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
+39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 
 ### Community contributions
 
@@ -128,7 +129,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
-- BSI-IT (as requested by the German community)
+- Secure Controls Framework (SCF)
 - CCPA
 - AI Act
 - Part-IS
