@@ -33,8 +33,10 @@ print("parsing", input_file_name)
 dataframe = openpyxl.load_workbook(input_file_name)
 output_table = []
 domains = {}
+objectives = {}
 measures = {}
 current_domain_id = ""
+current_objective_id = ""
 
 for tab in dataframe:
     print("parsing tab", tab.title)
@@ -44,6 +46,11 @@ for tab in dataframe:
             (domain_id, name, description) = (r.value for r in row[0:3])
             if domain_id and re.match(r'D\d+', domain_id):
                 domains[domain_id] = (name, description)
+    if title in ("Objectives"):
+        for row in tab:
+            (objective_id, name, description, domain_id) = (r.value for r in row[0:4])
+            if objective_id and re.match(r'SO\d+', objective_id):
+                objectives[objective_id] = (name, description, domain_id)
     if title in ("Measures"):
         for row in tab:
             (measure_id, _, objective, so_level, _, description) = (r.value for r in row[0:6])
@@ -56,10 +63,13 @@ for tab in dataframe:
                 if domain_id != current_domain_id:
                     current_domain_id = domain_id
                     output_table.append(("", 1, domain_id, domains[domain_id][0], domains[domain_id][1], ""))
-                objective = ref_id.split('-')[0]
-                req_measures = ["1:"+measure_id for measure_id in measures if measures[measure_id][0] == objective]
-                output_table.append(("x", 2, ref_id, "", description, ",".join(req_measures)))
-                output_table.append(("", 3, ref_id+"-evidence", "Evidence", evidence, ""))
+                objective_id = ref_id.split('-')[0]
+                if objective_id != current_objective_id:
+                    current_objective_id = objective_id
+                    output_table.append(("", 2, objective_id, objectives[objective_id][0], objectives[objective_id][1], ""))
+                req_measures = ["1:"+measure_id for measure_id in measures if measures[measure_id][0] == objective_id]
+                output_table.append(("x", 3, ref_id, "", description, ",".join(req_measures)))
+                output_table.append(("", 4, "", "Evidence", evidence, ""))
 
 print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
@@ -86,7 +96,8 @@ ws2 = wb_output.create_sheet("reference_controls")
 ws2.append(["ref_id", "name", "category", "description"])
 for measure_id in measures:
     (objective, so_level, description) = measures[measure_id]
-    ws2.append([measure_id, f"{measure_id} level {so_level}", "process", description + f"\n{objective} level {so_level}"])
+
+    ws2.append([measure_id, f"(L{so_level}) {description[3:]}", "process", f"Objective: {objective}, level: {so_level}"])
 
 ws1 = wb_output.create_sheet("requirements")
 ws1.append(
