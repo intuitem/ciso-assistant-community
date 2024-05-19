@@ -129,6 +129,7 @@ class StoredLibrary(LibraryMixin):
         cls, library_content: bytes, builtin: bool = False
     ) -> "StoredLibrary | None":
         from library.utils import match_urn
+
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             return None  # We do not store the library if its hash checksum is in the database.
@@ -149,9 +150,7 @@ class StoredLibrary(LibraryMixin):
 
         urn = library_data["urn"]
         if not match_urn(urn):
-            raise ValueError(
-                "Library URN is badly formatted"
-            )
+            raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(
