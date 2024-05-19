@@ -6,6 +6,8 @@
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
+    <a href="#supported-languages-">Languages</a>
+    ·
     <a href="https://discord.gg/qvkaMdQ8da">Discord</a>
     ·
     <a href="#supported-frameworks-">Frameworks</a>
@@ -100,19 +102,23 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 28. CIS Controls v8\*
 29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
-31. NIST SP 800-171 rev2 🇺🇸
+31. NIST SP 800-171 rev2 (2021) 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 34. GSA FedRAMP rev5 ☁️🇺🇸
 35. Cadre Conformité Cyber France (3CF) v1 (2021) ✈️🇫🇷
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
+38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
+39. BSI: IT-Grundschutz-Kompendium 🇩🇪
+40. NIST SP 800-171 rev3 (2024) 🇺🇸
 
-### Community contrib
+### Community contributions
 
 1. ISO 27001:2022, version Française 🇫🇷🌐
 2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 
 <br/>
 
@@ -126,7 +132,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
-- BSI-IT (as requested by the German community)
+- Secure Controls Framework (SCF)
 - CCPA
 - AI Act
 - Part-IS
@@ -262,6 +268,10 @@ export DJANGO_SECRET_KEY=...
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
+
+# Authentication options
+export AUTH_TOKEN_TTL=900 # optional, default value is 900 seconds (15 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
@@ -410,11 +420,23 @@ Set DJANGO_DEBUG=False for security reason.
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
+## Supported languages 🌐
+
+- FR: French
+- EN: English
+- AR: Arabic
+- PT: Portuguese
+- ES: Spanish
+- DE: German
+- NL: Dutch
+- IT: Italian
+
+
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
-- [eCharts](https://echarts.apache.org) - Charting library 
+- [eCharts](https://echarts.apache.org) - Charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform

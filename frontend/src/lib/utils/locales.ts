@@ -20,6 +20,18 @@ export const LOCALE_MAP = {
 	pt: {
 		name: 'portuguese',
 		flag: '🇧🇷'
+	},
+	es: {
+		name: 'spanish',
+		flag: '🇪🇸'
+	},
+	nl: {
+		name: 'dutch',
+		flag: '🇳🇱'
+	},
+	it: {
+		name: 'italian',
+		flag: '🇮🇹'
 	}
 };
 
@@ -43,6 +55,10 @@ export function localItems(languageTag: string): LocalItems {
 		english: m.english({ languageTag: languageTag }),
 		arabic: m.arabic({ languageTag: languageTag }),
 		portuguese: m.portuguese({ languageTag: languageTag }),
+		spanish: m.spanish({ languageTag: languageTag }),
+		german: m.german({ languageTag: languageTag }),
+		dutch: m.dutch({ languageTag: languageTag }),
+		italian: m.italian({ languageTag: languageTag }),
 		home: m.home({ languageTag: languageTag }),
 		edit: m.edit({ languageTag: languageTag }),
 		overview: m.overview({ languageTag: languageTag }),

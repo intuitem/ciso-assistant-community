@@ -1,7 +1,13 @@
 {% load i18n %}
 {% load static tailwind_tags %}
 
-<table class="min-w-full leading-normal">
+<style>
+    th, td {
+        border: 1px solid black;
+    }
+</style>
+
+<table class="w-full p-4 leading-normal">
     <thead>
         <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "ID" %}
@@ -30,7 +36,7 @@
     </thead>
     <tbody>
         {% for scenario in scenarios %}
-            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500">
+            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500 text-center">
                 <td class="px-5 py-5 border-b border-gray-200 text-sm">
                     {{ scenario.rid }}
                 </td>
@@ -45,9 +51,13 @@
                     </div>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
-                    <p class="whitespace-no-wrap">
-                        {% if scenario.threat %}{{ scenario.threat }}{% else %}--{% endif %}
-                    </p>
+                    {% for threat in scenario.threats.all %}
+                        <p class="whitespace-no-wrap">
+                            {{ threat }}
+                        </p>
+                    {% empty %}
+                        --
+                    {% endfor %}
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                     <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_controls|linebreaksbr }}</p>
