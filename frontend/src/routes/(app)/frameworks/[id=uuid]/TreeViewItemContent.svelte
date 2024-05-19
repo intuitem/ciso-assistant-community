@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { getRequirementTitle } from '$lib/utils/helpers';
+	import { getOptions } from '$lib/utils/crud';
+
 	export let ref_id: string;
 	export let name: string;
 	export let description: string;
@@ -94,15 +96,13 @@
 					<p>--</p>
 				{:else}
 					<ul class="list-disc ml-4">
-						{#each reference_controls as func}
+						{#each getOptions({
+							objects: reference_controls,
+							extra_fields: [['folder', 'str']],
+							label: 'auto' // convention for automatic label calculation
+						})as func}
 							<li>
-								{#if func.id}
-									<a class="anchor" href="/reference-controls/{func.id}">
-										{func.name}
-									</a>
-								{:else}
-									<p>{func.name}</p>
-								{/if}
+								<p>{func.label}</p>
 							</li>
 						{/each}
 					</ul>
