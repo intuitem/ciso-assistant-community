@@ -6,6 +6,8 @@
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
+    <a href="#supported-languages-">Languages</a>
+    ·
     <a href="https://discord.gg/qvkaMdQ8da">Discord</a>
     ·
     <a href="#supported-frameworks-">Frameworks</a>
