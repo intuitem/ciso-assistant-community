@@ -528,5 +528,7 @@
 	"matchingRequirements": "Requisitos correspondentes",
 	"asZIP": "em ZIP",
 	"incoming": "aproximação",
-	"outdated": "Desatualizado"
+	"outdated": "Desatualizado",
+	"exportBackupDescription": "Isso irá serializar e criar um backup do banco de dados, incluindo usuários e RBAC. Evidências e outros arquivos não estão incluídos no backup.",
+	"importBackupDescription": "Isso irá desserializar e restaurar o banco de dados a partir de um backup. Isso substituirá todos os dados existentes, incluindo usuários e RBAC, e não poderá ser desfeito."
 }
