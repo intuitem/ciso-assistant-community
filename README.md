@@ -417,6 +417,18 @@ Set DJANGO_DEBUG=False for security reason.
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
+## Supported languages 🌐
+
+- FR: French
+- EN: English
+- AR: Arabic
+- PT: Portuguese
+- ES: Spanish
+- DE: German
+- NL: Dutch
+- IT: Italian
+
+
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
