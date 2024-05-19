@@ -12,7 +12,11 @@
 		french: m.french(),
 		english: m.english(),
 		arabic: m.arabic(),
-		portuguese: m.portuguese()
+		portuguese: m.portuguese(),
+		spanish: m.spanish(),
+		german: m.german(),
+		dutch: m.dutch(),
+		italian: m.italian()
 	};
 
 	const modalStore = getModalStore();
@@ -21,7 +25,11 @@
 		fr: 'Français',
 		en: 'English',
 		ar: 'العربية',
-		pt: 'Português'
+		pt: 'Português',
+		es: 'Español',
+		nl: 'Nederlands',
+		de: 'Deutsch',
+		it: 'Italiano'
 	};
 
 	let value = languageTag();
