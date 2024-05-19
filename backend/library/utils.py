@@ -662,22 +662,3 @@ class LibraryImporter:
                 print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e
-
-
-def import_library_view(library: dict) -> Union[str, None]:
-    """
-    Imports a library
-
-    Parameters
-    ----------
-    library : dict
-        A library dictionary loaded from a library YAML configuration file.
-
-    Returns
-    -------
-    optional_error : Union[str,None]
-        A string describing the error if the function fails and returns None on success.
-    """
-    # NOTE: We should just use LibraryImporter.import_library at this point
-    library_importer = LibraryImporter(library)
-    return library_importer.import_library()
