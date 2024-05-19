@@ -188,7 +188,7 @@
 				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
 			/>
 		</div>
-		<div class="flex flex-col space-y-2 ml-4">
+		<div class="flex flex-col space-y-2 ml-4 border border-2">
 			<div class="flex flex-row space-x-2">
 				<button class="btn variant-filled-primary" use:popup={popupDownload}
 					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
@@ -198,6 +198,7 @@
 					data-popup="popupDownload"
 				>
 					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+
 					<a
 						href="/compliance-assessments/{data.compliance_assessment.id}/export"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
@@ -219,6 +220,10 @@
 			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
+			<a href={`${$page.url.pathname}/flash-mode`} class="btn variant-filled-surface h-fit"
+				><i class="fa-solid fa-forward-fast mr-2" /> Flash mode</a
+			>
+
 		</div>
 	</div>
 
