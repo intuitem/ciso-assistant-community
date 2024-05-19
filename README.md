@@ -6,6 +6,8 @@
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
+    <a href="#supported-languages-">Languages</a>
+    ·
     <a href="https://discord.gg/qvkaMdQ8da">Discord</a>
     ·
     <a href="#supported-frameworks-">Frameworks</a>
@@ -108,13 +110,14 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
 38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
+39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 
 ### Community contributions
 
 1. ISO 27001:2022, version Française 🇫🇷🌐
 2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
-4. MCAS : PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 
 <br/>
 
@@ -128,7 +131,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
-- BSI-IT (as requested by the German community)
+- Secure Controls Framework (SCF)
 - CCPA
 - AI Act
 - Part-IS
@@ -415,6 +418,18 @@ Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
+
+## Supported languages 🌐
+
+- FR: French
+- EN: English
+- AR: Arabic
+- PT: Portuguese
+- ES: Spanish
+- DE: German
+- NL: Dutch
+- IT: Italian
+
 
 ## Built With 💜
 
