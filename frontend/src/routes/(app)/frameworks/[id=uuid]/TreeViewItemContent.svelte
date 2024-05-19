@@ -96,11 +96,7 @@
 					<p>--</p>
 				{:else}
 					<ul class="list-disc ml-4">
-						{#each getOptions({
-							objects: reference_controls,
-							extra_fields: [['folder', 'str']],
-							label: 'auto' // convention for automatic label calculation
-						}) as func}
+						{#each getOptions( { objects: reference_controls, extra_fields: [['folder', 'str']], label: 'auto' } ) as func} // convention for automatic label calculation
 							<li>
 								<p>{func.label}</p>
 							</li>
