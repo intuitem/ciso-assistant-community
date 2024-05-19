@@ -49,7 +49,6 @@ Conventions:
         They shall be prefixed by the id of the corresponding base_urn and a semicolumn.
     For reference controls:
         The first line is a header, with the following possible fields (* for required):
-            - depth(*): 1/2/3/.. for requirement groups, empty for a requirement.
             - ref_id(*)
             - name
             - description
@@ -350,7 +349,7 @@ for tab in dataframe:
                 if implementation_groups:
                     req_node["implementation_groups"] = implementation_groups.split(",")
                 threats = row[header["threats"]].value if "threats" in header else None
-                reference_controls = (
+                req_reference_controls = (
                     row[header["reference_controls"]].value
                     if "reference_controls" in header
                     else None
@@ -366,8 +365,8 @@ for tab in dataframe:
                             "reference_control_base_urn"
                         ][prefix]
                         threat_urns.append(f"{urn_prefix}{part_name}")
-                if reference_controls:
-                    for element in re.split(r"[\s,]+", reference_controls):
+                if req_reference_controls:
+                    for element in re.split(r"[\s,]+", req_reference_controls):
                         parts = re.split(r":", element)
                         prefix = parts.pop(0)
                         part_name = ":".join(parts)
@@ -387,7 +386,7 @@ for tab in dataframe:
         print("processing reference controls")
         current_function = {}
         is_header = True
-        reference_controls_base_urn = library_vars["reference_control_base_urn"]
+        reference_control_base_urn = library_vars["reference_control_base_urn"]
         for row in tab:
             if is_header:
                 header = read_header(row)
@@ -413,7 +412,7 @@ for tab in dataframe:
                 )
                 ref_id_urn = ref_id.lower().replace(" ", "-")
                 current_function = {}
-                current_function["urn"] = f"{reference_controls_base_urn}:{ref_id_urn}"
+                current_function["urn"] = f"{reference_control_base_urn}:{ref_id_urn}"
                 current_function["ref_id"] = ref_id
                 if name:
                     current_function["name"] = name
@@ -583,6 +582,12 @@ if "library_dependencies" in library_vars:
 
 library["objects"] = {}
 
+if has_reference_controls:
+    library["objects"]["reference_controls"] = reference_controls
+
+if has_threats:
+    library["objects"]["threats"] = threats
+
 if has_framework:
     library["objects"]["framework"] = {
         "urn": library_vars["framework_urn"],
@@ -605,12 +610,6 @@ if has_framework:
             implementation_groups_definition
         )
     library["objects"]["framework"]["requirement_nodes"] = requirement_nodes
-
-if has_reference_controls:
-    library["objects"]["reference_controls"] = reference_controls
-
-if has_threats:
-    library["objects"]["threats"] = threats
 
 if risk_matrix:
     library["objects"]["risk_matrix"] = [risk_matrix]
