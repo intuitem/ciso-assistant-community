@@ -100,7 +100,7 @@
 							objects: reference_controls,
 							extra_fields: [['folder', 'str']],
 							label: 'auto' // convention for automatic label calculation
-						})as func}
+						}) as func}
 							<li>
 								<p>{func.label}</p>
 							</li>
