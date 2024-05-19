@@ -7,37 +7,59 @@
 	export let data: PageData;
 	const tree = data.tree;
 
-	let possible_states = [
-		'To do',
-		'In progress',
-		'Non Compliant',
-		'Partially Compliant',
-		'Compliant',
-		'Not Applicable'
+	let possible_options = [
+		{ id: 'to_do', label: 'To do' },
+		{ id: 'in_progress', label: 'In progress' },
+		{ id: 'non_compliant', label: 'Non Compliant' },
+		{ id: 'partially_compliant', label: 'Partially Compliant' },
+		{ id: 'compliant', label: 'Compliant' },
+		{ id: 'not_applicable', label: 'Not Applicable' }
 	];
 
 	let expected_data = [
-		{ status: 'To do', urn: 'xyz', requirement: 'This is a security requirement 1', id: '1' },
-		{ status: 'In progress', urn: 'abc', requirement: 'This is a security requirement 2', id: '2' },
+		{ status: 'to_do', urn: 'xyz', requirement: 'This is a security requirement 1', id: '1' },
+		{ status: 'in_progress', urn: 'abc', requirement: 'This is a security requirement 2', id: '2' },
 		{
-			status: 'Non Compliant',
+			status: 'non_compliant',
 			urn: 'def',
 			requirement: 'This is a security requirement 3',
 			id: '3'
 		},
 		{
-			status: 'Partially Compliant',
+			status: 'partially_compliant',
 			urn: 'ghi',
 			requirement: 'This is a security requirement 4',
 			id: '4'
 		},
-		{ status: 'Compliant', urn: 'jkl', requirement: 'This is a security requirement 5', id: '5' },
+		{ status: 'compliant', urn: 'jkl', requirement: 'This is a security requirement 5', id: '5' },
 		{
-			status: 'Not Applicable',
+			status: 'not_applicable',
 			urn: 'mno',
 			requirement: 'This is a security requirement 6',
 			id: '6'
-		}
+		},
+        { status: 'to_do', urn: 'pqr', requirement: 'This is a security requirement 7', id: '7' },
+        { status: 'in_progress', urn: 'stu', requirement: 'This is a security requirement 8', id: '8' },
+        {
+            status: 'non_compliant',
+            urn: 'vwx',
+            requirement: 'This is a security requirement 9',
+            id: '9'
+        },
+        {
+            status: 'partially_compliant',
+            urn: 'yza',
+            requirement: 'This is a security requirement 10',
+            id: '10'
+        },
+        { status: 'compliant', urn: 'bcd', requirement: 'This is a security requirement 11', id: '11' },
+        {
+            status: 'not_applicable',
+            urn: 'efg',
+            requirement: 'This is a security requirement 12',
+            id: '12'
+        }
+
 	];
 
 	// Reactive variable to keep track of the current item index
@@ -60,6 +82,7 @@
 	// Function to update the status of the current item
 	function updateStatus(event) {
 		expected_data[currentIndex].status = event.target.value;
+        console.log("we can perform the api call here to update the status of item ", expected_data[currentIndex].id, " to ", event.target.value);
 	}
 </script>
 
@@ -74,112 +97,32 @@
 					<div class="flex flex-row justify-between" />
 
 					<div class="">
-						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">status</h3>
+						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">Status</h3>
 						<ul
 							class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
 						>
-							<li
-								class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
-							>
-								<div class="flex items-center ps-3">
-									<input
-										id="horizontal-list-radio-license"
-										type="radio"
-										value=""
-										name="list-radio"
-										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-									/>
-									<label
-										for="horizontal-list-radio-license"
-										class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-										>Driver License
-									</label>
-								</div>
-							</li>
-							<li
-								class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
-							>
-								<div class="flex items-center ps-3">
-									<input
-										id="horizontal-list-radio-id"
-										type="radio"
-										value=""
-										name="list-radio"
-										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-									/>
-									<label
-										for="horizontal-list-radio-id"
-										class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-										>State ID</label
-									>
-								</div>
-							</li>
-							<li
-								class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
-							>
-								<div class="flex items-center ps-3">
-									<input
-										id="horizontal-list-radio-military"
-										type="radio"
-										value=""
-										name="list-radio"
-										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-									/>
-									<label
-										for="horizontal-list-radio-military"
-										class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-										>US Military</label
-									>
-								</div>
-							</li>
-							<li class="w-full dark:border-gray-600">
-								<div class="flex items-center ps-3">
-									<input
-										id="horizontal-list-radio-passport"
-										type="radio"
-										value=""
-										name="list-radio"
-										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-									/>
-									<label
-										for="horizontal-list-radio-passport"
-										class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-										>US Passport</label
-									>
-								</div>
-							</li>
-                            <li class="w-full dark:border-gray-600">
-								<div class="flex items-center ps-3">
-									<input
-										id="horizontal-list-bla1"
-										type="radio"
-										value=""
-										name="list-radio"
-										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-									/>
-									<label
-										for="horizontal-list-bla1"
-										class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-										>US Passport</label
-									>
-								</div>
-							</li>
-                            <li class="w-full dark:border-gray-600">
-								<div class="flex items-center ps-3">
-									<input
-										id="horizontal-list-bla2"
-										type="radio"
-										value=""
-										name="list-radio"
-										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-									/>
-									<label
-										for="horizontal-list-bla2"
-										class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-										>US Passport</label
-									>
-								</div>
-							</li>
+							{#each possible_options as option}
+								<li
+									class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
+								>
+									<div class="flex items-center ps-3">
+										<input
+											id={option.id}
+											type="radio"
+											value={option.id}
+											name="list-radio"
+											checked={option.id === expected_data[currentIndex].status}
+											on:change={updateStatus}
+											class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+										/>
+										<label
+											for={option.id}
+											class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+											>{option.label}
+										</label>
+									</div>
+								</li>
+							{/each}
 						</ul>
 					</div>
 
