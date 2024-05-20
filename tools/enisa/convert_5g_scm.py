@@ -44,31 +44,59 @@ for tab in dataframe:
     if title in ("Domains"):
         for row in tab:
             (domain_id, name, description) = (r.value for r in row[0:3])
-            if domain_id and re.match(r'D\d+', domain_id):
+            if domain_id and re.match(r"D\d+", domain_id):
                 domains[domain_id] = (name, description)
     if title in ("Objectives"):
         for row in tab:
             (objective_id, name, description, domain_id) = (r.value for r in row[0:4])
-            if objective_id and re.match(r'SO\d+', objective_id):
+            if objective_id and re.match(r"SO\d+", objective_id):
                 objectives[objective_id] = (name, description, domain_id)
     if title in ("Measures"):
         for row in tab:
-            (measure_id, _, objective, so_level, _, description) = (r.value for r in row[0:6])
-            if measure_id and re.match(r'M\d+', measure_id):
-                measures["5G-"+measure_id] = (objective, so_level, description)
+            (measure_id, _, objective, so_level, _, description) = (
+                r.value for r in row[0:6]
+            )
+            if measure_id and re.match(r"M\d+", measure_id):
+                measures["5G-" + measure_id] = (objective, so_level, description)
     if title in ("5GControls"):
         for row in tab:
-            (ref_id, description, evidence, _, _, _, domain_id) = (r.value for r in row[0:7])
-            if ref_id and re.match('SO\d+-\d+', ref_id):
+            (ref_id, description, evidence, _, _, _, domain_id) = (
+                r.value for r in row[0:7]
+            )
+            if ref_id and re.match("SO\d+-\d+", ref_id):
                 if domain_id != current_domain_id:
                     current_domain_id = domain_id
-                    output_table.append(("", 1, domain_id, domains[domain_id][0], domains[domain_id][1], ""))
-                objective_id = ref_id.split('-')[0]
+                    output_table.append(
+                        (
+                            "",
+                            1,
+                            domain_id,
+                            domains[domain_id][0],
+                            domains[domain_id][1],
+                            "",
+                        )
+                    )
+                objective_id = ref_id.split("-")[0]
                 if objective_id != current_objective_id:
                     current_objective_id = objective_id
-                    output_table.append(("", 2, objective_id, objectives[objective_id][0], objectives[objective_id][1], ""))
-                req_measures = ["1:"+measure_id for measure_id in measures if measures[measure_id][0] == objective_id]
-                output_table.append(("x", 3, ref_id, "", description, ",".join(req_measures)))
+                    output_table.append(
+                        (
+                            "",
+                            2,
+                            objective_id,
+                            objectives[objective_id][0],
+                            objectives[objective_id][1],
+                            "",
+                        )
+                    )
+                req_measures = [
+                    "1:" + measure_id
+                    for measure_id in measures
+                    if measures[measure_id][0] == objective_id
+                ]
+                output_table.append(
+                    ("x", 3, ref_id, "", description, ",".join(req_measures))
+                )
                 output_table.append(("", 4, "", "Evidence", evidence, ""))
 
 print("generating", output_file_name)
