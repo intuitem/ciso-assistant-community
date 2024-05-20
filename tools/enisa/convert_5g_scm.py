@@ -68,8 +68,7 @@ for tab in dataframe:
                     current_objective_id = objective_id
                     output_table.append(("", 2, objective_id, objectives[objective_id][0], objectives[objective_id][1], ""))
                 req_measures = ["1:"+measure_id for measure_id in measures if measures[measure_id][0] == objective_id]
-                output_table.append(("x", 3, ref_id, "", description, ",".join(req_measures)))
-                output_table.append(("", 4, "", "Evidence", evidence, ""))
+                output_table.append(("x", 3, ref_id, "", description, ",".join(req_measures), evidence))
 
 print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
@@ -100,7 +99,7 @@ for measure_id in measures:
 
 ws1 = wb_output.create_sheet("requirements")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "reference_controls"]
+    ["assessable", "depth", "ref_id", "name", "description", "reference_controls", "typical_evidence"]
 )
 for row in output_table:
     ws1.append(row)
