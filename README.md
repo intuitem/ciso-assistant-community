@@ -112,6 +112,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
 39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
+41. ENISA: 5G Security Controls Matrix 🇪🇺
 
 ### Community contributions
 
