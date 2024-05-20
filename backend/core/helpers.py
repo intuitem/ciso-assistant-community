@@ -309,12 +309,6 @@ def get_sorted_requirement_nodes(
                             "status_display": req_as.get_status_display(),
                             "status_i18n": camel_case(req_as.status),
                             "style": "leaf",
-                            "threats": ThreatReadSerializer(
-                                req.threats.all(), many=True
-                            ).data,
-                            "reference_controls": ReferenceControlReadSerializer(
-                                req.reference_controls.all(), many=True
-                            ).data,
                         }
                     )
                 else:
@@ -325,12 +319,6 @@ def get_sorted_requirement_nodes(
                             "name": req.name,
                             "description": req.description,
                             "style": "leaf",
-                            "threats": ThreatReadSerializer(
-                                req.threats.all(), many=True
-                            ).data,
-                            "reference_controls": ReferenceControlReadSerializer(
-                                req.reference_controls.all(), many=True
-                            ).data,
                         }
                     )
         return result
