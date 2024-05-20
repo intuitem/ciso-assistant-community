@@ -318,13 +318,17 @@ for tab in dataframe:
                     if "implementation_groups" in header
                     else None
                 )
-                skip_count = bool(row[header["skip_count"]].value)
+                skip_count = "skip_count" in header and bool(
+                    row[header["skip_count"]].value
+                )
                 if skip_count:
                     counter_fix += 1
                     ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
                 else:
                     ref_id_urn = (
-                        ref_id.lower().replace(" ", "-") if ref_id else f"node{counter-counter_fix}"
+                        ref_id.lower().replace(" ", "-")
+                        if ref_id
+                        else f"node{counter-counter_fix}"
                     )
                 urn = f"{root_nodes_urn}:{ref_id_urn}"
                 if urn in urn_unicity_checker:
