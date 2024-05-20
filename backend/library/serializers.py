@@ -1,11 +1,7 @@
-from core.models import Library
-from core.serializers import (
-    BaseModelSerializer,
-)
+from core.models import StoredLibrary, LoadedLibrary
 from rest_framework import serializers
 
-
-class LibraryObjectSerializer(serializers.Serializer):
+"""class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=[
             "risk_matrix",
@@ -15,21 +11,66 @@ class LibraryObjectSerializer(serializers.Serializer):
         ]
     )
     fields = serializers.DictField(child=serializers.CharField())
+"""
 
 
-class LibrarySerializer(serializers.Serializer):
+class StoredLibrarySerializer(serializers.ModelSerializer):
+    # Not used yet
+    class Meta:
+        model = StoredLibrary
+        fields = [
+            "id",
+            "name",
+            "description",
+            "urn",
+            "ref_id",
+            "locale",
+            "version",
+            "packager",
+            "provider",
+            "builtin",
+            "objects_meta",
+            "is_loaded",
+        ]
+
+
+class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoredLibrary
+        fields = "__all__"
+
+
+class LoadedLibraryDetailedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoadedLibrary
+        fields = "__all__"
+
+
+"""
+class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
+    content = serializers.SerializerMethodField()
+
+    def get_content(self, content: bytes):
+        return content.encode("utf-8") # Should we enforce UTF-8 for library files ?
+"""
+
+
+class LoadedLibrarySerializer(serializers.Serializer):
+    id = serializers.CharField()
     name = serializers.CharField()
     description = serializers.CharField()
     locale = serializers.ChoiceField(choices=["en", "fr"])
-    objects = LibraryObjectSerializer(many=True)
-    format_version = serializers.CharField()
+    # objects = LibraryObjectSerializer(many=True)
+    version = serializers.CharField()
     copyright = serializers.CharField()
+    builtin = serializers.BooleanField()
 
 
-class LibraryModelSerializer(BaseModelSerializer):
+"""class LibraryModelSerializer(BaseModelSerializer):
     class Meta:
-        model = Library
+        model = LoadedLibrary
         fields = "__all__"
+"""
 
 
 class LibraryUploadSerializer(serializers.Serializer):

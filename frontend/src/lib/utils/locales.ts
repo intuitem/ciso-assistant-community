@@ -9,6 +9,10 @@ export const LOCALE_MAP = {
 		name: 'french',
 		flag: '🇫🇷'
 	},
+	de: {
+		name: 'german',
+		flag: '🇩🇪'
+	},
 	ar: {
 		name: 'arabic',
 		flag: '🇸🇦'
@@ -16,6 +20,18 @@ export const LOCALE_MAP = {
 	pt: {
 		name: 'portuguese',
 		flag: '🇧🇷'
+	},
+	es: {
+		name: 'spanish',
+		flag: '🇪🇸'
+	},
+	nl: {
+		name: 'dutch',
+		flag: '🇳🇱'
+	},
+	it: {
+		name: 'italian',
+		flag: '🇮🇹'
 	}
 };
 
@@ -39,6 +55,10 @@ export function localItems(languageTag: string): LocalItems {
 		english: m.english({ languageTag: languageTag }),
 		arabic: m.arabic({ languageTag: languageTag }),
 		portuguese: m.portuguese({ languageTag: languageTag }),
+		spanish: m.spanish({ languageTag: languageTag }),
+		german: m.german({ languageTag: languageTag }),
+		dutch: m.dutch({ languageTag: languageTag }),
+		italian: m.italian({ languageTag: languageTag }),
 		home: m.home({ languageTag: languageTag }),
 		edit: m.edit({ languageTag: languageTag }),
 		overview: m.overview({ languageTag: languageTag }),
@@ -322,7 +342,7 @@ export function localItems(languageTag: string): LocalItems {
 		mediumSOK: m.mediumSOK({ languageTag: languageTag }),
 		highSOK: m.highSOK({ languageTag: languageTag }),
 		libraryImportError: m.libraryImportError({ languageTag: languageTag }),
-		libraryAlreadyExistsError: m.libraryAlreadyImportedError({ languageTag: languageTag }),
+		libraryAlreadyExistsError: m.libraryAlreadyLoadedError({ languageTag: languageTag }),
 		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag }),
 		minScore: m.minScore({ languageTag: languageTag }),
 		maxScore: m.maxScore({ languageTag: languageTag }),
@@ -334,7 +354,13 @@ export function localItems(languageTag: string): LocalItems {
 		}),
 		attemptToRemoveOnlyAdminUserGroup: m.attemptToRemoveOnlyAdminUserGroup({
 			languageTag: languageTag
-		})
+		}),
+		actionPlan: m.actionPlan({ languageTag: languageTag }),
+		matchingRequirements: m.matchingRequirements({ languageTag: languageTag }),
+		remediationPlan: m.remediationPlan({ languageTag: languageTag }),
+		incoming: m.incoming({ languageTag: languageTag }),
+		today: m.today({ languageTag: languageTag }),
+		outdated: m.outdated({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }

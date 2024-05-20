@@ -72,7 +72,7 @@ export default {
 				'view_riskmatrix',
 				'view_requirementnode',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -96,7 +96,7 @@ export default {
 				'view_requirementnode',
 				'view_evidence',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -156,7 +156,7 @@ export default {
 				'delete_evidence',
 				'view_requirementnode',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -181,7 +181,7 @@ export default {
 				'view_requirementnode',
 				'view_evidence',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		}
@@ -197,7 +197,7 @@ export default {
 		urn: 'urn:intuitem:risk:library:critical_risk_matrix_5x5'
 	},
 	referenceControl: {
-		name: 'Physical security policy',
+		name: 'POL.PHYSICAL - Physical security policy',
 		category: 'policy',
 		library: {
 			name: 'Documents and policies',
@@ -207,7 +207,7 @@ export default {
 		urn: 'urn:intuitem:risk:function:POL.PHYSICAL'
 	},
 	referenceControl2: {
-		name: 'Controls accountability matrix',
+		name: 'DOC.CONTROLS - Controls accountability matrix',
 		category: 'process',
 		library: {
 			name: 'Documents and policies',
@@ -217,7 +217,7 @@ export default {
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
 	},
 	threat: {
-		name: 'Exfiltration Over Other Network Medium',
+		name: 'T1011 - Exfiltration Over Other Network Medium',
 		library: {
 			name: 'Mitre ATT&CK v14 - Threats and mitigations',
 			ref: 'mitre-attack',
@@ -226,7 +226,7 @@ export default {
 		urn: 'urn:intuitem:risk:threat:mitre-attack:T1011'
 	},
 	threat2: {
-		name: 'Exfiltration Over Physical Medium',
+		name: 'T1052 - Exfiltration Over Physical Medium',
 		library: {
 			name: 'Mitre ATT&CK v14 - Threats and mitigations',
 			ref: 'mitre-attack',
