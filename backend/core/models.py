@@ -149,6 +149,13 @@ class StoredLibrary(LibraryMixin):
         urn = library_data["urn"]
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
+
+        is_stored = StoredLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).exists()
+        if is_stored:
+            return None  # We do not store the library if it is same content
+
         is_loaded = LoadedLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).exists()
