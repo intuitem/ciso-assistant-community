@@ -202,6 +202,7 @@ class RequirementNodeImporter:
             assessable=self.requirement_data.get("assessable"),
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
+            typical_evidence=self.requirement_data.get("typical_evidence"),
             provider=framework_object.provider,
             order_id=self.index,
             name=self.requirement_data.get("name"),

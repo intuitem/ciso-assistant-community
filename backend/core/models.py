@@ -536,6 +536,8 @@ class RequirementNode(ReferentialObjectMixin):
         null=True, verbose_name=_("Implementation groups")
     )
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
+    typical_evidence = models.TextField(null=True, blank=True, verbose_name=_("Typical evidence"))
+
 
     class Meta:
         verbose_name = _("RequirementNode")
