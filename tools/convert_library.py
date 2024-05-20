@@ -44,6 +44,7 @@ Conventions:
             - threats
             - reference_controls
             - annotation
+            - typical_evidence
         The normal tree order shall be respected
         If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
         They shall be prefixed by the id of the corresponding base_urn and a semicolumn.
@@ -311,6 +312,9 @@ for tab in dataframe:
                 annotation = (
                     row[header["annotation"]].value if "annotation" in header else None
                 )
+                typical_evidence = (
+                    row[header["typical_evidence"]].value if "typical_evidence" in header else None
+                )
                 implementation_groups = (
                     row[header["implementation_groups"]].value
                     if "implementation_groups" in header
@@ -346,6 +350,8 @@ for tab in dataframe:
                     req_node["description"] = description
                 if annotation:
                     req_node["annotation"] = annotation
+                if typical_evidence:
+                    req_node["typical_evidence"] = typical_evidence
                 if implementation_groups:
                     req_node["implementation_groups"] = implementation_groups.split(",")
                 threats = row[header["threats"]].value if "threats" in header else None
