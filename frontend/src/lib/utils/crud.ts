@@ -10,7 +10,9 @@ type GetOptionsParams = {
 	suggestions?: any[];
 	label?: string;
 	value?: string;
-	extra_fields: (string[] | string)[];
+	extra_fields: string[];
+	self?: Record<string, any>;
+	selfSelect?: boolean;
 };
 
 export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any) {
@@ -22,7 +24,7 @@ export function checkConstraints(constraints: { [key: string]: any }, foreignKey
 	return emptyConstraintsList;
 }
 
-function getValue(object: { [key: string]: any }, keys: string[]) {
+function getValue(object: { [key: string]: any }, keys: string | string[]) {
 	if (typeof keys === 'string') {
 		return object[keys];
 	}
@@ -45,21 +47,26 @@ export const getOptions = ({
 	label: string;
 	value: string;
 	suggested: boolean;
-	self: Record<string, any>;
-	selfSelect: boolean;
+	self?: Record<string, any>;
+	selfSelect?: boolean;
 }[] => {
+	const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 	const options = objects
 		.map((object) => {
+			let my_label =
+				label != 'auto'
+					? object[label]
+					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
 			return {
 				label:
 					extra_fields.length > 0
 						? extra_fields
-								.map((fields) => getValue(object, fields))
+								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
 						  '/' +
-						  object[label]
-						: object[label],
+						  my_label
+						: my_label,
 				value: object[value],
 				suggested: false
 			};
@@ -109,6 +116,8 @@ interface SelectField {
 
 export interface ModelMapEntry {
 	name: string;
+	localName: string;
+	localNamePlural: string;
 	verboseName: string;
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
@@ -117,7 +126,6 @@ export interface ModelMapEntry {
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
 	filters?: SelectField[];
-	[key: string]: any;
 }
 
 type ModelMap = {
@@ -129,7 +137,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'folder',
 		localName: 'domain',
 		localNamePlural: 'domains',
-		localFrGender: 'm',
 		verboseName: 'Domain',
 		verboseNamePlural: 'Domains',
 		foreignKeyFields: [
@@ -141,7 +148,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'project',
 		localName: 'project',
 		localNamePlural: 'projects',
-		localFrGender: 'm',
 		verboseName: 'Project',
 		verboseNamePlural: 'Projects',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
@@ -156,7 +162,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskmatrix',
 		localName: 'riskMatrix',
 		localNamePlural: 'riskMatrices',
-		localFrGender: 'f',
 		verboseName: 'Risk matrix',
 		verboseNamePlural: 'Risk matrices',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
@@ -165,7 +170,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskassessment',
 		localName: 'riskAssessment',
 		localNamePlural: 'riskAssessments',
-		localFrGender: 'f',
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [
@@ -180,11 +184,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	threats: {
-		ref_id: 'ref_id',
 		name: 'threat',
 		localName: 'threat',
 		localNamePlural: 'threats',
-		localFrGender: 'f',
 		verboseName: 'Threat',
 		verboseNamePlural: 'Threats',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
@@ -193,7 +195,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskscenario',
 		localName: 'riskScenario',
 		localNamePlural: 'riskScenarios',
-		localFrGender: 'm',
 		verboseName: 'Risk scenario',
 		verboseNamePlural: 'Risk scenarios',
 		foreignKeyFields: [
@@ -205,14 +206,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' }
 		],
-		filters: [{ field: 'threats' }, { field: 'risk_assessment' }],
-		search: false
+		filters: [{ field: 'threats' }, { field: 'risk_assessment' }]
 	},
 	'applied-controls': {
 		name: 'appliedcontrol',
 		localName: 'appliedControl',
 		localNamePlural: 'appliedControls',
-		localFrGender: 'f',
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
 		detailViewFields: [
@@ -248,7 +247,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'appliedcontrol',
 		localName: 'policy',
 		localNamePlural: 'policies',
-		localFrGender: 'f',
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
@@ -268,7 +266,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskacceptance',
 		localName: 'riskAcceptance',
 		localNamePlural: 'riskAcceptances',
-		localFrGender: 'f',
 		verboseName: 'Risk acceptance',
 		verboseNamePlural: 'Risk acceptances',
 		foreignKeyFields: [
@@ -283,11 +280,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'risk_scenarios' }, { field: 'folder' }, { field: 'approver' }]
 	},
 	'reference-controls': {
-		ref_id: 'ref_id',
 		name: 'referencecontrol',
 		localName: 'referenceControl',
 		localNamePlural: 'referenceControls',
-		localFrGender: 'f',
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
@@ -298,7 +293,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'asset',
 		localName: 'asset',
 		localNamePlural: 'assets',
-		localFrGender: 'm',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
 		foreignKeyFields: [
@@ -312,7 +306,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'user',
 		localName: 'user',
 		localNamePlural: 'users',
-		localFrGender: 'm',
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
@@ -322,7 +315,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'usergroup',
 		localName: 'userGroup',
 		localNamePlural: 'userGroups',
-		localFrGender: 'm',
+
 		verboseName: 'User group',
 		verboseNamePlural: 'User groups',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
@@ -332,18 +325,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'roleassignment',
 		localName: 'roleAssignment',
 		localNamePlural: 'roleAssignments',
-		localFrGender: 'f',
 		verboseName: 'Role assignment',
 		verboseNamePlural: 'Role assignments',
 		foreignKeyFields: [],
 		filters: []
 	},
 	frameworks: {
-		ref_id: 'ref_id',
 		name: 'framework',
 		localName: 'framework',
 		localNamePlural: 'frameworks',
-		localFrGender: 'm',
 		verboseName: 'Framework',
 		verboseNamePlural: 'Frameworks',
 		foreignKeyFields: [
@@ -357,7 +347,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'evidence',
 		localName: 'evidence',
 		localNamePlural: 'evidences',
-		localFrGender: 'f',
 		verboseName: 'Evidence',
 		verboseNamePlural: 'Evidences',
 		foreignKeyFields: [
@@ -370,7 +359,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',
 		localNamePlural: 'complianceAssessments',
-		localFrGender: 'f',
 		verboseName: 'Compliance assessment',
 		verboseNamePlural: 'Compliance assessments',
 		foreignKeyFields: [
@@ -383,11 +371,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
-		ref_id: 'ref_id',
 		name: 'requirement',
 		localName: 'requirement',
 		localNamePlural: 'requirements',
-		localFrGender: 'f',
 		verboseName: 'Requirement',
 		verboseNamePlural: 'Requirements'
 	},
@@ -395,7 +381,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'requirementassessment',
 		localName: 'requirementAssessment',
 		localNamePlural: 'requirementAssessments',
-		localFrGender: 'f',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
 		selectFields: [{ field: 'status' }],
@@ -405,13 +390,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		]
 	},
-	libraries: {
-		name: 'library',
-		localName: 'library',
-		localNamePlural: 'libraries',
-		localFrGender: 'f',
-		verboseName: 'Library',
-		verboseNamePlural: 'Libraries'
+	'stored-libraries': {
+		name: 'storedlibrary',
+		localName: 'stored library',
+		localNamePlural: 'stored libraries',
+		verboseName: 'stored Library',
+		verboseNamePlural: 'stored Libraries'
+	},
+	'loaded-libraries': {
+		name: 'loadedlibrary',
+		localName: 'loaded library',
+		localNamePlural: 'loaded libraries',
+		verboseName: 'loaded Library',
+		verboseNamePlural: 'loaded Libraries'
 	}
 };
 
@@ -423,6 +414,14 @@ export const FIELD_COMPONENT_MAP = {
 		locale: LanguageDisplay,
 		actions: LibraryActions
 	},
+	// "stored-libraries": {
+	// 	locale: LanguageDisplay,
+	// 	actions: LibraryActions
+	// },
+	// "loaded-libraries": {
+	// 	locale: LanguageDisplay
+	// 	// actions: LibraryActions
+	// },
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}
@@ -546,9 +545,9 @@ export const urlParamModelSelectFields = (model: string): SelectField[] => {
 	return URL_MODEL_MAP[model]?.selectFields || [];
 };
 
-export const getModelInfo = (model: string): ModelMapEntry => {
+export const getModelInfo = (model: urlModel): ModelMapEntry => {
 	const map = URL_MODEL_MAP[model] || {};
-	map['urlModel' as urlModel] = model;
+	map['urlModel'] = model;
 	return map;
 };
 

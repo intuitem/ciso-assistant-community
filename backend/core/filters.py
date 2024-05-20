@@ -22,8 +22,6 @@ from django.utils.translation import gettext_lazy as _
 class GenericFilterSet(FilterSet):
     def __init__(self, data=None, queryset=None, *, request=None, prefix=None):
         super().__init__(data, queryset, request=request, prefix=prefix)
-        # for f in self.filters.items():
-        #     print(f[0], f[1].field.widget)
 
 
 class GenericOrderingFilter(OrderingFilter):
