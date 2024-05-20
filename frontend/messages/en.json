@@ -430,7 +430,7 @@
 	"validate": "Validate",
 	"reject": "Reject",
 	"revoke": "Revoke",
-	"riskAcceptanceValidatedMessage": "This risk acceptance is currently validated. It can be revoked at any time, but this will be irrevocable. You will need to duplicate it with a different verison if necessary.",
+	"riskAcceptanceValidatedMessage": "This risk acceptance is currently validated. It can be revoked at any time, but this will be irrevocable. You will need to duplicate it with a different version if necessary.",
 	"confirmModalTitle": "Confirm",
 	"confirmModalMessage": "Are you sure? This action will permanently affect the following object",
 	"submit": "Submit",
