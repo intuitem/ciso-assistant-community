@@ -409,6 +409,15 @@ tests/e2e-tests.sh
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
 
+## API and Swagger
+
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/ 
+
+To interact with it:
+
+- call `/api/iam/login/` with your credentials in the body to get the token
+- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's Token not Bearer.
+
 ## Setting CISO Assistant for production
 
 The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
