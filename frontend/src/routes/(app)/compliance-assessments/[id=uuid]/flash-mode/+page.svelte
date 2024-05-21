@@ -105,7 +105,7 @@
 					on:click={previousItem}
 					disabled={currentIndex === 0}
 				>
-					{m.back()}
+					{m.previous()}
 				</button>
 				<button
 					class="variant-filled-primary px-4 py-2 rounded"
