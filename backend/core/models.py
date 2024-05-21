@@ -18,7 +18,7 @@ import yaml
 
 from django.urls import reverse
 from datetime import date, datetime
-from typing import Union, Dict, Set, Tuple, Type, Self
+from typing import Union, Dict, Set, List, Tuple, Type, Self
 from django.utils.html import format_html
 
 from structlog import get_logger
@@ -214,6 +214,7 @@ class LibraryUpgrader:
         ]
         self.new_library = new_library
         library_content = json.loads(self.new_library.content)
+        self.dependencies = library_content.get("dependencies",[])
         self.new_framework = library_content.get("framework")
         self.new_matrices = library_content.get("risk_matrix")
         self.threats = library_content.get("threats",[])
@@ -226,11 +227,37 @@ class LibraryUpgrader:
             for matrix in self.new_matrices :
                 self.new_objects[matrix["urn"]] = matrix
 
+    def upgrade_dependencies(self) -> Union[str,None] :
+        for dependency_urn in self.dependencies :
+            possible_dependencies = [*LoadedLibrary.objects.filter(urn=dependency_urn)]
+            if not possible_dependencies :
+                return "Dependency not found"
+            dependency = possible_dependencies[0]
+            for i in range(1,len(possible_dependencies)) :
+                possible_dependency = possible_dependencies[i]
+                if possible_dependency.locale == self.old_library.locale :
+                    dependency = possible_dependency
+
+            if (err_msg := dependency.upgrade()) is not None :
+                return err_msg
+
+            if dependency is None :
+                try :
+                    stored_dependencies = StoredLibrary.objects.get(urn=dependency_urn)
+                    stored_dependency: StoredLibrary = max(stored_dependencies,key=lambda lib: lib.version) # This code is repeated and should therefore be stored in a dedicated function
+                    if (err_msg := stored_dependency.load()) is not None :
+                        return err_msg
+                except :
+                    return "Dependency not found"
+
     # We should create a LibraryVerifier class in the future that check if the libary is valid and use it for a better error handling.
     def upgrade_library(self) -> Union[str,None] :
+        if (error_msg := self.upgrade_dependencies()) is not None :
+            return error_msg
         old_urns = set(obj.urn for obj in self.old_objects)
         new_urns = set(self.new_objects.keys())
 
+        # deleted_urns = old_urns.difference(new_urns)
         if not new_urns.issuperset(old_urns) :
             return "This library upgrade is deleting existing objects."
 
@@ -314,27 +341,31 @@ class LibraryUpgrader:
                 for reference_control_urn in requirement_node :
                     new_requirement_node.reference_controls.add(objects_created[reference_control_urn])
 
+        print(f"[Self.new_matrices] {self.new_matrices is None} {type(self.new_matrices)}")
         if self.new_matrices is not None :
             for matrix in self.new_matrices :
                 json_definition_keys = {"grid","probability","impact","risk"} # Store this as a constant somewhere (as a static attribute of the class)
                 other_keys = set(matrix.keys()) - json_definition_keys
                 matrix_dict = {
-                    key: matrix["key"]
+                    key: matrix[key]
                     for key in other_keys
                 }
                 matrix_dict["json_definition"] = {}
                 for key in json_definition_keys :
                     if key in matrix : # If all keys are mandatory this condition is useless
                         matrix_dict["json_definition"][key] = matrix[key]
+                matrix_dict["json_definition"] = json.dumps(matrix_dict["json_definition"])
 
-                RiskMatrix.objects.update_or_create(
+                new_matrix, created = RiskMatrix.objects.update_or_create(
                     urn=matrix["urn"],
                     defaults=matrix_dict,
                     create_defaults={
-                        **referential_object_dict
-                        **matrix_dict,
+                        **referential_object_dict,
+                        **matrix_dict
                     }
                 )
+                print(f"[RiskMatrix created] {created}")
+                print(f"[RiskMatrix json_definition] {new_matrix.json_definition}")
 
 
 class LoadedLibrary(LibraryMixin):
@@ -379,6 +410,10 @@ class LoadedLibrary(LibraryMixin):
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res
+
+    def get_used_objects(self) -> List[str] :
+        """Returns the list of URNs of objects currently used that are appart of this loaded library."""
+        raise NotImplementedError("TODO !")
 
     @property
     def reference_count(self) -> int:
