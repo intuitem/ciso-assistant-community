@@ -128,7 +128,7 @@ for measure_id in measures:
 
 ws1 = wb_output.create_sheet("requirements")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "reference_controls"]
+    ["assessable", "depth", "ref_id", "name", "description", "reference_controls", "typical_evidence"]
 )
 for row in output_table:
     ws1.append(row)
