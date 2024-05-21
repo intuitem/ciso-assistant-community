@@ -45,6 +45,7 @@ Conventions:
             - reference_controls
             - annotation
             - typical_evidence
+            - skip_count: trick for fixing a referential without changing the urns (advanced users)
         The normal tree order shall be respected
         If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
         They shall be prefixed by the id of the corresponding base_urn and a semicolumn.
@@ -287,6 +288,7 @@ for tab in dataframe:
             )
         is_header = True
         counter = 0
+        counter_fix = 0
         for row in tab:
             counter += 1
             if is_header:
@@ -320,9 +322,18 @@ for tab in dataframe:
                     if "implementation_groups" in header
                     else None
                 )
-                ref_id_urn = (
-                    ref_id.lower().replace(" ", "-") if ref_id else f"node{counter}"
+                skip_count = "skip_count" in header and bool(
+                    row[header["skip_count"]].value
                 )
+                if skip_count:
+                    counter_fix += 1
+                    ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
+                else:
+                    ref_id_urn = (
+                        ref_id.lower().replace(" ", "-")
+                        if ref_id
+                        else f"node{counter-counter_fix}"
+                    )
                 urn = f"{root_nodes_urn}:{ref_id_urn}"
                 if urn in urn_unicity_checker:
                     print("URN duplicate:", urn)
