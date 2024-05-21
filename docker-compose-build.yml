@@ -9,7 +9,7 @@ services:
     restart: always
     environment:
       - ALLOWED_HOSTS=backend
-      - CISO_ASSISTANT_URL=https://localhost:8443
+      - CISO_ASSISTANT_URL=https://ciso.redsoftsolutions.com:8443
       - DJANGO_DEBUG=True
     volumes:
       - ./db:/code/db
@@ -31,12 +31,15 @@ services:
     restart: unless-stopped
     ports:
       - 8443:8443
+      - 80:80
+      - 443:443
     command:
       - caddy
       - reverse-proxy
       - --from
-      - https://localhost:8443
+      - https://ciso.redsoftsolutions.com:8443
       - --to
       - frontend:3000
     volumes:
       - ./db:/data
+      - ./Caddyfile:/etc/caddy/Caddyfile

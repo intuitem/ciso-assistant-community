@@ -1,0 +1,7 @@
+ciso.redsoftsolutions.com {
+ 
+    reverse_proxy frontend:3000
+    tls {
+        issuer acme 
+    }
+}

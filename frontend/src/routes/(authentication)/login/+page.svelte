@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import CisoLogo from '$lib/assets/ciso.svg';
+	import CisoLogo from '$lib/assets/quant.svg';
 	import { loginSchema } from '$lib/utils/schemas';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
