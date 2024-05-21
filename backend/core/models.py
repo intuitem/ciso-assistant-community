@@ -1434,6 +1434,10 @@ class ComplianceAssessment(Assessment):
         """
         Returns assessable requirement assessments based on the selected implementation groups
         """
+        if not self.selected_implementation_groups:
+            return RequirementAssessment.objects.filter(
+                compliance_assessment=self, requirement__assessable=True
+            )
         selected_implementation_groups_set = set(self.selected_implementation_groups)
         filtered_requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self,
