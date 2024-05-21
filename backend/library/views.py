@@ -107,10 +107,12 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
         try:
             key = "urn" if pk.startswith("urn:") else "id"
-            library = StoredLibrary.objects.get(
+            for _ in range(10) : print(f"Looking for {key} {pk}")
+            libraries = StoredLibrary.objects.filter( # The get method raise an exception if multiple objects are found
                 **{key: pk}
             )  # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
-        except:
+            library = max(libraries,key=lambda lib: lib.version) # Which mean we can only import the latest version of the library, if that so library that has a most recent version stored shouldn't be displayed and should even be erased from the database
+        except :
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         try:
