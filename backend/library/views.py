@@ -166,7 +166,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
                 return HttpResponse(
-                    json.dumps({"error": f"Failed to store library content ({e})"}),
+                    json.dumps({"error": "Failed to store library content."}),
                     status=HTTP_422_UNPROCESSABLE_ENTITY,
                 )
 
