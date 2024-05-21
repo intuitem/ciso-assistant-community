@@ -221,7 +221,7 @@
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
 			<a href={`${$page.url.pathname}/flash-mode`} class="btn variant-filled-surface h-fit"
-				><i class="fa-solid fa-forward-fast mr-2" /> Flash mode</a
+				><i class="fa-solid fa-forward-fast mr-2" /> {m.flashMode()}</a
 			>
 		</div>
 	</div>

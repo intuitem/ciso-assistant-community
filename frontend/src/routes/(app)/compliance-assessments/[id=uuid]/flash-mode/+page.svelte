@@ -1,23 +1,27 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
 
 	export let data: PageData;
 
 	breadcrumbObject.set(data.compliance_assessment);
 
 	let possible_options = [
-		{ id: 'to_do', label: 'To do' },
-		{ id: 'in_progress', label: 'In progress' },
-		{ id: 'non_compliant', label: 'Non Compliant' },
-		{ id: 'partially_compliant', label: 'Partially Compliant' },
-		{ id: 'compliant', label: 'Compliant' },
-		{ id: 'not_applicable', label: 'Not Applicable' }
+		{ id: 'to_do', label: m.toDo() },
+		{ id: 'in_progress', label: m.inProgress() },
+		{ id: 'non_compliant', label: m.nonCompliant() },
+		{ id: 'partially_compliant', label: m.partiallyCompliant() },
+		{ id: 'compliant', label: m.compliant() },
+		{ id: 'not_applicable', label: m.notApplicable() }
 	];
 
 	// Reactive variable to keep track of the current item index
 	let currentIndex = 0;
+
+	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].status];
 
 	// Function to handle the "Next" button click
 	function nextItem() {
@@ -47,17 +51,22 @@
 </script>
 
 <div class="flex h-full justify-center items-center">
-	<div class="flex flex-col bg-white w-1/2 h-1/2 rounded-xl shadow-xl p-4">
+	<div style="border-color: {color}" class="flex flex-col bg-white w-1/2 h-1/2 rounded-xl shadow-xl p-4 border-4">
 		{#if data.requirement_assessments[currentIndex]}
 			<div class="flex flex-col w-full h-full space-y-4">
 				<div class="flex justify-between">
+					
 					<div class="text-sm mt-4">{data.requirement_assessments[currentIndex].name}</div>
 					<div class="mt-4 font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
 				</div>
+				{#if data.requirement_assessments[currentIndex].description}
 				<div class="flex text-lg h-1/3 items-center">{data.requirement_assessments[currentIndex].description}</div>
+				{:else}
+				<div class="flex text-gray-400 h-1/3 italic text-sm items-center">{m.noDescription()}</div>
+				{/if}
 				<div class="items-center">
 					<div class="">
-						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">Status</h3>
+						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">{m.status()}</h3>
 						<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						<ul
 							class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -75,7 +84,7 @@
 											name="status"
 											checked={option.id === data.requirement_assessments[currentIndex].status}
 											on:change={updateStatus}
-											class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+											class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
 											/>
 										<label
 											for={option.id}
@@ -92,18 +101,18 @@
 			</div>
 			<div class="flex justify-between">
 				<button
-					class="bg-gray-500 text-white px-4 py-2 rounded"
+					class="bg-gray-400 text-white px-4 py-2 rounded"
 					on:click={previousItem}
 					disabled={currentIndex === 0}
 				>
-					Back
+					{m.back()}
 				</button>
 				<button
-					class="bg-blue-500 text-white px-4 py-2 rounded"
+					class="variant-filled-primary px-4 py-2 rounded"
 					on:click={nextItem}
 					disabled={currentIndex === data.requirement_assessments.length - 1}
 				>
-					Next
+					{m.next()}
 				</button>
 			</div>
 		{/if}

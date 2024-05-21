@@ -528,5 +528,7 @@
 	"matchingRequirements": "Matching requirements",
 	"asZIP": "as ZIP",
 	"incoming": "Incoming",
-	"outdated": "Outdated"
+	"outdated": "Outdated",
+	"back": "Back",
+	"flashMode": "Flash mode"
 }
