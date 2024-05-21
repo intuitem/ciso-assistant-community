@@ -188,7 +188,7 @@
 				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
 			/>
 		</div>
-		<div class="flex flex-col space-y-2 ml-4 border border-2">
+		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
 				<button class="btn variant-filled-primary" use:popup={popupDownload}
 					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
@@ -223,7 +223,6 @@
 			<a href={`${$page.url.pathname}/flash-mode`} class="btn variant-filled-surface h-fit"
 				><i class="fa-solid fa-forward-fast mr-2" /> Flash mode</a
 			>
-
 		</div>
 	</div>
 

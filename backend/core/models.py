@@ -1431,7 +1431,20 @@ class ComplianceAssessment(Assessment):
         ]
 
     def get_requirement_assessments(self):
-        return RequirementAssessment.objects.filter(compliance_assessment=self)
+        """
+        Returns assessable requirement assessments based on the selected implementation groups
+        """
+        selected_implementation_groups_set = set(self.selected_implementation_groups)
+        filtered_requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self,
+            requirement__assessable=True
+        )
+        requirement_assessments_list = []
+        for requirement in filtered_requirements:
+            if selected_implementation_groups_set & set(requirement.requirement.implementation_groups):
+                requirement_assessments_list.append(requirement)
+
+        return requirement_assessments_list
 
     def get_requirements_status_count(self):
         requirements_status_count = []
@@ -1671,6 +1684,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return self.requirement.display_short
+    
+    def get_requirement_description(self) -> str:
+        return self.requirement.description
 
     class Meta:
         verbose_name = _("Requirement assessment")
