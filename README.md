@@ -237,6 +237,7 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
+export EMAIL_USE_TLS=True
 ```
 
 **Other variables**
