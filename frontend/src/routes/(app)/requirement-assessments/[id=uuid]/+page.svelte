@@ -223,7 +223,10 @@
 					<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0}
-							<div class="flex items-center mb-2 px-2 text-xs space-x-2"><i class="fa-solid fa-info-circle" /><p>{m.requirementAppliedControlHelpText()}</p></div>
+							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+								<i class="fa-solid fa-info-circle" />
+								<p>{m.requirementAppliedControlHelpText()}</p>
+							</div>
 							<div
 								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 							>
@@ -244,7 +247,10 @@
 							</div>
 						{/if}
 						{#if tabSet === 1}
-						<div class="flex items-center mb-2 px-2 text-xs space-x-2"><i class="fa-solid fa-info-circle" /><p>{m.requirementEvidenceHelpText()}</p></div>
+							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+								<i class="fa-solid fa-info-circle" />
+								<p>{m.requirementEvidenceHelpText()}</p>
+							</div>
 							<div
 								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 							>
