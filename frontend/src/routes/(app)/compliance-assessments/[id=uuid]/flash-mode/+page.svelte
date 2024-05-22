@@ -4,6 +4,7 @@
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
+	import { getRequirementTitle } from '$lib/utils/helpers';
 
 	export let data: PageData;
 
@@ -23,6 +24,11 @@
 
 	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].status];
 
+	$: requirement = data.requirements.find(req => req.id === data.requirement_assessments[currentIndex].requirement);
+	$: parent = data.requirements.find(req => req.urn === requirement.parent_urn);
+
+	$: title = requirement.display_short ? requirement.display_short : parent.display_short ? parent.display_short : parent.description;
+
 	// Function to handle the "Next" button click
 	function nextItem() {
 		if (currentIndex < data.requirement_assessments.length - 1) {
@@ -40,7 +46,6 @@
 	// Function to update the status of the current item
 	function updateStatus(event) {
 		data.requirement_assessments[currentIndex].status = event.target.value;
-        console.log("we can perform the api call here to update the status of item ", data.requirement_assessments[currentIndex].id, " to ", event.target.value);
 		const form = document.getElementById('flashModeForm');
 		const formData = new FormData(form);
 		fetch(form.action, {
@@ -54,15 +59,17 @@
 	<div style="border-color: {color}" class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4">
 		{#if data.requirement_assessments[currentIndex]}
 			<div class="flex flex-col w-full h-full space-y-4">
-				<div class="flex justify-between">
-					
-					<div class="text-sm mt-4">{data.requirement_assessments[currentIndex].name}</div>
-					<div class="mt-4 font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
-				</div>
 				{#if data.requirement_assessments[currentIndex].description}
-				<div class="flex text-sm h-1/2 items-center text-center justify-center">{data.requirement_assessments[currentIndex].description}</div>
+				<div class="flex justify-between h-1/6">
+					<div class="font-semibold">{title}</div>
+					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
+				</div>
+				<div class="flex h-1/2 items-center text-center justify-center">{data.requirement_assessments[currentIndex].description}</div>
 				{:else}
-				<div class="flex text-gray-400 h-1/3 italic text-sm items-center">{m.noDescription()}</div>
+				<div class="flex justify-end h-1/6">
+					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
+				</div>
+				<div class="flex font-semibold h-1/2 items-center text-center justify-center">{title}</div>
 				{/if}
 				<div class="items-center">
 					<div class="">

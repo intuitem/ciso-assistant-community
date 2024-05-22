@@ -9,12 +9,16 @@ export const load = (async ({ fetch, params }) => {
 	const res = await fetch(endpoint);
 	const compliance_assessment = await res.json();
 
-	const requirement_assessments = await fetch(`${endpoint}flash_mode/`).then((res) => res.json());
+	const flashMode = await fetch(`${endpoint}flash_mode/`).then((res) => res.json());
+
+	const requirement_assessments = flashMode.requirement_assessments
+	const requirements = flashMode.requirements
 
 	return {
 		URLModel,
 		compliance_assessment,
-		requirement_assessments
+		requirement_assessments,
+		requirements
 	};
 }) satisfies PageServerLoad;
 
