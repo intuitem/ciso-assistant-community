@@ -528,5 +528,7 @@
 	"matchingRequirements": "Overeenkomende vereisten",
 	"asZIP": "als ZIP",
 	"incoming": "Binnenkomend",
-	"outdated": "Verouderd"
+	"outdated": "Verouderd",
+	"exportBackupDescription": "Dit zal de database serialiseren en een back-up maken, inclusief gebruikers en RBAC. Bewijzen en andere bestanden zijn niet inbegrepen in de back-up.",
+	"importBackupDescription": "Dit zal de database deserialiseren en herstellen vanaf een back-up. Dit zal alle bestaande gegevens, inclusief gebruikers en RBAC, overschrijven en kan niet ongedaan worden gemaakt."
 }
