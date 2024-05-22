@@ -1641,7 +1641,7 @@ def generate_html(
         else:
             assessment = RequirementAssessment.objects.filter(
                 requirement__urn=requirement_node.urn,
-                compliance_assessment=compliance_assessment
+                compliance_assessment=compliance_assessment,
             ).first()
 
             table += "<div>"
