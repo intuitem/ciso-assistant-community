@@ -1,3 +1,4 @@
+import { Console } from 'console';
 import { test, expect, type Locator } from '../../utils/test-utils.js';
 
 test.describe.configure({ mode: 'serial' });

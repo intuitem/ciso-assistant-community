@@ -528,5 +528,7 @@
 	"matchingRequirements": "Übereinstimmende Anforderungen",
 	"asZIP": "als ZIP",
 	"incoming": "Eingehend",
-	"outdated": "Veraltet"
+	"outdated": "Veraltet",
+	"exportBackupDescription": "Dies wird die Datenbank serialisieren und ein Backup erstellen, einschließlich Benutzer und RBAC. Beweise und andere Dateien sind im Backup nicht enthalten.",
+	"importBackupDescription": "Dies wird die Datenbank aus einem Backup deserialisieren und wiederherstellen. Dies wird alle vorhandenen Daten, einschließlich Benutzer und RBAC, überschreiben und kann nicht rückgängig gemacht werden."
 }

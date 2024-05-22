@@ -202,6 +202,7 @@ class RequirementNodeImporter:
             assessable=self.requirement_data.get("assessable"),
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
+            typical_evidence=self.requirement_data.get("typical_evidence"),
             provider=framework_object.provider,
             order_id=self.index,
             name=self.requirement_data.get("name"),
@@ -618,8 +619,6 @@ class LibraryImporter:
 
     def import_objects(self, library_object):
         """Import library objects."""
-        if self._framework_importer is not None:
-            self._framework_importer.import_framework(library_object)
 
         for threat in self._threats:
             threat.import_threat(library_object)
@@ -629,6 +628,9 @@ class LibraryImporter:
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
+
+        if self._framework_importer is not None:
+            self._framework_importer.import_framework(library_object)
 
     @transaction.atomic
     def _import_library(self):
@@ -658,6 +660,7 @@ class LibraryImporter:
                 else:
                     raise e
             except Exception as e:
+                print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e
 
