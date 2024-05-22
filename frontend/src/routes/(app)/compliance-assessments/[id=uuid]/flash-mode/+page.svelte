@@ -51,7 +51,7 @@
 </script>
 
 <div class="flex h-full justify-center items-center">
-	<div style="border-color: {color}" class="flex flex-col bg-white w-1/2 h-1/2 rounded-xl shadow-xl p-4 border-4">
+	<div style="border-color: {color}" class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4">
 		{#if data.requirement_assessments[currentIndex]}
 			<div class="flex flex-col w-full h-full space-y-4">
 				<div class="flex justify-between">
@@ -60,7 +60,7 @@
 					<div class="mt-4 font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
 				</div>
 				{#if data.requirement_assessments[currentIndex].description}
-				<div class="flex text-lg h-1/3 items-center">{data.requirement_assessments[currentIndex].description}</div>
+				<div class="flex text-sm h-1/2 items-center text-center justify-center">{data.requirement_assessments[currentIndex].description}</div>
 				{:else}
 				<div class="flex text-gray-400 h-1/3 italic text-sm items-center">{m.noDescription()}</div>
 				{/if}
