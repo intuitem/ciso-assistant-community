@@ -530,5 +530,7 @@
 	"incoming": "aproximação",
 	"outdated": "Desatualizado",
 	"exportBackupDescription": "Isso irá serializar e criar um backup do banco de dados, incluindo usuários e RBAC. Evidências e outros arquivos não estão incluídos no backup.",
-	"importBackupDescription": "Isso irá desserializar e restaurar o banco de dados a partir de um backup. Isso substituirá todos os dados existentes, incluindo usuários e RBAC, e não poderá ser desfeito."
+	"importBackupDescription": "Isso irá desserializar e restaurar o banco de dados a partir de um backup. Isso substituirá todos os dados existentes, incluindo usuários e RBAC, e não poderá ser desfeito.",
+	"requirementAppliedControlHelpText": "As evidências vinculadas às medidas selecionadas serão automaticamente associadas ao requisito.",
+	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito."
 }
