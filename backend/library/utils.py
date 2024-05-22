@@ -28,7 +28,7 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$"
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
 
 
 def match_urn(urn_string):
@@ -663,22 +663,3 @@ class LibraryImporter:
                 print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e
-
-
-def import_library_view(library: dict) -> Union[str, None]:
-    """
-    Imports a library
-
-    Parameters
-    ----------
-    library : dict
-        A library dictionary loaded from a library YAML configuration file.
-
-    Returns
-    -------
-    optional_error : Union[str,None]
-        A string describing the error if the function fails and returns None on success.
-    """
-    # NOTE: We should just use LibraryImporter.import_library at this point
-    library_importer = LibraryImporter(library)
-    return library_importer.import_library()
