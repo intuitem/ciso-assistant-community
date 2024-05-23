@@ -11,8 +11,8 @@ export const load = (async ({ fetch, params }) => {
 
 	const flashMode = await fetch(`${endpoint}flash_mode/`).then((res) => res.json());
 
-	const requirement_assessments = flashMode.requirement_assessments
-	const requirements = flashMode.requirements
+	const requirement_assessments = flashMode.requirement_assessments;
+	const requirements = flashMode.requirements;
 
 	return {
 		URLModel,
@@ -25,7 +25,7 @@ export const load = (async ({ fetch, params }) => {
 export const actions: Actions = {
 	updateRequirementAssessment: async (event) => {
 		const formData = await event.request.formData();
-		const values: {id: string, status: string} = {id: '', status: ''};
+		const values: { id: string; status: string } = { id: '', status: '' };
 		for (const entry of formData.entries()) {
 			values[entry[0]] = entry[1];
 		}

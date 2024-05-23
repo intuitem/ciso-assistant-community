@@ -361,7 +361,7 @@ export function localItems(languageTag: string): LocalItems {
 		incoming: m.incoming({ languageTag: languageTag }),
 		today: m.today({ languageTag: languageTag }),
 		outdated: m.outdated({ languageTag: languageTag }),
-		flashMode: m.flashMode({ languageTag: languageTag }),
+		flashMode: m.flashMode({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
