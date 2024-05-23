@@ -102,7 +102,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 28. CIS Controls v8\*
 29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
-31. NIST SP 800-171 rev2 🇺🇸
+31. NIST SP 800-171 rev2 (2021) 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 34. GSA FedRAMP rev5 ☁️🇺🇸
@@ -111,6 +111,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
 38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
 39. BSI: IT-Grundschutz-Kompendium 🇩🇪
+40. NIST SP 800-171 rev3 (2024) 🇺🇸
+41. ENISA: 5G Security Controls Matrix 🇪🇺
 
 ### Community contributions
 
@@ -406,6 +408,15 @@ tests/e2e-tests.sh
 ```
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
+
+## API and Swagger
+
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/ 
+
+To interact with it:
+
+- call `/api/iam/login/` with your credentials in the body to get the token
+- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's Token not Bearer.
 
 ## Setting CISO Assistant for production
 
