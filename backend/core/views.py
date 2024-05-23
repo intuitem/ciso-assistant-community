@@ -1661,7 +1661,8 @@ def generate_html(
                 table += bar_graph(requirement_node)
         else:
             assessment = RequirementAssessment.objects.filter(
-                requirement__urn=requirement_node.urn
+                requirement__urn=requirement_node.urn,
+                compliance_assessment=compliance_assessment,
             ).first()
 
             table += "<div>"
