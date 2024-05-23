@@ -529,5 +529,6 @@
 	"asZIP": "as ZIP",
 	"incoming": "Incoming",
 	"outdated": "Outdated",
-	"flashMode": "Flash mode"
+	"flashMode": "Flash mode",
+	"goBackToAudit": "Go back to the audit"
 }

@@ -34,12 +34,18 @@
 		if (currentIndex < data.requirement_assessments.length - 1) {
 			currentIndex += 1;
 		}
+		else {
+			currentIndex = 0;
+		}
 	}
 
 	// Function to handle the "Back" button click
 	function previousItem() {
 		if (currentIndex > 0) {
 			currentIndex -= 1;
+		}
+		else {
+			currentIndex = data.requirement_assessments.length - 1;
 		}
 	}
 
@@ -55,22 +61,26 @@
 	}
 </script>
 
-<div class="flex h-full justify-center items-center">
+<div class="flex flex-col h-full justify-center items-center">
 	<div style="border-color: {color}" class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4">
 		{#if data.requirement_assessments[currentIndex]}
 			<div class="flex flex-col w-full h-full space-y-4">
-				{#if data.requirement_assessments[currentIndex].description}
 				<div class="flex justify-between h-1/6">
-					<div class="font-semibold">{title}</div>
+					<div class=""><a
+						href="/compliance-assessments/{data.compliance_assessment.id}"
+						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+					>
+						<i class="fa-solid fa-arrow-left" />
+						<p class="">{m.goBackToAudit()}</p>
+					</a></div>
 					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
 				</div>
-				<div class="flex h-1/2 items-center text-center justify-center">{data.requirement_assessments[currentIndex].description}</div>
-				{:else}
-				<div class="flex justify-end h-1/6">
-					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
+				<div class="flex flex-col h-1/2 items-center text-center justify-center">
+					<p class="font-semibold">{title}</p>
+					{#if data.requirement_assessments[currentIndex].description}
+						{data.requirement_assessments[currentIndex].description}
+					{/if}
 				</div>
-				<div class="flex font-semibold h-1/2 items-center text-center justify-center">{title}</div>
-				{/if}
 				<div class="items-center">
 					<div class="">
 						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">{m.status()}</h3>
@@ -110,14 +120,12 @@
 				<button
 					class="bg-gray-400 text-white px-4 py-2 rounded"
 					on:click={previousItem}
-					disabled={currentIndex === 0}
 				>
 					{m.previous()}
 				</button>
 				<button
 					class="variant-filled-primary px-4 py-2 rounded"
 					on:click={nextItem}
-					disabled={currentIndex === data.requirement_assessments.length - 1}
 				>
 					{m.next()}
 				</button>
