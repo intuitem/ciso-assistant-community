@@ -116,7 +116,7 @@ ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:enisa-5g-scm
 ws.append(["framework_ref_id", "ENISA 5G SCM v1.3"])
 ws.append(["framework_name", "ENISA 5G Security Control Matrix v1.3"])
 ws.append(["framework_description", library_description])
-ws.append(["reference_control_base_urn", "risk:reference_control:enisa-5g-scm", "1"])
+ws.append(["reference_control_base_urn", f"urn:{packager.lower()}:risk:reference_control:enisa-5g-scm", "1"])
 ws.append(["tab", "reference_controls", "reference_controls"])
 ws.append(["tab", "requirements", "requirements"])
 
