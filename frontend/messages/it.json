@@ -529,6 +529,7 @@
 	"asZIP": "come ZIP",
 	"incoming": "In arrivo",
 	"outdated": "Obsoleto",
+	"goBackToAudit": "Torniamo all'audit",
 	"exportBackupDescription": "Questo serializzerà e creerà un backup del database, inclusi utenti e RBAC. Le prove e altri file non sono inclusi nel backup.",
 	"importBackupDescription": "Questo deserializzerà e ripristinerà il database da un backup. Questo sovrascriverà tutti i dati esistenti, inclusi utenti e RBAC, e non può essere annullato."
 }
