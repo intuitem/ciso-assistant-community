@@ -1766,7 +1766,7 @@ def generate_html(
     </html>
     """
 
-    return (content, selected_evidences)
+    return (content, list(set(selected_evidences)))
 
 
 def export_mp_csv(request):
