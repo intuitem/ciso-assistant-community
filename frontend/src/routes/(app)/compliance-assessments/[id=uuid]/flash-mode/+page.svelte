@@ -24,17 +24,22 @@
 
 	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].status];
 
-	$: requirement = data.requirements.find(req => req.id === data.requirement_assessments[currentIndex].requirement);
-	$: parent = data.requirements.find(req => req.urn === requirement.parent_urn);
+	$: requirement = data.requirements.find(
+		(req) => req.id === data.requirement_assessments[currentIndex].requirement
+	);
+	$: parent = data.requirements.find((req) => req.urn === requirement.parent_urn);
 
-	$: title = requirement.display_short ? requirement.display_short : parent.display_short ? parent.display_short : parent.description;
+	$: title = requirement.display_short
+		? requirement.display_short
+		: parent.display_short
+		? parent.display_short
+		: parent.description;
 
 	// Function to handle the "Next" button click
 	function nextItem() {
 		if (currentIndex < data.requirement_assessments.length - 1) {
 			currentIndex += 1;
-		}
-		else {
+		} else {
 			currentIndex = 0;
 		}
 	}
@@ -43,8 +48,7 @@
 	function previousItem() {
 		if (currentIndex > 0) {
 			currentIndex -= 1;
-		}
-		else {
+		} else {
 			currentIndex = data.requirement_assessments.length - 1;
 		}
 	}
@@ -57,22 +61,27 @@
 		fetch(form.action, {
 			method: 'POST',
 			body: formData
-		})
+		});
 	}
 </script>
 
 <div class="flex flex-col h-full justify-center items-center">
-	<div style="border-color: {color}" class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4">
+	<div
+		style="border-color: {color}"
+		class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4"
+	>
 		{#if data.requirement_assessments[currentIndex]}
 			<div class="flex flex-col w-full h-full space-y-4">
 				<div class="flex justify-between h-1/6">
-					<div class=""><a
-						href="/compliance-assessments/{data.compliance_assessment.id}"
-						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-					>
-						<i class="fa-solid fa-arrow-left" />
-						<p class="">{m.goBackToAudit()}</p>
-					</a></div>
+					<div class="">
+						<a
+							href="/compliance-assessments/{data.compliance_assessment.id}"
+							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+						>
+							<i class="fa-solid fa-arrow-left" />
+							<p class="">{m.goBackToAudit()}</p>
+						</a>
+					</div>
 					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
 				</div>
 				<div class="flex flex-col h-1/2 items-center text-center justify-center">
@@ -85,52 +94,45 @@
 					<div class="">
 						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">{m.status()}</h3>
 						<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-						<ul
-							class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-						>
-							<input hidden name="id" value={data.requirement_assessments[currentIndex].id}/>
-							{#each possible_options as option}
-								<li
-									class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
-								>
-									<div class="flex items-center ps-3">	
+							<ul
+								class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+							>
+								<input hidden name="id" value={data.requirement_assessments[currentIndex].id} />
+								{#each possible_options as option}
+									<li
+										class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
+									>
+										<div class="flex items-center ps-3">
 											<input
-											id={option.id}
-											type="radio"
-											value={option.id}
-											name="status"
-											checked={option.id === data.requirement_assessments[currentIndex].status}
-											on:change={updateStatus}
-											class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+												id={option.id}
+												type="radio"
+												value={option.id}
+												name="status"
+												checked={option.id === data.requirement_assessments[currentIndex].status}
+												on:change={updateStatus}
+												class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
 											/>
-										<label
-											for={option.id}
-											class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-											>{option.label}
-										</label>
-									</div>
-								</li>
-							{/each}
-						</ul>
+											<label
+												for={option.id}
+												class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+												>{option.label}
+											</label>
+										</div>
+									</li>
+								{/each}
+							</ul>
 						</form>
 					</div>
 				</div>
 			</div>
 			<div class="flex justify-between">
-				<button
-					class="bg-gray-400 text-white px-4 py-2 rounded"
-					on:click={previousItem}
-				>
+				<button class="bg-gray-400 text-white px-4 py-2 rounded" on:click={previousItem}>
 					{m.previous()}
 				</button>
-				<button
-					class="variant-filled-primary px-4 py-2 rounded"
-					on:click={nextItem}
-				>
+				<button class="variant-filled-primary px-4 py-2 rounded" on:click={nextItem}>
 					{m.next()}
 				</button>
 			</div>
 		{/if}
 	</div>
 </div>
-

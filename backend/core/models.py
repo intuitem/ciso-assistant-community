@@ -1450,13 +1450,14 @@ class ComplianceAssessment(Assessment):
             ).order_by("requirement__order_id")
         selected_implementation_groups_set = set(self.selected_implementation_groups)
         filtered_requirements = RequirementAssessment.objects.filter(
-            compliance_assessment=self,
-            requirement__assessable=True
+            compliance_assessment=self, requirement__assessable=True
         ).order_by("requirement__order_id")
         print(filtered_requirements)
         requirement_assessments_list = []
         for requirement in filtered_requirements:
-            if selected_implementation_groups_set & set(requirement.requirement.implementation_groups):
+            if selected_implementation_groups_set & set(
+                requirement.requirement.implementation_groups
+            ):
                 requirement_assessments_list.append(requirement)
 
         return requirement_assessments_list
@@ -1699,7 +1700,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return self.requirement.display_short
-    
+
     def get_requirement_description(self) -> str:
         return self.requirement.description
 
