@@ -1452,7 +1452,6 @@ class ComplianceAssessment(Assessment):
         filtered_requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         ).order_by("requirement__order_id")
-        print(filtered_requirements)
         requirement_assessments_list = []
         for requirement in filtered_requirements:
             if selected_implementation_groups_set & set(
