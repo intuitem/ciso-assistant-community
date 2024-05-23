@@ -1,0 +1,1128 @@
+urn: urn:intuitem:risk:library:nist-800-171-rev3
+locale: en
+ref_id: nist-800-171-rev3
+name: NIST SP 800-171 Rev. 3
+description: 'Protecting Controlled Unclassified Information in Nonfederal Systems
+  and Organizations
+
+  https://csrc.nist.gov/pubs/sp/800/171/r3/final'
+copyright: NIST
+version: 1
+provider: NIST
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nist-800-171-rev3
+    ref_id: nist-800-171-rev3
+    name: NIST SP 800-171 Rev. 3
+    description: 'Protecting Controlled Unclassified Information in Nonfederal Systems
+      and Organizations
+
+      https://csrc.nist.gov/pubs/sp/800/171/r3/final'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      assessable: false
+      depth: 1
+      name: Access Control
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.01
+      name: Account Management
+      description: "a.\tDefine the types of system accounts allowed and prohibited.\n\
+        b.\tCreate, enable, modify, disable, and remove system accounts in accordance\
+        \ with policy, procedures, prerequisites, and criteria.\nc.\tSpecify:\n1.\t\
+        Authorized users of the system,\n2.\tGroup and role membership, and\n3.\t\
+        Access authorizations (i.e., privileges) for each account.\nd.\tAuthorize\
+        \ access to the system based on:\n1.\tA valid access authorization and\n2.\t\
+        Intended system usage.\ne.\tMonitor the use of system accounts.\nf.\tDisable\
+        \ system accounts when: \n1.\tThe accounts have expired,\n2.\tThe accounts\
+        \ have been inactive for [Assignment: organization-defined time period],\n\
+        3.\tThe accounts are no longer associated with a user or individual,\n4.\t\
+        The accounts are in violation of organizational policy, or\n5.\tSignificant\
+        \ risks associated with individuals are discovered.\ng.\tNotify account managers\
+        \ and designated personnel or roles within:\n1.\t[Assignment: organization-defined\
+        \ time period] when accounts are no longer required.\n2.\t[Assignment: organization-defined\
+        \ time period] when users are terminated or transferred.\n3.\t[Assignment:\
+        \ organization-defined time period] when system usage or the need-to-know\
+        \ changes for an individual.\nh.\tRequire that users log out of the system\
+        \ after [Assignment: organization-defined time period] of expected inactivity\
+        \ or when [Assignment: organization-defined circumstances]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.02
+      name: Access Enforcement
+      description: Enforce approved authorizations for logical access to CUI and system
+        resources in accordance with applicable access control policies.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.03
+      name: Information Flow Enforcement
+      description: Enforce approved authorizations for controlling the flow of CUI
+        within the system and between connected systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.04
+      name: Separation of Duties
+      description: "a.\tIdentify the duties of individuals requiring separation.\n\
+        b.\tDefine system access authorizations to support separation of duties."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.05
+      name: Least Privilege
+      description: "a.\tAllow only authorized system access for users (or processes\
+        \ acting on behalf of users) that is necessary to accomplish assigned organizational\
+        \ tasks.\nb.\tAuthorize access to [Assignment: organization-defined security\
+        \ functions] and [Assignment: organization-defined security-relevant information].\n\
+        c.\tReview the privileges assigned to roles or classes of users [Assignment:\
+        \ organization-defined frequency] to validate the need for such privileges.\n\
+        d.\tReassign or remove privileges, as necessary."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.06
+      name: "Least Privilege \u2013 Privileged Accounts"
+      description: "a.\tRestrict privileged accounts on the system to [Assignment:\
+        \ organization-defined personnel or roles].\nb.\tRequire that users (or roles)\
+        \ with privileged accounts use non-privileged accounts when accessing non-security\
+        \ functions or non-security information."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.07
+      name: "Least Privilege \u2013 Privileged Functions"
+      description: "a.\tPrevent non-privileged users from executing privileged functions.\n\
+        b.\tLog the execution of privileged functions."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.08
+      name: Unsuccessful Logon Attempts
+      description: "a.\tEnforce a limit of [Assignment: organization-defined number]\
+        \ consecutive invalid logon attempts by a user during a [Assignment: organization-defined\
+        \ time period].\nb.\tAutomatically [Selection (one or more): lock the account\
+        \ or node for an [Assignment: organization-defined time period]; lock the\
+        \ account or node until released by an administrator; delay next logon prompt;\
+        \ notify system administrator; take other action] when the maximum number\
+        \ of unsuccessful attempts is exceeded."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.09
+      name: System Use Notification
+      description: Display a system use notification message with privacy and security
+        notices consistent with applicable CUI rules before granting access to the
+        system.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.10
+      name: Device Lock
+      description: "a.\tPrevent access to the system by [Selection (one or more):\
+        \ initiating a device lock after [Assignment: organization-defined time period]\
+        \ of inactivity; requiring the user to initiate a device lock before leaving\
+        \ the system unattended].\nb.\tRetain the device lock until the user reestablishes\
+        \ access using established identification and authentication procedures.\n\
+        c.\tConceal, via the device lock, information previously visible on the display\
+        \ with a publicly viewable image."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.11
+      name: Session Termination
+      description: 'Terminate a user session automatically after [Assignment: organization-defined
+        conditions or trigger events requiring session disconnect].'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.12
+      name: Remote Access
+      description: "a.\tEstablish usage restrictions, configuration requirements,\
+        \ and connection requirements for each type of allowable remote system access.\n\
+        b.\tAuthorize each type of remote system access prior to establishing such\
+        \ connections.\nc.\tRoute remote access to the system through authorized and\
+        \ managed access control points.\nd.\tAuthorize the remote execution of privileged\
+        \ commands and remote access to security-relevant information."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.16
+      name: Wireless Access
+      description: "a.\tEstablish usage restrictions, configuration requirements,\
+        \ and connection requirements for each type of wireless access to the system.\n\
+        b.\tAuthorize each type of wireless access to the system prior to establishing\
+        \ such connections.\nc.\tDisable, when not intended for use, wireless networking\
+        \ capabilities prior to issuance and deployment.\nd.\tProtect wireless access\
+        \ to the system using authentication and encryption."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.18
+      name: Access Control for Mobile Devices
+      description: "a.\tEstablish usage restrictions, configuration requirements,\
+        \ and connection requirements for mobile devices.\nb.\tAuthorize the connection\
+        \ of mobile devices to the system.\nc.\tImplement full-device or container-based\
+        \ encryption to protect the confidentiality of CUI on mobile devices."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.20
+      name: Use of External Systems
+      description: "a.\tProhibit the use of external systems unless the systems are\
+        \ specifically authorized.\nb.\tEstablish the following security requirements\
+        \ to be satisfied on external systems prior to allowing use of or access to\
+        \ those systems by authorized individuals: [Assignment: organization-defined\
+        \ security requirements].\nc.\tPermit authorized individuals to use external\
+        \ systems to access the organizational system or to process, store, or transmit\
+        \ CUI only after:\n1.\tVerifying that the security requirements on the external\
+        \ systems as specified in the organization\u2019s system security plans have\
+        \ been satisfied and\n2.\tRetaining approved system connection or processing\
+        \ agreements with the organizational entities hosting the external systems.\n\
+        d.\tRestrict the use of organization-controlled portable storage devices by\
+        \ authorized individuals on external systems."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.01.22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node2
+      ref_id: 03.01.22
+      name: Publicly Accessible Content
+      description: "a.\tTrain authorized individuals to ensure that publicly accessible\
+        \ information does not contain CUI.\nb.\tReview the content on publicly accessible\
+        \ systems for CUI and remove such information, if discovered."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node19
+      assessable: false
+      depth: 1
+      name: Awareness and Training
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.02.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node19
+      ref_id: 03.02.01
+      name: Literacy Training and Awareness
+      description: "a.\tProvide security literacy training to system users:\n1.\t\
+        As part of initial training for new users and [Assignment: organization-defined\
+        \ frequency] thereafter,\n2.\tWhen required by system changes or following\
+        \ [Assignment: organization-defined events], and\n3.\tOn recognizing and reporting\
+        \ indicators of insider threat, social engineering, and social mining.\nb.\t\
+        Update security literacy training content [Assignment: organization-defined\
+        \ frequency] and following [Assignment: organization-defined events]. "
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.02.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node19
+      ref_id: 03.02.02
+      name: Role-Based Training
+      description: "a.\tProvide role-based security training to organizational personnel:\n\
+        1.\tBefore authorizing access to the system or CUI, before performing assigned\
+        \ duties, and [Assignment: organization-defined frequency] thereafter.\n2.\t\
+        When required by system changes or following [Assignment: organization-defined\
+        \ events].\nb.\tUpdate role-based training content [Assignment: organization-defined\
+        \ frequency] and following [Assignment: organization-defined events]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      assessable: false
+      depth: 1
+      name: Audit and Accountability
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.01
+      name: Event Logging
+      description: "a.\tSpecify the following event types selected for logging within\
+        \ the system: [Assignment: organization-defined event types].\nb.\tReview\
+        \ and update the event types selected for logging [Assignment: organization-defined\
+        \ frequency]. "
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.02
+      name: Audit Record Content
+      description: "a.\tInclude the following content in audit records: \n1.\tWhat\
+        \ type of event occurred\n2.\tWhen the event occurred\n3.\tWhere the event\
+        \ occurred\n4.\tSource of the event\n5.\tOutcome of the event\n6.\tIdentity\
+        \ of the individuals, subjects, objects, or entities associated with the event\n\
+        b.\tProvide additional information for audit records as needed."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.03
+      name: Audit Record Generation
+      description: "a.\tGenerate audit records for the selected event types and audit\
+        \ record content specified in 03.03.01 and 03.03.02.\nb.\tRetain audit records\
+        \ for a time period consistent with the records retention policy."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.04
+      name: Response to Audit Logging Process Failures
+      description: "a.\tAlert organizational personnel or roles within [Assignment:\
+        \ organization-defined time period] in the event of an audit logging process\
+        \ failure.\nb.\tTake the following additional actions: [Assignment: organization-defined\
+        \ additional actions]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.05
+      name: Audit Record Review, Analysis, and Reporting
+      description: "a.\tReview and analyze system audit records [Assignment: organization-defined\
+        \ frequency] for indications and the potential impact of inappropriate or\
+        \ unusual activity.\nb.\tReport findings to organizational personnel or roles.\n\
+        c.\tAnalyze and correlate audit records across different repositories to gain\
+        \ organization-wide situational awareness."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.06
+      name: Audit Record Reduction and Report Generation
+      description: "a.\tImplement an audit record reduction and report generation\
+        \ capability that supports audit record review, analysis, reporting requirements,\
+        \ and after-the-fact investigations of incidents.\nb.\tPreserve the original\
+        \ content and time ordering of audit records."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.07
+      name: Time Stamps
+      description: "a.\tUse internal system clocks to generate time stamps for audit\
+        \ records.\nb.\tRecord time stamps for audit records that meet [Assignment:\
+        \ organization-defined granularity of time measurement] and that use Coordinated\
+        \ Universal Time (UTC), have a fixed local time offset from UTC, or include\
+        \ the local time offset as part of the time stamp."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.03.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node22
+      ref_id: 03.03.08
+      name: Protection of Audit Information
+      description: "a.\tProtect audit information and audit logging tools from unauthorized\
+        \ access, modification, and deletion.\nb.\tAuthorize access to management\
+        \ of audit logging functionality to only a subset of privileged users or roles."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      assessable: false
+      depth: 1
+      name: Configuration Management
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.01
+      name: Baseline Configuration
+      description: "a.\tDevelop and maintain under configuration control, a current\
+        \ baseline configuration of the system.\nb.\tReview and update the baseline\
+        \ configuration of the system [Assignment: organization-defined frequency]\
+        \ and when system components are installed or modified."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.02
+      name: Configuration Settings
+      description: "a.\tEstablish, document, and implement the following configuration\
+        \ settings for the system that reflect the most restrictive mode consistent\
+        \ with operational requirements: [Assignment: organization-defined configuration\
+        \ settings].\nb.\tIdentify, document, and approve any deviations from established\
+        \ configuration settings."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.03
+      name: Configuration Change Control
+      description: "a.\tDefine the types of changes to the system that are configuration-controlled.\n\
+        b.\tReview proposed configuration-controlled changes to the system, and approve\
+        \ or disapprove such changes with explicit consideration for security impacts.\n\
+        c.\tImplement and document approved configuration-controlled changes to the\
+        \ system.\nd.\tMonitor and review activities associated with configuration-controlled\
+        \ changes to the system."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.04
+      name: 'Impact Analyses '
+      description: "a.\tAnalyze changes to the system to determine potential security\
+        \ impacts prior to change implementation.\nb.\tVerify that the security requirements\
+        \ for the system continue to be satisfied after the system changes have been\
+        \ implemented."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.05
+      name: Access Restrictions for Change
+      description: Define, document, approve, and enforce physical and logical access
+        restrictions associated with changes to the system.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.06
+      name: Least Functionality
+      description: "a.\tConfigure the system to provide only mission-essential capabilities.\n\
+        b.\tProhibit or restrict use of the following functions, ports, protocols,\
+        \ connections, and services: [Assignment: organization-defined functions,\
+        \ ports, protocols, connections, and services].\nc.\tReview the system [Assignment:\
+        \ organization-defined frequency] to identify unnecessary or nonsecure functions,\
+        \ ports, protocols, connections, and services.\nd.\tDisable or remove functions,\
+        \ ports, protocols, connections, and services that are unnecessary or nonsecure."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.08
+      name: "Authorized Software \u2013 Allow by Exception"
+      description: "a.\tIdentify software programs authorized to execute on the system.\n\
+        b.\tImplement a deny-all, allow-by-exception policy for the execution of authorized\
+        \ software programs on the system.\nc.\tReview and update the list of authorized\
+        \ software programs [Assignment: organization-defined frequency]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.10
+      name: System Component Inventory
+      description: "a.\tDevelop and document an inventory of system components.\n\
+        b.\tReview and update the system component inventory [Assignment: organization-defined\
+        \ frequency].\nc.\tUpdate the system component inventory as part of installations,\
+        \ removals, and system updates."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.11
+      name: Information Location
+      description: "a.\tIdentify and document the location of CUI and the system components\
+        \ on which the information is processed and stored.\nb.\tDocument changes\
+        \ to the system or system component location where CUI is processed and stored."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.04.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node31
+      ref_id: 03.04.12
+      name: System and Component Configuration for High-Risk Areas
+      description: "a.\tIssue systems or system components with the following configurations\
+        \ to individuals traveling to high-risk locations: [Assignment: organization-defined\
+        \ system configurations].\nb.\tApply the following security requirements to\
+        \ the systems or components when the individuals return from travel: [Assignment:\
+        \ organization-defined security requirements]. "
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      assessable: false
+      depth: 1
+      name: Identification and Authentication
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.01
+      name: User Identification, Authentication, and Re-Authentication
+      description: "a.\tUniquely identify and authenticate system users, and associate\
+        \ that unique identification with processes acting on behalf of those users.\n\
+        b.\tRe-authenticate users when [Assignment: organization-defined circumstances\
+        \ or situations requiring re-authentication]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.02
+      name: Device Identification and Authentication
+      description: 'Uniquely identify and authenticate [Assignment: organization-defined
+        devices or types of devices] before establishing a system connection.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.03
+      name: Multi-Factor Authentication
+      description: Implement multi-factor authentication for access to privileged
+        and non-privileged accounts.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.04
+      name: Replay-Resistant Authentication
+      description: Implement replay-resistant authentication mechanisms for access
+        to privileged and non-privileged accounts.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.05
+      name: Identifier Management
+      description: "a.\tReceive authorization from organizational personnel or roles\
+        \ to assign an individual, group, role, service, or device identifier.\nb.\t\
+        Select and assign an identifier that identifies an individual, group, role,\
+        \ service, or device.\nc.\tPrevent the reuse of identifiers for [Assignment:\
+        \ organization-defined time period].\nd.\tManage individual identifiers by\
+        \ uniquely identifying each individual as [Assignment: organization-defined\
+        \ characteristic identifying individual status]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.07
+      name: Password Management
+      description: "a.\tMaintain a list of commonly-used, expected, or compromised\
+        \ passwords, and update the list [Assignment: organization-defined frequency]\
+        \ and when organizational passwords are suspected to have been compromised.\n\
+        b.\tVerify that passwords are not found on the list of commonly used, expected,\
+        \ or compromised passwords when users create or update passwords.\nc.\tTransmit\
+        \ passwords only over cryptographically protected channels.\nd.\tStore passwords\
+        \ in a cryptographically protected form.\ne.\tSelect a new password upon first\
+        \ use after account recovery.\nf.\tEnforce the following composition and complexity\
+        \ rules for passwords: [Assignment: organization-defined composition and complexity\
+        \ rules]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.11
+      name: Authentication Feedback
+      description: 'Obscure feedback of authentication information during the authentication
+        process. '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.05.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node42
+      ref_id: 03.05.12
+      name: Authenticator Management
+      description: "a.\tVerify the identity of the individual, group, role, service,\
+        \ or device receiving the authenticator as part of the initial authenticator\
+        \ distribution.\nb.\tEstablish initial authenticator content for any authenticators\
+        \ issued by the organization.\nc.\tEstablish and implement administrative\
+        \ procedures for initial authenticator distribution; for lost, compromised,\
+        \ or damaged authenticators; and for revoking authenticators.\nd.\tChange\
+        \ default authenticators at first use.\ne.\tChange or refresh authenticators\
+        \ [Assignment: organization-defined frequency] or when the following events\
+        \ occur: [Assignment: organization-defined events].\nf.\tProtect authenticator\
+        \ content from unauthorized disclosure and modification."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node51
+      assessable: false
+      depth: 1
+      name: Incident response
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node51
+      ref_id: 03.06.01
+      name: Incident Handling
+      description: Implement an incident-handling capability that is consistent with
+        the incident response plan and includes preparation, detection and analysis,
+        containment, eradication, and recovery.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node51
+      ref_id: 03.06.02
+      name: Incident Monitoring, Reporting, and Response Assistance
+      description: "a.\tTrack and document system security incidents. \nb.\tReport\
+        \ suspected incidents to the organizational incident response capability within\
+        \ [Assignment: organization-defined time period].\nc.\tReport incident information\
+        \ to [Assignment: organization-defined authorities].\nd.\tProvide an incident\
+        \ response support resource that offers advice and assistance to system users\
+        \ on handling and reporting incidents."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node51
+      ref_id: 03.06.03
+      name: Incident Response Testing
+      description: 'Test the effectiveness of the incident response capability [Assignment:
+        organization-defined frequency].'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node51
+      ref_id: 03.06.04
+      name: Incident Response Training
+      description: "a.\tProvide incident response training to system users consistent\
+        \ with assigned roles and responsibilities:\n1.\tWithin [Assignment: organization-defined\
+        \ time period] of assuming an incident response role or responsibility or\
+        \ acquiring system access,\n2.\tWhen required by system changes, and\n3.\t\
+        [Assignment: organization-defined frequency] thereafter.\nb.\tReview and update\
+        \ incident response training content [Assignment: organization-defined frequency]\
+        \ and following [Assignment: organization-defined events]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.06.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node51
+      ref_id: 03.06.05
+      name: Incident Response Plan
+      description: "a.\tDevelop an incident response plan that:\n1.\tProvides the\
+        \ organization with a roadmap for implementing its incident response capability,\n\
+        2.\tDescribes the structure and organization of the incident response capability,\n\
+        3.\tProvides a high-level approach for how the incident response capability\
+        \ fits into the overall organization,\n4.\tDefines reportable incidents,\n\
+        5.\tAddresses the sharing of incident information, and\n6.\tDesignates responsibilities\
+        \ to organizational entities, personnel, or roles.\nb.\tDistribute copies\
+        \ of the incident response plan to designated incident response personnel\
+        \ (identified by name and/or by role) and organizational elements.\nc.\tUpdate\
+        \ the incident response plan to address system and organizational changes\
+        \ or problems encountered during plan implementation, execution, or testing.\n\
+        d.\tProtect the incident response plan from unauthorized disclosure."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node57
+      assessable: false
+      depth: 1
+      name: Maintenance
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.07.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node57
+      ref_id: 03.07.04
+      name: Maintenance Tools
+      description: "a.\tApprove, control, and monitor the use of system maintenance\
+        \ tools.\nb.\tCheck media with diagnostic and test programs for malicious\
+        \ code before it is used in the system.\nc.\tPrevent the removal of system\
+        \ maintenance equipment containing CUI by verifying that there is no CUI on\
+        \ the equipment, sanitizing or destroying the equipment, or retaining the\
+        \ equipment within the facility."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.07.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node57
+      ref_id: 03.07.05
+      name: Nonlocal Maintenance
+      description: "a.\tApprove and monitor nonlocal maintenance and diagnostic activities.\n\
+        b.\tImplement multi-factor authentication and replay resistance in the establishment\
+        \ of nonlocal maintenance and diagnostic sessions.\nc.\tTerminate session\
+        \ and network connections when nonlocal maintenance is completed."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.07.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node57
+      ref_id: 03.07.06
+      name: Maintenance Personnel
+      description: "a.\tEstablish a process for maintenance personnel authorization.\n\
+        b.\tMaintain a list of authorized maintenance organizations or personnel.\n\
+        c.\tVerify that non-escorted personnel who perform maintenance on the system\
+        \ possess the required access authorizations.\nd.\tDesignate organizational\
+        \ personnel with required access authorizations and technical competence to\
+        \ supervise the maintenance activities of personnel who do not possess the\
+        \ required access authorizations."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      assessable: false
+      depth: 1
+      name: Media Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.01
+      name: Media Storage
+      description: Physically control and securely store system media that contain
+        CUI.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.02
+      name: Media Access
+      description: Restrict access to CUI on system media to authorized personnel
+        or roles.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.03
+      name: Media Sanitization
+      description: Sanitize system media that contain CUI prior to disposal, release
+        out of organizational control, or release for reuse.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.04
+      name: Media Marking
+      description: Mark system media that contain CUI to indicate distribution limitations,
+        handling caveats, and applicable CUI markings.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.05
+      name: Media Transport
+      description: "a.\tProtect and control system media that contain CUI during transport\
+        \ outside of controlled areas.\nb.\tMaintain accountability of system media\
+        \ that contain CUI during transport outside of controlled areas.\nc.\tDocument\
+        \ activities associated with the transport of system media that contain CUI."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.07
+      name: Media Use
+      description: "a.\tRestrict or prohibit the use of [Assignment: organization-defined\
+        \ types of system media]. \nb.\tProhibit the use of removable system media\
+        \ without an identifiable owner."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.08.09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node61
+      ref_id: 03.08.09
+      name: "System Backup \u2013 Cryptographic Protection"
+      description: "a.\tProtect the confidentiality of backup information.\nb.\tImplement\
+        \ cryptographic mechanisms to prevent the unauthorized disclosure of CUI at\
+        \ backup storage locations."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node69
+      assessable: false
+      depth: 1
+      name: Personnel Security
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.09.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node69
+      ref_id: 03.09.01
+      name: Personnel Screening
+      description: "a.\tScreen individuals prior to authorizing access to the system.\n\
+        b.\tRescreen individuals in accordance with [Assignment: organization-defined\
+        \ conditions requiring rescreening]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.09.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node69
+      ref_id: 03.09.02
+      name: Personnel Termination and Transfer
+      description: "a.\tWhen individual employment is terminated:\n1.\tDisable system\
+        \ access within [Assignment: organization-defined time period],\n2.\tTerminate\
+        \ or revoke authenticators and credentials associated with the individual,\
+        \ and\n3.\tRetrieve security-related system property.\nb.\tWhen individuals\
+        \ are reassigned or transferred to other positions in the organization:\n\
+        1.\tReview and confirm the ongoing operational need for current logical and\
+        \ physical access authorizations to the system and facility, and\n2.\tModify\
+        \ access authorization to correspond with any changes in operational need."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node72
+      assessable: false
+      depth: 1
+      name: Physical Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node72
+      ref_id: 03.10.01
+      name: Physical Access Authorizations
+      description: "a.\tDevelop, approve, and maintain a list of individuals with\
+        \ authorized access to the facility where the system resides.\nb.\tIssue authorization\
+        \ credentials for facility access.\nc.\tReview the facility access list [Assignment:\
+        \ organization-defined frequency].\nd.\tRemove individuals from the facility\
+        \ access list when access is no longer required."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node72
+      ref_id: 03.10.02
+      name: Monitoring Physical Access
+      description: "a.\tMonitor physical access to the facility where the system resides\
+        \ to detect and respond to physical security incidents.\nb.\tReview physical\
+        \ access logs [Assignment: organization-defined frequency] and upon occurrence\
+        \ of [Assignment: organization-defined events or potential indications of\
+        \ events]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node72
+      ref_id: 03.10.06
+      name: Alternate Work Site
+      description: "a.\tDetermine alternate work sites allowed for use by employees.\n\
+        b.\tEmploy the following security requirements at alternate work sites: [Assignment:\
+        \ organization-defined security requirements]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node72
+      ref_id: 03.10.07
+      name: Physical Access Control
+      description: "a.\tEnforce physical access authorizations at entry and exit points\
+        \ to the facility where the system resides by:\n1.\tVerifying individual physical\
+        \ access authorizations before granting access to the facility and\n2.\tControlling\
+        \ ingress and egress with physical access control systems, devices, or guards.\n\
+        b.\tMaintain physical access audit logs for entry or exit points.\nc.\tEscort\
+        \ visitors, and control visitor activity.\nd.\tSecure keys, combinations,\
+        \ and other physical access devices.\ne.\tControl physical access to output\
+        \ devices to prevent unauthorized individuals from obtaining access to CUI."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.10.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node72
+      ref_id: 03.10.08
+      name: 'Access Control for Transmission  '
+      description: Control physical access to system distribution and transmission
+        lines within organizational facilities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node78
+      assessable: false
+      depth: 1
+      name: Risk Assessment
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node78
+      ref_id: 03.11.01
+      name: Risk Assessment
+      description: "a.\tAssess the risk (including supply chain risk) of unauthorized\
+        \ disclosure resulting from the processing, storage, or transmission of CUI.\
+        \ \nb.\tUpdate risk assessments [Assignment: organization-defined frequency]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node78
+      ref_id: 03.11.02
+      name: Vulnerability Monitoring and Scanning
+      description: "a.\tMonitor and scan the system for vulnerabilities [Assignment:\
+        \ organization-defined frequency] and when new vulnerabilities affecting the\
+        \ system are identified.\nb.\tRemediate system vulnerabilities within [Assignment:\
+        \ organization-defined response times].\nc.\tUpdate system vulnerabilities\
+        \ to be scanned [Assignment: organization-defined frequency] and when new\
+        \ vulnerabilities are identified and reported."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.11.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node78
+      ref_id: 03.11.04
+      name: Risk Response
+      description: Respond to findings from security assessments, monitoring, and
+        audits.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node82
+      assessable: false
+      depth: 1
+      name: Security Assessment
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.12.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node82
+      ref_id: 03.12.01
+      name: Security Assessment
+      description: 'Assess the security requirements for the system and its environment
+        of operation [Assignment: organization-defined frequency] to determine if
+        the requirements have been satisfied.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.12.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node82
+      ref_id: 03.12.02
+      name: Plan of Action and Milestones
+      description: "a.\tDevelop a plan of action and milestones for the system:\n\
+        1.\tTo document the planned remediation actions to correct weaknesses or deficiencies\
+        \ noted during security assessments and\n2.\tTo reduce or eliminate known\
+        \ system vulnerabilities.\nb.\tUpdate the existing plan of action and milestones\
+        \ based on the findings from:\n1.\tSecurity assessments,\n2.\tAudits or reviews,\
+        \ and\n3.\tContinuous monitoring activities."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.12.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node82
+      ref_id: 03.12.03
+      name: Continuous Monitoring
+      description: Develop and implement a system-level continuous monitoring strategy
+        that includes ongoing monitoring and security assessments.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.12.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node82
+      ref_id: 03.12.05
+      name: Information Exchange
+      description: "a.\tApprove and manage the exchange of CUI between the system\
+        \ and other systems using [Selection (one or more): interconnection security\
+        \ agreements; information exchange security agreements; memoranda of understanding\
+        \ or agreement; service-level agreements; user agreements; non-disclosure\
+        \ agreements; other types of agreements].\nb.\tDocument interface characteristics,\
+        \ security requirements, and responsibilities for each system as part of the\
+        \ exchange agreements.\nc.\tReview and update the exchange agreements [Assignment:\
+        \ organization-defined frequency]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node87
+      assessable: false
+      depth: 1
+      name: System and Communications Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node87
+      ref_id: 03.13.01
+      name: Boundary Protection
+      description: "a.\tMonitor and control communications at external managed interfaces\
+        \ to the system and key internal managed interfaces within the system.\nb.\t\
+        Implement subnetworks for publicly accessible system components that are physically\
+        \ or logically separated from internal networks.\nc.\tConnect to external\
+        \ systems only through managed interfaces that consist of boundary protection\
+        \ devices arranged in accordance with an organizational security architecture."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node89
+      assessable: false
+      depth: 1
+      name: System and Services Acquisition
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      assessable: false
+      depth: 1
+      name: System and Communications Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.04
+      name: Information in Shared System Resources
+      description: Prevent unauthorized and unintended information transfer via shared
+        system resources.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.06
+      name: "Network Communications \u2013 Deny by Default \u2013 Allow by Exception"
+      description: Deny network communications traffic by default, and allow network
+        communications traffic by exception.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.08
+      name: Transmission and Storage Confidentiality
+      description: Implement cryptographic mechanisms to prevent the unauthorized
+        disclosure of CUI during transmission and while in storage.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.09
+      name: Network Disconnect
+      description: 'Terminate the network connection associated with a communications
+        session at the end of the session or after [Assignment: organization-defined
+        time period] of inactivity.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.10
+      name: Cryptographic Key Establishment and Management
+      description: 'Establish and manage cryptographic keys in the system in accordance
+        with the following key management requirements: [Assignment: organization-defined
+        requirements for key generation, distribution, storage, access, and destruction].'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.11
+      name: Cryptographic Protection
+      description: 'Implement the following types of cryptography to protect the confidentiality
+        of CUI: [Assignment: organization-defined types of cryptography]. '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.12
+      name: Collaborative Computing Devices and Applications
+      description: "a.\tProhibit the remote activation of collaborative computing\
+        \ devices and applications with the following exceptions: [Assignment: organization-defined\
+        \ exceptions where remote activation is to be allowed].\nb.\tProvide an explicit\
+        \ indication of use to users physically present at the devices."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.13
+      name: Mobile Code
+      description: "a.\tDefine acceptable mobile code and mobile code technologies.\n\
+        b.\tAuthorize, monitor, and control the use of mobile code."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.13.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node90
+      ref_id: 03.13.15
+      name: Session Authenticity
+      description: 'Protect the authenticity of communications sessions. '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node100
+      assessable: false
+      depth: 1
+      name: System and Information Integrity
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node100
+      ref_id: 03.14.01
+      name: Flaw Remediation
+      description: "a.\tIdentify, report, and correct system flaws.\nb.\tInstall security-relevant\
+        \ software and firmware updates within [Assignment: organization-defined time\
+        \ period] of the release of the updates."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node100
+      ref_id: 03.14.02
+      name: Malicious Code Protection
+      description: "a.\tImplement malicious code protection mechanisms at system entry\
+        \ and exit points to detect and eradicate malicious code.\nb.\tUpdate malicious\
+        \ code protection mechanisms as new releases are available in accordance with\
+        \ configuration management policies and procedures.\nc.\tConfigure malicious\
+        \ code protection mechanisms to:\n1.\tPerform scans of the system [Assignment:\
+        \ organization-defined frequency] and real-time scans of files from external\
+        \ sources at endpoints or system entry and exit points as the files are downloaded,\
+        \ opened, or executed; and\n2.\tBlock malicious code, quarantine malicious\
+        \ code, or take other mitigation actions in response to malicious code detection."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node100
+      ref_id: 03.14.03
+      name: Security Alerts, Advisories, and Directives
+      description: "a.\tReceive system security alerts, advisories, and directives\
+        \ from external organizations on an ongoing basis.\nb.\tGenerate and disseminate\
+        \ internal system security alerts, advisories, and directives, as necessary."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node100
+      ref_id: 03.14.06
+      name: System Monitoring
+      description: "a.\tMonitor the system to detect:\n1.\tAttacks and indicators\
+        \ of potential attacks and\n2.\tUnauthorized connections.\nb.\tIdentify unauthorized\
+        \ use of the system.\nc.\tMonitor inbound and outbound communications traffic\
+        \ to detect unusual or unauthorized activities or conditions."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.14.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node100
+      ref_id: 03.14.08
+      name: Information Management and Retention
+      description: Manage and retain CUI within the system and CUI output from the
+        system in accordance with applicable laws, Executive Orders, directives, regulations,
+        policies, standards, guidelines, and operational requirements.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node106
+      assessable: false
+      depth: 1
+      name: 'Planning '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node106
+      ref_id: 03.15.01
+      name: Policy and Procedures
+      description: "a.\tDevelop, document, and disseminate to organizational personnel\
+        \ or roles the policies and procedures needed to satisfy the security requirements\
+        \ for the protection of CUI.\nb.\tReview and update policies and procedures\
+        \ [Assignment: organization-defined frequency]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node106
+      ref_id: 03.15.02
+      name: System Security Plan
+      description: "a.\tDevelop a system security plan that:\n1.\tDefines the constituent\
+        \ system components;\n2.\tIdentifies the information types processed, stored,\
+        \ and transmitted by the system;\n3.\tDescribes specific threats to the system\
+        \ that are of concern to the organization;\n4.\tDescribes the operational\
+        \ environment for the system and any dependencies on or connections to other\
+        \ systems or system components;\n5.\tProvides an overview of the security\
+        \ requirements for the system;\n6.\tDescribes the safeguards in place or planned\
+        \ for meeting the security requirements;\n7.\tIdentifies individuals that\
+        \ fulfill system roles and responsibilities; and\n8.\tIncludes other relevant\
+        \ information necessary for the protection of CUI.\nb.\tReview and update\
+        \ the system security plan [Assignment: organization-defined frequency].\n\
+        c.\tProtect the system security plan from unauthorized disclosure."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.15.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node106
+      ref_id: 03.15.03
+      name: Rules of Behavior
+      description: "a.\tEstablish rules that describe the responsibilities and expected\
+        \ behavior for system usage and protecting CUI.\nb.\tProvide rules to individuals\
+        \ who require access to the system.\nc.\tReceive a documented acknowledgement\
+        \ from individuals indicating that they have read, understand, and agree to\
+        \ abide by the rules of behavior before authorizing access to CUI and the\
+        \ system.\nd.\tReview and update the rules of behavior [Assignment: organization-defined\
+        \ frequency]."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node110
+      assessable: false
+      depth: 1
+      name: System and Services Acquisition
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.16.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node110
+      ref_id: 03.16.01
+      name: Security Engineering Principles
+      description: 'Apply the following systems security engineering principles to
+        the development or modification of the system and system components: [Assignment:
+        organization-defined systems security engineering principles].'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.16.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node110
+      ref_id: 03.16.02
+      name: Unsupported System Components
+      description: "a.\tReplace system components when support for the components\
+        \ is no longer available from the developer, vendor, or manufacturer.\nb.\t\
+        Provide options for risk mitigation or alternative sources for continued support\
+        \ for unsupported components that cannot be replaced."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.16.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node110
+      ref_id: 03.16.03
+      name: External System Services
+      description: "a.\tRequire the providers of external system services used for\
+        \ the processing, storage, or transmission of CUI to comply with the following\
+        \ security requirements: [Assignment: organization-defined security requirements].\n\
+        b.\tDefine and document user roles and responsibilities with regard to external\
+        \ system services, including shared responsibilities with external service\
+        \ providers.\nc.\tImplement processes, methods, and techniques to monitor\
+        \ security requirement compliance by external service providers on an ongoing\
+        \ basis."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node114
+      assessable: false
+      depth: 1
+      name: Supply Chain Risk Management
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.17.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node114
+      ref_id: 03.17.01
+      name: Supply Chain Risk Management Plan
+      description: "a.\tDevelop a plan for managing supply chain risks associated\
+        \ with the research and development, design, manufacturing, acquisition, delivery,\
+        \ integration, operations, maintenance, and disposal of the system, system\
+        \ components, or system services.\nb.\tReview and update the supply chain\
+        \ risk management plan [Assignment: organization-defined frequency].\nc.\t\
+        Protect the supply chain risk management plan from unauthorized disclosure."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.17.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node114
+      ref_id: 03.17.02
+      name: Acquisition Strategies, Tools, and Methods
+      description: Develop and implement acquisition strategies, contract tools, and
+        procurement methods to identify, protect against, and mitigate supply chain
+        risks.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev3:03.17.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev3:node114
+      ref_id: 03.17.03
+      name: Supply Chain Requirements and Processes
+      description: "a.\tEstablish a process for identifying and addressing weaknesses\
+        \ or deficiencies in the supply chain elements and processes.\nb.\tEnforce\
+        \ the following security requirements to protect against supply chain risks\
+        \ to the system, system components, or system services and to limit the harm\
+        \ or consequences from supply chain-related events: [Assignment: organization-defined\
+        \ security requirements]."
