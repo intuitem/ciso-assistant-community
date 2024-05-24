@@ -529,6 +529,7 @@
 	"asZIP": "en ZIP",
 	"incoming": "En approche",
 	"outdated": "Dépassé",
+	"goBackToAudit": "Retour à l'audit",
 	"exportBackupDescription": "Cela va sérialiser et créer une sauvegarde de la base de données, y compris les utilisateurs et RBAC. Les preuves et autres fichiers ne sont pas inclus dans la sauvegarde.",
 	"importBackupDescription": "Cela va désérialiser et restaurer la base de données à partir d'une sauvegarde. Cela va écraser toutes les données existantes, y compris les utilisateurs et RBAC. Cette action est irréversible.",
 	"requirementAppliedControlHelpText": "Les preuves liées aux mesures sélectionnées seront automatiquement associées à l'exigence.",
