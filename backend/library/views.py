@@ -199,26 +199,21 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         if "view_storedlibrary" not in request.user.permissions:
             return Response(status=HTTP_403_FORBIDDEN)
 
-        loaded_libraries = [
-            {
-                key: getattr(library, key)
-                for key in [
-                    "id",
-                    "name",
-                    "description",
-                    "urn",
-                    "ref_id",
-                    "locale",
-                    "version",
-                    "packager",
-                    "provider",
-                    "builtin",
-                    "objects_meta",
-                    "reference_count",
-                ]
+        stored_libraries = [*StoredLibrary.objects.all()]
+        last_version = {}
+        for stored_library in stored_libraries :
+            if last_version.get(stored_library.urn,-1) < stored_library.version :
+                last_version[stored_library.urn] = stored_library.version
+
+        loaded_libraries = []
+        for library in LoadedLibrary.objects.all() :
+            loaded_library = {
+                key: getattr(library,key)
+                for key in ["id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta","reference_count"]
             }
-            for library in LoadedLibrary.objects.all()
-        ]
+            loaded_library["has_update"] = last_version.get(library.urn,-1) > library.version
+            loaded_libraries.append(loaded_library)
+
         return Response({"results": loaded_libraries})
 
     def retrieve(self, request, *args, pk, **kwargs):

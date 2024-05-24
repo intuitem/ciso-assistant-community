@@ -73,7 +73,7 @@
 {/if}
 <!-- This condition must check that the libary is a LoadedLibrary object and that there is an available upgrade for it -->
 <!-- Should we put a is_upgradable BooleanField directly into the LoadedLibrary model or query the database everytime we load the loaded libraries menu to check if there is an upgrade available or not among the stored liaries ? -->
-{#if actionsURLModel === 'loaded-libraries'}
+{#if actionsURLModel === 'loaded-libraries' && library.has_update}
 	{#if loading.form && loading.library === library.urn}
 		<div class="flex items-center cursor-progress" role="status">
 			<svg
