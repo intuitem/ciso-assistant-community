@@ -169,7 +169,7 @@ Make sure you have a recent version of docker (>= 25.0).
 1. Clone the repository
 
 ```sh
-git clone git@github.com:intuitem/ciso-assistant-community.git
+git clone https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
