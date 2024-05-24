@@ -20,7 +20,6 @@ from django.urls import reverse
 from datetime import date, datetime
 from typing import Union, Dict, Set, List, Tuple, Type, Self
 from django.utils.html import format_html
-from library.utils import LibraryImporter
 
 from structlog import get_logger
 
@@ -203,6 +202,8 @@ class StoredLibrary(LibraryMixin):
         return StoredLibrary.store_library_content(library_content, builtin)
 
     def load(self) -> Union[str, None]:
+        from library.utils import LibraryImporter
+        
         if LoadedLibrary.objects.filter(urn=self.urn,locale=self.locale) :
             return "This library has already been loaded."
 
