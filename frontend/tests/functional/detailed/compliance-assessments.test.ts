@@ -1,3 +1,5 @@
+import { LoginPage } from '../../utils/login-page.js';
+import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 
 let vars = TestContent.generateTestVars();
@@ -113,4 +115,17 @@ test('compliance assessments scoring is working properly', async ({ logedPage, p
     await expect((await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM - Asset Management', ['ID - Identify'])).content.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', (IDAMScore).toString());
     await expect((await complianceAssessmentsPage.itemDetail.treeViewItem('ID - Identify', [])).content.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', (IDScore).toString());
     await expect(page.getByTestId('progress-radial').first()).toHaveAttribute('aria-valuenow', (globalScore).toString());
+});
+
+test.afterAll('cleanup', async ({ browser }) => {
+    const page = await browser.newPage();
+    const loginPage = new LoginPage(page);
+    const foldersPage = new PageContent(page, '/folders', 'Domains');
+
+    await loginPage.goto();
+    await loginPage.login();
+    await foldersPage.goto();
+    await foldersPage.deleteItemButton(vars.folderName).click();
+    await foldersPage.deleteModalConfirmButton.click();
+    await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 });
