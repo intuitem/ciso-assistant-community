@@ -1,4 +1,8 @@
 <p align="center">
+Star the project 🌟 to get releases notification and help growing the community!
+</p>
+
+<p align="center">
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
@@ -90,7 +94,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝
+19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -113,6 +117,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
+42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱  
 
 ### Community contributions
 
@@ -138,7 +143,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - AI Act
 - Part-IS
 - SOX
-- MASVS
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
@@ -169,7 +173,7 @@ Make sure you have a recent version of docker (>= 25.0).
 1. Clone the repository
 
 ```sh
-git clone git@github.com:intuitem/ciso-assistant-community.git
+git clone https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
@@ -237,6 +241,7 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
+export EMAIL_USE_TLS=True
 ```
 
 **Other variables**
@@ -408,6 +413,15 @@ tests/e2e-tests.sh
 ```
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
+
+## API and Swagger
+
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/ 
+
+To interact with it:
+
+- call `/api/iam/login/` with your credentials in the body to get the token
+- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's Token not Bearer.
 
 ## Setting CISO Assistant for production
 

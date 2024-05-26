@@ -1,0 +1,335 @@
+urn: urn:intuitem:risk:library:owasp-masvs-v2.1.0
+locale: en
+ref_id: owasp-masvs-v2.1.0
+name: OWASP MASVS 2.1.0
+description: OWASP Mobile Application Security Verification Standard v2.1.0
+copyright: CC BY-SA 3.0 - The OWASP Foundation
+version: 1
+provider: OWASP
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:owasp-masvs-v2.1.0
+    ref_id: owasp-masvs-v2.1.0
+    name: OWASP MASVS 2.1.0
+    description: OWASP Mobile Application Security Verification Standard v2.1.0
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-storage
+      assessable: false
+      depth: 1
+      ref_id: MASVS-STORAGE
+      name: Storage
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-storage-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-storage
+      ref_id: MASVS-STORAGE-1
+      name: The app securely stores sensitive data.
+      description: Apps handle sensitive data coming from many sources such as the
+        user, the backend, system services or other apps on the device and usually
+        need to store it locally. The storage locations may be private to the app
+        (e.g. its internal storage) or be public and therefore accessible by the user
+        or other installed apps (e.g. public folders such as Downloads). This control
+        ensures that any sensitive data that is intentionally stored by the app is
+        properly protected independently of the target location.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-storage-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-storage
+      ref_id: MASVS-STORAGE-2
+      name: The app prevents leakage of sensitive data.
+      description: There are cases when sensitive data is unintentionally stored or
+        exposed to publicly accessible locations; typically as a side-effect of using
+        certain APIs, system capabilities such as backups or logs. This control covers
+        this kind of unintentional leaks where the developer actually has a way to
+        prevent it.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-crypto
+      assessable: false
+      depth: 1
+      ref_id: MASVS-CRYPTO
+      name: Cryptography
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-crypto-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-crypto
+      ref_id: MASVS-CRYPTO-1
+      name: The app employs current strong cryptography and uses it according to industry
+        best practices.
+      description: Cryptography plays an especially important role in securing the
+        user's data - even more so in a mobile environment, where attackers having
+        physical access to the user's device is a likely scenario. This control covers
+        general cryptography best practices, which are typically defined in external
+        standards.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-crypto-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-crypto
+      ref_id: MASVS-CRYPTO-2
+      name: The app performs key management according to industry best practices.
+      description: Even the strongest cryptography would be compromised by poor key
+        management. This control covers the management of cryptographic keys throughout
+        their lifecycle, including key generation, storage and protection.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth
+      assessable: false
+      depth: 1
+      ref_id: MASVS-AUTH
+      name: ' Authentication and Authorization'
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth
+      ref_id: MASVS-AUTH-1
+      name: The app uses secure authentication and authorization protocols and follows
+        the relevant best practices.
+      description: Most apps connecting to a remote endpoint require user authentication
+        and also enforce some kind of autho- rization. While the enforcement of these
+        mechanisms must be on the remote endpoint, the apps also have to ensure that
+        it follows all the relevant best practices to ensure a secure use of the involved
+        protocols.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth
+      ref_id: MASVS-AUTH-2
+      name: The app performs local authentication securely according to the platform
+        best practices.
+      description: Many apps allow users to authenticate via biometrics or a local
+        PIN code. These authentication mechanisms need to be correctly implemented.
+        Additionally, some apps might not have a remote endpoint, and rely fully on
+        local app authentication.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-auth
+      ref_id: MASVS-AUTH-3
+      name: The app secures sensitive operations with additional authentication.
+      description: Some additional form of authentication is often desirable for sensitive
+        actions inside the app. This can be done in different ways (biometric, pin,
+        MFA code generator, email, deep links, etc) and they all need to be implemented
+        securely.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-network
+      assessable: false
+      depth: 1
+      ref_id: MASVS-NETWORK
+      name: Network Communication
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-network-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-network
+      ref_id: MASVS-NETWORK-1
+      name: The app secures all network traffic according to the current best practices.
+      description: Ensuring data privacy and integrity of any data in transit is critical
+        for any app that communicates over the network. This is typically done by
+        encrypting data and authenticating the remote endpoint, as TLS does. However,
+        there are many ways for a developer to disable the platform secure defaults,
+        or bypass them completely by using low-level APIs or third-party libraries.
+        This control ensures that the app is in fact setting up secure connections
+        in any situation.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-network-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-network
+      ref_id: MASVS-NETWORK-2
+      name: The app performs identity pinning for all remote endpoints under the developer's
+        control.
+      description: Instead of trusting all the default root CAs of the framework or
+        device, this control will make sure that only very specific CAs are trusted.
+        This practice is typically called certificate pinning or public key pinning.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform
+      assessable: false
+      depth: 1
+      ref_id: MASVS-PLATFORM
+      name: Platform Interaction
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform
+      ref_id: MASVS-PLATFORM-1
+      name: The app uses IPC mechanisms securely.
+      description: Apps typically use platform provided IPC mechanisms to intentionally
+        expose data or functionality. Both installed apps and the user are able to
+        interact with the app in many different ways. This control ensures that all
+        interactions involving IPC mechanisms happen securely.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform
+      ref_id: MASVS-PLATFORM-2
+      name: The app uses WebViews securely.
+      description: WebViews are typically used by apps that have a need for increased
+        control over the UI. This control ensures that WebViews are configured securely
+        to prevent sensitive data leakage as well as sensitive functionality exposure
+        (e.g. via JavaScript bridges to native code).
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-platform
+      ref_id: MASVS-PLATFORM-3
+      name: The app uses the user interface securely.
+      description: Sensitive data has to be displayed in the UI in many situations
+        (e.g. passwords, credit card details, OTP codes in notifications). This control
+        ensures that this data doesn't end up being unintentionally leaked due to
+        platform mechanisms such as auto-generated screenshots or accidentally disclosed
+        via e.g. shoulder surfing or sharing the device with another person.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code
+      assessable: false
+      depth: 1
+      ref_id: MASVS-CODE
+      name: Code Quality
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code
+      ref_id: MASVS-CODE-1
+      name: The app requires an up-to-date platform version.
+      description: Every release of the mobile OS includes security patches and new
+        security features. By supporting older versions, apps stay vulnerable to well-known
+        threats. This control ensures that the app is running on an up-to-date platform
+        version so that users have the latest security protections.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code
+      ref_id: MASVS-CODE-2
+      name: The app has a mechanism for enforcing app updates.
+      description: Sometimes critical vulnerabilities are discovered in the app when
+        it is already in production. This control ensures that there is a mechanism
+        to force the users to update the app before they can continue using it.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code
+      ref_id: MASVS-CODE-3
+      name: The app only uses software components without known vulnerabilities.
+      description: To be truly secure, a full whitebox assessment should have been
+        performed on all app components. However, as it usually happens with e.g.
+        for third-party components this is not always feasible and not typically part
+        of a penetration test. This control covers "low-hanging fruit" cases, such
+        as those that can be detected just by scanning libraries for known vulnerabilities.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-code
+      ref_id: MASVS-CODE-4
+      name: The app validates and sanitizes all untrusted inputs.
+      description: Apps have many data entry points including the UI, IPC, the network,
+        the file system, etc. This incoming data might have been inadvertently modified
+        by untrusted actors and may lead to bypass of critical security checks as
+        well as classical injection attacks such as SQL injection, XSS or insecure
+        deserialization. This control ensures that this data is treated as untrusted
+        input and is properly verified and sanitized before it's used.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience
+      assessable: false
+      depth: 1
+      ref_id: MASVS-RESILIENCE
+      name: Resilience Against Reverse Engineering and Tampering
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience
+      ref_id: MASVS-RESILIENCE-1
+      name: The app validates the integrity of the platform.
+      description: Running on a platform that has been tampered with can be very dangerous
+        for apps, as this may disable certain security features, putting the data
+        of the app at risk. Trusting the platform is essential for many of the MASVS
+        controls relying on the platform being secure (e.g. secure storage, biometrics,
+        sandboxing, etc.). This control tries to validate that the OS has not been
+        compromised and its security features can thus be trusted.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience
+      ref_id: MASVS-RESILIENCE-2
+      name: The app implements anti-tampering mechanisms.
+      description: Apps run on a user-controlled device, and without proper protections
+        it's relatively easy to run a modified version locally (e.g. to cheat in a
+        game, or enable premium features without paying), or upload a back- doored
+        version of it to third-party app stores. This control tries to ensure the
+        integrity of the app's intended functionality by preventing modifications
+        to the original code and resources.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience
+      ref_id: MASVS-RESILIENCE-3
+      name: The app implements anti-static analysis mechanisms.
+      description: Understanding the internals of an app is typically the first step
+        towards tampering with it (either dynamically, or statically). This control
+        tries to impede comprehension by making it as difficult as possible to figure
+        out how an app works using static analysis.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-resilience
+      ref_id: MASVS-RESILIENCE-4
+      name: The app implements anti-dynamic analysis techniques.
+      description: Sometimes pure static analysis is very difficult and time consuming
+        so it typically goes hand in hand with dynamic analysis. Observing and manipulating
+        an app during runtime makes it much easier to decipher its behavior. This
+        control aims to make it as difficult as possible to perform dynamic analysis,
+        as well as prevent dynamic instrumentation which could allow an attacker to
+        modify the code at runtime.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy
+      assessable: false
+      depth: 1
+      ref_id: MASVS-PRIVACY
+      name: Privacy
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy
+      ref_id: MASVS-PRIVACY-1
+      name: The app minimizes access to sensitive data and resources.
+      description: 'Apps should only request access to the data they absolutely need
+        for their functionality and always with informed consent from the user. This
+        control ensures that apps practice data minimization and restricts access
+        control, reducing the potential impact of data breaches or leaks.
+
+        Furthermore, apps should share data with third parties only when necessary,
+        and this should include enforc- ing that third-party SDKs operate based on
+        user consent, not by default or without it. Apps should prevent third-party
+        SDKs from ignoring consent signals or from collecting data before consent
+        is confirmed.
+
+        Additionally, apps should be aware of the ''supply chain'' of SDKs they incorporate,
+        ensuring that no data is unnecessarily passed down their chain of dependencies.
+        This end-to-end responsibility for data aligns with recent SBOM regulatory
+        requirements, making apps more accountable for their data practices.'
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy
+      ref_id: MASVS-PRIVACY-2
+      name: The app prevents identification of the user.
+      description: 'Protecting user identity is crucial. This control emphasizes the
+        use of unlinkability techniques like data abstraction, anonymization and pseudonymization
+        to prevent user identification and tracking.
+
+        Another key aspect addressed by this control is to establish technical barriers
+        when employing complex ''fingerprint-like'' signals (e.g. device IDs, IP addresses,
+        behavioral patterns) for specific purposes. For in- stance, a fingerprint
+        used for fraud detection should be isolated and not repurposed for audience
+        measure- ment in an analytics SDK. This ensures that each data stream serves
+        its intended function without risking user privacy.'
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy
+      ref_id: MASVS-PRIVACY-3
+      name: The app is transparent about data collection and usage.
+      description: Users have the right to know how their data is being used. This
+        control ensures that apps provide clear information about data collection,
+        storage, and sharing practices, including any behavior a user wouldn't reasonably
+        expect, such as background data collection. Apps should also adhere to platform
+        guidelines on data declarations.
+    - urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-masvs-v2.1.0:masvs-privacy
+      ref_id: MASVS-PRIVACY-4
+      name: The app offers user control over their data.
+      description: Users should have control over their data. This control ensures
+        that apps provide mechanisms for users to manage, delete, and modify their
+        data, and change privacy settings as needed (e.g. to revoke consent). Additionally,
+        apps should re-prompt for consent and update their transparency disclosures
+        when they require more data than initially specified.

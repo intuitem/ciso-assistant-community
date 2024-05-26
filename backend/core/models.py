@@ -128,6 +128,8 @@ class StoredLibrary(LibraryMixin):
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False
     ) -> "StoredLibrary | None":
+        from library.utils import match_urn
+
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             return None  # We do not store the library if its hash checksum is in the database.
@@ -147,8 +149,16 @@ class StoredLibrary(LibraryMixin):
             raise ValueError(err)
 
         urn = library_data["urn"]
+        if not match_urn(urn):
+            raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
+
+        if StoredLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).exists():
+            return None  # We do not store the library if it is same content
+
         is_loaded = LoadedLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).exists()
@@ -536,6 +546,9 @@ class RequirementNode(ReferentialObjectMixin):
         null=True, verbose_name=_("Implementation groups")
     )
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
+    typical_evidence = models.TextField(
+        null=True, blank=True, verbose_name=_("Typical evidence")
+    )
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -1438,7 +1451,25 @@ class ComplianceAssessment(Assessment):
         ]
 
     def get_requirement_assessments(self):
-        return RequirementAssessment.objects.filter(compliance_assessment=self)
+        """
+        Returns sorted assessable requirement assessments based on the selected implementation groups
+        """
+        if not self.selected_implementation_groups:
+            return RequirementAssessment.objects.filter(
+                compliance_assessment=self, requirement__assessable=True
+            ).order_by("requirement__order_id")
+        selected_implementation_groups_set = set(self.selected_implementation_groups)
+        filtered_requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        ).order_by("requirement__order_id")
+        requirement_assessments_list = []
+        for requirement in filtered_requirements:
+            if selected_implementation_groups_set & set(
+                requirement.requirement.implementation_groups
+            ):
+                requirement_assessments_list.append(requirement)
+
+        return requirement_assessments_list
 
     def get_requirements_status_count(self):
         requirements_status_count = []
@@ -1678,6 +1709,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return self.requirement.display_short
+
+    def get_requirement_description(self) -> str:
+        return self.requirement.description
 
     class Meta:
         verbose_name = _("Requirement assessment")
