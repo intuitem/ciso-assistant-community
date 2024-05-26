@@ -4,24 +4,7 @@ let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 test('compliance assessments scoring is working properly', async ({ logedPage, pages, complianceAssessmentsPage, page }) => {
-    test.slow();
-
     const testRequirements = ["folders", "projects", "complianceAssessments"];
-    
-    for (let requirement of testRequirements) {
-        requirement += "Page";
-        const requiredPage = pages[requirement];
-
-        await requiredPage.goto();
-        await requiredPage.hasUrl();
-
-        await requiredPage.createItem(
-            testObjectsData[requirement].build,
-            'dependency' in testObjectsData[requirement] ? testObjectsData[requirement].dependency : null
-        );
-    };
-
-    await complianceAssessmentsPage.viewItemDetail(testObjectsData.complianceAssessmentsPage.build.name);
     const IDAM1Score = {
         ratio: 0.66,
         progress: "75",
@@ -42,6 +25,21 @@ test('compliance assessments scoring is working properly', async ({ logedPage, p
         progress: "25",
         value: 1
     }
+    
+    for (let requirement of testRequirements) {
+        requirement += "Page";
+        const requiredPage = pages[requirement];
+
+        await requiredPage.goto();
+        await requiredPage.hasUrl();
+
+        await requiredPage.createItem(
+            testObjectsData[requirement].build,
+            'dependency' in testObjectsData[requirement] ? testObjectsData[requirement].dependency : null
+        );
+    };
+
+    await complianceAssessmentsPage.viewItemDetail(testObjectsData.complianceAssessmentsPage.build.name);
     
     // Click on the ID.AM-1 tree view item
     const IDAM1TreeViewItem = await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM-1', ['ID - Identify', 'ID.AM - Asset Management']);
@@ -109,8 +107,8 @@ test('compliance assessments scoring is working properly', async ({ logedPage, p
 
     // Assert that the computed compliance assessment score is correct
     const IDAMScore = (parseFloat(IDAM1Score.progress) + parseFloat(IDAM2Score.progress)) / 2;
-    const IDScore = (IDAMScore + parseFloat(IDBE1Score.progress)) / 2;
-    const globalScore = (IDScore + parseFloat(PRAC1Score.progress)) / 2;
+    const IDScore = IDAMScore + (parseFloat(IDBE1Score.progress) - IDAMScore) / 3;
+    const globalScore = IDScore + (parseFloat(PRAC1Score.progress) - IDScore) / 4;
 
     await expect((await complianceAssessmentsPage.itemDetail.treeViewItem('ID.AM - Asset Management', ['ID - Identify'])).content.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', (IDAMScore).toString());
     await expect((await complianceAssessmentsPage.itemDetail.treeViewItem('ID - Identify', [])).content.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', (IDScore).toString());
