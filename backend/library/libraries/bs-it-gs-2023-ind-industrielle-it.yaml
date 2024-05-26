@@ -1,0 +1,2579 @@
+urn: urn:intuitem:risk:library:bs-it-gs-2023-ind-industrielle-it
+locale: de
+ref_id: bs-it-gs-2023-ind-industrielle-it
+name: "IT-Grundschutz-Kompendium \u2013 Werkzeug f\xFCr Informationssicherheit - IND:\
+  \ Industrielle IT"
+description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlichung\
+  \ des IT-Grundschutzes. Zusammen mit den BSI-Standards bildet es die Basis f\xFC\
+  r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6chten."
+copyright: Deutschland BSI
+version: 1
+provider: BSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:bs-it-gs-2023-ind-industrielle-it
+    ref_id: bs-it-gs-2023-ind-industrielle-it
+    name: "IT-Grundschutz-Kompendium \u2013 Werkzeug f\xFCr Informationssicherheit\
+      \ - IND: Industrielle IT"
+    description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlichung\
+      \ des IT-Grundschutzes. Zusammen mit den BSI-Standards bildet es die Basis f\xFC\
+      r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6\
+      chten."
+    implementation_groups_definition:
+    - ref_id: B
+      name: Basis
+      description: null
+    - ref_id: S
+      name: Standard
+      description: null
+    - ref_id: E
+      name: "Erh\xF6hter Schutzbedarf"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      assessable: false
+      depth: 1
+      ref_id: IND.1
+      name: Prozessleit- und Automatisierungstechnik
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A1
+      name: Einbindung in die Sicherheitsorganisation
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1
+      ref_id: IND.1.A1.1
+      description: "Ein Managementsystem f\xFCr Informationssicherheit (ISMS) f\xFC\
+        r den Betrieb der OT-Infrastruktur MUSS entweder als selbst\xE4ndiges ISMS\
+        \ oder als Teil eines Gesamt-ISMS existieren."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1
+      ref_id: IND.1.A1.2
+      description: "Eine gesamtverantwortliche Person f\xFCr die Informationssicherheit\
+        \ im OT-Bereich MUSS benannt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a1
+      ref_id: IND.1.A1.3
+      description: Er oder sie MUSS innerhalb der Institution bekannt gegeben werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A3
+      name: Schutz vor Schadprogrammen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3
+      ref_id: IND.1.A3.1
+      description: "Beim Einsatz von Virenschutz-Software auf OT-Komponenten MUSS\
+        \ ber\xFCcksichtigt werden, ob und in welcher Konfiguration der Betrieb von\
+        \ Virenschutz-Software vom herstellenden Unternehmen unterst\xFCtzt wird."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3
+      ref_id: IND.1.A3.2
+      description: "Ist dies nicht der Fall, MUSS der Bedarf an alternativen Schutzverfahren\
+        \ gepr\xFCft werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a3
+      ref_id: IND.1.A3.3
+      description: "Die Virensignaturen D\xDCRFEN NICHT von OT-Systemen direkt aus\
+        \ dem Internet bezogen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A4
+      name: Dokumentation der OT-Infrastruktur
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.1
+      description: Alle sicherheitsrelevanten Parameter der OT-Infrastruktur SOLLTEN
+        dokumentiert sein.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.2
+      description: "In einem Bestandsverzeichnis SOLLTEN alle Software- und Systemkomponenten\
+        \ gef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.3
+      description: "Hieraus SOLLTEN die eingesetzten Produkt- und Protokollversionen\
+        \ sowie die Zust\xE4ndigkeiten hervorgehen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.4
+      description: Zu den eingesetzten Komponenten SOLLTEN eventuelle Restriktionen
+        der herstellenden Unternehmen oder regulatorische Auflagen bestimmt sein.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.5
+      description: "Diese Dokumentation und ein Systeminventar SOLLTEN beispielsweise\
+        \ in einem Leitsystem gef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.6
+      description: "Zus\xE4tzlich SOLLTE ein aktueller Netzplan Zonen, Zonen\xFCberg\xE4\
+        nge (Conduits), eingesetzte Kommunikationsprotokolle und -verfahren sowie\
+        \ Au\xDFenschnittstellen dokumentieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.7
+      description: "Bei den Schnittstellen SOLLTEN aktive Netzkomponenten und manuelle\
+        \ Datentransferverfahren, z. B. durch Wechseldatentr\xE4ger, ber\xFCcksichtigt\
+        \ werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a4
+      ref_id: IND.1.A4.8
+      description: "Zonen und Conduits sch\xFCtzen die OT-Infrastrukur, indem die\
+        \ Automatisierungsl\xF6sung in Zellen und Kommunikationskan\xE4len strukturiert\
+        \ werden SOLLTE."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A5
+      name: Entwicklung eines geeigneten Zonenkonzepts
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      ref_id: IND.1.A5.1
+      description: "Die OT-Infrastruktur SOLLTE auch horizontal in unabh\xE4ngige\
+        \ Funktionsbereiche, wie etwa Anlagen, segmentiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      ref_id: IND.1.A5.2
+      description: "Die einzelnen Zonen SOLLTEN, so weit wie m\xF6glich, im Betrieb\
+        \ voneinander unabh\xE4ngig sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      ref_id: IND.1.A5.3
+      description: "Insbesondere die Zonen, in denen der technische Prozess gesteuert\
+        \ wird, SOLLTEN bei einem Ausfall der anderen Zonen f\xFCr einen gewissen\
+        \ Zeitraum weiter funktionst\xFCchtig sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      ref_id: IND.1.A5.4
+      description: Auch SOLLTE die Abkopplung nach einem Angriff weiter funktionieren.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      ref_id: IND.1.A5.5
+      description: Dieser Zeitraum SOLLTE geeignet definiert und dokumentiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a5
+      ref_id: IND.1.A5.6
+      description: Das Netz SOLLTE manipulations- und fehlerresistent konzipiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A6
+      name: "\xC4nderungsmanagement im OT-Betrieb"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a6
+      ref_id: IND.1.A6.1
+      description: "F\xFCr \xC4nderungen an der OT SOLLTE ein eigener \xC4nderungsprozess\
+        \ definiert, dokumentiert und gelebt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A7
+      name: "Etablieren einer \xFCbergreifenden Berechtigungsverwaltung zwischen der\
+        \ OT und in der Office-IT"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.1
+      description: "Die Institution SOLLTE einen Prozess zur Verwaltung von Zug\xE4\
+        ngen und zugeordneten Berechtigungen f\xFCr den Zugriff auf die OT etablieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.2
+      description: "Die Berechtigungsverwaltung SOLLTE den Prozess, die Durchf\xFC\
+        hrung und die Dokumentation f\xFCr die Beantragung, Einrichtung und den Entzug\
+        \ von Berechtigungen umfassen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.3
+      description: "Die Berechtigungsverwaltung SOLLTE gew\xE4hrleisten, dass Berechtigungen\
+        \ nach dem Minimalprinzip vergeben und regelm\xE4\xDFig \xFCberpr\xFCft werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.4
+      description: "In der Berechtigungsverwaltung SOLLTEN die Zugriffe auf IT-Systeme\
+        \ f\xFCr Mitarbeitende, Administrierende und Dritte geregelt sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.5
+      description: "Jeder oder jede Beteiligte SOLLTE regelm\xE4\xDFig zu den einzuhaltenden\
+        \ Regelungen sensibilisiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.6
+      description: "Die Einhaltung SOLLTE \xFCberpr\xFCft werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a7
+      ref_id: IND.1.A7.7
+      description: Fehlverhalten SOLLTE sanktioniert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A8
+      name: Sichere Administration
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8
+      ref_id: IND.1.A8.1
+      description: "F\xFCr die Erstkonfiguration, Verwaltung und Fernwartung in der\
+        \ OT SOLLTEN entweder sichere Protokolle oder abgetrennte Administrationsnetze\
+        \ mit entsprechendem Schutzbedarf genutzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8
+      ref_id: IND.1.A8.2
+      description: "Der Zugang zu diesen Schnittstellen SOLLTE auf die Berechtigten\
+        \ eingeschr\xE4nkt sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8
+      ref_id: IND.1.A8.3
+      description: "Es SOLLTE nur der Zugriff auf die Systeme und Funktionen gew\xE4\
+        hrt sein, die f\xFCr die jeweilige Administrationsaufgabe ben\xF6tigt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a8
+      ref_id: IND.1.A8.4
+      description: "Die Systeme und Kommunikationskan\xE4le, mit denen die Administration\
+        \ oder Fernwartung durchgef\xFChrt wird, SOLLTEN das gleiche Schutzniveau\
+        \ aufweisen wie die verwaltete OT-Komponente."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A9
+      name: "Restriktiver Einsatz von Wechseldatentr\xE4gern und mobilen Endger\xE4\
+        ten in ICS-Umgebungen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      ref_id: IND.1.A9.1
+      description: "F\xFCr die Nutzung von Wechseldatentr\xE4gern und mobilen Endger\xE4\
+        ten SOLLTEN Regelungen aufgestellt und bekannt gegeben werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      ref_id: IND.1.A9.2
+      description: "Der Einsatz von Wechseldatentr\xE4gern und mobilen Endger\xE4\
+        ten in ICS-Umgebungen SOLLTE beschr\xE4nkt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      ref_id: IND.1.A9.3
+      description: "F\xFCr Medien und Ger\xE4te von Dienstleistenden SOLLTEN ein Genehmigungsprozess\
+        \ und eine Anforderungsliste existieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      ref_id: IND.1.A9.4
+      description: "Die Vorgaben SOLLTEN allen Dienstleistenden bekannt sein und von\
+        \ diesen schriftlich best\xE4tigt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      ref_id: IND.1.A9.5
+      description: "Auf den OT-Komponenten SOLLTEN alle nicht ben\xF6tigten Schnittstellen\
+        \ deaktiviert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a9
+      ref_id: IND.1.A9.6
+      description: "An den aktiven Schnittstellen SOLLTE die Nutzung auf bestimmte\
+        \ Ger\xE4te oder Medien eingeschr\xE4nkt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A10
+      name: Monitoring, Protokollierung und Detektion
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      ref_id: IND.1.A10.1
+      description: Betriebs- und sicherheitsrelevante Ereignisse SOLLTEN zeitnah identifiziert
+        werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      ref_id: IND.1.A10.2
+      description: Hierzu SOLLTE ein geeignetes Log- und Event-Management entwickelt
+        und umgesetzt werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      ref_id: IND.1.A10.3
+      description: "Das Log- und Event-Management SOLLTE angemessene Ma\xDFnahmen\
+        \ umfassen, um sicherheitsrelevante Ereignisse zu erkennen und zu erheben."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      ref_id: IND.1.A10.4
+      description: Es SOLLTE zudem einen Reaktionsplan (Security Incident Response)
+        enthalten.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      ref_id: IND.1.A10.5
+      description: "Der Reaktionsplan SOLLTE Verfahren zur Behandlung von Sicherheitsvorf\xE4\
+        llen festlegen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a10
+      ref_id: IND.1.A10.6
+      description: "Darin abgedeckt sein SOLLTEN die Klassifizierung von Ereignissen,\
+        \ Meldewege und Festlegung der einzubeziehenden Organisationseinheiten, Reaktionspl\xE4\
+        ne zur Schadensbegrenzung, Analyse und Wiederherstellung von Systemen und\
+        \ Diensten sowie die Dokumentation und Nachbereitung von Vorf\xE4llen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A11
+      name: Sichere Beschaffung und Systementwicklung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.1
+      description: Sollen OT-Systeme beschafft, geplant oder entwickelt werden, SOLLTEN
+        Regelungen zur Informationssicherheit getroffen und dokumentiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.2
+      description: Die Unterlagen SOLLTEN Teil der Ausschreibung sein.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.3
+      description: "Bei Beschaffungen, Planungen oder Entwicklungen SOLLTE die Informationssicherheit\
+        \ in dem gesamten Lebenszyklus ber\xFCcksichtigt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.4
+      description: "Voraussetzungen und Umsetzungshinweise f\xFCr einen sicheren Betrieb\
+        \ von ICS-Komponenten von den herstellenden Unternehmen SOLLTEN fr\xFChzeitig\
+        \ eingeplant und umgesetzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.5
+      description: "F\xFCr ICS-Komponenten SOLLTEN einheitliche und dem Schutzbedarf\
+        \ angemessene Anforderungen an die Informationssicherheit definiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.6
+      description: "Diese SOLLTEN ber\xFCcksichtigt werden, wenn neue ICS-Komponenten\
+        \ beschafft werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.7
+      description: Die Einhaltung und Umsetzung SOLLTE dokumentiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.8
+      description: "Die Institution SOLLTE dokumentieren, wie sich das System in die\
+        \ Konzepte f\xFCr die Zoneneinteilung, das Berechtigungs- und Schwachstellen-Management\
+        \ sowie f\xFCr den Virenschutz einf\xFCgt und diese gegebenenfalls anpassen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a11
+      ref_id: IND.1.A11.9
+      description: Es SOLLTE geregelt sein, wie der Betrieb aufrechterhalten werden
+        kann, falls einer der Kooperationspartner keine Dienstleistungen mehr anbietet.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A12
+      name: Etablieren eines Schwachstellen-Managements
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12
+      ref_id: IND.1.A12.1
+      description: "F\xFCr den sicheren Betrieb einer OT-Umgebung SOLLTE die Institution\
+        \ ein Schwachstellen-Management etablieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12
+      ref_id: IND.1.A12.2
+      description: "Das Schwachstellen-Management SOLLTE L\xFCcken in Software, Komponenten,\
+        \ Protokollen und Au\xDFenschnittstellen der Umgebung identifizieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12
+      ref_id: IND.1.A12.3
+      description: "Au\xDFerdem SOLLTEN sich daraus erforderliche Handlungen ableiten,\
+        \ bewerten und umsetzen lassen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12
+      ref_id: IND.1.A12.4
+      description: "Grundlage daf\xFCr SOLLTEN Schwachstellenmeldungen von herstellenden\
+        \ Unternehmen oder \xF6ffentlich verf\xFCgbare CERT-Meldungen sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a12
+      ref_id: IND.1.A12.5
+      description: "Erg\xE4nzend hierzu SOLLTEN organisatorische und technische Audits\
+        \ zur Schwachstellenanalyse durchgef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A13
+      name: "Notfallplanung f\xFCr OT"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a13
+      ref_id: IND.1.A13.1
+      description: "Notfallpl\xE4ne f\xFCr den Ausfall und f\xFCr die Kompromittierung\
+        \ jeder Zone SOLLTEN definiert, dokumentiert, nach jeder gr\xF6\xDFeren \xC4\
+        nderung getestet und regelm\xE4\xDFig ge\xFCbt sein."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a13
+      ref_id: IND.1.A13.2
+      description: "Zudem SOLLTE ein wirksames Ersatzverfahren f\xFCr den Ausfall\
+        \ der (Fern-) Administrationsm\xF6glichkeit definiert, dokumentiert und getestet\
+        \ sein."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A14
+      name: Starke Authentisierung an OT-Komponenten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14
+      ref_id: IND.1.A14.1
+      description: "Zur sicheren Authentisierung von privilegierten Benutzenden in\
+        \ Steuerungssystemen SOLLTE ein zentraler Verzeichnisdienst eingerichtet werden\
+        \ (siehe Baustein ORP.4 Identit\xE4ts- und Berechtigungsmanagement)."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14
+      ref_id: IND.1.A14.2
+      description: "Die Authentisierung SOLLTE durch den Einsatz mehrerer Faktoren\
+        \ wie Wissen, Besitz oder Biometrie zus\xE4tzlich abgesichert werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14
+      ref_id: IND.1.A14.3
+      description: "Bei der Planung SOLLTE darauf geachtet werden, dass daraus entstehende\
+        \ Abh\xE4ngigkeiten in der Authentisierung bekannt sind und bei der Umsetzung\
+        \ der L\xF6sung ber\xFCcksichtigt werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a14
+      ref_id: IND.1.A14.4
+      description: "Es SOLLTE sichergestellt werden, dass die Authentisierung von\
+        \ betrieblich erforderlichen technischen Konten auch in Notf\xE4llen durchgef\xFC\
+        hrt werden kann."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A15
+      name: "\xDCberwachung von weitreichenden Berechtigungen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15
+      ref_id: IND.1.A15.1
+      description: "Die Institution SOLLTE ein Bestandsverzeichnis f\xFChren, das\
+        \ alle vergebenen Zutritts-, Zugangs und Zugriffsrechte auf kritische Systeme\
+        \ enth\xE4lt."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15
+      ref_id: IND.1.A15.2
+      description: "Das Verzeichnis SOLLTE beinhalten, welche Rechte ein bestimmter\
+        \ Benutzender oder eine bestimme Benutzende effektiv hat und wer an einem\
+        \ bestimmten System \xFCber welche Rechte verf\xFCgt."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15
+      ref_id: IND.1.A15.3
+      description: "Alle kritischen administrativen T\xE4tigkeiten SOLLTEN protokolliert\
+        \ werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a15
+      ref_id: IND.1.A15.4
+      description: "Der IT-Betrieb SOLLTE NICHT die Protokolle l\xF6schen oder manipulieren\
+        \ k\xF6nnen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A16
+      name: "St\xE4rkere Abschottung der Zonen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16
+      ref_id: IND.1.A16.1
+      description: "Bei hoch schutzbed\xFCrftigen oder schlecht absicherbaren ICS-Umgebungen\
+        \ SOLLTEN vorbeugend Schnittstellensysteme mit Sicherheitspr\xFCffunktionen\
+        \ eingesetzt werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16
+      ref_id: IND.1.A16.2
+      description: "Durch Realisierung einer oder mehrerer Anbindungszonen (DMZ) in\
+        \ P-A-P-Struktur SOLLTEN durchg\xE4ngige Au\xDFenverbindungen terminiert werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a16
+      ref_id: IND.1.A16.3
+      description: "Erforderliche Sicherheitspr\xFCfungen SOLLTEN so erfolgen, dass\
+        \ die ICS-Anlage nicht angepasst werden muss."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A17
+      name: "Regelm\xE4\xDFige Sicherheits\xFCberpr\xFCfung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17
+      ref_id: IND.1.A17.1
+      description: "Die Sicherheitskonfiguration von OT-Komponenten SOLLTE regelm\xE4\
+        \xDFig und bedarfsorientiert bei pl\xF6tzlich auftretenden neuen, bisher unbekannten\
+        \ Gef\xE4hrdungen \xFCberpr\xFCft werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17
+      ref_id: IND.1.A17.2
+      description: "Die Sicherheits\xFCberpr\xFCfung SOLLTE zumindest die exponierten\
+        \ Systeme mit Au\xDFenschnittstellen oder Benutzendeninteraktion umfassen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17
+      ref_id: IND.1.A17.3
+      description: "Auch das realisierte Sicherheitskonzept SOLLTE regelm\xE4\xDF\
+        ig \xFCberpr\xFCft werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a17
+      ref_id: IND.1.A17.4
+      description: "Die Sicherheits\xFCberpr\xFCfung SOLLTE als Konfigurationspr\xFC\
+        fung oder auch durch automatisierte Konformit\xE4tspr\xFCfungen erfolgen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A18
+      name: Protokollierung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a18.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a18
+      ref_id: IND.1.A18.1
+      description: "Jede \xC4nderung an ICS-Komponenten MUSS protokolliert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a18.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a18
+      ref_id: IND.1.A18.2
+      description: "Au\xDFerdem M\xDCSSEN alle Zugriffe auf ICS-Komponenten protokolliert\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A19
+      name: Erstellung von Datensicherungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a19.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a19
+      ref_id: IND.1.A19.1
+      description: "Programme und Daten M\xDCSSEN regelm\xE4\xDFig gesichert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a19.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a19
+      ref_id: IND.1.A19.2
+      description: "Auch nach jeder System\xE4nderung an OT-Komponenten MUSS eine\
+        \ Sicherung erstellt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A20
+      name: Systemdokumentation
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20
+      ref_id: IND.1.A20.1
+      description: Es SOLLTE eine erweiterte Systemdokumentation erstellt werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20
+      ref_id: IND.1.A20.2
+      description: "Darin SOLLTEN Besonderheiten im Betrieb und die M\xF6glichkeiten\
+        \ zur Systemverwaltung festgehalten werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a20
+      ref_id: IND.1.A20.3
+      description: "Au\xDFerdem SOLLTE dokumentiert werden, wenn ICS-Komponenten ver\xE4\
+        ndert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A21
+      name: Dokumentation der Kommunikationsbeziehungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a21.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a21
+      ref_id: IND.1.A21.1
+      description: Es SOLLTE dokumentiert werden, mit welchen Systemen eine ICS-Komponente
+        welche Daten austauscht.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a21.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a21
+      ref_id: IND.1.A21.2
+      description: "Au\xDFerdem SOLLTEN die Kommunikationsverbindungen neu integrierter\
+        \ ICS-Komponenten dokumentiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A22
+      name: "Zentrale Systemprotokollierung und -\xFCberwachung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a22.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a22
+      ref_id: IND.1.A22.1
+      description: Die Protokollierungsdaten von ICS-Komponenten SOLLTEN zentral gespeichert
+        werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a22.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a22
+      ref_id: IND.1.A22.2
+      description: Bei sicherheitskritischen Ereignissen SOLLTE automatisch alarmiert
+        werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A23
+      name: Aussonderung von ICS-Komponenten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a23
+      ref_id: IND.1.A23.1
+      description: "Wenn alte oder defekte ICS-Komponenten ausgesondert werden, SOLLTEN\
+        \ alle sch\xFCtzenswerten Daten sicher gel\xF6scht werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a23
+      ref_id: IND.1.A23.2
+      description: Es SOLLTE insbesondere sichergestellt sein, dass alle Zugangsdaten
+        nachhaltig entfernt wurden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1
+      ref_id: IND.1.A24
+      name: "Kommunikation im St\xF6rfall"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a24.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.1.a24
+      ref_id: IND.1.A24.1
+      description: "Alternative und unabh\xE4ngige Kommunikationsm\xF6glichkeiten\
+        \ SOLLTEN aufgebaut und betrieben werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      assessable: false
+      depth: 1
+      ref_id: IND.2.1
+      name: Allgemeine ICS-Komponente
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A1
+      name: "Einschr\xE4nkung des Zugriffs auf Konfigurations- und Wartungsschnittstellen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1
+      ref_id: IND.2.1.A1.1
+      description: "Standardm\xE4\xDFig eingerichtete bzw. vom herstellenden Unternehmen\
+        \ gesetzte Passw\xF6rter M\xDCSSEN gewechselt werden (siehe ORP.4 Identit\xE4\
+        ts- und Berechtigungsmanagement)."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1
+      ref_id: IND.2.1.A1.2
+      description: Der Wechsel MUSS dokumentiert werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1
+      ref_id: IND.2.1.A1.3
+      description: "Die Passw\xF6rter M\xDCSSEN sicher hinterlegt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1
+      ref_id: IND.2.1.A1.4
+      description: "Es MUSS sichergestellt werden, dass nur berechtigte Mitarbeitende\
+        \ auf Konfigurations- und Wartungsschnittstellen von ICS-Komponenten zugreifen\
+        \ k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a1
+      ref_id: IND.2.1.A1.5
+      description: "Die Konfiguration von ICS-Komponenten DARF NUR nach einer Freigabe\
+        \ durch die verantwortliche Person oder nach einer Authentisierung ge\xE4\
+        ndert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A2
+      name: "Nutzung sicherer \xDCbertragungs-Protokolle f\xFCr die Konfiguration\
+        \ und Wartung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a2
+      ref_id: IND.2.1.A2.1
+      description: "F\xFCr die Konfiguration und Wartung von ICS-Komponenten M\xDC\
+        SSEN sichere Protokolle eingesetzt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a2
+      ref_id: IND.2.1.A2.2
+      description: "Die Informationen M\xDCSSEN gesch\xFCtzt \xFCbertragen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A4
+      name: Deaktivierung oder Deinstallation nicht genutzter Dienste, Funktionen
+        und Schnittstellen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a4
+      ref_id: IND.2.1.A4.1
+      description: "Alle nicht genutzten Dienste, Funktionen und Schnittstellen der\
+        \ ICS-Komponenten M\xDCSSEN deaktiviert oder deinstalliert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A6
+      name: Netzsegmentierung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6
+      ref_id: IND.2.1.A6.1
+      description: "ICS-Komponenten M\xDCSSEN von der Office-IT getrennt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6
+      ref_id: IND.2.1.A6.2
+      description: "H\xE4ngen ICS-Komponenten von anderen Diensten im Netz ab, SOLLTE\
+        \ das ausreichend dokumentiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a6
+      ref_id: IND.2.1.A6.3
+      description: "ICS-Komponenten SOLLTEN so wenig wie m\xF6glich mit anderen ICS-Komponenten\
+        \ kommunizieren."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A7
+      name: Erstellung von Datensicherungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a7
+      ref_id: IND.2.1.A7.1
+      description: "Vor jeder System\xE4nderung an einer ICS-Komponente M\xDCSSEN\
+        \ Backups erstellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A8
+      name: Schutz vor Schadsoftware
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8
+      ref_id: IND.2.1.A8.1
+      description: "ICS-Komponenten SOLLTEN durch geeignete Mechanismen vor Schadprogrammen\
+        \ gesch\xFCtzt werden (siehe OPS.1.1.4 Schutz vor Schadprogrammen)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8
+      ref_id: IND.2.1.A8.2
+      description: "Wird daf\xFCr ein Virenschutzprogramm benutzt, SOLLTEN das Programm\
+        \ und die Virensignaturen nach der Freigabe durch das herstellende Unternehmen\
+        \ immer auf dem aktuellen Stand sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a8
+      ref_id: IND.2.1.A8.3
+      description: "Wenn die Ressourcen auf der ICS-Komponente nicht ausreichend sind\
+        \ oder die Echtzeitanforderung durch den Einsatz von Virenschutzprogrammen\
+        \ gef\xE4hrdet werden k\xF6nnte, SOLLTEN alternative Ma\xDFnahmen ergriffen\
+        \ werden, etwa die Abschottung der ICS-Komponente oder des Produktionsnetzes."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A11
+      name: Wartung der ICS-Komponenten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11
+      ref_id: IND.2.1.A11.1
+      description: Bei der Wartung einer ICS-Komponente SOLLTEN immer die aktuellen
+        und freigegebenen Sicherheitsupdates eingespielt werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11
+      ref_id: IND.2.1.A11.2
+      description: "Updates f\xFCr das Betriebssystem SOLLTEN erst nach Freigabe durch\
+        \ das herstellende Unternehmen einer ICS-Komponente installiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11
+      ref_id: IND.2.1.A11.3
+      description: Alternativ SOLLTE die Aktualisierung in einer Testumgebung erprobt
+        werden, bevor diese in einer produktiven ICS-Komponente eingesetzt wird.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a11
+      ref_id: IND.2.1.A11.4
+      description: "F\xFCr kritische Sicherheitsupdates SOLLTE kurzfristig eine Wartung\
+        \ durchgef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A13
+      name: Geeignete Inbetriebnahme von ICS-Komponenten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a13
+      ref_id: IND.2.1.A13.1
+      description: Bevor ICS-Komponenten in Betrieb genommen werden, SOLLTEN sie dem
+        aktuellen, intern freigegebenen Firmware-, Software- und Patch-Stand entsprechen.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a13
+      ref_id: IND.2.1.A13.2
+      description: "Neue ICS-Komponenten SOLLTEN in die bestehenden Betriebs-, \xDC\
+        berwachungs- und Informationssicherheitsmanagement-Prozesse eingebunden werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A16
+      name: Schutz externer Schnittstellen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a16
+      ref_id: IND.2.1.A16.1
+      description: "Von au\xDFen erreichbare Schnittstellen SOLLTEN vor Missbrauch\
+        \ gesch\xFCtzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A17
+      name: "Nutzung sicherer Protokolle f\xFCr die \xDCbertragung von Mess- und Steuerdaten"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17
+      ref_id: IND.2.1.A17.1
+      description: "Mess- oder Steuerdaten SOLLTEN bei der \xDCbertragung vor unberechtigten\
+        \ Zugriffen oder Ver\xE4nderungen gesch\xFCtzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17
+      ref_id: IND.2.1.A17.2
+      description: "Bei Anwendungen mit Echtzeitanforderungen SOLLTE gepr\xFCft werden,\
+        \ ob dies umsetzbar ist."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a17
+      ref_id: IND.2.1.A17.3
+      description: "Werden Mess- oder Steuerdaten \xFCber \xF6ffentliche Netze \xFC\
+        bertragen, SOLLTEN sie angemessen gesch\xFCtzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A18
+      name: "Kommunikation im St\xF6rfall"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a18.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a18
+      ref_id: IND.2.1.A18.1
+      description: "Es SOLLTE alternative und unabh\xE4ngige Kommunikationsm\xF6glichkeiten\
+        \ geben, die bei einem St\xF6rfall benutzt werden k\xF6nnen, um handlungsf\xE4\
+        hig zu bleiben."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A19
+      name: Security-Tests
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19
+      ref_id: IND.2.1.A19.1
+      description: "Mithilfe von regelm\xE4\xDFigen Security-Tests SOLLTE gepr\xFC\
+        ft werden, ob die technischen Sicherheitsma\xDFnahmen noch effektiv umgesetzt\
+        \ sind."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19
+      ref_id: IND.2.1.A19.2
+      description: Die Security-Tests SOLLTEN nicht im laufenden Anlagenbetrieb erfolgen.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19
+      ref_id: IND.2.1.A19.3
+      description: Die Tests SOLLTEN auf die Wartungszeiten geplant werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19
+      ref_id: IND.2.1.A19.4
+      description: Die Ergebnisse SOLLTEN dokumentiert werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a19
+      ref_id: IND.2.1.A19.5
+      description: Erkannte Risiken SOLLTEN bewertet und behandelt werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1
+      ref_id: IND.2.1.A20
+      name: "Vertrauensw\xFCrdiger Code"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a20.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a20
+      ref_id: IND.2.1.A20.1
+      description: "Firmware-Updates oder neue Steuerungsprogramme SOLLTEN NUR eingespielt\
+        \ werden, wenn vorher ihre Integrit\xE4t \xFCberpr\xFCft wurde."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a20.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.1.a20
+      ref_id: IND.2.1.A20.2
+      description: "Sie SOLLTEN nur aus vertrauensw\xFCrdigen Quellen stammen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2
+      assessable: false
+      depth: 1
+      ref_id: IND.2.2
+      name: Speicherprogrammierbare Steuerung (SPS)
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2
+      ref_id: IND.2.2.A1
+      name: "Erweiterte Systemdokumentation f\xFCr Speicherprogrammierbare Steuerungen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a1
+      ref_id: IND.2.2.A1.1
+      description: "Steuerungsprogramme und Konfigurationen SOLLTEN immer gesichert\
+        \ werden, bevor an ihnen etwas ver\xE4ndert wird."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a1
+      ref_id: IND.2.2.A1.2
+      description: "\xC4nderungen an der Konfiguration oder der Tausch von Komponenten\
+        \ SOLLTEN vollst\xE4ndig dokumentiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2
+      ref_id: IND.2.2.A3
+      name: Zeitsynchronisation
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.2.a3
+      ref_id: IND.2.2.A3.1
+      description: "Die Systemzeit SOLLTE automatisch \xFCber eine zentrale automatisierte\
+        \ Zeitsynchronisation eingestellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3
+      assessable: false
+      depth: 1
+      ref_id: IND.2.3
+      name: Sensoren und Aktoren
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3
+      ref_id: IND.2.3.A1
+      name: Installation von Sensoren
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1
+      ref_id: IND.2.3.A1.1
+      description: "Sensoren M\xDCSSEN in geeigneter Weise installiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1
+      ref_id: IND.2.3.A1.2
+      description: "Sensoren M\xDCSSEN ausreichend robust sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a1
+      ref_id: IND.2.3.A1.3
+      description: "Sie M\xDCSSEN zuverl\xE4ssig unter den vorhandenen Umgebungsbedingungen\
+        \ wie gro\xDFer W\xE4rme, K\xE4lte, Staub, Vibration oder Korrosion messen\
+        \ k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3
+      ref_id: IND.2.3.A2
+      name: Kalibrierung von Sensoren
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2
+      ref_id: IND.2.3.A2.1
+      description: "Wenn notwendig, SOLLTEN Sensoren regelm\xE4\xDFig kalibriert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2
+      ref_id: IND.2.3.A2.2
+      description: Die Kalibrierungen SOLLTEN geeignet dokumentiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a2
+      ref_id: IND.2.3.A2.3
+      description: "Der Zugang zur Kalibrierung eines Sensors MUSS gesch\xFCtzt sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3
+      ref_id: IND.2.3.A3
+      name: Drahtlose Kommunikation
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a3
+      ref_id: IND.2.3.A3.1
+      description: Drahtlose Verwaltungsschnittstellen wie Bluetooth, WLAN oder NFC
+        SOLLTEN NICHT benutzt werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.3.a3
+      ref_id: IND.2.3.A3.2
+      description: Alle nicht benutzten Kommunikationsschnittstellen SOLLTEN deaktiviert
+        werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4
+      assessable: false
+      depth: 1
+      ref_id: IND.2.4
+      name: Maschine
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4
+      ref_id: IND.2.4.A1
+      name: Fernwartung durch Maschinen- und Anlagenbauende
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      ref_id: IND.2.4.A1.1
+      description: "F\xFCr die Fernwartung einer Maschine MUSS es eine zentrale Richtlinie\
+        \ geben."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      ref_id: IND.2.4.A1.2
+      description: "Darin MUSS geregelt werden, wie die jeweiligen Fernwartungsl\xF6\
+        sungen einzusetzen sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      ref_id: IND.2.4.A1.3
+      description: "Die Richtlinie MUSS auch festlegen, wie Kommunikationsverbindungen\
+        \ gesch\xFCtzt werden sollen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      ref_id: IND.2.4.A1.4
+      description: "Hier\xFCber hinaus MUSS sie auch beschreiben, welche Aktivit\xE4\
+        ten w\xE4hrend der Fernwartung \xFCberwacht werden sollen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      ref_id: IND.2.4.A1.5
+      description: "Au\xDFerdem SOLLTE NICHT m\xF6glich sein, dass \xFCber die Fernwartung\
+        \ einer Maschine auf andere IT-Systeme oder Maschinen der Institution zugegriffen\
+        \ werden kann."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a1
+      ref_id: IND.2.4.A1.6
+      description: "Mit Dienstleistenden MUSS vereinbart werden, wie sie die in der\
+        \ Maschine gespeicherten Informationen verwerten d\xFCrfen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4
+      ref_id: IND.2.4.A2
+      name: "Betrieb nach Ende der Gew\xE4hrleistung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a2
+      ref_id: IND.2.4.A2.1
+      description: "Es MUSS ein Prozess etabliert werden, der gew\xE4hrleistet, dass\
+        \ die Maschine auch \xFCber den Gew\xE4hrleistungszeitraum hinaus sicher weiterbetrieben\
+        \ werden kann."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.4.a2
+      ref_id: IND.2.4.A2.2
+      description: "Hierzu M\xDCSSEN mit den Liefernden weitere Unterst\xFCtzungsleistungen\
+        \ vertraglich vereinbart werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      assessable: false
+      depth: 1
+      ref_id: IND.2.7
+      name: Safety Instrumented Systems
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A1
+      name: Erfassung und Dokumentation
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a1
+      ref_id: IND.2.7.A1.1
+      description: "Alle zum SIS geh\xF6renden Hardware- und Softwarekomponenten,\
+        \ relevante Informationen, Verbindungen sowie Rollen und Zust\xE4ndigkeiten\
+        \ M\xDCSSEN gesondert erfasst und dokumentiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A2
+      name: Zweckgebundene Nutzung der Hard- und Softwarekomponenten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a2
+      ref_id: IND.2.7.A2.1
+      description: "Die Hard- und Softwarekomponenten, die zum SIS geh\xF6ren oder\
+        \ im Zusammenhang mit diesem genutzt werden, D\xDCRFEN NICHT zweckentfremdet\
+        \ werde."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A3
+      name: "\xC4nderung des Anwendungsprogramms auf dem Logiksystem"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3
+      ref_id: IND.2.7.A3.1
+      description: "Bereits vorhandene Schutzmechanismen am Logiksystem M\xDCSSEN\
+        \ aktiviert sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3
+      ref_id: IND.2.7.A3.2
+      description: "Wenn dies nicht m\xF6glich ist, M\xDCSSEN alternative Ma\xDFnahmen\
+        \ ergriffen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a3
+      ref_id: IND.2.7.A3.3
+      description: "Anwendungsprogramme auf den Logiksystemen D\xDCRFEN NUR von autorisierten\
+        \ Personen ge\xE4ndert oder zur \xDCbertragung freigegeben werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A4
+      name: Verankerung von Informationssicherheit im Functional Safety Management
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a4
+      ref_id: IND.2.7.A4.1
+      description: "Alle Prozesse und Zust\xE4ndigkeiten bez\xFCglich der Informationssicherheit\
+        \ von SIS SOLLTEN klar definiert sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a4
+      ref_id: IND.2.7.A4.2
+      description: Im Functional Safety Management SOLLTEN diese beschrieben und namentlich
+        genannt sein.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A5
+      name: Notfallmanagement von SIS
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a5
+      ref_id: IND.2.7.A5.1
+      description: "Die Behandlung von Sicherheitsvorf\xE4llen SOLLTE in einem Vorfallreaktionsplan\
+        \ festgehalten werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a5
+      ref_id: IND.2.7.A5.2
+      description: "Dieser SOLLTE die Rollen und Zust\xE4ndigkeiten festhalten und\
+        \ die zu ergreifenden Ma\xDFnahmen enthalten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A6
+      name: Sichere Planung und Spezifikation des SIS
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a6
+      ref_id: IND.2.7.A6.1
+      description: "Versehentliche oder unautorisierte \xC4nderungen an der Spezifikation,\
+        \ Implementierung und an den Engineering-Daten SOLLTEN verhindert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A7
+      name: "Trennung und Unabh\xE4ngigkeit des SIS von der Umgebung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a7
+      ref_id: IND.2.7.A7.1
+      description: "Das SIS SOLLTE r\xFCckwirkungsfrei von seiner Umgebung betrieben\
+        \ werden, um seine Sicherheitsfunktionen gew\xE4hrleisten zu k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a7
+      ref_id: IND.2.7.A7.2
+      description: "Prozesse, die potenziell Auswirkungen auf das SIS haben, SOLLTEN\
+        \ dem \xC4nderungsmanagementprozess des Functional Safety Management unterstellt\
+        \ werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A8
+      name: "Sichere \xDCbertragung von Engineering Daten auf SIS"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a8
+      ref_id: IND.2.7.A8.1
+      description: "Die Integrit\xE4t der Engineering-Daten SOLLTE w\xE4hrend der\
+        \ \xDCbertragung auf SIS sichergestellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A9
+      name: Absicherung der Daten- und Signalverbindungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a9
+      ref_id: IND.2.7.A9.1
+      description: "Sofern keine R\xFCckwirkungsfreiheit von Daten- und Signalverbindungen\
+        \ (Unidirektionalit\xE4t) nachgewiesen werden kann, SOLLTEN diese Verbindungen\
+        \ geeignet abgesichert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A10
+      name: "Anzeige und Alarmierung von simulierten oder gebr\xFCckten Variablen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10
+      ref_id: IND.2.7.A10.1
+      description: "Variablen der SIS, die durch Ersatzwerte besetzt (simuliert) oder\
+        \ von au\xDFen gebr\xFCckt werden, SOLLTEN in geeigneter Weise \xFCberwacht\
+        \ werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10
+      ref_id: IND.2.7.A10.2
+      description: Die Werte SOLLTEN den Benutzenden fortlaufend angezeigt werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10
+      ref_id: IND.2.7.A10.3
+      description: Grenzwerte SOLLTEN definiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a10
+      ref_id: IND.2.7.A10.4
+      description: "Wenn diese Grenzwerte erreicht werden, SOLLTEN die zust\xE4ndigen\
+        \ Personen in geeigneter Weise alarmiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A11
+      name: Umgang mit integrierten Systemen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a11
+      ref_id: IND.2.7.A11.1
+      description: "F\xFCr integrierte Systeme SOLLTE eine passende Strategie entwickelt\
+        \ werden, die den Umgang mit Komponenten regelt, welche die funktionale Sicherheit\
+        \ (Safety) betreffen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7
+      ref_id: IND.2.7.A12
+      name: "Sicherstellen der Integrit\xE4t und Authentizit\xE4t von Anwendungsprogrammen\
+        \ und Konfigurationsdaten"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12
+      ref_id: IND.2.7.A12.1
+      description: "Es SOLLTE darauf geachtet werden, dass die herstellenden Unternehmen\
+        \ geeignete Mechanismen entwickeln und integrieren, die die Integrit\xE4t\
+        \ und Authentizit\xE4t von Konfigurationsdaten und Anwendungsprogrammen auf\
+        \ dem Logiksystem oder auf den damit verbundenen Sensoren und Aktoren gew\xE4\
+        hrleisten."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12
+      ref_id: IND.2.7.A12.2
+      description: "Jegliche Software, die als Download angeboten wird, SOLLTE vor\
+        \ Manipulation gesch\xFCtzt werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.2.7.a12
+      ref_id: IND.2.7.A12.3
+      description: "Verletzungen der Integrit\xE4t SOLLTEN automatisch erkannt und\
+        \ gemeldet werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      assessable: false
+      depth: 1
+      ref_id: IND.3.2
+      name: Fernwartung im industriellen Umfeld
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A1
+      name: Planung des Einsatzes der Fernwartung in der OT
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.1
+      description: "Im industriellen Umfeld MUSS f\xFCr s\xE4mtliche Einrichtungen\
+        \ zur Fernwartung ein einheitliches, zentrales Fernwartungskonzept f\xFCr\
+        \ die gesamte OT der Institution erstellt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.2
+      description: "In dem OT-Fernwartungskonzept M\xDCSSEN folgende Aspekte ber\xFC\
+        cksichtigt werden:"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.3
+      description: "\u2022 spezifische gesetzliche Vorgaben, z. B. Schutz von Personen,"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.4
+      description: "\u2022 spezifische Vorgaben durch anlagenherstellende Unternehmen,"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.5
+      description: "\u2022 spezifische Anforderungen durch dezentrale Infrastrukturen,"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.6
+      description: "\u2022 spezifische Anforderungen an die Anbindungen f\xFCr die\
+        \ Fernwartung,"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.7
+      description: "\u2022 spezifische Anforderungen an die Verf\xFCgbarkeit der Fernwartung,"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.8
+      description: "\u2022 spezifische Anforderungen durch Umgebungsbedingungen sowie"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.9
+      description: "\u2022 spezifische Anforderungen durch Bestandsanlagen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.10
+      description: "Alle diese Aspekte M\xDCSSEN mit s\xE4mtlichen beteiligten internen\
+        \ und externen Stellen abgestimmt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.11
+      description: "S\xE4mtliche Fernwartungszug\xE4nge, \xFCber die Zugriffe auf\
+        \ ein ICS der Institution m\xF6glich sind, M\xDCSSEN in einer zentralen Dokumentation\
+        \ erfasst werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.12
+      description: "F\xFCr neu anzuschaffende fernwartbare Maschinen M\xDCSSEN die\
+        \ Anforderungen an die Informationssicherheit mit den Liefernden abgestimmt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.13
+      description: "Das Ziel SOLLTE eine Standardisierung der verwendeten Fernwartungsl\xF6\
+        sungen sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a1
+      ref_id: IND.3.2.A1.14
+      description: "Sobald standardisierte L\xF6sungen f\xFCr die Fernwartung geplant\
+        \ werden, M\xDCSSEN sich die OT und die B\xFCro- und Geb\xE4ude-IT gemeinsam\
+        \ abstimmen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A2
+      name: "Konsistente Dokumentation der Fernwartung durch OT sowie B\xFCro- und\
+        \ Geb\xE4ude-IT"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a2
+      ref_id: IND.3.2.A2.1
+      description: "Im industriellen Umfeld M\xDCSSEN die OT und die B\xFCro- und\
+        \ Geb\xE4ude-IT s\xE4mtliche OT-Fernwartungszug\xE4nge gemeinsam erfassen\
+        \ und dokumentieren."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a2
+      ref_id: IND.3.2.A2.2
+      description: "Insbesondere bei Fernwartungskomponenten, die in Package Units\
+        \ integriert sind, M\xDCSSEN auch alle deaktivierten Zug\xE4nge dokumentiert\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A3
+      name: "Regelm\xE4\xDFige Pr\xFCfungen sowie Ausnahmegenehmigungen bestehender\
+        \ OT-Fernwartungszug\xE4nge"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a3
+      ref_id: IND.3.2.A3.1
+      description: "S\xE4mtliche Anlagen M\xDCSSEN regelm\xE4\xDFig gepr\xFCft werden,\
+        \ ob alle ihre Fernwartungszug\xE4nge dem Soll-Zustand, d. h. dem aktuellen\
+        \ Fernwartungskonzept f\xFCr die OT, entsprechen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a3
+      ref_id: IND.3.2.A3.2
+      description: "F\xFCr notwendige Abweichungen vom Konzept MUSS innerhalb der\
+        \ OT ein Genehmigungsprozess etabliert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A4
+      name: Verbindliche Regelung der OT-Fernwartung durch Dritte
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.1
+      description: "Mit s\xE4mtlichen externen Benutzenden, d. h. herstellenden Unternehmen,\
+        \ Integratoren und Wartungsdienstleistenden, M\xDCSSEN angemessen restriktive\
+        \ Regelungen f\xFCr die OT-Fernwartung vertraglich vereinbart werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.2
+      description: "Diese vertraglichen Regelungen M\xDCSSEN zu jedem Zeitpunkt gew\xE4\
+        hrleisten, dass externe Benutzende jegliche OT-Fernwartungszug\xE4nge ausschlie\xDF\
+        lich kontrolliert und abgestimmt nutzen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.3
+      description: "Intern MUSS festgelegt werden, \xFCber welche Fernwartungszug\xE4\
+        nge welche T\xE4tigkeiten durch welche externen Benutzenden zul\xE4ssig sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.4
+      description: "Dar\xFCber hinaus MUSS festgelegt werden, welche internen Mitarbeitende\
+        \ Fernwartungszugriffe und -t\xE4tigkeiten von Externen autorisieren, beobachten\
+        \ und gegebenenfalls unterst\xFCtzen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.5
+      description: "Im industriellen Umfeld MUSS sichergestellt werden, dass Personen\
+        \ an oder in Anlagen und Maschinen weder direkt noch indirekt durch eine aktive\
+        \ Fernwartung gef\xE4hrdet werden k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.6
+      description: "Insbesondere bei Safety-Maschinen MUSS der oder die interne OT-Mitarbeitende\
+        \ sowohl organisatorisch als auch technisch die Hoheit \xFCber den Beginn\
+        \ und das Ende der Fernwartung haben."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a4
+      ref_id: IND.3.2.A4.7
+      description: Vertraglich MUSS ausgeschlossen werden, dass der Remote-Zugriff
+        ohne explizite Zustimmung der internen OT-Mitarbeitenden aufgebaut und aufrechterhalten
+        werden kann.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A5
+      name: "Interne Abstimmung f\xFCr die OT-Fernwartung mit der B\xFCro- und Geb\xE4\
+        ude-IT"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      ref_id: IND.3.2.A5.1
+      description: "Die OT, die B\xFCro- und Geb\xE4ude-IT sowie alle weiteren beteiligten\
+        \ Organisationseinheiten M\xDCSSEN angemessen restriktive Regelungen f\xFC\
+        r s\xE4mtliche Komponenten und Schnittstellen festlegen, die direkt oder indirekt\
+        \ OT-Fernwartung in der Institution erm\xF6glichen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      ref_id: IND.3.2.A5.2
+      description: "Diese internen Regelungen M\xDCSSEN zu jedem Zeitpunkt eine kontrollierte\
+        \ und abgestimmte Nutzung der jeweiligen OT-Fernwartungszug\xE4nge gew\xE4\
+        hrleisten."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      ref_id: IND.3.2.A5.3
+      description: "Folgende Aspekte M\xDCSSEN geregelt werden:"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      ref_id: IND.3.2.A5.4
+      description: "\u2022 Prozesse"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      ref_id: IND.3.2.A5.5
+      description: "\u2022 Zust\xE4ndigkeiten"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a5
+      ref_id: IND.3.2.A5.6
+      description: "\u2022 Berechtigungen"
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A6
+      name: Absicherung jedes Fernwartungszugriffs auf die OT
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6
+      ref_id: IND.3.2.A6.1
+      description: "Im industriellen Umfeld MUSS die OT jeden Zugriff auf ein IT-System,\
+        \ das einen Fernwartungsdienst f\xFCr die OT bereitstellt, selbst steuern\
+        \ k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6
+      ref_id: IND.3.2.A6.2
+      description: "Hierf\xFCr MUSS der Zugriff durch mindestens eine Sicherheitskomponente\
+        \ in der Zust\xE4ndigkeit der OT abgesichert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6
+      ref_id: IND.3.2.A6.3
+      description: "Der Zugang zur Fernwartung SOLLTE f\xFCr alle Zugriffe vereinheitlicht\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6
+      ref_id: IND.3.2.A6.4
+      description: Jeder Zugriff SOLLTE mithilfe zentraler Authentisierungskomponenten
+        kontrolliert und explizit zugelassen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a6
+      ref_id: IND.3.2.A6.5
+      description: "Falls Komponenten von OT-Fernwartungszug\xE4ngen dezentral liegen\
+        \ oder in Package Units integriert sind, dann M\xDCSSEN diese Zug\xE4nge durch\
+        \ eine zus\xE4tzliche Sicherheitskomponente abgesichert werden, die ihrerseits\
+        \ zentral liegt und nicht in eine Package Unit integriert ist."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A7
+      name: Technische Entkopplung von Zugriffen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7
+      ref_id: IND.3.2.A7.1
+      description: Jeder Fernzugriff auf jegliche Komponenten in einer OT-Zone SOLLTE
+        entkoppelt erfolgen.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7
+      ref_id: IND.3.2.A7.2
+      description: "In jedem Fernwartungszugang in die OT SOLLTE ein IT-System positioniert\
+        \ sein, das die Verbindung vor dem \xDCbergang in die OT-Zielzone terminiert\
+        \ und zum Fernwartungsdienst eine neue, \xFCberwachte und reglementierte Kommunikation\
+        \ aufbaut."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7
+      ref_id: IND.3.2.A7.3
+      description: "Alle f\xFCr die Fernwartung ben\xF6tigten Werkzeuge und Programme\
+        \ SOLLTEN auf dem IT-System des Fernwartungszugangs installiert und lauff\xE4\
+        hig sein sowie einen Mehrbenutzendenbetrieb unterst\xFCtzen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7
+      ref_id: IND.3.2.A7.4
+      description: Das IT-System SOLLTE ein Sprungserver oder ein vergleichbares Application
+        Layer Gateway (ALG) sein, das in einem dedizierten Sicherheitssegment, z.
+        B. in einer demilitarisierten Zone (DMZ) positioniert ist.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a7
+      ref_id: IND.3.2.A7.5
+      description: "F\xFCr das IT-System zur Entkopplung der Zugriffe SOLLTE die OT\
+        \ zust\xE4ndig sein, d. h. es liegt idealerweise in einer OT-DMZ."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A8
+      name: Explizite Freigabe jeder OT-Fernwartungssitzung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8
+      ref_id: IND.3.2.A8.1
+      description: "Jede Fernwartungssitzung SOLLTE vorab durch einen oder einer OT-Mitarbeitenden\
+        \ der betreibenden Institution, der oder die f\xFCr das Zielsystem der Sitzung\
+        \ zust\xE4ndig ist, genehmigt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8
+      ref_id: IND.3.2.A8.2
+      description: Erst danach SOLLTE der oder die OT-Mitarbeitende den Fernwartungszugang
+        freischalten.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8
+      ref_id: IND.3.2.A8.3
+      description: "Die explizite Freigabe SOLLTE sowohl im Bedarfsfall als auch w\xE4\
+        hrend abgestimmter Wartungsfenster eingehalten werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8
+      ref_id: IND.3.2.A8.4
+      description: "Die Freigabe SOLLTE grunds\xE4tzlich nur f\xFCr einen begrenzten\
+        \ Zeitraum g\xFCltig sein, d. h. die zust\xE4ndigen OT-Mitarbeitenden behalten\
+        \ die Hoheit \xFCber den Zeitpunkt der Fernwartung (siehe Anforderung IND.3.2.A3\
+        \ Regelm\xE4\xDFige Pr\xFCfungen sowie Ausnahmegenehmigungen bestehender OT-Fernwartungszug\xE4\
+        nge)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a8
+      ref_id: IND.3.2.A8.5
+      description: "Dar\xFCber hinaus SOLLTEN externe Fernwartungszugriffe ausschlie\xDF\
+        lich von innen nach au\xDFen, d. h. aus dem OT-Netz heraus, aufgebaut werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A9
+      name: Sicherer Austausch von Dateien begleitend zur OT-Fernwartung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9
+      ref_id: IND.3.2.A9.1
+      description: "F\xFCr einen Dateiaustausch im Rahmen der OT-Fernwartung, z. B.\
+        \ von Konfigurationsdateien, Updates oder Handb\xFCchern, SOLLTE ein sicheres\
+        \ Vorgehen etabliert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9
+      ref_id: IND.3.2.A9.2
+      description: "Dies MUSS mindestens eine \xDCberpr\xFCfung auf Schadsoftware\
+        \ beinhalten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9
+      ref_id: IND.3.2.A9.3
+      description: Der Verbindungsaufbau zwischen einem Datenaustauschsystem und der
+        Dateiquelle SOLLTE nicht automatisiert erfolgen, sondern vor jedem Dateiaustausch
+        von der OT der Institution initiiert und authentisiert werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a9
+      ref_id: IND.3.2.A9.4
+      description: "Ein Dateiaustausch SOLLTE grunds\xE4tzlich protokolliert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A10
+      name: Beobachtung und Kontrolle von OT-Fernwartungssitzungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10
+      ref_id: IND.3.2.A10.1
+      description: "Im industriellen Umfeld MUSS sichergestellt werden, dass weder\
+        \ direkt noch indirekt Personen an oder in Anlagen und Maschinen sowie die\
+        \ Anlagen oder Maschinen selbst durch eine aktive Fernwartung gef\xE4hrdet\
+        \ werden k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10
+      ref_id: IND.3.2.A10.2
+      description: "Dar\xFCber hinaus MUSS sichergestellt werden, dass eine aktive\
+        \ Fernwartung den Produktionsprozess nicht beeintr\xE4chtigt."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10
+      ref_id: IND.3.2.A10.3
+      description: "Falls Personen- oder Sachsch\xE4den m\xF6glich sind, MUSS sichergestellt\
+        \ sein, dass die OT-Mitarbeitenden die Fernwartungst\xE4tigkeiten vor Ort\
+        \ mitverfolgen k\xF6nnen (Vier-Augen-Prinzip)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a10
+      ref_id: IND.3.2.A10.4
+      description: "Die OT-Mitarbeitenden SOLLTEN bei Bedarf eingreifen k\xF6nnen\
+        \ sowie eine Fernwartungssitzung unterbrechen k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A11
+      name: "Zentrale Verwaltung aller Konten f\xFCr die OT-Fernwartung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a11
+      ref_id: IND.3.2.A11.1
+      description: "F\xFCr den Fernwartungszugriff in der OT SOLLTEN ausschlie\xDF\
+        lich Konten verwendet werden, die in einem zentralen Verzeichnisdienst der\
+        \ OT oder der Institution verwaltet werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A12
+      name: "Dedizierte Fernwartungsl\xF6sung in der OT"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12
+      ref_id: IND.3.2.A12.1
+      description: "F\xFCr die Fernwartung im industriellen Umfeld SOLLTE eine dedizierte\
+        \ OT-Fernwartungsl\xF6sung eingesetzt werden, die unabh\xE4ngig von der B\xFC\
+        ro- und Geb\xE4ude-IT ist."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12
+      ref_id: IND.3.2.A12.2
+      description: "Alle weiteren Funktionen auf den IT-Systemen zur OT-Fernwartung,\
+        \ insbesondere auch Funktionen zur Administration von IT-Systemen und Netzen\
+        \ au\xDFerhalb der OT, SOLLTEN deaktiviert bzw. unterbunden werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a12
+      ref_id: IND.3.2.A12.3
+      description: "Falls eine maximale Unabh\xE4ngigkeit realisiert werden soll,\
+        \ SOLLTE auch ein dedizierter Internet-Zugang f\xFCr die OT-Fernwartung genutzt\
+        \ werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A13
+      name: Protokollierung der Inhalte von Fernwartungszugriffen in der OT
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a13
+      ref_id: IND.3.2.A13.1
+      description: "F\xFCr die Fernwartung von OT-Anwendungen oder -Systemen SOLLTE\
+        \ die Protokollierung so ausgeweitet werden, dass s\xE4mtliche T\xE4tigkeiten\
+        \ l\xFCckenlos und umgehend nachvollziehbar sind."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a13
+      ref_id: IND.3.2.A13.2
+      description: "Hierzu SOLLTEN erg\xE4nzend zur Protokollierung von Ereignissen\
+        \ und Sitzungsdaten auch die Inhalte von Fernwartungszugriffen protokolliert\
+        \ werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2
+      ref_id: IND.3.2.A14
+      name: Technische Kontrolle von Fernwartungssitzungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14
+      ref_id: IND.3.2.A14.1
+      description: "OT-Fernwartungssitzungen SOLLTEN erg\xE4nzend zu IND.3.2.A10 Beobachtung\
+        \ und Kontrolle von OT-Fernwartungssitzungen kontinuierlich durch eine technische\
+        \ L\xF6sung reglementiert werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14
+      ref_id: IND.3.2.A14.2
+      description: "Dabei SOLLTEN die Aktivit\xE4ten auf Befehlsebene, d. h. manuelle\
+        \ und automatisierte Befehle, technisch \xFCberwacht und gegebenenfalls automatisch\
+        \ unterbunden werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14
+      ref_id: IND.3.2.A14.3
+      description: "Zus\xE4tzlich SOLLTEN Sitzungen komponenten\xFCbergreifend \xFC\
+        berwacht werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-ind-industrielle-it:ind.3.2.a14
+      ref_id: IND.3.2.A14.4
+      description: "Falls technisch \xFCberwacht wird, dann SOLLTE nicht nur bei konkreten\
+        \ Regelverst\xF6\xDFen, sondern auch bei Anomalien im Benutzungsverhalten\
+        \ ein Alarm ausgel\xF6st werden, z. B. sobald ein pl\xF6tzlich erh\xF6htes\
+        \ Kommunikationsvolumen erkannt wird."
+      implementation_groups:
+      - E

@@ -73,7 +73,8 @@
 			options={getOptions({
 				objects: model.foreignKeys['reference_control'],
 				extra_fields: [['folder', 'str']],
-				suggestions: suggestions['reference_control']
+				suggestions: suggestions['reference_control'],
+				label: 'auto' // convention for automatic label calculation
 			})}
 			field="reference_control"
 			label={m.referenceControl()}
@@ -189,7 +190,8 @@
 			multiple
 			options={getOptions({
 				objects: model.foreignKeys['threats'],
-				extra_fields: [['folder', 'str']]
+				extra_fields: [['folder', 'str']],
+				label: 'auto' // convention for automatic label calculation
 			})}
 			field="threats"
 			label={m.threats()}

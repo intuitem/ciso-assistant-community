@@ -28,7 +28,7 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$"
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
 
 
 def match_urn(urn_string):
@@ -37,148 +37,6 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
-
-
-def get_available_library_files():
-    """
-    Returns a list of available library files
-
-    Returns:
-        files: list of available library files
-    """
-    files = []
-    path = settings.BASE_DIR / "library/libraries"
-    for f in os.listdir(path):
-        if (
-            os.path.isfile(os.path.join(path, f))
-            and f.endswith(".yaml")
-            or f.endswith(".yml")
-        ):
-            files.append(f)
-    return files
-
-
-AVAILABLE_LIBRARIES = {}
-
-
-def get_available_libraries():
-    """
-    Returns a list of available libraries
-
-    Returns:
-        libraries: list of available libraries
-    """
-    files = get_available_library_files()
-    path = settings.BASE_DIR / "library/libraries"
-    libraries = []
-    for f in files:
-        fname = path / f
-        modified_time = os.path.getmtime(fname)
-        libs = AVAILABLE_LIBRARIES.get((fname, modified_time))
-        if libs is None:
-            with open(fname, "r", encoding="utf-8") as file:
-                libs = list(yaml.load_all(file, Loader=yaml.CSafeLoader))
-            AVAILABLE_LIBRARIES[(fname, os.path.getmtime(fname))] = libs
-        for _lib in libs:
-            if (
-                lib := LoadedLibrary.objects.filter(urn=_lib["urn"]).first()
-            ) is not None:
-                _lib["id"] = lib.id
-                _lib["reference_count"] = lib.reference_count
-            libraries.append(_lib)
-    return libraries
-
-
-def get_library_names(libraries):
-    """
-    Returns a list of available library names
-
-    Returns:
-        names: list of available library names
-    """
-    names = []
-    for lib in libraries:
-        names.append(lib.get("name"))
-    return names
-
-
-def get_library(urn: str) -> dict | None:
-    """
-    Returns a library by urn, trying to minimize file I/O by directly accessing the specific YAML file.
-
-    Args:
-        urn: URN of the library to return.
-
-    Returns:
-        The library with the given urn, or None if not found.
-    """
-    if match_urn(urn) is None:
-        logger.error("Invalid URN", urn=urn)
-        raise ValueError("Invalid URN")
-
-    # First, try to fetch the library from the database.dd
-    try:
-        lib = LoadedLibrary.objects.get(urn=urn)
-        return {
-            "id": lib.id,
-            "urn": lib.urn,
-            "name": lib.name,
-            "description": lib.description,
-            "provider": lib.provider,
-            "packager": lib.packager,
-            "copyright": lib.copyright,
-            "reference_count": lib.reference_count,
-            "objects": lib._objects,
-        }
-    except LoadedLibrary.DoesNotExist:
-        # Construct the path to the YAML file from the urn.
-        filename = urn.split(":")[-1]
-        libraries_path = settings.BASE_DIR / "library/libraries"
-        _path = libraries_path / f"{filename}.yaml"
-
-        # Ensure that the path is within the libraries directory to prevent directory traversal attacks.
-        path = Path(os.path.abspath(_path))
-
-        logger.info(
-            "Attempting to load library",
-            filename=filename,
-            path=path,
-        )
-        if not path.parent.samefile(libraries_path):
-            logger.error(
-                "Attempted to access file outside of libraries directory",
-                path=path,
-                libraries_path=libraries_path,
-            )
-            raise SuspiciousFileOperation(
-                "Attempted to access file outside of libraries directory"
-            )
-
-        # Attempt to directly load the library from its specific YAML file.
-        if os.path.isfile(path):
-            with open(path, "r", encoding="utf-8") as file:
-                library_data = yaml.load(file, Loader=yaml.CSafeLoader)
-                # TODO: looks like we are going through here twice, why?
-                if library_data and library_data.get("urn") == urn:
-                    return library_data
-        logger.error("File not found", path=path)
-
-    logger.error("Library not found", urn=urn)
-    raise Http404("Library not found")
-
-
-def get_library_items(library, type: str) -> list[dict]:
-    """
-    Returns a list of items of a given type from a library
-
-    Args:
-        library: library to return items from
-        type: type of items to return
-
-    Returns:
-        items: list of items of the given type from the library
-    """
-    return library["objects"].get(type, [])
 
 
 class RequirementNodeImporter:
@@ -202,6 +60,7 @@ class RequirementNodeImporter:
             assessable=self.requirement_data.get("assessable"),
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
+            typical_evidence=self.requirement_data.get("typical_evidence"),
             provider=framework_object.provider,
             order_id=self.index,
             name=self.requirement_data.get("name"),
@@ -573,7 +432,6 @@ class LibraryImporter:
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
-                # import_library_view(get_library(dependency))
                 dependency = StoredLibrary.objects.get(
                     urn=dependency_urn
                 )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
@@ -618,8 +476,6 @@ class LibraryImporter:
 
     def import_objects(self, library_object):
         """Import library objects."""
-        if self._framework_importer is not None:
-            self._framework_importer.import_framework(library_object)
 
         for threat in self._threats:
             threat.import_threat(library_object)
@@ -629,6 +485,9 @@ class LibraryImporter:
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
+
+        if self._framework_importer is not None:
+            self._framework_importer.import_framework(library_object)
 
     @transaction.atomic
     def _import_library(self):
@@ -658,24 +517,6 @@ class LibraryImporter:
                 else:
                     raise e
             except Exception as e:
+                print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e
-
-
-def import_library_view(library: dict) -> Union[str, None]:
-    """
-    Imports a library
-
-    Parameters
-    ----------
-    library : dict
-        A library dictionary loaded from a library YAML configuration file.
-
-    Returns
-    -------
-    optional_error : Union[str,None]
-        A string describing the error if the function fails and returns None on success.
-    """
-    # NOTE: We should just use LibraryImporter.import_library at this point
-    library_importer = LibraryImporter(library)
-    return library_importer.import_library()

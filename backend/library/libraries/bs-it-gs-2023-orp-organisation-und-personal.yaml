@@ -1,0 +1,2500 @@
+urn: urn:intuitem:risk:library:bs-it-gs-2023-orp-organisation-und-personal
+locale: de
+ref_id: bs-it-gs-2023-orp-organisation-und-personal
+name: "IT-Grundschutz-Kompendium \u2013 Werkzeug f\xFCr Informationssicherheit - ORP:\
+  \ Organisation und Personal"
+description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlichung\
+  \ des IT-Grundschutzes. Zusammen mit den BSI-Standards bildet es die Basis f\xFC\
+  r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6chten."
+copyright: Deutschland BSI
+version: 1
+provider: BSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:bs-it-gs-2023-orp-organisation-und-personal
+    ref_id: bs-it-gs-2023-orp-organisation-und-personal
+    name: "IT-Grundschutz-Kompendium \u2013 Werkzeug f\xFCr Informationssicherheit\
+      \ - ORP: Organisation und Personal"
+    description: "Das IT-Grundschutz-Kompendium ist die grundlegende Ver\xF6ffentlichung\
+      \ des IT-Grundschutzes. Zusammen mit den BSI-Standards bildet es die Basis f\xFC\
+      r alle, die sich umfassend mit dem Thema Informationssicherheit befassen m\xF6\
+      chten."
+    implementation_groups_definition:
+    - ref_id: B
+      name: Basis
+      description: null
+    - ref_id: S
+      name: Standard
+      description: null
+    - ref_id: E
+      name: "Erh\xF6hter Schutzbedarf"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      assessable: false
+      depth: 1
+      ref_id: ORP.1
+      name: Organisation
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A1
+      name: Festlegung von Verantwortlichkeiten und Regelungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1
+      ref_id: ORP.1.A1.1
+      description: "Innerhalb einer Institution M\xDCSSEN alle relevanten Aufgaben\
+        \ und Funktionen klar definiert und voneinander abgegrenzt sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1
+      ref_id: ORP.1.A1.2
+      description: "Es M\xDCSSEN verbindliche Regelungen f\xFCr die Informationssicherheit\
+        \ f\xFCr die verschiedenen betrieblichen Aspekte \xFCbergreifend festgelegt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1
+      ref_id: ORP.1.A1.3
+      description: "Die Organisationsstrukturen sowie verbindliche Regelungen M\xDC\
+        SSEN anlassbezogen \xFCberarbeitet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a1
+      ref_id: ORP.1.A1.4
+      description: "Die \xC4nderungen M\xDCSSEN allen Mitarbeitenden bekannt gegeben\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A2
+      name: "Zuweisung der Zust\xE4ndigkeiten"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a2
+      ref_id: ORP.1.A2.1
+      description: "F\xFCr alle Gesch\xE4ftsprozesse, Anwendungen, IT-Systeme, R\xE4\
+        ume und Geb\xE4ude sowie Kommunikationsverbindungen MUSS festgelegt werden,\
+        \ wer f\xFCr diese und deren Sicherheit zust\xE4ndig ist."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a2
+      ref_id: ORP.1.A2.2
+      description: "Alle Mitarbeitenden M\xDCSSEN dar\xFCber informiert sein, insbesondere\
+        \ wof\xFCr sie zust\xE4ndig sind und welche damit verbundenen Aufgaben sie\
+        \ wahrnehmen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A3
+      name: Beaufsichtigung oder Begleitung von Fremdpersonen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3
+      ref_id: ORP.1.A3.1
+      description: "Institutionsfremde Personen M\xDCSSEN von Mitarbeitenden zu den\
+        \ R\xE4umen begleitet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3
+      ref_id: ORP.1.A3.2
+      description: "Die Mitarbeitenden der Institution M\xDCSSEN institutionsfremde\
+        \ Personen in sensiblen Bereichen beaufsichtigen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a3
+      ref_id: ORP.1.A3.3
+      description: "Die Mitarbeitenden SOLLTEN dazu angehalten werden, institutionsfremde\
+        \ Personen in den R\xE4umen der Institution nicht unbeaufsichtigt zu lassen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A4
+      name: Funktionstrennung zwischen unvereinbaren Aufgaben
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4
+      ref_id: ORP.1.A4.1
+      description: "Die Aufgaben und die hierf\xFCr erforderlichen Rollen und Funktionen\
+        \ M\xDCSSEN so strukturiert sein, dass unvereinbare Aufgaben wie operative\
+        \ und kontrollierende Funktionen auf verschiedene Personen verteilt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4
+      ref_id: ORP.1.A4.2
+      description: "F\xFCr unvereinbare Funktionen MUSS eine Funktionstrennung festgelegt\
+        \ und dokumentiert sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a4
+      ref_id: ORP.1.A4.3
+      description: "Auch Vertreter M\xDCSSEN der Funktionstrennung unterliegen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A8
+      name: "Betriebsmittel- und Ger\xE4teverwaltung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8
+      ref_id: ORP.1.A8.1
+      description: "Alle Ger\xE4te und Betriebsmittel, die Einfluss auf die Informationssicherheit\
+        \ haben und die zur Aufgabenerf\xFCllung und zur Einhaltung der Sicherheitsanforderungen\
+        \ erforderlich sind, SOLLTEN in ausreichender Menge vorhanden sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8
+      ref_id: ORP.1.A8.2
+      description: "Es SOLLTE geeignete Pr\xFCf- und Genehmigungsverfahren vor Einsatz\
+        \ der Ger\xE4te und Betriebsmittel geben."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8
+      ref_id: ORP.1.A8.3
+      description: "Ger\xE4te und Betriebsmittel SOLLTEN in geeigneten Bestandsverzeichnissen\
+        \ aufgelistet werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a8
+      ref_id: ORP.1.A8.4
+      description: "Um den Missbrauch von Daten zu verhindern, SOLLTE die zuverl\xE4\
+        ssige L\xF6schung oder Vernichtung von Ger\xE4ten und Betriebsmitteln geregelt\
+        \ sein (siehe hierzu CON.6 L\xF6schen und Vernichten)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A13
+      name: "Sicherheit bei Umz\xFCgen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13
+      ref_id: ORP.1.A13.1
+      description: "Vor einem Umzug SOLLTEN fr\xFChzeitig Sicherheitsrichtlinien erarbeitet\
+        \ bzw. aktualisiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13
+      ref_id: ORP.1.A13.2
+      description: "Alle Mitarbeitenden SOLLTEN \xFCber die vor, w\xE4hrend und nach\
+        \ dem Umzug relevanten Sicherheitsma\xDFnahmen informiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a13
+      ref_id: ORP.1.A13.3
+      description: "Nach dem Umzug SOLLTE \xFCberpr\xFCft werden, ob das transportierte\
+        \ Umzugsgut vollst\xE4ndig und unbesch\xE4digt bzw. unver\xE4ndert angekommen\
+        \ ist."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A15
+      name: Ansprechperson zu Informationssicherheitsfragen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15
+      ref_id: ORP.1.A15.1
+      description: "In jeder Institution MUSS es Ansprechpersonen f\xFCr Sicherheitsfragen\
+        \ geben, die sowohl scheinbar einfache wie auch komplexe oder technische Fragen\
+        \ beantworten k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15
+      ref_id: ORP.1.A15.2
+      description: "Die Ansprechpersonen M\xDCSSEN allen Mitarbeitenden der Institution\
+        \ bekannt sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a15
+      ref_id: ORP.1.A15.3
+      description: "Diesbez\xFCgliche Informationen M\xDCSSEN in der Institution f\xFC\
+        r alle verf\xFCgbar und leicht zug\xE4nglich sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A16
+      name: Richtlinie zur sicheren IT-Nutzung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.1
+      description: "Es SOLLTE eine Richtlinie erstellt werden, in der f\xFCr alle\
+        \ Mitarbeitenden transparent beschrieben wird, welche Rahmenbedingungen bei\
+        \ der IT-Nutzung eingehalten werden m\xFCssen und welche Sicherheitsma\xDF\
+        nahmen zu ergreifen sind."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.2
+      description: 'Die Richtlinie SOLLTE folgende Punkte abdecken:'
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.3
+      description: "\u2022 Sicherheitsziele der Institution,"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.4
+      description: "\u2022 wichtige Begriffe,"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.5
+      description: "\u2022 Aufgaben und Rollen mit Bezug zur Informationssicherheit,"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.6
+      description: "\u2022 Ansprechperson zu Fragen der Informationssicherheit sowie"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.7
+      description: "\u2022 von den Mitarbeitenden umzusetzende und einzuhaltende Sicherheitsma\xDF\
+        nahmen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.8
+      description: Die Richtlinie SOLLTE allen Benutzenden zur Kenntnis gegeben werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.9
+      description: "Jeder neue Benutzende SOLLTE die Kenntnisnahme und Beachtung der\
+        \ Richtlinie schriftlich best\xE4tigen, bevor er die Informationstechnik nutzen\
+        \ darf."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.10
+      description: "Benutzende SOLLTEN die Richtlinie regelm\xE4\xDFig oder nach gr\xF6\
+        \xDFeren \xC4nderungen erneut best\xE4tigen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a16
+      ref_id: ORP.1.A16.11
+      description: "Die Richtlinie sollte zum Nachlesen f\xFCr alle Mitarbeitenden\
+        \ frei zug\xE4nglich abgelegt werden, beispielsweise im Intranet."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1
+      ref_id: ORP.1.A17
+      name: "Mitf\xFChrverbot von Mobiltelefonen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a17
+      ref_id: ORP.1.A17.1
+      description: "Mobiltelefone SOLLTEN NICHT zu vertraulichen Besprechungen und\
+        \ Gespr\xE4chen mitgef\xFChrt werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.1.a17
+      ref_id: ORP.1.A17.2
+      description: "Falls erforderlich, SOLLTE dies durch Mobilfunk-Detektoren \xFC\
+        berpr\xFCft werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      assessable: false
+      depth: 1
+      ref_id: ORP.2
+      name: Personal
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A1
+      name: Geregelte Einarbeitung neuer Mitarbeitender
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1
+      ref_id: ORP.2.A1.1
+      description: "Die Personalabteilung sowie die Vorgesetzten M\xDCSSEN daf\xFC\
+        r sorgen, dass Mitarbeitende zu Beginn ihrer Besch\xE4ftigung in ihre neuen\
+        \ Aufgaben eingearbeitet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1
+      ref_id: ORP.2.A1.2
+      description: "Die Mitarbeitenden M\xDCSSEN \xFCber bestehende Regelungen, Handlungsanweisungen\
+        \ und Verfahrensweisen informiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a1
+      ref_id: ORP.2.A1.3
+      description: "Eine Checkliste und ein direkter Ansprechpartner oder Ansprechpartnerin\
+        \ (\u201EPate oder Patin\u201C) kann hierbei hilfreich sein und SOLLTE etabliert\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A2
+      name: Geregelte Verfahrensweise beim Weggang von Mitarbeitenden
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.1
+      description: Verlassen Mitarbeitende die Institution, MUSS der oder die Nachfolgende
+        rechtzeitig eingewiesen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.2
+      description: Dies SOLLTE idealerweise durch den oder die ausscheidenden Mitarbeitenden
+        erfolgen.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.3
+      description: "Ist eine direkte \xDCbergabe nicht m\xF6glich, MUSS von den ausscheidenden\
+        \ Mitarbeitenden eine ausf\xFChrliche Dokumentation angefertigt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.4
+      description: "Au\xDFerdem M\xDCSSEN von ausscheidenden Mitarbeitenden alle im\
+        \ Rahmen ihrer T\xE4tigkeit erhaltenen Unterlagen, Schl\xFCssel und Ger\xE4\
+        te sowie Ausweise und Zutrittsberechtigungen eingezogen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.5
+      description: Vor der Verabschiedung MUSS noch einmal auf Verschwiegenheitsverpflichtungen
+        hingewiesen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.6
+      description: Es SOLLTE besonders darauf geachtet werden, dass keine Interessenkonflikte
+        auftreten.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.7
+      description: Um nach einem Stellenwechsel Interessenkonflikte zu vermeiden,
+        SOLLTEN Konkurrenzverbote und Karenzzeiten vereinbart werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.8
+      description: "Weiterhin M\xDCSSEN Notfall- und andere Ablaufpl\xE4ne aktualisiert\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.9
+      description: "Alle betroffenen Stellen innerhalb der Institution, wie z. B.\
+        \ das Sicherheitspersonal oder die IT-Abteilung, M\xDCSSEN \xFCber das Ausscheiden\
+        \ des oder der Mitarbeitenden informiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.10
+      description: Damit alle verbundenen Aufgaben, die beim Ausscheiden des oder
+        der Mitarbeitenden anfallen, erledigt werden, SOLLTE hier ebenfalls eine Checkliste
+        angelegt werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a2
+      ref_id: ORP.2.A2.11
+      description: Zudem SOLLTE es einen festen Ansprechpartner oder Ansprechpartnerin
+        der Personalabteilung geben, der den Weggang von Mitarbeitenden begleitet.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A3
+      name: Festlegung von Vertretungsregelungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      ref_id: ORP.2.A3.1
+      description: "Die Vorgesetzten M\xDCSSEN daf\xFCr sorgen, dass im laufenden\
+        \ Betrieb Vertretungsregelungen umgesetzt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      ref_id: ORP.2.A3.2
+      description: "Daf\xFCr MUSS sichergestellt werden, dass es f\xFCr alle wesentlichen\
+        \ Gesch\xE4ftsprozesse und Aufgaben praktikable Vertretungsregelungen gibt."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      ref_id: ORP.2.A3.3
+      description: Bei diesen Regelungen MUSS der Aufgabenumfang der Vertretung im
+        Vorfeld klar definiert werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      ref_id: ORP.2.A3.4
+      description: "Es MUSS sichergestellt werden, dass die Vertretung \xFCber das\
+        \ daf\xFCr n\xF6tige Wissen verf\xFCgt."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      ref_id: ORP.2.A3.5
+      description: "Ist dies nicht der Fall, MUSS \xFCberpr\xFCft werden, wie der\
+        \ Vertretenden zu schulen ist oder ob es ausreicht, den aktuellen Verfahrens-\
+        \ oder Projektstand ausreichend zu dokumentieren."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a3
+      ref_id: ORP.2.A3.6
+      description: "Ist es im Ausnahmefall nicht m\xF6glich, f\xFCr einzelne Mitarbeitende\
+        \ einen kompetenten Vertretenden zu benennen oder zu schulen, MUSS fr\xFC\
+        hzeitig entschieden werden, ob externes Personal daf\xFCr hinzugezogen werden\
+        \ kann."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A4
+      name: "Festlegung von Regelungen f\xFCr den Einsatz von Fremdpersonal"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4
+      ref_id: ORP.2.A4.1
+      description: "Wird externes Personal besch\xE4ftigt, MUSS dieses wie alle eigenen\
+        \ Mitarbeitenden dazu verpflichtet werden, geltende Gesetze, Vorschriften\
+        \ und interne Regelungen einzuhalten."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4
+      ref_id: ORP.2.A4.2
+      description: Fremdpersonal, das kurzfristig oder einmalig eingesetzt wird, MUSS
+        in sicherheitsrelevanten Bereichen beaufsichtigt werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4
+      ref_id: ORP.2.A4.3
+      description: "Bei l\xE4ngerfristig besch\xE4ftigtem Fremdpersonal MUSS dieses\
+        \ wie die eigenen Mitarbeitenden in seine Aufgaben eingewiesen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4
+      ref_id: ORP.2.A4.4
+      description: "Auch f\xFCr diese Mitarbeitende MUSS eine Vertretungsregelung\
+        \ eingef\xFChrt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a4
+      ref_id: ORP.2.A4.5
+      description: "Verl\xE4sst das Fremdpersonal die Institution, M\xDCSSEN Arbeitsergebnisse\
+        \ wie bei eigenem Personal geregelt \xFCbergeben und eventuell ausgeh\xE4\
+        ndigte Zugangsberechtigungen zur\xFCckgegeben werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A5
+      name: "Vertraulichkeitsvereinbarungen f\xFCr den Einsatz von Fremdpersonal"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a5
+      ref_id: ORP.2.A5.1
+      description: "Bevor externe Personen Zugang und Zugriff zu vertraulichen Informationen\
+        \ erhalten, M\xDCSSEN mit ihnen Vertraulichkeitsvereinbarungen in schriftlicher\
+        \ Form geschlossen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a5
+      ref_id: ORP.2.A5.2
+      description: "In diesen Vertraulichkeitsvereinbarungen M\xDCSSEN alle wichtigen\
+        \ Aspekte zum Schutz von institutionsinternen Informationen ber\xFCcksichtigt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A7
+      name: "\xDCberpr\xFCfung der Vertrauensw\xFCrdigkeit von Mitarbeitenden"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7
+      ref_id: ORP.2.A7.1
+      description: "Neue Mitarbeitende SOLLTEN auf ihre Vertrauensw\xFCrdigkeit hin\
+        \ \xFCberpr\xFCft werden, bevor sie eingestellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7
+      ref_id: ORP.2.A7.2
+      description: "Soweit m\xF6glich, SOLLTEN alle an der Personalauswahl Beteiligten\
+        \ kontrollieren, ob die Angaben der Bewerbenden, die relevant f\xFCr die Einsch\xE4\
+        tzung ihrer Vertrauensw\xFCrdigkeit sind, glaubhaft sind."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7
+      ref_id: ORP.2.A7.3
+      description: "Insbesondere SOLLTE sorgf\xE4ltig gepr\xFCft werden, ob der vorgelegte\
+        \ Lebenslauf korrekt, plausibel und vollst\xE4ndig ist."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a7
+      ref_id: ORP.2.A7.4
+      description: "Dabei SOLLTEN auff\xE4llig erscheinende Angaben \xFCberpr\xFC\
+        ft werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A13
+      name: "Sicherheits\xFCberpr\xFCfung"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13
+      ref_id: ORP.2.A13.1
+      description: "Im Hochsicherheitsbereich SOLLTE eine zus\xE4tzliche Sicherheits\xFC\
+        berpr\xFCfung zus\xE4tzlich zur grundlegenden \xDCberpr\xFCfung der Vertrauensw\xFC\
+        rdigkeit von Mitarbeitenden durchgef\xFChrt werden."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13
+      ref_id: ORP.2.A13.2
+      description: "Arbeiten Mitarbeitende mit nach dem Geheimschutz klassifizierten\
+        \ Verschlusssachen, SOLLTEN sich die entsprechenden Mitarbeitenden einer Sicherheits\xFC\
+        berpr\xFCfung nach dem Sicherheits\xFCberpr\xFCfungsgesetz (S\xDCG) unterziehen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a13
+      ref_id: ORP.2.A13.3
+      description: "Diesbez\xFCglich SOLLTE der oder die Informationssicherheitsbeauftragte\
+        \ den Geheimschutzbeauftragten oder die Geheimschutzbeauftragte bzw. Sicherheitsbevollm\xE4\
+        chtigten oder Sicherheitsbevollm\xE4chtigte der Institution einbeziehen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A14
+      name: "Aufgaben und Zust\xE4ndigkeiten von Mitarbeitenden"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14
+      ref_id: ORP.2.A14.1
+      description: "Alle Mitarbeitenden M\xDCSSEN dazu verpflichtet werden, geltende\
+        \ Gesetze, Vorschriften und interne Regelungen einzuhalten."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14
+      ref_id: ORP.2.A14.2
+      description: "Den Mitarbeitenden MUSS der rechtliche Rahmen ihre T\xE4tigkeit\
+        \ bekannt sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14
+      ref_id: ORP.2.A14.3
+      description: "Die Aufgaben und Zust\xE4ndigkeiten von Mitarbeitenden M\xDCSSEN\
+        \ in geeigneter Weise dokumentiert sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14
+      ref_id: ORP.2.A14.4
+      description: "Au\xDFerdem M\xDCSSEN alle Mitarbeitenden darauf hingewiesen werden,\
+        \ dass alle w\xE4hrend der Arbeit erhaltenen Informationen ausschlie\xDFlich\
+        \ zum internen Gebrauch bestimmt sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a14
+      ref_id: ORP.2.A14.5
+      description: "Den Mitarbeitenden MUSS bewusst gemacht werden, die Informationssicherheit\
+        \ der Institution auch au\xDFerhalb der Arbeitszeit und au\xDFerhalb des Betriebsgel\xE4\
+        ndes zu sch\xFCtzen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2
+      ref_id: ORP.2.A15
+      name: Qualifikation des Personals
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      ref_id: ORP.2.A15.1
+      description: "Mitarbeitende M\xDCSSEN regelm\xE4\xDFig geschult bzw. weitergebildet\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      ref_id: ORP.2.A15.2
+      description: In allen Bereichen MUSS sichergestellt werden, dass kein Mitarbeitende
+        mit veralteten Wissensstand arbeitet.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      ref_id: ORP.2.A15.3
+      description: "Weiterhin SOLLTE den Mitarbeitenden w\xE4hrend ihrer Besch\xE4\
+        ftigung die M\xF6glichkeit gegeben werden, sich im Rahmen ihres T\xE4tigkeitsfeldes\
+        \ weiterzubilden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      ref_id: ORP.2.A15.4
+      description: "Werden Stellen besetzt, M\xDCSSEN die erforderlichen Qualifikationen\
+        \ und F\xE4higkeiten genau formuliert sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      ref_id: ORP.2.A15.5
+      description: "Anschlie\xDFend SOLLTE gepr\xFCft werden, ob diese bei den Bewerbenden\
+        \ f\xFCr die Stelle tats\xE4chlich vorhanden sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.2.a15
+      ref_id: ORP.2.A15.6
+      description: "Es MUSS sichergestellt sein, dass Stellen nur von Mitarbeitenden\
+        \ besetzt werden, f\xFCr die sie qualifiziert sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      assessable: false
+      depth: 1
+      ref_id: ORP.3
+      name: Sensibilisierung und Schulung zur Informationssicherheit
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A1
+      name: "Sensibilisierung der Institutionsleitung f\xFCr Informationssicherheit"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      ref_id: ORP.3.A1.1
+      description: "Die Institutionsleitung MUSS ausreichend f\xFCr Sicherheitsfragen\
+        \ sensibilisiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      ref_id: ORP.3.A1.2
+      description: "Die Sicherheitskampagnen und Schulungsma\xDFnahmen M\xDCSSEN von\
+        \ der Institutionsleitung unterst\xFCtzt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      ref_id: ORP.3.A1.3
+      description: "Vor dem Beginn eines Sensibilisierungs- und Schulungsprogramms\
+        \ zur Informationssicherheit MUSS die Unterst\xFCtzung der Institutionsleitung\
+        \ eingeholt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      ref_id: ORP.3.A1.4
+      description: "Alle Vorgesetzten M\xDCSSEN die Informationssicherheit unterst\xFC\
+        tzen, indem sie mit gutem Beispiel vorangehen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      ref_id: ORP.3.A1.5
+      description: "F\xFChrungskr\xE4fte M\xDCSSEN die Sicherheitsvorgaben umsetzen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a1
+      ref_id: ORP.3.A1.6
+      description: "Hier\xFCber hinaus M\xDCSSEN sie ihre Mitarbeitenden auf deren\
+        \ Einhaltung hinweisen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A3
+      name: Einweisung des Personals in den sicheren Umgang mit IT
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3
+      ref_id: ORP.3.A3.1
+      description: "Alle Mitarbeitenden und externen Benutzenden M\xDCSSEN in den\
+        \ sicheren Umgang mit IT-, ICS- und IoT-Komponenten eingewiesen und sensibilisiert\
+        \ werden, soweit dies f\xFCr ihre Arbeitszusammenh\xE4nge relevant ist."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3
+      ref_id: ORP.3.A3.2
+      description: "Daf\xFCr M\xDCSSEN verbindliche, verst\xE4ndliche und aktuelle\
+        \ Richtlinien zur Nutzung der jeweiligen Komponenten zur Verf\xFCgung stehen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a3
+      ref_id: ORP.3.A3.3
+      description: Werden IT-, ICS- oder IoT-Systeme oder -Dienste in einer Weise
+        benutzt, die den Interessen der Institution widersprechen, MUSS dies kommuniziert
+        werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A4
+      name: Konzeption und Planung eines Sensibilisierungs- und Schulungsprogramms
+        zur Informationssicherheit
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      ref_id: ORP.3.A4.1
+      description: Sensibilisierungs- und Schulungsprogramme zur Informationssicherheit
+        SOLLTEN sich an den jeweiligen Zielgruppen orientieren.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      ref_id: ORP.3.A4.2
+      description: "Dazu SOLLTE eine Zielgruppenanalyse durchgef\xFChrt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      ref_id: ORP.3.A4.3
+      description: "Hierbei SOLLTEN Schulungsma\xDFnahmen auf die speziellen Anforderungen\
+        \ und unterschiedlichen Hintergr\xFCnde fokussiert werden k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      ref_id: ORP.3.A4.4
+      description: Es SOLLTE ein zielgruppenorientiertes Sensibilisierungs- und Schulungsprogramm
+        zur Informationssicherheit erstellt werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      ref_id: ORP.3.A4.5
+      description: "Dieses Schulungsprogramm SOLLTE den Mitarbeitenden alle Informationen\
+        \ und F\xE4higkeiten vermitteln, die erforderlich sind, um in der Institution\
+        \ geltende Sicherheitsregelungen und -ma\xDFnahmen umsetzen zu k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a4
+      ref_id: ORP.3.A4.6
+      description: "Es SOLLTE regelm\xE4\xDFig \xFCberpr\xFCft und aktualisiert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A6
+      name: "Durchf\xFChrung von Sensibilisierungen und Schulungen zur Informationssicherheit"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a6
+      ref_id: ORP.3.A6.1
+      description: Alle Mitarbeitenden SOLLTEN entsprechend ihren Aufgaben und Verantwortlichkeiten
+        zu Informationssicherheitsthemen geschult werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A7
+      name: Schulung zur Vorgehensweise nach IT-Grundschutz
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7
+      ref_id: ORP.3.A7.1
+      description: Informationssicherheitsbeauftragte SOLLTEN mit dem IT-Grundschutz
+        vertraut sein.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7
+      ref_id: ORP.3.A7.2
+      description: Wurde ein Schulungsbedarf identifiziert, SOLLTE eine geeignete
+        IT-Grundschutz-Schulung geplant werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7
+      ref_id: ORP.3.A7.3
+      description: "F\xFCr die Planung einer Schulung SOLLTE der Online-Kurs des BSI\
+        \ zum IT-Grundschutz ber\xFCcksichtigt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7
+      ref_id: ORP.3.A7.4
+      description: "Innerhalb der Schulung SOLLTE die Vorgehensweise anhand praxisnaher\
+        \ Beispiele ge\xFCbt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a7
+      ref_id: ORP.3.A7.5
+      description: "Es SOLLTE gepr\xFCft werden, ob der oder die Informationssicherheitsbeauftragte\
+        \ sich zu einem BSI IT-Grundschutz-Praktiker qualifizieren lassen sollten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A8
+      name: Messung und Auswertung des Lernerfolgs
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8
+      ref_id: ORP.3.A8.1
+      description: Die Lernerfolge im Bereich Informationssicherheit SOLLTEN zielgruppenbezogen
+        gemessen und ausgewertet werden, um festzustellen, inwieweit die in den Sensibilisierungs-
+        und Schulungsprogrammen zur Informationssicherheit beschriebenen Ziele erreicht
+        sind.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8
+      ref_id: ORP.3.A8.2
+      description: "Die Messungen SOLLTEN sowohl quantitative als auch qualitative\
+        \ Aspekte der Sensibilisierungs- und Schulungsprogramme zur Informationssicherheit\
+        \ ber\xFCcksichtigen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8
+      ref_id: ORP.3.A8.3
+      description: "Die Ergebnisse SOLLTEN bei der Verbesserung des Sensibilisierungs-\
+        \ und Schulungsangebots zur Informationssicherheit in geeigneter Weise einflie\xDF\
+        en."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a8
+      ref_id: ORP.3.A8.4
+      description: "Der oder die Informationssicherheitsbeauftragte SOLLTE sich regelm\xE4\
+        \xDFig mit der Personalabteilung und den anderen f\xFCr die Sicherheit relevanten\
+        \ Ansprechpartnern (Datenschutz, Gesundheits- und Arbeitsschutz, Brandschutz\
+        \ etc.) \xFCber die Effizienz der Aus- und Weiterbildung austauschen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3
+      ref_id: ORP.3.A9
+      name: Spezielle Schulung von exponierten Personen und Institutionen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.3.a9
+      ref_id: ORP.3.A9.1
+      description: "Besonders exponierte Personen SOLLTEN vertiefende Schulungen in\
+        \ Hinblick auf m\xF6gliche Gef\xE4hrdungen sowie geeignete Verhaltensweisen\
+        \ und Vorsichtsma\xDFnahmen erhalten."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      assessable: false
+      depth: 1
+      ref_id: ORP.4
+      name: "Identit\xE4ts- und Berechtigungsmanagement"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A1
+      name: "Regelung f\xFCr die Einrichtung und L\xF6schung von Benutzenden und Benutzendengruppen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1
+      ref_id: ORP.4.A1.1
+      description: "Es MUSS geregelt werden, wie Benutzendenkennungen und -gruppen\
+        \ einzurichten und zu l\xF6schen sind."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1
+      ref_id: ORP.4.A1.2
+      description: "Jede Benutzendenkennung MUSS eindeutig einer Person zugeordnet\
+        \ werden k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1
+      ref_id: ORP.4.A1.3
+      description: "Benutzendenkennungen, die l\xE4ngere Zeit inaktiv sind, SOLLTEN\
+        \ deaktiviert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1
+      ref_id: ORP.4.A1.4
+      description: "Alle Benutzenden und Benutzendengruppen D\xDCRFEN NUR \xFCber\
+        \ separate administrative Rollen eingerichtet und gel\xF6scht werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a1
+      ref_id: ORP.4.A1.5
+      description: "Nicht ben\xF6tigte Benutzendenkennungen, wie z. B. standardm\xE4\
+        \xDFig eingerichtete Gastkonten oder Standard-Administrierendenkennungen,\
+        \ M\xDCSSEN geeignet deaktiviert oder gel\xF6scht werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A2
+      name: "Einrichtung, \xC4nderung und Entzug von Berechtigungen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2
+      ref_id: ORP.4.A2.1
+      description: "Benutzendenkennungen und Berechtigungen D\xDCRFEN NUR aufgrund\
+        \ des tats\xE4chlichen Bedarfs und der Notwendigkeit zur Aufgabenerf\xFCllung\
+        \ vergeben werden (Prinzip der geringsten Berechtigungen, englisch Least Privileges\
+        \ und Erforderlichkeitsprinzip, englisch Need-to-know)."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2
+      ref_id: ORP.4.A2.2
+      description: "Bei personellen Ver\xE4nderungen M\xDCSSEN die nicht mehr ben\xF6\
+        tigten Benutzendenkennungen und Berechtigungen entfernt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2
+      ref_id: ORP.4.A2.3
+      description: "Beantragen Mitarbeitende Berechtigungen, die \xFCber den Standard\
+        \ hinausgehen, D\xDCRFEN diese NUR nach zus\xE4tzlicher Begr\xFCndung und\
+        \ Pr\xFCfung vergeben werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2
+      ref_id: ORP.4.A2.4
+      description: "Zugriffsberechtigungen auf Systemverzeichnisse und -dateien SOLLTEN\
+        \ restriktiv eingeschr\xE4nkt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a2
+      ref_id: ORP.4.A2.5
+      description: "Alle Berechtigungen M\xDCSSEN \xFCber separate administrative\
+        \ Rollen eingerichtet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A3
+      name: Dokumentation der Benutzendenkennungen und Rechteprofile
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3
+      ref_id: ORP.4.A3.1
+      description: Es MUSS dokumentiert werden, welche Benutzendenkennungen, angelegte
+        Benutzendengruppen und Rechteprofile zugelassen und angelegt wurden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3
+      ref_id: ORP.4.A3.2
+      description: "Die Dokumentation der zugelassenen Benutzendenkennungen, angelegten\
+        \ Benutzendengruppen und Rechteprofile MUSS regelm\xE4\xDFig daraufhin \xFC\
+        berpr\xFCft werden, ob sie den tats\xE4chlichen Stand der Rechtevergabe widerspiegelt."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3
+      ref_id: ORP.4.A3.3
+      description: "Dabei MUSS auch gepr\xFCft werden, ob die Rechtevergabe noch den\
+        \ Sicherheitsanforderungen und den aktuellen Aufgaben der Benutzenden entspricht."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3
+      ref_id: ORP.4.A3.4
+      description: "Die Dokumentation MUSS vor unberechtigtem Zugriff gesch\xFCtzt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a3
+      ref_id: ORP.4.A3.5
+      description: Sofern sie in elektronischer Form erfolgt, SOLLTE sie in das Datensicherungsverfahren
+        einbezogen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A4
+      name: Aufgabenverteilung und Funktionstrennung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a4
+      ref_id: ORP.4.A4.1
+      description: "Die von der Institution definierten unvereinbaren Aufgaben und\
+        \ Funktionen (siehe Baustein ORP.1 Organisation) M\xDCSSEN durch das Identit\xE4\
+        ts- und Berechtigungsmanagement getrennt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A5
+      name: Vergabe von Zutrittsberechtigungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5
+      ref_id: ORP.4.A5.1
+      description: Es MUSS festgelegt werden, welche Zutrittsberechtigungen an welche
+        Personen im Rahmen ihrer Funktion vergeben bzw. ihnen entzogen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5
+      ref_id: ORP.4.A5.2
+      description: Die Ausgabe bzw. der Entzug von verwendeten Zutrittsmittel wie
+        Chipkarten MUSS dokumentiert werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5
+      ref_id: ORP.4.A5.3
+      description: "Wenn Zutrittsmittel kompromittiert wurden, M\xDCSSEN sie ausgewechselt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5
+      ref_id: ORP.4.A5.4
+      description: "Die Zutrittsberechtigten SOLLTEN f\xFCr den korrekten Umgang mit\
+        \ den Zutrittsmitteln geschult werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a5
+      ref_id: ORP.4.A5.5
+      description: "Bei l\xE4ngeren Abwesenheiten SOLLTEN berechtigte Personen vor\xFC\
+        bergehend gesperrt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A6
+      name: Vergabe von Zugangsberechtigungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6
+      ref_id: ORP.4.A6.1
+      description: Es MUSS festgelegt werden, welche Zugangsberechtigungen an welche
+        Personen im Rahmen ihrer Funktion vergeben bzw. ihnen entzogen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6
+      ref_id: ORP.4.A6.2
+      description: Werden Zugangsmittel wie Chipkarten verwendet, so MUSS die Ausgabe
+        bzw. der Entzug dokumentiert werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6
+      ref_id: ORP.4.A6.3
+      description: "Wenn Zugangsmittel kompromittiert wurden, M\xDCSSEN sie ausgewechselt\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6
+      ref_id: ORP.4.A6.4
+      description: "Die Zugangsberechtigten SOLLTEN f\xFCr den korrekten Umgang mit\
+        \ den Zugangsmitteln geschult werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a6
+      ref_id: ORP.4.A6.5
+      description: "Bei l\xE4ngeren Abwesenheiten SOLLTEN berechtigte Personen vor\xFC\
+        bergehend gesperrt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A7
+      name: Vergabe von Zugriffsrechten
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7
+      ref_id: ORP.4.A7.1
+      description: Es MUSS festgelegt werden, welche Zugriffsrechte an welche Personen
+        im Rahmen ihrer Funktion vergeben bzw. ihnen entzogen werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7
+      ref_id: ORP.4.A7.2
+      description: Werden im Rahmen der Zugriffskontrolle Chipkarten oder Token verwendet,
+        so MUSS die Ausgabe bzw. der Entzug dokumentiert werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7
+      ref_id: ORP.4.A7.3
+      description: "Die Anwendenden SOLLTEN f\xFCr den korrekten Umgang mit Chipkarten\
+        \ oder Token geschult werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a7
+      ref_id: ORP.4.A7.4
+      description: "Bei l\xE4ngeren Abwesenheiten SOLLTEN berechtigte Personen vor\xFC\
+        bergehend gesperrt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A8
+      name: Regelung des Passwortgebrauchs
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.1
+      description: "Die Institution MUSS den Passwortgebrauch verbindlich regeln (siehe\
+        \ auch ORP.4.A22 Regelung zur Passwortqualit\xE4t und ORP.4.A23 Regelung f\xFC\
+        r passwortverarbeitende Anwendungen und IT-Systeme)."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.2
+      description: "Dabei MUSS gepr\xFCft werden, ob Passw\xF6rter als alleiniges\
+        \ Authentisierungsverfahren eingesetzt werden sollen, oder ob andere Authentisierungsmerkmale\
+        \ bzw. -verfahren zus\xE4tzlich zu oder anstelle von Passw\xF6rtern verwendet\
+        \ werden k\xF6nnen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.3
+      description: "Passw\xF6rter D\xDCRFEN NICHT mehrfach verwendet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.4
+      description: "F\xFCr jedes IT-System bzw. jede Anwendung MUSS ein eigenst\xE4\
+        ndiges Passwort verwendet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.5
+      description: "Passw\xF6rter, die leicht zu erraten sind oder in g\xE4ngigen\
+        \ Passwortlisten gef\xFChrt werden, D\xDCRFEN NICHT verwendet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.6
+      description: "Passw\xF6rter M\xDCSSEN geheim gehalten werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.7
+      description: "Sie D\xDCRFEN NUR den Benutzenden pers\xF6nlich bekannt sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.8
+      description: "Passw\xF6rter D\xDCRFEN NUR unbeobachtet eingegeben werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.9
+      description: "Passw\xF6rter D\xDCRFEN NICHT auf programmierbaren Funktionstasten\
+        \ von Tastaturen oder M\xE4usen gespeichert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.10
+      description: "Ein Passwort DARF NUR f\xFCr eine Hinterlegung f\xFCr einen Notfall\
+        \ schriftlich fixiert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.11
+      description: Es MUSS dann sicher aufbewahrt werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.12
+      description: "Die Nutzung eines Passwort-Managers SOLLTE gepr\xFCft werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.13
+      description: "Bei Passwort-Managern mit Funktionen oder Plug-ins, mit denen\
+        \ Passw\xF6rter \xFCber Onlinedienste Dritter synchronisiert oder anderweitig\
+        \ an Dritte \xFCbertragen werden, M\xDCSSEN diese Funktionen und Plug-ins\
+        \ deaktiviert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a8
+      ref_id: ORP.4.A8.14
+      description: Ein Passwort MUSS gewechselt werden, wenn es unautorisierten Personen
+        bekannt geworden ist oder der Verdacht dazu besteht.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A9
+      name: Identifikation und Authentisierung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a9
+      ref_id: ORP.4.A9.1
+      description: Der Zugriff auf alle IT-Systeme und Dienste MUSS durch eine angemessene
+        Identifikation und Authentisierung der zugreifenden Benutzenden, Dienste oder
+        IT-Systeme abgesichert sein.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a9
+      ref_id: ORP.4.A9.2
+      description: "Vorkonfigurierte Authentisierungsmittel M\xDCSSEN vor dem produktiven\
+        \ Einsatz ge\xE4ndert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A10
+      name: Schutz von Benutzendenkennungen mit weitreichenden Berechtigungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a10
+      ref_id: ORP.4.A10.1
+      description: "Benutzendenkennungen mit weitreichenden Berechtigungen SOLLTEN\
+        \ mit einer Mehr-Faktor-Authentisierung, z. B. mit kryptografischen Zertifikaten,\
+        \ Chipkarten oder Token, gesch\xFCtzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A11
+      name: "Zur\xFCcksetzen von Passw\xF6rtern"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11
+      ref_id: ORP.4.A11.1
+      description: "F\xFCr das Zur\xFCcksetzen von Passw\xF6rtern SOLLTE ein angemessenes\
+        \ sicheres Verfahren definiert und umgesetzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11
+      ref_id: ORP.4.A11.2
+      description: "Die Mitarbeitenden des IT-Betriebs, die Passw\xF6rter zur\xFC\
+        cksetzen k\xF6nnen, SOLLTEN entsprechend geschult werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a11
+      ref_id: ORP.4.A11.3
+      description: "Bei h\xF6herem Schutzbedarf des Passwortes SOLLTE eine Strategie\
+        \ definiert werden, falls Mitarbeitende des IT-Betriebs aufgrund fehlender\
+        \ sicherer M\xF6glichkeiten der \xDCbermittlung des Passwortes die Verantwortung\
+        \ nicht \xFCbernehmen k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A12
+      name: "Entwicklung eines Authentisierungskonzeptes f\xFCr IT-Systeme und Anwendungen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12
+      ref_id: ORP.4.A12.1
+      description: Es SOLLTE ein Authentisierungskonzept erstellt werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12
+      ref_id: ORP.4.A12.2
+      description: "Darin SOLLTE f\xFCr jedes IT-System und jede Anwendung definiert\
+        \ werden, welche Funktions- und Sicherheitsanforderungen an die Authentisierung\
+        \ gestellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12
+      ref_id: ORP.4.A12.3
+      description: "Authentisierungsinformationen M\xDCSSEN kryptografisch sicher\
+        \ gespeichert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a12
+      ref_id: ORP.4.A12.4
+      description: "Authentisierungsinformationen D\xDCRFEN NICHT unverschl\xFCsselt\
+        \ \xFCber unsichere Netze \xFCbertragen werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A13
+      name: Geeignete Auswahl von Authentisierungsmechanismen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13
+      ref_id: ORP.4.A13.1
+      description: Es SOLLTEN dem Schutzbedarf angemessene Identifikations- und Authentisierungsmechanismen
+        verwendet werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13
+      ref_id: ORP.4.A13.2
+      description: "Authentisierungsdaten SOLLTEN durch das IT-System bzw. die IT-Anwendungen\
+        \ bei der Verarbeitung jederzeit gegen Aussp\xE4hung, Ver\xE4nderung und Zerst\xF6\
+        rung gesch\xFCtzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13
+      ref_id: ORP.4.A13.3
+      description: "Das IT-System bzw. die IT-Anwendung SOLLTE nach jedem erfolglosen\
+        \ Authentisierungsversuch weitere Anmeldeversuche zunehmend verz\xF6gern (Time\
+        \ Delay)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13
+      ref_id: ORP.4.A13.4
+      description: "Die Gesamtdauer eines Anmeldeversuchs SOLLTE begrenzt werden k\xF6\
+        nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a13
+      ref_id: ORP.4.A13.5
+      description: "Nach \xDCberschreitung der vorgegebenen Anzahl erfolgloser Authentisierungsversuche\
+        \ SOLLTE das IT-System bzw. die IT-Anwendung die Benutzendenkennung sperren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A14
+      name: Kontrolle der Wirksamkeit der Benutzendentrennung am IT-System bzw. an
+        der Anwendung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a14
+      ref_id: ORP.4.A14.1
+      description: "In angemessenen Zeitabst\xE4nden SOLLTE \xFCberpr\xFCft werden,\
+        \ ob die Benutzenden von IT-Systemen bzw. Anwendungen sich regelm\xE4\xDF\
+        ig nach Aufgabenerf\xFCllung abmelden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a14
+      ref_id: ORP.4.A14.2
+      description: Ebenso SOLLTE kontrolliert werden, dass nicht mehrere Benutzende
+        unter der gleichen Kennung arbeiten.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A15
+      name: "Vorgehensweise und Konzeption der Prozesse beim Identit\xE4ts- und Berechtigungsmanagement"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      ref_id: ORP.4.A15.1
+      description: "F\xFCr das Identit\xE4ts- und Berechtigungsmanagement SOLLTEN\
+        \ folgenden Prozesse definiert und umgesetzt werden:"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      ref_id: ORP.4.A15.2
+      description: "\u2022 Richtlinien verwalten,"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      ref_id: ORP.4.A15.3
+      description: "\u2022 Identit\xE4tsprofile verwalten,"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      ref_id: ORP.4.A15.4
+      description: "\u2022 Benutzendenkennungen verwalten,"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      ref_id: ORP.4.A15.5
+      description: "\u2022 Berechtigungsprofile verwalten sowie"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a15
+      ref_id: ORP.4.A15.6
+      description: "\u2022 Rollen verwalten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A16
+      name: "Richtlinien f\xFCr die Zugriffs- und Zugangskontrolle"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16
+      ref_id: ORP.4.A16.1
+      description: "Es SOLLTE eine Richtlinie f\xFCr die Zugriffs- und Zugangskontrolle\
+        \ von IT-Systemen, IT-Komponenten und Datennetzen erstellt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16
+      ref_id: ORP.4.A16.2
+      description: Es SOLLTEN Standard-Rechteprofile benutzt werden, die den Funktionen
+        und Aufgaben der Mitarbeitenden entsprechen.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a16
+      ref_id: ORP.4.A16.3
+      description: "F\xFCr jedes IT-System und jede IT-Anwendung SOLLTE eine schriftliche\
+        \ Zugriffsregelung existieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A17
+      name: "Geeignete Auswahl von Identit\xE4ts- und Berechtigungsmanagement-Systemen"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17
+      ref_id: ORP.4.A17.1
+      description: "Beim Einsatz eines Identit\xE4ts- und Berechtigungsmanagement-Systems\
+        \ SOLLTE dieses f\xFCr die Institution und deren jeweilige Gesch\xE4ftsprozesse,\
+        \ Organisationsstrukturen und Abl\xE4ufe sowie deren Schutzbedarf geeignet\
+        \ sein."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17
+      ref_id: ORP.4.A17.2
+      description: "Das Identit\xE4ts- und Berechtigungsmanagement-System SOLLTE die\
+        \ in der Institution vorhandenen Vorgaben zum Umgang mit Identit\xE4ten und\
+        \ Berechtigungen abbilden k\xF6nnen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17
+      ref_id: ORP.4.A17.3
+      description: "Das ausgew\xE4hlte Identit\xE4ts- und Berechtigungsmanagement-System\
+        \ SOLLTE den Grundsatz der Funktionstrennung unterst\xFCtzen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a17
+      ref_id: ORP.4.A17.4
+      description: "Das Identit\xE4ts- und Berechtigungsmanagement-System SOLLTE angemessen\
+        \ vor Angriffen gesch\xFCtzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A18
+      name: Einsatz eines zentralen Authentisierungsdienstes
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18
+      ref_id: ORP.4.A18.1
+      description: "Um ein zentrales Identit\xE4ts- und Berechtigungsmanagement aufzubauen,\
+        \ SOLLTE ein zentraler netzbasierter Authentisierungsdienst eingesetzt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18
+      ref_id: ORP.4.A18.2
+      description: "Der Einsatz eines zentralen netzbasierten Authentisierungsdienstes\
+        \ SOLLTE sorgf\xE4ltig geplant werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a18
+      ref_id: ORP.4.A18.3
+      description: "Dazu SOLLTEN die Sicherheitsanforderungen dokumentiert werden,\
+        \ die f\xFCr die Auswahl eines solchen Dienstes relevant sind."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A19
+      name: Einweisung aller Mitarbeitenden in den Umgang mit Authentisierungsverfahren
+        und -mechanismen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19
+      ref_id: ORP.4.A19.1
+      description: Alle Mitarbeitende SOLLTEN in den korrekten Umgang mit dem Authentisierungsverfahren
+        eingewiesen werden.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19
+      ref_id: ORP.4.A19.2
+      description: "Es SOLLTE verst\xE4ndliche Richtlinien f\xFCr den Umgang mit Authentisierungsverfahren\
+        \ geben."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a19
+      ref_id: ORP.4.A19.3
+      description: "Die Mitarbeitenden SOLLTEN \xFCber relevante Regelungen informiert\
+        \ werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A20
+      name: "Notfallvorsorge f\xFCr das Identit\xE4ts- und Berechtigungsmanagement-System"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20
+      ref_id: ORP.4.A20.1
+      description: "Es SOLLTE gepr\xFCft werden, inwieweit ein ausgefallenes Identit\xE4\
+        ts- und Berechtigungsmanagement-System sicherheitskritisch f\xFCr die Gesch\xE4\
+        ftsprozesse ist."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20
+      ref_id: ORP.4.A20.2
+      description: "Es SOLLTEN Vorkehrungen getroffen werden, um bei einem ausgefallenen\
+        \ Identit\xE4ts- und Berechtigungsmanagement-System weiterhin arbeitsf\xE4\
+        hig zu sein."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a20
+      ref_id: ORP.4.A20.3
+      description: "Insbesondere SOLLTE das im Notfallkonzept vorgesehene Berechtigungskonzept\
+        \ weiterhin anwendbar sein, wenn das Identit\xE4ts- und Berechtigungsmanagement-System\
+        \ ausgefallen ist."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A21
+      name: Mehr-Faktor-Authentisierung
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a21.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a21
+      ref_id: ORP.4.A21.1
+      description: Es SOLLTE eine sichere Mehr-Faktor-Authentisierung, z. B. mit kryptografischen
+        Zertifikaten, Chipkarten oder Token, zur Authentisierung verwendet werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A22
+      name: "Regelung zur Passwortqualit\xE4t"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22
+      ref_id: ORP.4.A22.1
+      description: "In Abh\xE4ngigkeit von Einsatzzweck und Schutzbedarf M\xDCSSEN\
+        \ sichere Passw\xF6rter geeigneter Qualit\xE4t gew\xE4hlt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22
+      ref_id: ORP.4.A22.2
+      description: Das Passwort MUSS so komplex sein, dass es nicht leicht zu erraten
+        ist.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a22
+      ref_id: ORP.4.A22.3
+      description: "Das Passwort DARF NICHT zu kompliziert sein, damit Benutzende\
+        \ in der Lage sind, das Passwort mit vertretbarem Aufwand regelm\xE4\xDFig\
+        \ zu verwenden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A23
+      name: "Regelung f\xFCr passwortverarbeitende Anwendungen und IT-Systeme"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.1
+      description: IT-Systeme oder Anwendungen SOLLTEN NUR mit einem validen Grund
+        zum Wechsel des Passworts auffordern.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.2
+      description: Reine zeitgesteuerte Wechsel SOLLTEN vermieden werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.3
+      description: "Es M\xDCSSEN Ma\xDFnahmen ergriffen werden, um die Kompromittierung\
+        \ von Passw\xF6rtern zu erkennen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.4
+      description: "Ist dies nicht m\xF6glich, so SOLLTE gepr\xFCft werden, ob die\
+        \ Nachteile eines zeitgesteuerten Passwortwechsels in Kauf genommen werden\
+        \ k\xF6nnen und Passw\xF6rter in gewissen Abst\xE4nden gewechselt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.5
+      description: "Standardpassw\xF6rter M\xDCSSEN durch ausreichend starke Passw\xF6\
+        rter ersetzt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.6
+      description: "Vordefinierte Kennungen M\xDCSSEN ge\xE4ndert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.7
+      description: "Es SOLLTE sichergestellt werden, dass die m\xF6gliche Passwortl\xE4\
+        nge auch im vollen Umfang von verarbeitenden IT-Systemen gepr\xFCft wird."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.8
+      description: "Nach einem Passwortwechsel D\xDCRFEN alte Passw\xF6rter NICHT\
+        \ mehr genutzt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.9
+      description: "Passw\xF6rter M\xDCSSEN so sicher wie m\xF6glich gespeichert werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.10
+      description: "Bei Kennungen f\xFCr technische Konten, Dienstkonten, Schnittstellen\
+        \ oder Vergleichbares SOLLTE ein Passwortwechsel sorgf\xE4ltig geplant und\
+        \ gegebenenfalls mit den Anwendungsverantwortlichen abgestimmt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.11
+      description: "Bei der Authentisierung in vernetzten Systemen D\xDCRFEN Passw\xF6\
+        rter NICHT unverschl\xFCsselt \xFCber unsichere Netze \xFCbertragen werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.12
+      description: "Wenn Passw\xF6rter in einem Intranet \xFCbertragen werden, SOLLTEN\
+        \ sie verschl\xFCsselt werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a23
+      ref_id: ORP.4.A23.13
+      description: Bei erfolglosen Anmeldeversuchen SOLLTEN die passwortverarbeitenden
+        Anwendungen oder die IT-Systeme keinen Hinweis darauf geben, ob Passwort oder
+        Kennung falsch sind.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4
+      ref_id: ORP.4.A24
+      name: "Vier-Augen-Prinzip f\xFCr administrative T\xE4tigkeiten"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24
+      ref_id: ORP.4.A24.1
+      description: "Administrative T\xE4tigkeiten SOLLTEN nur durch zwei Personen\
+        \ durchgef\xFChrt werden k\xF6nnen."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24
+      ref_id: ORP.4.A24.2
+      description: Dazu SOLLTEN bei Mehr-Faktor-Authentisierung die Faktoren auf die
+        zwei Personen verteilt werden.
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.4.a24
+      ref_id: ORP.4.A24.3
+      description: "Bei der Nutzung von Passw\xF6rtern SOLLTEN diese in zwei Teile\
+        \ zerlegt werden und jede der zwei Personen enth\xE4lt einen Teil."
+      implementation_groups:
+      - E
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5
+      assessable: false
+      depth: 1
+      ref_id: ORP.5
+      name: Compliance Management (Anforderungsmanagement)
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5
+      ref_id: ORP.5.A1
+      name: Identifikation der Rahmenbedingungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1
+      ref_id: ORP.5.A1.1
+      description: "Alle gesetzlichen, vertraglichen und sonstigen Vorgaben mit Auswirkungen\
+        \ auf das Informationssicherheitsmanagement M\xDCSSEN identifiziert und dokumentiert\
+        \ werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1
+      ref_id: ORP.5.A1.2
+      description: "Die f\xFCr die einzelnen Bereiche der Institution relevanten gesetzlichen,\
+        \ vertraglichen und sonstigen Vorgaben SOLLTEN in einer strukturierten \xDC\
+        bersicht herausgearbeitet werden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a1
+      ref_id: ORP.5.A1.3
+      description: Die Dokumentation MUSS auf dem aktuellen Stand gehalten werden.
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5
+      ref_id: ORP.5.A2
+      name: Beachtung der Rahmenbedingungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2
+      ref_id: ORP.5.A2.1
+      description: "Die als sicherheitsrelevant identifizierten Anforderungen M\xDC\
+        SSEN bei der Planung und Konzeption von Gesch\xE4ftsprozessen, Anwendungen\
+        \ und IT-Systemen oder bei der Beschaffung neuer Komponenten einflie\xDFen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2
+      ref_id: ORP.5.A2.2
+      description: "F\xFChrungskr\xE4fte, die eine rechtliche Verantwortung f\xFC\
+        r die Institution tragen, M\xDCSSEN f\xFCr die Einhaltung der gesetzlichen,\
+        \ vertraglichen und sonstigen Vorgaben sorgen."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2
+      ref_id: ORP.5.A2.3
+      description: "Die Verantwortlichkeiten und Zust\xE4ndigkeiten f\xFCr die Einhaltung\
+        \ dieser Vorgaben M\xDCSSEN festgelegt sein."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2
+      ref_id: ORP.5.A2.4
+      description: "Es M\xDCSSEN geeignete Ma\xDFnahmen identifiziert und umgesetzt\
+        \ werden, um Verst\xF6\xDFe gegen relevante Anforderungen zu vermeiden."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a2
+      ref_id: ORP.5.A2.5
+      description: "Wenn solche Verst\xF6\xDFe erkannt werden, M\xDCSSEN sachgerechte\
+        \ Korrekturma\xDFnahmen ergriffen werden, um die Abweichungen zu beheben."
+      implementation_groups:
+      - B
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5
+      ref_id: ORP.5.A4
+      name: Konzeption und Organisation des Compliance Managements
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4
+      ref_id: ORP.5.A4.1
+      description: In der Institution SOLLTE ein Prozess aufgebaut werden, um alle
+        relevanten gesetzlichen, vertraglichen und sonstigen Vorgaben mit Auswirkungen
+        auf das Informationssicherheitsmanagement zu identifizieren.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4
+      ref_id: ORP.5.A4.2
+      description: "Es SOLLTEN geeignete Prozesse und Organisationsstrukturen aufgebaut\
+        \ werden, um basierend auf der Identifikation und Beachtung der rechtlichen\
+        \ Rahmenbedingungen, den \xDCberblick \xFCber die verschiedenen rechtlichen\
+        \ Anforderungen an die einzelnen Bereiche der Institution zu gew\xE4hrleisten."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4
+      ref_id: ORP.5.A4.3
+      description: "Daf\xFCr SOLLTEN Zust\xE4ndige f\xFCr das Compliance Management\
+        \ festgelegt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4
+      ref_id: ORP.5.A4.4
+      description: "Compliance-Beauftragte und Informationssicherheitsbeauftragte\
+        \ SOLLTEN sich regelm\xE4\xDFig austauschen."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a4
+      ref_id: ORP.5.A4.5
+      description: "Sie SOLLTEN gemeinsam Sicherheitsanforderungen ins Compliance\
+        \ Management integrieren, sicherheitsrelevante Anforderungen in Sicherheitsma\xDF\
+        nahmen \xFCberf\xFChren und deren Umsetzung kontrollieren."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5
+      ref_id: ORP.5.A5
+      name: Ausnahmegenehmigungen
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5
+      ref_id: ORP.5.A5.1
+      description: "Ist es in Einzelf\xE4llen erforderlich, von getroffenen Regelungen\
+        \ abzuweichen, SOLLTE die Ausnahme begr\xFCndet und durch eine autorisierte\
+        \ Stelle nach einer Risikoabsch\xE4tzung genehmigt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5
+      ref_id: ORP.5.A5.2
+      description: "Es SOLLTE ein Genehmigungsverfahren f\xFCr Ausnahmegenehmigungen\
+        \ geben."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5
+      ref_id: ORP.5.A5.3
+      description: "Es SOLLTE eine \xDCbersicht \xFCber alle erteilten Ausnahmegenehmigungen\
+        \ erstellt und gepflegt werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5
+      ref_id: ORP.5.A5.4
+      description: "Ein entsprechendes Verfahren f\xFCr die Dokumentation und ein\
+        \ \xDCberpr\xFCfungsprozess SOLLTE etabliert werden."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a5
+      ref_id: ORP.5.A5.5
+      description: Alle Ausnahmegenehmigungen SOLLTEN befristet sein.
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5
+      ref_id: ORP.5.A8
+      name: "Regelm\xE4\xDFige \xDCberpr\xFCfungen des Compliance Managements"
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a8
+      ref_id: ORP.5.A8.1
+      description: "Es SOLLTE ein Verfahren etabliert sein, wie das Compliance Management\
+        \ und die sich daraus ergebenden Anforderungen und Ma\xDFnahmen regelm\xE4\
+        \xDFig auf ihre Effizienz und Effektivit\xE4t \xFCberpr\xFCft werden (siehe\
+        \ auch DER.3.1 Audits und Revisionen)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bs-it-gs-2023-orp-organisation-und-personal:orp.5.a8
+      ref_id: ORP.5.A8.2
+      description: "Es SOLLTE regelm\xE4\xDFig gepr\xFCft werden, ob die Organisationsstruktur\
+        \ und die Prozesse des Compliance Managements angemessen sind."
+      implementation_groups:
+      - S

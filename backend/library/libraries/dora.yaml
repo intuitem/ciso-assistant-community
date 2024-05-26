@@ -7,7 +7,7 @@ description: REGULATION (EU) 2022/2554 OF THE EUROPEAN PARLIAMENT AND OF THE COU
   amending Regulations (EC) No 1060/2009, (EU) No 648/2012, (EU) No 600/2014, (EU)
   No 909/2014 and (EU) 2016/1011
 copyright: European Union law
-version: 1
+version: 2
 provider: EU
 packager: intuitem
 objects:
@@ -3565,7 +3565,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:dora:node307
       ref_id: 13.2.c
       description: the effectiveness of incident escalation within the financial entity;
-        (d) the effectiveness of internal and external communication.
+    - urn: urn:intuitem:risk:req_node:dora:node310-1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node307
+      ref_id: 13.2.d
+      description: ' the effectiveness of internal and external communication.'
     - urn: urn:intuitem:risk:req_node:dora:13.3
       assessable: true
       depth: 4

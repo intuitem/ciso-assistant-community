@@ -1,10 +1,16 @@
 <p align="center">
+Star the project 🌟 to get releases notification and help growing the community!
+</p>
+
+<p align="center">
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
+    ·
+    <a href="#supported-languages-">Languages</a>
     ·
     <a href="https://discord.gg/qvkaMdQ8da">Discord</a>
     ·
@@ -88,7 +94,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝
+19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -100,19 +106,25 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 28. CIS Controls v8\*
 29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
-31. NIST SP 800-171 rev2 🇺🇸
+31. NIST SP 800-171 rev2 (2021) 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 34. GSA FedRAMP rev5 ☁️🇺🇸
 35. Cadre Conformité Cyber France (3CF) v1 (2021) ✈️🇫🇷
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
+38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
+39. BSI: IT-Grundschutz-Kompendium 🇩🇪
+40. NIST SP 800-171 rev3 (2024) 🇺🇸
+41. ENISA: 5G Security Controls Matrix 🇪🇺
+42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱  
 
-### Community contrib
+### Community contributions
 
 1. ISO 27001:2022, version Française 🇫🇷🌐
 2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 
 <br/>
 
@@ -126,12 +138,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
-- BSI-IT (as requested by the German community)
+- Secure Controls Framework (SCF)
 - CCPA
 - AI Act
 - Part-IS
 - SOX
-- MASVS
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
@@ -162,7 +173,7 @@ Make sure you have a recent version of docker (>= 25.0).
 1. Clone the repository
 
 ```sh
-git clone git@github.com:intuitem/ciso-assistant-community.git
+git clone https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
@@ -230,6 +241,7 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
+export EMAIL_USE_TLS=True
 ```
 
 **Other variables**
@@ -262,6 +274,10 @@ export DJANGO_SECRET_KEY=...
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
+
+# Authentication options
+export AUTH_TOKEN_TTL=900 # optional, default value is 900 seconds (15 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
@@ -398,6 +414,15 @@ tests/e2e-tests.sh
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
 
+## API and Swagger
+
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/ 
+
+To interact with it:
+
+- call `/api/iam/login/` with your credentials in the body to get the token
+- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's Token not Bearer.
+
 ## Setting CISO Assistant for production
 
 The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
@@ -410,11 +435,23 @@ Set DJANGO_DEBUG=False for security reason.
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
+## Supported languages 🌐
+
+- FR: French
+- EN: English
+- AR: Arabic
+- PT: Portuguese
+- ES: Spanish
+- DE: German
+- NL: Dutch
+- IT: Italian
+
+
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
-- [eCharts](https://echarts.apache.org) - Charting library 
+- [eCharts](https://echarts.apache.org) - Charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform

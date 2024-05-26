@@ -7,6 +7,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
+import { listViewFields } from '$lib/utils/table';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
@@ -20,25 +21,34 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`
 	).then((res) => res.json());
 
+	const headFields = [
+		'rid',
+		'name',
+		'threats',
+		'existingControls',
+		'currentLevel',
+		'appliedControls',
+		'residualLevel'
+	];
+
+	const bodyFields = [
+		'rid',
+		'name',
+		'threats',
+		'existing_controls',
+		'current_level',
+		'applied_controls',
+		'residual_level'
+	];
+
+	const headData: Record<string, string> = bodyFields.reduce((obj, key, index) => {
+		obj[key] = headFields[index];
+		return obj;
+	}, {});
+
 	const scenariosTable: TableSource = {
-		head: [
-			'rid',
-			'name',
-			'threats',
-			'existingControls',
-			'currentLevel',
-			'appliedControls',
-			'residualLevel'
-		],
-		body: tableSourceMapper(scenarios, [
-			'rid',
-			'name',
-			'threats',
-			'existing_controls',
-			'current_level',
-			'applied_controls',
-			'residual_level'
-		]),
+		head: headData,
+		body: tableSourceMapper(scenarios, bodyFields),
 		meta: scenarios
 	};
 
