@@ -63,14 +63,12 @@ test('compliance assessments scoring is working properly', async ({
 
 	const IDAM1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDAM1SliderBoundingBox &&
-		(await page
-			.getByTestId('range-slider-input')
-			.click({
-				position: {
-					x: IDAM1SliderBoundingBox.width * IDAM1Score.ratio,
-					y: IDAM1SliderBoundingBox.height / 2
-				}
-			}));
+		(await page.getByTestId('range-slider-input').click({
+			position: {
+				x: IDAM1SliderBoundingBox.width * IDAM1Score.ratio,
+				y: IDAM1SliderBoundingBox.height / 2
+			}
+		}));
 	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
 		'aria-valuenow',
 		IDAM1Score.progress
@@ -96,14 +94,12 @@ test('compliance assessments scoring is working properly', async ({
 
 	const IDAM2SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDAM2SliderBoundingBox &&
-		(await page
-			.getByTestId('range-slider-input')
-			.click({
-				position: {
-					x: IDAM2SliderBoundingBox.width * IDAM2Score.ratio,
-					y: IDAM2SliderBoundingBox.height / 2
-				}
-			}));
+		(await page.getByTestId('range-slider-input').click({
+			position: {
+				x: IDAM2SliderBoundingBox.width * IDAM2Score.ratio,
+				y: IDAM2SliderBoundingBox.height / 2
+			}
+		}));
 	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
 		'aria-valuenow',
 		IDAM2Score.progress
@@ -129,14 +125,12 @@ test('compliance assessments scoring is working properly', async ({
 
 	const IDBE1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	IDBE1SliderBoundingBox &&
-		(await page
-			.getByTestId('range-slider-input')
-			.click({
-				position: {
-					x: IDBE1SliderBoundingBox.width * IDBE1Score.ratio,
-					y: IDBE1SliderBoundingBox.height / 2
-				}
-			}));
+		(await page.getByTestId('range-slider-input').click({
+			position: {
+				x: IDBE1SliderBoundingBox.width * IDBE1Score.ratio,
+				y: IDBE1SliderBoundingBox.height / 2
+			}
+		}));
 	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
 		'aria-valuenow',
 		IDBE1Score.progress
@@ -162,14 +156,12 @@ test('compliance assessments scoring is working properly', async ({
 
 	const PRAC1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();
 	PRAC1SliderBoundingBox &&
-		(await page
-			.getByTestId('range-slider-input')
-			.click({
-				position: {
-					x: PRAC1SliderBoundingBox.width * PRAC1Score.ratio,
-					y: PRAC1SliderBoundingBox.height / 2
-				}
-			}));
+		(await page.getByTestId('range-slider-input').click({
+			position: {
+				x: PRAC1SliderBoundingBox.width * PRAC1Score.ratio,
+				y: PRAC1SliderBoundingBox.height / 2
+			}
+		}));
 	await expect(page.getByTestId('progress-radial')).toHaveAttribute(
 		'aria-valuenow',
 		PRAC1Score.progress
