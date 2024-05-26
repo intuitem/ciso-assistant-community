@@ -7,7 +7,7 @@ description: "Ce document, \xE9tabli par la direction de la s\xE9curit\xE9 de l'
   \ civile.\nversion 2 du 30 avril 2024\nhttps://meteor.dsac.aviation-civile.gouv.fr/meteor-externe/api/file/attachment/12d47db0-e8a9-4be4-b243-50bd8cc835f1"
 copyright: "Ce document peut \xEAtre utilis\xE9 librement, sous r\xE9serve de mentionner\
   \ sa paternit\xE9."
-version: 1
+version: 2
 provider: "Direction de la s\xE9curit\xE9 de l'aviation civile"
 packager: intuitem
 objects:
@@ -121,8 +121,14 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node11
       description: "les objectifs de s\xE9curit\xE9 de l\u2019information qu\u2019\
-        il s\u2019est fix\xE9 afin de mettre en \u0153uvre cette strat\xE9gie ; -\
-        \  les \xE9tapes et le plan d\u2019actions pour atteindre ces objectifs. "
+        il s\u2019est fix\xE9 afin de mettre en \u0153uvre cette strat\xE9gie ;"
+      implementation_groups:
+      - sec
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node13-1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node11
+      description: "les \xE9tapes et le plan d\u2019actions pour atteindre ces objectifs. "
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:c3cf-v2:3.2.2
@@ -1108,9 +1114,16 @@ objects:
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node124
       description: "la liste des organismes en interface pr\xE9sentant un risque pour\
-        \ la s\xFBret\xE9 et/ou la s\xE9curit\xE9 a\xE9rienne ; o le cas \xE9ch\xE9\
-        ant, la liste des syst\xE8mes d\u2019information critiques au regard de la\
-        \ s\xFBret\xE9. "
+        \ la s\xFBret\xE9 et/ou la s\xE9curit\xE9 a\xE9rienne ;"
+      implementation_groups:
+      - sec
+      - sur
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node131-2
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node124
+      description: "le cas \xE9ch\xE9ant, la liste des syst\xE8mes d\u2019information\
+        \ critiques au regard de la s\xFBret\xE9. "
       implementation_groups:
       - sec
       - sur
@@ -1160,13 +1173,43 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node136
       description: "d\xE9finit et justifie pour chacun des risques relatifs \xE0 la\
-        \ s\xFBret\xE9 et/ou \xE0 la s\xE9curit\xE9 a\xE9rienne s\u2019il :\n- maintient\
-        \ le risque \xE0 condition qu\u2019il soit acceptable en l\u2019\xE9tat ;\n\
-        - r\xE9duit le niveau de risque par l\u2019introduction, la suppression ou\
-        \ la modification des mesures de s\xE9curit\xE9 de l\u2019information ;\n\
-        - refuse le risque en \xE9vitant l\u2019activit\xE9 ou la situation qui donne\
-        \ lieu \xE0 un risque ; \n- partage le risque avec une autre partie capable\
-        \ de g\xE9rer de mani\xE8re plus efficace le risque."
+        \ s\xFBret\xE9 et/ou \xE0 la s\xE9curit\xE9 a\xE9rienne s\u2019il :"
+      implementation_groups:
+      - sec
+      - sur
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node137-3
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node137
+      description: "maintient le risque \xE0 condition qu\u2019il soit acceptable\
+        \ en l\u2019\xE9tat ;"
+      implementation_groups:
+      - sec
+      - sur
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node137-4
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node137
+      description: "r\xE9duit le niveau de risque par l\u2019introduction, la suppression\
+        \ ou la modification des mesures de s\xE9curit\xE9 de l\u2019information ;"
+      implementation_groups:
+      - sec
+      - sur
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node137-5
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node137
+      description: "refuse le risque en \xE9vitant l\u2019activit\xE9 ou la situation\
+        \ qui donne lieu \xE0 un risque ; "
+      implementation_groups:
+      - sec
+      - sur
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node137-6
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node137
+      description: "partage le risque avec une autre partie capable de g\xE9rer de\
+        \ mani\xE8re plus efficace le risque."
       implementation_groups:
       - sec
       - sur
@@ -2197,34 +2240,41 @@ objects:
       - sec
     - urn: urn:intuitem:risk:req_node:c3cf-v2:node265
       assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:4.4.4
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node264
       description: "la liste des incidents redout\xE9s relatifs \xE0 la s\xE9curit\xE9\
         \ a\xE9rienne; "
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:c3cf-v2:node266
       assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:4.4.4
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node264
       description: "la liste des sources de collecte, le syst\xE8me de veille des\
         \ vuln\xE9rabilit\xE9s et les \xE9v\xE9nements journalis\xE9s ; "
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:c3cf-v2:node267
       assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:4.4.4
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node264
       description: "la liste des r\xE8gles de d\xE9tection mises en \u0153uvre ; "
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:c3cf-v2:node268
       assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:4.4.4
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node264
       description: "les actions imm\xE9diates \xE0 mettre en \u0153uvre pour chaque\
         \ type d\u2019incident redout\xE9 relatifs \xE0 la s\xE9curit\xE9 a\xE9rienne\
-        \ ; -  les plans de rem\xE9diation. "
+        \ ;"
+      implementation_groups:
+      - sec
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node268-7
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node264
+      description: "les plans de rem\xE9diation. "
       implementation_groups:
       - sec
     - urn: urn:intuitem:risk:req_node:c3cf-v2:node269
@@ -2493,7 +2543,7 @@ objects:
       depth: 9
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node299
       description: "la mise en \u0153uvre de mesures de s\xE9curit\xE9 de l\u2019\
-        information d\xE9finies par l\u2019organisme7 ainsi qu\u2019une surveillance\
+        information d\xE9finies par l\u2019organisme ainsi qu\u2019une surveillance\
         \ adapt\xE9e au contexte des activit\xE9s du tiers ; "
       implementation_groups:
       - sec
@@ -2904,7 +2954,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node349
       description: "prend en consid\xE9ration les emplois, \xE9tudes et interruptions[3]\
         \ \xE9ventuelles de ces personnes dans les \xC9tats o\xF9 elles ont r\xE9\
-        sid\xE99 au cours des 5 derni\xE8res ann\xE9es ; "
+        sid\xE9 au cours des 5 derni\xE8res ann\xE9es ; "
       implementation_groups:
       - sur
     - urn: urn:intuitem:risk:req_node:c3cf-v2:node354
@@ -2919,7 +2969,7 @@ objects:
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node349
-      description: "porte une vigilance particuli\xE8re sur les interruptions6 injustifi\xE9\
+      description: "porte une vigilance particuli\xE8re sur les interruptions injustifi\xE9\
         es de ces personnes en leur demandant des explications ou justificatifs et\
         \ trace le fait que cette v\xE9rification a bien \xE9t\xE9 effectu\xE9e. "
       implementation_groups:
@@ -3804,7 +3854,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node459
       description: "l\u2019articulation avec l\u2019organisation d\xE9j\xE0 en place\
         \ pour l\u2019\xE9valuation de la conformit\xE9 relative \xE0 la s\xE9curit\xE9\
-        \ a\xE9rienne ; -  la p\xE9riodicit\xE9 et/ou les \xE9v\xE9nements significatifs\
+        \ a\xE9rienne ;"
+      implementation_groups:
+      - sec
+    - urn: urn:intuitem:risk:req_node:c3cf-v2:node462-8
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-v2:node459
+      description: "la p\xE9riodicit\xE9 et/ou les \xE9v\xE9nements significatifs\
         \ activant cette organisation. "
       implementation_groups:
       - sec

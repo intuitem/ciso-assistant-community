@@ -50,8 +50,13 @@ export const getOptions = ({
 	self?: Record<string, any>;
 	selfSelect?: boolean;
 }[] => {
+	const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 	const options = objects
 		.map((object) => {
+			let my_label =
+				label != 'auto'
+					? object[label]
+					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
 			return {
 				label:
 					extra_fields.length > 0
@@ -60,8 +65,8 @@ export const getOptions = ({
 								.map((string) => `${string}`)
 								.join('/') +
 						  '/' +
-						  object[label]
-						: object[label],
+						  my_label
+						: my_label,
 				value: object[value],
 				suggested: false
 			};

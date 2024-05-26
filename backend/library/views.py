@@ -123,11 +123,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception:
+        except Exception as e:
             return Response(
-                {
-                    "error": "Failed to load library, please check if it has dependencies"
-                },  # This must translated
+                {"error": f"Failed to load library ({e})"},  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
@@ -170,7 +168,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
                 return HttpResponse(
-                    json.dumps({"error": "Failed to store library content"}),
+                    json.dumps({"error": "Failed to store library content."}),
                     status=HTTP_422_UNPROCESSABLE_ENTITY,
                 )
 
