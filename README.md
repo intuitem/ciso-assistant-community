@@ -139,7 +139,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - AI Act
 - Part-IS
 - SOX
-- MASVS
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
