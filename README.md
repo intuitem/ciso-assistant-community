@@ -90,7 +90,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝
+19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -113,6 +113,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
+42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱  
 
 ### Community contributions
 
