@@ -1,0 +1,257 @@
+urn: urn:intuitem:risk:library:asf-baseline-v2
+locale: en
+ref_id: ASF-Baseline
+name: Agile Security Framework - Baseline
+description: Quick overview of essential security domains - holistic baseline for
+  custom framework
+copyright: "\xA9 intuitem"
+version: 1
+provider: intuitem
+packager: intuitem
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-01
+    ref_id: ASF-REC-01
+    category: process
+    description: Risk assessment framework
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-02
+    ref_id: ASF-REC-02
+    category: technical
+    description: EDR deployment
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-03
+    ref_id: ASF-REC-03
+    category: physical
+    description: Facility surveillance
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-04
+    ref_id: ASF-REC-04
+    category: policy
+    description: IAM/PAM Policy
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-05
+    ref_id: ASF-REC-05
+    category: technical
+    description: Immutable backups
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-06
+    ref_id: ASF-REC-06
+    category: technical
+    description: SAST
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-07
+    ref_id: ASF-REC-07
+    category: technical
+    description: SCA
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-08
+    ref_id: ASF-REC-08
+    category: technical
+    description: DAST/IAST
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-09
+    ref_id: ASF-REC-09
+    category: process
+    description: TPRM Framework
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-10
+    ref_id: ASF-REC-10
+    category: technical
+    description: CMDB
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-11
+    ref_id: ASF-REC-11
+    category: technical
+    description: Network Segmentation and Isolation
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-12
+    ref_id: ASF-REC-12
+    category: policy
+    description: Data Retention and Destruction Policy
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-13
+    ref_id: ASF-REC-13
+    category: technical
+    description: Multi-factor Authentication (MFA) Implementation
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-14
+    ref_id: ASF-REC-14
+    category: process
+    description: Incident Response Plan
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-15
+    ref_id: ASF-REC-15
+    category: technical
+    description: Application Whitelisting
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-16
+    ref_id: ASF-REC-16
+    category: physical
+    description: Biometric Access Controls
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-17
+    ref_id: ASF-REC-17
+    category: process
+    description: Regular Security Awareness Training
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-18
+    ref_id: ASF-REC-18
+    category: technical
+    description: Email Security Gateway
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-19
+    ref_id: ASF-REC-19
+    category: policy
+    description: BYOD (Bring Your Own Device) Policy
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-20
+    ref_id: ASF-REC-20
+    category: technical
+    description: Cloud Access Security Broker (CASB)
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-21
+    ref_id: ASF-REC-21
+    category: technical
+    description: Compute Vulnerability scanner
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-22
+    ref_id: ASF-REC-22
+    category: process
+    description: Vulnerabilities triage and review
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-23
+    ref_id: ASF-REC-23
+    category: technical
+    description: Web Application Firewall (WAF)
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-24
+    ref_id: ASF-REC-24
+    category: technical
+    description: Secure Coding Training - Tooling and practices
+  - urn: urn:intuitem:risk:reference_control:asf-baseline-v2:asf-rec-25
+    ref_id: ASF-REC-25
+    category: process
+    description: Third parties compliance questionnaire
+  framework:
+    urn: urn:intuitem:risk:framework:asf-baseline-v2
+    ref_id: ASF-Baseline
+    name: Agile Security Framework - Baseline
+    description: Quick overview of essential security domains - holistic baseline
+      for custom framework
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:01
+      assessable: true
+      depth: 1
+      ref_id: '01'
+      name: Risk, Governance and Regulation
+      description: Risk analysis, assigned personnel, management involvement, regulatory
+        framework identification, independent audit
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-01
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:02
+      assessable: true
+      depth: 1
+      ref_id: '02'
+      name: Inventory
+      description: Hardware and software components listed, regular controls and audits,
+        lifecycle management, categorization, visibility, and continuous improvement
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-10
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:03
+      assessable: true
+      depth: 1
+      ref_id: '03'
+      name: IAM/PAM
+      description: Identity federation, SSO and MFA, group-based access management,
+        secrets management, AD hardening, IAM aligned with onboarding and offboarding
+        processes
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-04
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:04
+      assessable: true
+      depth: 1
+      ref_id: '04'
+      name: Data Protection and Privacy
+      description: Encryption (in transit and at rest), audit trails, privacy by design
+        (data minimization at least), GDPR compliance
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-12
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:05
+      assessable: true
+      depth: 1
+      ref_id: '05'
+      name: Endpoint Protection
+      description: Antivirus/Antimalware, EDR, MDM, Application Control, quarantaine
+        management, email and browsing security
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-02
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-18
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:06
+      assessable: true
+      depth: 1
+      ref_id: '06'
+      name: Network Protection
+      description: Network segmentation, Firewall, IDS, Remote Access Control (VPN
+        and/or ZTNA), WAF, NAC, and Wireless Security
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-11
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-23
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:07
+      assessable: true
+      depth: 1
+      ref_id: '07'
+      name: Vulnerability Management
+      description: Identification on all workloads and assets, monitoring and communication,
+        triage and prioritization processes, continuous patching, periodic checkpoints
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-21
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-22
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:08
+      assessable: true
+      depth: 1
+      ref_id: 08
+      name: Training
+      description: General cybersecurity awareness, specialized training, campaigns
+        to check for efficiency
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-17
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-24
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:09
+      assessable: true
+      depth: 1
+      ref_id: 09
+      name: Third-Party Risk Management
+      description: Vendor management, exit strategy, privileged communication channels,
+        decoupling, incident management, contract management
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-09
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-25
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:10
+      assessable: true
+      depth: 1
+      ref_id: '10'
+      name: Physical Security
+      description: Facility access control, surveillance, security personnel, visitor
+        management, locks and safes, emergency response, secure disposal
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-03
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-16
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:11
+      assessable: true
+      depth: 1
+      ref_id: '11'
+      name: Cloud Security
+      description: Understanding of the shared responsibility model, applying the
+        same principles of IAM, network, and data protection, threat detection, and
+        response
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-20
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:12
+      assessable: true
+      depth: 1
+      ref_id: '12'
+      name: Software Security
+      description: Application security and DevSecOps principles, threat modelling,
+        use standard libraries, software factory security through gates (SAST, SCA,
+        secret leaks, DAST)
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-06
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-07
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-08
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:13
+      assessable: true
+      depth: 1
+      ref_id: '13'
+      name: Security Detection and Response
+      description: Aggregation of events for inspection and correlation, logs protection,
+        tooling and processes for timely incident response involving relevant stakeholders
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-13
+    - urn: urn:intuitem:risk:req_node:asf-baseline-v2:14
+      assessable: true
+      depth: 1
+      ref_id: '14'
+      name: Disaster Recovery & Backup
+      description: Offline or immutable backups, performed and tested, protocols and
+        playbooks for disaster recovery documented and tested, cyber resiliency strategy
+        documented and known
+      reference_controls:
+      - urn:intuitem:risk:reference_control:asf-baseline-v2:ASF-REC-14
