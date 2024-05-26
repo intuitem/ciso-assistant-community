@@ -1,5 +1,5 @@
 <p align="center">
-Start by starring the project 🌟 to get releases notification and help growing the community !
+Star the project 🌟 to get releases notification and help growing our community!
 </p>
 
 <p align="center">
