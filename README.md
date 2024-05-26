@@ -1,4 +1,8 @@
 <p align="center">
+Start by starring the project 🌟 to get releases notification and help growing the community !
+</p>
+
+<p align="center">
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
