@@ -295,7 +295,7 @@
 						type="button"
 						on:click={cancel}>{m.cancel()}</button
 					>
-					<button class="btn variant-filled-primary font-semibold w-full" type="submit"
+					<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button" type="submit"
 						>{m.save()}</button
 					>
 				</div>

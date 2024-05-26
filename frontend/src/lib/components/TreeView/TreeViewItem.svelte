@@ -395,7 +395,7 @@
 		</div>
 		<!-- Slot: Lead -->
 		{#if $$slots.lead && !hideLead}
-			<div class="tree-item-lead">
+			<div class="tree-item-lead" data-testid="tree-item-lead">
 				<slot name="lead" />
 			</div>
 		{/if}
