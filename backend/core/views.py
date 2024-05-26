@@ -1372,6 +1372,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             filter_graph_by_implementation_groups(tree, implementation_groups)
         )
 
+    @action(detail=True, methods=["get"])
+    def flash_mode(self, request, pk):
+        """Returns the list of requirement assessments for flash mode"""
+        requirement_assessments_objects = (
+            self.get_object().get_requirement_assessments()
+        )
+        requirements_objects = RequirementNode.objects.filter(
+            framework=self.get_object().framework
+        )
+        requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments_objects, many=True
+        ).data
+        requirements = RequirementNodeReadSerializer(
+            requirements_objects, many=True
+        ).data
+        flash_mode = {
+            "requirements": requirements,
+            "requirement_assessments": requirement_assessments,
+        }
+        return Response(flash_mode, status=status.HTTP_200_OK)
+
     @action(detail=True)
     def export(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -1640,7 +1661,8 @@ def generate_html(
                 table += bar_graph(requirement_node)
         else:
             assessment = RequirementAssessment.objects.filter(
-                requirement__urn=requirement_node.urn
+                requirement__urn=requirement_node.urn,
+                compliance_assessment=compliance_assessment,
             ).first()
 
             table += "<div>"
@@ -1744,7 +1766,7 @@ def generate_html(
     </html>
     """
 
-    return (content, selected_evidences)
+    return (content, list(set(selected_evidences)))
 
 
 def export_mp_csv(request):
