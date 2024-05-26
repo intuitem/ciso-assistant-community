@@ -103,8 +103,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 25. TISAX (VDA ISA) 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
-28. CIS Controls v8\*
-29. CSA CCM (Cloud Controls Matrix)\*
+28. CIS Controls v8\* 🌐
+29. CSA CCM (Cloud Controls Matrix)\* ☁️
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 (2021) 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
@@ -117,7 +117,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
-42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱  
+42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
+43. Agile Security Framework (ASF) - by intuitem. A baseline of 14 security domains for flash assessment and custom frameworks 🤗   
 
 ### Community contributions
 
