@@ -32,6 +32,7 @@ export const load = (async ({ fetch }) => {
 		row.overview = [
 			`Provider: ${row.provider}`,
 			`Packager: ${row.packager}`,
+			`Version: ${row.version}`,
 			...Object.entries(row.objects_meta).map(([key, value]) => `${key}: ${value}`)
 		];
 		row.allowDeleteLibrary = row.allowDeleteLibrary =
