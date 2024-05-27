@@ -2,9 +2,9 @@ from pathlib import Path
 from django.apps import apps
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Q, Count
+from django.db.models import Q
 
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
@@ -148,7 +148,7 @@ class StoredLibrary(LibraryMixin):
             logger.error("Error while loading library content", error=err)
             raise ValueError(err)
 
-        urn = library_data["urn"]
+        urn = library_data["urn"].lower()
         if not match_urn(urn):
             raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
@@ -218,7 +218,7 @@ class StoredLibrary(LibraryMixin):
         return error_msg
 
 
-class LibraryUpgrader:
+class LibraryUpdater:
     def __init__(self,old_library: Type["LoadedLibrary"],new_library: StoredLibrary) :
         self.old_library = old_library
         self.old_objects = [
@@ -236,19 +236,21 @@ class LibraryUpgrader:
         self.new_matrices = library_content.get("risk_matrix")
         self.threats = library_content.get("threats",[])
         self.reference_controls = library_content.get("reference_controls",[])
-        self.new_objects = {obj["urn"]: obj for obj in self.threats}
-        self.new_objects.update({obj["urn"]: obj for obj in self.reference_controls})
+        self.new_objects = {obj["urn"].lower(): obj for obj in self.threats}
+        self.new_objects.update({obj["urn"].lower(): obj for obj in self.reference_controls})
         if self.new_framework :
-            self.new_objects[self.new_framework["urn"]] = self.new_framework
+            self.new_objects[self.new_framework["urn"].lower()] = self.new_framework
         if self.new_matrices :
             for matrix in self.new_matrices :
-                self.new_objects[matrix["urn"]] = matrix
+                self.new_objects[matrix["urn"].lower()] = matrix
 
-    def upgrade_dependencies(self) -> Union[str,None] :
+    def update_dependencies(self) -> Union[str,None] :
         for dependency_urn in self.dependencies :
             possible_dependencies = [*LoadedLibrary.objects.filter(urn=dependency_urn)]
             if not possible_dependencies : # This part of the code hasn't been tested yet
                 stored_dependencies = [*StoredLibrary.objects.filter(urn=dependency_urn)]
+                if not stored_dependencies :
+                    return "Dependency not found."
                 dependency = stored_dependencies[0]
                 for i in range(1,len(stored_dependencies)) :
                     stored_dependency = stored_dependencies[i]
@@ -256,6 +258,7 @@ class LibraryUpgrader:
                         dependency = stored_dependency
                 if (err_msg := dependency.load()) :
                     return err_msg
+                continue
 
             dependency = possible_dependencies[0]
             for i in range(1,len(possible_dependencies)) :
@@ -263,27 +266,37 @@ class LibraryUpgrader:
                 if possible_dependency.locale == self.old_library.locale :
                     dependency = possible_dependency
 
-            if (err_msg := dependency.upgrade()) is not None :
+            if (err_msg := dependency.update()) is not None :
                 return err_msg
 
-            """try :
-                stored_dependencies = StoredLibrary.objects.filter(urn=dependency_urn)
-                stored_dependency = max(stored_dependencies,key=lambda lib: lib.version) # This code is repeated and should therefore be stored in a dedicated function
-                if (err_msg := stored_dependency.load()) is not None :
-                    return err_msg
-            except :
-                return "Dependency not found"""
-
-    # We should create a LibraryVerifier class in the future that check if the libary is valid and use it for a better error handling.
-    def upgrade_library(self) -> Union[str,None] :
-        if (error_msg := self.upgrade_dependencies()) is not None :
+    # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
+    def update_library(self) -> Union[str,None] :
+        if (error_msg := self.update_dependencies()) is not None :
             return error_msg
+
+        old_dependencies_urn = {
+            dependency.urn for dependency in
+            self.old_library.dependencies.all()
+        }
+        dependencies_urn = set(self.dependencies)
+        new_dependencies_urn = dependencies_urn - old_dependencies_urn
+
+        if not set(dependencies_urn).issuperset(old_dependencies_urn) :
+            return "Invalid library update."
+
+        new_dependencies = []
+        for new_dependency_urn in new_dependencies_urn :
+            try :
+                new_dependency = LoadedLibrary.objects.filter(urn=new_dependency_urn).first() # The locale is not handled by this code
+            except :
+                return "Dependency not found."
+            new_dependencies.append(new_dependency)
 
         for key, value in [
             ("name", self.new_library.name),
             ("version", self.new_library.version),
             ("provider", self.new_library.provider),
-            ("packager", self.new_library.packager), # A user can fake a builtin library in this case because he can upgrade a builtin library by adding its own libary with the same URN as a builtin libary.
+            ("packager", self.new_library.packager), # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
             ("ref_id", self.new_library.ref_id), # Should we even update the ref_id ?
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
@@ -293,6 +306,9 @@ class LibraryUpgrader:
             setattr(self.old_library,key,value)
         self.old_library.save()
 
+        for new_dependency in new_dependencies :
+            self.old_library.dependencies.add(new_dependency)
+
         referential_object_dict = {
             "locale": self.old_library.locale,
             "default_locale": self.old_library.default_locale,
@@ -301,8 +317,8 @@ class LibraryUpgrader:
         }
 
         for threat in self.threats :
-            new_threat, _ = Threat.objects.update_or_create(
-                urn=threat["urn"],
+            Threat.objects.update_or_create(
+                urn=threat["urn"].lower(),
                 defaults=threat,
                 create_defaults={
                     **referential_object_dict,
@@ -312,8 +328,8 @@ class LibraryUpgrader:
             )
 
         for reference_control in self.reference_controls :
-            new_reference_control, _ = ReferenceControl.objects.update_or_create(
-                urn=reference_control["urn"],
+            ReferenceControl.objects.update_or_create(
+                urn=reference_control["urn"].lower(),
                 defaults=reference_control,
                 create_defaults={
                     **referential_object_dict,
@@ -336,7 +352,7 @@ class LibraryUpgrader:
             )
 
             requirement_node_urns = set(rc.urn for rc in RequirementNode.objects.filter(framework=new_framework))
-            new_requirement_node_urns = set(rc["urn"] for rc in self.new_framework["requirement_nodes"])
+            new_requirement_node_urns = set(rc["urn"].lower() for rc in self.new_framework["requirement_nodes"])
             deleted_requirement_node_urns = requirement_node_urns - new_requirement_node_urns
 
             for requirement_node_urn in deleted_requirement_node_urns :
@@ -355,13 +371,18 @@ class LibraryUpgrader:
             for rc in ReferenceControl.objects.filter(library__in=involved_libraries) :
                 objects_tracked[rc.urn] = rc
 
+            compliance_assessments = [*ComplianceAssessment.objects.filter(framework=new_framework)]
+
+            order_id = 0
             for requirement_node in requirement_nodes :
                 requirement_node_dict = {**requirement_node}
                 for key in ["maturity","depth","reference_controls","threats"] :
                     requirement_node_dict.pop(key,None)
+                requirement_node_dict["order_id"] = order_id
+                order_id += 1
 
-                new_requirement_node, _ = RequirementNode.objects.update_or_create(
-                    urn=requirement_node["urn"],
+                new_requirement_node, created = RequirementNode.objects.update_or_create(
+                    urn=requirement_node["urn"].lower(),
                     defaults=requirement_node_dict,
                     create_defaults={
                         **referential_object_dict,
@@ -369,15 +390,29 @@ class LibraryUpgrader:
                         "framework": new_framework
                     }
                 )
-                # The 2 following lines fix a bug in the sorting process of requirement nodes, but this may not the best way to fix this problem.
-                new_requirement_node.order_id = requirement_node.get("order_id") # Always return None because there is no key with order_id in the YAML files
-                new_requirement_node.save()
+
+                if created :
+                    for compliance_assessment in compliance_assessments :
+                        ra = RequirementAssessment.objects.create(
+                            compliance_assessment=compliance_assessment,
+                            requirement=new_requirement_node,
+                            folder=compliance_assessment.project.folder
+                        )
 
                 for threat_urn in requirement_node_dict.get("threats",[]) :
-                    new_requirement_node.threats.add(objects_tracked[threat_urn])
+                    thread_to_add = objects_tracked.get(threat_urn)
+                    if thread_to_add is None : # I am not 100% this condition is usefull
+                        thread_to_add = Threat.objects.filter(urn=threat_urn).first() # No locale support
+                    if thread_to_add is not None :
+                        new_requirement_node.threats.add(thread_to_add)
 
-                for reference_control_urn in requirement_node_dict.get("reference_controls",[]) :
-                    new_requirement_node.reference_controls.add(objects_tracked[reference_control_urn])
+                for reference_control_urn in requirement_node.get("reference_controls",[]) :
+                    reference_control_to_add = objects_tracked.get(reference_control_urn)
+                    if reference_control_to_add is None : # I am not 100% this condition is usefull
+                        reference_control_to_add = ReferenceControl.objects.filter(urn=reference_control_urn.lower()).first() # No locale support
+
+                    if reference_control_to_add is not None :
+                        new_requirement_node.reference_controls.add(reference_control_to_add)
 
         if self.new_matrices is not None :
             for matrix in self.new_matrices :
@@ -393,8 +428,8 @@ class LibraryUpgrader:
                         matrix_dict["json_definition"][key] = matrix[key]
                 matrix_dict["json_definition"] = json.dumps(matrix_dict["json_definition"])
 
-                new_matrix, created = RiskMatrix.objects.update_or_create(
-                    urn=matrix["urn"],
+                RiskMatrix.objects.update_or_create(
+                    urn=matrix["urn"].lower(),
                     defaults=matrix_dict,
                     create_defaults={
                         **referential_object_dict,
@@ -402,27 +437,22 @@ class LibraryUpgrader:
                         "library": self.old_library
                     }
                 )
-                print(f"[RiskMatrix created] {created}")
-                print(f"[RiskMatrix json_definition] {new_matrix.json_definition}")
-
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
 
-    def upgrade(self) :
-        # What happens if we delete a loaded library while it's being upgraded ?
-        # Should we make some kind of mutex for this ?
-
+    @transaction.atomic
+    def update(self) :
         new_libraries = [*StoredLibrary.objects.filter(urn=self.urn,locale=self.locale,version__gt=self.version)]
 
         if not new_libraries :
-            return None # We should raise an error there in the future to inform that no new library has been found.
+            return "This library has no update."
 
         new_library = max(new_libraries,key=lambda lib: lib.version)
-        library_upgrader = LibraryUpgrader(self,new_library)
-        return library_upgrader.upgrade_library()
+        library_updater = LibraryUpdater(self,new_library)
+        return library_updater.update_library()
 
     @property
     def _objects(self):

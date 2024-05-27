@@ -194,7 +194,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     queryset = LoadedLibrary.objects.all()
 
     def list(self, request, *args, **kwargs):
-        if "view_storedlibrary" not in request.user.permissions:
+        if "view_loadedlibrary" not in request.user.permissions :
             return Response(status=HTTP_403_FORBIDDEN)
 
         stored_libraries = [*StoredLibrary.objects.all()]
@@ -280,11 +280,11 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         requirement_nodes = framework.requirement_nodes.all()
         return Response(get_sorted_requirement_nodes(requirement_nodes, None))
 
-    @action(detail=True, methods=["get"], url_path="upgrade")
-    def upgrade(self, request, pk) :
+    @action(detail=True, methods=["get"], url_path="update")
+    def _update(self, request, pk) :
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(codename="add_loadedlibrary"), # We should use either this permission or making a new permission "upgrade_loadedlibrary"
+            perm=Permission.objects.get(codename="add_loadedlibrary"), # We should use either this permission or making a new permission "update_loadedlibrary"
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
@@ -294,7 +294,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         except Exception as e :
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND) # Error messages could be returned as JSON instead
 
-        error_msg = library.upgrade()
+        error_msg = library.update()
         if error_msg is None :
             return Response(status=HTTP_204_NO_CONTENT)
         return Response(error_msg,status=HTTP_422_UNPROCESSABLE_ENTITY) # We must make at least one error message
