@@ -196,7 +196,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     queryset = LoadedLibrary.objects.all()
 
     def list(self, request, *args, **kwargs):
-        if "view_storedlibrary" not in request.user.permissions:
+        if "view_loadedlibrary" not in request.user.permissions :
             return Response(status=HTTP_403_FORBIDDEN)
 
         stored_libraries = [*StoredLibrary.objects.all()]
@@ -299,4 +299,5 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         error_msg = library.upgrade()
         if error_msg is None :
             return Response(status=HTTP_204_NO_CONTENT)
+        print(f"[ERROR MESSAGE] {error_msg}\n"*10)
         return Response(error_msg,status=HTTP_422_UNPROCESSABLE_ENTITY) # We must make at least one error message
