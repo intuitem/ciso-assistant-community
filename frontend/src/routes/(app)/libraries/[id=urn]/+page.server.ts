@@ -21,8 +21,8 @@ export const actions: Actions = {
 			event
 		);
 	},
-	upgrade: async(event) => {
-		const endpoint = `${BASE_API_URL}/loaded-libraries/${event.params.id}/upgrade/`;
+	update: async(event) => {
+		const endpoint = `${BASE_API_URL}/loaded-libraries/${event.params.id}/update/`;
 		const res = await event.fetch(endpoint); // We will have to make this a PATCH later (we should use PATCH when modifying an object)
 		const resText = await res.text();
 
