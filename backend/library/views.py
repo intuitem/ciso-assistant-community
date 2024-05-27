@@ -283,7 +283,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         return Response(get_sorted_requirement_nodes(requirement_nodes, None))
 
     @action(detail=True, methods=["get"], url_path="update")
-    def update(self, request, pk) :
+    def _update(self, request, pk) :
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_loadedlibrary"), # We should use either this permission or making a new permission "update_loadedlibrary"
