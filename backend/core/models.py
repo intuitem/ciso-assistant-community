@@ -215,7 +215,7 @@ class StoredLibrary(LibraryMixin):
         return error_msg
 
 
-class LibraryUpgrader:
+class LibraryUpdater:
     def __init__(self,old_library: Type["LoadedLibrary"],new_library: StoredLibrary) :
         self.old_library = old_library
         self.old_objects = [
@@ -241,7 +241,7 @@ class LibraryUpgrader:
             for matrix in self.new_matrices :
                 self.new_objects[matrix["urn"].lower()] = matrix
 
-    def upgrade_dependencies(self) -> Union[str,None] :
+    def update_dependencies(self) -> Union[str,None] :
         for dependency_urn in self.dependencies :
             possible_dependencies = [*LoadedLibrary.objects.filter(urn=dependency_urn)]
             if not possible_dependencies : # This part of the code hasn't been tested yet
@@ -263,12 +263,12 @@ class LibraryUpgrader:
                 if possible_dependency.locale == self.old_library.locale :
                     dependency = possible_dependency
 
-            if (err_msg := dependency.upgrade()) is not None :
+            if (err_msg := dependency.update()) is not None :
                 return err_msg
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
-    def upgrade_library(self) -> Union[str,None] :
-        if (error_msg := self.upgrade_dependencies()) is not None :
+    def update_library(self) -> Union[str,None] :
+        if (error_msg := self.update_dependencies()) is not None :
             return error_msg
 
         old_dependencies_urn = {
@@ -293,7 +293,7 @@ class LibraryUpgrader:
             ("name", self.new_library.name),
             ("version", self.new_library.version),
             ("provider", self.new_library.provider),
-            ("packager", self.new_library.packager), # A user can fake a builtin library in this case because he can upgrade a builtin library by adding its own library with the same URN as a builtin library.
+            ("packager", self.new_library.packager), # A user can fake a builtin library in this case because he can update a builtin library by adding its own library with the same URN as a builtin library.
             ("ref_id", self.new_library.ref_id), # Should we even update the ref_id ?
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
@@ -441,15 +441,15 @@ class LoadedLibrary(LibraryMixin):
     )
 
     @transaction.atomic
-    def upgrade(self) :
+    def update(self) :
         new_libraries = [*StoredLibrary.objects.filter(urn=self.urn,locale=self.locale,version__gt=self.version)]
 
         if not new_libraries :
             return "This library has no update."
 
         new_library = max(new_libraries,key=lambda lib: lib.version)
-        library_upgrader = LibraryUpgrader(self,new_library)
-        return library_upgrader.upgrade_library()
+        library_updater = LibraryUpdater(self,new_library)
+        return library_updater.update_library()
 
     @property
     def _objects(self):
