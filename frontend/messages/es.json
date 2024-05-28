@@ -529,8 +529,6 @@
 	"asZIP": "como ZIP",
 	"incoming": "Entrante",
 	"outdated": "Desactualizado",
-	"exportBackupDescription": "Esto serializará y creará una copia de seguridad de la base de datos, incluidos los usuarios y RBAC. Las pruebas y otros archivos no se incluyen en la copia de seguridad.",
-	"importBackupDescription": "Esto deserializará y restaurará la base de datos desde una copia de seguridad. Esto sobrescribirá todos los datos existentes, incluidos los usuarios y RBAC, y no se puede deshacer.",
 	"riskAssessmentInProgress": "La evaluación de riesgos aún está en progreso",
 	"riskAssessmentNoAuthor": "Ningún autor asignado a esta evaluación de riesgos",
 	"riskAssessmentEmpty": "La evaluación de riesgos está vacía. Aún no se ha declarado ningún escenario de riesgo",
@@ -551,5 +549,10 @@
 	"complianceAssessmentNoAuthor": "Ningún autor asignado a esta auditoría",
 	"requirementAssessmentNoAppliedControl": "El estado de la evaluación de requisitos es conforme o parcialmente conforme sin que se haya aplicado ningún control.",
 	"appliedControlNoReferenceControl": "El control aplicado no tiene ningún control de referencia seleccionado",
-	"evidenceNoFile": "La evidencia no tiene ningún archivo subido"
+	"evidenceNoFile": "La evidencia no tiene ningún archivo subido",
+	"goBackToAudit": "Volver a la auditoría",
+	"exportBackupDescription": "Esto serializará y creará una copia de seguridad de la base de datos, incluidos los usuarios y RBAC. Las pruebas y otros archivos no se incluyen en la copia de seguridad.",
+	"importBackupDescription": "Esto deserializará y restaurará la base de datos desde una copia de seguridad. Esto sobrescribirá todos los datos existentes, incluidos los usuarios y RBAC, y no se puede deshacer.",
+	"requirementAppliedControlHelpText": "Las evidencias vinculadas a las medidas seleccionadas se asociarán automáticamente al requisito.",
+	"requirementEvidenceHelpText": "Esta pestaña le permite agregar evidencias adicionales al requisito."
 }

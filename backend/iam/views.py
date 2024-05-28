@@ -52,7 +52,7 @@ class LogoutView(views.APIView):
         try:
             logger.info("logout request", user=request.user)
             logout(request)
-            logger.info("logout succesful", user=request.user)
+            logger.info("logout successful", user=request.user)
         except Exception as e:
             logger.error("logout failed", user=request.user, error=e)
         return Response({"message": "Logged out successfully."}, status=HTTP_200_OK)
@@ -109,7 +109,7 @@ class PasswordResetView(views.APIView):
 
 class ResetPasswordConfirmView(views.APIView):
     """
-    API Endpoit for reset password confirm
+    API Endpoint for reset password confirm
     """
 
     default_token_generator = PasswordResetTokenGenerator()

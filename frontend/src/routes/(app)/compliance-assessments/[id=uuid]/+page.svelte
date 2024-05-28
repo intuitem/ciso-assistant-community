@@ -198,6 +198,7 @@
 					data-popup="popupDownload"
 				>
 					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+
 					<a
 						href="/compliance-assessments/{data.compliance_assessment.id}/export"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
@@ -218,6 +219,9 @@
 			</div>
 			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
+			>
+			<a href={`${$page.url.pathname}/flash-mode`} class="btn variant-filled-surface h-fit"
+				><i class="fa-solid fa-forward-fast mr-2" /> {m.flashMode()}</a
 			>
 		</div>
 	</div>

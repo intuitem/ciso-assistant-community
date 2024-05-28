@@ -1,4 +1,8 @@
 <p align="center">
+Star the project 🌟 to get releases notification and help growing the community!
+</p>
+
+<p align="center">
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
@@ -90,7 +94,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝
+19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -99,8 +103,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 25. TISAX (VDA ISA) 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
-28. CIS Controls v8\*
-29. CSA CCM (Cloud Controls Matrix)\*
+28. CIS Controls v8\* 🌐
+29. CSA CCM (Cloud Controls Matrix)\* ☁️
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 (2021) 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
@@ -113,6 +117,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 39. BSI: IT-Grundschutz-Kompendium 🇩🇪
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
+42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
+43. Agile Security Framework (ASF) - by intuitem. A baseline of 14 security domains for flash assessment and custom frameworks 🤗   
 
 ### Community contributions
 
@@ -138,7 +144,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - AI Act
 - Part-IS
 - SOX
-- MASVS
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
@@ -169,7 +174,7 @@ Make sure you have a recent version of docker (>= 25.0).
 1. Clone the repository
 
 ```sh
-git clone git@github.com:intuitem/ciso-assistant-community.git
+git clone https://github.com/intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
