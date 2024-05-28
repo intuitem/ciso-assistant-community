@@ -272,9 +272,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{localItems()[
-									'associated' + capitalizeFirstLetter(model.info.localNamePlural)
-								]}
+								{localItems()['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
 							</h4>
 						</div>
 						{#if model.table}

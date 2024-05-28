@@ -36,9 +36,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: localItems()[
-					'add' + capitalizeFirstLetter(data.model.localName)
-				].toLowerCase(),
+				body: localItems()['add' + capitalizeFirstLetter(data.model.localName)].toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
