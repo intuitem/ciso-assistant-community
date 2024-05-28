@@ -111,7 +111,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
-													<li>{localItems()[error.msgid]}</li>
+													<li>{#if error.object.name}<a class="anchor" href={error.link}>{error.object.name}</a>:{/if} {localItems()[error.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -130,7 +130,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
-													<li>{localItems()[warning.msgid]}</li>
+													<li>
+														{#if warning.object.name}
+															<a class="anchor" href={warning.link}>{warning.object.name}</a>:
+														{/if}
+														{localItems()[warning.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
@@ -149,7 +154,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
-													<li>{localItems()[info.msgid]}</li>
+													<li>{#if info.object.name}<a class="anchor" href={info.link}>{info.object.name}</a>:{/if} {localItems()[info.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -186,7 +191,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
-													<li>{localItems()[error.msgid]}</li>
+													<li>{#if error.object.name}<a class="anchor" href={error.link}>{error.object.name}</a>:{/if} {localItems()[error.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -205,7 +210,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
-													<li>{localItems()[warning.msgid]}</li>
+													<li>{#if warning.object.name}<a class="anchor" href={warning.link}>{warning.object.name}</a>:{/if} {localItems()[warning.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -224,7 +229,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
-													<li>{localItems()[info.msgid]}</li>
+													<li>{#if info.object.name}<a class="anchor" href={info.link}>{info.object.name}</a>:{/if} {localItems()[info.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
