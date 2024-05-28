@@ -11,7 +11,7 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.error('server response:', response);
 			setFlash({ type: 'error', message: response.error }, event);
-			return fail(400, { error: m.errorImportingLibrary() });
+			return fail(400, { error: m.errorLoadingLibrary() });
 		}
 		setFlash(
 			{
