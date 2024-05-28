@@ -943,6 +943,7 @@ class RiskAssessment(Assessment):
                     "msg": _("{}: Risk assessment is still in progress").format(
                         str(self)
                     ),
+                    "msgid": "riskAssessmentInProgress",
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -953,6 +954,7 @@ class RiskAssessment(Assessment):
                     "msg": _("{}: No author assigned to this risk assessment").format(
                         str(self)
                     ),
+                    "msgid": "riskAssessmentNoAuthor",
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -963,6 +965,7 @@ class RiskAssessment(Assessment):
                     "msg": _(
                         "{}: RiskAssessment is empty. No risk scenario declared yet"
                     ).format(self),
+                    "msgid": "riskAssessmentEmpty",
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -982,6 +985,7 @@ class RiskAssessment(Assessment):
                         "msg": _("{} current risk level has not been assessed").format(
                             ri["name"]
                         ),
+                        "msgid": "riskScenarioNoCurrentLevel",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -992,6 +996,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk level has not been assessed. If no additional measures are applied, it should be at the same level as the current risk"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioNoResidualLevel",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1002,6 +1007,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk level is higher than the current one"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioResidualHigherThanCurrent",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1012,6 +1018,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk probability is higher than the current one"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioResidualProbaHigherThanCurrent",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1022,6 +1029,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk impact is higher than the current one"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioResidualImpactHigherThanCurrent",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1041,6 +1049,7 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{}: residual risk level has been lowered without any specific measure"
                             ).format(ri["name"]),
+                            "msgid": "riskScenarioResidualLoweredWithoutMeasures",
                             "obj_type": "riskscenario",
                             "object": ri,
                         }
@@ -1053,6 +1062,7 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{} risk accepted but no risk acceptance attached"
                             ).format(ri),
+                            "msgid": "riskScenarioAcceptedNoAcceptance",
                             "obj_type": "riskscenario",
                             "object": ri,
                         }
@@ -1073,6 +1083,7 @@ class RiskAssessment(Assessment):
                 warnings_lst.append(
                     {
                         "msg": _("{} does not have an ETA").format(mtg["name"]),
+                        "msgid": "appliedControlNoETA",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
@@ -1084,6 +1095,7 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{} ETA is in the past now. Consider updating its status or the date"
                             ).format(mtg["name"]),
+                            "msgid": "appliedControlETAInPast",
                             "obj_type": "appliedcontrol",
                             "object": {"name": mtg["name"], "id": mtg["id"]},
                         }
@@ -1095,6 +1107,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} does not have an estimated effort. This will help you for prioritization"
                         ).format(mtg["name"]),
+                        "msgid": "appliedControlNoEffort",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
@@ -1106,6 +1119,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{}: Applied control does not have an external link attached. This will help you for follow-up"
                         ).format(mtg["name"]),
+                        "msgid": "appliedControlNoLink",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
@@ -1126,6 +1140,7 @@ class RiskAssessment(Assessment):
                         "msg": _("{}: Acceptance has no expiry date").format(
                             ra["name"]
                         ),
+                        "msgid": "riskAcceptanceNoExpiryDate",
                         "obj_type": "appliedcontrol",
                         "object": ra,
                     }
@@ -1137,6 +1152,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{}: Acceptance has expired. Consider updating the status or the date"
                         ).format(ra["name"]),
+                        "msgid": "riskAcceptanceExpired",
                         "obj_type": "riskacceptance",
                         "object": ra,
                     }
@@ -1544,6 +1560,7 @@ class ComplianceAssessment(Assessment):
                     "msg": _("{}: Compliance assessment is still in progress").format(
                         str(self)
                     ),
+                    "msgid": "complianceAssessmentInProgress",
                     "obj_type": "complianceassessment",
                     "object": _object,
                 }
@@ -1555,6 +1572,7 @@ class ComplianceAssessment(Assessment):
                     "msg": _(
                         "{}: No author assigned to this compliance assessment"
                     ).format(str(self)),
+                    "msgid": "complianceAssessmentNoAuthor",
                     "obj_type": "complianceassessment",
                     "object": _object,
                 }
@@ -1580,6 +1598,7 @@ class ComplianceAssessment(Assessment):
                         "msg": _(
                             "{}: Requirement assessment status is compliant or partially compliant with no applied control applied"
                         ).format(requirement_assessment["repr"]),
+                        "msgid": "requirementAssessmentNoAppliedControl",
                         "obj_type": "requirementassessment",
                         "object": requirement_assessment,
                     }
@@ -1601,6 +1620,7 @@ class ComplianceAssessment(Assessment):
                         "msg": _(
                             "{}: Applied control has no reference control selected"
                         ).format(applied_control["name"]),
+                        "msgid": "appliedControlNoReferenceControl",
                         "obj_type": "appliedcontrol",
                         "object": applied_control,
                     }
@@ -1624,6 +1644,7 @@ class ComplianceAssessment(Assessment):
                         "msg": _("{}: Evidence has no file uploaded").format(
                             evidence["name"]
                         ),
+                        "msgid": "evidenceNoFile",
                         "obj_type": "evidence",
                         "object": evidence,
                     }

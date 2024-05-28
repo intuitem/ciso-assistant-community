@@ -2,6 +2,7 @@
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
+	import { localItems } from '$lib/utils/locales';
 
 	export let data: PageData;
 
@@ -110,7 +111,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
-													<li>{error.msg}</li>
+													<li>{localItems()[error.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -129,7 +130,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
-													<li>{warning.msg}</li>
+													<li>{localItems()[warning.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -148,7 +149,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
-													<li>{info.msg}</li>
+													<li>{localItems()[info.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -185,7 +186,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
-													<li>{error.msg}</li>
+													<li>{localItems()[error.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -204,7 +205,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
-													<li>{warning.msg}</li>
+													<li>{localItems()[warning.msgid]}</li>
 												{/each}
 											</ul>
 										</div>
@@ -223,7 +224,7 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
-													<li>{info.msg}</li>
+													<li>{localItems()[info.msgid]}</li>
 												{/each}
 											</ul>
 										</div>

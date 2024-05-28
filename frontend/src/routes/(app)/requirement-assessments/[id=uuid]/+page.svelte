@@ -72,7 +72,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -91,7 +91,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.evidenceModel.localName)]
+			title: localItems()['add' + capitalizeFirstLetter(data.evidenceModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
