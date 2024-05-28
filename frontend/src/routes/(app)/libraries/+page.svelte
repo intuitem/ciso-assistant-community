@@ -7,12 +7,23 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { onMount } from 'svelte';
 
 	export let data;
 
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 	let tabSet: number = data.loadedLibrariesTable.body.length > 0 ? 0 : 1;
 	$: if (data.loadedLibrariesTable.body.length === 0) tabSet = 0;
+
+	let _sessionStorage: Storage | null = null;
+	$: if (_sessionStorage !== null) {
+		_sessionStorage["library_tabgroup"] = tabSet;
+	}
+
+	onMount(() => {
+		_sessionStorage = sessionStorage;
+		tabSet = Number(_sessionStorage["library_tabgroup"]) ?? tabSet;
+	});
 </script>
 
 <div class="card bg-white shadow">
