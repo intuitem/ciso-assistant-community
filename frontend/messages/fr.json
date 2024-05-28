@@ -544,7 +544,7 @@
 	"appliedControlNoETA": "N'a pas d'ETA",
 	"appliedControlETAInPast": "L’ETA appartient désormais au passé. Pensez à mettre à jour son statut ou la date",
 	"appliedControlNoEffort": "N'a pas d'effort estimé. Cela vous aidera pour la priorisation",
-	"appliedControlNoLink": "Le contrôle appliqué n’a pas de lien externe attaché. Cela vous aidera pour le suivi",
+	"appliedControlNoLink": "La mesure appliquée n’a pas de lien externe attaché. Cela vous aidera pour le suivi",
 	"riskAcceptanceNoExpiryDate": "L'acceptation n'a pas de date d'expiration",
 	"riskAcceptanceExpired": "L'acceptation a expiré. Pensez à mettre à jour le statut ou la date",
 	"complianceAssessmentInProgress": "L'audit est toujours en cours",
