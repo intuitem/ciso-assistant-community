@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-23 15:19+0200\n"
+"POT-Creation-Date: 2024-05-28 18:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
 #: admin_config.py:6
 msgid "Editor"
 msgstr ""
@@ -37,15 +38,15 @@ msgstr ""
 msgid "published"
 msgstr ""
 
-#: base_models.py:110 models.py:52 templates/core/action_plan_pdf.html:35
+#: base_models.py:110 models.py:52 templates/core/action_plan_pdf.html:42
 #: templates/snippets/mp_data.html:58 templates/snippets/ri_list_nested.html:16
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
-#: base_models.py:111 models.py:54 templates/core/action_plan_pdf.html:36
+#: base_models.py:111 models.py:54 templates/core/action_plan_pdf.html:43
 #: templates/snippets/mp_data.html:59 templates/snippets/ra_data.html:43
 msgid "Description"
-msgstr ""
+msgstr "Description"
 
 #: filters.py:28 filters.py:30
 msgid "Order by"
@@ -70,7 +71,7 @@ msgstr ""
 #: filters.py:139 filters.py:196 templates/core/action_plan_pdf.html:14
 #: templates/snippets/mp_data.html:5
 msgid "Domain"
-msgstr ""
+msgstr "Domaine"
 
 #: filters.py:140 filters.py:197
 msgid "Domain (descending)"
@@ -230,7 +231,7 @@ msgstr ""
 msgid "Threat"
 msgstr ""
 
-#: models.py:300 models.py:524 models.py:1223
+#: models.py:300 models.py:524 models.py:1255
 msgid "Threats"
 msgstr ""
 
@@ -250,9 +251,9 @@ msgstr ""
 msgid "Physical"
 msgstr ""
 
-#: models.py:339 models.py:727 templates/core/action_plan_pdf.html:37
+#: models.py:339 models.py:727 templates/core/action_plan_pdf.html:44
 msgid "Category"
-msgstr ""
+msgstr "Catégorie"
 
 #: models.py:343 models.py:550
 msgid "Typical evidence"
@@ -286,15 +287,15 @@ msgid ""
 "selection for new risk assessments."
 msgstr ""
 
-#: models.py:458 models.py:1400
+#: models.py:458 models.py:1432
 msgid "Minimum score"
 msgstr ""
 
-#: models.py:459 models.py:1401
+#: models.py:459 models.py:1433
 msgid "Maximum score"
 msgstr ""
 
-#: models.py:461 models.py:1403
+#: models.py:461 models.py:1435
 msgid "Score definition"
 msgstr ""
 
@@ -302,10 +303,10 @@ msgstr ""
 msgid "Implementation groups definition"
 msgstr ""
 
-#: models.py:475 models.py:538 models.py:1387
+#: models.py:475 models.py:538 models.py:1419
 #: templates/core/action_plan_pdf.html:20
 msgid "Framework"
-msgstr ""
+msgstr "Référentiel"
 
 #: models.py:476
 msgid "Frameworks"
@@ -363,15 +364,15 @@ msgstr ""
 msgid "Internal reference"
 msgstr ""
 
-#: models.py:577 models.py:734 models.py:874 models.py:1654
+#: models.py:577 models.py:734 models.py:874 models.py:1717
 #: templates/snippets/mp_data.html:65 templates/snippets/ri_list_nested.html:31
 msgid "Status"
 msgstr ""
 
-#: models.py:582 models.py:860 models.py:1295
+#: models.py:582 models.py:860 models.py:1327
 #: templates/core/action_plan_pdf.html:16 templates/snippets/mp_data.html:7
 msgid "Project"
-msgstr ""
+msgstr "Projet"
 
 #: models.py:583
 msgid "Projects"
@@ -397,7 +398,7 @@ msgstr ""
 msgid "parent assets"
 msgstr ""
 
-#: models.py:632 models.py:1210
+#: models.py:632 models.py:1242
 msgid "Assets"
 msgstr ""
 
@@ -425,27 +426,27 @@ msgstr ""
 msgid "Evidence"
 msgstr ""
 
-#: models.py:678 models.py:719 models.py:1668
+#: models.py:678 models.py:719 models.py:1731
 msgid "Evidences"
 msgstr ""
 
 #: models.py:694 models.py:853
 msgid "Planned"
-msgstr ""
+msgstr "Planifié"
 
 #: models.py:695
 msgid "Active"
-msgstr ""
+msgstr "Actif"
 
 #: models.py:696
 msgid "Inactive"
-msgstr ""
+msgstr "Inactif"
 
 #: models.py:701
 msgid "Small"
 msgstr ""
 
-#: models.py:702 models.py:1187 tests/test_helpers.py:77
+#: models.py:702 models.py:1219 tests/test_helpers.py:77
 #: tests/test_helpers.py:142
 msgid "Medium"
 msgstr ""
@@ -466,18 +467,18 @@ msgstr ""
 msgid "Estimated Time of Arrival"
 msgstr ""
 
-#: models.py:740 models.py:894 templates/core/action_plan_pdf.html:38
+#: models.py:740 models.py:894 templates/core/action_plan_pdf.html:45
 #: templates/snippets/mp_data.html:62
 msgid "ETA"
-msgstr ""
+msgstr "ETA"
 
 #: models.py:745
 msgid "Date after which the applied control is no longer valid"
 msgstr ""
 
-#: models.py:746 models.py:1737 templates/core/action_plan_pdf.html:39
+#: models.py:746 models.py:1803 templates/core/action_plan_pdf.html:46
 msgid "Expiry date"
-msgstr ""
+msgstr "Date d'expiration"
 
 #: models.py:752
 msgid "External url for action follow-up (eg. Jira ticket)"
@@ -487,16 +488,16 @@ msgstr ""
 msgid "Relative effort of the measure (using T-Shirt sizing)"
 msgstr ""
 
-#: models.py:761 templates/core/action_plan_pdf.html:40
+#: models.py:761 templates/core/action_plan_pdf.html:47
 #: templates/snippets/mp_data.html:63
 msgid "Effort"
-msgstr ""
+msgstr "Effort"
 
 #: models.py:767
 msgid "Applied control"
 msgstr ""
 
-#: models.py:768 models.py:1217 models.py:1684
+#: models.py:768 models.py:1249 models.py:1747
 msgid "Applied controls"
 msgstr ""
 
@@ -504,7 +505,7 @@ msgstr ""
 msgid "Policies"
 msgstr ""
 
-#: models.py:854 models.py:1644
+#: models.py:854 models.py:1707
 msgid "In progress"
 msgstr ""
 
@@ -560,377 +561,385 @@ msgstr ""
 msgid "{}: Risk assessment is still in progress"
 msgstr ""
 
-#: models.py:953
+#: models.py:954
 msgid "{}: No author assigned to this risk assessment"
 msgstr ""
 
-#: models.py:964
+#: models.py:966
 msgid "{}: RiskAssessment is empty. No risk scenario declared yet"
 msgstr ""
 
-#: models.py:982
+#: models.py:987
 msgid "{} current risk level has not been assessed"
 msgstr ""
 
-#: models.py:993
+#: models.py:1000
 msgid ""
 "{} residual risk level has not been assessed. If no additional measures are "
 "applied, it should be at the same level as the current risk"
 msgstr ""
 
-#: models.py:1003
+#: models.py:1011
 msgid "{} residual risk level is higher than the current one"
 msgstr ""
 
-#: models.py:1013
+#: models.py:1023
 msgid "{} residual risk probability is higher than the current one"
 msgstr ""
 
-#: models.py:1023
+#: models.py:1035
 msgid "{} residual risk impact is higher than the current one"
 msgstr ""
 
-#: models.py:1042
+#: models.py:1056
 msgid "{}: residual risk level has been lowered without any specific measure"
 msgstr ""
 
-#: models.py:1054
+#: models.py:1070
 msgid "{} risk accepted but no risk acceptance attached"
 msgstr ""
 
-#: models.py:1075
+#: models.py:1093
 msgid "{} does not have an ETA"
 msgstr ""
 
-#: models.py:1085
+#: models.py:1105
 msgid "{} ETA is in the past now. Consider updating its status or the date"
 msgstr ""
 
-#: models.py:1096
+#: models.py:1118
 msgid ""
 "{} does not have an estimated effort. This will help you for prioritization"
 msgstr ""
 
-#: models.py:1107
+#: models.py:1131
 msgid ""
 "{}: Applied control does not have an external link attached. This will help "
 "you for follow-up"
 msgstr ""
 
-#: models.py:1126
+#: models.py:1154
 msgid "{}: Acceptance has no expiry date"
 msgstr ""
 
-#: models.py:1138
+#: models.py:1168
 msgid "{}: Acceptance has expired. Consider updating the status or the date"
 msgstr ""
 
-#: models.py:1165
+#: models.py:1197
 msgid "Open"
 msgstr ""
 
-#: models.py:1166
+#: models.py:1198
 msgid "Mitigate"
 msgstr ""
 
-#: models.py:1167
+#: models.py:1199
 msgid "Accept"
 msgstr ""
 
-#: models.py:1168
+#: models.py:1200
 msgid "Avoid"
 msgstr ""
 
-#: models.py:1169
+#: models.py:1201
 msgid "Transfer"
 msgstr ""
 
-#: models.py:1174
+#: models.py:1206
 msgid "--"
 msgstr ""
 
-#: models.py:1176
+#: models.py:1208
 msgid "The strength of the knowledge supporting the assessment is undefined"
 msgstr ""
 
-#: models.py:1180 tests/test_helpers.py:76 tests/test_helpers.py:141
+#: models.py:1212 tests/test_helpers.py:76 tests/test_helpers.py:141
 msgid "Low"
 msgstr ""
 
-#: models.py:1182
+#: models.py:1214
 msgid "The strength of the knowledge supporting the assessment is low"
 msgstr ""
 
-#: models.py:1189
+#: models.py:1221
 msgid "The strength of the knowledge supporting the assessment is medium"
 msgstr ""
 
-#: models.py:1194 tests/test_helpers.py:78 tests/test_helpers.py:143
+#: models.py:1226 tests/test_helpers.py:78 tests/test_helpers.py:143
 msgid "High"
 msgstr ""
 
-#: models.py:1196
+#: models.py:1228
 msgid "The strength of the knowledge supporting the assessment is high"
 msgstr ""
 
-#: models.py:1205 templates/snippets/mp_data.html:9
+#: models.py:1237 templates/snippets/mp_data.html:9
 msgid "RiskAssessment"
 msgstr ""
 
-#: models.py:1212
+#: models.py:1244
 msgid "Assets impacted by the risk scenario"
 msgstr ""
 
-#: models.py:1230
+#: models.py:1262
 msgid ""
 "The existing controls to manage this risk. Edit the risk scenario to add "
 "extra applied controls."
 msgstr ""
 
-#: models.py:1232 templates/snippets/mp_data.html:48
+#: models.py:1264 templates/snippets/mp_data.html:48
 #: templates/snippets/ri_list_nested.html:22
 msgid "Existing controls"
 msgstr ""
 
-#: models.py:1238
+#: models.py:1270
 msgid "Current probability"
 msgstr ""
 
-#: models.py:1241
+#: models.py:1273
 msgid "Current impact"
 msgstr ""
 
-#: models.py:1245
+#: models.py:1277
 msgid "Current level"
 msgstr ""
 
-#: models.py:1247
+#: models.py:1279
 msgid ""
 "The risk level given the current measures. Automatically updated on Save, "
 "based on the chosen risk matrix"
 msgstr ""
 
-#: models.py:1253
+#: models.py:1285
 msgid "Residual probability"
 msgstr ""
 
-#: models.py:1256
+#: models.py:1288
 msgid "Residual impact"
 msgstr ""
 
-#: models.py:1260
+#: models.py:1292
 msgid "Residual level"
 msgstr ""
 
-#: models.py:1262
+#: models.py:1294
 msgid ""
 "The risk level when all the extra measures are done. Automatically updated "
 "on Save, based on the chosen risk matrix"
 msgstr ""
 
-#: models.py:1270
+#: models.py:1302
 msgid "Treatment status"
 msgstr ""
 
-#: models.py:1275
+#: models.py:1307
 msgid "Strength of Knowledge"
 msgstr ""
 
-#: models.py:1276
+#: models.py:1308
 msgid "The strength of the knowledge supporting the assessment"
 msgstr ""
 
-#: models.py:1279 models.py:1749
+#: models.py:1311 models.py:1815
 msgid "Justification"
 msgstr ""
 
-#: models.py:1285
+#: models.py:1317
 msgid "Risk scenario"
 msgstr ""
 
-#: models.py:1286 models.py:1714
+#: models.py:1318 models.py:1780
 msgid "Risk scenarios"
 msgstr ""
 
-#: models.py:1352
+#: models.py:1384
 msgid ": "
 msgstr ""
 
-#: models.py:1381 models.py:1647
+#: models.py:1413 models.py:1710
 msgid "Compliant"
 msgstr ""
 
-#: models.py:1382
+#: models.py:1414
 msgid "Non compliant (minor)"
 msgstr ""
 
-#: models.py:1383
+#: models.py:1415
 msgid "Non compliant (major)"
 msgstr ""
 
-#: models.py:1384 models.py:1648
+#: models.py:1416 models.py:1711
 msgid "Not applicable"
 msgstr ""
 
-#: models.py:1394
+#: models.py:1426
 msgid "Result"
 msgstr ""
 
-#: models.py:1397
+#: models.py:1429
 msgid "Selected implementation groups"
 msgstr ""
 
-#: models.py:1407 models.py:1675
+#: models.py:1439 models.py:1738
 msgid "Compliance assessment"
 msgstr ""
 
-#: models.py:1408
+#: models.py:1440
 msgid "Compliance assessments"
 msgstr ""
 
-#: models.py:1544
+#: models.py:1594
 msgid "{}: Compliance assessment is still in progress"
 msgstr ""
 
-#: models.py:1556
+#: models.py:1607
 msgid "{}: No author assigned to this compliance assessment"
 msgstr ""
 
-#: models.py:1581
+#: models.py:1634
 msgid ""
 "{}: Requirement assessment status is compliant or partially compliant with "
 "no applied control applied"
 msgstr ""
 
-#: models.py:1602
+#: models.py:1659
 msgid "{}: Applied control has no reference control selected"
 msgstr ""
 
-#: models.py:1624
+#: models.py:1685
 msgid "{}: Evidence has no file uploaded"
 msgstr ""
 
-#: models.py:1643
+#: models.py:1706
 msgid "To do"
 msgstr ""
 
-#: models.py:1645
+#: models.py:1708
 msgid "Non compliant"
 msgstr ""
 
-#: models.py:1646
+#: models.py:1709
 msgid "Partially compliant"
 msgstr ""
 
-#: models.py:1659
+#: models.py:1722
 msgid "Score"
 msgstr ""
 
-#: models.py:1663
+#: models.py:1726
 msgid "Is scored"
 msgstr ""
 
-#: models.py:1671
+#: models.py:1734
 msgid "Observation"
 msgstr ""
 
-#: models.py:1679
+#: models.py:1742
 msgid "Requirement"
 msgstr ""
 
-#: models.py:1689
+#: models.py:1752
 msgid "Selected"
 msgstr ""
 
-#: models.py:1696
+#: models.py:1762
 msgid "Requirement assessment"
 msgstr ""
 
-#: models.py:1697
+#: models.py:1763
 msgid "Requirement assessments"
 msgstr ""
 
-#: models.py:1705
+#: models.py:1771
 msgid "Created"
 msgstr ""
 
-#: models.py:1706
+#: models.py:1772
 msgid "Submitted"
 msgstr ""
 
-#: models.py:1707
+#: models.py:1773
 msgid "Accepted"
 msgstr ""
 
-#: models.py:1708
+#: models.py:1774
 msgid "Rejected"
 msgstr ""
 
-#: models.py:1709
+#: models.py:1775
 msgid "Revoked"
 msgstr ""
 
-#: models.py:1716
+#: models.py:1782
 msgid ""
 "Select the risk scenarios to be accepted, attention they must be part of the "
 "chosen domain"
 msgstr ""
 
-#: models.py:1722
+#: models.py:1788
 msgid "Risk owner and approver identity"
 msgstr ""
 
-#: models.py:1723 utils.py:48 utils.py:55 utils.py:58
+#: models.py:1789 utils.py:48 utils.py:55 utils.py:58
 msgid "Approver"
 msgstr ""
 
-#: models.py:1732
+#: models.py:1798
 msgid "State"
 msgstr ""
 
-#: models.py:1735
+#: models.py:1801
 msgid "Specify when the risk acceptance will no longer apply"
 msgstr ""
 
-#: models.py:1740
+#: models.py:1806
 msgid "Acceptance date"
 msgstr ""
 
-#: models.py:1743
+#: models.py:1809
 msgid "Rejection date"
 msgstr ""
 
-#: models.py:1746
+#: models.py:1812
 msgid "Revocation date"
 msgstr ""
 
-#: models.py:1758
+#: models.py:1824
 msgid "Risk acceptance"
 msgstr ""
 
-#: models.py:1759
+#: models.py:1825
 msgid "Risk acceptances"
 msgstr ""
 
+#: templates/core/action_plan_pdf.html:12
+msgid "Action plan"
+msgstr "Plan d'action"
+
 #: templates/core/action_plan_pdf.html:18
 msgid "Audit"
-msgstr ""
+msgstr "Audit"
 
 #: templates/core/action_plan_pdf.html:22
 msgid "Associated applied controls"
-msgstr ""
+msgstr "Mesures appliquées associées"
 
 #: templates/core/action_plan_pdf.html:23
 msgid "Separated by status and sorted by eta"
-msgstr ""
+msgstr "Séparées par statut et trié par eta"
 
-#: templates/core/action_plan_pdf.html:41
+#: templates/core/action_plan_pdf.html:28
+msgid "No status"
+msgstr "Aucun statut"
+
+#: templates/core/action_plan_pdf.html:48
 msgid "Matching requirements"
-msgstr ""
+msgstr "Exigences associées"
 
-#: templates/core/action_plan_pdf.html:58
+#: templates/core/action_plan_pdf.html:65
 msgid "No entries found"
-msgstr ""
+msgstr "Aucune entrée trouvée"
 
 #: templates/registration/first_connexion_email.html:14
 msgid "Welcome to CISO Assistant!"
