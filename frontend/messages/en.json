@@ -552,5 +552,4 @@
 	"requirementAssessmentNoAppliedControl": "Requirement assessment status is compliant or partially compliant with no applied control applied",
 	"appliedControlNoReferenceControl": "Applied control has no reference control selected",
 	"evidenceNoFile": "Evidence has no file uploaded"
-
 }
