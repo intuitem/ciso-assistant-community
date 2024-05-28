@@ -93,7 +93,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: localItems(languageTag())[
+					object: localItems()[
 						toCamelCase(modelVerboseName.toLowerCase())
 					].toLowerCase(),
 					name: form.data.name

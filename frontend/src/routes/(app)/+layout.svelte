@@ -26,8 +26,8 @@
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4">
 			<span class="text-2xl font-bold pb-1" id="page-title">
-				{#if localItems(languageTag())[$pageTitle]}
-					{localItems(languageTag())[$pageTitle]}
+				{#if localItems()[$pageTitle]}
+					{localItems()[$pageTitle]}
 				{:else}
 					{$pageTitle}
 				{/if}

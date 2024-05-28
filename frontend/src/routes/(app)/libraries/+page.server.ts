@@ -97,7 +97,7 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const translate_error = localItems(languageTag())[response.error];
+				const translate_error = localItems()[response.error];
 				const toast_error_message =
 					translate_error ?? m.libraryImportError() + '(' + response.error + ')';
 
