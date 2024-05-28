@@ -529,6 +529,7 @@
 	"asZIP": "als ZIP",
 	"incoming": "Binnenkomend",
 	"outdated": "Verouderd",
+	"goBackToAudit": "Ga terug naar de controle",
 	"exportBackupDescription": "Dit zal de database serialiseren en een back-up maken, inclusief gebruikers en RBAC. Bewijzen en andere bestanden zijn niet inbegrepen in de back-up.",
 	"importBackupDescription": "Dit zal de database deserialiseren en herstellen vanaf een back-up. Dit zal alle bestaande gegevens, inclusief gebruikers en RBAC, overschrijven en kan niet ongedaan worden gemaakt.",
 	"riskAssessmentInProgress": "De risicobeoordeling is nog in volle gang",
@@ -551,5 +552,7 @@
 	"complianceAssessmentNoAuthor": "Er is geen auteur toegewezen aan deze audit",
 	"requirementAssessmentNoAppliedControl": "De status van de vereistenbeoordeling is conform of gedeeltelijk conform en er is geen toegepaste controle toegepast",
 	"appliedControlNoReferenceControl": "Voor de toegepaste regeling is geen referentieregeling geselecteerd",
-	"evidenceNoFile": "Er is geen bestand geüpload voor bewijsmateriaal"
+	"evidenceNoFile": "Er is geen bestand geüpload voor bewijsmateriaal",
+	"requirementAppliedControlHelpText": "Bewijsstukken die verband houden met de geselecteerde maatregelen worden automatisch aan de eis gekoppeld.",
+	"requirementEvidenceHelpText": "Op dit tabblad kunt u extra bewijsstukken aan de eis toevoegen."
 }

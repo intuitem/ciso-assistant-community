@@ -529,6 +529,7 @@
 	"asZIP": "em ZIP",
 	"incoming": "aproximação",
 	"outdated": "Desatualizado",
+	"goBackToAudit": "Volte para a auditoria",
 	"exportBackupDescription": "Isso irá serializar e criar um backup do banco de dados, incluindo usuários e RBAC. Evidências e outros arquivos não estão incluídos no backup.",
 	"importBackupDescription": "Isso irá desserializar e restaurar o banco de dados a partir de um backup. Isso substituirá todos os dados existentes, incluindo usuários e RBAC, e não poderá ser desfeito.",
 	"riskAssessmentInProgress": "A avaliação de risco ainda está em andamento",
@@ -551,5 +552,7 @@
 	"complianceAssessmentNoAuthor": "Nenhum autor atribuído a esta auditoria",
 	"requirementAssessmentNoAppliedControl": "O status da avaliação de requisitos está em conformidade ou parcialmente em conformidade, sem nenhum controle aplicado",
 	"appliedControlNoReferenceControl": "O controle aplicado não tem nenhum controle de referência selecionado",
-	"evidenceNoFile": "A evidência não tem nenhum arquivo carregado"
+	"evidenceNoFile": "A evidência não tem nenhum arquivo carregado",
+	"requirementAppliedControlHelpText": "As evidências vinculadas às medidas selecionadas serão automaticamente associadas ao requisito.",
+	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito."
 }
