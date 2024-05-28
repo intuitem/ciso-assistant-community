@@ -475,6 +475,7 @@
 	"librarySuccessfullyLoaded": "The library has been successfully loaded",
 	"noLibraryDetected": "No library detected",
 	"errorImportingLibrary": "Error importing library",
+	"updateThisLibrary": "Update this library",
 	"librarySuccessfullyUpdated": "Library successfully updated",
 	"libraryNotFound": "Library not found",
 	"libraryHasNoUpdate": "This library has no update",
