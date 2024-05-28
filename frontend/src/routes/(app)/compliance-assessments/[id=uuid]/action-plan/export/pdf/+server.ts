@@ -7,13 +7,13 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/action_plan_pdf/`;
 
-	console.log(languageTag())
+	console.log(languageTag());
 
-	const res = await fetch(endpoint,{
+	const res = await fetch(endpoint, {
 		headers: {
-			'Accept-Language': languageTag(),
+			'Accept-Language': languageTag()
 		}
-		});
+	});
 	if (!res.ok) {
 		error(400, 'Error fetching the PDF file');
 	}
