@@ -292,7 +292,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             key = "urn" if pk.startswith("urn:") else "id"
             library = LoadedLibrary.objects.get(**{key: pk})
         except Exception as e :
-            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND) # Error messages could be returned as JSON instead
+            return Response(data="libraryNotFound", status=HTTP_404_NOT_FOUND) # Error messages could be returned as JSON instead
 
         error_msg = library.update()
         if error_msg is None :
