@@ -25,6 +25,7 @@
 		applyAction(result);
 	}
 </script>
+
 {#if actionsURLModel === 'stored-libraries' && Object.hasOwn(library, 'is_loaded') && !library.is_loaded}
 	{#if loading.form && loading.library === library.urn}
 		<div class="flex items-center cursor-progress" role="status">
@@ -110,7 +111,7 @@
 				}}
 				on:submit={handleSubmit}
 			>
-				<button title={m.updateThisLibrary()} on:click={e => e.stopPropagation()}>
+				<button title={m.updateThisLibrary()} on:click={(e) => e.stopPropagation()}>
 					<i class="fa-solid fa-circle-up" />
 				</button>
 			</form>
