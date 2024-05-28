@@ -250,7 +250,7 @@ class LibraryUpdater:
             if not possible_dependencies : # This part of the code hasn't been tested yet
                 stored_dependencies = [*StoredLibrary.objects.filter(urn=dependency_urn)]
                 if not stored_dependencies :
-                    return "Dependency not found."
+                    return "dependencyNotFound"
                 dependency = stored_dependencies[0]
                 for i in range(1,len(stored_dependencies)) :
                     stored_dependency = stored_dependencies[i]
@@ -266,7 +266,9 @@ class LibraryUpdater:
                 if possible_dependency.locale == self.old_library.locale :
                     dependency = possible_dependency
 
-            if (err_msg := dependency.update()) is not None :
+            if (err_msg := dependency.update()) not in [
+                None,"libraryHasNoUpdate"
+            ] :
                 return err_msg
 
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
@@ -282,14 +284,14 @@ class LibraryUpdater:
         new_dependencies_urn = dependencies_urn - old_dependencies_urn
 
         if not set(dependencies_urn).issuperset(old_dependencies_urn) :
-            return "Invalid library update."
+            return "invalidLibraryUpdate"
 
         new_dependencies = []
         for new_dependency_urn in new_dependencies_urn :
             try :
                 new_dependency = LoadedLibrary.objects.filter(urn=new_dependency_urn).first() # The locale is not handled by this code
             except :
-                return "Dependency not found."
+                return "dependencyNotFound"
             new_dependencies.append(new_dependency)
 
         for key, value in [
@@ -448,7 +450,7 @@ class LoadedLibrary(LibraryMixin):
         new_libraries = [*StoredLibrary.objects.filter(urn=self.urn,locale=self.locale,version__gt=self.version)]
 
         if not new_libraries :
-            return "This library has no update."
+            return "libraryHasNoUpdate"
 
         new_library = max(new_libraries,key=lambda lib: lib.version)
         library_updater = LibraryUpdater(self,new_library)
