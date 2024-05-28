@@ -99,7 +99,7 @@ export const actions: Actions = {
 
 				const translate_error = localItems(languageTag())[response.error];
 				const toast_error_message =
-					translate_error ?? m.libraryImportError() + '(' + response.error + ')';
+					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
 
 				setFlash({ type: 'error', message: toast_error_message }, event);
 				return fail(400, { form });
