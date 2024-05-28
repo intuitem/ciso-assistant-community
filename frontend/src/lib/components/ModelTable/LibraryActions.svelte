@@ -2,6 +2,7 @@
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
+	import * as m from '$paraglide/messages';
 
 	export let meta: any;
 	export let actionsURLModel: string;
@@ -109,7 +110,7 @@
 				}}
 				on:submit={handleSubmit}
 			>
-				<button on:click={e => e.stopPropagation()}>
+				<button title={m.updateThisLibrary()} on:click={e => e.stopPropagation()}>
 					<i class="fa-solid fa-circle-up" />
 				</button>
 			</form>

@@ -475,6 +475,7 @@
 	"librarySuccessfullyLoaded": "La bibliothèque a été chargée avec succès",
 	"noLibraryDetected": "Aucune bibliothèque détectée",
 	"errorImportingLibrary": "Erreur lors de l'importation de la bibliothèque",
+	"updateThisLibrary": "Mettre à jour cette bibliothèque",
 	"librarySuccessfullyUpdated": "La bibliothèque a mise à jour avec succès",
 	"libraryNotFound": "Bibliothèque introuvable",
 	"libraryHasNoUpdate": "Cette bibliothèque n'a pas de mise à jour",
