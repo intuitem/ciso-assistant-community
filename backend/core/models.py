@@ -353,6 +353,7 @@ class LibraryUpdater:
             del framework_dict["requirement_nodes"]
 
             new_framework, _ = Framework.objects.update_or_create(
+                urn=self.new_framework["urn"],
                 defaults=framework_dict,
                 create_defaults={
                     **referential_object_dict,
