@@ -390,12 +390,12 @@
 			{/if}
 		{/if}
 		<!-- Slot: Content -->
-		<div class="tree-item-content w-full">
+		<div class="tree-item-content w-full" data-testid="tree-item-content">
 			<slot />
 		</div>
 		<!-- Slot: Lead -->
 		{#if $$slots.lead && !hideLead}
-			<div class="tree-item-lead">
+			<div class="tree-item-lead" data-testid="tree-item-lead">
 				<slot name="lead" />
 			</div>
 		{/if}

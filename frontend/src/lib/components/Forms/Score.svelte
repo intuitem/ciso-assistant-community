@@ -54,6 +54,7 @@
 			<div class="flex w-full items-center justify-center">
 				<RangeSlider
 					class="w-full"
+					data-testid="range-slider-input"
 					name="range-slider"
 					bind:value={$value}
 					min={min_score}
