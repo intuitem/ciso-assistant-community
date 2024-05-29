@@ -72,7 +72,9 @@ class RequirementNodeImporter:
         )
 
         for threat in self.requirement_data.get("threats", []):
-            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
+            requirement_node.threats.add(
+                Threat.objects.get(urn=threat.lower())
+            )  # URN are not case insensitive in the whole codebase yet, we should fix that and make sure URNs are always transformed into lowercase before being used.
 
         for reference_control in self.requirement_data.get("reference_controls", []):
             requirement_node.reference_controls.add(
