@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-28 18:40+0200\n"
+"POT-Creation-Date: 2024-05-29 13:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,23 +20,23 @@ msgstr ""
 
 #: admin_config.py:6
 msgid "Editor"
-msgstr ""
+msgstr "Éditeur"
 
 #: admin_config.py:7
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 #: base_models.py:10 filters.py:324
 msgid "Created at"
-msgstr ""
+msgstr "Créé le"
 
 #: base_models.py:11
 msgid "Updated at"
-msgstr ""
+msgstr "Mis à jour le"
 
 #: base_models.py:12
 msgid "published"
-msgstr ""
+msgstr "publié"
 
 #: base_models.py:110 models.py:52 templates/core/action_plan_pdf.html:42
 #: templates/snippets/mp_data.html:58 templates/snippets/ri_list_nested.html:16
@@ -50,23 +50,23 @@ msgstr "Description"
 
 #: filters.py:28 filters.py:30
 msgid "Order by"
-msgstr ""
+msgstr "Trier par"
 
 #: filters.py:121
 msgid "Search applied control..."
-msgstr ""
+msgstr "Rechercher un mesure appliquée..."
 
 #: filters.py:137 filters.py:166 filters.py:194 filters.py:219 filters.py:251
 #: filters.py:347 filters.py:370 filters.py:398 filters.py:425 filters.py:452
 #: filters.py:479
 msgid "name"
-msgstr ""
+msgstr "nom"
 
 #: filters.py:138 filters.py:167 filters.py:195 filters.py:220 filters.py:252
 #: filters.py:348 filters.py:371 filters.py:399 filters.py:426 filters.py:453
 #: filters.py:480
 msgid "Name (descending)"
-msgstr ""
+msgstr "Nom (décroissant)"
 
 #: filters.py:139 filters.py:196 templates/core/action_plan_pdf.html:14
 #: templates/snippets/mp_data.html:5
@@ -75,181 +75,181 @@ msgstr "Domaine"
 
 #: filters.py:140 filters.py:197
 msgid "Domain (descending)"
-msgstr ""
+msgstr "Domaine (décroissant)"
 
 #: filters.py:141
 msgid "reference control"
-msgstr ""
+msgstr "mesure de référence"
 
 #: filters.py:142
 msgid "Reference control (descending)"
-msgstr ""
+msgstr "Mesure de référence (décroissant)"
 
 #: filters.py:156
 msgid "Search domain..."
-msgstr ""
+msgstr "Rechercher un domaine..."
 
 #: filters.py:168 filters.py:372 filters.py:400 filters.py:427 filters.py:454
 #: filters.py:481
 msgid "description"
-msgstr ""
+msgstr "description"
 
 #: filters.py:169 filters.py:373 filters.py:401 filters.py:428 filters.py:455
 #: filters.py:482
 msgid "Description (descending)"
-msgstr ""
+msgstr "Description (décroissant)"
 
 #: filters.py:183
 msgid "Search project..."
-msgstr ""
+msgstr "Rechercher un projet..."
 
 #: filters.py:212
 msgid "Search threat..."
-msgstr ""
+msgstr "Rechercher une menace..."
 
 #: filters.py:240
 msgid "Search function..."
-msgstr ""
+msgstr "Rechercher une fonction..."
 
 #: filters.py:253
 msgid "provider"
-msgstr ""
+msgstr "fournisseur"
 
 #: filters.py:254
 msgid "Provider (descending)"
-msgstr ""
+msgstr "Fournisseur (décroissant)"
 
 #: filters.py:276
 msgid "Yes"
-msgstr ""
+msgstr "Oui"
 
 #: filters.py:277
 msgid "No"
-msgstr ""
+msgstr "Non"
 
 #: filters.py:305
 msgid "Search user..."
-msgstr ""
+msgstr "Rechercher un utilisateur..."
 
 #: filters.py:318
 msgid "Email"
-msgstr ""
+msgstr "E-mail"
 
 #: filters.py:319
 msgid "Email (descending)"
-msgstr ""
+msgstr "E-mail (décroissant)"
 
 #: filters.py:320
 msgid "First name"
-msgstr ""
+msgstr "Prénom"
 
 #: filters.py:321
 msgid "First name (descending)"
-msgstr ""
+msgstr "Prénom (décroissant)"
 
 #: filters.py:322
 msgid "Last name"
-msgstr ""
+msgstr "Nom de famille"
 
 #: filters.py:323
 msgid "Last name (descending)"
-msgstr ""
+msgstr "Nom de famille (décroissant)"
 
 #: filters.py:325
 msgid "Created at (descending)"
-msgstr ""
+msgstr "Créé le (décroissant)"
 
 #: filters.py:339
 msgid "Search user group..."
-msgstr ""
+msgstr "Rechercher un groupe d'utilisateurs..."
 
 #: filters.py:358
 msgid "Search compliance assessment..."
-msgstr ""
+msgstr "Rechercher une évaluation de conformité..."
 
 #: filters.py:388
 msgid "Search requirement assessment..."
-msgstr ""
+msgstr "Rechercher une évaluation d'exigence..."
 
 #: filters.py:415
 msgid "Search requirement..."
-msgstr ""
+msgstr "Rechercher une exigence..."
 
 #: filters.py:442
 msgid "Search evidence..."
-msgstr ""
+msgstr "Rechercher une preuve..."
 
 #: filters.py:469
 msgid "Search framework..."
-msgstr ""
+msgstr "Rechercher un référentiel..."
 
 #: models.py:39 models.py:93
 msgid "URN"
-msgstr ""
+msgstr "URN"
 
 #: models.py:42
 msgid "Reference ID"
-msgstr ""
+msgstr "ID de référence"
 
 #: models.py:45
 msgid "Locale"
-msgstr ""
+msgstr "Locale"
 
 #: models.py:47
 msgid "Default locale"
-msgstr ""
+msgstr "Locale par défaut"
 
 #: models.py:49 models.py:400
 msgid "Provider"
-msgstr ""
+msgstr "Fournisseur"
 
 #: models.py:55
 msgid "Annotation"
-msgstr ""
+msgstr "Annotation"
 
 #: models.py:95
 msgid "Copyright"
-msgstr ""
+msgstr "Copyright"
 
 #: models.py:97 models.py:867
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 #: models.py:102
 msgid "Packager of the library"
-msgstr ""
+msgstr "Responsable de l'empaquetage de la bibliothèque"
 
 #: models.py:103
 msgid "Packager"
-msgstr ""
+msgstr "Empaqueteur"
 
 #: models.py:218
 msgid "Dependencies"
-msgstr ""
+msgstr "Dépendances"
 
 #: models.py:299 templates/snippets/ri_list_nested.html:19
 msgid "Threat"
-msgstr ""
+msgstr "Menace"
 
 #: models.py:300 models.py:524 models.py:1255
 msgid "Threats"
-msgstr ""
+msgstr "Menaces"
 
 #: models.py:320 models.py:838
 msgid "Policy"
-msgstr ""
+msgstr "Politique"
 
 #: models.py:321
 msgid "Process"
-msgstr ""
+msgstr "Processus"
 
 #: models.py:322
 msgid "Technical"
-msgstr ""
+msgstr "Technique"
 
 #: models.py:323
 msgid "Physical"
-msgstr ""
+msgstr "Physique"
 
 #: models.py:339 models.py:727 templates/core/action_plan_pdf.html:44
 msgid "Category"
@@ -257,51 +257,55 @@ msgstr "Catégorie"
 
 #: models.py:343 models.py:550
 msgid "Typical evidence"
-msgstr ""
+msgstr "Preuve type"
 
 #: models.py:349 templates/snippets/mp_data.html:61
 msgid "Reference control"
-msgstr ""
+msgstr "Mesure de référence"
 
 #: models.py:350 models.py:530
 msgid "Reference controls"
-msgstr ""
+msgstr "Mesures de référence"
 
 #: models.py:385
 msgid "JSON definition"
-msgstr ""
+msgstr "Définition JSON"
 
 #: models.py:387
 msgid ""
 "JSON definition of the risk matrix.         See the documentation for more "
 "information."
 msgstr ""
+"Définition JSON de la matrice de risque. Consultez la documentation pour "
+"plus d'informations."
 
 #: models.py:393
 msgid "enabled"
-msgstr ""
+msgstr "activé"
 
 #: models.py:396
 msgid ""
 "If the risk matrix is set as disabled, it will not be available for "
 "selection for new risk assessments."
 msgstr ""
+"Si la matrice de risque est désactivée, elle ne sera pas disponible pour la "
+"sélection lors de nouvelles évaluations de risque."
 
 #: models.py:458 models.py:1432
 msgid "Minimum score"
-msgstr ""
+msgstr "Score minimum"
 
 #: models.py:459 models.py:1433
 msgid "Maximum score"
-msgstr ""
+msgstr "Score maximum"
 
 #: models.py:461 models.py:1435
 msgid "Score definition"
-msgstr ""
+msgstr "Définition du score"
 
 #: models.py:464
 msgid "Implementation groups definition"
-msgstr ""
+msgstr "Définition des groupes de mise en œuvre"
 
 #: models.py:475 models.py:538 models.py:1419
 #: templates/core/action_plan_pdf.html:20
@@ -310,64 +314,68 @@ msgstr "Référentiel"
 
 #: models.py:476
 msgid "Frameworks"
-msgstr ""
+msgstr "Référentiels"
 
 #: models.py:542
 msgid "Parent URN"
-msgstr ""
+msgstr "URN parent"
 
 #: models.py:544
 msgid "Order ID"
-msgstr ""
+msgstr "ID de commande"
 
 #: models.py:546
 msgid "Implementation groups"
-msgstr ""
+msgstr "Groupes de mise en œuvre"
 
 #: models.py:548
 msgid "Assessable"
-msgstr ""
+msgstr "Évaluable"
 
 #: models.py:554
+#, fuzzy
+#| msgid "Requirement"
 msgid "RequirementNode"
-msgstr ""
+msgstr "Exigence"
 
 #: models.py:555
+#, fuzzy
+#| msgid "Requirement"
 msgid "RequirementNodes"
-msgstr ""
+msgstr "Exigence"
 
 #: models.py:563
 msgid "Undefined"
-msgstr ""
+msgstr "Non défini"
 
 #: models.py:564
 msgid "Design"
-msgstr ""
+msgstr "Conception"
 
 #: models.py:565
 msgid "Development"
-msgstr ""
+msgstr "Développement"
 
 #: models.py:566
 msgid "Production"
-msgstr ""
+msgstr "Production"
 
 #: models.py:567
 msgid "EndOfLife"
-msgstr ""
+msgstr "Fin de vie"
 
 #: models.py:568
 msgid "Dropped"
-msgstr ""
+msgstr "Abandonné"
 
 #: models.py:571
 msgid "Internal reference"
-msgstr ""
+msgstr "Référence interne"
 
 #: models.py:577 models.py:734 models.py:874 models.py:1717
 #: templates/snippets/mp_data.html:65 templates/snippets/ri_list_nested.html:31
 msgid "Status"
-msgstr ""
+msgstr "Statut"
 
 #: models.py:582 models.py:860 models.py:1327
 #: templates/core/action_plan_pdf.html:16 templates/snippets/mp_data.html:7
@@ -376,59 +384,60 @@ msgstr "Projet"
 
 #: models.py:583
 msgid "Projects"
-msgstr ""
+msgstr "Projets"
 
 #: models.py:616
 msgid "Primary"
-msgstr ""
+msgstr "Primaire"
 
 #: models.py:617
 msgid "Support"
-msgstr ""
+msgstr "Support"
 
 #: models.py:620
 msgid "business value"
-msgstr ""
+msgstr "valeur métier"
 
 #: models.py:623
 msgid "type"
-msgstr ""
+msgstr "type"
 
 #: models.py:626
 msgid "parent assets"
-msgstr ""
+msgstr "actifs parents"
 
 #: models.py:632 models.py:1242
 msgid "Assets"
-msgstr ""
+msgstr "Actifs"
 
 #: models.py:633
 msgid "Asset"
-msgstr ""
+msgstr "Actif"
 
 #: models.py:663
 msgid "Attachment for evidence (eg. screenshot, log file, etc.)"
 msgstr ""
+"Pièce jointe pour la preuve (par ex. capture d'écran, fichier journal, etc.)"
 
 #: models.py:664
 msgid "Attachment"
-msgstr ""
+msgstr "Pièce jointe"
 
 #: models.py:670
 msgid "Link to the evidence (eg. Jira ticket, etc.)"
-msgstr ""
+msgstr "Lien vers la preuve (par ex. billet Jira, etc.)"
 
 #: models.py:671 models.py:753 templates/snippets/mp_data.html:64
 msgid "Link"
-msgstr ""
+msgstr "Lien"
 
 #: models.py:677
 msgid "Evidence"
-msgstr ""
+msgstr "Preuve"
 
 #: models.py:678 models.py:719 models.py:1731
 msgid "Evidences"
-msgstr ""
+msgstr "Preuves"
 
 #: models.py:694 models.py:853
 msgid "Planned"
@@ -444,28 +453,28 @@ msgstr "Inactif"
 
 #: models.py:701
 msgid "Small"
-msgstr ""
+msgstr "Petit"
 
 #: models.py:702 models.py:1219 tests/test_helpers.py:77
 #: tests/test_helpers.py:142
 msgid "Medium"
-msgstr ""
+msgstr "Moyen"
 
 #: models.py:703
 msgid "Large"
-msgstr ""
+msgstr "Grand"
 
 #: models.py:704
 msgid "Extra Large"
-msgstr ""
+msgstr "Extra large"
 
 #: models.py:714
 msgid "Reference Control"
-msgstr ""
+msgstr "Mesure de référence"
 
 #: models.py:739
 msgid "Estimated Time of Arrival"
-msgstr ""
+msgstr "Heure d'arrivée estimée"
 
 #: models.py:740 models.py:894 templates/core/action_plan_pdf.html:45
 #: templates/snippets/mp_data.html:62
@@ -474,7 +483,7 @@ msgstr "ETA"
 
 #: models.py:745
 msgid "Date after which the applied control is no longer valid"
-msgstr ""
+msgstr "Date à partir de laquelle la mesure appliquée n'est plus valide"
 
 #: models.py:746 models.py:1803 templates/core/action_plan_pdf.html:46
 msgid "Expiry date"
@@ -482,11 +491,11 @@ msgstr "Date d'expiration"
 
 #: models.py:752
 msgid "External url for action follow-up (eg. Jira ticket)"
-msgstr ""
+msgstr "URL externe pour le suivi de l'action (par ex. billet Jira)"
 
 #: models.py:760
 msgid "Relative effort of the measure (using T-Shirt sizing)"
-msgstr ""
+msgstr "Effort relatif de la mesure (en utilisant la taille des T-shirts)"
 
 #: models.py:761 templates/core/action_plan_pdf.html:47
 #: templates/snippets/mp_data.html:63
@@ -495,423 +504,453 @@ msgstr "Effort"
 
 #: models.py:767
 msgid "Applied control"
-msgstr ""
+msgstr "Mesure appliqué"
 
 #: models.py:768 models.py:1249 models.py:1747
 msgid "Applied controls"
-msgstr ""
+msgstr "Mesures appliqués"
 
 #: models.py:839
 msgid "Policies"
-msgstr ""
+msgstr "Politiques"
 
 #: models.py:854 models.py:1707
 msgid "In progress"
-msgstr ""
+msgstr "En cours"
 
 #: models.py:855
 msgid "In review"
-msgstr ""
+msgstr "En examen"
 
 #: models.py:856
 msgid "Done"
-msgstr ""
+msgstr "Terminé"
 
 #: models.py:857
 msgid "Deprecated"
-msgstr ""
+msgstr "Déprécié"
 
 #: models.py:866
 msgid "Version of the compliance assessment (eg. 1.0, 2.0, etc.)"
-msgstr ""
+msgstr "Version de l'évaluation de conformité (par ex. 1.0, 2.0, etc.)"
 
 #: models.py:881
 msgid "Authors"
-msgstr ""
+msgstr "Auteurs"
 
 #: models.py:887
 msgid "Reviewers"
-msgstr ""
+msgstr "Relecteurs"
 
 #: models.py:893
+#, fuzzy
+#| msgid "estimated time of arrival"
 msgid "Estimated time of arrival"
-msgstr ""
+msgstr "heure d'arrivée estimée"
 
 #: models.py:899 models.py:900
 msgid "Due date"
-msgstr ""
+msgstr "Date d'échéance"
 
 #: models.py:913
 msgid "WARNING! After choosing it, you will not be able to change it"
 msgstr ""
+"ATTENTION ! Une fois que vous l'aurez choisi, vous ne pourrez plus le "
+"modifier."
 
 #: models.py:914
 msgid "Risk matrix"
-msgstr ""
+msgstr "Matrice de risque"
 
-#: models.py:918 templates/snippets/ra_data.html:8
+#: models.py:918 templates/snippets/mp_data.html:9
+#: templates/snippets/ra_data.html:8
 msgid "Risk assessment"
-msgstr ""
+msgstr "Évaluation de risque"
 
 #: models.py:919
 msgid "Risk assessments"
-msgstr ""
+msgstr "Évaluations de risque"
 
 #: models.py:943
 msgid "{}: Risk assessment is still in progress"
-msgstr ""
+msgstr "{} : L'évaluation des risques est toujours en cours"
 
 #: models.py:954
 msgid "{}: No author assigned to this risk assessment"
-msgstr ""
+msgstr "{} : Aucun auteur n'a été affecté à cette évaluation des risques"
 
 #: models.py:966
 msgid "{}: RiskAssessment is empty. No risk scenario declared yet"
 msgstr ""
+"{} : L'évaluation des risques est vide. Aucun scénario de risque n'a encore "
+"été déclaré."
 
 #: models.py:987
 msgid "{} current risk level has not been assessed"
-msgstr ""
+msgstr "{} : Le niveau de risque actuel n'a pas été évalué"
 
 #: models.py:1000
 msgid ""
 "{} residual risk level has not been assessed. If no additional measures are "
 "applied, it should be at the same level as the current risk"
 msgstr ""
+"{} : Le niveau de risque résiduel n'a pas été évalué. S'il n'y a pas de "
+"mesures supplémentaires appliquées, il devrait être au même niveau que le "
+"risque actuel."
 
 #: models.py:1011
 msgid "{} residual risk level is higher than the current one"
-msgstr ""
+msgstr "{} : Le niveau de risque résiduel est supérieur à l'actuel"
 
 #: models.py:1023
 msgid "{} residual risk probability is higher than the current one"
-msgstr ""
+msgstr "{} : La probabilité de risque résiduel est supérieure à l'actuelle"
 
 #: models.py:1035
 msgid "{} residual risk impact is higher than the current one"
-msgstr ""
+msgstr "{} : L'impact du risque résiduel est supérieur à l'actuel"
 
 #: models.py:1056
 msgid "{}: residual risk level has been lowered without any specific measure"
 msgstr ""
+"{} : Le niveau de risque résiduel a été réduit sans aucune mesure spécifique"
 
 #: models.py:1070
 msgid "{} risk accepted but no risk acceptance attached"
-msgstr ""
+msgstr "{} : Risque accepté mais aucune acceptation de risque jointe"
 
 #: models.py:1093
 msgid "{} does not have an ETA"
-msgstr ""
+msgstr "{} : Pas d'ETA"
 
 #: models.py:1105
 msgid "{} ETA is in the past now. Consider updating its status or the date"
 msgstr ""
+"{} : L'ETA est dans le passé maintenant. Envisagez de mettre à jour son "
+"statut ou la date."
 
 #: models.py:1118
 msgid ""
 "{} does not have an estimated effort. This will help you for prioritization"
-msgstr ""
+msgstr "{} : Pas d'effort estimé. Cela vous aidera pour la prioritisation"
 
 #: models.py:1131
 msgid ""
 "{}: Applied control does not have an external link attached. This will help "
 "you for follow-up"
 msgstr ""
+"{} : La mesure appliquée ne comporte pas de lien externe joint. Cela vous "
+"aidera pour le suivi"
 
 #: models.py:1154
 msgid "{}: Acceptance has no expiry date"
-msgstr ""
+msgstr "{} : L'acceptation n'a pas de date d'expiration"
 
 #: models.py:1168
 msgid "{}: Acceptance has expired. Consider updating the status or the date"
 msgstr ""
+"{} : L'acceptation a expiré. Envisagez de mettre à jour le statut ou la date."
 
 #: models.py:1197
 msgid "Open"
-msgstr ""
+msgstr "Ouvert"
 
 #: models.py:1198
 msgid "Mitigate"
-msgstr ""
+msgstr "Atténuer"
 
 #: models.py:1199
 msgid "Accept"
-msgstr ""
+msgstr "Accepter"
 
 #: models.py:1200
 msgid "Avoid"
-msgstr ""
+msgstr "Éviter"
 
 #: models.py:1201
 msgid "Transfer"
-msgstr ""
+msgstr "Transférer"
 
 #: models.py:1206
 msgid "--"
-msgstr ""
+msgstr "--"
 
 #: models.py:1208
 msgid "The strength of the knowledge supporting the assessment is undefined"
-msgstr ""
+msgstr "La force de la connaissance soutenant l'évaluation est indéfinie"
 
 #: models.py:1212 tests/test_helpers.py:76 tests/test_helpers.py:141
 msgid "Low"
-msgstr ""
+msgstr "Faible"
 
 #: models.py:1214
 msgid "The strength of the knowledge supporting the assessment is low"
-msgstr ""
+msgstr "La force de la connaissance soutenant l'évaluation est faible"
 
 #: models.py:1221
 msgid "The strength of the knowledge supporting the assessment is medium"
-msgstr ""
+msgstr "La force de la connaissance soutenant l'évaluation est moyenne"
 
 #: models.py:1226 tests/test_helpers.py:78 tests/test_helpers.py:143
 msgid "High"
-msgstr ""
+msgstr "Élevé"
 
 #: models.py:1228
 msgid "The strength of the knowledge supporting the assessment is high"
-msgstr ""
+msgstr "La force de la connaissance soutenant l'évaluation est élevée"
 
-#: models.py:1237 templates/snippets/mp_data.html:9
+#: models.py:1237
 msgid "RiskAssessment"
-msgstr ""
+msgstr "ÉvaluationDesRisques"
 
 #: models.py:1244
 msgid "Assets impacted by the risk scenario"
-msgstr ""
+msgstr "Actifs impactés par le scénario de risque"
 
 #: models.py:1262
 msgid ""
 "The existing controls to manage this risk. Edit the risk scenario to add "
 "extra applied controls."
 msgstr ""
+"Les mesures existantes pour gérer ce risque. Modifiez le scénario de risque "
+"pour ajouter des mesures appliquées supplémentaires."
 
 #: models.py:1264 templates/snippets/mp_data.html:48
 #: templates/snippets/ri_list_nested.html:22
 msgid "Existing controls"
-msgstr ""
+msgstr "Mesures existantes"
 
 #: models.py:1270
 msgid "Current probability"
-msgstr ""
+msgstr "Probabilité actuelle"
 
 #: models.py:1273
 msgid "Current impact"
-msgstr ""
+msgstr "Impact actuel"
 
 #: models.py:1277
 msgid "Current level"
-msgstr ""
+msgstr "Niveau actuel"
 
 #: models.py:1279
 msgid ""
 "The risk level given the current measures. Automatically updated on Save, "
 "based on the chosen risk matrix"
 msgstr ""
+"Le niveau de risque compte tenu des mesures actuelles. Mis à jour "
+"automatiquement lors de l'enregistrement, sur la base de la matrice de "
+"risque choisie."
 
 #: models.py:1285
 msgid "Residual probability"
-msgstr ""
+msgstr "Probabilité résiduelle"
 
 #: models.py:1288
 msgid "Residual impact"
-msgstr ""
+msgstr "Impact résiduel"
 
 #: models.py:1292
 msgid "Residual level"
-msgstr ""
+msgstr "Niveau résiduel"
 
 #: models.py:1294
 msgid ""
 "The risk level when all the extra measures are done. Automatically updated "
 "on Save, based on the chosen risk matrix"
 msgstr ""
+"Le niveau de risque lorsque toutes les mesures supplémentaires sont mises en "
+"œuvre. Mis à jour automatiquement lors de l'enregistrement, sur la base de "
+"la matrice de risque choisie."
 
 #: models.py:1302
 msgid "Treatment status"
-msgstr ""
+msgstr "Statut de traitement"
 
 #: models.py:1307
 msgid "Strength of Knowledge"
-msgstr ""
+msgstr "Force de la connaissance"
 
 #: models.py:1308
 msgid "The strength of the knowledge supporting the assessment"
-msgstr ""
+msgstr "La force de la connaissance soutenant l'évaluation"
 
 #: models.py:1311 models.py:1815
 msgid "Justification"
-msgstr ""
+msgstr "Justification"
 
 #: models.py:1317
 msgid "Risk scenario"
-msgstr ""
+msgstr "Scénario de risque"
 
 #: models.py:1318 models.py:1780
 msgid "Risk scenarios"
-msgstr ""
+msgstr "Scénarios de risque"
 
 #: models.py:1384
 msgid ": "
-msgstr ""
+msgstr ": "
 
 #: models.py:1413 models.py:1710
 msgid "Compliant"
-msgstr ""
+msgstr "Conforme"
 
 #: models.py:1414
 msgid "Non compliant (minor)"
-msgstr ""
+msgstr "Non conforme (mineur)"
 
 #: models.py:1415
 msgid "Non compliant (major)"
-msgstr ""
+msgstr "Non conforme (majeur)"
 
 #: models.py:1416 models.py:1711
 msgid "Not applicable"
-msgstr ""
+msgstr "Non applicable"
 
 #: models.py:1426
 msgid "Result"
-msgstr ""
+msgstr "Résultat"
 
 #: models.py:1429
 msgid "Selected implementation groups"
-msgstr ""
+msgstr "Groupes de mise en œuvre sélectionnés"
 
 #: models.py:1439 models.py:1738
 msgid "Compliance assessment"
-msgstr ""
+msgstr "Évaluation de conformité"
 
 #: models.py:1440
 msgid "Compliance assessments"
-msgstr ""
+msgstr "Évaluations de conformité"
 
 #: models.py:1594
 msgid "{}: Compliance assessment is still in progress"
-msgstr ""
+msgstr "{} : L'évaluation de la conformité est toujours en cours"
 
 #: models.py:1607
 msgid "{}: No author assigned to this compliance assessment"
-msgstr ""
+msgstr "{} : Aucun auteur n'a été affecté à cette évaluation de conformité"
 
 #: models.py:1634
 msgid ""
 "{}: Requirement assessment status is compliant or partially compliant with "
 "no applied control applied"
 msgstr ""
+"{} : Le statut de l'évaluation de l'exigence est conforme ou partiellement "
+"conforme, sans aucun mesure appliquée"
 
 #: models.py:1659
 msgid "{}: Applied control has no reference control selected"
 msgstr ""
+"{} : La mesure appliquée ne comporte pas de mesure de référence "
+"sélectionné"
 
 #: models.py:1685
 msgid "{}: Evidence has no file uploaded"
-msgstr ""
+msgstr "{} : La preuve ne comporte pas de fichier téléchargé"
 
 #: models.py:1706
 msgid "To do"
-msgstr ""
+msgstr "À faire"
 
 #: models.py:1708
 msgid "Non compliant"
-msgstr ""
+msgstr "Non conforme"
 
 #: models.py:1709
 msgid "Partially compliant"
-msgstr ""
+msgstr "Partiellement conforme"
 
 #: models.py:1722
 msgid "Score"
-msgstr ""
+msgstr "Score"
 
 #: models.py:1726
 msgid "Is scored"
-msgstr ""
+msgstr "Est noté"
 
 #: models.py:1734
 msgid "Observation"
-msgstr ""
+msgstr "Observation"
 
 #: models.py:1742
 msgid "Requirement"
-msgstr ""
+msgstr "Exigence"
 
 #: models.py:1752
 msgid "Selected"
-msgstr ""
+msgstr "Sélectionné"
 
 #: models.py:1762
 msgid "Requirement assessment"
-msgstr ""
+msgstr "Évaluation de l'exigence"
 
 #: models.py:1763
 msgid "Requirement assessments"
-msgstr ""
+msgstr "Évaluations de l'exigence"
 
 #: models.py:1771
 msgid "Created"
-msgstr ""
+msgstr "Créé"
 
 #: models.py:1772
 msgid "Submitted"
-msgstr ""
+msgstr "Soumis"
 
 #: models.py:1773
 msgid "Accepted"
-msgstr ""
+msgstr "Accepté"
 
 #: models.py:1774
 msgid "Rejected"
-msgstr ""
+msgstr "Rejeté"
 
 #: models.py:1775
 msgid "Revoked"
-msgstr ""
+msgstr "Révoqué"
 
 #: models.py:1782
 msgid ""
 "Select the risk scenarios to be accepted, attention they must be part of the "
 "chosen domain"
 msgstr ""
+"Sélectionnez les scénarios de risque à accepter, faites attention, ils "
+"doivent faire partie du domaine choisi"
 
 #: models.py:1788
 msgid "Risk owner and approver identity"
-msgstr ""
+msgstr "Identité du propriétaire du risque et de l'approbateur"
 
 #: models.py:1789 utils.py:48 utils.py:55 utils.py:58
 msgid "Approver"
-msgstr ""
+msgstr "Approbateur"
 
 #: models.py:1798
 msgid "State"
-msgstr ""
+msgstr "État"
 
 #: models.py:1801
 msgid "Specify when the risk acceptance will no longer apply"
-msgstr ""
+msgstr "Précisez quand l'acceptation du risque ne sera plus valable"
 
 #: models.py:1806
 msgid "Acceptance date"
-msgstr ""
+msgstr "Date d'acceptation"
 
 #: models.py:1809
 msgid "Rejection date"
-msgstr ""
+msgstr "Date de rejet"
 
 #: models.py:1812
 msgid "Revocation date"
-msgstr ""
+msgstr "Date de révocation"
 
 #: models.py:1824
 msgid "Risk acceptance"
-msgstr ""
+msgstr "Acceptation du risque"
 
 #: models.py:1825
 msgid "Risk acceptances"
-msgstr ""
+msgstr "Acceptations du risque"
 
 #: templates/core/action_plan_pdf.html:12
 msgid "Action plan"
@@ -923,63 +962,68 @@ msgstr "Audit"
 
 #: templates/core/action_plan_pdf.html:22
 msgid "Associated applied controls"
-msgstr "Mesures appliquées associées"
+msgstr "Mesures appliqués associés"
 
 #: templates/core/action_plan_pdf.html:23
 msgid "Separated by status and sorted by eta"
-msgstr "Séparées par statut et trié par eta"
+msgstr "Séparés par statut et triés par ETA"
 
 #: templates/core/action_plan_pdf.html:28
 msgid "No status"
-msgstr "Aucun statut"
+msgstr "Pas de statut"
 
 #: templates/core/action_plan_pdf.html:48
 msgid "Matching requirements"
-msgstr "Exigences associées"
+msgstr "Exigences correspondantes"
 
 #: templates/core/action_plan_pdf.html:65
 msgid "No entries found"
-msgstr "Aucune entrée trouvée"
+msgstr "Aucun résultat trouvé"
 
 #: templates/registration/first_connexion_email.html:14
 msgid "Welcome to CISO Assistant!"
-msgstr ""
+msgstr "Bienvenue sur CISO Assistant !"
 
 #: templates/registration/first_connexion_email.html:15
 #: templates/registration/password_reset_email.html:23
 msgid "Your all-in-one GRC Management Platform"
-msgstr ""
+msgstr "Votre plateforme de gestion GRC tout-en-un"
 
 #: templates/registration/first_connexion_email.html:33
 msgid ""
 "You have been granted access to CISO Assistant. To get started, use the link "
 "below to define your password:"
 msgstr ""
+"Vous avez été autorisé à accéder à CISO Assistant. Pour commencer, utilisez "
+"le lien ci-dessous pour définir votre mot de passe :"
 
 #: templates/registration/first_connexion_email.html:38
 msgid "Set my password"
-msgstr ""
+msgstr "Définir mon mot de passe"
 
 #: templates/registration/first_connexion_email.html:41
 #: templates/registration/password_reset_email.html:43
 msgid "An issue with the link? copy and paste the following in your browser"
 msgstr ""
+"Un problème avec le lien ? Copiez et collez le suivant dans votre navigateur"
 
 #: templates/registration/first_connexion_email.html:49
 msgid ""
 "This link can only be used once. In case of an issue, you can access your "
 "instance"
 msgstr ""
+"Ce lien ne peut être utilisé qu'une seule fois. En cas de problème, vous "
+"pouvez accéder à votre instance"
 
 #: templates/registration/first_connexion_email.html:49
 #: templates/registration/first_connexion_email.html:58
 #: templates/registration/password_reset_email.html:51
 msgid "here"
-msgstr ""
+msgstr "ici"
 
 #: templates/registration/first_connexion_email.html:49
 msgid "and request a password reset"
-msgstr ""
+msgstr "et demander une réinitialisation du mot de passe"
 
 #: templates/registration/first_connexion_email.html:54
 #: templates/registration/password_reset_email.html:55
@@ -987,174 +1031,182 @@ msgid ""
 "If you, or your organization, did not make this request, you can simply "
 "ignore this email"
 msgstr ""
+"Si vous ou votre organisation n'avez pas fait cette demande, vous pouvez "
+"simplement ignorer cet e-mail."
 
 #: templates/registration/first_connexion_email.html:58
 msgid "Learn more about CISO Assistant"
-msgstr ""
+msgstr "En savoir plus sur CISO Assistant"
 
 #: templates/registration/first_connexion_email.html:63
 #: templates/registration/password_reset_email.html:58
 msgid "Sincerely"
-msgstr ""
+msgstr "Cordialement,"
 
 #: templates/registration/first_connexion_email.html:64
 #: templates/registration/password_reset_email.html:59
 msgid "CISO Assistant Team"
-msgstr ""
+msgstr "Équipe CISO Assistant"
 
 #: templates/registration/password_reset_email.html:32
 msgid "Hello"
-msgstr ""
+msgstr "Bonjour,"
 
 #: templates/registration/password_reset_email.html:36
 msgid ""
 "We have received a password reset request for this email. Click below to "
 "proceed:"
 msgstr ""
+"Nous avons reçu une demande de réinitialisation de mot de passe pour cet e-"
+"mail. Cliquez ci-dessous pour continuer :"
 
 #: templates/registration/password_reset_email.html:40
 msgid "Reset my password"
-msgstr ""
+msgstr "Réinitialiser mon mot de passe"
 
 #: templates/registration/password_reset_email.html:50
 msgid ""
 "This link can only be used once. In case of an issue, go to your instance"
 msgstr ""
+"Ce lien ne peut être utilisé qu'une seule fois. En cas de problème, rendez-"
+"vous sur votre instance"
 
 #: templates/registration/password_reset_email.html:51
 msgid "and request a new password reset"
-msgstr ""
+msgstr "et demander une nouvelle réinitialisation de mot de passe"
 
 #: templates/snippets/mp_data.html:11
 msgid "Associated risk scenarios"
-msgstr ""
+msgstr "Scénarios de risque associés"
 
 #: templates/snippets/mp_data.html:20
 msgid ""
 "Risk risk_assessment seems to be empty. Measure Plan cannot be generated."
 msgstr ""
+"Le risque risk_assessment semble être vide. Le plan de mesure ne peut pas "
+"être généré."
 
 #: templates/snippets/mp_data.html:43
 msgid "No associated measure"
-msgstr ""
+msgstr "Aucune mesure associée"
 
 #: templates/snippets/mp_data.html:54
 msgid "Additional measures"
-msgstr ""
+msgstr "Mesures supplémentaires"
 
 #: templates/snippets/mp_data.html:60
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: templates/snippets/ra_data.html:13
 msgid "Risk matrix:"
-msgstr ""
+msgstr "Matrice de risque :"
 
 #: templates/snippets/ra_data.html:18
 msgid "Authors:"
-msgstr ""
+msgstr "Auteurs :"
 
 #: templates/snippets/ra_data.html:25
 msgid "Reviewers:"
-msgstr ""
+msgstr "Relecteurs :"
 
 #: templates/snippets/ra_data.html:32
 msgid "Status:"
-msgstr ""
+msgstr "Statut :"
 
 #: templates/snippets/ra_data.html:35
 msgid "ETA:"
-msgstr ""
+msgstr "ETA :"
 
 #: templates/snippets/ra_data.html:36
 msgid "Due date:"
-msgstr ""
+msgstr "Date d'échéance :"
 
 #: templates/snippets/ra_data.html:37
 msgid "Created at:"
-msgstr ""
+msgstr "Créé le :"
 
 #: templates/snippets/ra_data.html:38
 msgid "Updated at:"
-msgstr ""
+msgstr "Mis à jour le :"
 
 #: templates/snippets/ra_data.html:51
 msgid "Associated Risk scenarios"
-msgstr ""
+msgstr "Scénarios de risque associés"
 
 #: templates/snippets/ra_data.html:56
 msgid "Risk matrix view"
-msgstr ""
+msgstr "Vue de la matrice de risque"
 
 #: templates/snippets/ra_data.html:59
 msgid "Current"
-msgstr ""
+msgstr "Actuel"
 
 #: templates/snippets/ra_data.html:67
 msgid "Residual"
-msgstr ""
+msgstr "Résiduel"
 
 #: templates/snippets/ri_list_nested.html:13
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: templates/snippets/ri_list_nested.html:25
 msgid "Current risk level"
-msgstr ""
+msgstr "Niveau de risque actuel"
 
 #: templates/snippets/ri_list_nested.html:28
 msgid "Residual risk level"
-msgstr ""
+msgstr "Niveau de risque résiduel"
 
 #: templates/snippets/ri_list_nested.html:34
 msgid "Suggested measures"
-msgstr ""
+msgstr "Mesures suggérées"
 
 #: templates/snippets/ri_list_nested.html:115
 msgid "No scenario found."
-msgstr ""
+msgstr "Aucun scénario trouvé."
 
 #: templates/snippets/risk_legend.html:4
 msgid "Risk levels"
-msgstr ""
+msgstr "Niveaux de risque"
 
 #: templates/snippets/risk_matrix.html:40
 #: templates/snippets/risk_matrix.html:86
 msgid "Impact"
-msgstr ""
+msgstr "Impact"
 
 #: templates/snippets/risk_matrix.html:46
 msgid "Probability"
-msgstr ""
+msgstr "Probabilité"
 
 #: tests/test_helpers.py:75 tests/test_helpers.py:140
 msgid "Very Low"
-msgstr ""
+msgstr "Très faible"
 
 #: tests/test_helpers.py:79 tests/test_helpers.py:144
 msgid "Very High"
-msgstr ""
+msgstr "Très élevé"
 
 #: utils.py:45 utils.py:53
 msgid "Administrator"
-msgstr ""
+msgstr "Administrateur"
 
 #: utils.py:46 utils.py:56
 msgid "Domain manager"
-msgstr ""
+msgstr "Gestionnaire de domaine"
 
 #: utils.py:47 utils.py:57
 msgid "Analyst"
-msgstr ""
+msgstr "Analyste"
 
 #: utils.py:49 utils.py:54 utils.py:59
 msgid "Reader"
-msgstr ""
+msgstr "Lecteur"
 
 #: utils.py:68
 msgid "French"
-msgstr ""
+msgstr "Français"
 
 #: utils.py:69
 msgid "English"
-msgstr ""
+msgstr "Anglais"

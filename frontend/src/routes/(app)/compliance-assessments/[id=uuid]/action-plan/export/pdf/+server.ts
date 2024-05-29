@@ -7,8 +7,6 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/action_plan_pdf/`;
 
-	console.log(languageTag());
-
 	const res = await fetch(endpoint, {
 		headers: {
 			'Accept-Language': languageTag()
