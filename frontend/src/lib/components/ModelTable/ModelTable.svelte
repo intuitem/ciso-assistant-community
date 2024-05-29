@@ -298,7 +298,7 @@
                   {/if}
                 </svelte:fragment>
                 <svelte:fragment slot="tail">
-                  <svelte:component this={actionsComponent} meta={row.meta ?? {}}/>
+                  <svelte:component this={actionsComponent} meta={row.meta ?? {}} {actionsURLModel}/>
                 </svelte:fragment>
               </TableRowActions>
             {/if}

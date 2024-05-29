@@ -107,9 +107,14 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
         try:
             key = "urn" if pk.startswith("urn:") else "id"
-            library = StoredLibrary.objects.get(
+            for _ in range(10):
+                print(f"Looking for {key} {pk}")
+            libraries = StoredLibrary.objects.filter(  # The get method raise an exception if multiple objects are found
                 **{key: pk}
             )  # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
+            library = max(
+                libraries, key=lambda lib: lib.version
+            )  # Which mean we can only import the latest version of the library, if that so library that has a most recent version stored shouldn't be displayed and should even be erased from the database
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
@@ -193,11 +198,18 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     queryset = LoadedLibrary.objects.all()
 
     def list(self, request, *args, **kwargs):
-        if "view_storedlibrary" not in request.user.permissions:
+        if "view_loadedlibrary" not in request.user.permissions:
             return Response(status=HTTP_403_FORBIDDEN)
 
-        loaded_libraries = [
-            {
+        stored_libraries = [*StoredLibrary.objects.all()]
+        last_version = {}
+        for stored_library in stored_libraries:
+            if last_version.get(stored_library.urn, -1) < stored_library.version:
+                last_version[stored_library.urn] = stored_library.version
+
+        loaded_libraries = []
+        for library in LoadedLibrary.objects.all():
+            loaded_library = {
                 key: getattr(library, key)
                 for key in [
                     "id",
@@ -214,8 +226,11 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
                     "reference_count",
                 ]
             }
-            for library in LoadedLibrary.objects.all()
-        ]
+            loaded_library["has_update"] = (
+                last_version.get(library.urn, -1) > library.version
+            )
+            loaded_libraries.append(loaded_library)
+
         return Response({"results": loaded_libraries})
 
     def retrieve(self, request, *args, pk, **kwargs):
@@ -283,3 +298,28 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         framework = lib.frameworks.first()
         requirement_nodes = framework.requirement_nodes.all()
         return Response(get_sorted_requirement_nodes(requirement_nodes, None))
+
+    @action(detail=True, methods=["get"], url_path="update")
+    def _update(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(
+                codename="add_loadedlibrary"
+            ),  # We should use either this permission or making a new permission "update_loadedlibrary"
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            library = LoadedLibrary.objects.get(**{key: pk})
+        except Exception as e:
+            return Response(
+                data="libraryNotFound", status=HTTP_404_NOT_FOUND
+            )  # Error messages could be returned as JSON instead
+
+        error_msg = library.update()
+        if error_msg is None:
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(
+            error_msg, status=HTTP_422_UNPROCESSABLE_ENTITY
+        )  # We must make at least one error message
