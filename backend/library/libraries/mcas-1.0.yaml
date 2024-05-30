@@ -261,11 +261,11 @@ objects:
       ref_id: INT
       name: "Int\xE9gration de la SSI dans le cycle de vie des syst\xE8mes d\u2019\
         information"
-    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-homqlog-ssi
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-homolog-ssi
       assessable: true
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
-      ref_id: INT-HOMQLOG-SSI
+      ref_id: INT-HOMOLOG-SSI
       name: "Homologation de s\xE9curit\xE9 des syst\xE8mes d'information"
       description: "Tout syst\xE8me d'information doit faire l'objet d'une d\xE9cision\
         \ d\u2019homologation de sa s\xE9curit\xE9 avant sa mise en exploitation dans\
@@ -560,7 +560,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
-      ref_id: PHY CI-EAU
+      ref_id: PHY-CI-EAU
       name: "Lutte contre les voies d\u2019eau"
       description: "Une \xE9tude sur les risques dus aux voies d'eau doit \xEAtre\
         \ r\xE9alis\xE9e. Cette \xE9tude doit notamment prendre en compte le risque\
@@ -1107,21 +1107,21 @@ objects:
         \ rares cas. Les op\xE9rations les plus courantes doivent \xEAtre effectu\xE9\
         es avec des comptes du domaine membres des groupes locaux d\u2019administration\
         \ des ordinateurs ou ayant une d\xE9l\xE9gation d'administration."
-    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-doivi-serv
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-serv
       assessable: true
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
-      ref_id: EXP-DOIVI-SERV
+      ref_id: EXP-DOM-SERV
       name: "Ma\xEEtriser l\u2019utilisation des comptes de service"
       description: "Les comptes de service ont la particularit\xE9 d'avoir g\xE9n\xE9\
         ralement leurs mots de passe inscrits en dur dans des applications ou dans\
         \ des syst\xE8mes. Afin de pouvoir \xEAtre en mesure de changer ces mots de\
         \ passe en urgence, il est n\xE9cessaire de ma\xEEtriser leur utilisation."
-    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-doivi-limitserv
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-limitserv
       assessable: true
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
-      ref_id: EXP-DOIVI-LIMITSERV
+      ref_id: EXP-DOM-LIMITSERV
       name: Limiter les droits des comptes de service
       description: "Les comptes de service doivent faire l\u2019objet d\u2019une restriction\
         \ des droits, en suivant le principe du moindre privil\xE8ge."
@@ -1190,11 +1190,11 @@ objects:
         \ \xEAtre remont\xE9s sur un serveur central pour analyse statistique et gestion\
         \ des probl\xE8mes a posteriori (exemples : serveur constamment infect\xE9\
         , virus d\xE9tect\xE9 et non \xE9radiqu\xE9 par l'antivirus, etc.)."
-    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-maj-antmr
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-maj-antivir
       assessable: true
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
-      ref_id: EXP-MAJ-ANTMR
+      ref_id: EXP-MAJ-ANTIVIR
       name: "Mise \xE0 lourde la base de signatures"
       description: "Les mises \xE0 jour des bases antivirales et des moteurs d'antivirus\
         \ doivent \xEAtre d\xE9ploy\xE9es automatiquement sur les serveurs et les\
@@ -1756,11 +1756,11 @@ objects:
         \ \xEAtre appliqu\xE9es : envoi de documents uniquement \xE0 destination d'une\
         \ adresse de messagerie interne \xE0 l'entit\xE9, envoi uniquement \xE0 une\
         \ seule adresse de messagerie. S\xE9curisation de la t\xE9l\xE9phonie"
-    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-tel-miniiv1
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-tel-minim
       assessable: true
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
-      ref_id: PDT-TEL-MINIIV1
+      ref_id: PDT-TEL-MINIM
       name: "S\xE9curiser la configuration des autocommutateurs"
       description: "Les autocommutateurs doivent \xEAtre maintenus \xE0 jour au niveau\
         \ des correctifs de s\xE9curit\xE9. Leur configuration doit \xEAtre durcie.\
