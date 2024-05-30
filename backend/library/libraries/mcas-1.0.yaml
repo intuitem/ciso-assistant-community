@@ -690,10 +690,11 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
       ref_id: RES-COUCHBAS
-      name: "Implanter des m\xE9canismes de protection contre les attaques sur les"
-      description: "couches basses. Une attention particuli\xE8re doit \xEAtre apport\xE9\
-        e \xE2 l'implantation des protocoles de couches basses, de fa\xE7on \xE0 se\
-        \ pr\xE9munir des attaques usuelles."
+      name: "Implanter des m\xE9canismes de protection contre les attaques sur les\
+        \ couches basses"
+      description: "Une attention particuli\xE8re doit \xEAtre apport\xE9e \xE2 l'implantation\
+        \ des protocoles de couches basses, de fa\xE7on \xE0 se pr\xE9munir des attaques\
+        \ usuelles."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:res-routdyn
       assessable: true
       depth: 2
@@ -732,12 +733,11 @@ objects:
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
       ref_id: RES-SECRET
       name: "Modifier syst\xE9matiquement les \xE9l\xE9ments d\u2019authentification\
-        \ par d\xE9faut des"
-      description: "\xE9quipements et services. Les mots de passe par d\xE9faut doivent\
-        \ \xEAtre imp\xE9rativement modifi\xE9s, de m\xEAme en ce qui concerne les\
-        \ certificats. Les dispositions n\xE9cessaires doivent \xEAtre prises aupr\xE8\
-        s des fournisseurs de fa\xE7on \xE0 pouvoir modifier les certificats install\xE9\
-        s par d\xE9faut."
+        \ par d\xE9faut des \xE9quipements et services"
+      description: "Les mots de passe par d\xE9faut doivent \xEAtre imp\xE9rativement\
+        \ modifi\xE9s, de m\xEAme en ce qui concerne les certificats. Les dispositions\
+        \ n\xE9cessaires doivent \xEAtre prises aupr\xE8s des fournisseurs de fa\xE7\
+        on \xE0 pouvoir modifier les certificats install\xE9s par d\xE9faut."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:res-durci
       assessable: true
       depth: 2
@@ -1195,7 +1195,7 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-MAJ-ANTIVIR
-      name: "Mise \xE0 lourde la base de signatures"
+      name: "Mise \xE0 jour de la base de signatures"
       description: "Les mises \xE0 jour des bases antivirales et des moteurs d'antivirus\
         \ doivent \xEAtre d\xE9ploy\xE9es automatiquement sur les serveurs et les\
         \ postes de travail par un dispositif prescrit par les directions, bureaux\
@@ -1217,13 +1217,12 @@ objects:
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-POL-COR
       name: "D\xE9finir et mettre en \u0153uvre une politique de suivi et d\u2019\
-        application des"
-      description: "correctifs de s\xE9curit\xE9. Le maintien dans le temps du niveau\
-        \ de s\xE9curit\xE9 d\u2019un syst\xE8me d\u2019information impose une gestion\
-        \ organis\xE9e et adapt\xE9e des mises \xE0 jour de s\xE9curit\xE9. Un processus\
-        \ de gestion des correctifs propre \xE0 chaque syst\xE8me ou applicatif doit\
-        \ \xEAtre d\xE9fini, et adapt\xE9 suivant les contraintes et le niveau d\u2019\
-        exposition du syst\xE8me."
+        application des correctifs de s\xE9curit\xE9"
+      description: "Le maintien dans le temps du niveau de s\xE9curit\xE9 d\u2019\
+        un syst\xE8me d\u2019information impose une gestion organis\xE9e et adapt\xE9\
+        e des mises \xE0 jour de s\xE9curit\xE9. Un processus de gestion des correctifs\
+        \ propre \xE0 chaque syst\xE8me ou applicatif doit \xEAtre d\xE9fini, et adapt\xE9\
+        \ suivant les contraintes et le niveau d\u2019exposition du syst\xE8me."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-cor-sec
       assessable: true
       depth: 2
@@ -1272,14 +1271,14 @@ objects:
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-POL-JOUR
       name: "D\xE9finir et mettre en \u0153uvre une politique de gestion et d\u2019\
-        analyse des"
-      description: "journaux de traces. Une politique de gestion et d'analyse des\
-        \ journaux de traces des \xE9v\xE9nements de s\xE9curit\xE9 est d\xE9finie\
-        \ par le RSSI, valid\xE9e par l\u2019autorit\xE9 qualifi\xE9e, et mise en\
-        \ \u0153uvre. Le niveau de s\xE9curit\xE9 d\u2019un syst\xE8me d\u2019information\
-        \ d\xE9pend en grande partie de la capacit\xE9 de ses exploitants et administrateurs\
-        \ \xE0 d\xE9tecter les erreurs, dysfonctionnements et tentatives d\u2019acc\xE8\
-        s illicites survenant sur les \xE9l\xE9ments qui le composent."
+        analyse des journaux de traces"
+      description: "Une politique de gestion et d'analyse des journaux de traces des\
+        \ \xE9v\xE9nements de s\xE9curit\xE9 est d\xE9finie par le RSSI, valid\xE9\
+        e par l\u2019autorit\xE9 qualifi\xE9e, et mise en \u0153uvre. Le niveau de\
+        \ s\xE9curit\xE9 d\u2019un syst\xE8me d\u2019information d\xE9pend en grande\
+        \ partie de la capacit\xE9 de ses exploitants et administrateurs \xE0 d\xE9\
+        tecter les erreurs, dysfonctionnements et tentatives d\u2019acc\xE8s illicites\
+        \ survenant sur les \xE9l\xE9ments qui le composent."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-cons-jour
       assessable: true
       depth: 2
@@ -1306,7 +1305,7 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-MAIT-MAT
-      name: "Ma\xEEtrise des mat\xE9riels,"
+      name: "Ma\xEEtrise des mat\xE9riels"
       description: "Les postes de travail - y compris dans le cas d'une location -\
         \ sont fournis \xE0 l'utilisateur par l\u2019entit\xE9, g\xE9r\xE9s et configur\xE9\
         s sous la responsabilit\xE9 de l'entit\xE9. La connexion d'\xE9quipements\
@@ -1350,11 +1349,11 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-NOMAD-SENS
-      name: "D\xE9claration des \xE9quipements nomades aptes \xE0 traiter des"
-      description: "informations sensibles. L\u2019autorit\xE9 d'homologation du SI\
-        \ valide les usages possibles des \xE9quipements nomades vis-\xE0-vis du traitement\
-        \ des informations sensibles ; les usages non explicitement autoris\xE9s sont\
-        \ interdits."
+      name: "D\xE9claration des \xE9quipements nomades aptes \xE0 traiter des informations\
+        \ sensibles"
+      description: "L\u2019autorit\xE9 d'homologation du SI valide les usages possibles\
+        \ des \xE9quipements nomades vis-\xE0-vis du traitement des informations sensibles\
+        \ ; les usages non explicitement autoris\xE9s sont interdits."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-acc-dist
       assessable: true
       depth: 2
@@ -1389,7 +1388,7 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-CI-OS
-      name: "Syst\xE8mes d\u2019exploitation,"
+      name: "Syst\xE8mes d\u2019exploitation"
       description: "Les syst\xE8mes d'exploitation d\xE9ploy\xE9s doivent faire l'objet\
         \ d'un support valide de la part d\u2019un \xE9diteur ou d\u2019un prestataire\
         \ de service. Seuls les services et applications n\xE9cessaires sont install\xE9\
@@ -1536,7 +1535,7 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
       ref_id: EXP-CI-AUDIT
-      name: "AudiWcontr\xF4le"
+      name: "Audit/Contr\xF4le"
       description: "Le RSSI pilote des audits r\xE9guliers du syst\xE8me d\u2019information\
         \ relevant de sa responsabilit\xE9."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
@@ -1632,7 +1631,7 @@ objects:
       depth: 2
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
       ref_id: PDT-SAUV-LOC
-      name: "Sauvegarde I synchronisation des donn\xE9es locales"
+      name: "Sauvegarde / synchronisation des donn\xE9es locales"
       description: "Dans le cas o\xF9 des donn\xE9es doivent \xEAtre stock\xE9es en\
         \ local sur le poste de travail, des moyens de synchronisation ou de sauvegarde\
         \ doivent \xEAtre fournis aux utilisateurs."
@@ -2004,11 +2003,10 @@ objects:
       parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
       ref_id: PCA-SUIVILOCAL
       name: "Suivi de la mise en \u0153uvre du plan de continuit\xE9 d'activit\xE9\
-        \ local des"
-      description: "Syst\xE8me d'Information (PCA des SI). Le RSSI d'une entit\xE9\
-        \ s\u2019assure de la bonne mise en \u0153uvre des dispositions pr\xE9vues\
-        \ dans le plan de continuit\xE9 d\u2019activit\xE9 des syst\xE8mes d\u2019\
-        information."
+        \ local des Syst\xE8mes d'Information (PCA des SI)"
+      description: "Le RSSI d'une entit\xE9 s\u2019assure de la bonne mise en \u0153\
+        uvre des dispositions pr\xE9vues dans le plan de continuit\xE9 d\u2019activit\xE9\
+        \ des syst\xE8mes d\u2019information."
     - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-proc
       assessable: true
       depth: 2
