@@ -50,6 +50,7 @@ erDiagram
     DOMAIN {
         string name
         string description
+        int version
     }
 
 ```
@@ -65,6 +66,12 @@ erDiagram
     LOADED_LIBRARY  ||--o{ RISK_MATRIX      : contains
     LOADED_LIBRARY  ||--o{ MAPPING          : contains
     LOADED_LIBRARY2 }o--o{ LOADED_LIBRARY   : depends_on
+    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY: translates
+
+    LIBRARY_TRANSLATION {
+        string locale
+        json translation
+    }
 ```
 
 ### General data model
@@ -103,7 +110,6 @@ erDiagram
     FRAMEWORK {
         string  urn
         string  locale
-        boolean default_locale
         string  ref_id
         string  name
         string  description
@@ -151,7 +157,6 @@ erDiagram
     THREAT {
         string  urn
         string  locale
-        boolean default_locale
         string  ref_id
         string  name
         string  description
@@ -162,7 +167,6 @@ erDiagram
     REQUIREMENT_NODE {
         string  urn
         string  locale
-        boolean default_locale
         string  ref_id
         string  name
         string  description
@@ -177,7 +181,6 @@ erDiagram
     REFERENCE_CONTROL {
         string  urn
         string  locale
-        boolean default_locale
         string  ref_id
         string  name
         string  description
@@ -222,7 +225,6 @@ erDiagram
     RISK_MATRIX {
         string  urn
         string  locale
-        boolean default_locale
         string  ref_id
         string  name
         string  description
@@ -295,7 +297,6 @@ erDiagram
     MAPPING {
         string  urn
         string  locale
-        boolean default_locale
         string  ref_id
         string  name
         string  description
@@ -451,7 +452,6 @@ namespace ReferentialObjects {
         +CharField urn
         +CharField ref_id
         +CharField locale
-        +booleanField default_locale
         +CharField provider
         +CharField annotation
         +display_short() str
@@ -914,7 +914,6 @@ Conversely, a referential object with a null URN is called a "local referential 
 - it is created by a user in a given domain (not in the root folder)
 - it can be edited with proper permission.
 - The URN cannot be edited and is hidden.
-- default_locale=True (non-localized object)
 
 Referential objects have the following optional fields:
 - ref_id: reference used in the standard for this object (e.g. A.5.5).
@@ -930,6 +929,20 @@ It is possible to mix global and local referential objects. For example, a clien
 Note: links to URN occur only in libraries, links in the database shall always use the UUID of the object.
 
 The library_manager role will be defined to manage library objects.
+
+## Referential objects translation
+
+When a several locales are loaded for a same library (same URN), the first one is loaded normaly, and becomes the reference version. The next ones are loaed in a LibraryTranslation object, that is used to adapt the UI.
+
+The translation JSON field contains a dictionary with urn as key and a dictionary of (field_name, value) as value.
+
+Example: 
+```
+{
+    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]], 
+    "urn:intuitem:risk:req_node:iso27001-2022:4.3", ...
+}
+```
 
 ## Access control model
 

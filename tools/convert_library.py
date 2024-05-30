@@ -315,7 +315,9 @@ for tab in dataframe:
                     row[header["annotation"]].value if "annotation" in header else None
                 )
                 typical_evidence = (
-                    row[header["typical_evidence"]].value if "typical_evidence" in header else None
+                    row[header["typical_evidence"]].value
+                    if "typical_evidence" in header
+                    else None
                 )
                 implementation_groups = (
                     row[header["implementation_groups"]].value

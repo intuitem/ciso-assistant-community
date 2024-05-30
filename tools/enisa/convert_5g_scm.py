@@ -116,7 +116,13 @@ ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:enisa-5g-scm
 ws.append(["framework_ref_id", "ENISA 5G SCM v1.3"])
 ws.append(["framework_name", "ENISA 5G Security Control Matrix v1.3"])
 ws.append(["framework_description", library_description])
-ws.append(["reference_control_base_urn", f"urn:{packager.lower()}:risk:reference_control:enisa-5g-scm", "1"])
+ws.append(
+    [
+        "reference_control_base_urn",
+        f"urn:{packager.lower()}:risk:reference_control:enisa-5g-scm",
+        "1",
+    ]
+)
 ws.append(["tab", "reference_controls", "reference_controls"])
 ws.append(["tab", "requirements", "requirements"])
 
@@ -128,7 +134,15 @@ for measure_id in measures:
 
 ws1 = wb_output.create_sheet("requirements")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "reference_controls", "typical_evidence"]
+    [
+        "assessable",
+        "depth",
+        "ref_id",
+        "name",
+        "description",
+        "reference_controls",
+        "typical_evidence",
+    ]
 )
 for row in output_table:
     ws1.append(row)
