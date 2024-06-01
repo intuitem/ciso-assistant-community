@@ -239,11 +239,14 @@ def get_sorted_requirement_nodes(
         """
         result = {}
         for node in start:
-            children = [
-                requirement_node
-                for requirement_node in requirement_nodes
-                if requirement_node.parent_urn == node.urn
-            ]
+            children = sorted(
+                [
+                    requirement_node
+                    for requirement_node in requirement_nodes
+                    if requirement_node.parent_urn == node.urn
+                ],
+                key=lambda x: x.order_id,
+            )
             req_as = (
                 requirement_assessment_from_requirement_id[str(node.id)]
                 if requirements_assessed
