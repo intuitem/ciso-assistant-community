@@ -118,7 +118,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
-43. Agile Security Framework (ASF) - by intuitem. A baseline of 14 security domains for flash assessment and custom frameworks 🤗   
+43. Agile Security Framework (ASF) - baseline - by intuitem 🤗   
 44. EU AI Act 🇪🇺🤖
 
 ### Community contributions
