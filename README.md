@@ -119,7 +119,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 41. ENISA: 5G Security Controls Matrix 🇪🇺
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
 43. Agile Security Framework (ASF) - by intuitem. A baseline of 14 security domains for flash assessment and custom frameworks 🤗   
-44. EU AI Act
+44. EU AI Act 🇪🇺🤖
 
 ### Community contributions
 
@@ -149,11 +149,13 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
-### Add your own library (framework, threat catalog, reference controls catalog or matrix)
+## Add your own library
 
-Have a look in the tools directory and its dedicated readme. The convert_library.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
+A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
 
-You will also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+Take a look at the `tools` directory and its dedicated readme. The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
+
+You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
 ## Community
 
