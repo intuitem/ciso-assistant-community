@@ -213,7 +213,9 @@
 						<i class="fa-solid fa-pencil" />
 						{m.annotation()}
 					</p>
-					<p class="py-1">{annotation}</p>
+					<p class="whitespace-pre-line py-1">
+						{annotation}
+					</p>
 				</div>
 			{/if}
 		</div>
