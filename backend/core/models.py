@@ -1450,24 +1450,32 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
-    def get_requirement_assessments(self):
+    def get_requirement_assessments(self, include_non_assessable=False):
         """
-        Returns sorted assessable requirement assessments based on the selected implementation groups
+        Returns sorted assessable requirement assessments based on the selected implementation groups.
+        If include_non_assessable is True, it returns all requirements regardless of their assessable status.
         """
         if not self.selected_implementation_groups:
-            return RequirementAssessment.objects.filter(
-                compliance_assessment=self, requirement__assessable=True
-            ).order_by("requirement__order_id")
+            requirements = RequirementAssessment.objects.filter(
+                compliance_assessment=self
+            )
+            if not include_non_assessable:
+                requirements = requirements.filter(requirement__assessable=True)
+            return requirements.order_by("requirement__order_id")
+
         selected_implementation_groups_set = set(self.selected_implementation_groups)
-        filtered_requirements = RequirementAssessment.objects.filter(
-            compliance_assessment=self, requirement__assessable=True
-        ).order_by("requirement__order_id")
-        requirement_assessments_list = []
-        for requirement in filtered_requirements:
-            if selected_implementation_groups_set & set(
-                requirement.requirement.implementation_groups
-            ):
-                requirement_assessments_list.append(requirement)
+        requirements = RequirementAssessment.objects.filter(compliance_assessment=self)
+        if not include_non_assessable:
+            requirements = requirements.filter(requirement__assessable=True)
+
+        requirements = requirements.order_by("requirement__order_id")
+
+        requirement_assessments_list = [
+            requirement
+            for requirement in requirements
+            if selected_implementation_groups_set
+            & set(requirement.requirement.implementation_groups)
+        ]
 
         return requirement_assessments_list
 
