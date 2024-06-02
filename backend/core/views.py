@@ -1361,11 +1361,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = self.get_object().framework
+        max_score = _framework.max_score
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
             RequirementAssessment.objects.filter(
                 compliance_assessment=self.get_object()
             ).all(),
+            max_score,
         )
         implementation_groups = self.get_object().selected_implementation_groups
         return Response(
