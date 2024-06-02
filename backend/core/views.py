@@ -1729,7 +1729,7 @@ def generate_html(
                 table += (
                     '<div class="grid grid-cols-2 justify-items-left font-semibold">'
                 )
-                table += f'<p>{("Applied applied controls")}:</p>'
+                table += f'<p>{("Applied controls")}:</p>'
                 table += f'<p>{("Associated evidence")}:</p>'
                 table += "</div>"
                 table += '<div class="flex flex-row">'
