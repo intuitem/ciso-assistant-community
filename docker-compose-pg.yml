@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - ALLOWED_HOSTS=backend
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=True
+      - POSTGRES_NAME=ciso_assistant
+      - POSTGRES_USER=ciso_assistant
+      - POSTGRES_PASSWORD=ciso_assistant
+      - DB_HOST=postgres
+    volumes:
+      - ./db:/code/db
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    depends_on:
+      - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ciso_assistant
+      POSTGRES_USER: ciso_assistant
+      POSTGRES_PASSWORD: ciso_assistant
+    volumes:
+      - ./db:/var/lib/postgresql/data
+
+
+  caddy:
+    container_name: caddy
+    image: caddy:2.7.6
+    restart: unless-stopped
+    ports:
+      - 8443:8443
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - https://localhost:8443
+      - --to
+      - frontend:3000
+    volumes:
+      - ./db:/data
