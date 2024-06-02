@@ -102,7 +102,7 @@ SETTINGS_DATA = """{
             "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
         },
         // Public X.509 certificate of the IdP
-        "x509cert": "<onelogin_connector_cert>"
+        "x509cert": "MIICmzCCAYMCBgGP2auE8DANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDDAZtYXN0ZXIwHhcNMjQwNjAyMTU1NTQ3WhcNMzQwNjAyMTU1NzI3WjARMQ8wDQYDVQQDDAZtYXN0ZXIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDN41sTNMtfd8FG9BENArR6czvf7CnkSeD"
         //
         //  Instead of using the whole X.509cert you can use a fingerprint in order to
         //  validate a SAMLResponse (but you still need the X.509cert to validate LogoutRequest and LogoutResponse using the HTTP-Redirect binding).
@@ -142,6 +142,6 @@ SETTINGS_DATA = """{
 """
 
 s = ''.join(l+'\n' if not l.lstrip().startswith('//') else '' for l in SETTINGS_DATA.split('\n'))
-for i, s2 in enumerate(s.split('\n'), start=1): 
-    print(i, s2)
+#for i, s2 in enumerate(s.split('\n'), start=1): 
+#    print(i, s2)
 settings = OneLogin_Saml2_Settings(json.loads(s))
