@@ -9,6 +9,7 @@ services:
       - ALLOWED_HOSTS=backend
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
+      - AUTH_TOKEN_TTL=7200
     volumes:
       - ./db:/code/db
 

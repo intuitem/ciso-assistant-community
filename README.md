@@ -118,7 +118,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
-43. Agile Security Framework (ASF) - baseline - by intuitem 🤗   
+43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
 44. EU AI Act 🇪🇺🤖
 
 ### Community contributions
@@ -279,7 +279,7 @@ export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBU
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 
 # Authentication options
-export AUTH_TOKEN_TTL=900 # optional, default value is 900 seconds (15 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
@@ -419,7 +419,7 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/ 
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/
 
 To interact with it:
 
