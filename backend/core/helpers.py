@@ -213,10 +213,14 @@ def get_sorted_requirement_nodes(
     Recursive function to build framework groups tree
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
+    max_score: the maximum score. This is an attribute of the framework
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
+
     """
+
+    # TODO: pass the framework attributes later on instead of max_score
 
     # cope for old version not creating order_id correctly
     for req in requirement_nodes:

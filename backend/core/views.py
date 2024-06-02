@@ -1063,7 +1063,9 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(), None
+                RequirementNode.objects.filter(framework=_framework).all(),
+                None,
+                _framework.max_score,
             )
         )
 
@@ -1361,13 +1363,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = self.get_object().framework
-        max_score = _framework.max_score
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
             RequirementAssessment.objects.filter(
                 compliance_assessment=self.get_object()
             ).all(),
-            max_score,
+            _framework.max_score,
         )
         implementation_groups = self.get_object().selected_implementation_groups
         return Response(
@@ -1548,7 +1549,11 @@ def generate_html(
     ).all()
 
     implementation_groups = compliance_assessment.selected_implementation_groups
-    graph = get_sorted_requirement_nodes(list(requirement_nodes), list(assessments))
+    graph = get_sorted_requirement_nodes(
+        list(requirement_nodes),
+        list(assessments),
+        compliance_assessment.framework.max_score,
+    )
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
     flattened_graph = flatten_dict(graph)
 
@@ -1606,6 +1611,7 @@ def generate_html(
     content = """
     <html lang="en">
     <head>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="https://unpkg.com/dezui@latest">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Compliance report</title>
