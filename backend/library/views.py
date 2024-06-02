@@ -149,7 +149,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
         preview = preview_library(framework)
         return Response(
-            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
+            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None, None)
         )
 
     @action(detail=False, methods=["post"], url_path="upload")
