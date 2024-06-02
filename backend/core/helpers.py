@@ -207,6 +207,7 @@ def get_compliance_assessment_stats(
 def get_sorted_requirement_nodes(
     requirement_nodes: list,
     requirements_assessed: list | None,
+    max_score: int,
 ) -> dict:
     """
     Recursive function to build framework groups tree
@@ -264,11 +265,7 @@ def get_sorted_requirement_nodes(
                 "status": req_as.status if requirements_assessed else None,
                 "is_scored": req_as.is_scored if requirements_assessed else None,
                 "score": req_as.score if requirements_assessed else None,
-                "max_score": (
-                    req_as.compliance_assessment.framework.max_score
-                    if requirements_assessed
-                    else None
-                ),
+                "max_score": (max_score if requirements_assessed else None),
                 "status_display": (
                     req_as.get_status_display() if requirements_assessed else None
                 ),
@@ -308,7 +305,7 @@ def get_sorted_requirement_nodes(
                             "status": req_as.status,
                             "is_scored": req_as.is_scored,
                             "score": req_as.score,
-                            "max_score": req_as.compliance_assessment.framework.max_score,
+                            "max_score": max_score,
                             "status_display": req_as.get_status_display(),
                             "status_i18n": camel_case(req_as.status),
                             "style": "leaf",
