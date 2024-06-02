@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+echo "This is a sample for running the CISO Assistant Community Edition with a PostgreSQL database"
+echo "You should adjust the docker-compose-pg.yml file with right credentials and settings and most likely split the db on a separate server in a production environment"
+
 if [ -d ./db ] ; then
     echo "the database seems already created"
     echo "you should launch docker compose -f docker-compose-pg.yml up -d"
