@@ -38,7 +38,7 @@ services:
       POSTGRES_USER: ciso_assistant
       POSTGRES_PASSWORD: ciso_assistant
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - ./db/pg:/var/lib/postgresql/data
 
 
   caddy:
