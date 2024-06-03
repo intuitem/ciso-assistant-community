@@ -339,9 +339,13 @@ export function localItems(): LocalItems {
 		lowSOK: m.lowSOK(),
 		mediumSOK: m.mediumSOK(),
 		highSOK: m.highSOK(),
-		libraryImportError: m.libraryImportError(),
+		libraryLoadingError: m.libraryLoadingError(),
 		libraryAlreadyExistsError: m.libraryAlreadyLoadedError(),
 		invalidLibraryFileError: m.invalidLibraryFileError(),
+		libraryNotFound: m.libraryNotFound(),
+		libraryHasNoUpdate: m.libraryHasNoUpdate(),
+		dependencyNotFound: m.dependencyNotFound(),
+		invalidLibraryUpdate: m.invalidLibraryUpdate(),
 		minScore: m.minScore(),
 		maxScore: m.maxScore(),
 		scoresDefinition: m.scoresDefinition(),
@@ -355,6 +359,7 @@ export function localItems(): LocalItems {
 		incoming: m.incoming(),
 		today: m.today(),
 		outdated: m.outdated(),
+		flashMode: m.flashMode(),
 		complianceAssessmentInProgress: m.complianceAssessmentInProgress(),
 		complianceAssessmentNoAuthor: m.complianceAssessmentNoAuthor(),
 		requirementAssessmentNoAppliedControl: m.requirementAssessmentNoAppliedControl(),
@@ -376,7 +381,6 @@ export function localItems(): LocalItems {
 		appliedControlNoLink: m.appliedControlNoLink(),
 		riskAcceptanceNoExpiryDate: m.riskAcceptanceNoExpiryDate(),
 		riskAcceptanceExpired: m.riskAcceptanceExpired(),
-		flashMode: m.flashMode()
 	};
 	return LOCAL_ITEMS;
 }
