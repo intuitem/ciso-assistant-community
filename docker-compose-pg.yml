@@ -5,11 +5,16 @@ services:
     container_name: backend
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     restart: always
+    depends_on:
+      - postgres
     environment:
       - ALLOWED_HOSTS=backend
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
-      - AUTH_TOKEN_TTL=7200
+      - POSTGRES_NAME=ciso_assistant
+      - POSTGRES_USER=ciso_assistant
+      - POSTGRES_PASSWORD=ciso_assistant
+      - DB_HOST=postgres
     volumes:
       - ./db:/code/db
 
@@ -23,6 +28,18 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     depends_on:
       - backend
+
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: ciso_assistant
+      POSTGRES_USER: ciso_assistant
+      POSTGRES_PASSWORD: ciso_assistant
+    volumes:
+      - ./db/pg:/var/lib/postgresql/data
+
 
   caddy:
     container_name: caddy

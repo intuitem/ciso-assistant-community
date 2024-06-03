@@ -5,6 +5,10 @@
 	export let data: PageData;
 	const threats = data.requirement.threats;
 	const reference_controls = data.requirement.reference_controls;
+	const annotation = data.requirement.annotation;
+
+	const has_threats = threats && threats.length > 0;
+	const has_reference_controls = reference_controls && reference_controls.length > 0;
 
 	import { page } from '$app/stores';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -155,54 +159,65 @@
 			👉 {data.requirement.description}
 		</p>
 	{/if}
-	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
-		<div class="card p-4 variant-glass-primary text-sm flex flex-row cursor-auto">
-			<div class="flex-1">
-				<p class="font-medium">
-					<i class="fa-solid fa-gears" />
-					{m.suggestedReferenceControls()}
-				</p>
-				{#if reference_controls.length === 0}
-					<p>--</p>
-				{:else}
-					<ul class="list-disc ml-4">
-						{#each reference_controls as func}
-							<li>
-								{#if func.id}
-									<a class="anchor" href="/reference-controls/{func.id}">
-										{func.str}
-									</a>
-								{:else}
-									<p>{func.str}</p>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
-			<div class="flex-1">
-				<p class="font-medium">
-					<i class="fa-solid fa-gears" />
-					{m.threatsCovered()}
-				</p>
-				{#if threats.length === 0}
-					<p>--</p>
-				{:else}
-					<ul class="list-disc ml-4">
-						{#each threats as threat}
-							<li>
-								{#if threat.id}
-									<a class="anchor" href="/threats/{threat.id}">
-										{threat.str}
-									</a>
-								{:else}
-									<p>{threat.str}</p>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
+	{#if has_threats || has_reference_controls || annotation}
+		<div class="card p-4 variant-glass-primary text-sm flex flex-col cursor-auto">
+			{#if has_threats || has_reference_controls}
+				<div class="flex flex-row cursor-auto">
+					<div class="flex-1">
+						{#if reference_controls.length > 0}
+							<p class="font-medium">
+								<i class="fa-solid fa-gears" />
+								{m.suggestedReferenceControls()}
+							</p>
+							<ul class="list-disc ml-4">
+								{#each reference_controls as func}
+									<li>
+										{#if func.id}
+											<a class="anchor" href="/reference-controls/{func.id}">
+												{func.str}
+											</a>
+										{:else}
+											<p>{func.str}</p>
+										{/if}
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+					<div class="flex-1">
+						{#if threats.length > 0}
+							<p class="font-medium">
+								<i class="fa-solid fa-gears" />
+								{m.threatsCovered()}
+							</p>
+							<ul class="list-disc ml-4">
+								{#each threats as threat}
+									<li>
+										{#if threat.id}
+											<a class="anchor" href="/threats/{threat.id}">
+												{threat.str}
+											</a>
+										{:else}
+											<p>{threat.str}</p>
+										{/if}
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				</div>
+			{/if}
+			{#if annotation}
+				<div class="my-2">
+					<p class="font-medium">
+						<i class="fa-solid fa-pencil" />
+						{m.annotation()}
+					</p>
+					<p class="whitespace-pre-line py-1">
+						{annotation}
+					</p>
+				</div>
+			{/if}
 		</div>
 	{/if}
 	<div class="mt-4">
