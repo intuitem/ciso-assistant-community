@@ -303,6 +303,7 @@
 		<HiddenInput {form} field="requirement_assessments" />
 		<FileInput
 			{form}
+			allowPaste={true}
 			helpText={object.attachment
 				? `${m.attachmentWarningText()}: ${object.attachment}`
 				: m.attachmentHelpText()}
