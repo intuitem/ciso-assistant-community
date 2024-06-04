@@ -76,8 +76,6 @@ for chapter in nzism.find_all("chapter"):
         ("", 1, chapter_id, chapter_name)
     )
     print("Parsing Chapter", chapter_name)
-    if(chapter_id != "6"):
-        continue
     
     for section in chapter.findChildren("section", recursive=False):
         section_id = remove_last_dot(section["title"].split(" ")[0])
