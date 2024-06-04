@@ -39,7 +39,7 @@ def process_paragraph(level, paragraph):
         paragraph_cid = f"CID: {paragraph["cid"]}"
 
     output_table.append(
-        (paragraph_assessable, level, paragraph_id, "", paragraph_description, paragraph_classification, paragraph_cid)
+        (paragraph_assessable, level, paragraph_id, paragraph_cid, paragraph_description, paragraph_classification)
     )
 
 
@@ -133,7 +133,7 @@ ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("requirements")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups", "annotation"]
+    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
 )
 for row in output_table:
     ws1.append(row)
