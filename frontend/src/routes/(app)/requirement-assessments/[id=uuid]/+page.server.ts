@@ -406,7 +406,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 				})
 			},
 			event

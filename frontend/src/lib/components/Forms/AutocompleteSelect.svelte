@@ -89,8 +89,8 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && localItems(languageTag())[toCamelCase(option.label)]}
-					{localItems(languageTag())[toCamelCase(option.label)]}
+				{:else if translateOptions && localItems()[toCamelCase(option.label)]}
+					{localItems()[toCamelCase(option.label)]}
 				{:else}
 					{option.label}
 				{/if}
