@@ -21,4 +21,4 @@ if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
 	python manage.py createsuperuser --noinput
 fi
 
-exec gunicorn --chdir ciso_assistant --bind :8000 --env RUN_MAIN=true ciso_assistant.wsgi:application
+exec gunicorn --chdir ciso_assistant --bind :8000 --timeout 300 --env RUN_MAIN=true ciso_assistant.wsgi:application
