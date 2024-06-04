@@ -17,12 +17,12 @@
 
 	let _sessionStorage: Storage | null = null;
 	$: if (_sessionStorage !== null) {
-		_sessionStorage["library_tabgroup"] = tabSet;
+		_sessionStorage['library_tabgroup'] = tabSet;
 	}
 
 	onMount(() => {
 		_sessionStorage = sessionStorage;
-		tabSet = Number(_sessionStorage["library_tabgroup"]) ?? tabSet;
+		tabSet = Number(_sessionStorage['library_tabgroup']) ?? tabSet;
 	});
 </script>
 
