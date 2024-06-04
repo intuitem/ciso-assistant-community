@@ -1,0 +1,1086 @@
+urn: urn:defend:risk:library:nzism-v3.7
+locale: en
+ref_id: NSIZM-v3.7
+name: NZISM v3.7
+description: New Zealand Information Security Manual v3.7
+copyright: "Except where specifically noted, all material on this site is \xA9 Crown\
+  \ copyright.\n\nYou can reproduce Crown copyright material free of charge without\
+  \ requiring specific permission, provided that the material is reproduced accurately\
+  \ and on the condition that the source of the material and its copyright status\
+  \ are acknowledged.\n\nThis licence does not apply to any logos, emblems and trade\
+  \ marks on the website or to the website\u2019s design elements or to any photography\
+  \ and imagery. Those items may not be used without our express permission.\n\nThe\
+  \ permission to reproduce Crown copyright protected material does not extend to\
+  \ any material on this site that is identified as being the copyright of a third\
+  \ party. Authorisation to reproduce such material must be obtained from the copyright\
+  \ holders concerned.\n\nThe NZISM is licensed under the Creative Commons Attribution\
+  \ 4.0 New Zealand licence, available at https://creativecommons.org/licenses/by/4.0/(external\
+  \ link). You are free to copy, distribute, and adapt the work, as long as you attribute\
+  \ the work and abide by any other licence terms. For the avoidance of doubt, this\
+  \ means this licence applies only to material as set out in the NZISM."
+version: '1'
+provider: New Zealand Government Communications Security Bureau
+packager: DEFEND
+objects:
+  framework:
+    urn: urn:defend:risk:framework:nzism-v3.7
+    ref_id: NSIZM-v3.7
+    name: NZISM v3.7
+    description: New Zealand Information Security Manual v3.7
+    scores_definition:
+    - score: 0
+      name: Non Compliant
+      description: null
+    - score: 1
+      name: Compliant
+      description: null
+    implementation_groups_definition:
+    - ref_id: All Classifications
+      name: All Classifications
+      description: null
+    - ref_id: Unclassified
+      name: Unclassified
+      description: null
+    - ref_id: In-Confidence
+      name: In-Confidence
+      description: null
+    - ref_id: Restricted/Sensitive
+      name: Restricted/Sensitive
+      description: null
+    - ref_id: Confidential
+      name: Confidential
+      description: null
+    - ref_id: Secret
+      name: Secret
+      description: null
+    - ref_id: Top Secret
+      name: Top Secret
+      description: null
+    requirement_nodes:
+    - urn: urn:defend:risk:req_node:nzism-v3.7:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: About information security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Information Security Services within Government
+    - urn: urn:defend:risk:req_node:nzism-v3.7:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Information security governance - roles and responsibilities
+    - urn: urn:defend:risk:req_node:nzism-v3.7:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: System Certification and Accreditation
+    - urn: urn:defend:risk:req_node:nzism-v3.7:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Information security documentation
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Information security monitoring
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6
+      ref_id: '6.1'
+      name: Information Security Reviews
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node9
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.1
+      name: Objective
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node9
+      ref_id: 6.1.1
+      description: Information security reviews maintain the security of agency systems
+        and detect gaps and deficiencies.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node11
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.1
+      name: Context
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node12
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node11
+      description: Scope
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.2
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node12
+      ref_id: 6.1.2
+      description: "This section covers information on conducting reviews of any agency\u2019\
+        s information security posture and security implementation."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node14
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node11
+      description: Information security reviews
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.3
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node14
+      ref_id: 6.1.3
+      description: 'An information security review:
+
+        identifies any changes to the business requirements or concept of operation
+        for the subject of the review;
+
+        identifies any changes to the security risks faced by the subject of the review;
+
+        assesses the effectiveness of the existing counter-measures;
+
+        validates the implementation of controls and counter-measures; and
+
+        reports on any changes necessary to maintain an effective security posture.
+
+        '
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.4
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node14
+      ref_id: 6.1.4
+      description: "An information security review can be scoped to cover anything\
+        \ from a single system to an entire agency\u2019s systems."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node17
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.1
+      name: References
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node17
+      ref_id: 6.1.5
+      description: "Additional information relating to system auditing is contained\
+        \ in:\n\n\nReference\nTitle\_\nPublisher\nSource\n\n\nISO/IEC 27006:2015\_\
+        \n\nInformation technology \u2014 Security techniques \u2014 Requirements\
+        \ for bodies providing audit and certification of information security management\
+        \ systems\n\nISO\n\nhttps://www.iso.org/standard/62313.html\n\n\n\nISO/IEC\
+        \ 27007:2020\_\n\nInformation security, cybersecurity and privacy protection\
+        \ \u2014 Guidelines for information security management systems auditing\n\
+        \nISO\n\nhttps://www.iso.org/standard/77802.html\n\n\n\nISO/IEC TS 27008:2019\_\
+        \n\nInformation technology \u2014 Security techniques \u2014 Guidelines for\
+        \ the assessment of information security controls\n\nISO\n\nhttps://www.iso.org/standard/67397.html\n\
+        \n\n\n"
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node19
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.1
+      name: PSR references
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node19
+      ref_id: 6.1.6
+      description: "Relevant PSR requirements can be found at:\n\n\nReference\nTitle\n\
+        Source\n\n\n\nPSR Mandatory Requirements\n\n\nGOV3, INFOSEC1, INFOSEC2, INFOSEC3\
+        \ and INFOSEC4\n\n\nhttps://www.protectivesecurity.govt.nz\nhttps://protectivesecurity.govt.nz/mandatory-requirements-4/\n\
+        https://protectivesecurity.govt.nz/information-security/mandatory-requirements-3/\n\
+        \n\n\n\nPSR content protocols\_\n\n\nManagement protocol for information security\n\
+        \n\nhttps://protectivesecurity.govt.nz/information-security/management-protocol-2/\n\
+        \n\n\n\nPSR requirements sections\n\n\nSelf assessment & reporting\nValidate\
+        \ your security measures\n\n\nhttps://www.protectivesecurity.govt.nz/self-assessment-and-reporting/\n\
+        https://www.protectivesecurity.govt.nz/information-security/lifecycle/validate-your-security-measures/\n\
+        \n\n\n"
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node21
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.1
+      name: Rationale & Controls
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node22
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node21
+      description: Conducting information security reviews
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.7.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node22
+      ref_id: 6.1.7.R.01
+      description: "Annual reviews of an agency\u2019s information security posture\
+        \ can assist with ensuring that agencies are responding to the latest threats,\
+        \ environmental changes and that systems are properly configured in accordance\
+        \ with any changes to information security documentation and guidance."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.7.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node22
+      ref_id: 6.1.7.C.01
+      description: Agencies SHOULD undertake and document information security reviews
+        of their systems at least annually.
+      annotation: 'CID: 1040'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node25
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node21
+      description: Managing Conflicts of Interest
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.8.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node25
+      ref_id: 6.1.8.R.01
+      description: Reviews may be undertaken by personnel independent of the target
+        of evaluation or by an independent third party to ensure that there is no
+        (perceived or actual) conflict of interest and that an information security
+        review is undertaken in an objective manner.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.8.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node25
+      ref_id: 6.1.8.C.01
+      description: Agencies SHOULD have information security reviews conducted by
+        personnel independent to the target of the review or by an independent third
+        party.
+      annotation: 'CID: 1043'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node28
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node21
+      description: 'Focus of information security reviews '
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.9.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node28
+      ref_id: 6.1.9.R.01
+      description: 'Incidents, significant changes or an aggregation of minor changes
+        may require a security review to determine and support any necessary changes
+        and to demonstrate good systems governance. An agency may choose to undertake
+        an information security review:
+
+        as a result of a specific information security incident;
+
+        because a change to a system or its environment that significantly impacts
+        on the agreed and implemented system architecture and information security
+        policy; or
+
+        as part of a regular scheduled review.
+
+        '
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.9.r.02
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node28
+      ref_id: 6.1.9.R.02
+      description: In order to review risk, an information security review should
+        analyse the threat environment and the highest classification of information
+        that is stored, processed or communicated by that system.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.9.r.03
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node28
+      ref_id: 6.1.9.R.03
+      description: "Depending on the scope and subject of the information security\
+        \ review, agencies may gather information on areas including:\nagency priorities,\
+        \ business requirements and/or concept of operations;\nthreat data;\nrisk\
+        \ likelihood and consequence estimates;\neffectiveness of existing counter-measures;\n\
+        other possible counter-measures;\_\nchanges to standards, policies and guidelines;\n\
+        recommended good practices; and\nsignificant system incidents and changes.\n"
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.1.9.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node28
+      ref_id: 6.1.9.C.01
+      description: 'Agencies SHOULD review the components detailed in the table below.
+        Agencies SHOULD also ensure that any adjustments and changes as a result of
+        any vulnerability analysis are consistent with the vulnerability disclosure
+        policy.
+
+
+
+        Component
+
+        Review
+
+
+
+        Information security documentation
+
+        The SecPol, Systems Architecture, SRMPs, SSPs, SitePlan, SOPs, the VDP, the
+        IRP, and any third party assurance reports.
+
+
+
+        Dispensations
+
+        Prior to the identified expiry date.
+
+
+
+        Operating environment
+
+        When an identified threat emerges or changes, an agency gains or loses a function
+        or the operation of functions are moved to a new physical environment.
+
+
+
+        Procedures
+
+        After an information security incident or test exercise.
+
+
+
+        System security
+
+        Items that could affect the security of the system on a regular basis.
+
+
+
+        Threats
+
+        Changes in threat environment and risk profile.
+
+
+
+        NZISM
+
+        Changes to baseline or other controls, any new controls and guidance.
+
+
+
+        '
+      annotation: 'CID: 1048'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6
+      ref_id: '6.2'
+      name: Vulnerability Analysis
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node34
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.2
+      name: Objective
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node34
+      ref_id: 6.2.1
+      description: "Exploitable information system weaknesses can be identified by\
+        \ vulnerability analyses and inform assessments\_and controls selection."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node36
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.2
+      name: Context
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node37
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node36
+      description: Scope
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.2
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node37
+      ref_id: 6.2.2
+      description: This section covers information on conducting vulnerability assessments
+        on systems as part of the suite of good IT governance activities.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node39
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node36
+      description: Changes as a result of a vulnerability analysis
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.3
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node39
+      ref_id: 6.2.3
+      description: It is important that normal change management processes are followed
+        where changes are necessary in order to address security risks identified
+        in a vulnerability analysis.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node41
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.2
+      name: Rationale & Controls
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node42
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node41
+      description: Vulnerability analysis strategy
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.4.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node42
+      ref_id: 6.2.4.R.01
+      description: Vulnerabilities may be unintentionally introduced and new vulnerabilities
+        are constantly identified, presenting ongoing risks to information systems
+        security.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.4.r.02
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node42
+      ref_id: 6.2.4.R.02
+      description: While agencies are encouraged to monitor the public domain for
+        information related to vulnerabilities that could affect their systems, they
+        should not remain complacent if no specific vulnerabilities relating to deployed
+        products are disclosed.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.4.r.03
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node42
+      ref_id: 6.2.4.R.03
+      description: In some cases, vulnerabilities can be introduced as a result of
+        poor information security practices or as an unintended consequence of activities
+        within an agency. As such, even if no new public domain vulnerabilities in
+        deployed products have been disclosed, there is still value to be gained from
+        regular vulnerability analysis activities.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.4.r.04
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node42
+      ref_id: 6.2.4.R.04
+      description: "Furthermore, monitoring vulnerabilities, conducting analysis and\
+        \ being aware of industry and product changes and advances, including NZISM\
+        \ requirements, provides an awareness of other changes which may adversely\
+        \ impact the security risk profile of the agency\u2019s systems."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.4.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node42
+      ref_id: 6.2.4.C.01
+      description: "Agencies SHOULD implement a vulnerability analysis strategy by:\n\
+        monitoring public domain information about new vulnerabilities in operating\
+        \ systems and application software;\nconsidering the use of automated tools\
+        \ to perform vulnerability assessments on systems in a controlled manner;\n\
+        running manual checks against system configurations to ensure that only allowed\
+        \ services are active and that disallowed services are prevented;\_\nusing\
+        \ security checklists for operating systems and common applications; and\n\
+        examining any significant incidents on the agency\u2019s systems.\n"
+      annotation: 'CID: 1063'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node48
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node41
+      description: Conducting vulnerability assessments
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.5.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node48
+      ref_id: 6.2.5.R.01
+      description: A baseline or known point of origin is the basis of any comparison
+        and allows measurement of changes and improvements when further information
+        security monitoring activities are conducted.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.5.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node48
+      ref_id: 6.2.5.C.01
+      description: "Agencies SHOULD conduct vulnerability assessments in order to\
+        \ establish a baseline. This SHOULD be done:\nbefore a system is first used;\n\
+        after any significant incident;\nafter a significant change to the system;\n\
+        after changes to standards, policies and guidelines;\_\nwhen specified by\
+        \ an ITSM or system owner.\n"
+      annotation: 'CID: 1066'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node51
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node41
+      description: Resolving vulnerabilities
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.6.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node51
+      ref_id: 6.2.6.R.01
+      description: Vulnerabilities may occur as a result of poorly designed or implemented
+        information security practices, accidental activities or malicious activities,
+        and not just as the result of a technical issue.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.2.6.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node51
+      ref_id: 6.2.6.C.01
+      description: Agencies SHOULD analyse and treat all vulnerabilities and subsequent
+        security risks to their systems identified during a vulnerability assessment.
+      annotation: 'CID: 1069'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6
+      ref_id: '6.3'
+      name: Change Management
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node55
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.3
+      name: Objective
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node55
+      ref_id: 6.3.1
+      description: "To ensure information security is an integral part of the change\
+        \ management process, it should be incorporated into the agency\u2019s IT\
+        \ maintenance governance and management activities."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node57
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.3
+      name: Context
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node58
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node57
+      description: Scope
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.2
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node58
+      ref_id: 6.3.2
+      description: This section covers information on identifying and managing routine
+        and urgent changes to systems.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node60
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node57
+      description: Identifying the need for change
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.3
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node60
+      ref_id: 6.3.3
+      description: 'The need for change can be identified in various ways, including:
+
+        system users identifying problems or enhancements;
+
+        vendors notifying of upgrades to software or IT equipment;
+
+        vendors notifying of the end of life to software or IT equipment;
+
+        advances in technology in general;
+
+        implementing new systems that necessitate changes to existing systems;
+
+        identifying new tasks or functionality requiring updates or new systems;
+
+        organisational change;
+
+        business process or concept of operation change;
+
+        standards evolution;
+
+        government policy or Cabinet directives;
+
+        threat or vulnerability identification and notifications received or issued;
+        and
+
+        other incidents or continuous improvement activities.
+
+        '
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node62
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node57
+      description: Types of system change
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.4
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node62
+      ref_id: 6.3.4
+      description: 'A proposed change to a system could involve:
+
+        an upgrade to, or introduction of IT equipment;
+
+        an upgrade to, or introduction of software;
+
+        environment or infrastructure change; or
+
+        major changes to access controls.
+
+        '
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node64
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.3
+      name: PSR references
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node64
+      ref_id: 6.3.5
+      description: "Relevant PSR requirements can be found at:\n\n\nReference\nTitle\n\
+        Source\n\n\n\nPSR Mandatory Requirements\n\n\nGOV3, INFOSEC1, INFOSEC2, INFOSEC3\
+        \ and INFOSEC4\n\n\nhttps://www.protectivesecurity.govt.nz\nhttps://protectivesecurity.govt.nz/mandatory-requirements-4/\n\
+        https://protectivesecurity.govt.nz/information-security/mandatory-requirements-3/\n\
+        \n\n\n\nPSR content protocols\_\n\n\nManagement protocol for information security\n\
+        \n\nhttps://protectivesecurity.govt.nz/information-security/management-protocol-2/\n\
+        \n\n\n\nPSR requirements sections\n\n\nSelf assessment & reporting\nImplement\
+        \ your information security measures\nMaintain your business continuity\_\
+        programme\n\n\nhttps://www.protectivesecurity.govt.nz/self-assessment-and-reporting/\n\
+        https://www.protectivesecurity.govt.nz/physical-security/understand-the-physical-security-lifecycle/implement-2/\n\
+        https://www.protectivesecurity.govt.nz/governance/business-continuity-management/maintain-your-business-continuity-programme/\n\
+        \n\n\n"
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node66
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.3
+      name: Rationale & Controls
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node67
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node66
+      description: Change management
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.6.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node67
+      ref_id: 6.3.6.R.01
+      description: A considered and accountable process requires consultation with
+        all stakeholders before any changes are implemented. In the case of changes
+        that will affect the security or accreditation status of a system, the Accreditation
+        Authority is a key stakeholder and will need to be consulted and grant approval
+        for the proposed changes.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.6.r.02
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node67
+      ref_id: 6.3.6.R.02
+      description: "Change management processes are most likely to be bypassed or\
+        \ ignored when an urgent change needs to be made to a system. In these cases\
+        \ it is essential that the agency\u2019s change management process strongly\
+        \ enforces appropriate actions to be taken before and after an urgent change\
+        \ is implemented."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.6.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node67
+      ref_id: 6.3.6.C.01
+      description: 'Agencies MUST ensure that for routine and urgent changes:
+
+        the change management process, as defined in the relevant information security
+        documentation, is followed;
+
+        the proposed change is approved by the relevant authority;
+
+        any proposed change that could impact the security or accreditation status
+        of a system is submitted to the Accreditation Authority for approval; and
+
+        all associated information security documentation is updated to reflect the
+        change.
+
+        '
+      annotation: 'CID: 1088'
+      implementation_groups:
+      - Top Secret
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.6.c.02
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node67
+      ref_id: 6.3.6.C.02
+      description: 'Agencies SHOULD ensure that for routine and urgent changes:
+
+        the change management process, as defined in the relevant information security
+        documentation, is followed;
+
+        the proposed change is approved by the relevant authority;
+
+        any proposed change that could impact the security of a system or accreditation
+        status is submitted to the Accreditation Authority for approval; and
+
+        all associated information security documentation is updated to reflect the
+        change.
+
+        '
+      annotation: 'CID: 1089'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node72
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node66
+      description: Change management process
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.7.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node72
+      ref_id: 6.3.7.R.01
+      description: "Uncontrolled changes pose risks to information systems as well\
+        \ as the potential to cause operational disruptions.\_ A change management\
+        \ process is fundamental to ensure a considered and accountable approach with\
+        \ appropriate approvals.\_ Furthermore, the change management process provides\
+        \ an opportunity for the security impact of the change to be considered and\
+        \ if necessary, reaccreditation processes initiated."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.7.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node72
+      ref_id: 6.3.7.C.01
+      description: "An agency\u2019s change management process MUST define appropriate\
+        \ actions to be followed before and after urgent changes are implemented."
+      annotation: 'CID: 1093'
+      implementation_groups:
+      - Top Secret
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.7.c.02
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node72
+      ref_id: 6.3.7.C.02
+      description: "An agency\u2019s change management process SHOULD define appropriate\
+        \ actions to be followed before and after urgent changes are implemented."
+      annotation: 'CID: 1094'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.7.c.03
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node72
+      ref_id: 6.3.7.C.03
+      description: 'Agencies SHOULD follow this change management process outline:
+
+        produce a written change request;
+
+        submit the change request to all stakeholders for approval;
+
+        document the changes to be implemented;
+
+        test the approved changes;
+
+        notification to user of the change schedule and likely effect or outage;
+
+        implement the approved changes after successful testing;
+
+        update the relevant information security documentation including the SRMP,
+        SSP and SOPs
+
+        notify and educate system users of the changes that have been implemented
+        as close as possible to the time the change is applied; and
+
+        continually educate system users in regards to changes.
+
+        '
+      annotation: 'CID: 1095'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node77
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node66
+      description: Changes impacting the security of a system
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.8.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node77
+      ref_id: 6.3.8.R.01
+      description: The accreditation of a system accepts residual security risk relating
+        to the operation of that system. Changes may impact the overall security risk
+        for the system. It is essential that the Accreditation Authority is consulted
+        and accepts the changes and any changes to risk.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.3.8.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node77
+      ref_id: 6.3.8.C.01
+      description: When a configuration change impacts the security of a system and
+        is subsequently assessed as having changed the overall security risk for the
+        system, the agency MUST reaccredit the system.
+      annotation: 'CID: 1098'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6
+      ref_id: '6.4'
+      name: Business Continuity and Disaster Recovery
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node81
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.4
+      name: Objective
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node81
+      ref_id: 6.4.1
+      description: "To ensure business continuity and disaster recovery processes\
+        \ are established to assist in meeting the agency\u2019s business requirements,\
+        \ minimise any disruption to the availability of information and systems,\
+        \ and assist recoverability."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node83
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.4
+      name: Context
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node84
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node83
+      description: Scope
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.2
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node84
+      ref_id: 6.4.2
+      description: "This section covers information on business continuity and disaster\
+        \ recovery relating\_specifically to systems."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node86
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.4
+      name: References
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node86
+      ref_id: 6.4.3
+      description: "Additional information relating to business continuity is contained\
+        \ in:\n\n\nReference\nTitle\nPublisher\nSource\n\n\nISO 22301:2019\n\nSecurity\
+        \ and resilience \u2014 Business continuity management systems \u2014 Requirements\n\
+        \n\_ISO\n\nhttps://www.iso.org/standard/75106.html\n\n\n\nISO/IEC 27001:2013\n\
+        Information Technology \u2013 Security Techniques - Information Security Management\
+        \ Systems - Requirements\n\_ISO\n\nhttps://www.iso.org/standard/54534.html\n\
+        \n\n\nISO/IEC 27002:2022\n\nInformation security, cybersecurity and privacy\
+        \ protection \u2014 Information security controls\n\n\_ISO\n\nhttps://www.iso.org/standard/75652.html\n\
+        \n\n\nISO/IEC 27005:2018\nInformation Technology \u2013 Security Techniques\
+        \ - Information Security Risk Management\n\_ISO\n\nhttps://www.iso.org/standard/75281.html\n\
+        \n\n\nISO/IEC 27031:2011\n\nInformation technology \u2014 Security techniques\
+        \ \u2014 Guidelines for information and communication technology readiness\
+        \ for business continuity\n\n\_ISO\n\nhttps://www.iso.org/standard/44374.html\n\
+        \n\n\nSAA/SNZ HB 221:2004\nBusiness Continuity Management\n\_Standards NZ\n\
+        \nhttps://standards.govt.nz/\_\n\n\n\n"
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node88
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.4
+      name: PSR references
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node88
+      ref_id: 6.4.4
+      description: "Relevant PSR requirements can be found at:\_\n\n\nReference\n\
+        Title\nSource\n\n\n\nPSR Mandatory Requirements\n\nGOV3, GOV7, INFOSEC1 and\
+        \ PHYSEC1\n\nhttps://www.protectivesecurity.govt.nz\nhttps://protectivesecurity.govt.nz/mandatory-requirements-4/\n\
+        https://protectivesecurity.govt.nz/information-security/mandatory-requirements-3/\_\
+        \nhttps://www.protectivesecurity.govt.nz/physical-security/physical-security-mandatory-requirements-2/\n\
+        \n\n\n\_PSR content protocols\_\n\nManagement protocol for information security\n\
+        Management protocol for physical security\n\n\nhttps://protectivesecurity.govt.nz/information-security/management-protocol-2/\n\
+        https://www.protectivesecurity.govt.nz/physical-security/management-protocol/\n\
+        \n\n\n\_PSR requirements sections\n\nBusiness continuity management\n\n\n\
+        https://www.protectivesecurity.govt.nz/governance/business-continuity-management/\_\
+        \n\n\n\n"
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node90
+      assessable: false
+      depth: 3
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:6.4
+      name: Rationale & Controls
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node91
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node90
+      description: Availability requirements
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.5.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node91
+      ref_id: 6.4.5.R.01
+      description: "Availability and recovery requirements will vary based on each\
+        \ agency\u2019s business needs and are likely to be widely variable across\
+        \ government. Agencies will determine their own availability and recovery\
+        \ requirements and implement measures consistent with the agency's SRMP to\
+        \ achieve them as part of their risk management and governance processes."
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.5.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node91
+      ref_id: 6.4.5.C.01
+      description: "Agencies MUST determine availability and recovery requirements\
+        \ for their systems and implement measures consistent\_with the agency's SRMP\
+        \ to support them."
+      annotation: 'CID: 1120'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node94
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node90
+      description: Backup strategy
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.6.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node94
+      ref_id: 6.4.6.R.01
+      description: Having a backup strategy in place is a fundamental part of business
+        continuity planning. The backup strategy ensures that critical business information
+        is recoverable if lost. Vital records are defined as any information, systems
+        data, configurations or equipment requirements necessary to restore normal
+        operations.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.6.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node94
+      ref_id: 6.4.6.C.01
+      description: 'Agencies SHOULD:
+
+        Identify vital records;
+
+        backup all vital records;
+
+        store copies of critical information, with associated documented recovery
+        procedures, offsite and secured in accordance with the requirements for the
+        highest classification of the information; and
+
+        test backup and restoration processes regularly to confirm their effectiveness.
+
+        '
+      annotation: 'CID: 1123'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node97
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node90
+      description: Business Continuity plan
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.7.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node97
+      ref_id: 6.4.7.R.01
+      description: It is important to develop a business continuity plan to assist
+        in ensuring that critical systems and data functions can be maintained when
+        the system is operating under constraint, for example, when bandwidth is unexpectedly
+        limited below established thresholds.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.7.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node97
+      ref_id: 6.4.7.C.01
+      description: Agencies SHOULD develop and document a business continuity plan.
+      annotation: 'CID: 1126'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:node100
+      assessable: false
+      depth: 4
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node90
+      description: Disaster recovery plan
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.8.r.01
+      assessable: false
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node100
+      ref_id: 6.4.8.R.01
+      description: Developing and documenting a disaster recovery plan, will reduce
+        the time between a disaster occurring, and critical functions of systems being
+        restored.
+    - urn: urn:defend:risk:req_node:nzism-v3.7:6.4.8.c.01
+      assessable: true
+      depth: 5
+      parent_urn: urn:defend:risk:req_node:nzism-v3.7:node100
+      ref_id: 6.4.8.C.01
+      description: Agencies SHOULD develop and document a disaster recovery plan.
+      annotation: 'CID: 1129'
+      implementation_groups:
+      - All Classifications
+    - urn: urn:defend:risk:req_node:nzism-v3.7:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Information Security Incidents
+    - urn: urn:defend:risk:req_node:nzism-v3.7:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Physical Security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Personnel Security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Infrastructure
+    - urn: urn:defend:risk:req_node:nzism-v3.7:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: Communications Systems and Devices
+    - urn: urn:defend:risk:req_node:nzism-v3.7:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: Product Security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: Media and IT Equipment Management, Decommissioning and Disposal
+    - urn: urn:defend:risk:req_node:nzism-v3.7:14
+      assessable: false
+      depth: 1
+      ref_id: '14'
+      name: Software security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:15
+      assessable: false
+      depth: 1
+      ref_id: '15'
+      name: Email security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:16
+      assessable: false
+      depth: 1
+      ref_id: '16'
+      name: Access Control and Passwords
+    - urn: urn:defend:risk:req_node:nzism-v3.7:17
+      assessable: false
+      depth: 1
+      ref_id: '17'
+      name: Cryptography
+    - urn: urn:defend:risk:req_node:nzism-v3.7:18
+      assessable: false
+      depth: 1
+      ref_id: '18'
+      name: Network security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:19
+      assessable: false
+      depth: 1
+      ref_id: '19'
+      name: Gateway security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:20
+      assessable: false
+      depth: 1
+      ref_id: '20'
+      name: Data management
+    - urn: urn:defend:risk:req_node:nzism-v3.7:21
+      assessable: false
+      depth: 1
+      ref_id: '21'
+      name: Distributed Working
+    - urn: urn:defend:risk:req_node:nzism-v3.7:22
+      assessable: false
+      depth: 1
+      ref_id: '22'
+      name: Enterprise systems security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:23
+      assessable: false
+      depth: 1
+      ref_id: '23'
+      name: Public Cloud Security
+    - urn: urn:defend:risk:req_node:nzism-v3.7:24
+      assessable: false
+      depth: 1
+      ref_id: '24'
+      name: Supporting Information
