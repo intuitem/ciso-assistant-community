@@ -5,5 +5,5 @@
 </script>
 
 <span class="whitespace-nowrap text-primary-800 font-semibold uppercase tracking-tighter text-xs">
-	{localItems(languageTag())[item.name]}
+	{localItems()[item.name]}
 </span>

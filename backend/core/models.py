@@ -1225,6 +1225,7 @@ class RiskAssessment(Assessment):
                     "msg": _("{}: Risk assessment is still in progress").format(
                         str(self)
                     ),
+                    "msgid": "riskAssessmentInProgress",
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -1235,6 +1236,7 @@ class RiskAssessment(Assessment):
                     "msg": _("{}: No author assigned to this risk assessment").format(
                         str(self)
                     ),
+                    "msgid": "riskAssessmentNoAuthor",
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -1245,6 +1247,7 @@ class RiskAssessment(Assessment):
                     "msg": _(
                         "{}: RiskAssessment is empty. No risk scenario declared yet"
                     ).format(self),
+                    "msgid": "riskAssessmentEmpty",
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -1257,6 +1260,8 @@ class RiskAssessment(Assessment):
             "json", self.risk_scenarios.all().order_by("created_at")
         )
         scenarios = [x["fields"] for x in json.loads(_scenarios)]
+        for i in range(len(scenarios)):
+            scenarios[i]["id"] = json.loads(_scenarios)[i]["pk"]
         for ri in scenarios:
             if ri["current_level"] < 0:
                 warnings_lst.append(
@@ -1264,6 +1269,8 @@ class RiskAssessment(Assessment):
                         "msg": _("{} current risk level has not been assessed").format(
                             ri["name"]
                         ),
+                        "msgid": "riskScenarioNoCurrentLevel",
+                        "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1274,6 +1281,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk level has not been assessed. If no additional measures are applied, it should be at the same level as the current risk"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioNoResidualLevel",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1284,6 +1292,8 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk level is higher than the current one"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioResidualHigherThanCurrent",
+                        "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1294,6 +1304,8 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk probability is higher than the current one"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioResidualProbaHigherThanCurrent",
+                        "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1304,6 +1316,8 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} residual risk impact is higher than the current one"
                         ).format(ri["name"]),
+                        "msgid": "riskScenarioResidualImpactHigherThanCurrent",
+                        "link": f"risk-scenarios/{ri['id']}",
                         "obj_type": "riskscenario",
                         "object": ri,
                     }
@@ -1323,6 +1337,8 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{}: residual risk level has been lowered without any specific measure"
                             ).format(ri["name"]),
+                            "msgid": "riskScenarioResidualLoweredWithoutMeasures",
+                            "link": f"risk-scenarios/{ri['id']}",
                             "obj_type": "riskscenario",
                             "object": ri,
                         }
@@ -1335,6 +1351,8 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{} risk accepted but no risk acceptance attached"
                             ).format(ri),
+                            "msgid": "riskScenarioAcceptedNoAcceptance",
+                            "link": f"risk-scenarios/{ri['id']}",
                             "obj_type": "riskscenario",
                             "object": ri,
                         }
@@ -1355,6 +1373,8 @@ class RiskAssessment(Assessment):
                 warnings_lst.append(
                     {
                         "msg": _("{} does not have an ETA").format(mtg["name"]),
+                        "msgid": "appliedControlNoETA",
+                        "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
@@ -1366,6 +1386,8 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{} ETA is in the past now. Consider updating its status or the date"
                             ).format(mtg["name"]),
+                            "msgid": "appliedControlETAInPast",
+                            "link": f"applied-controls/{mtg['id']}",
                             "obj_type": "appliedcontrol",
                             "object": {"name": mtg["name"], "id": mtg["id"]},
                         }
@@ -1377,6 +1399,8 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} does not have an estimated effort. This will help you for prioritization"
                         ).format(mtg["name"]),
+                        "msgid": "appliedControlNoEffort",
+                        "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
@@ -1388,6 +1412,8 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{}: Applied control does not have an external link attached. This will help you for follow-up"
                         ).format(mtg["name"]),
+                        "msgid": "appliedControlNoLink",
+                        "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
@@ -1401,6 +1427,8 @@ class RiskAssessment(Assessment):
             .order_by("created_at"),
         )
         acceptances = [x["fields"] for x in json.loads(_acceptances)]
+        for i in range(len(acceptances)):
+            acceptances[i]["id"] = json.loads(_acceptances)[i]["pk"]
         for ra in acceptances:
             if not ra["expiry_date"]:
                 warnings_lst.append(
@@ -1408,6 +1436,8 @@ class RiskAssessment(Assessment):
                         "msg": _("{}: Acceptance has no expiry date").format(
                             ra["name"]
                         ),
+                        "msgid": "riskAcceptanceNoExpiryDate",
+                        "link": f"risk-acceptances/{ra['id']}",
                         "obj_type": "appliedcontrol",
                         "object": ra,
                     }
@@ -1419,6 +1449,8 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{}: Acceptance has expired. Consider updating the status or the date"
                         ).format(ra["name"]),
+                        "msgid": "riskAcceptanceExpired",
+                        "link": f"risk-acceptances/{ra['id']}",
                         "obj_type": "riskacceptance",
                         "object": ra,
                     }
@@ -1844,6 +1876,7 @@ class ComplianceAssessment(Assessment):
                     "msg": _("{}: Compliance assessment is still in progress").format(
                         str(self)
                     ),
+                    "msgid": "complianceAssessmentInProgress",
                     "obj_type": "complianceassessment",
                     "object": _object,
                 }
@@ -1855,6 +1888,7 @@ class ComplianceAssessment(Assessment):
                     "msg": _(
                         "{}: No author assigned to this compliance assessment"
                     ).format(str(self)),
+                    "msgid": "complianceAssessmentNoAuthor",
                     "obj_type": "complianceassessment",
                     "object": _object,
                 }
@@ -1868,7 +1902,8 @@ class ComplianceAssessment(Assessment):
         requirement_assessments = []
         for ra in _requirement_assessments:
             ra_dict = json.loads(serializers.serialize("json", [ra]))[0]["fields"]
-            ra_dict["repr"] = str(ra)
+            ra_dict["name"] = str(ra)
+            ra_dict["id"] = ra.id
             requirement_assessments.append(ra_dict)
         for requirement_assessment in requirement_assessments:
             if (
@@ -1879,7 +1914,9 @@ class ComplianceAssessment(Assessment):
                     {
                         "msg": _(
                             "{}: Requirement assessment status is compliant or partially compliant with no applied control applied"
-                        ).format(requirement_assessment["repr"]),
+                        ).format(requirement_assessment["name"]),
+                        "msgid": "requirementAssessmentNoAppliedControl",
+                        "link": f"requirement-assessments/{requirement_assessment['id']}",
                         "obj_type": "requirementassessment",
                         "object": requirement_assessment,
                     }
@@ -1894,6 +1931,8 @@ class ComplianceAssessment(Assessment):
             ).order_by("created_at"),
         )
         applied_controls = [x["fields"] for x in json.loads(_applied_controls)]
+        for i in range(len(applied_controls)):
+            applied_controls[i]["id"] = json.loads(_applied_controls)[i]["pk"]
         for applied_control in applied_controls:
             if not applied_control["reference_control"]:
                 info_lst.append(
@@ -1901,6 +1940,8 @@ class ComplianceAssessment(Assessment):
                         "msg": _(
                             "{}: Applied control has no reference control selected"
                         ).format(applied_control["name"]),
+                        "msgid": "appliedControlNoReferenceControl",
+                        "link": f"applied-controls/{applied_control['id']}",
                         "obj_type": "appliedcontrol",
                         "object": applied_control,
                     }
@@ -1917,6 +1958,8 @@ class ComplianceAssessment(Assessment):
             ).order_by("created_at"),
         )
         evidences = [x["fields"] for x in json.loads(_evidences)]
+        for i in range(len(evidences)):
+            evidences[i]["id"] = json.loads(_evidences)[i]["pk"]
         for evidence in evidences:
             if not evidence["attachment"]:
                 warnings_lst.append(
@@ -1924,6 +1967,8 @@ class ComplianceAssessment(Assessment):
                         "msg": _("{}: Evidence has no file uploaded").format(
                             evidence["name"]
                         ),
+                        "msgid": "evidenceNoFile",
+                        "link": f"evidences/{evidence['id']}",
                         "obj_type": "evidence",
                         "object": evidence,
                     }

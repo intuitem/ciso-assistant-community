@@ -71,7 +71,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}

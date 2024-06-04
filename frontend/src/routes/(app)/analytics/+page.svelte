@@ -35,7 +35,7 @@
 	const rsd_rsk_label = m.residualRisk();
 
 	function localizeChartLabels(labels: string[]): string[] {
-		return labels.map((label) => localItems(languageTag())[label]);
+		return labels.map((label) => localItems()[label]);
 	}
 
 	const appliedControlTodoTable: TableSource = {
