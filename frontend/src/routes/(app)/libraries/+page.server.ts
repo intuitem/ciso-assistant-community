@@ -103,7 +103,7 @@ export const actions: Actions = {
 					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
 
 				setFlash({ type: 'error', message: toast_error_message }, event);
-				delete form.data["file"]; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
+				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}
 			setFlash({ type: 'success', message: m.librarySuccessfullyLoaded() }, event);
