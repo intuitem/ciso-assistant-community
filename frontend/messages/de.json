@@ -460,7 +460,7 @@
 	"domainManager": "Domänen-Manager",
 	"analyst": "Analyst",
 	"successfullyCreatedObject": "Das {object} Objekt wurde erfolgreich erstellt",
-	"successfullyUpdatedObject": "Das {object} Objekt wurde erfolgreich aktualisiert",
+	"successfullyUpdatedObject": "Das {object} Objekt: {name} wurde erfolgreich aktualisiert",
 	"successfullySavedObject": "Das {object} Objekt wurde erfolgreich gespeichert",
 	"successfullyDeletedObject": "Das {object} Objekt wurde erfolgreich gelöscht",
 	"successfullyDeletedLibrary": "Die Bibliothek wurde erfolgreich gelöscht",
@@ -474,6 +474,7 @@
 	"attachmentDeleted": "Der Anhang wurde erfolgreich gelöscht",
 	"librarySuccessfullyLoaded": "Die Bibliothek wurde erfolgreich geladen",
 	"noLibraryDetected": "Keine Bibliothek erkannt",
+	"errorImportingLibrary": "Fehler beim Importieren der Bibliothek",
 	"passwordSuccessfullyChanged": "Ihr Passwort wurde erfolgreich geändert",
 	"passwordSuccessfullyReset": "Ihr Passwort wurde erfolgreich zurückgesetzt",
 	"passwordSuccessfullySet": "Ihr Passwort wurde erfolgreich festgelegt",
@@ -497,6 +498,7 @@
 	"lowSOK": "Die Wissensstärke zur Unterstützung der Bewertung ist niedrig",
 	"mediumSOK": "Die Wissensstärke zur Unterstützung der Bewertung ist mittel",
 	"highSOK": "Die Wissensstärke zur Unterstützung der Bewertung ist hoch",
+	"libraryImportError": "Beim Importieren Ihrer Bibliothek ist ein Fehler aufgetreten.",
 	"libraryAlreadyLoadedError": "Diese Bibliothek wurde bereits geladen.",
 	"invalidLibraryFileError": "Ungültige Bibliotheksdatei. Stellen Sie sicher, dass das Format korrekt ist.",
 	"taintedFormMessage": "Möchten Sie diese Seite verlassen? Änderungen, die Sie vorgenommen haben, werden möglicherweise nicht gespeichert.",
@@ -552,7 +554,5 @@
 	"appliedControlNoReferenceControl": "Für die angewandte Steuerung ist keine Referenzsteuerung ausgewählt",
 	"evidenceNoFile": "Für den Beweis wurde keine Datei hochgeladen",
 	"requirementAppliedControlHelpText": "Mit den ausgewählten Maßnahmen verknüpfte Nachweise werden automatisch der Anforderung zugeordnet.",
-	"requirementEvidenceHelpText": "Über diese Registerkarte können Sie der Anforderung weitere Nachweise hinzufügen.",
-	"errorImportingLibrary": "Fehler beim Importieren der Bibliothek",
-	"libraryImportError": "Beim Importieren Ihrer Bibliothek ist ein Fehler aufgetreten."
+	"requirementEvidenceHelpText": "Über diese Registerkarte können Sie der Anforderung weitere Nachweise hinzufügen."
 }
