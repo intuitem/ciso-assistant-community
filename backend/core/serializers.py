@@ -52,11 +52,13 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
-        
+
     def validate_name(self, value):
         clean_value = bleach.clean(value, tags=[], attributes={})
         if clean_value != value:
-            raise serializers.ValidationError("The name must not contain characters from HTML tags or attributes.")
+            raise serializers.ValidationError(
+                "The name must not contain characters from HTML tags or attributes."
+            )
         return value
 
     class Meta:
