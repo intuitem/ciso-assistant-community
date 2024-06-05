@@ -1,4 +1,4 @@
-import json, yaml
+import json
 from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.status import (
@@ -181,12 +181,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyLoadedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except yaml.YAMLError:
+        except:
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-
 
 class LoadedLibraryViewSet(viewsets.ModelViewSet):
     # serializer_class = LoadedLibrarySerializer
