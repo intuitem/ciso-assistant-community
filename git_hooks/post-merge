@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-exec ciso_assistant/scripts/generate_build_file.sh > ciso_assistant/build.json
