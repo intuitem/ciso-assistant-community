@@ -480,7 +480,7 @@
 	"passwordSuccessfullySetWelcome": "Je wachtwoord is succesvol ingesteld. Welkom bij CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Wacht {timing}sec voordat je een nieuwe resetlink aanvraagt",
 	"resetLinkSent": "Het verzoek is ontvangen, je zou een resetlink moeten ontvangen op het volgende adres: {email}",
-	"riskAcceptanceStateDoesntAllowEdit": "De staat van risicoacceptatie: {riskAcceptance} staat het niet toe om bewerkt te worden",
+	"riskAcceptanceStateDoesntAllowEdit": "De staat van risicoacceptatie staat het niet toe om bewerkt te worden",
 	"associatedRequirements": "Geassocieerde eisen",
 	"isPublished": "Is gepubliceerd",
 	"suggestedReferenceControls": "Voorgestelde referentiecontroles",

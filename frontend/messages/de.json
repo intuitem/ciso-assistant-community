@@ -480,7 +480,7 @@
 	"passwordSuccessfullySetWelcome": "Ihr Passwort wurde erfolgreich festgelegt. Willkommen bei CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Warten Sie {timing} Sekunden, bevor Sie einen neuen Zurücksetzungslink anfordern",
 	"resetLinkSent": "Die Anfrage wurde erhalten, Sie sollten einen Zurücksetzungslink an die folgende Adresse erhalten: {email}",
-	"riskAcceptanceStateDoesntAllowEdit": "Der Status der Risikoakzeptanz: {riskAcceptance} erlaubt keine Bearbeitung",
+	"riskAcceptanceStateDoesntAllowEdit": "Der Status der Risikoakzeptanz erlaubt keine Bearbeitung",
 	"associatedRequirements": "Zugehörige Anforderungen",
 	"isPublished": "Ist veröffentlicht",
 	"suggestedReferenceControls": "Vorgeschlagene Referenzkontrollen",
