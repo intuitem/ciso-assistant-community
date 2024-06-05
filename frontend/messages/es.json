@@ -480,7 +480,7 @@
 	"passwordSuccessfullySetWelcome": "Su contraseña se ha establecido con éxito. ¡Bienvenido a CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Espere {timing} segundos antes de solicitar un nuevo enlace de restablecimiento",
 	"resetLinkSent": "Se ha recibido la solicitud, debe recibir un enlace de restablecimiento en la siguiente dirección: {email}",
-	"riskAcceptanceStateDoesntAllowEdit": "El estado de aceptación de riesgos: {riskAcceptance} no permite editarlo",
+	"riskAcceptanceStateDoesntAllowEdit": "El estado de aceptación de riesgos no permite editarlo",
 	"associatedRequirements": "Requisitos asociados",
 	"isPublished": "Está publicado",
 	"suggestedReferenceControls": "Controles de referencia sugeridos",
