@@ -135,6 +135,10 @@ class StoredLibrary(LibraryMixin):
             return None  # We do not store the library if its hash checksum is in the database.
         try:
             library_data = yaml.safe_load(library_content)
+            if not isinstance(library_data, dict):
+                raise yaml.YAMLError(
+                    f"The YAML content must be a dictionary but it's been interpreted as a {type(library_data).__name__} !"
+                )
         except yaml.YAMLError as e:
             logger.error("Error while loading library content", error=e)
             raise e
