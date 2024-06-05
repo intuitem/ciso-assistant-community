@@ -1,0 +1,57 @@
+urn: urn:intuitem:risk:library:critical_risk_matrix_3x3
+locale: en
+ref_id: critical_3x3
+name: Critical risk matrix 3x3
+description: Critical risk matrix 3x3
+version: 1
+provider: intuitem
+packager: intuitem
+objects:
+  risk_matrix:
+    - urn: urn:intuitem:risk:matrix:critical_risk_matrix_3x3
+      ref_id: critical_3x3
+      name: critical 3x3
+      description: critical risk matrix 3x3
+      probability:
+        - abbreviation: L
+          name: Low
+          description: Unfrequent event
+        - abbreviation: M
+          name: Medium
+          description: Occasional event
+        - abbreviation: H
+          name: High
+          description: Frequent event
+      impact:
+        - abbreviation: L
+          name: Low
+          description: Low impact
+        - abbreviation: M
+          name: Medium
+          description: Medium impact
+        - abbreviation: H
+          name: High
+          description: High impact
+      risk:
+        - abbreviation: L
+          name: Low
+          description: acceptable risk
+          hexcolor: "#00FF00"
+        - abbreviation: M
+          name: Medium
+          description: risk requiring mitigation within 2 years
+          hexcolor: "#FFFF00"
+        - abbreviation: H
+          name: High
+          description: unacceptable risk
+          hexcolor: "#FF0000"
+      grid:
+        - - 0
+          - 1
+          - 1
+        - - 1
+          - 1
+          - 2
+        - - 1
+          - 2
+          - 2

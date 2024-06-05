@@ -1,0 +1,2015 @@
+urn: urn:intuitem:risk:library:rgs-v2.0
+locale: fr
+ref_id: RGS-v2.0
+name: "R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 version 2.0"
+description: "R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 version 2.0 selon\
+  \ l'Arr\xEAt\xE9 du 13 juin 2014 portant approbation du r\xE9f\xE9rentiel g\xE9\
+  n\xE9ral de s\xE9curit\xE9 et pr\xE9cisant les modalit\xE9s de mise en \u0153uvre\
+  \ de la proc\xE9dure de validation des certificats \xE9lectroniques\nhttps://www.legifrance.gouv.fr/loda/id/JORFTEXT000029122964"
+copyright: "Loi fran\xE7aise"
+version: 1
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:rgs-v2.0
+    ref_id: RGS-v2.0
+    name: "R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 version 2.0"
+    description: "R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 version 2.0 selon\
+      \ l'Arr\xEAt\xE9 du 13 juin 2014 portant approbation du r\xE9f\xE9rentiel g\xE9\
+      n\xE9ral de s\xE9curit\xE9 et pr\xE9cisant les modalit\xE9s de mise en \u0153\
+      uvre de la proc\xE9dure de validation des certificats \xE9lectroniques\nhttps://www.legifrance.gouv.fr/loda/id/JORFTEXT000029122964"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-1
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 1
+      name: "Mise en conformit\xE9 avec les exigences du \xAB d\xE9cret RGS \xBB  "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-1
+      description: "Le r\xE9f\xE9rentiel g\xE9n\xE9ral de s\xE9curit\xE9 (RGS) vise\
+        \ \xE0 renforcer la confiance des usagers dans les services \xE9lectroniques\
+        \ propos\xE9s par les autorit\xE9s administratives, notamment lorsque ceux-ci\
+        \ traitent des donn\xE9es personnelles. Il s\u2019applique aux syst\xE8mes\
+        \ d\u2019information mis en \u0153uvre par les autorit\xE9s administratives\
+        \ dans leurs relations entre elles et avec les usagers. Il peut aussi \xEA\
+        tre consid\xE9r\xE9 comme un recueil de bonnes pratiques pour tous les autres\
+        \ organismes."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-1
+      description: "Afin de mettre leur syst\xE8me d\u2019information en conformit\xE9\
+        \ avec le RGS, les autorit\xE9s administratives doivent adopter une d\xE9\
+        marche en cinq \xE9tapes, pr\xE9vue par le d\xE9cret n\xB0 2010-112 du 2 f\xE9\
+        vrier 2010 (d\xE9cret RGS) :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node4
+      description: "1. r\xE9alisation d\u2019une analyse des risques (art. 3 al. 1)\
+        \ ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node4
+      description: "2. d\xE9finition des objectifs de s\xE9curit\xE9 (art. 3 al. 2)\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node4
+      description: "3. choix et mise en \u0153uvre des mesures appropri\xE9es de protection\
+        \ et de d\xE9fense du SI (art. 3 al. 3) ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node4
+      description: "4. homologation de s\xE9curit\xE9 du syst\xE8me d\u2019information\
+        \ (art. 5) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node4
+      description: "5. suivi op\xE9rationnel de la s\xE9curit\xE9 du SI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-1
+      description: "Dans l\u2019\xE9ventualit\xE9 o\xF9 le syst\xE8me d\u2019information\
+        \ serait d\xE9j\xE0 en service sans avoir fait l\u2019objet de cette d\xE9\
+        marche, ou bien a \xE9t\xE9 modifi\xE9, la proc\xE9dure simplifi\xE9e suivante\
+        \ peut \xEAtre mise en oeuvre :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node10
+      description: "1. r\xE9alisation d\u2019un audit de la s\xE9curit\xE9 du syst\xE8\
+        me d\u2019information en interne ou externalis\xE9 aupr\xE8s d\u2019un prestataire\
+        \ ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node10
+      description: "2. r\xE9alisation d\u2019une analyse des risques simplifi\xE9\
+        e ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node10
+      description: "3. mise en \u0153uvre des mesures correctives fix\xE9es dans le\
+        \ rapport d\u2019audit ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node10
+      description: "4. d\xE9cision d\u2019homologation de s\xE9curit\xE9 du syst\xE8\
+        me d\u2019information ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node10
+      description: "5. suivi op\xE9rationnel de la s\xE9curit\xE9 du SI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-1
+      description: "Au-del\xE0 des mesures techniques et organisationnelles, les autorit\xE9\
+        s administratives doivent veiller :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node16
+      description: "- aux clauses relatives \xE0 la s\xE9curit\xE9 des contrats qu\u2019\
+        elles passent avec des prestataires charg\xE9s de les assister dans leur d\xE9\
+        marche de s\xE9curisation de leurs syst\xE8mes. Ces services peuvent \xEA\
+        tre de nature intellectuelle (audit de la s\xE9curit\xE9 du syst\xE8me d\u2019\
+        information, traitement d\u2019incident de s\xE9curit\xE9, notamment) ou technique\
+        \ (m\xE9canisme de d\xE9tection, externalisation, infog\xE9rance, mise dans\
+        \ le nuage de tout ou partie du syst\xE8me d\u2019information, tierce maintenance\
+        \ applicative, etc.) ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node16
+      description: "- au facteur humain : la sensibilisation du personnel aux questions\
+        \ de s\xE9curit\xE9 est primordiale, ainsi que la formation de ceux qui interviennent\
+        \ plus sp\xE9cifiquement dans la mise en \u0153uvre et le suivi op\xE9rationnel\
+        \ de la s\xE9curit\xE9 du syst\xE8me d\u2019information (surveillance, d\xE9\
+        tection, pr\xE9vention). "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-1
+      description: "D\u2019une mani\xE8re g\xE9n\xE9rale, il est recommand\xE9 de\
+        \ s\u2019appuyer sur les guides et sur la documentation produits par l\u2019\
+        ANSSI. "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-2
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 2
+      name: "Description des \xE9tapes de la mise en conformit\xE9 "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-2
+      ref_id: '2.1'
+      name: Analyse des risques
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      description: "L\u2019analyse de risques pr\xE9cise les besoins de s\xE9curit\xE9\
+        \ du syst\xE8me d\u2019information en fonction de la menace et des enjeux.\
+        \  "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      description: "La d\xE9marche d\u2019analyse de risques consiste \xE0 identifier\
+        \ les \xE9v\xE8nements qui peuvent affecter la s\xE9curit\xE9 du syst\xE8\
+        me, d\u2019en estimer les cons\xE9quences et les impacts potentiels puis de\
+        \ d\xE9cider des actions \xE0 r\xE9aliser afin de r\xE9duire le risque \xE0\
+        \ un niveau acceptable.  "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      description: "Les menaces \xE0 prendre en compte sont celles qui p\xE8sent r\xE9\
+        ellement sur le syst\xE8me et sur les informations qu\u2019il traite, transmet\
+        \ et stocke, dans l\u2019environnement dans lequel il se situe."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node25
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      description: "Lorsque le syst\xE8me d\u2019information int\xE8gre des certificats\
+        \ \xE9lectroniques ou de l\u2019horodatage \xE9lectronique, l\u2019analyse\
+        \ des risques doit permettre de d\xE9cider des usages (signature, authentification,\
+        \ confidentialit\xE9, etc.) et des niveaux de s\xE9curit\xE9 (*, ** ou ***)\
+        \ qui seront mis en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node26
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      description: "Il est recommand\xE9 de s\u2019appuyer sur la norme ISO 27005,\
+        \ qui fixe un cadre th\xE9orique de la gestion des risques."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node27
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.1
+      description: "Sa mise en \u0153uvre pratique peut \xEAtre facilit\xE9e par les\
+        \ explications et les outils, notamment logiciels, propos\xE9s par la m\xE9\
+        thode Expression des besoins et indentification des objectifs de s\xE9curit\xE9\
+        \ (EBIOS). "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-2
+      ref_id: '2.2'
+      name: "D\xE9finition des objectifs de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node29
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.2
+      description: "Une fois les risques appr\xE9ci\xE9s, l\u2019autorit\xE9 administrative\
+        \ doit \xE9noncer les objectifs de s\xE9curit\xE9 \xE0 satisfaire. Aux trois\
+        \ grands domaines traditionnels (disponibilit\xE9 et int\xE9grit\xE9 des donn\xE9\
+        es et du syst\xE8me, confidentialit\xE9 des donn\xE9es et des \xE9l\xE9ments\
+        \ critiques du syst\xE8me) peuvent s\u2019ajouter deux domaines compl\xE9\
+        mentaires :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node30
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node29
+      description: "- l\u2019authentification, afin de garantir que la personne identifi\xE9\
+        e est effectivement celle qu\u2019elle pr\xE9tend \xEAtre ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node31
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node29
+      description: "- la tra\xE7abilit\xE9, afin de pouvoir associer les actions sur\
+        \ les donn\xE9es et les processus aux personnes effectivement connect\xE9\
+        es au syst\xE8me et ainsi permettre de d\xE9celer toute action ou tentative\
+        \ d\u2019action ill\xE9gitime."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node32
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.2
+      description: "Les objectifs de s\xE9curit\xE9 doivent \xEAtre exprim\xE9s aussi\
+        \ bien en termes de protection que de d\xE9fense des syst\xE8mes d\u2019information. "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node33
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.2
+      description: "Les autorit\xE9s administratives peuvent s\u2019appuyer sur le\
+        \ guide m\xE9thodologique EBIOS 2010, afin de formuler pr\xE9cis\xE9ment ces\
+        \ objectifs de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-2
+      ref_id: '2.3'
+      name: "Choix et mise en \u0153uvre des mesures de s\xE9curit\xE9 adapt\xE9es"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node35
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.3
+      description: "L\u2019expression des objectifs de s\xE9curit\xE9 permet d\u2019\
+        appr\xE9cier les fonctions de s\xE9curit\xE9 qui peuvent \xEAtre mises en\
+        \ \u0153uvre pour les atteindre (art. 3, al. 3 du d\xE9cret RGS). Ces fonctions\
+        \ de s\xE9curit\xE9 sont mat\xE9rialis\xE9es par le choix de moyens et de\
+        \ mesures de nature :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node36
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node35
+      description: "- technique : produits de s\xE9curit\xE9 (mat\xE9riels ou logiciels),\
+        \ prestations de services de confiance informatiques ou autres dispositifs\
+        \ de s\xE9curit\xE9 (blindage, d\xE9tecteur d\u2019intrusion...) ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node37
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node35
+      description: "- organisationnelle : organisation des responsabilit\xE9s (habilitation\
+        \ du personnel, contr\xF4le des acc\xE8s, protection physique des \xE9l\xE9\
+        ments sensibles...), gestion des ressources humaines (affectation d\u2019\
+        agents responsables de la gestion du syst\xE8me d\u2019information, formation\
+        \ du personnel sp\xE9cialis\xE9, sensibilisation des utilisateurs)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node38
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.3
+      description: "Ces mesures de s\xE9curit\xE9 peuvent \xEAtre s\xE9lectionn\xE9\
+        es au sein des r\xE9f\xE9rentiels et normes existants."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node39
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.3
+      description: "Elles peuvent \xE9galement en \xEAtre adapt\xE9es ou bien \xEA\
+        tre cr\xE9\xE9es ex nihilo."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-2
+      ref_id: '2.4'
+      name: "Homologation de s\xE9curit\xE9 du syst\xE8me d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node41
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.4
+      description: "Les syst\xE8mes d\u2019information qui entrent dans le champ de\
+        \ l\u2019ordonnance du 8 d\xE9cembre 2005 doivent faire l\u2019objet, avant\
+        \ leur mise en service op\xE9rationnelle, d\u2019une d\xE9cision d\u2019homologation\
+        \ de s\xE9curit\xE9.  Egalement d\xE9nomm\xE9e \xAB attestation formelle \xBB\
+        \ (art. 5, al. 1 du d\xE9cret RGS), elle est prononc\xE9e par une autorit\xE9\
+        \ d\u2019homologation, d\xE9sign\xE9e par la ou les autorit\xE9s administratives\
+        \ charg\xE9es du syst\xE8me d\u2019information."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node42
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.4
+      description: "La d\xE9cision d\u2019homologation atteste, au nom de l\u2019\
+        autorit\xE9 administrative, que le syst\xE8me d\u2019information est prot\xE9\
+        g\xE9 conform\xE9ment aux objectifs de s\xE9curit\xE9 fix\xE9s et que les\
+        \ risques r\xE9siduels sont accept\xE9s. La d\xE9cision d\u2019homologation\
+        \ s\u2019appuie sur un dossier d\u2019homologation. Lorsqu\u2019elle concerne\
+        \ un t\xE9l\xE9service, cette d\xE9cision est rendue accessible aux usagers."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node43
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.4
+      description: "Il est recommand\xE9 que les syst\xE8mes d\u2019information homologu\xE9\
+        s fassent l\u2019objet d\u2019une revue p\xE9riodique. "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node44
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.4
+      description: "Afin d\u2019homologuer leurs syst\xE8mes d\u2019information, les\
+        \ autorit\xE9s administratives peuvent utiliser les recommandations d\xE9\
+        crites dans le guide publi\xE9 par l\u2019ANSSI [Guide homologation]. "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:2.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-2
+      ref_id: '2.5'
+      name: "Suivi op\xE9rationnel de la s\xE9curit\xE9 du syst\xE8me d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node46
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.5
+      description: "Les mesures de protection d\u2019un syst\xE8me d\u2019information\
+        \ doivent \xEAtre accompagn\xE9es d\u2019un suivi op\xE9rationnel quotidien\
+        \ ainsi que de mesures de surveillance et de d\xE9tection, afin de r\xE9agir\
+        \ au plus vite aux incidents de s\xE9curit\xE9 et de les traiter au mieux."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:2.5
+      description: "Le suivi op\xE9rationnel consiste\_:"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node48
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 collecter et \xE0 analyser les journaux d\u2019\xE9v\xE8\
+        nements et les alarmes,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node49
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 mener des audits r\xE9guliers,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node50
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 appliquer des mesures correctives apr\xE8s un audit ou\
+        \ un incident,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node51
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 mettre en \u0153uvre une cha\xEEne d\u2019alerte en cas\
+        \ d\u2019intrusion suppos\xE9e ou av\xE9r\xE9e sur le syst\xE8me,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node52
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 g\xE9rer les droits d\u2019acc\xE8s des utilisateurs,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node53
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 assurer une veille sur les menaces et les vuln\xE9rabilit\xE9\
+        s,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node54
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 entretenir des plans de continuit\xE9 et de reprise d\u2019\
+        activit\xE9,"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node55
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 sensibiliser le personnel et"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node56
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node47
+      description: "- \xE0 g\xE9rer les crises lorsqu\u2019elles surviennent."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 3
+      name: "R\xE8gles relatives \xE0 la cryptographie et \xE0 la protection des \xE9\
+        changes \xE9lectroniques"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node58
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      description: "Les r\xE8gles techniques impos\xE9es par le RGS portent uniquement\
+        \ sur la s\xE9curisation des infrastructures utilis\xE9es pour proc\xE9der\
+        \ aux \xE9changes \xE9lectroniques entre les autorit\xE9s administratives\
+        \ et les usagers ainsi qu\u2019entre les autorit\xE9s administratives elles-m\xEA\
+        mes."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node59
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      description: "Le RGS n\u2019impose aucune technologie particuli\xE8re et laisse\
+        \ aux autorit\xE9s administratives le choix des mesures \xE0 mettre en \u0153\
+        uvre. Il fixe cependant des exigences relatives \xE0 certaines fonctions de\
+        \ s\xE9curit\xE9, notamment la certification, l\u2019horodatage et l\u2019\
+        audit."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node60
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      description: "En fonction de leur besoin de s\xE9curit\xE9, issu de l\u2019\
+        analyse de risques, il appartient aux autorit\xE9s administratives de d\xE9\
+        terminer les fonctions de s\xE9curit\xE9 ainsi que les niveaux de s\xE9curit\xE9\
+        \ associ\xE9s, en s\u2019appuyant sur les m\xE9thodes, les outils et les bonnes\
+        \ pratiques propos\xE9s aux chapitres 2 et 7."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node61
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      description: "Lorsqu\u2019elles choisissent de mettre en \u0153uvre des fonctions\
+        \ de s\xE9curit\xE9 trait\xE9es dans le pr\xE9sent chapitre, les autorit\xE9\
+        s administratives choisissent le niveau de s\xE9curit\xE9 adapt\xE9 \xE0 leur\
+        \ besoin et appliquent les r\xE8gles correspondantes d\xE9crites dans ce r\xE9\
+        f\xE9rentiel."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node62
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      description: "Dans tous les cas, le Premier ministre  recommande l\u2019usage\
+        \ de produits qualifi\xE9s quand ils existent."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      ref_id: '3.1'
+      name: "R\xE8gles relatives \xE0 la cryptographie"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node64
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.1
+      description: "Lorsqu\u2019elles mettent en place des mesures de s\xE9curit\xE9\
+        \ comprenant des m\xE9canismes cryptographiques, les autorit\xE9s administratives\
+        \ doivent respecter les r\xE8gles, et si possible les recommandations, indiqu\xE9\
+        es dans les annexes [RGS_B1] et [RGS_B2], communs \xE0 tous les m\xE9canismes\
+        \ cryptographiques, ainsi que l\u2019annexe [RGS_B3], d\xE9di\xE9 aux m\xE9\
+        canismes d\u2019authentification."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-3
+      ref_id: '3.2'
+      name: "R\xE8gles relatives \xE0 la protection des \xE9changes \xE9lectroniques"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node66
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2
+      description: "Les r\xE8gles de s\xE9curit\xE9 \xE0 respecter pour les fonctions\
+        \ de s\xE9curit\xE9 d\u2019authentification, de signature \xE9lectronique,\
+        \ de confidentialit\xE9 et d\u2019horodatage, reposent sur l\u2019emploi de\
+        \ contremarques de temps dans le cas de l\u2019horodatage \xE9lectronique\
+        \ et de certificats \xE9lectroniques pour toutes les autres fonctions."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2
+      ref_id: 3.2.a
+      name: "R\xE8gles relatives aux certificats \xE9lectroniques"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node68
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a
+      description: "Les exigences concernant le composant \xAB certificat \xE9lectronique\
+        \ \xBB sont d\xE9crites dans deux annexes du RGS appel\xE9es respectivement\
+        \ \xAB Politique de certification type - Personne physique \xBB ([RGS_A2])\
+        \ et \xAB Politique de certification type - Services applicatifs \xBB ([RGS_A3]).\
+        \ Elles portent sur le contenu des certificats et sur les conditions dans\
+        \ lesquelles il est \xE9mis par un prestataire de services de certification\
+        \ \xE9lectronique (PSCE), ainsi que sur le dispositif de stockage de la cl\xE9\
+        \ priv\xE9e."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node69
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a
+      description: "Le RGS offre la possibilit\xE9 de disposer :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node70
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node69
+      description: "- des certificats mono-usage \xE0 usage d\u2019authentification\
+        \ de personne physique ou de serveur, de signature, de cachet et de confidentialit\xE9\
+        \ pour des niveaux une \xE9toile (*), deux \xE9toiles (**) et trois \xE9toiles\
+        \ (***) (cf. [RGS_A2] et [RGS_A3]) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node71
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node69
+      description: "- d\u2019un certificat \xE9lectronique unique, dit \xAB \xE0 double\
+        \ usage \xBB, pour les fonctions d\u2019authentification de personne physique\
+        \ et de signature \xE9lectronique. Ce certificat ne peut \xEAtre pr\xE9vu\
+        \ qu\u2019aux niveaux (*) et (**) (cf. [RGS_A2]). "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a
+      ref_id: 3.2.a.1
+      name: "L\u2019authentification d\u2019une entit\xE9 par certificat \xE9lectronique"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node73
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.1
+      description: "L\u2019authentification a pour but de v\xE9rifier l\u2019identit\xE9\
+        \ dont se r\xE9clame une personne ou une machine. La mise en \u0153uvre par\
+        \ une autorit\xE9 administrative des fonctions de s\xE9curit\xE9 \xAB Authentification\
+        \ \xBB ou \xAB Authentification serveur \xBB peut se faire selon trois niveaux\
+        \ de s\xE9curit\xE9 aux exigences croissantes : (*), (**) et (***)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node74
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.1
+      description: "Ces exigences, d\xE9crites dans les annexes [RGS_A1], couvrent,\
+        \ pour les trois niveaux de s\xE9curit\xE9, l\u2019ensemble des composants\
+        \ n\xE9cessaires \xE0 la mise en \u0153uvre de cette fonction de s\xE9curit\xE9\
+        , \xE0 savoir : "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node75
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node74
+      description: "- la bi-cl\xE9 et le certificat \xE9lectronique dont l\u2019usage\
+        \ est l\u2019authentification ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node76
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node74
+      description: "- le dispositif d\u2019authentification ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node77
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node74
+      description: "- le module de v\xE9rification d\u2019authentification ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node78
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node74
+      description: "- l\u2019application d\u2019authentification."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a
+      ref_id: 3.2.a.2
+      name: "La signature et le cachet \xE9lectroniques"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node80
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      description: "La signature \xE9lectronique d\u2019une personne permet de garantir\
+        \ l\u2019identit\xE9 du signataire, l\u2019int\xE9grit\xE9 du document sign\xE9\
+        \ et le lien entre le document sign\xE9 et la signature. Elle traduit ainsi\
+        \ la manifestation du consentement du signataire quant au contenu des informations\
+        \ sign\xE9es."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node81
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      description: "Dans le cas des \xE9changes d\xE9mat\xE9rialis\xE9s faisant intervenir\
+        \ des services applicatifs, la fonction de \xAB cachet \xBB permet de garantir\
+        \ l\u2019int\xE9grit\xE9 des informations \xE9chang\xE9es et l\u2019identification\
+        \ du service ayant \xAB cachet\xE9 \xBB ces informations. Cette fonction de\
+        \ \xAB cachet \xBB est, pour une machine, l\u2019\xE9quivalent de la fonction\
+        \ signature pour une personne."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node82
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      description: "La mise en \u0153uvre par une autorit\xE9 administrative des fonctions\
+        \ de s\xE9curit\xE9 \xAB Signature \xE9lectronique \xBB ou \xAB cachet \xBB\
+        \ peut se faire selon trois niveaux de s\xE9curit\xE9 aux exigences croissantes\
+        \ : (*), (**) et (***)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node83
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      description: "Ces exigences, d\xE9crites dans l\u2019annexe [RGS_A1], couvrent,\
+        \ pour les trois niveaux de s\xE9curit\xE9, l\u2019ensemble des composants\
+        \ n\xE9cessaires \xE0 la mise en \u0153uvre de cette fonction de s\xE9curit\xE9\
+        , \xE0 savoir\_:"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node84
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node83
+      description: "- la bi-cl\xE9 et le certificat \xE9lectronique dont l\u2019usage\
+        \ est la signature \xE9lectronique ou le cachet ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node85
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node83
+      description: "- le dispositif de cr\xE9ation de signature \xE9lectronique ou\
+        \ de cachet ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node86
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node83
+      description: "- l\u2019application de cr\xE9ation de signature \xE9lectronique\
+        \ ou de cachet ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node87
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node83
+      description: "- le module de v\xE9rification de signature \xE9lectronique ou\
+        \ de cachet."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node88
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      description: "Cas particulier de la signature des actes administratifs au sens\
+        \ de l\u2019ordonnance du 8 d\xE9cembre 2005"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node89
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node88
+      description: "Conform\xE9ment \xE0 l\u2019article 8 de l\u2019ordonnance du\
+        \ 8 d\xE9cembre 2005, les autorit\xE9s administratives doivent respecter les\
+        \ exigences du RGS lorsqu\u2019elles mettent en \u0153uvre, pour la signature\
+        \ de leurs actes administratifs, des syst\xE8mes d\u2019information utilisant\
+        \ des fonctions de s\xE9curit\xE9 d\xE9crites dans le RGS (certificats \xE9\
+        lectroniques, audit, etc.)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node90
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node88
+      description: "L\u2019autorit\xE9 administrative d\xE9termine le niveau de s\xE9\
+        curit\xE9, de une \xE9toile (*) \xE0 trois \xE9toiles (***), requis pour l\u2019\
+        usage de la signature \xE9lectronique des actes administratifs qu\u2019elle\
+        \ \xE9met. Elle doit respecter les r\xE8gles d\xE9finies au pr\xE9sent chapitre."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node91
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.2
+      description: "Cas particulier de la signature \xAB pr\xE9sum\xE9e fiable \xBB\
+        \ au sens de l\u2019article 1316-4 du Code civil :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node92
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node91
+      description: "Les exigences techniques d\xE9finies en annexe de l\u2019arr\xEA\
+        t\xE9 du 26 juillet 2004, et portant sur la d\xE9livrance de certificats \xE9\
+        lectroniques dits \xAB qualifi\xE9s \xBB au sens du d\xE9cret n\xB0 2001-272\
+        \ du 30 mars 2001, sont requises pour la g\xE9n\xE9ration de signatures \xE9\
+        lectroniques \xAB pr\xE9sum\xE9es fiables \xBB au sens de ce d\xE9cret."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node93
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node91
+      description: "Ces exigences constituent un sous-ensemble de celles contenues\
+        \ dans le document [RGS_A2] pour le niveau de s\xE9curit\xE9 (***) de la fonction\
+        \ signature \xE9lectronique, qui pr\xE9voit des exigences suppl\xE9mentaires,\
+        \ essentiellement en mati\xE8re de format et de variables de temps."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node94
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node91
+      description: "De ce fait, une signature \xE9lectronique s\xE9curis\xE9e au sens\
+        \ de l\u2019article 1er du d\xE9cret n\xB0 2001-272 du 30 mars 2001, \xE9\
+        tablie avec un dispositif s\xE9curis\xE9 de cr\xE9ation de signature certifi\xE9\
+        \ conforme dans les conditions de l\u2019article 3 et mettant en \u0153uvre\
+        \ des certificats de signature \xE9lectronique conformes au niveau de s\xE9\
+        curit\xE9 (***) de [RGS_A2], est de facto \xAB pr\xE9sum\xE9e fiable \xBB\
+        \ selon ce d\xE9cret et donc au sens de l\u2019article 1316-4 du code civil."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a
+      ref_id: 3.2.a.3
+      name: "La confidentialit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node96
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.3
+      description: "Le chiffrement constitue le m\xE9canisme essentiel de protection\
+        \ de la confidentialit\xE9. Cependant, la confidentialit\xE9 des informations\
+        \ peut aussi \xEAtre prot\xE9g\xE9e par des mesures compl\xE9mentaires de\
+        \ gestion des droits d\u2019acc\xE8s de chacun (en lecture, en \xE9criture\
+        \ ou en modification) aux donn\xE9es contenues dans le syst\xE8me d\u2019\
+        information. \xC0 cet effet, il est recommand\xE9 de mettre en place des m\xE9\
+        canismes techniques afin de s\u2019assurer que seules les personnes autoris\xE9\
+        es puissent acc\xE9der aux donn\xE9es en fonction de leur besoin d\u2019en\
+        \ conna\xEEtre. Ces m\xE9canismes doivent \xEAtre robustes et impl\xE9ment\xE9\
+        s au plus pr\xE8s du lieu de stockage des donn\xE9es."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node97
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.3
+      description: "La mise en \u0153uvre par une autorit\xE9 administrative de la\
+        \ fonction de s\xE9curit\xE9 \xAB Confidentialit\xE9 \xBB peut se faire selon\
+        \ trois niveaux de s\xE9curit\xE9 aux exigences croissantes : (*), (**) et\
+        \ (***)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node98
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.a.3
+      description: "Ces exigences, d\xE9crites dans l\u2019annexe [RGS_A1], couvrent,\
+        \ pour les trois niveaux de s\xE9curit\xE9, l\u2019ensemble des composants\
+        \ n\xE9cessaires \xE0 la mise en \u0153uvre de cette fonction de s\xE9curit\xE9\
+        , \xE0 savoir :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node99
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node98
+      description: "- la bi-cl\xE9 et le certificat \xE9lectronique dont l\u2019usage\
+        \ est le chiffrement ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node100
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node98
+      description: '- le dispositif de chiffrement ; '
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node101
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node98
+      description: '- le module de chiffrement ;'
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node102
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node98
+      description: "- le module de d\xE9chiffrement."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2
+      ref_id: 3.2.b
+      name: "R\xE8gles relatives \xE0 l\u2019horodatage \xE9lectronique"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node104
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.b
+      description: "Les exigences concernant le composant \xAB contremarque de temps\
+        \ \xBB sont d\xE9crites dans l\u2019annexe du RGS\xAB Politique d\u2019horodatage\
+        \ type \xBB ([RGS_A5]). Elles portent sur le contenu des contremarques de\
+        \ temps  et sur les conditions dans lesquelles il est \xE9mis par un prestataire\
+        \ de services d\u2019horodatage \xE9lectronique (PSHE)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node105
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.b
+      description: "Une fonction d\u2019horodatage permet d\u2019attester qu\u2019\
+        une donn\xE9e sous forme \xE9lectronique existe \xE0 un instant donn\xE9.\
+        \ Cette fonction met en \u0153uvre une contremarque de temps g\xE9n\xE9r\xE9\
+        e \xE0 l\u2019aide d\u2019un m\xE9canisme cryptographique respectant les r\xE8\
+        gles et, si possible, les recommandations contenues dans les r\xE9f\xE9rentiels\
+        \ [RGS_B1] et [RGS_B2]."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node106
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.b
+      description: "Cette contremarque, d\xE9livr\xE9e par un prestataire de services\
+        \ d\u2019horodatage \xE9lectronique (PSHE),doit respecter les exigences de\
+        \ l\u2019annexe [RGS_A5], appel\xE9e \xAB Politique d\u2019horodatage type\
+        \ \xBB."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node107
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.b
+      description: "Cette annexe ne distingue qu\u2019un niveau unique de s\xE9curit\xE9\
+        , auquel les autorit\xE9s administratives doivent se conformer d\xE8s lors\
+        \ qu\u2019elles souhaitent mettre en \u0153uvre la fonction d\u2019horodatage\
+        \ \xE9lectronique au sein de leur syst\xE8me d\u2019information."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node108
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.b
+      description: "Cas particulier de l\u2019horodatage \xAB pr\xE9sum\xE9 fiable\
+        \ \xBB, au sens des articles 1369-7 et 1369-8 du code civil"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node109
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node108
+      description: "Le prestataire qui souhaite proposer un service d\u2019horodatage\
+        \ b\xE9n\xE9ficiant de la pr\xE9somption de fiabilit\xE9 des articles 1369-7\
+        \ et 1369-8 du code civil doit respecter les exigences techniques d\xE9finies\
+        \ dans les articles 3 et 4 du d\xE9cret n\xB0 2011-434 du 20 avril 2011."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node110
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node108
+      description: "Le prestataire peut utiliser un module d\u2019horodatage qui doit\
+        \ avoir \xE9t\xE9 certifi\xE9 dans les conditions pr\xE9vues dans le d\xE9\
+        cret n\xB0 2002-535 du 18 avril 2002 et peut avoir \xE9t\xE9 qualifi\xE9 selon\
+        \ les formes d\xE9crites dans l\u2019arr\xEAt\xE9 du 20 avril 2011 relatif\
+        \ \xE0 la reconnaissance de la qualification des prestataires de services\
+        \ d\u2019horodatage \xE9lectronique et \xE0 l\u2019accr\xE9ditation des organismes\
+        \ qui proc\xE8dent \xE0 leur \xE9valuation."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node111
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node108
+      description: "Les exigences du document [RGS_A5] constituent un sous-ensemble\
+        \ de celles contenues dans le d\xE9cret 20 avril 2011, qui pr\xE9voit quelques\
+        \ exigences suppl\xE9mentaires de certification des unit\xE9s d\u2019horodatage.\
+        \ De ce fait, un horodatage \xAB pr\xE9sum\xE9 fiable \xBB au sens de ce d\xE9\
+        cret et des articles 1369-7 et 1369-8 du code civil est de facto conforme\
+        \ aux exigences du document [RGS_A5]."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.c
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2
+      ref_id: 3.2.c
+      name: "Rattachement \xE0 l\u2019infrastructure de gestion de la confiance de\
+        \ l\u2019administration (IGC/A)"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node113
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.c
+      description: "L\u2019ANSSI offre, parall\xE8lement au RGS, un service de certification\
+        \ \xE9lectronique qui consiste \xE0 signer l\u2019autorit\xE9 de certification\
+        \ (AC) racine d\u2019une autorit\xE9 administrative par l\u2019AC de l\u2019\
+        infrastructure de gestion de la confiance de l\u2019administration - IGC/A."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node114
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.c
+      description: "Les utilisateurs qui doivent se fier \xE0 des certificats d\xE9\
+        livr\xE9s par ou \xE0 cette autorit\xE9 administrative ou \xE0 ses agents\
+        \ ont la garantie que ces certificats ont fait l\u2019objet d\u2019une v\xE9\
+        rification de la cha\xEEne de certification jusqu\u2019au certificat de AC\
+        \ \xAB IGC/A \xBB."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node115
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.c
+      description: "L\u2019ANSSI est l\u2019autorit\xE9 racine de l\u2019IGC/A."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node116
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:3.2.c
+      description: "Les r\xE8gles relatives \xE0 la mise en \u0153uvre de l\u2019\
+        IGC/A sont d\xE9finies dans les politiques de certification de l\u2019IGC/A\
+        \ [PC_IGC/A]."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-4
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 4
+      name: "R\xE8gles relatives aux accus\xE9s d\u2019enregistrement et aux accus\xE9\
+        s de r\xE9ception"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node118
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-4
+      description: "L\u2019article 5 de l\u2019ordonnance du 8 d\xE9cembre 2005 pr\xE9\
+        voit que les accus\xE9s d\u2019enregistrement et les accus\xE9s de r\xE9ception\
+        \ sont \xE9mis selon un proc\xE9d\xE9 conforme au RGS. Ces accus\xE9s ne constituent\
+        \ pas en eux-m\xEAmes des fonctions de s\xE9curit\xE9. En revanche, ils peuvent\
+        \ s\u2019appuyer sur des fonctions de s\xE9curit\xE9 telles que la signature,\
+        \ le cachet et l\u2019horodatage."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node119
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-4
+      description: "Les accus\xE9s d\u2019enregistrement et de r\xE9ception sont g\xE9\
+        n\xE9r\xE9s et \xE9mis par les autorit\xE9s administratives \xE0 destination\
+        \ des usagers. Les autorit\xE9s administratives doivent d\xE9terminer les\
+        \ fonctions de s\xE9curit\xE9 n\xE9cessaires \xE0 la protection de ces accus\xE9\
+        s ainsi que leur niveau de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node120
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-4
+      description: "Dans le cas g\xE9n\xE9ral, il est recommand\xE9 que les accus\xE9\
+        s d\u2019enregistrement et de r\xE9ception \xE9mis en application des dispositions\
+        \ pr\xE9vues \xE0 l\u2019article 5 de l\u2019ordonnance du 8 d\xE9cembre 2005\
+        \ :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node121
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node120
+      description: "- soient horodat\xE9s avec des contremarques de temps conformes\
+        \ aux exigences du document [RGS_A_5] pour le niveau de s\xE9curit\xE9 unique\
+        \ pr\xE9vu par ce document ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node122
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node120
+      description: "- soient sign\xE9s par un agent d\u2019une autorit\xE9 administrative\
+        \ (ou cachet\xE9s par une machine d\u2019une autorit\xE9 administrative),\
+        \ conform\xE9ment aux exigences des documents [RGS_A_2] et [RGS_A_3] pour\
+        \ le niveau de s\xE9curit\xE9 choisi par l\u2019autorit\xE9 administrative\
+        \ parmi les niveaux (*), (**) et (***) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node123
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node120
+      description: "- utilisent des m\xE9canismes cryptographiques conformes aux r\xE9\
+        f\xE9rentiels [RGS_B_1] et [RGS_B_2]."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node124
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-4
+      description: "Dans le cas particulier o\xF9 les accus\xE9s sont \xE9mis en application\
+        \ des dispositions pr\xE9vues \xE0 l\u2019article 5.II de l\u2019ordonnance\
+        \ du 8 d\xE9cembre 2005, la date figurant sur les accus\xE9s doit faire foi,\
+        \ ce qui impose de garantir aux usagers un niveau de fiabilit\xE9 suppl\xE9\
+        mentaire. Les autorit\xE9s administratives doivent en tenir compte dans leur\
+        \ besoin de s\xE9curit\xE9 et donc dans le choix des fonctions de s\xE9curit\xE9\
+        \ et des niveaux de s\xE9curit\xE9 associ\xE9s."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node125
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-4
+      description: "S\u2019agissant de la gestion des accus\xE9s, la sauvegarde des\
+        \ accus\xE9s d\u2019enregistrement et de r\xE9ception doit \xEAtre assur\xE9\
+        e dans tous les cas, tant que peuvent survenir d\u2019\xE9ventuelles r\xE9\
+        clamations de la part des usagers. "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-5
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 5
+      name: "Qualification des produits de s\xE9curit\xE9 et des prestataires de services\
+        \ de confiance"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node127
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-5
+      description: "Conform\xE9ment \xE0 l\u2019article 4 du d\xE9cret RGS, les autorit\xE9\
+        s administratives qui d\xE9cident de recourir \xE0 des produits ou prestations\
+        \ de services vis\xE9s par le RGS recourrent \xE0 des produits de s\xE9curit\xE9\
+        \ et \xE0 des prestataires de service de confiance qualifi\xE9s ou, \xE0 d\xE9\
+        faut, s\u2019assurent de la conformit\xE9 au RGS des produits de s\xE9curit\xE9\
+        \ et services de confiance qu\u2019elles choisissent."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node128
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-5
+      description: "Dans ce cas, elles attestent formellement de la conformit\xE9\
+        \ au RGS de ces produits de s\xE9curit\xE9 et services de confiance. Elles\
+        \ adressent ces attestations \xE0 l\u2019ANSSI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-5
+      ref_id: '5.1'
+      name: "Qualification des produits de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node130
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.1
+      description: "La qualification de produits de s\xE9curit\xE9 pr\xE9voit trois\
+        \ niveaux de qualification :\n- qualification \xE9l\xE9mentaire (d\xE9crite\
+        \ dans le document [QE]) ;\n- qualification standard (d\xE9crite dans le document\
+        \ [QS]) ;\n- qualification renforc\xE9e (d\xE9crite dans le document [QR])."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node131
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.1
+      description: "Un produit de s\xE9curit\xE9 est qualifi\xE9 s\u2019il a fait\
+        \ l\u2019objet d\u2019une attestation de qualification et d\u2019un maintien\
+        \ de conditions de s\xE9curit\xE9 conforme aux proc\xE9dures d\xE9crites dans\
+        \ les documents [QE], [QS] et [QR]. L\u2019ANSSI instruit les demandes et\
+        \ d\xE9livre les attestations de qualification. La proc\xE9dure de qualification\
+        \ repose sur une certification pr\xE9alable, dans les formes pr\xE9vues par\
+        \ le d\xE9cret n\xB0 2002-535 du 18 avril 2002 et par l\u2019instruction n\xB0\
+        \ 1414/ANSSI/SR du 30 mai 2011 relative \xE0 la certification de s\xE9curit\xE9\
+        \ de premier niveau des produits des technologies de l\u2019information (CSPN)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node132
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.1
+      description: "Le niveau \xE9l\xE9mentaire est accord\xE9 sur la base d\u2019\
+        une CSPN. Les niveaux standard et renforc\xE9 le sont sur la base d\u2019\
+        une certification \xAB Crit\xE8res communs \xBB. Cependant, s\u2019agissant\
+        \ d\u2019un label sp\xE9cifique pour l\u2019administration, l\u2019ANSSI proc\xE8\
+        de \xE0 des contr\xF4les compl\xE9mentaires. Elle valide ainsi la cible de\
+        \ s\xE9curit\xE9 au regard des besoins de l\u2019administration et r\xE9alise\
+        \ ou fait r\xE9aliser des tests relatifs \xE0 la cryptologie et son impl\xE9\
+        mentation, sur la base des annexes B du RGS."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node133
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.1
+      description: "Pour garantir la coh\xE9rence des objectifs et des exigences de\
+        \ s\xE9curit\xE9, il est recommand\xE9 que la cible de s\xE9curit\xE9 soit,\
+        \ autant que possible, conforme \xE0 un des profils de protection propos\xE9\
+        s par l\u2019ANSSI  (https://www.ssi.gouv.fr/fr/certification-qualification/cc/profils-de-protection/).\
+        \ L\u2019ANSSI publie \xE9galement le catalogue des produits de s\xE9curit\xE9\
+        \ qualifi\xE9s : https://www.ssi.gouv.fr/fr/produits-et-prestataires/produitsqualifies/."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-5
+      ref_id: '5.2'
+      name: Qualification des prestataires de services de confiance (PSCO)
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node135
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      description: "Les prestataires de services peuvent \xE9ventuellement appartenir\
+        \ \xE0 plusieurs cat\xE9gories distinctes de PSCO. Ils doivent alors obtenir\
+        \ une qualification pour chaque type de prestation."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node136
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      description: "L\u2019attestation de qualification est d\xE9livr\xE9e par un\
+        \ organisme de qualification, \xE0 l\u2019issue d\u2019une \xE9valuation de\
+        \ la conformit\xE9 du PSCO aux exigences du RGS qui lui sont applicables.\
+        \ Ces exigences sont pr\xE9sent\xE9es sous forme de r\xE9f\xE9rentiels annex\xE9\
+        s au RGS (annexes A et C). Les organismes de qualification sont, eux-m\xEA\
+        mes, accr\xE9dit\xE9s par le Comit\xE9 fran\xE7ais d\u2019accr\xE9ditation\
+        \ (COFRAC) et habilit\xE9s par l\u2019ANSSI, conform\xE9ment \xE0 l\u2019\
+        instruction n\xB01001/ANSSI/SR du 8 avril 2011."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node137
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      description: "Lorsque le PSCO est une administration de l\u2019\xC9tat, l\u2019\
+        ANSSI peut proc\xE9der elle-m\xEAme \xE0 son \xE9valuation et \xE0 sa qualification."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node138
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      description: "Dans tous les cas, la qualification est accord\xE9e pour une dur\xE9\
+        e de trois ans."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node139
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      description: "La liste des organismes de qualification habilit\xE9s et des PSCO\
+        \ qualifi\xE9s est publi\xE9e par l\u2019ANSSI : https://www.ssi.gouv.fr/fr/produits-et-prestataires/prestataires-de-services-de-confiance-qualifies/"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node140
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2
+      description: "Les cat\xE9gories de PSCO vis\xE9es dans la pr\xE9sente version\
+        \ du RGS sont :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node140
+      ref_id: 5.2.a
+      name: "Les prestataires de services de certification \xE9lectronique "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node142
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.a
+      description: "Les r\xE9f\xE9rentiels d\u2019exigences applicables aux prestataires\
+        \ de services de certification \xE9lectronique (PSCE) figurent en annexes\
+        \ A2 et A3, respectivement appel\xE9es \xAB politique de certification type\
+        \ \u2013 certificats \xE9lectroniques de personnes \xBB et \xAB politique\
+        \ de certification type \u2013 certificats \xE9lectroniques de services applicatifs\
+        \ \xBB."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node143
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.a
+      description: "Ces r\xE9f\xE9rentiels distinguent trois niveaux de s\xE9curit\xE9\
+        , aux exigences croissantes : (*), (**) et (***). Ils visent distinctement\
+        \ les usages de chiffrement, d\u2019authentification de personne, de signature\
+        \ \xE9lectronique, d\u2019authentification de machine et de cachet, ainsi\
+        \ que le double usage authentification et signature \xE9lectronique."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node144
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.a
+      description: "Il est recommand\xE9 que les prestataires de services de certification\
+        \ \xE9lectronique r\xE9alisent les d\xE9marches n\xE9cessaires \xE0 l\u2019\
+        int\xE9gration de leurs certificats dans les principaux navigateurs."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node145
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.a
+      description: "Les PSCE peuvent proposer des offres conformes aux diff\xE9rentes\
+        \ versions du RGS. Les qualifications relatives aux offres conformes \xE0\
+        \ la premi\xE8re version du RGS seront caduques \xE0 l\u2019issue de la p\xE9\
+        riode de 4 ans d\u2019acceptation des certificats de ces offres pr\xE9vue\
+        \ au chapitre 8 du pr\xE9sent document, relatif \xE0 la transition entre la\
+        \ premi\xE8re et la deuxi\xE8me version du RGS."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node140
+      ref_id: 5.2.b
+      name: "Les prestataires de services d\u2019horodatage \xE9lectronique "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node147
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.b
+      description: "Le r\xE9f\xE9rentiel d\u2019exigences applicable aux prestataires\
+        \ de services d\u2019horodatage \xE9lectronique (PSHE), qui pr\xE9voit un\
+        \ niveau de s\xE9curit\xE9 unique, figure en annexe A5, appel\xE9e \xAB politique\
+        \ d\u2019horodatage type \xBB."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node140
+      ref_id: 5.2.c
+      name: "Les prestataires d\u2019audit de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node149
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:5.2.c
+      description: "Le r\xE9f\xE9rentiel d\u2019exigences applicables aux prestataires\
+        \ d\u2019audit de la s\xE9curit\xE9 des syst\xE8mes d\u2019information figure\
+        \ en annexe C du RGS. Il couvre les activit\xE9s d\u2019audit organisationnel,\
+        \ de code source, de configuration et d\u2019architecture, ainsi que les tests\
+        \ d\u2019intrusion."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-6
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 6
+      name: "Validation des certificats par l\u2019\xC9tat"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-6
+      ref_id: '6.1'
+      name: "Champ d\u2019application"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node152
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.1
+      description: "Les certificats \xE9lectroniques d\xE9livr\xE9s aux autorit\xE9\
+        s administratives et \xE0 leurs agents doivent \xEAtre valid\xE9s par l\u2019\
+        \xC9tat (art. 10 de l\u2019ordonnance du 8 d\xE9cembre 2005 et chapitre V\
+        \ du d\xE9cret RGS), afin de garantir que leurs porteurs sont bien les autorit\xE9\
+        s administratives ou les agents identifi\xE9s."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node153
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.1
+      description: "La proc\xE9dure de validation est mise en \u0153uvre par l\u2019\
+        ANSSI (art. 21 du d\xE9cret RGS). Elle consiste \xE0 v\xE9rifier que leur\
+        \  proc\xE9dure de d\xE9livrance est conforme aux r\xE8gles fix\xE9es au \xA7\
+        \ 6.2."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node154
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.1
+      description: "Elle concerne les certificats mis en \u0153uvre dans le but d\u2019\
+        assurer les fonctions de s\xE9curit\xE9 suivantes :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node155
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node154
+      description: "- authentification d\u2019une personne et d\u2019un serveur ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node156
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node154
+      description: "- signature \xE9lectronique et cachet ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node157
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node154
+      description: "- confidentialit\xE9."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node158
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.1
+      description: "Conform\xE9ment aux politiques de certification types (PC-Types)\
+        \ mentionn\xE9es au chapitre 3, la proc\xE9dure de d\xE9livrance de certificats\
+        \ recouvre les aspects suivants :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node159
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node158
+      description: "- l\u2019identification et la v\xE9rification de l\u2019identit\xE9\
+        \ des agents \xE0 qui seront d\xE9livr\xE9s des certificats ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node160
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node158
+      description: '- la fabrication technique des certificats ; '
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node161
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node158
+      description: '- la remise des certificats aux porteurs ; '
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node162
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node158
+      description: "- la publication (ou mise \xE0 disposition) des certificats, de\
+        \ leur statut et de la politique de certification ; "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node163
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node158
+      description: "- la r\xE9vocation et le renouvellement des certificats"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node164
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.1
+      description: "Lorsqu\u2019elle met en place une proc\xE9dure de d\xE9livrance\
+        \ de certificats, une autorit\xE9 administrative s\u2019appuie sur une autorit\xE9\
+        \ de certification (AC) interne ou externe, qui peut \xEAtre publique ou priv\xE9\
+        e. Une AC peut elle-m\xEAme recourir \xE0 des prestataires externes pour la\
+        \ mise en \u0153uvre de certaines des fonctions mentionn\xE9es. Dans tous\
+        \ les cas, l\u2019autorit\xE9 administrative reste seule responsable du processus\
+        \ global de d\xE9livrance."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-6
+      ref_id: '6.2'
+      name: "R\xE8gles de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node166
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.2
+      description: "L\u2019autorit\xE9 de certification doit :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node167
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node166
+      description: "- r\xE9diger une politique de certification (PC) par fonction\
+        \ de s\xE9curit\xE9, usage (authentification, signature, chiffrement) et niveau\
+        \ de s\xE9curit\xE9. Ces PC doivent \xEAtre conformes aux mod\xE8les des PC-Types\
+        \ (annexes [RGS_A_2] \xE0 [RGS_A_3]) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node168
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node166
+      description: "- mettre en \u0153uvre des cl\xE9s cryptographiques d\u2019AC\
+        \ sp\xE9cifiquement restreintes et d\xE9di\xE9es \xE0 la g\xE9n\xE9ration\
+        \ de certificats destin\xE9s aux autorit\xE9s administratives (AA) ou \xE0\
+        \ leurs agents et mentionner cette exigence dans la PC ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node169
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node166
+      description: "- g\xE9n\xE9rer des certificats \xE0 destination exclusive des\
+        \ AA, ou de leurs agents, et mentionner explicitement cette exigence dans\
+        \ la PC ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node170
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node166
+      description: "- lorsqu\u2019elle recourt \xE0 des prestataires externes pour\
+        \ certaines fonctions, \xE9tablir des proc\xE9dures avec ces prestataires\
+        \ permettant de garantir le respect de la PC pour ce qui les concerne ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node171
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node166
+      description: "- faire approuver cette PC par l\u2019AA et en respecter les r\xE8\
+        gles."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node172
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.2
+      description: "Lorsqu\u2019elle recourt \xE0 une AC externe, l\u2019autorit\xE9\
+        \ administrative doit \xE9tablir des proc\xE9dures qui lui permettent de s\u2019\
+        assurer du respect, par cette AC, des r\xE8gles du pr\xE9sent paragraphe."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-6
+      ref_id: '6.3'
+      name: "Proc\xE9dure de validation  "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node174
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      description: "Les autorit\xE9s administratives disposent d\u2019un d\xE9lai\
+        \ de trois ans \xE0 compter de la publication du pr\xE9sent r\xE9f\xE9rentiel\
+        \ pour obtenir la validation de leurs certificats (art. 23 du d\xE9cret RGS).\
+        \ Pour les certificats d\xE9livr\xE9s apr\xE8s ce d\xE9lai, la demande de\
+        \ validation devra \xEAtre faite dans un d\xE9lai de trois mois \xE0 compter\
+        \ de la d\xE9livrance des certificats."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      description: "\xC0 cet effet, l\u2019autorit\xE9 administrative adresse \xE0\
+        \ l\u2019ANSSI un dossier de demande de validation qui comporte les pi\xE8\
+        ces suivantes :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node176
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      description: "- l\u2019identification pr\xE9cise de l\u2019AA et de l\u2019\
+        AC concern\xE9es par la demande ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node177
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      description: "- la PC de l\u2019AC ainsi que, le cas \xE9ch\xE9ant, une description\
+        \ de la cha\xEEne de certification ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node178
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      description: "- le cas \xE9ch\xE9ant, les proc\xE9dures mentionn\xE9es au \xA7\
+        \ 6.2 \xE9tablies entre l\u2019AA et l\u2019AC et entre l\u2019AC et ses prestataires\
+        \ externes\_;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node179
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      description: "- les r\xE9sultats d\u2019un audit de conformit\xE9 de l\u2019\
+        AC \xE0 sa PC, qui doit \xEAtre r\xE9alis\xE9 par l\u2019AC conform\xE9ment\
+        \ aux r\xE8gles des PC-Types ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node180
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      description: "- le cas \xE9ch\xE9ant, l\u2019attestation de qualification de\
+        \ l\u2019AC au sens du d\xE9cret RGS ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node181
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node175
+      description: "- le certificat de l\u2019AC et, le cas \xE9ch\xE9ant, une demande\
+        \ de publication de ce certificat sur le site internet de l\u2019ANSSI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node182
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      description: "\xC0 l\u2019issue d\u2019un d\xE9lai de deux mois \xE0 compter\
+        \ de la r\xE9ception du dossier complet, et sous r\xE9serve que l\u2019ANSSI\
+        \ n\u2019ait pas fait part \xE0 l\u2019autorit\xE9 administrative d\u2019\
+        une non-conformit\xE9 au regard des r\xE8gles du \xA7 6.2 du pr\xE9sent RGS,\
+        \ l\u2019autorit\xE9 administrative est r\xE9put\xE9e avoir obtenu la validation\
+        \ des certificats."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node183
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      description: "L\u2019ANSSI peut, \xE0 tout moment, demander de v\xE9rifier sur\
+        \ place les conditions de d\xE9livrance des certificats afin de s\u2019assurer\
+        \ que les proc\xE9dures mises en place par l\u2019AC sont conformes au pr\xE9\
+        sent r\xE9f\xE9rentiel (art. 22 du d\xE9cret RGS). En cas de non-conformit\xE9\
+        \ signal\xE9e par l\u2019ANSSI, l\u2019autorit\xE9 administrative dispose\
+        \ d\u2019un d\xE9lai de trois mois pour faire corriger les proc\xE9dures de\
+        \ l\u2019AC. \xC0 d\xE9faut, les certificats ne sont plus consid\xE9r\xE9\
+        s comme conformes au d\xE9cret RGS. L\u2019ANSSI publie le nouveau statut\
+        \ de ce certificat sur son site."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node184
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      description: "L\u2019AA doit faire une demande de renouvellement de la validation\
+        \ lors de chaque modification substantielle des conditions de d\xE9livrance\
+        \ des certificats, notamment lorsque le certificat de l\u2019AC est expir\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node185
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.3
+      description: "D\xE8s que la validation a \xE9t\xE9 obtenue, le certificat de\
+        \ l\u2019AC est, sur demande de l\u2019autorit\xE9 administrative, mis \xE0\
+        \ disposition du public par l\u2019ANSSI sur son site Internet www.ssi.gouv.fr."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-6
+      ref_id: '6.4'
+      name: "Liste des informations relatives \xE0 la d\xE9livrance et \xE0 la validation"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node187
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:6.4
+      description: "Les autorit\xE9s administratives mettent \xE0 disposition des\
+        \ usagers les informations relatives \xE0 la d\xE9livrance et \xE0 la validation\
+        \ des certificats \xE9lectroniques (art. 22 du d\xE9cret RGS) :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node188
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node187
+      description: "- la PC de l\u2019AC ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node189
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node187
+      description: "- le certificat de l\u2019AC ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node190
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node187
+      description: "- la mention de l\u2019obtention de la validation des certificats\
+        \ au sens des pr\xE9sentes dispositions."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      assessable: false
+      depth: 1
+      ref_id: Chapitre 7
+      name: "Recommandations relatives \xE0 l\u2019application du r\xE9f\xE9rentiel "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node192
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      description: "Au-del\xE0 de l\u2019analyse de risques et de l\u2019homologation,\
+        \ l\u2019ANSSI recommande l\u2019adoption de bonnes pratiques relatives \xE0\
+        \ la m\xE9thodologie, aux proc\xE9dures et \xE0 l\u2019organisation."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.1'
+      name: "Organiser la s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1
+      ref_id: 7.1.a
+      name: "Organiser les responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node195
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.a
+      description: "Les autorit\xE9s administratives doivent mettre en \u0153uvre\
+        \ une organisation qui endosse les responsabilit\xE9s li\xE9es \xE0 la s\xE9\
+        curit\xE9 des syst\xE8mes d\u2019information."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node196
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.a
+      description: "Elle peut \xEAtre mutualis\xE9e avec celle requise pour la protection\
+        \ des informations classifi\xE9es de d\xE9fense, telle que d\xE9finie dans\
+        \ l\u2019instruction g\xE9n\xE9rale interminist\xE9rielle sur la protection\
+        \ du secret de la d\xE9fense nationale n\xB0 1300/SGDSN/PSE/PSD."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node197
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.a
+      description: "De pr\xE9f\xE9rence dirig\xE9e par un repr\xE9sentant de l\u2019\
+        autorit\xE9 administrative, cette organisation doit disposer des moyens mat\xE9\
+        riels n\xE9cessaires \xE0 la r\xE9alisation de ses missions et de la capacit\xE9\
+        \ \xE0 g\xE9rer les risques, les crises ou les incidents qui pourraient en\
+        \ r\xE9sulter."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node198
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.a
+      description: "Le cas \xE9chant, elle s\u2019appuie sur une cha\xEEne fonctionnelle\
+        \ SSI charg\xE9e de l\u2019assister dans le pilotage, la gestion et le suivi\
+        \ des moyens SSI : le responsable de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information (RSSI), l\u2019officier de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information (OSSI), le correspondants SSI, etc."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node199
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.a
+      description: "\xC9ventuellement \xE0 l\u2019aide de la cha\xEEne fonctionnelle\
+        \ SSI, l\u2019organisation mise en place par l\u2019autorit\xE9 administrative\
+        \ peut assurer les missions suivantes :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node200
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node199
+      description: "coordination des actions permettant l\u2019int\xE9gration des\
+        \ clauses li\xE9es \xE0 la SSI dans les contrats ou les conventions impliquant\
+        \ un acc\xE8s par des tiers \xE0 des informations ou \xE0 des ressources informatiques\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node201
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node199
+      description: "formalisation de la r\xE9partition des responsabilit\xE9s li\xE9\
+        es \xE0 la SSI (d\xE9finition des p\xE9rim\xE8tres de responsabilit\xE9, des\
+        \ d\xE9l\xE9gations de comp\xE9tences, etc.) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node202
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node199
+      description: "\xE9tablissement des relations n\xE9cessaires avec les autorit\xE9\
+        s externes de d\xE9fense des syst\xE8mes d\u2019information, notamment pour\
+        \ la gestion des intrusions et des attaques sur les syst\xE8mes."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1
+      ref_id: 7.1.b
+      name: "Mettre en place un syst\xE8me de management de la s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node204
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.b
+      description: "Il est recommand\xE9 de mettre en \u0153uvre des processus permettant\
+        \ de rechercher une am\xE9lioration constante de la SSI. Par exemple, la mise\
+        \ en place d\u2019un syst\xE8me de management de la s\xE9curit\xE9 de l\u2019\
+        information, tel que d\xE9fini dans la norme ISO 27001, permet non seulement\
+        \ de planifier et de mettre en \u0153uvre les mesures de protection du syst\xE8\
+        me d\u2019information, mais \xE9galement d\u2019en v\xE9rifier la pertinence\
+        \ et la conformit\xE9 par rapport aux objectifs \xE9tablis."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.c
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1
+      ref_id: 7.1.c
+      name: "\xC9laborer une politique de s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node206
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.1.c
+      description: "Il est recommand\xE9 d\u2019\xE9laborer et de formaliser une politique\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019information (PSSI). Elle peut \xEA\
+        tre g\xE9n\xE9rale ou d\xE9clin\xE9e en fonction des besoins sp\xE9cifiques\
+        \ de chaque domaine de chaque syst\xE8me d\u2019information. Le guide \xAB\
+        \ Politique SSI \xBB de l\u2019ANSSI fournit une aide pour son \xE9laboration."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.2'
+      name: "Impliquer les instances d\xE9cisionnelles"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node208
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.2
+      description: "Les instances d\xE9cisionnelles des autorit\xE9s administratives\
+        \ doivent \xEAtre impliqu\xE9es dans la s\xE9curisation des syst\xE8mes d\u2019\
+        information dont elles ont in fine la responsabilit\xE9, afin de donner les\
+        \ orientations ad\xE9quates, notamment en termes d\u2019investissement humain\
+        \ et financier, et de valider les objectifs de s\xE9curit\xE9 et les orientations\
+        \ strat\xE9giques. La norme ISO 27001 fournit, \xE0 titre indicatif, une liste\
+        \ de sujets susceptibles d\u2019\xEAtre trait\xE9s au niveau de la direction\
+        \ d\u2019une autorit\xE9 administrative."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.3'
+      name: "Adapter l\u2019effort de protection des syst\xE8mes d\u2019information\
+        \ aux enjeux de s\xE9curit\xE9 et prendre en compte la SSI dans les projets"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node210
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.3
+      description: "La s\xE9curit\xE9 d\u2019un syst\xE8me d\u2019information doit\
+        \ \xEAtre adapt\xE9e aux enjeux du syst\xE8me lui-m\xEAme et aux besoins de\
+        \ s\xE9curit\xE9 de l\u2019autorit\xE9 administrative, afin d\u2019y consacrer\
+        \ les moyens financiers et humains n\xE9cessaires et suffisants. Dans ce but,\
+        \ il est recommand\xE9 d\u2019utiliser les guides de l\u2019ANSSI \xAB Maturit\xE9\
+        \ SSI \xBB et \xAB Gestion et int\xE9gration de la SSI dans les projets \xBB\
+        \ (GISSIP). Ils permettent, dans le cadre du d\xE9veloppement d\u2019un projet\
+        \ de syst\xE8me d\u2019information, de d\xE9terminer les enjeux relatifs \xE0\
+        \ la s\xE9curit\xE9 et d\u2019identifier l\u2019ensemble des livrables relatifs\
+        \ \xE0 la SSI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.4'
+      name: "Adopter une d\xE9marche globale"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node212
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.4
+      description: "L\u2019ensemble de la d\xE9marche de s\xE9curisation des syst\xE8\
+        mes d\u2019information doit proc\xE9der d\u2019une volont\xE9 coh\xE9rente\
+        \ et globale, afin d\u2019\xE9viter la dispersion des efforts des \xE9quipes\
+        \ en charge de la SSI ou la mise en \u0153uvre de mesures de s\xE9curit\xE9\
+        \ parcellaires."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node213
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.4
+      description: "Chaque d\xE9cision doit \xEAtre prise au juste niveau hi\xE9rarchique."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node214
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.4
+      description: "Il est ainsi recommand\xE9 :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node215
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node214
+      description: "de prendre en consid\xE9ration tous les aspects qui peuvent affecter\
+        \ la SSI, qu\u2019ils soient techniques (mat\xE9riels, logiciels, r\xE9seaux)\
+        \ ou non (organisations, infrastructure, personnel) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node216
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node214
+      description: "- d\u2019envisager tous les risques et menaces, quelle que soit\
+        \ leur origine ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node217
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node214
+      description: "- de prendre en compte la SSI \xE0 tous les niveaux hi\xE9rarchiques.\
+        \ La SSI repose sur une vision strat\xE9gique et n\xE9cessite des choix d\u2019\
+        autorit\xE9 (enjeux, moyens humains et financiers, risques r\xE9siduels accept\xE9\
+        s) ainsi qu\u2019un contr\xF4le des actions et de leur l\xE9gitimit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node218
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node214
+      description: "de responsabiliser tous les acteurs (d\xE9cideurs, ma\xEEtrise\
+        \ d\u2019ouvrage et d\u2019\u0153uvre, utilisateurs) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node219
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node214
+      description: "d\u2019int\xE9grer la SSI tout au long du cycle de vie des syst\xE8\
+        mes d\u2019information (depuis l\u2019\xE9tude d\u2019opportunit\xE9 jusqu\u2019\
+        \xE0 la fin de vie du syst\xE8me)."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node220
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.4
+      description: "D\u2019une mani\xE8re similaire, la s\xE9curit\xE9 doit \xEAtre\
+        \ prise en compte d\xE8s la phase de d\xE9finition des objectifs fonctionnels\
+        \ des syst\xE8mes d\u2019information, afin de :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node221
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node220
+      description: "- limiter les surco\xFBts inh\xE9rents \xE0 l\u2019application\
+        \ tardive de mesures de s\xE9curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node222
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node220
+      description: "- garantir l\u2019efficacit\xE9 des mesures mises en \u0153uvre\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node223
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node220
+      description: "- garantir l\u2019efficacit\xE9 des mesures mises en \u0153uvre\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node224
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node220
+      description: "- favoriser l\u2019appropriation de la s\xE9curit\xE9 par les\
+        \ \xE9quipes en charge du SI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.5'
+      name: Informer et sensibiliser le personnel
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node226
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.5
+      description: "L\u2019ensemble des agents d\u2019une autorit\xE9 administrative,\
+        \ et le cas \xE9chant les contractants et les utilisateurs tiers, doivent\
+        \ suivre une formation adapt\xE9e sur la sensibilisation et recevoir r\xE9\
+        guli\xE8rement les mises \xE0 jour des politiques et des proc\xE9dures qui\
+        \ concernent leurs missions. "
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node227
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.5
+      description: "Cette formation doit permettre de r\xE9duire les risques li\xE9\
+        s \xE0 la m\xE9connaissance des principes de base et des r\xE8gles \xE9l\xE9\
+        mentaires de bonne utilisation de l\u2019outil informatique."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node228
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.5
+      description: "La sensibilisation du personnel doit \xEAtre r\xE9guli\xE8re.\
+        \ \xC0 cet effet, l\u2019ANSSI publie des bonnes pratiques pour l\u2019application\
+        \ de principes de base en mati\xE8re de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information : https://www.ssi.gouv.fr/fr/bonnes-pratiques/principes-generaux."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.6'
+      name: "Prendre en compte la s\xE9curit\xE9 dans les contrats et les achats"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node230
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.6
+      description: "Les exigences de s\xE9curit\xE9 relatives aux produits ou aux\
+        \ prestations acquis doivent faire l\u2019objet d\u2019une \xE9tude et doivent\
+        \ \xEAtre clairement formalis\xE9es et int\xE9gr\xE9es dans les dossiers d\u2019\
+        appels d\u2019offres, au m\xEAme titre que les exigences fonctionnelles, r\xE9\
+        glementaires, de performance ou de qualit\xE9."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.6
+      description: "Ces exigences peuvent concerner le syst\xE8me qui fait l\u2019\
+        objet de la consultation, mais aussi la gestion du projet lui-m\xEAme (formation\
+        \ ou habilitation des personnels), en incluant les phases op\xE9rationnelles\
+        \ et de maintenance. Il convient notamment de :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node232
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- veiller \xE0 int\xE9grer aux r\xE8glements de consultation ou\
+        \ aux cahiers des charges les r\xE9f\xE9rentiels de l\u2019ANSSI applicables\
+        \ (produits certifi\xE9s, qualifi\xE9s, agr\xE9\xE9s\u2026);"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node233
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- demander \xE0 ce que les produits de s\xE9curit\xE9 soient fournis\
+        \ avec l\u2019ensemble des \xE9l\xE9ments permettant d\u2019en appr\xE9cier\
+        \ le niveau de s\xE9curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node234
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9ciser les clauses relatives \xE0 la maintenance des produits\
+        \ acquis ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node235
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9ciser les clauses concernant les conditions de l\u2019\
+        intervention et de l\u2019acc\xE8s physique et logique des sous-traitants\_\
+        ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node236
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9ciser les clauses garantissant la qualit\xE9 et la s\xE9\
+        curit\xE9 des prestations et produits fournis ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node237
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9ciser les conditions de propri\xE9t\xE9 des codes sources\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node238
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9voir, le cas \xE9ch\xE9ant, la r\xE9versibilit\xE9 des\
+        \ prestations et la portabilit\xE9 des donn\xE9es g\xE9n\xE9r\xE9es pendant\
+        \ celles-ci en s\u2019assurant en particulier que les bases de donn\xE9es\
+        \ sont extractibles, que celle-ci peut \xEAtre distingu\xE9e du syst\xE8me\
+        \ lui-m\xEAme et que les formats utilis\xE9s sont ouverts  ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node239
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9ciser la nature et les modalit\xE9s de r\xE9alisation\
+        \ des tableaux de bord et m\xE9canismes de suivi des prestations de s\xE9\
+        curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node240
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9voir les modalit\xE9s de r\xE9action aux crises et aux\
+        \ incidents susceptibles d\u2019affecter le syst\xE8me ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node241
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- pr\xE9voir des points de contact comp\xE9tents \xE0 m\xEAme\
+        \ de r\xE9pondre aux besoins des autorit\xE9s administratives ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node242
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node231
+      description: "- v\xE9rifier, dans les r\xE9ponses \xE0 appel d\u2019offres,\
+        \ la couverture des exigences s\xE9curit\xE9 inscrites dans la consultation."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node243
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.6
+      description: "Une attention particuli\xE8re devra \xEAtre port\xE9e aux m\xE9\
+        canismes de validation et de recette des composants mettant en \u0153uvre\
+        \ les exigences de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.7'
+      name: "Prendre en compte la s\xE9curit\xE9 dans les projets d\u2019externalisation\
+        \ et d\u2019informatique en nuage"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node245
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.7
+      description: "Le recours \xE0 l\u2019externalisation ou \xE0 \xAB l\u2019informatique\
+        \ en nuage \xBB pr\xE9sente des risques sp\xE9cifiques qu\u2019il convient\
+        \ d\u2019\xE9valuer avant d\u2019aborder une telle d\xE9marche. Ces risques\
+        \ peuvent \xEAtre li\xE9s au contexte m\xEAme de l\u2019op\xE9ration d\u2019\
+        externalisation ou \xE0 des sp\xE9cifications contractuelles d\xE9ficientes\
+        \ ou incompl\xE8tes. Dans cette hypoth\xE8se, il est recommand\xE9 d\u2019\
+        appliquer les prescriptions d\xE9crites dans le guide de l\u2019ANSSI \xAB\
+        \ Ma\xEEtriser les risques de l\u2019infog\xE9rance \u2013 Externalisation\
+        \ des syst\xE8mes d\u2019information \xBB. Ce guide fournit :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node246
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node245
+      description: "une d\xE9marche coh\xE9rente de prise en compte des aspects SSI\
+        \ lors de la r\xE9daction du cahier des charges d\u2019une op\xE9ration d\u2019\
+        externalisation ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node247
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node245
+      description: "un ensemble de clauses types ainsi qu\u2019une base d\u2019exigences\
+        \ de s\xE9curit\xE9, \xE0 adapter et \xE0 personnaliser en fonction du contexte\
+        \ particulier de chaque projet d\u2019externalisation."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.8'
+      name: "Mettre en place des m\xE9canismes de d\xE9fense des syst\xE8mes d\u2019\
+        information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node249
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.8
+      description: "En compl\xE9ment des m\xE9canismes de protection des syst\xE8\
+        mes d\u2019information, et en fonction de leurs enjeux de s\xE9curit\xE9,\
+        \ les autorit\xE9s administratives doivent adopter des mesures compl\xE9mentaires\
+        \ relatives \xE0 la d\xE9fense des syst\xE8mes d\u2019information. Ces mesures\
+        \ consistent, en particulier, \xE0 assurer :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node250
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node249
+      description: "- la connaissance des syst\xE8mes exploit\xE9s par l\u2019autorit\xE9\
+        \ administrative, ou en relation avec elle (cartographie des SI, r\xE9pertoire\
+        \ des interconnexions, etc.) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node251
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node249
+      description: "- la d\xE9tection des malveillances, des erreurs et des imprudences,\
+        \ en p\xE9riph\xE9rie ou \xE0 l\u2019int\xE9rieur des syst\xE8mes d\u2019\
+        informations des autorit\xE9s administratives ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node252
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node249
+      description: "- la tra\xE7abilit\xE9 des actions et des acc\xE8s r\xE9alis\xE9\
+        s sur les syst\xE8mes d\u2019information (journalisation, notamment) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node253
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node249
+      description: "- la p\xE9rennisation des savoir-faire et des comp\xE9tences,\
+        \ notamment en termes d\u2019exploitation des SI ; \uF02D la conservation\
+        \ de la preuve des infractions d\xE9couvertes."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.9'
+      name: "Utiliser les produits et prestataires labellis\xE9s pour leur s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node255
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.9
+      description: "La qualification est un label, cr\xE9\xE9 par l\u2019ordonnance\
+        \ du 8 d\xE9cembre 2005, qui permet d\u2019attester de la confiance que l\u2019\
+        on peut accorder \xE0 des produits de s\xE9curit\xE9 et \xE0 des prestataires\
+        \ de services de confiance (PSCO), ainsi que de leur conformit\xE9 aux r\xE8\
+        gles du RGS qui leurs sont applicables. D\u2019autres labels existent pour\
+        \ attester de la comp\xE9tence des professionnels, notamment en mati\xE8re\
+        \ de SSI."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node256
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.9
+      description: "La n\xE9cessit\xE9 de recourir \xE0 des produits de s\xE9curit\xE9\
+        \ ou \xE0 des prestataires de services de confiance a \xE9t\xE9 r\xE9guli\xE8\
+        rement rappel\xE9e par le Premier ministre [1], ainsi il est recommand\xE9\
+        \ :"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node257
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node256
+      description: "- d\u2019utiliser chaque fois que possible des produits de s\xE9\
+        curit\xE9 qualifi\xE9s (cf. \xA7 5.1) par l\u2019ANSSI ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node258
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node256
+      description: "- de recourir chaque fois que possible \xE0 des PSCO qualifi\xE9\
+        s (cf. \xA7 5.2) ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node259
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node256
+      description: "- de prendre en consid\xE9ration, pour le choix des prestataires,\
+        \ en plus de leur qualification, leur \xE9ventuelle certification selon la\
+        \ norme ISO 27001 ou d\u2019autres normes \xE9quivalentes ;"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node260
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:node256
+      description: "- de prendre en consid\xE9ration, pour le choix de prestataires,\
+        \ la certification de leurs personnels lorsque des comp\xE9tences particuli\xE8\
+        res sont requises pour une fonction."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.10'
+      name: "\xC9laborer des plans de traitement d\u2019incidents ainsi que de continuit\xE9\
+        \ et de reprise d\u2019activit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node262
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.10
+      description: "Les autorit\xE9s doivent se pr\xE9parer \xE0 faire face \xE0 des\
+        \ incidents de s\xE9curit\xE9 pour lesquels toutes les mesures pr\xE9ventives\
+        \ auraient \xE9chou\xE9. A ce titre, elles doivent mettre en \u0153uvre un\
+        \ plan de continuit\xE9 d\u2019activit\xE9 et un plan de reprise d\u2019activit\xE9\
+        \ qui identifient les moyens et les proc\xE9dures n\xE9cessaires pour revenir\
+        \ \xE0 une situation nominale le plus rapidement possible, en cas d\u2019\
+        incident grave."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node263
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.10
+      description: "Ces documents doivent \xEAtre r\xE9guli\xE8rement mis \xE0 jour."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node264
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.10
+      description: "Les plans et les proc\xE9dures qui en d\xE9coulent doivent faire\
+        \ l\u2019objet de test r\xE9guliers."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.11'
+      name: "Proc\xE9der \xE0 des audits r\xE9guliers de la s\xE9curit\xE9 du syst\xE8\
+        me d\u2019information"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node266
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.11
+      description: "Les autorit\xE9s administratives doivent r\xE9aliser ou faire\
+        \ r\xE9aliser des audits r\xE9guliers de leurs SI.  \xC0 cet effet, le r\xE9\
+        f\xE9rentiel d\u2019exigences relatif aux prestataires d\u2019audit de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d\u2019information (annexe C du RGS) fixe\
+        \ les r\xE8gles que doivent respecter les prestataires tiers qui r\xE9alisent\
+        \ des audits de la s\xE9curit\xE9 des syst\xE8mes d\u2019information des autorit\xE9\
+        s administratives. Cette annexe d\xE9crit \xE9galement des recommandations\
+        \ \xE0 l\u2019intention des commanditaires d\u2019audits, dans le cadre de\
+        \ la passation de march\xE9s publics ou d\u2019un accord contractuel, ainsi\
+        \ qu\u2019aux prestataires d\u2019audit dans le cadre de leur devoir de conseil."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node267
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.11
+      description: "Afin de s\u2019assurer qu\u2019elles recourent \xE0 des prestataires\
+        \ qui respectent ces exigences, les autorit\xE9s administratives doivent,\
+        \ autant que possible, faire appel \xE0 des prestataires ayant obtenu une\
+        \ qualification, selon le sch\xE9ma d\xE9crit au chapitre 5."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.12'
+      name: "R\xE9aliser une veille sur les menaces et les vuln\xE9rabilit\xE9s"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node269
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.12
+      description: "Se tenir inform\xE9 sur l\u2019\xE9volution des menaces et des\
+        \ vuln\xE9rabilit\xE9s, en identifiant les incidents qu\u2019elles favorisent\
+        \ ainsi que leurs impacts potentiels, constitue une mesure fondamentale de\
+        \ d\xE9fense."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node270
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.12
+      description: "Les sites institutionnels, comme celui du CERT-FR (https://www.cert.ssi.gouv.fr),\
+        \ ou ceux des \xE9diteurs de logiciels et de mat\xE9riels constituent des\
+        \ sources d\u2019information essentielles sur les vuln\xE9rabilit\xE9s identifi\xE9\
+        es, ainsi que sur les contre-mesures et les correctifs \xE9ventuels."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node271
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.12
+      description: "Les mises \xE0 jour des logiciels et d\u2019autres \xE9quipements,\
+        \ les correctifs des syst\xE8mes d\u2019exploitation et des applications font\
+        \ l\u2019objet d\u2019alertes et d\u2019avis qu\u2019il est indispensable\
+        \ de suivre."
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:7.13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:chapitre-7
+      ref_id: '7.13'
+      name: "Favoriser l\u2019interop\xE9rabilit\xE9"
+    - urn: urn:intuitem:risk:req_node:rgs-v2.0:node273
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rgs-v2.0:7.13
+      description: "L\u2019administration \xE9lectronique ne saurait \xE9voluer sans\
+        \ une prise en compte des r\xE8gles relatives \xE0 l\u2019interop\xE9rabilit\xE9\
+        \ et \xE0 la mise en coh\xE9rence des diff\xE9rents syst\xE8mes d\u2019information\
+        \ des autorit\xE9s administratives et de leurs partenaires (usagers, acteurs\
+        \ industriels, etc.). L\u2019interop\xE9rabilit\xE9 est en particulier trait\xE9\
+        e \xE0 travers le R\xE9f\xE9rentiel g\xE9n\xE9ral d\u2019interop\xE9rabilit\xE9\
+        . Le processus de r\xE9f\xE9rencement est, quant \xE0 lui, d\xE9crit dans\
+        \ l\u2019arr\xEAt\xE9 du 18 janvier 2012 relatif au r\xE9f\xE9rencement de\
+        \ produits de s\xE9curit\xE9 ou d\u2019offres de prestataires de services\
+        \ de confiance."

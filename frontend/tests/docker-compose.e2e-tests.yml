@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  backend:
+    container_name: test-backend
+    build:
+      context: ../../backend/
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
+      - CISO_ASSISTANT_URL=http://localhost:4173
+      - DJANGO_DEBUG=True
+    ports:
+      - 8080:8000
+
+  tests:
+    container_name: functional-tests
+    environment:
+      - ORIGIN=http://localhost:4173
+      - DOCKER=True
+    build:
+      context: ../../frontend/
+      dockerfile: ./tests/Dockerfile
+      args:
+        - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./reports:/app/tests/reports
+      - ./results:/app/tests/results
+    ports:
+      - 9323:9323 # playwright reporter port
+    command: 'npx playwright test ${ARGS}'

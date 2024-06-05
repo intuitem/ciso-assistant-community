@@ -1,0 +1,1132 @@
+urn: urn:intuitem:risk:library:essential-eight
+locale: en
+ref_id: Essential Eight
+name: Essential Eight Maturity Model
+description: "The Australian Signals Directorate (ASD) has developed prioritised mitigation\
+  \ strategies, in the form of the Strategies to Mitigate Cyber Security Incidents,\
+  \ to help organisations protect themselves against various cyber threats. The most\
+  \ effective of these mitigation strategies are the Essential Eight.\n\nThe Essential\
+  \ Eight has been designed to protect organisations\u2019 internet-connected information\
+  \ technology networks. While the principles behind the Essential Eight may be applied\
+  \ to enterprise mobility and operational technology networks, it was not designed\
+  \ for such purposes and alternative mitigation strategies may be more appropriate\
+  \ to defend against unique cyber threats to these environments."
+copyright: "The Commonwealth of Australia owns all the material we produce. All material\
+  \ presented on this website is provided under a Creative Commons Attribution 3.0\
+  \ Australia licence, with the exception of:\n\n   - the Commonwealth Coat of Arms\
+  \ \u2013 terms of use are available at It\u2019s an Honour - external site\n   -\
+  \ our logo\n   - materials specifically not provided under a Creative Commons attribution\
+  \ 3.0 Australia licence\n   - content supplied by third parties.\n\nLicense details\
+  \ and conditions are available at Creative Commons Attribution 3.0 Australia.\n\n\
+  You should attribute material you get from this website as Australian Government\
+  \ Department of Home Affairs."
+version: 1
+provider: Australian Government
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:essential-eight
+    ref_id: Essential Eight
+    name: Essential Eight Maturity Model
+    description: "The Australian Signals Directorate (ASD) has developed prioritised\
+      \ mitigation strategies, in the form of the Strategies to Mitigate Cyber Security\
+      \ Incidents, to help organisations protect themselves against various cyber\
+      \ threats. The most effective of these mitigation strategies are the Essential\
+      \ Eight.\n\nThe Essential Eight has been designed to protect organisations\u2019\
+      \ internet-connected information technology networks. While the principles behind\
+      \ the Essential Eight may be applied to enterprise mobility and operational\
+      \ technology networks, it was not designed for such purposes and alternative\
+      \ mitigation strategies may be more appropriate to defend against unique cyber\
+      \ threats to these environments."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:essential-eight:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Patch applications
+    - urn: urn:intuitem:risk:req_node:essential-eight:node3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: An automated method of asset discovery is used at least fortnightly
+        to support the detection of assets for subsequent vulnerability scanning activities.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: A vulnerability scanner with an up-to-date vulnerability database
+        is used for vulnerability scanning activities.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: A vulnerability scanner is used at least daily to identify missing
+        patches or updates for vulnerabilities in online services.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: A vulnerability scanner is used at least weekly to identify missing
+        patches or updates for vulnerabilities in office productivity suites, web
+        browsers and their extensions, email clients, PDF software, and security products.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: A vulnerability scanner is used at least fortnightly to identify
+        missing patches or updates for vulnerabilities in applications other than
+        office productivity suites, web browsers and their extensions, email clients,
+        PDF software, and security products.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in online services are applied within 48 hours of release when vulnerabilities
+        are assessed as critical by vendors or when working exploits exist.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in online services are applied within two weeks of release when vulnerabilities
+        are assessed as non-critical by vendors and no working exploits exist.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in office productivity suites, web browsers and their extensions, email clients,
+        PDF software, and security products are applied within 48 hours of release
+        when vulnerabilities are assessed as critical by vendors or when working exploits
+        exist.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in office productivity suites, web browsers and their extensions, email clients,
+        PDF software, and security products are applied within two weeks of release.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in applications other than office productivity suites, web browsers and their
+        extensions, email clients, PDF software, and security products are applied
+        within one month of release.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Online services that are no longer supported by vendors are removed.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Office productivity suites, web browsers and their extensions,
+        email clients, PDF software, Adobe Flash Player, and security products that
+        are no longer supported by vendors are removed.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:1
+      description: Applications other than office productivity suites, web browsers
+        and their extensions, email clients, PDF software, Adobe Flash Player, and
+        security products that are no longer supported by vendors are removed.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Patch operating systems
+    - urn: urn:intuitem:risk:req_node:essential-eight:node17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: An automated method of asset discovery is used at least fortnightly
+        to support the detection of assets for subsequent vulnerability scanning activities.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: A vulnerability scanner with an up-to-date vulnerability database
+        is used for vulnerability scanning activities.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: A vulnerability scanner is used at least daily to identify missing
+        patches or updates for vulnerabilities in operating systems of internet-facing
+        servers and internet-facing network devices.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: A vulnerability scanner is used at least fortnightly to identify
+        missing patches or updates for vulnerabilities in operating systems of workstations,
+        non-internet-facing servers and non-internet-facing network devices.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: A vulnerability scanner is used at least fortnightly to identify
+        missing patches or updates for vulnerabilities in drivers.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: A vulnerability scanner is used at least fortnightly to identify
+        missing patches or updates for vulnerabilities in firmware.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in operating systems of internet-facing servers and internet-facing network
+        devices are applied within 48 hours of release when vulnerabilities are assessed
+        as critical by vendors or when working exploits exist.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in operating systems of internet-facing servers and internet-facing network
+        devices are applied within two weeks of release when vulnerabilities are assessed
+        as non-critical by vendors and no working exploits exist.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in operating systems of workstations, non-internet-facing servers and non-internet-facing
+        network devices are applied within 48 hours of release when vulnerabilities
+        are assessed as critical by vendors or when working exploits exist.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in operating systems of workstations, non-internet-facing servers and non-internet-facing
+        network devices are applied within one month of release.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in drivers are applied within 48 hours of release when vulnerabilities are
+        assessed as critical by vendors or when working exploits exist.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node28
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in drivers are applied within one month of release when vulnerabilities are
+        assessed as non-critical by vendors and no working exploits exist.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in firmware are applied within 48 hours of release when vulnerabilities are
+        assessed as critical by vendors or when working exploits exist.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Patches, updates or other vendor mitigations for vulnerabilities
+        in firmware are applied within one month of release when vulnerabilities are
+        assessed as non-critical by vendors and no working exploits exist.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: The latest release, or the previous release, of operating systems
+        are used.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:2
+      description: Operating systems that are no longer supported by vendors are replaced.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Multi-factor authentication
+    - urn: urn:intuitem:risk:req_node:essential-eight:node34
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: "Multi-factor authentication is used to authenticate users to their\
+        \ organisation\u2019s online services that process, store or communicate their\
+        \ organisation\u2019s sensitive data."
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node35
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: "Multi-factor authentication is used to authenticate users to third-party\
+        \ online services that process, store or communicate their organisation\u2019\
+        s sensitive data."
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node36
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: "Multi-factor authentication (where available) is used to authenticate\
+        \ users to third-party online services that process, store or communicate\
+        \ their organisation\u2019s non-sensitive data."
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node37
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: "Multi-factor authentication is used to authenticate users to their\
+        \ organisation\u2019s online customer services that process, store or communicate\
+        \ their organisation\u2019s sensitive customer data."
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node38
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: "Multi-factor authentication is used to authenticate users to third-party\
+        \ online customer services that process, store or communicate their organisation\u2019\
+        s sensitive customer data."
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node39
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication is used to authenticate customers to
+        online customer services that process, store or communicate sensitive customer
+        data.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node40
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication is used to authenticate privileged
+        users of systems.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node41
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication is used to authenticate unprivileged
+        users of systems.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node42
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication is used to authenticate users of data
+        repositories.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node43
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: 'Multi-factor authentication uses either: something users have
+        and something users know, or something users have that is unlocked by something
+        users know or are.'
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node44
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication used for authenticating users of online
+        services is phishing-resistant.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node45
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication used for authenticating customers of
+        online customer services provides a phishing-resistant option.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node46
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication used for authenticating users of systems
+        is phishing-resistant.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node47
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Multi-factor authentication used for authenticating users of data
+        repositories is phishing-resistant.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node48
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Successful and unsuccessful multi-factor authentication events
+        are centrally logged.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node49
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Event logs are protected from unauthorised modification and deletion.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node50
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Event logs from internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node51
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Event logs from non-internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node52
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Event logs from workstations are analysed in a timely manner to
+        detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node53
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Cyber security events are analysed in a timely manner to identify
+        cyber security incidents.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node54
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Cyber security incidents are reported to the Chief Information
+        Security Officer, or one of their delegates, as soon as possible after they
+        occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node55
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Cyber security incidents are reported to ASD as soon as possible
+        after they occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node56
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:3
+      description: Following the identification of a cyber security incident, the
+        cyber security incident response plan is enacted.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Restrict administrative privileges
+    - urn: urn:intuitem:risk:req_node:essential-eight:node58
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Requests for privileged access to systems, applications and data
+        repositories are validated when first requested.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node59
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged access to systems, applications and data repositories
+        is disabled after 12 months unless revalidated.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node60
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged access to systems and applications is disabled after
+        45 days of inactivity.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node61
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged users are assigned a dedicated privileged account to
+        be used solely for duties requiring privileged access.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node62
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged access to systems, applications and data repositories
+        is limited to only what is required for users and services to undertake their
+        duties.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node63
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged accounts (excluding those explicitly authorised to access
+        online services) are prevented from accessing the internet, email and web
+        services.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node64
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged accounts explicitly authorised to access online services
+        are strictly limited to only what is required for users and services to undertake
+        their duties.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node65
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Secure Admin Workstations are used in the performance of administrative
+        activities.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node66
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged users use separate privileged and unprivileged operating
+        environments.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node67
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged operating environments are not virtualised within unprivileged
+        operating environments.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node68
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Unprivileged accounts cannot logon to privileged operating environments.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node69
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged accounts (excluding local administrator accounts) cannot
+        logon to unprivileged operating environments.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node70
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Just-in-time administration is used for administering systems and
+        applications.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node71
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Administrative activities are conducted through jump servers.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node72
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Credentials for break glass accounts, local administrator accounts
+        and service accounts are long, unique, unpredictable and managed.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node73
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Memory integrity functionality is enabled.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node74
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Local Security Authority protection functionality is enabled.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node75
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Credential Guard functionality is enabled.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node76
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Remote Credential Guard functionality is enabled.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node77
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged access events are centrally logged.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node78
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Privileged account and group management events are centrally logged.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node79
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Event logs are protected from unauthorised modification and deletion.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node80
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Event logs from internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node81
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Event logs from non-internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node82
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Event logs from workstations are analysed in a timely manner to
+        detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node83
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Cyber security events are analysed in a timely manner to identify
+        cyber security incidents.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node84
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Cyber security incidents are reported to the Chief Information
+        Security Officer, or one of their delegates, as soon as possible after they
+        occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node85
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Cyber security incidents are reported to ASD as soon as possible
+        after they occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node86
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:4
+      description: Following the identification of a cyber security incident, the
+        cyber security incident response plan is enacted.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Application control
+    - urn: urn:intuitem:risk:req_node:essential-eight:node88
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control is implemented on workstations.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node89
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control is implemented on internet-facing servers.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node90
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control is implemented on non-internet-facing servers.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node91
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control is applied to user profiles and temporary folders
+        used by operating systems, web browsers and email clients.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node92
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control is applied to all locations other than user
+        profiles and temporary folders used by operating systems, web browsers and
+        email clients.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node93
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control restricts the execution of executables, software
+        libraries, scripts, installers, compiled HTML, HTML applications and control
+        panel applets to an organisation-approved set.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node94
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control restricts the execution of drivers to an organisation-approved
+        set.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node95
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: "Microsoft\u2019s recommended application blocklist is implemented."
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node96
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: "Microsoft\u2019s vulnerable driver blocklist is implemented."
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node97
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Application control rulesets are validated on an annual or more
+        frequent basis.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node98
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Allowed and blocked application control events are centrally logged.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node99
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Event logs are protected from unauthorised modification and deletion.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node100
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Event logs from internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node101
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Event logs from non-internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node102
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Event logs from workstations are analysed in a timely manner to
+        detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node103
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Cyber security events are analysed in a timely manner to identify
+        cyber security incidents.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node104
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Cyber security incidents are reported to the Chief Information
+        Security Officer, or one of their delegates, as soon as possible after they
+        occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node105
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Cyber security incidents are reported to ASD as soon as possible
+        after they occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node106
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:5
+      description: Following the identification of a cyber security incident, the
+        cyber security incident response plan is enacted.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Restrict Microsoft Office macros
+    - urn: urn:intuitem:risk:req_node:essential-eight:node108
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macros are disabled for users that do not have
+        a demonstrated business requirement.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node109
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Only Microsoft Office macros running from within a sandboxed environment,
+        a Trusted Location or that are digitally signed by a trusted publisher are
+        allowed to execute.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node110
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macros are checked to ensure they are free of
+        malicious code before being digitally signed or placed within Trusted Locations.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node111
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Only privileged users responsible for checking that Microsoft Office
+        macros are free of malicious code can write to and modify content within Trusted
+        Locations.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node112
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macros digitally signed by an untrusted publisher
+        cannot be enabled via the Message Bar or Backstage View.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node113
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macros digitally signed by signatures other than
+        V3 signatures cannot be enabled via the Message Bar or Backstage View.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node114
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: "Microsoft Office\u2019s list of trusted publishers is validated\
+        \ on an annual or more frequent basis."
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node115
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macros in files originating from the internet
+        are blocked.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node116
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macro antivirus scanning is enabled.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node117
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macros are blocked from making Win32 API calls.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node118
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:6
+      description: Microsoft Office macro security settings cannot be changed by users.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: User application hardening
+    - urn: urn:intuitem:risk:req_node:essential-eight:node120
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Internet Explorer 11 is disabled or removed.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node121
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Web browsers do not process Java from the internet.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node122
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Web browsers do not process web advertisements from the internet.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node123
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Web browsers are hardened using ASD and vendor hardening guidance,
+        with the most restrictive guidance taking precedence when conflicts occur.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node124
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Web browser security settings cannot be changed by users.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node125
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Microsoft Office is blocked from creating child processes.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node126
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Microsoft Office is blocked from creating executable content.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node127
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Microsoft Office is blocked from injecting code into other processes.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node128
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Microsoft Office is configured to prevent activation of Object
+        Linking and Embedding packages.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node129
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Office productivity suites are hardened using ASD and vendor hardening
+        guidance, with the most restrictive guidance taking precedence when conflicts
+        occur.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node130
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Office productivity suite security settings cannot be changed by
+        users.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node131
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: PDF software is blocked from creating child processes.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node132
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: PDF software is hardened using ASD and vendor hardening guidance,
+        with the most restrictive guidance taking precedence when conflicts occur.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node133
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: PDF software security settings cannot be changed by users.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node134
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: .NET Framework 3.5 (includes .NET 2.0 and 3.0) is disabled or removed.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node135
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Windows PowerShell 2.0 is disabled or removed.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node136
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: PowerShell is configured to use Constrained Language Mode.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node137
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: PowerShell module logging, script block logging and transcription
+        events are centrally logged.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node138
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Command line process creation events are centrally logged.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node139
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Event logs are protected from unauthorised modification and deletion.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node140
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Event logs from internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node141
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Event logs from non-internet-facing servers are analysed in a timely
+        manner to detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node142
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Event logs from workstations are analysed in a timely manner to
+        detect cyber security events.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node143
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Cyber security events are analysed in a timely manner to identify
+        cyber security incidents.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node144
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Cyber security incidents are reported to the Chief Information
+        Security Officer, or one of their delegates, as soon as possible after they
+        occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node145
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Cyber security incidents are reported to ASD as soon as possible
+        after they occur or are discovered.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node146
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:7
+      description: Following the identification of a cyber security incident, the
+        cyber security incident response plan is enacted.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Regular backups
+    - urn: urn:intuitem:risk:req_node:essential-eight:node148
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Backups of data, applications and settings are performed and retained
+        in accordance with business criticality and business continuity requirements.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node149
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Backups of data, applications and settings are synchronised to
+        enable restoration to a common point in time.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node150
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Backups of data, applications and settings are retained in a secure
+        and resilient manner.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node151
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Restoration of data, applications and settings from backups to
+        a common point in time is tested as part of disaster recovery exercises.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node152
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Unprivileged accounts cannot access backups belonging to other
+        accounts.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node153
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Unprivileged accounts cannot access their own backups.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node154
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Privileged accounts (excluding backup administrator accounts) cannot
+        access backups belonging to other accounts.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node155
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Privileged accounts (excluding backup administrator accounts) cannot
+        access their own backups.
+      maturity: 3
+    - urn: urn:intuitem:risk:req_node:essential-eight:node156
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Unprivileged accounts are prevented from modifying and deleting
+        backups.
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:essential-eight:node157
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Privileged accounts (excluding backup administrator accounts) are
+        prevented from modifying and deleting backups.
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:essential-eight:node158
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:essential-eight:8
+      description: Backup administrator accounts are prevented from modifying and
+        deleting backups during their retention period.
+      maturity: 3

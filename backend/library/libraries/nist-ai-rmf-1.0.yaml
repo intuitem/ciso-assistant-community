@@ -1,0 +1,953 @@
+urn: urn:intuitem:risk:library:nist-ai-rmf-1.0
+locale: en
+ref_id: NIST-AI-RMF-1.0
+name: NIST AI RMF 1.0
+description: 'National Institute of Standards and Technology - Artificial Intelligence
+  Risk Management Framework '
+copyright: With the exception of material marked as copyrighted, information presented
+  on NIST sites are considered public information and may be distributed or copied.
+version: 1
+provider: NIST
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nist-ai-rmf-1.0
+    ref_id: NIST-AI-RMF-1.0
+    name: NIST AI RMF 1.0
+    description: 'National Institute of Standards and Technology - Artificial Intelligence
+      Risk Management Framework '
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      assessable: false
+      depth: 1
+      ref_id: GOVERN
+      description: A culture of risk management is cultivated and present.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      name: Preamble
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node3
+      description: "The GOVERN function:\n\u2022\tcultivates and implements a culture\
+        \ of risk management within organizations designing, developing, deploying,\
+        \ evaluating, or acquiring AI systems;\n\u2022\toutlines processes, documents,\
+        \ and organizational schemes that anticipate, identify, and manage the risks\
+        \ a system can pose, including to users and others across society \u2013 and\
+        \ procedures to achieve those outcomes;\n\u2022\tincorporates processes to\
+        \ assess potential impacts;\n\u2022\tprovides a structure by which AI risk\
+        \ management functions can align with organizational principles, policies,\
+        \ and strategic priorities;\n\u2022\tconnects technical aspects of AI system\
+        \ design and development to organizational values and principles, and enables\
+        \ organizational practices and competencies for the individuals involved in\
+        \ acquiring, training, deploying, and monitoring such systems; and\n\u2022\
+        \taddresses full product lifecycle and associated processes, including legal\
+        \ and other issues concerning use of third-party software or hardware systems\
+        \ and data."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node3
+      description: "GOVERN is a cross-cutting function that is infused throughout\
+        \ AI risk management and enables the other functions of the process. Aspects\
+        \ of GOVERN, especially those related to compliance or evaluation, should\
+        \ be integrated into each of the other functions. Attention to governance\
+        \ is a continual and intrinsic requirement for effective AI risk management\
+        \ over an AI system\u2019s lifespan and the organization\u2019s hierarchy."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node3
+      description: "Strong governance can drive and enhance internal practices and\
+        \ norms to facilitate organizational risk culture. Governing authorities can\
+        \ determine the overarching policies that direct an organization\u2019s mission,\
+        \ goals, values, culture, and risk tolerance. Senior leadership sets the tone\
+        \ for risk management within an organization, and with it, organizational\
+        \ culture. Management aligns the technical aspects of AI risk management to\
+        \ policies and operations. Documentation can enhance transparency, improve\
+        \ human review processes, and bolster accountability in AI system teams."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node3
+      description: After putting in place the structures, systems, processes, and
+        teams described in the GOVERN function, organizations should benefit from
+        a purpose-driven culture focused on risk understanding and management. It
+        is incumbent on Framework users to continue to execute the GOVERN function
+        as knowledge, cultures, and needs or expectations from AI actors evolve over
+        time.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      ref_id: GOVERN 1
+      description: Policies, processes, procedures, and practices across the organization
+        related to the mapping, measuring, and managing of AI risks are in place,
+        transparent, and implemented effectively.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.1
+      description: Legal and regulatory requirements involving AI are understood,
+        managed, and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.2
+      description: The characteristics of trustworthy AI are integrated into organizational
+        policies, processes, procedures, and practices.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.3
+      description: "Processes, procedures, and practices are in place to determine\
+        \ the needed level of risk management activities based on the organization\u2019\
+        s risk tolerance."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.4
+      description: The risk management process and its outcomes are established through
+        transparent policies, procedures, and other controls based on organizational
+        risk priorities.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.5
+      description: Ongoing monitoring and periodic review of the risk management process
+        and its outcomes are planned and organizational roles and responsibilities
+        clearly defined, including determining the frequency of periodic review.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.6
+      description: Mechanisms are in place to inventory AI systems and are resourced
+        according to organizational risk priorities.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-1
+      ref_id: GOVERN 1.7
+      description: "Processes and procedures are in place for decommissioning and\
+        \ phasing out AI systems safely and in a manner that does not increase risks\
+        \ or decrease the organization\u2019s trustworthiness."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      ref_id: GOVERN 2
+      description: Accountability structures are in place so that the appropriate
+        teams and individuals are empowered, responsible, and trained for mapping,
+        measuring, and managing AI risks.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2
+      ref_id: GOVERN 2.1
+      description: Roles and responsibilities and lines of communication related to
+        mapping, measuring, and managing AI risks are documented and are clear to
+        individuals and teams throughout the organization.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2
+      ref_id: GOVERN 2.2
+      description: "The organization\u2019s personnel and partners receive AI risk\
+        \ management training to enable them to perform their duties and responsibilities\
+        \ consistent with related policies, procedures, and agreements."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-2
+      ref_id: GOVERN 2.3
+      description: Executive leadership of the organization takes responsibility for
+        decisions about risks associated with AI system development and deployment.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      ref_id: GOVERN 3
+      description: Workforce diversity, equity, inclusion, and accessibility processes
+        are prioritized in the mapping, measuring, and managing of AI risks throughout
+        the lifecycle.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3
+      ref_id: GOVERN 3.1
+      description: Decision-making related to mapping, measuring, and managing AI
+        risks throughout the lifecycle is informed by a diverse team (e.g., diversity
+        of demographics, disciplines, experience, expertise, and backgrounds).
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-3
+      ref_id: GOVERN 3.2
+      description: Policies and procedures are in place to define and differentiate
+        roles and responsibilities for human-AI configurations and oversight of AI
+        systems.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      ref_id: GOVERN 4
+      description: Organizational teams are committed to a culture that considers
+        and communicates AI risk.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4
+      ref_id: GOVERN 4.1
+      description: Organizational policies and practices are in place to foster a
+        critical thinking and safety-first mindset in the design, development, deployment,
+        and uses of AI systems to minimize potential negative impacts.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4
+      ref_id: GOVERN 4.2
+      description: Organizational teams document the risks and potential impacts of
+        the AI technology they design, develop, deploy, evaluate, and use, and they
+        communicate about the impacts more broadly.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-4
+      ref_id: GOVERN 4.3
+      description: Organizational practices are in place to enable AI testing, identification
+        of incidents, and information sharing.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      ref_id: GOVERN 5
+      description: Processes are in place for robust engagement with relevant AI actors.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-5
+      ref_id: GOVERN 5.1
+      description: Organizational policies and practices are in place to collect,
+        consider, prioritize, and integrate feedback from those external to the team
+        that developed or deployed the AI system regarding the potential individual
+        and societal impacts related to AI risks.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-5
+      ref_id: GOVERN 5.2
+      description: Mechanisms are established to enable the team that developed or
+        deployed AI systems to regularly incorporate adjudicated feedback from relevant
+        AI actors into system design and implementation.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern
+      ref_id: GOVERN 6
+      description: Policies and procedures are in place to address AI risks and benefits
+        arising from third-party software and data and other supply chain issues.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6
+      ref_id: GOVERN 6.1
+      description: "Policies and procedures are in place that address AI risks associated\
+        \ with third-party entities, including risks of infringement of a third-party\u2019\
+        s intellectual property or other rights."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:govern-6
+      ref_id: GOVERN 6.2
+      description: Contingency processes are in place to handle failures or incidents
+        in third-party data or AI systems deemed to be high-risk.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      assessable: false
+      depth: 1
+      ref_id: MAP
+      description: Context is recognized and risks related to context are identified.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node34
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      name: Preamble
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node35
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node34
+      description: 'The MAP function establishes the context to frame risks related
+        to an AI system. The AI lifecycle consists of many interdependent activities
+        involving a diverse set of actors (See Figure 3). In practice, AI actors in
+        charge of one part of the process often do not have full visibility or control
+        over other parts and their associated contexts. The interdependencies between
+        these activities, and among the relevant AI actors, can make it difficult
+        to reliably anticipate impacts of AI systems. For example, early decisions
+        in identifying purposes and objectives of an AI system can alter its behavior
+        and capabilities, and the dynamics of deployment setting (such as end users
+        or impacted individuals) can shape the impacts of AI system decisions. As
+        a result, the best intentions within one dimension of the AI lifecycle can
+        be undermined via interactions with decisions and conditions in other, later
+        activities.
+
+        This complexity and varying levels of visibility can introduce uncertainty
+        into risk management practices. Anticipating, assessing, and otherwise addressing
+        potential sources of negative risk can mitigate this uncertainty and enhance
+        the integrity of the decision process.'
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node36
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node34
+      description: "The information gathered while carrying out the MAP function enables\
+        \ negative risk prevention and informs decisions for processes such as model\
+        \ management, as well as an initial decision about appropriateness or the\
+        \ need for an AI solution. Outcomes in the MAP function are the basis for\
+        \ the MEASURE and MANAGE functions. Without contextual knowledge, and awareness\
+        \ of risks within the identified contexts, risk management is difficult to\
+        \ perform. The MAP function is intended to enhance an organization\u2019s\
+        \ ability to identify risks and broader contributing factors."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node37
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node34
+      description: "Implementation of this function is enhanced by incorporating perspectives\
+        \ from a diverse internal team and engagement with those external to the team\
+        \ that developed or deployed the AI system. Engagement with external collaborators,\
+        \ end users, potentially impacted communities, and others may vary based on\
+        \ the risk level of a particular AI system, the makeup of the internal team,\
+        \ and organizational policies. Gathering such broad perspectives can help\
+        \ organizations proactively prevent negative risks and develop more trustworthy\
+        \ AI systems by:\n\u2022\timproving their capacity for understanding contexts;\n\
+        \u2022\tchecking their assumptions about context of use;\n\u2022\tenabling\
+        \ recognition of when systems are not functional within or out of their intended\
+        \ context;\n\u2022\tidentifying positive and beneficial uses of their existing\
+        \ AI systems;\n\u2022\timproving understanding of limitations in AI and ML\
+        \ processes;\n\u2022\tidentifying constraints in real-world applications that\
+        \ may lead to negative impacts;\n\u2022\tidentifying known and foreseeable\
+        \ negative impacts related to intended use of AI systems; and\n\u2022\tanticipating\
+        \ risks of the use of AI systems beyond intended use."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node38
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node34
+      description: After completing the MAP function, Framework users should have
+        sufficient contextual knowledge about AI system impacts to inform an initial
+        go/no-go decision about whether to design, develop, or deploy an AI system.
+        If a decision is made to proceed, organizations should utilize the MEASURE
+        and MANAGE functions along with policies and procedures put into place in
+        the GOVERN function to assist in AI risk management efforts. It is incumbent
+        on Framework users to continue applying the MAP function to AI systems as
+        context, capabilities, risks, benefits, and potential impacts evolve over
+        time.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      ref_id: MAP 1
+      description: Context is established and understood.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      ref_id: MAP 1.1
+      description: 'Intended purposes, potentially beneficial uses, contextspecific
+        laws, norms and expectations, and prospective settings in which the AI system
+        will be deployed are understood and documented. Considerations include: the
+        specific set or types of users along with their expectations; potential positive
+        and negative impacts of system uses to individuals, communities, organizations,
+        society, and the planet; assumptions and related limitations about AI system
+        purposes, uses, and risks across the development or product AI lifecycle;
+        and related TEVV and system metrics.'
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      ref_id: MAP 1.2
+      description: Interdisciplinary AI actors, competencies, skills, and capacities
+        for establishing context reflect demographic diversity and broad domain and
+        user experience expertise, and their participation is documented. Opportunities
+        for interdisciplinary collaboration are prioritized.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      ref_id: MAP 1.3
+      description: "The organization\u2019s mission and relevant goals for AI technology\
+        \ are understood and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      ref_id: MAP 1.4
+      description: "The business value or context of business use has been clearly\
+        \ defined or \u2013 in the case of assessing existing AI systems \u2013 re-evaluated."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      ref_id: MAP 1.5
+      description: Organizational risk tolerances are determined and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-1
+      ref_id: MAP 1.6
+      description: "System requirements (e.g., \u201Cthe system shall respect the\
+        \ privacy of its users\u201D) are elicited from and understood by relevant\
+        \ AI actors. Design decisions take socio-technical implications into account\
+        \ to address AI risks."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      ref_id: MAP 2
+      description: Categorization of the AI system is performed.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2
+      ref_id: MAP 2.1
+      description: The specific tasks and methods used to implement the tasks that
+        the AI system will support are defined (e.g., classifiers, generative models,
+        recommenders).
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2
+      ref_id: MAP 2.2
+      description: "Information about the AI system\u2019s knowledge limits and how\
+        \ system output may be utilized and overseen by humans is documented. Documentation\
+        \ provides sufficient information to assist relevant AI actors when making\
+        \ decisions and taking subsequent actions."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-2
+      ref_id: MAP 2.3
+      description: Scientific integrity and TEVV considerations are identified and
+        documented, including those related to experimental design, data collection
+        and selection (e.g., availability, representativeness, suitability), system
+        trustworthiness, and construct validation.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      ref_id: MAP 3
+      description: AI capabilities, targeted usage, goals, and expected benefits and
+        costs compared with appropriate benchmarks are understood.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3
+      ref_id: MAP 3.1
+      description: Potential benefits of intended AI system functionality and performance
+        are examined and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3
+      ref_id: MAP 3.2
+      description: "Potential costs, including non-monetary costs, which result from\
+        \ expected or realized AI errors or system functionality and trustworthiness\
+        \ \u2013 as connected to organizational risk tolerance \u2013 are examined\
+        \ and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3
+      ref_id: MAP 3.3
+      description: "Targeted application scope is specified and documented based on\
+        \ the system\u2019s capability, established context, and AI system categorization."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3
+      ref_id: MAP 3.4
+      description: "Processes for operator and practitioner proficiency with AI system\
+        \ performance and trustworthiness \u2013 and relevant technical standards\
+        \ and certifications \u2013 are defined, assessed, and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-3
+      ref_id: MAP 3.5
+      description: Processes for human oversight are defined, assessed, and documented
+        in accordance with organizational policies from the GOVERN function.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      ref_id: MAP 4
+      description: Risks and benefits are mapped for all components of the AI system
+        including third-party software and data.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4
+      ref_id: MAP 4.1
+      description: "Approaches for mapping AI technology and legal risks of its components\
+        \ \u2013 including the use of third-party data or software \u2013 are in place,\
+        \ followed, and documented, as are risks of infringement of a third party\u2019\
+        s intellectual property or other rights."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-4
+      ref_id: MAP 4.2
+      description: Internal risk controls for components of the AI system, including
+        third-party AI technologies, are identified and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map
+      ref_id: MAP 5
+      description: Impacts to individuals, groups, communities, organizations, and
+        society are characterized.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5
+      ref_id: MAP 5.1
+      description: Likelihood and magnitude of each identified impact (both potentially
+        beneficial and harmful) based on expected use, past uses of AI systems in
+        similar contexts, public incident reports, feedback from those external to
+        the team that developed or deployed the AI system, or other data are identified
+        and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:map-5
+      ref_id: MAP 5.2
+      description: Practices and personnel for supporting regular engagement with
+        relevant AI actors and integrating feedback about positive, negative, and
+        unanticipated impacts are in place and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure
+      assessable: false
+      depth: 1
+      ref_id: MEASURE
+      description: Identified risks are assessed, analyzed, or tracked.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node63
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure
+      name: Preamble
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node64
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node63
+      description: "The MEASURE function employs quantitative, qualitative, or mixed-method\
+        \ tools, techniques, and methodologies to analyze, assess, benchmark, and\
+        \ monitor AI risk and related impacts. It uses knowledge relevant to AI risks\
+        \ identified in the MAP function and informs the MANAGE function. AI systems\
+        \ should be tested before their deployment and regularly while in operation.\
+        \ AI risk measurements include documenting aspects of systems\u2019 functionality\
+        \ and trustworthiness."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node65
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node63
+      description: Measuring AI risks includes tracking metrics for trustworthy characteristics,
+        social impact, and human-AI configurations. Processes developed or adopted
+        in the MEASURE function should include rigorous software testing and performance
+        assessment methodologies with associated measures of uncertainty, comparisons
+        to performance benchmarks, and formalized reporting and documentation of results.
+        Processes for independent review can improve the effectiveness of testing
+        and can mitigate internal biases and potential conflicts of interest.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node66
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node63
+      description: Where tradeoffs among the trustworthy characteristics arise, measurement
+        provides a traceable basis to inform management decisions. Options may include
+        recalibration, impact mitigation, or removal of the system from design, development,
+        production, or use, as well as a range of compensating, detective, deterrent,
+        directive, and recovery controls.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node67
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node63
+      description: After completing the MEASURE function, objective, repeatable, or
+        scalable test, evaluation, verification, and validation (TEVV) processes including
+        metrics, methods, and methodologies are in place, followed, and documented.
+        Metrics and measurement methodologies should adhere to scientific, legal,
+        and ethical norms and be carried out in an open and transparent process. New
+        types of measurement, qualitative and quantitative, may need to be developed.
+        The degree to which each measurement type provides unique and meaningful information
+        to the assessment of AI risks should be considered. Framework users will enhance
+        their capacity to comprehensively evaluate system trustworthiness, identify
+        and track existing and emergent risks, and verify efficacy of the metrics.
+        Measurement outcomes will be utilized in the MANAGE function to assist risk
+        monitoring and response efforts. It is incumbent on Framework users to continue
+        applying the MEASURE function to AI systems as knowledge, methodologies, risks,
+        and impacts evolve over time.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure
+      ref_id: MEASURE 1
+      description: Appropriate methods and metrics are identified and applied.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1
+      ref_id: MEASURE 1.1
+      description: "Approaches and metrics for measurement of AI risks enumerated\
+        \ during the MAP function are selected for implementation starting with the\
+        \ most significant AI risks. The risks or trustworthiness characteristics\
+        \ that will not \u2013 or cannot \u2013 be measured are properly documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1
+      ref_id: MEASURE 1.2
+      description: Appropriateness of AI metrics and effectiveness of existing controls
+        are regularly assessed and updated, including reports of errors and potential
+        impacts on affected communities.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-1
+      ref_id: MEASURE 1.3
+      description: Internal experts who did not serve as front-line developers for
+        the system and/or independent assessors are involved in regular assessments
+        and updates. Domain experts, users, AI actors external to the team that developed
+        or deployed the AI system, and affected communities are consulted in support
+        of assessments as necessary per organizational risk tolerance.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure
+      ref_id: MEASURE 2
+      description: AI systems are evaluated for trustworthy characteristics.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.1
+      description: Test sets, metrics, and details about the tools used during TEVV
+        are documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.2
+      description: Evaluations involving human subjects meet applicable requirements
+        (including human subject protection) and are representative of the relevant
+        population.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.3
+      description: AI system performance or assurance criteria are measured qualitatively
+        or quantitatively and demonstrated for conditions similar to deployment setting(s).
+        Measures are documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.4
+      description: "The functionality and behavior of the AI system and its components\
+        \ \u2013 as identified in the MAP function \u2013 are monitored when in production."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.5
+      description: The AI system to be deployed is demonstrated to be valid and reliable.
+        Limitations of the generalizability beyond the conditions under which the
+        technology was developed are documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.6
+      description: "The AI system is evaluated regularly for safety risks \u2013 as\
+        \ identified in the MAP function. The AI system to be deployed is demonstrated\
+        \ to be safe, its residual negative risk does not exceed the risk tolerance,\
+        \ and it can fail safely, particularly if made to operate beyond its knowledge\
+        \ limits. Safety metrics reflect system reliability and robustness, real-time\
+        \ monitoring, and response times for AI system failures."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.7
+      description: "AI system security and resilience \u2013 as identified in the\
+        \ MAP function \u2013 are evaluated and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.8
+      description: "Risks associated with transparency and accountability \u2013 as\
+        \ identified in the MAP function \u2013 are examined and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.9
+      description: "The AI model is explained, validated, and documented, and AI system\
+        \ output is interpreted within its context \u2013 as identified in the MAP\
+        \ function \u2013 to inform responsible use and governance."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.10
+      description: "Privacy risk of the AI system \u2013 as identified in the MAP\
+        \ function \u2013 is examined and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.11
+      description: "Fairness and bias \u2013 as identified in the MAP function \u2013\
+        \ are evaluated and results are documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.12
+      description: "Environmental impact and sustainability of AI model training and\
+        \ management activities \u2013 as identified in the MAP function \u2013 are\
+        \ assessed and documented."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-2
+      ref_id: MEASURE 2.13
+      description: Effectiveness of the employed TEVV metrics and processes in the
+        MEASURE function are evaluated and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure
+      ref_id: MEASURE 3
+      description: Mechanisms for tracking identified AI risks over time are in place.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3
+      ref_id: MEASURE 3.1
+      description: Approaches, personnel, and documentation are in place to regularly
+        identify and track existing, unanticipated, and emergent AI risks based on
+        factors such as intended and actual performance in deployed contexts.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3
+      ref_id: MEASURE 3.2
+      description: Risk tracking approaches are considered for settings where AI risks
+        are difficult to assess using currently available measurement techniques or
+        where metrics are not yet available.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-3
+      ref_id: MEASURE 3.3
+      description: Feedback processes for end users and impacted communities to report
+        problems and appeal system outcomes are established and integrated into AI
+        system evaluation metrics.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure
+      ref_id: MEASURE 4
+      description: Feedback about efficacy of measurement is gathered and assessed.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4
+      ref_id: MEASURE 4.1
+      description: Measurement approaches for identifying AI risks are connected to
+        deployment context(s) and informed through consultation with domain experts
+        and other end users. Approaches are documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4
+      ref_id: MEASURE 4.2
+      description: Measurement results regarding AI system trustworthiness in deployment
+        context(s) and across the AI lifecycle are informed by input from domain experts
+        and relevant AI actors to validate whether the system is performing consistently
+        as intended. Results are documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:measure-4
+      ref_id: MEASURE 4.3
+      description: Measurable performance improvements or declines based on consultations
+        with relevant AI actors, including affected communities, and field data about
+        contextrelevant risks and trustworthiness characteristics are identified and
+        documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage
+      assessable: false
+      depth: 1
+      ref_id: MANAGE
+      description: Risks are prioritized and acted upon based on a projected impact.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node95
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage
+      name: Preamble
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node96
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node95
+      description: "The MANAGE function entails allocating risk resources to mapped\
+        \ and measured risks on a regular basis and as defined by the GOVERN function.\
+        \ Risk treatment comprises plans to respond to, recover from, and communicate\
+        \ about incidents or events.\nContextual information gleaned from expert consultation\
+        \ and input from relevant AI actors \u2013 established in GOVERN and carried\
+        \ out in MAP \u2013 is utilized in this function to decrease the likelihood\
+        \ of system failures and negative impacts. Systematic documentation practices\
+        \ established in GOVERN and utilized in MAP and MEASURE bolster AI risk management\
+        \ efforts and increase transparency and accountability. Processes for assessing\
+        \ emergent risks are in place, along with mechanisms for continual improvement."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node97
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node95
+      description: After completing the MANAGE function, plans for prioritizing risk
+        and regular monitoring and improvement will be in place. Framework users will
+        have enhanced capacity to manage the risks of deployed AI systems and to allocate
+        risk management resources based on assessed and prioritized risks. It is incumbent
+        on Framework users to continue to apply the MANAGE function to deployed AI
+        systems as methods, contexts, risks, and needs or expectations from relevant
+        AI actors evolve over time.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage
+      ref_id: MANAGE 1
+      description: AI risks based on assessments and other analytical output from
+        the MAP and MEASURE functions are prioritized, responded to, and managed.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1
+      ref_id: MANAGE 1.1
+      description: A determination is made as to whether the AI system achieves its
+        intended purposes and stated objectives and whether its development or deployment
+        should proceed.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1
+      ref_id: MANAGE 1.2
+      description: Treatment of documented AI risks is prioritized based on impact,
+        likelihood, and available resources or methods.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1
+      ref_id: MANAGE 1.3
+      description: Responses to the AI risks deemed high priority, as identified by
+        the MAP function, are developed, planned, and documented. Risk response options
+        can include mitigating, transferring, avoiding, or accepting.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-1
+      ref_id: MANAGE 1.4
+      description: Negative residual risks (defined as the sum of all unmitigated
+        risks) to both downstream acquirers of AI systems and end users are documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage
+      ref_id: MANAGE 2
+      description: Strategies to maximize AI benefits and minimize negative impacts
+        are planned, prepared, implemented, documented, and informed by input from
+        relevant AI actors.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2
+      ref_id: MANAGE 2.1
+      description: "Resources required to manage AI risks are taken into account \u2013\
+        \ along with viable non-AI alternative systems, approaches, or methods \u2013\
+        \ to reduce the magnitude or likelihood of potential impacts."
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2
+      ref_id: MANAGE 2.2
+      description: Mechanisms are in place and applied to sustain the value of deployed
+        AI systems.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2
+      ref_id: MANAGE 2.3
+      description: Procedures are followed to respond to and recover from a previously
+        unknown risk when it is identified.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-2
+      ref_id: MANAGE 2.4
+      description: Mechanisms are in place and applied, and responsibilities are assigned
+        and understood, to supersede, disengage, or deactivate AI systems that demonstrate
+        performance or outcomes inconsistent with intended use.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage
+      ref_id: MANAGE 3
+      description: AI risks and benefits from third-party entities are managed.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-3
+      ref_id: MANAGE 3.1
+      description: AI risks and benefits from third-party resources are regularly
+        monitored, and risk controls are applied and documented.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-3
+      ref_id: MANAGE 3.2
+      description: Pre-trained models which are used for development are monitored
+        as part of AI system regular monitoring and maintenance.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage
+      ref_id: MANAGE 4
+      description: Risk treatments, including response and recovery, and communication
+        plans for the identified and measured AI risks are documented and monitored
+        regularly.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4
+      ref_id: MANAGE 4.1
+      description: Post-deployment AI system monitoring plans are implemented, including
+        mechanisms for capturing and evaluating input from users and other relevant
+        AI actors, appeal and override, decommissioning, incident response, recovery,
+        and change management.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4
+      ref_id: MANAGE 4.2
+      description: Measurable activities for continual improvements are integrated
+        into AI system updates and include regular engagement with interested parties,
+        including relevant AI actors.
+    - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:manage-4
+      ref_id: MANAGE 4.3
+      description: Incidents and errors are communicated to relevant AI actors, including
+        affected communities. Processes for tracking, responding to, and recovering
+        from incidents and errors are followed and documented.

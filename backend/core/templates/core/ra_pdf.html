@@ -1,0 +1,4 @@
+{% extends 'core/base_pdf.html' %}
+{% block content %}
+{% include 'snippets/ra_data.html' with pdf=True scenarios=context %}
+{% endblock %}

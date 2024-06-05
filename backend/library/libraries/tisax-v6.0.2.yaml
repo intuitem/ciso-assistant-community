@@ -1,0 +1,3430 @@
+urn: urn:intuitem:risk:library:tisax-v6.0.2
+locale: en
+ref_id: TISAX v6.0.2
+name: 'Trusted Information Security Assessment Exchange    '
+description: "ISA provides the basis for\n- a self-assessment to determine the state\
+  \ of information security in an organization (e.g. company)\n- audits performed\
+  \ by internal departments (e.g. Internal Audit, Information Security)\n- TISAX\u24C7\
+  \ Assessments (Trusted Information Security Assessment Exchange, https://enx.com/tisax/)\n\
+  Source: https://portal.enx.com/isa6-en.xlsx\n"
+copyright: "\xA9 2023 ENX Association, an Association according to the French Law\
+  \ of 1901, registered under No. w923004198 at the Sous-pr\xE9fecture of Boulogne-Billancourt,\
+  \ France.\nThis work of ENX's Working Group ISA was provided to the VDA in the present\
+  \ version by the ENX Association for published by the VDA as the VDA ISA. It is\
+  \ made to all interested parties free of charge under the following licensing terms.\
+  \ The release in the VDA is done by the VDA's Working Group Information Security\
+  \ and Economic Protection. Publication takes place with the consent of the rights\
+  \ holder. The VDA is responsible for the publication of the VDA ISA.\nThe Tab \"\
+  \"Data Protection\"\" is provided, owned and copyrighted by VERBAND DER AUTOMOBILINDUSTRIE\
+  \ e.V. (VDA, German Association of the Automotive Industry); Behrenstr.\_35; 10117\_\
+  Berlin\"\nThis work has been licensed under Creative Commons Attribution - No Derivative\
+  \ Works 4.0 International Public License. In addition, You are granted the right\
+  \ to distribute derivatives under certain terms as detailed in section 9 which are\
+  \ not part of the Creative Commons license. The complete and valid text of the license\
+  \ is to be found in line 17ff.\n"
+version: 2
+provider: VDA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:tisax-v6.0.2
+    ref_id: TISAX v6.0.2
+    name: Trusted Information Security Assessment Exchange
+    description: "ISA provides the basis for\n- a self-assessment to determine the\
+      \ state of information security in an organization (e.g. company)\n- audits\
+      \ performed by internal departments (e.g. Internal Audit, Information Security)\n\
+      - TISAX\u24C7 Assessments (Trusted Information Security Assessment Exchange,\
+      \ https://enx.com/tisax/)\nSource: https://portal.enx.com/isa6-en.xlsx\n"
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: A process is not available, not followed or not suitable for achieving
+        the objective.
+    - score: 1
+      name: Performed
+      description: An undocumented or incompletely documented process is followed
+        and indicators exist that it achieves its objective.
+    - score: 2
+      name: Managed
+      description: A process achieving its objectives is followed. Process documentation
+        and process implementation evidence are available.
+    - score: 3
+      name: Established
+      description: A standard process integrated into the overall system is followed.
+        Dependencies on other processes are documented and suitable interfaces are
+        created. Evidence exists that the process has been used sustainably and actively
+        over an extended period.
+    - score: 4
+      name: Predictable
+      description: An established process is followed. The effectiveness of the process
+        is continually monitored by collecting key figures. Limit values are defined
+        at which the process is considered to be insufficiently effective and requires
+        adjustment. (Key Performance Indicators)
+    - score: 5
+      name: Optimizing
+      description: A predictable process with continual improvement as a major objective
+        is followed. Improvement is actively advanced by dedicated resources.
+    implementation_groups_definition:
+    - ref_id: must
+      name: Requirements (must)
+      description: Strict requirements without any exemptions.
+    - ref_id: should
+      name: Requirements (should)
+      description: Must be implemented by the organization. In certain circumstances,
+        however, there may be a valid justification for non-compliance with these
+        requirements. In case of any deviation, its effects must be understood by
+        the organization and it must be plausibly justified.
+    - ref_id: high
+      name: In case of high protection needs
+      description: Must additionally be met if the tested subject has high protection
+        needs.
+    - ref_id: very_high
+      name: In case of very high protection needs
+      description: Must additionally be met if the tested subject has very high protection
+        needs.
+    - ref_id: SGA
+      name: For Simplified Group Assessments (SGA)
+      description: A simplified way to audit very large organizations with a high
+        maturity. An example is the TISAX Simplified Group Assessment mechanism that
+        is an option for TISAX Assessments of an assessment scope with a large number
+        of sites.
+    - ref_id: vehicle
+      name: For vehicles classified as requiring protection
+      description: Protects physical prototypes which are classified as requiring
+        protection. Prototypes include vehicles, components and parts. The owner of
+        the intellectual property for the prototype is considered the owner of the
+        prototype. The owner's commissioning department is responsible for classifying
+        the protection need of a prototype. For prototypes classified as requiring
+        high or very high protection, the minimum requirements for prototype protection
+        must be applied.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: IS Policies and Organization
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      ref_id: '1.1'
+      name: Information Security Policies
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1
+      ref_id: 1.1.1
+      name: To what extent are information security policies available?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1.1
+      name: (must)
+      description: "+ The requirements for information security have been determined\
+        \ and documented:\n  - The requirements are adapted to the organization\u2019\
+        s goals,\n  - A policy is prepared and is released by the organization.\n\
+        + The policy includes objectives and the significance of information security\
+        \ within the organization."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1.1
+      name: (should)
+      description: "+ The information security requirements based on the strategy\
+        \ of the organization, legislation and contracts are considered in the policy.\n\
+        + The policy indicates consequences in case of non-conformance. \n+ Other\
+        \ relevant security policies are established.\n+ Periodic review and, if required,\
+        \ revision of the policies are established.\n+ The policies are made available\
+        \ to employees in a suitable form (e.g. intranet).\n+ Employees and external\
+        \ business partners are informed of any changes relevant to them."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1.1
+      name: (for Simplified Group Assessments)
+      description: + Policies are published and implemented in the entire assessment
+        scope.
+      implementation_groups:
+      - SGA
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node8
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.1.1
+      name: Further information
+      description: "Introduction:\nThe requirements derived from the information security\
+        \ strategy and the context of the organization result in information security\
+        \ guidelines, which can be mapped in a multi-level document pyramid depending\
+        \ on the size of the company. The context of the organization results, among\
+        \ other things, from the corporate culture, customer requirements or legal\
+        \ requirements. An overarching guideline is usually the main document on the\
+        \ basis of which further guidelines and regulations are derived.\n\nJustification:\n\
+        Guidelines and regulations are the basis for joint action to achieve strategic\
+        \ corporate goals. Without central regulations that are visible to relevant\
+        \ persons, misunderstandings can arise from the point of view of information\
+        \ security and different decisions can be made, which consequently generate\
+        \ incalculable risks to information security. In addition, regulations are\
+        \ a basis for comparing the actual implementation with the written requirements\
+        \ in regular effectiveness checks and for identifying opportunities for improvement.\
+        \ \n\nBasic information:\nIt is important to consider the requirements of\
+        \ information security in business processes.  Requirements for information\
+        \ security means the level of security that ensures the safe handling of information.\n\
+        The requirements can be brought to the organization from outside or arise\
+        \ from within the organization itself. \nThe requirements of the individual\
+        \ \"interested parties\" must be aligned with the objectives of the organization\
+        \ and a strategy must be identified to achieve the requirements and objectives.\n\
+        \nEmployees will also find detailed explanations of the consequences of non-compliance\
+        \ with guidelines in the guidelines.  \nThe organization examines from its\
+        \ point of view the need for guidelines for achieving the objectives and for\
+        \ operating an ISMS and creates them. \nSince framework conditions can change,\
+        \ it makes sense to check the guidelines regularly, e.g. annually, for appropriateness\
+        \ and correctness.\nEmployees need access to the policies. A central location,\
+        \ such as the intranet, is recommended to ensure that you always have access\
+        \ to the latest version of a policy. This is where printed guidelines have\
+        \ significant disadvantages. \nA business partner may also need access to\
+        \ the guidelines, for example, because he assigns or transfers personnel within\
+        \ the scope of the ISMS. The need for contractual arrangements will be assessed\
+        \ by the organisation.\n\n\"Other relevant security policies\" designates\
+        \ all security-relevant policies that are not part of the ISMS and are relevant\
+        \ for Information Security."
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      ref_id: '1.2'
+      name: Organization of Information Security
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2
+      ref_id: 1.2.1
+      name: To what extent is information security managed within the organization?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.1
+      name: (must)
+      description: "+ The scope of the ISMS (the organization managed by the ISMS)\
+        \ is defined.\n+ The organization's requirements for the ISMS are determined.\n\
+        + The organizational management has commissioned and approved the ISMS.\n\
+        + The ISMS provides the organizational management with suitable monitoring\
+        \ and control means (e.g. management review).\n+ Applicable controls have\
+        \ been determined (e.g. ISO\_27001 Statement of Applicability, completed ISA\
+        \ catalogue).\n+ The effectiveness of the ISMS is regularly reviewed by the\
+        \ management."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.1
+      name: (for Simplified Group Assessments)
+      description: + The management system is approved by an entity that has the necessary
+        authority for the entire assessment scope (i.e., all locations within the
+        scope).
+      implementation_groups:
+      - SGA
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2
+      ref_id: 1.2.2
+      name: To what extent are information security responsibilities organized?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
+      name: (must)
+      description: '+ Responsibilities for information security within the organization
+        are defined, documented, and assigned.
+
+        + The responsible employees are defined and qualified for their task.
+
+        + The required resources are available.
+
+        + The contact persons are known within the organization and to relevant business
+        partners.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
+      name: (should)
+      description: "+ There is a definition and documentation of an adequate information\
+        \ security structure within the organization.\n  - Other relevant security\
+        \ roles are considered."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
+      name: (for high protection needs)
+      description: + An appropriate organizational separation of responsibilities
+        should be established in order to avoid conflict of interests (separation
+        of duties). (C, I, A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
+      name: (for Simplified Group Assessments)
+      description: + A named person with overall responsibility for the management
+        system exists and is available.
+      implementation_groups:
+      - SGA
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node18
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
+      name: Further information
+      description: 'Basic information:
+
+        "Other relevant security roles" designates all security-relevant roles that
+        are not part of the ISMS and are relevant for Information Security.'
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2
+      ref_id: 1.2.3
+      name: To what extent are information security requirements considered in projects?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node20
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.3
+      name: (must)
+      description: + Projects are classified while taking into account the information
+        security requirements.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.3
+      name: (should)
+      description: '+ The procedure and criteria for the classification of projects
+        are documented.
+
+        + During an early stage of the project, risk assessment is conducted based
+        on the defined procedure and repeated in case of changes to the project.
+
+        + For identified information security risks, measures are derived and considered
+        in the project.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node22
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.3
+      name: (for high protection needs)
+      description: + The measures thus derived are reviewed regularly during the project
+        and reassessed in case of changes to the assessment criteria. (C, I, A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2
+      ref_id: 1.2.4
+      name: To what extent are the responsibilities between external IT service providers
+        and the own organization defined?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node24
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.4
+      name: (must)
+      description: '+ The concerned services and IT services used are identified.
+
+        + The security requirements relevant to the IT service are determined:
+
+        + The organization responsible for implementing the requirement is defined
+        and aware of its responsibility.
+
+        + Mechanisms for shared responsibilities are specified and implemented.
+
+        + The responsible organization fulfils its respective responsibilities.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node25
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.4
+      name: (should)
+      description: '+ In case of IT services, configuration has been conceived, implemented,
+        and documented based on the necessary security requirements.
+
+        + The responsible staff is adequately trained.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node26
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.4
+      name: (for high protection needs)
+      description: '+ A list exists indicating the concerned IT services and the respective
+        responsible IT service providers. (C, I, A)
+
+        + The applicability of the ISA controls has been verified and documented.
+        (C, I, A)
+
+        + The service configuration is included in the regular security assessments.
+        (C, I, A)
+
+        + Proof is provided that the IT service providers fulfil their responsibility.
+        (C, I, A)
+
+        + Integration into local protective measures (such as secure authentication
+        mechanisms) is established and documented. (C, I, A)'
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      ref_id: '1.3'
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3
+      ref_id: 1.3.1
+      name: 'To what extent are information assets identified and recorded? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node29
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.1
+      name: (must)
+      description: "+ Information assets and other assets where security is relevant\
+        \ to the organization are identified and recorded.\n  - A person responsible\
+        \ for these information assets is assigned.\n+ The supporting assets processing\
+        \ the information assets are identified and recorded:\n  - A person responsible\
+        \ for these supporting assets is assigned."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node30
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.1
+      name: (should)
+      description: "+ A catalogue of the relevant information assets exists:\n  -\
+        \ The corresponding supporting assets are assigned to each relevant information\
+        \ asset,\n  - The catalogue is subject to regular review."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node31
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.1
+      name: Further information
+      description: "Introduction:\nIt is important for every organization to know\
+        \ the information that is of value to it (e.g. trade secrets, critical business\
+        \ processes, know-how, patents). These are called information assets (also\
+        \ called primary assets). The value of information results, among other things,\
+        \ from the economic benefit or the legal necessity (e.g. by laws, customer\
+        \ contracts) that the information creates in a certain situation, and the\
+        \ costs that have to be incurred. \nIn addition, the need to protect these\
+        \ information assets is inherited by information carriers (also referred to\
+        \ as secondary or supporting assets) (e.g. IT systems, services/IT services,\
+        \ employees) that are related. (See also Classification of Information in\
+        \ Control 1.3.2)\n\nJustification:\nAn inventory of the information assets\
+        \ and the derived information carriers ensures that the organization has an\
+        \ overview of its information assets and can determine the protection needs\
+        \ for confidentiality, integrity and availability.\nOn this basis, an organization\
+        \ can determine fundamental protective measures to protect itself and the\
+        \ information assets/carriers.\n\nBasic requirements:\nInformation assets,\
+        \ information carriers and protection requirements change regularly (e.g.\
+        \ in the event of changes to the organisation, the IT landscape or processes).\
+        \ One task of the organization is to keep the directory of identified information\
+        \ assets and information carriers up to date. A central process is helpful\
+        \ in order to obtain a complete overview of these assets along the entire\
+        \ life cycle from generation/commissioning, use to destruction/deletion. Overviews\
+        \ of these information assets and information carriers as well as the protection\
+        \ requirements are a supporting instrument in order to obtain and maintain\
+        \ a comprehensive overview.\nFor a comprehensive analysis of these information\
+        \ assets, a look at the essential business processes and the information assets\
+        \ processed in this process helps, since the protection requirements also\
+        \ depend on the process. In a further step, further information is relevant,\
+        \ the loss or disclosure of which would cause financial or reputational damage\
+        \ (e.g. patents, business documents, customer lists, customer contracts, personnel\
+        \ files, etc.).\n\nAssets where security is of relevance are all assets where\
+        \ information or cyber security threats have relevant impact to the organization\
+        \ or its business. This includes IT systems, IT services, OT systems, IOT\
+        \ devices."
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3
+      ref_id: 1.3.2
+      name: To what extent are information assets classified and managed in terms
+        of their protection needs?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node33
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.2
+      name: (must)
+      description: "+ A consistent scheme for the classification of information assets\
+        \ regarding the protection goal of confidentiality is available.\n+ Evaluation\
+        \ of the identified information assets is carried out according to the defined\
+        \ criteria and assigned to the existing classification scheme. \n+ Specifications\
+        \ for the handling of supporting assets (e.g. identification, correct handling,\
+        \ transport, storage, return, deletion/disposal) depending on the classification\
+        \ of information assets are in place and implemented."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node34
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.2
+      name: (should)
+      description: + The protection goals of integrity and availability are taken
+        into consideration.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node35
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.2
+      name: Further information
+      description: 'Introduction:
+
+        The objective of the classification of information assets is a consistent
+        determination of the need for protection. This allows the organization to
+        standardize and apply appropriate security measures. The classification of
+        information is based on the upstream determination of the possible information
+        assets and information carriers, which is described in more detail in Control
+        1.3.1.
+
+
+        Justification:
+
+        The unambiguous classification of information assets and the description of
+        standardized and specified protective measures for handling information significantly
+        reduces the scope for handling information assets. In this way, concrete guidelines
+        help both the owners, users and additional departments such as IT to handle
+        the information assets appropriately.'
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3
+      ref_id: 1.3.3
+      name: "To what extent is it ensured that only evaluated and approved external\
+        \ IT services are used for processing the organization\u2019s information\
+        \ assets?"
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node37
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.3
+      name: (must)
+      description: "+ External IT services are not used without explicit assessment\
+        \ and implementation of the information security requirements:\n  - A risk\
+        \ assessment of the external IT services is available,\n  - Legal, regulatory,\
+        \ and contractual requirements are considered.\n+ The external IT services\
+        \ have been harmonized with the protection need of the processed information\
+        \ assets."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node38
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.3
+      name: (should)
+      description: '+ Requirements regarding the procurement, commissioning and release
+        associated with the use of external IT services are determined and fulfilled.
+
+        + A procedure for release in consideration of the protection need is established.
+
+        + External IT services and their approval are documented.
+
+        + It is verified at regular intervals that only approved external IT services
+        are used.
+
+        '
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3
+      ref_id: 1.3.4
+      name: "To what extent is it ensured that only evaluated and approved software\
+        \ is used for processing the organization\u2019s information assets?"
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node40
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.4
+      name: (must)
+      description: "+ Software is approved before installation or use. The following\
+        \ aspects are considered:\n  - Limited approval for specific use-cases or\
+        \ roles\n  - Conformance to the information security requirements\n  - Software\
+        \ use rights and licensing \n  - Source / reputation of the software\n+ Software\
+        \ approval also applies to special purpose software such as maintenance tools"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node41
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.4
+      name: (should)
+      description: '+ The types of software such as firmware, operating systems, applications,
+        libraries, device drivers to be managed are determined.
+
+        + Repositories of managed software exist
+
+        + The software repositories are protected against unauthorized manipulation
+
+        + Approval of software is regularly reviewed
+
+        + Software versions and patch levels are known'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node42
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.4
+      name: (for very high protection needs)
+      description: + Additional requirements for software use (e.g., need for control
+        or monitoring of usage) are determined (if any) (C, I, A)
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node43
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.4
+      name: Further information
+      description: "Software determines the logic on how information is processed\
+        \ within the organization. A short and pragmatic approval helps to ensure\
+        \ that software does not generate irresponsible risks to the organization's\
+        \ information and infrastructure.\n\nEvaluation and approval of software enables\
+        \ the organization to limit risks of unintended logic and at the same time\
+        \ is the basis of a solid vulnerability and patch management (see 5.2.5) as\
+        \ well as maintaining a compliant license management (see 7.1.1). Its important\
+        \ to also consider software for admin and maintenance use such as debugging\
+        \ and firmware updating tools. \nWhen it comes to software management, the\
+        \ first step should be to determine on which level software needs to be approved.\
+        \ Finding a good compromise between the need for security and practicallity\
+        \ is the main driver of this consideration. For example, dedicated approval\
+        \ of every application or software library that comes with the base installation\
+        \ of the operating system would be excessive in many scenarios. Similarly,\
+        \ the commitment to a specific device usually means that not approving necessary\
+        \ firmware and/or device drivers significantly impacts the devices usability.\n\
+        A repository of approved software prevents that people inside your organization\
+        \ accidentally install unapproved or modified software. Maintaining software\
+        \ versions and patch levels simplifies patch-management, but does not necessarily\
+        \ mean that every patch needs to be individually evaluated before approval.\
+        \ \nEspecially if you have software that allows you to conduct administrative\
+        \ tasks, additional requirements might be necessary. A tool allowing to monitor\
+        \ network traffic for security or debugging purposes or manipulate configuration\
+        \ of critical system might be restricted for use requiring individual approval\
+        \ while maintaining a 4-eyes principile.\n\nKey is to keep the evaluation\
+        \ and approval processes simple enough to be practical. If approval becomes\
+        \ to difficult or time-consuming, your administration will become reluctant\
+        \ to approve relevant software and users in the organization will circumvent\
+        \ the appvoal process to get the software they need. Accordingly, a good evaluation\
+        \ process is  designed, to adapt to the protection need of the software. This\
+        \ means first of all, to decide on the level of evaluation necessary for specific\
+        \ classes of software.\n\nWhen it comes to evaluation, the control already\
+        \ gives good indications what steps the evaluation processes should follow:\n\
+        + Determine the intended or forseeable use scenario of the software and what\
+        \ security requirements apply for that scenario (i.e. is the approval including\
+        \ special high risk scenarios with specific security requirements or is the\
+        \ approval for normal risk use cases with a limited set of security requirements\
+        \ only)\n+ Determine if your organization has the right to use the software\
+        \ (i.e. does the (to be) acquired licensing permit the intended use-case)\n\
+        + Consider the source of the software. Do your organization trusts the source\
+        \ (e.g. is it provided or distributed by a known and trusted software vendor)\n\
+        \nThe outcome of these three steps will determine additional evaluation need.\
+        \ When deciding on further steps, keep in mind that further testing or evaluation\
+        \ might not only remidiate risks, but also creates a time delay which can\
+        \ be a risk in itself. For example, in many cases the risk of not installing\
+        \ a security relevant patch because testing has not been conducted11 yet is\
+        \ higher than the risk that the patch creates issues that would have been\
+        \ detected by testing. A good approach always aims to find an appropriate\
+        \ balance.\n\nAccordingly, granularity of software approval vary by scenario\
+        \ and can be very broad. For example, it might be practical to approve all\
+        \ system software that comes with a baseline operating system installation\
+        \ (i.e. operating system components, drivers, etc.). Also approval of trusted\
+        \ software repositories (i.e. based on the app classification of a mobile\
+        \ device store or operating system distribution) can be a valid approach,\
+        \ especially when limited to use in standard scenarios (i.e. without access\
+        \ to information with a significant protection need) \n \nWhen it comes to\
+        \ the type of approval, its important to notice that there is no need to keep\
+        \ centrallized approval lists. Based of the organization, the approval can\
+        \ be done in a decentralized way (i.e. in some cases, the development department\
+        \ has its specific evaluation and approval capabilities within the framework\
+        \ of the centralized processes). Similarly, its often more pratical and accurate\
+        \ to maintain an overview over installed software versions and patch levels\
+        \ by automated management tools rather than by manually maintaining lists. "
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      ref_id: '1.4'
+      name: IS Risk Management
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.4
+      ref_id: 1.4.1
+      name: To what extent are information security risks managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node46
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.4.1
+      name: (must)
+      description: '+ Risk assessments are carried out both at regular intervals and
+        in response to events.
+
+        + Information security risks are appropriately assessed (e.g. for probability
+        of occurrence and potential damage).
+
+        + Information security risks are documented.
+
+        + A responsible person (risk owner) is assigned to each information security
+        risk. This person is responsible for the assessment and handling of the information
+        security risks.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node47
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.4.1
+      name: (should)
+      description: "+ A procedure is in place defining how to identify, assess and\
+        \ address security risks within the organization.\n+ Criteria for the assessment\
+        \ and handling of  security risks exist.\n+ Measures for handling security\
+        \ risks and the persons responsible for these are specified and documented:\n\
+        \  - A plan of measures or an overview of their state of implementation is\
+        \ followed.\n+ In case of changes to the environment (e.g. organizational\
+        \ structure, location, changes to regulations), reassessment is carried out\
+        \ in a timely manner."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      ref_id: '1.5'
+      name: Assessments
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5
+      ref_id: 1.5.1
+      name: To what extent is compliance with information security ensured in procedures
+        and processes?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node50
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.1
+      name: (must)
+      description: '+ Observation of policies is verified throughout the organization.
+
+        + Information security policies and procedures are reviewed at regular intervals.
+
+        + Measures for correcting potential non-conformities (deviations) are initiated
+        and pursued.
+
+        + Compliance with information security requirements (e.g. technical specifications)
+        is verified at regular intervals.
+
+        + The results of the conducted reviews are recorded and retained.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node51
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.1
+      name: (should)
+      description: + A plan for content and framework conditions (time schedule, scope,
+        controls) of the reviews to be conducted is provided.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node52
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.1
+      name: (for Simplified Group Assessments)
+      description: "+ Internal controls are implemented for all entities within the\
+        \ assessment scope. \n  - The implementation of all applicable security requirements\
+        \ and control objectives are included.\n+ Suitably qualified and appropriate\
+        \ information security audit responsibilities and resources are defined.\n\
+        + A detailed internal audit plan and schedule is defined and followed. The\
+        \ following aspects are considered:\n  - The entire assessment scope is covered\n\
+        \  - Internal audits are conducted regularly\n  - Results of internal audits\
+        \ are tracked within the ISMS structures"
+      implementation_groups:
+      - SGA
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5
+      ref_id: 1.5.2
+      name: To what extent is the ISMS reviewed by an independent authority?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node54
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.2
+      name: (must)
+      description: '+ Information security reviews are carried out by an independent
+        and competent body at regular intervals and in case of fundamental changes.
+
+        + Measures for correcting potential deviations are initiated and pursued.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node55
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.2
+      name: (should)
+      description: + The results of conducted reviews are documented and reported
+        to the management of the organization.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node56
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.2
+      name: (for Simplified Group Assessments)
+      description: "+ In case of fundamental changes, audits are conducted by an independent\
+        \ and appropriately qualified entity (i.e., external entities or special internal\
+        \ departments which are objective, competent and free from undue influence\
+        \ (independent)\n  - Findings and implementation of corrective actions is\
+        \ tracked by the independent entity."
+      implementation_groups:
+      - SGA
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
+      ref_id: '1.6'
+      name: Incident and Crisis Management
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6
+      ref_id: 1.6.1
+      name: To what extent are information security relevant events or observations
+        reported?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node59
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.1
+      name: (must)
+      description: "+ A definition for a reportable security event or observation\
+        \ exists and is known by employees and relevant stakeholders. The following\
+        \ aspects are considered:\n  - Events and observations related to personnel\
+        \ (e.g., misconduct / misbehaviour)\n  - Events and observations related to\
+        \ physical security (e.g., intrusion, theft, unauthorized access to security\
+        \ zones, vulnerabilities in the security zones)\n  - Events and observations\
+        \ related to IT and cyber security (e.g., vulnerable IT-systems, detected\
+        \ successful or unsuccessful attacks)\n  - Events and observations related\
+        \ to suppliers and other business partners (e.g., any incidents that can have\
+        \ negative effect on the security of own organization)\n+ Adequate mechanisms\
+        \ based on perceived risks to report security events are defined, implemented,\
+        \ and known to all relevant potential reporters\n+ Adequate channels for communication\
+        \ with event reporters exist."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node60
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.1
+      name: (should)
+      description: "+ A common point of contact for event reporting exists.\n+ Different\
+        \ reporting channels according to perceived severity exist (i.e., real time\
+        \ communication for significant events / emergencies in addition to asynchronous\
+        \ mechanisms such as tickets or email) are available.\n+ Employees are obliged\
+        \ and trained to report relevant events.\n+ Security event reports from external\
+        \ parties are considered.\n  - An externally accessible way to report security\
+        \ events exists and is communicated,\n  - Reaction to security event reports\
+        \ from external parties are defined\n+ Mechanism to - and information how\
+        \ to - report incidents is accessible by all relevant reporters.\n+ A feedback\
+        \ procedure to reporters is established."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node61
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.1
+      name: (for very high protection needs)
+      description: + Tests and exercises of event and observation reporting are conducted
+        regularly. (C, I, A)
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6
+      ref_id: 1.6.2
+      name: 'To what extent are reported security events managed?
+
+        '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node63
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
+      name: (must)
+      description: '+ Reported events are processed without undue delay.
+
+        + An adequate reaction to reported security events is ensured.
+
+        + Lessons learned are incorporated into continuous improvement.
+
+        '
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node64
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
+      name: (should)
+      description: "+ During processing, reported events are categorized (e.g. by\
+        \ responsibility into personnel, physical and cyber), qualified (e.g. not\
+        \ security relevant, observation, suggested security improvement, security\
+        \ vulnerability, security incident) and prioritized (e.g. low, moderate, severe,\
+        \ critical).\n+ Responsibilities for handling of events based on their category\
+        \ are defined and assigned. The following aspects are considered:\n  - Coordination\
+        \ of incidents and vulnerabilities across multiple categories\n  - Qualification\
+        \ and resources\n  - Contact mechanisms based on type and priority (e.g.,\
+        \ non-time-critical communication, time-critical communication, emergency\
+        \ communication)\n  - Absence-management\n+ A strategy for filing official\
+        \ reports and searching prosecution of potentially criminally relevant aspects\
+        \ of security incidents exists. (C, I, A)\n"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node65
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
+      name: (for high protection needs)
+      description: "+ Maximum response times based on class, category and severity\
+        \ are defined. (C, I, A)\n+ Event not processed appropriately according to\
+        \ their priority are escalated. (C, I, A)\n  - Conditions and thresholds such\
+        \ as maximum reaction times before escalation are defined\n  - Mechanisms,\
+        \ processes, and contacts for escalation are defined\n  - Escalation paths\
+        \ up to the organization\u2019s top management is defined\n+ Lawful, regulatory,\
+        \ and contractual reporting obligations and respective contact information\
+        \ are known. (C, I, A)\n+ A communication strategy for security related events\
+        \ exist. The following aspects are considered: (C, I, A)\n  - To whom to communicate\
+        \ (e.g., shareholders, affected business partners and customers, other shareholders,\
+        \ general public)\n  - When to communicate\n  - Responsibilities for communication\n\
+        \  - Authorization and approval of communication\n  - Legal and regulatory\
+        \ restrictions of communication\n  - What to communicate (e.g. prepared templates\
+        \ and building blocks for specific scenarios)\n  - How to communicate (e.g.,\
+        \ communication channels)\n+ Procedures for response to supplier security\
+        \ incidents are established. The following aspects are considered: (C, I,\
+        \ A)\n  - Analysis of the impact on the own organization and invocation of\
+        \ appropriate internal mechanisms\n  - The need for reporting according to\
+        \ own reporting procedures"
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node66
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
+      name: (for very high protection needs)
+      description: "+ Handling of events in different categories and priorities is\
+        \ regularly tested. (A)\n  - Exercise or simulation of rarely occurring categories\
+        \ and priorities\n  - Exercise or simulation include escalation mechanisms"
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node67
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
+      name: (for Simplified Group Assessments)
+      description: + Standard mechanisms to report and track relevant security events
+        are established.
+      implementation_groups:
+      - SGA
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6
+      ref_id: 1.6.3
+      name: 'To what extent is the organization prepared to handle crisis situations?
+
+        '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node69
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.3
+      name: (must)
+      description: "+ An appropriate planning to react to and recover from crisis\
+        \ situations exists.\n  - The required resources are available.\n+ Responsibilities\
+        \ and authority for crisis management within the organization are defined,\
+        \ documented, and assigned.\n+ The responsible employees are defined and qualified\
+        \ for their task."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node70
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.3
+      name: (should)
+      description: "+ Methods to detect crisis situations are established.\n  - General\
+        \ indications for the existence or imminence of a crisis situation and specific\
+        \ predictable crisis are identified\n+ A procedure to invoke and/or escalate\
+        \ crisis management is in place.\n+ Strategic goals and their priority in\
+        \ crisis situations are defined and known to relevant personnel. The following\
+        \ aspects are considered:\n  - Ethical priorities (e.g., protection of life\
+        \ and health)\n  - Core business processes (e.g., processes that ensure the\
+        \ survival of the organization)\n  - Appropriate information security\n+ A\
+        \ crisis management team is defined and approved. The following aspects are\
+        \ considered:\n  - Management commitment\n  - Composition (e.g., participation\
+        \ of all major functions of the organization including organization leadership\
+        \ (management board), business operations (production), HR, information security,\
+        \ corporate security, corporate emergency services, IT/cyber security, communication,\
+        \ finance) \n  - Structure and roles\n  - Competences of members\n  - Expectation\
+        \ and authority\n  - Decision making procedures\n+ Crisis policies and procedures\
+        \ are defined and approved. The following aspects are considered:\n  - Exceptional\
+        \ authorities and decision-making processes beyond the crisis management team\n\
+        \  - Primary and backup means of communication\n  - Emergency operating procedures\n\
+        \  - Exceptional organizational structures (e.g., reporting, information gathering,\
+        \ decision making)\n  - Exceptional functions, responsibilities, and authority\
+        \ (including reporting)\n  - Exceptional tools \n+ Crisis planning is reviewed\
+        \ and updated regularly."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node71
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.3
+      name: (for high protection needs)
+      description: "+ Relevant different potential crisis scenarios are identified.\
+        \ The following aspects are considered: (A)\n  - Crisis situations with unavailability\
+        \ of key personnel (e.g. Health crisis, Kidnapping / accidents affecting organization\
+        \ leadership):\n  - Crisis situations with unavailable of key physical resources\
+        \ (e.g. fire or natural disasters at specific sites)\n  - Crisis situations\
+        \ with outage of key infrastructure (e.g. outage of key communication channels,\
+        \ complete outage of IT infrastructure)\n+ Necessary resources and information\
+        \ to handle crisis (e.g. communication infrastructure, availability of necessary\
+        \ information such as contact information and relevant risks in different\
+        \ crisis situations) are identified. (A)\n  - Appropriate measures to ensure\
+        \ availability of infrastructure or fallback planning and information considering\
+        \ different crisis scenarios are in place\n+ A communication strategy for\
+        \ crisis situations exist. The following aspects are considered: (A)\n  -\
+        \ To whom to communicate (e.g., shareholders, affected business partners and\
+        \ customers, other shareholders, general public)\n  - When to communicate\n\
+        \  - Responsibilities for communication\n  - Authorization and approval of\
+        \ communication\n  - Legal and regulatory restrictions of communication (e.g.,\
+        \ stock corporation regulations)\n  - What to communicate (e.g. prepared templates\
+        \ for statements, contact information and building blocks for specific scenarios)\n\
+        \  - Communication channels (e.g., Media channels, social media)\n  - Instruments\
+        \ to monitor communication\n  - Instruction and procedures for employees (in\
+        \ case of direct communication approaches such as direct contact of employees\
+        \ by business partners)\n+ The efficiency, feasibility, and appropriateness\
+        \ of the crisis planning is evaluated regularly. (A)\n+ Spot based testing\
+        \ of crisis planning is conducted ((e.g., simulation, table-top-exercises\
+        \ involving key personnel) (A)"
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node72
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.3
+      name: (for very high protection needs)
+      description: + Crisis exercises and simulations involving all relevant persons,
+        decision makers are conducted regularly. (A)
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Human Resources
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2
+      ref_id: 2.1.1
+      name: To what extent is the qualification of employees for sensitive work fields
+        ensured?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node75
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.1
+      name: (must)
+      description: '+ Sensitive work fields and jobs are determined.
+
+        + The requirements for employees with respect to their job profiles are determined
+        and fulfilled.
+
+        + The identity of potential employees is verified (e.g. checking identity
+        documents).'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node76
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.1
+      name: (should)
+      description: '+ The personal suitability of potential employees is verified
+        by means of simple methods (e.g. job interview).
+
+        + An extended suitability verification depending on the respective work field
+        and job is conducted. (e.g. assessment centre, psychological analysis, checking
+        of references, certificates and diploma, checking of certificates of conduct,
+        checking of professional and private background).'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2
+      ref_id: 2.1.2
+      name: To what extent is all staff contractually bound to comply with information
+        security policies?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node78
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.2
+      name: (must)
+      description: '+ A non-disclosure obligation is in effect.
+
+        + An obligation to comply with the information security policies is in effect.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node79
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.2
+      name: (should)
+      description: '+ A non-disclosure obligation beyond the employment contract or
+        order is in effect.
+
+        + Information security aspects are considered in the employment contracts
+        of the staff.
+
+        + A procedure for handling violations of said obligations is described.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2
+      ref_id: 2.1.3
+      name: To what extent is staff made aware of and trained with respect to the
+        risks arising from the handling of information?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node81
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.3
+      name: (must)
+      description: + Employees are trained and made aware.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node82
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.3
+      name: (should)
+      description: "+ A concept for awareness and training of employees is prepared.\
+        \ As a minimum, the following aspects are considered:\n  - Information security\
+        \ policy,\n  - Reports of information security events,\n  - Reaction to occurrence\
+        \ of malware,\n  - Policies regarding user accounts and login information\
+        \ (e.g. password policy),\n  - Compliance issues of information security,\n\
+        \  - Requirements and procedures regarding the use of non-disclosure agreements\
+        \ when sharing information requiring protection,\n  - Use of external IT services.\n\
+        + Target groups for training and awareness measures (i.e., people working\
+        \ in specific risk environments such as administrators, employees having access\
+        \ to customer networks, personnel in areas of manufacturing) are identified\
+        \ and considered in a training concept.\n+ The concept has been approved by\
+        \ the responsible management.\n+ Training and awareness measures are carried\
+        \ out both at regular intervals and in response to events.\n+ Participation\
+        \ in training and awareness measures is documented. \n+ Contact persons for\
+        \ information security are known to employees."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2
+      ref_id: 2.1.4
+      name: To what extent is mobile work regulated?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node84
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.4
+      name: (must)
+      description: "+ The requirements for teleworking are determined and fulfilled.\
+        \ The following aspects are considered:\n  - Secure handling of and access\
+        \ to information (in both electronic and paper form) while considering the\
+        \ protection needs and the contractual requirements applying to private (e.g.\
+        \ home office) and public surroundings (e.g. during travels),\n  - Behavior\
+        \ in private surroundings,\n  - Behavior in public surroundings,\n  - Measures\
+        \ for protection from theft (e.g. in public surroundings),\n+ The organization\u2019\
+        s network is accessed via a secured connection (e.g. VPN) and strong authentication."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node85
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.4
+      name: (should)
+      description: "+ The following aspects are considered:\n  - Measures for travelling\
+        \ (e.g. viewing by authorities),\n  - Measures for travelling to security-critical\
+        \ countries.\n+ Employee awareness."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node86
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.4
+      name: (for high protection needs)
+      description: + Protective measures against overhearing and viewing are implemented.
+        (C)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node87
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.4
+      name: Further information
+      description: Contractual requirements include, for example, customer requirements
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Physical Security
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3
+      ref_id: 3.1.1
+      name: To what extent are security zones managed to protect information assets?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node90
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.1
+      name: (must)
+      description: "+ A security zone concept including the associated protective\
+        \ measures based on the requirements for the handling of information assets\
+        \ is in place:\n  - Physical conditions (e.g. premises\_/ buildings\_/ spaces)\
+        \ are considered in the definition of security zones,\n  - This also includes\
+        \ delivery and shipping areas.\n+ The defined protective measures are implemented.\n\
+        + The code of conduct for security zones is known to all persons involved."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node91
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.1
+      name: (should)
+      description: '+ Procedures for allocation and revocation of access rights are
+        established.
+
+        + Visitor management policies (including registration and escorting of visitors)
+        are defined.
+
+        + Policies for carrying along and using mobile IT devices and mobile data
+        storage devices (e.g. registration before they are carried along, identification
+        obligations) are defined and implemented.
+
+        + Network/infrastructure components (own or customer networks) are protected
+        against unauthorized access.
+
+        + External properties used for storing and processing information assets are
+        considered in the security zone concept (e.g. storage rooms, garages, workshops,
+        test tracks, data processing centres).'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node92
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.1
+      name: (for high protection needs)
+      description: + Protective measures against simple overhearing and viewing are
+        implemented. (C)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node93
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.1
+      name: Further information
+      description: "Introduction:\nThe concept of security zones basically describes\
+        \ different physical areas with different protection requirements. How a corresponding\
+        \ zone is to be protected is derived from the protection requirements of the\
+        \ assets located there. The more important the assets located there, the higher\
+        \ the protection requirements of the security zone.\nFor example, personnel\
+        \ data or prototype data and the areas in which they are processed are more\
+        \ sensitive than areas of the canteen where menus are displayed.\nIn principle,\
+        \ each company can freely choose the number of existing zone types. One approach\
+        \ would be, for example, to link the classification levels \"public\" to,\
+        \ for example, \"strictly confidential\" and the analogous definition of 4\
+        \ security zones.\n\nBasic information:\nAn effective security zone concept\
+        \ separates different security zones from each other by means of suitable\
+        \ measures. These separations can be represented by the following measures,\
+        \ among others:\n- Technical measures such as detectors and alarm monitoring.\n\
+        - Physical measures such as the use of walls, doors, locking systems\n- Personnel\
+        \ measures such as security guards, doormen, receptionists\n- Organizational\
+        \ measures such as processes for granting and withdrawing access authorizations.\n\
+        Only if a zone is separated from the previous zones by one or more measures,\
+        \ it can be considered as an independent zone. If there is no protective measure\
+        \ between the respective security zones, the higher security zone falls back\
+        \ to the lower zone.\nUsing the example of an open-plan office, it is not\
+        \ possible to define one part as a highly sensitive zone for handling strictly\
+        \ confidential data, for example, and the other part as an internal zone.\n\
+        Using the example of a server room, this falls back to the protection level\
+        \ of the existing area such as corridors if the doors to the server room are\
+        \ not locked and no monitoring takes place.\n\nSecurity zones should be built\
+        \ on the basis of an onion-shell model. A highly protected zone is usually\
+        \ not adjacent to a public area (e.g. The prototype warehouse is located directly\
+        \ next to the publicly accessible canteen). Ideally, between a public area\
+        \ and a highly sensitive area such as the prototype warehouse, there is an\
+        \ \"internal\" zone as a buffer, which only the company's own employees can\
+        \ enter.\nA direct derivation of protective measures from the security zones\
+        \ is the implementation of the need-to-know principle. The more security-relevant\
+        \ the security zone, the fewer people should be able to enter the area. For\
+        \ example, if the entire workforce can enter an open-plan office, only administrators\
+        \ usually need access authorizations for the server room. For the implementation\
+        \ of a security zone concept, the implementation of an access concept is therefore\
+        \ always necessary. However, it should be noted that locking concepts do not\
+        \ correspond 1-to-1 with the security zones, since, for example, a prototype\
+        \ responsible for the highly sensitive zone of the prototype protection may\
+        \ not enter the highly sensitive zone of the server room, or the administrator\
+        \ does not necessarily have to enter prototype areas.\n\nThe definition of\
+        \ security zones can affect the following areas, among others: \n- Technical\
+        \ measures: use of alarm systems, motion detectors, video cameras + Physical\
+        \ measures: walls, barbed wire, fences, resistance classes of doors & windows\n\
+        - Personnel measures: use of doormen, security services with stripes, use\
+        \ of external service providers such as cleaning companies\n- Organizational\
+        \ measures: Allocation of access authorizations (need-to-know), frequency\
+        \ of rights review of access authorizations; the introduction of sound recording\
+        \ devices; masking of optics from smartphones of employees and employees;\
+        \ Clear Screen and Clean Desk requirements; visitor registration requirements;\
+        \ Conclusion of confidentiality agreements (GHV); Use or prohibition of smart\
+        \ devices (e.g. with microphones)\n#####Technik with organizational measures#####\n\
+        \nDesign aids for defining security zones in the security zone concept:\n\
+        The use of a zone scheme based on the classification scheme with four zone\
+        \ types has established itself as good practice for security zones: public\
+        \ area, normal protection area, high protection area and very high protection\
+        \ area. It is easier to transfer the protection requirements of the assets\
+        \ into a zone scheme, especially when first sketching security zones.\nIt\
+        \ has also proven to be useful to mark the security zones on premises and\
+        \ building floor plans in color in order to provide the company itself and\
+        \ possible auditors with a quick overview of the location of the security\
+        \ zones. One possibility is the use of clearly defined and intuitive colors\
+        \ for each security zone. For example, the following color scheme could be\
+        \ chosen:\n + Gray colors = Public areas \n + Green Colors = Internal Areas\n\
+        \ + Yellow colors = Areas with high protection needs (e.g. Confidential)\n\
+        \ + Red colors = Areas with very high protection needs (e.g. Strictly Confidential)"
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3
+      ref_id: 3.1.2
+      name: Superseded by 1.6.3, 5.2.8 and 5.2.9
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node95
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.2
+      name: (must)
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3
+      ref_id: 3.1.3
+      name: To what extent is the handling of supporting assets managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node97
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.3
+      name: (must)
+      description: '+ The requirements for the handling of supporting assets (e.g.
+        transport, storage, repair, loss, return, disposal) are determined and fulfilled. '
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node98
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.3
+      name: (for high protection needs)
+      description: "+ Supporting assets are protected. Disposal of supporting assets\
+        \ is conducted in accordance with one of the relevant standards (e.g. ISO\_\
+        21964, at least Security Level 4). (C)"
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node99
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.3
+      name: Further information
+      description: "Introduction:\nThe term \"supporting asset\" refers to all media\
+        \ on which information can be permanently stored. These include fixed IT devices\
+        \ (e.g. workstation PCs, workstations, servers, etc.), mobile IT devices (e.g.\
+        \ USB sticks, memory cards, notebooks, smartphones, etc.) as well as analogue\
+        \ media such as paper documents. For all supporting assets, information security\
+        \ and thus a secure application from creation to use to disposal is of fundamental\
+        \ importance. \n\nJustification:\nDuring the entire life cycle of supporting\
+        \ assets, there is a risk that sensitive information, e.g. If the data is\
+        \ not adequately protected, it can be lost and/or spied on. Therefore, supporting\
+        \ assets are to be protected according to the need for protection of the information\
+        \ stored or processed on them.\n\nBasic information:\nBefore the creation\
+        \ phase, therefore, the question of the need for protection and the associated\
+        \ classification of the supporting assets already arises. These are usually\
+        \ dependent on the information information assets that are stored on them\
+        \ (see Control 1.3.1 and 1.3.2). Based on the need for protection under the\
+        \ classification, appropriate protective measures for the creation, use and\
+        \ disposal of the supporting assets can then be defined and implemented."
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3
+      ref_id: 3.1.4
+      name: To what extent is the handling of mobile IT devices and mobile data storage
+        devices managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node101
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.4
+      name: (must)
+      description: "+ The requirements for mobile IT devices and mobile data storage\
+        \ devices are determined and fulfilled. The following aspects are considered:\
+        \ \n  - Encryption,\n  - Access protection (e.g. PIN, password),\n  - Marking\
+        \ (also considering requirements for use in the presence of customers)."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node102
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.4
+      name: (should)
+      description: '+ Registration of the IT devices.
+
+        + Users are informed of missing data protection on mobile devices.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node103
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.4
+      name: (for high protection needs)
+      description: "+ General encryption of mobile data storage devices or the information\
+        \ assets stored thereon: (C, I)\n  - Where this is technically not feasible,\
+        \ information is protected by similarly effective measures."
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4
+      ref_id: '4.1'
+      name: Identity Management
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1
+      ref_id: 4.1.1
+      name: To what extent is the use of identification means managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node107
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.1
+      name: (must)
+      description: "+ The requirements for the handling of identification means over\
+        \ the entire lifecycle are determined and fulfilled. The following aspects\
+        \ are considered:\n  - Creation, handover, return and destruction,\n  - Validity\
+        \ periods,\n  - Traceability,\n  - Handling of loss."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node108
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.1
+      name: (should)
+      description: + Identification means can be produced under controlled conditions
+        only.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node109
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.1
+      name: (for high protection needs)
+      description: '+ The validity of identification means is limited to an appropriate
+        period. (C, I, A)
+
+        + A strategy of blocking or invalidation of identification means in case of
+        loss is prepared and implemented as far as possible. (C, I, A)'
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1
+      ref_id: 4.1.2
+      name: To what extent is the user access to IT services and IT systems secured?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node111
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.2
+      name: (must)
+      description: '+ The procedures for user authentication have been selected based
+        on a risk assessment. Possible attack scenarios have been considered (e.g.
+        direct accessibility via the internet).
+
+        + State of the art procedures for user authentication are applied.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node112
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.2
+      name: (should)
+      description: "+ The user authentication procedures are defined and implemented\
+        \ based on the business-related and security-relevant requirements:\n  - Users\
+        \ are authenticated at least by means of strong passwords according to the\
+        \ state of the art.\n+ Superior procedures are used for the authentication\
+        \ of privileged user accounts (e.g. Privileged Access Management, two-factor\
+        \ authentication)."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node113
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.2
+      name: (for high protection needs)
+      description: '+ Depending on the risk assessment, authentication procedure and
+        access control have been enhanced by supplementary measures (e.g. continuous
+        access monitoring with respect to irregularities or use of strong authentication,
+        automatic logout, disabling in case of inactivity, or brute force prevention).
+        (C, I, A)
+
+        '
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node114
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.2
+      name: (for very high protection needs)
+      description: + Before gaining access to data of very high protection needs,
+        users are authenticated by means of strong authentication (e.g. two-factor
+        authentication) according to the state of the art. (C, I)
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1
+      ref_id: 4.1.3
+      name: 'To what extent are user accounts and login information securely managed
+        and applied? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node116
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.3
+      name: (must)
+      description: "+ The creating, changing, and deleting of user accounts is conducted.\n\
+        + Unique and personalized user accounts are used.\n+ The use of \u201Ccollective\
+        \ accounts\u201D is regulated (e.g. restricted to cases where traceability\
+        \ of actions is dispensable).\n+ User accounts are disabled immediately after\
+        \ the user has resigned from or left the organization (e.g. upon termination\
+        \ of the employment contract).\n+ User accounts are regularly reviewed.\n\
+        + The login information is provided to the user in a secure manner.\n+ A policy\
+        \ for the handling of login information is defined and implemented. The following\
+        \ aspects are considered:\n  - No disclosure of login information to third\
+        \ parties\n  - not even to persons of authority\n  - under observation of\
+        \ legal parameters\n  - No writing down or unencrypted storing of login information\n\
+        \  - Immediate changing of login information whenever potential compromising\
+        \ is suspected\n  - No use of identical login information for business and\
+        \ non-business purposes\n  - Changing of temporary or initial login information\
+        \ following the 1st login   - Requirements for the quality of authentication\
+        \ information (e.g. length of password, types of characters to be used).\n\
+        + The login information (e.g. passwords) of a personalized user account must\
+        \ be known to the assigned user only. "
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node117
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.3
+      name: (should)
+      description: '+ A basic user account with minimum access rights and functionalities
+        is existent and used.
+
+        + Default accounts and passwords pre-configured by manufacturers are disabled
+        (e.g. by blocking or changing of password).
+
+        + User accounts are created or authorized by the responsible body.
+
+        + Creating user accounts is subject to an approval process (four-eyes principle).
+
+        + User accounts of service providers are disabled upon completion of their
+        task.
+
+        + Deadlines for disabling and deleting user accounts are defined.
+
+        + The use of default passwords is technically prevented.
+
+        + Where strong authentication is applied, the use of the medium (e.g. ownership
+        factor) is secure.
+
+        + User accounts are reviewed at regular intervals. This also includes user
+        accounts in customers'' IT systems.
+
+        + Interactive login for service accounts (technical accounts) is technically
+        prevented.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4
+      ref_id: '4.2'
+      name: Access Management
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2
+      ref_id: 4.2.1
+      name: To what extent are access rights assigned and managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node120
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2.1
+      name: (must)
+      description: "+ The requirements for the management of access rights (authorization)\
+        \ are determined and fulfilled. The following aspects are considered:\n  -\
+        \ Procedure for application, verification, and approval,\n  - Applying the\
+        \ minimum (\u201Cneed-to-know\u201D/\"least privilege\") principle.\n  - Access\
+        \ rights are revoked when no longer needed\n+ The access rights granted for\
+        \ normal and privileged user accounts and technical accounts are reviewed\
+        \ at regular intervals also within IT systems of customers."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node121
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2.1
+      name: (should)
+      description: "+ Strategies for authorizing access to information are prepared.\n\
+        + Authorization roles are used.\n+ Rights are allocated on a need-to-use basis\
+        \ and according to the role and/or area of responsibility. \n+ Normal user\
+        \ accounts are not granted privileged access rights.\n+ The access rights\
+        \ of a user account are adapted after the user has changed (e.g. to another\
+        \ field of responsibility)."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node122
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2.1
+      name: (for high protection needs)
+      description: + The access rights are approved by the responsible internal Information
+        Officer. (C, I, A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node123
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2.1
+      name: (for very high protection needs)
+      description: "+ Prevention of unauthorized persons gaining access and information\
+        \ (privileged users): (C)\n  - Information is stored in encrypted form at\
+        \ content level (e.g. file level).\n  - Where encryption is not feasible,\
+        \ information shall be protected by similarly effective measures. \n+ Existing\
+        \ access rights are regularly reviewed at shorter intervals (e.g. quarterly)\
+        \ (C)"
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node124
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2.1
+      name: Further information
+      description: + In case of externally operated IT infrastructure (e.g. server)
+        and/or cloud solutions, compliance with the encryption requirements according
+        to control question 5.1.1 is ensured.
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "IT Security\_/ Cyber Security"
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5
+      ref_id: '5.1'
+      name: Cryptography
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1
+      ref_id: 5.1.1
+      name: To what extent is the use of cryptographic procedures managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node128
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.1
+      name: (must)
+      description: "+ All cryptographic procedures used (e.g. encryption, signature,\
+        \ and hash algorithms, protocols) provide the security required by the respective\
+        \ application field according to the recognized industry standard,\n  - to\
+        \ the extent legally feasible."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node129
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.1
+      name: (should)
+      description: "+ Preparation of technical rules containing requirements for encryption\
+        \ in order to protect information according to its classification.\n+ A concept\
+        \ for the application of cryptography is defined and implemented. The following\
+        \ aspects are considered:\n  - Cryptographic procedures,\n  - Key strengths,\n\
+        \  - Procedures for the complete lifecycle of cryptographic keys, including\
+        \ generation, storage, archiving, retrieval, distribution, deactivation, renewal,\
+        \ and deletion.\n+ An emergency process for restoring key material is established."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node130
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.1
+      name: (for high protection needs)
+      description: + Key sovereignty requirements (particularly in case of external
+        processing) are determined and fulfilled. (C, I)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1
+      ref_id: 5.1.2
+      name: To what extent is information protected during transfer?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node132
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.2
+      name: (must)
+      description: "+ The network services used to transfer information are identified\
+        \ and documented. \n+ Policies and procedures in accordance with the classification\
+        \ requirements for the use of network services are defined and implemented.\n\
+        + Measures for the protection of transferred contents against unauthorized\
+        \ access are implemented."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node133
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.2
+      name: (should)
+      description: "+ Measures for ensuring correct addressing and correct transfer\
+        \ of information are implemented.\n+ Electronic data exchange is conducted\
+        \ using content or transport encryption according to the respective classification.\
+        \ \n+ Remote access connections are verified to possess adequate security\
+        \ features (e.g., encryption, granting and termination of access) and capabilities."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node134
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.2
+      name: (for high protection needs)
+      description: "+ Information is transported or transferred in encrypted form:\
+        \ (C)\n  - Where encryption is not feasible, information must be protected\
+        \ by similarly effective measures."
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node135
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.2
+      name: (for very high protection needs)
+      description: + Information is transported or transferred in content-encrypted
+        form. (C)
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5
+      ref_id: '5.2'
+      name: Operations Security
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.1
+      name: 'To what extent are changes managed? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node138
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.1
+      name: (must)
+      description: + Information security requirements for changes to the organization,
+        business processes, IT systems are determined and applied.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node139
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.1
+      name: (should)
+      description: '+ A formal approval procedure is established.
+
+        + Changes are verified and assessed for their potential impact on the information
+        security.
+
+        + Changes affecting the information security are subjected to planning and
+        testing.
+
+        + Procedures for fallback in fault cases are considered.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node140
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.1
+      name: (for high protection needs)
+      description: + Compliance with the information security requirements is verified
+        during and after the changes are applied. (C, I, A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.2
+      name: To what extent are development and testing environments separated from
+        operational environments?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node142
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.2
+      name: (must)
+      description: '+ The IT systems have been subjected to risk assessment in order
+        to determine the necessity of their separation into development, testing and
+        operational systems.
+
+        + A segmentation is implemented based on the results of risk analysis.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node143
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.2
+      name: (should)
+      description: "+ The requirements for development and testing environments are\
+        \ determined and implemented. The following aspects are considered:\n  - Separation\
+        \ of development, testing and operational systems,\n  - No development and\
+        \ system tools on operational systems (except those required for operation),\n\
+        \  - Use of different user profiles for development, testing, and operational\
+        \ systems."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.3
+      name: To what extent are IT systems protected against malware?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node145
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.3
+      name: (must)
+      description: '+ Requirements for protection against malware are determined.
+
+        + Technical and organizational measures for protection against malware are
+        defined and implemented.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node146
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.3
+      name: (should)
+      description: "+ Unnecessary network services are disabled.\n+ Access to network\
+        \ services is restricted to necessary access by means of suitable protective\
+        \ measures (see examples).\n+ Malware protection software is installed and\
+        \ updated automatically at regular intervals (e.g. virus scanner).\n+ Received\
+        \ files and software are automatically inspected for malware prior to their\
+        \ execution (on-access scan).\n+ The entire data contents of all systems is\
+        \ regularly inspected for malware.\n+ Data transferred by central gateways\
+        \ (e.g. e-mail, internet, third-party networks) is automatically inspected\
+        \ by means of protection software:\n  - Encrypted connections are considered.\n\
+        + Measures to prevent protection software from being deactivated or altered\
+        \ by users are defined and implemented.\n+ Case-related staff awareness measures.\n\
+        + For IT systems operated without the use of malware protection software,\
+        \ alternative measures (e.g. special resilience measures, few services, no\
+        \ active users, network isolation) are implemented. "
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.4
+      name: To what extent are event logs recorded and analysed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node148
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.4
+      name: (must)
+      description: '+ Information security requirements regarding the handling of
+        event logs are determined and fulfilled.
+
+        + Security-relevant requirements regarding the logging of activities of system
+        administrators and users are determined and fulfilled.
+
+        + The IT systems used are assessed regarding the necessity of logging.
+
+        + When using external IT services, information on the monitoring options is
+        obtained and considered in the assessment.
+
+        + Event logs are checked regularly for rule violations and noticeable problems
+        in compliance with the permissible legal and organizational provisions.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node149
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.4
+      name: (should)
+      description: '+ A procedure for the escalation of relevant events to the responsible
+        body (e.g. security incident report, data protection, corporate security,
+        IT security) is defined and established.
+
+        + Event logs (contents and meta data) are protected against alteration. (e.g.
+        by a dedicated environment).
+
+        + Adequate monitoring and recording of any actions on the network that are
+        relevant to information security are established.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node150
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.4
+      name: (for high protection needs)
+      description: '+ Information security requirements relevant to the security during
+        the handling of event logs, e.g. contractual requirements, are determined
+        and implemented. (C, I, A)
+
+        + Cases of access during connection and disconnection of external networks
+        (e.g. remote maintenance) are logged. (C, I, A)'
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node151
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.4
+      name: (for very high protection needs)
+      description: + Logging of any access to data of very high protection needs as
+        far as technically feasible and as permissible according to legal and organizational
+        provisions. (C, I)
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.5
+      name: 'To what extent are vulnerabilities identified and addressed? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node153
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.5
+      name: (must)
+      description: '+ Information on technical vulnerabilities for the IT systems
+        in use is gathered (e.g. information from the manufacturer, system audits,
+        CVS database) and evaluated (e.g. Common Vulnerability Scoring System CVSS)
+
+        + Potentially affected IT systems and software are identified, assessed and
+        any vulnerabilities are addressed.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node154
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.5
+      name: (should)
+      description: '+ An adequate patch management is defined and implemented (e.g.
+        patch testing and installation).
+
+        + Risk minimizing measures are implemented, as necessary.
+
+        + Successful installation of patches is verified in an appropriate manner.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node155
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.5
+      name: Further information
+      description: "Introduction:\nThe basic objective of this control is to continuously\
+        \ deal with current vulnerabilities in IT systems of any kind in order to\
+        \ mitigate known gaps as quickly as possible before they can be exploited.\
+        \ \n\nJustification:\nAttackers can exploit vulnerabilities in IT systems,\
+        \ for example, to gain access to the network and thus to information carriers\
+        \ and information assets. Vulnerability detection therefore plays a central\
+        \ role in information security. It is the basis for the necessary vulnerability\
+        \ management and thus also for the following risk analyses and derivation\
+        \ of measures.\n\nBasic information:\nSince exploited vulnerabilities can\
+        \ have extremely far-reaching effects, especially if the attack is not detected\
+        \ at all (e.g. \"listening\" without direct damage), a systematic approach\
+        \ makes sense. It is important to obtain as much information as possible about\
+        \ the IT systems used in your own organization and external systems, such\
+        \ as:\n- Operating Systems\n- Firmware\n- Apps\n- Cloud Services \n\nAn ISMS\
+        \ can generally play to its strengths here. Controls that can help here are,\
+        \ for example:\n- Defining responsibilities (see 1.2.2 and 1.2.4)\n- Identify\
+        \ relevant systems (cf.1.3.1)\n- Identify risks (see 1.4.1)\n- Training and\
+        \ sensitizing employees (see 2.1.3)\n- Preparation for exceptional situations\
+        \ (see 3.1.2)\n- Change Management (see 5.2.1)\n- Review of information systems\
+        \ (see 5.2.6)"
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.6
+      name: To what extent are IT systems and services technically checked (system
+        and service audit)?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node157
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.6
+      name: (must)
+      description: '+ Requirements for auditing IT systems or services are determined.
+
+        + The scope of the system audit is specified in a timely manner.
+
+        + System or service audits are coordinated with the operator and users of
+        the IT systems or services.
+
+        + The results of system or service audits are stored in a traceable manner
+        and reported to the relevant management.
+
+        + Measures are derived from the results.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node158
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.6
+      name: (should)
+      description: "+ System and service audits are planned taking into account any\
+        \ security risks they might cause (e.g. disturbances).\n+ Regular system or\
+        \ service audits are performed\n  - carried out by qualified personnel\n \
+        \ - suitable tools (e.g. vulnerability scanners) are used for system and service\
+        \ audits (if applicable)\n  - performed from the internet and the internal\
+        \ network\n+ Within a reasonable period following completion of the audit,\
+        \ a report is prepared."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node159
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.6
+      name: (for high protection needs)
+      description: + For critical IT systems or services, additional system or service
+        audit requirements have been identified and are fulfilled (e.g., service specific
+        tests and tools and/or human penetration tests, risk-based time intervals)
+        (A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node160
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.6
+      name: (for very high protection needs)
+      description: "+ IT systems and services are regularly scanned for vulnerabilities.\
+        \ (A)\n      - Suitable protective measures must be implemented for systems\
+        \ and services that may not be scanned."
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.7
+      name: 'To what extent is the network of the organization managed?
+
+
+        '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node162
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.7
+      name: (must)
+      description: '+ Requirements for the management and control of networks are
+        determined and fulfilled.
+
+        + Requirements regarding network segmentation are determined and fulfilled.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node163
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.7
+      name: (should)
+      description: "+ Procedures for the management and control of networks are defined.\n\
+        + For a risk-based network segmentation, the following aspects are considered:\n\
+        \  - Limitations for connecting IT systems to the network,\n  - Use of security\
+        \ technologies,\n  - Performance, trust, availability, security, and safety\
+        \ considerations\n  - Limitation of impact in case of compromised IT systems\n\
+        \  - Detection of potential attacks and lateral movement of attackers\n  -\
+        \ Separation of networks with different operational purpose (e.g. test and\
+        \ development networks, office network, manufacturing networks)\n  - The increased\
+        \ risk due to network services accessible via the internet,\n  - Technology-specific\
+        \ separation options when using external IT services,\n  - Adequate separation\
+        \ between own networks and customer networks while considering customer requirements\n\
+        \  - Detection and prevention of data loss/leakage"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node164
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.7
+      name: (for high protection needs)
+      description: "+ Extended requirements for the management and control of networks\
+        \ are determined and implemented. The following aspects are considered: (C,\
+        \ I, A)\n  - Authentication of IT systems on the network,\n  - Access to the\
+        \ management interfaces of IT systems is restricted.\n  - Specific risks (e.g.\
+        \ wireless and remote access)"
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.8
+      name: To what extent is continuity planning for IT services in place?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node166
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.8
+      name: (must)
+      description: '+ Critical IT services are identified, and business impact is
+        considered.
+
+        + Requirements and responsibilities for continuity and recovery of those IT
+        services are known to relevant stakeholders and fulfilled.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node167
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.8
+      name: (should)
+      description: "+ Critical IT systems are identified\n - the relevant systems\
+        \ are classified to have the appropriate protection need\n - adequate and\
+        \ appropriate security measures are implemented\n+ Continuity planning includes\
+        \ at least the following scenarios affecting critical IT systems:\n  - (Distributed)\
+        \ Denial of Service attacks\n  - Successful ransomware attacks and other sabotage\
+        \ activities \n  - System failure \n  - Natural disaster \n+ Continuity planning\
+        \ considers the following cases \n   - Alternative communication strategies,\
+        \ in case primary communication means are not available \n  - Alternative\
+        \ storage strategies, in case primary storage means are not available\n  -\
+        \ Alternative power and network\n+ Continuity planning is regularly reviewed\
+        \ and updated"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node168
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.8
+      name: (for high protection needs)
+      description: "+ Continuity planning includes predefined time frames (Recovery\
+        \ Time Objective) for resumption of operation in line with requirements. (A)\n\
+        + Appropriate SLAs with external service providers according to continuity\
+        \ planning are in place. (A)\n+ Continuity plans include coordination of contractually\
+        \ agreed communication with business partners (A)\n+ Continuity planning is\
+        \ regularly tested including a full recovery and reconstitution of the system\
+        \ to a known state and compliance with defined target times. (A)\n+ A backup\
+        \ and recovery strategy for critical IT services and information is defined\
+        \ and implemented. The following aspects are considered: \n  - Backups are\
+        \ protected against unauthorized modification or deletion by malicious software.\
+        \ (I, A)\n  - Backups are protected against unauthorized access by malicious\
+        \ software or operators (C, I)"
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node169
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.8
+      name: (for very high protection needs)
+      description: "+ Continuity planning is coordinated with the continuity plans\
+        \ of relevant external service providers. (A)\n+ Continuance of essential\
+        \ mission and business functions with minimal or no loss of operational continuity\
+        \ is possible. The plan for continuance of essential mission and business\
+        \ functions considers the following aspects:\n  - Alternate operation strategies\
+        \ and necessary separated standby systems to retain and/or resume operation\
+        \ to the extent possible if critical IT services become unavailable. (A)\n\
+        \  - Alternate storage and backup sites that provide controls equivalent to\
+        \ that of the primary site. (C, I, A)\n+ Continuity planning is tested regularly.\
+        \ Tests and any lessons learned are documented. (I, A)"
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
+      ref_id: 5.2.9
+      name: To what extent is the backup and recovery of data and IT services ensured?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node171
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.9
+      name: (must)
+      description: "+ Backup concepts exist for relevant IT systems. The following\
+        \ aspects are considered:\n  - Appropriate protective measures to ensure confidentiality,\
+        \ integrity, and availability for data backups.\n+ Recovery concepts exist\
+        \ for relevant IT services."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node172
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.9
+      name: (should)
+      description: "+ A backup and recovery concept exists for each relevant IT service.\n\
+        \  - Dependencies between IT services and the sequence for recovery are considered.\n"
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node173
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.9
+      name: (for high protection needs)
+      description: "+ Backup and recovery concepts are methodically reviewed at regular\
+        \ intervals. (A)\n+ General restore capability is considered and tested (e.g.,\
+        \ sample testing, test systems) (I, A)\n+ Backup and recovery concepts consider\
+        \ the following aspects: (A)\n  - Recovery Point Objective (RPO).\n  - Recovery\
+        \ Time Objective (RTO).\n  - Required resources for recovery (considering\
+        \ capacity and performance incl. personnel and hardware).\n  - Avoidance of\
+        \ overload scenarios during recovery.\n  - Appropriate spatial redundancy\
+        \ (e.g., separate room, separate fire  section, separate datacentre, separate\
+        \ site)."
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node174
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.9
+      name: (for very high protection needs)
+      description: '+ (Additional) Backups are performed via offline procedures, immutable
+        backups or by using isolated IAM technology. (I, A)
+
+        + Restore procedures are technically tested in a methodical way at regular
+        intervals. (I, A)
+
+        + Geographical redundancy is considered in data backup and recovery concepts.
+        (A)'
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5
+      ref_id: '5.3'
+      name: System acquisitions, requirement management and development
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3
+      ref_id: 5.3.1
+      name: To what extent is information security considered in new or further developed
+        IT systems?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node177
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.1
+      name: (must)
+      description: '+ The information security requirements associated with the design
+        and development of IT systems are determined and considered.
+
+        + The information security requirements associated with the acquisition or
+        extension of IT systems and IT components are determined and considered.
+
+        + Information security requirements associated with changes to developed IT
+        systems are considered.
+
+        + System approval tests are carried out under consideration of the information
+        security requirements.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node178
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.1
+      name: (should)
+      description: "+ Requirement specifications are prepared. The following aspects\
+        \ are considered:\n  - The information security requirements. \n  - Vendor\
+        \ recommendations and best practices for secure configuration and implementation\n\
+        \  - Best practices and security guidelines\n  - Fail safe (designed to return\
+        \ to a safe condition in the event of a failure or malfunction)\n+ Requirement\
+        \ specifications are reviewed against the information security requirements.\n\
+        + The IT system is reviewed for compliance with specifications prior to productive\
+        \ use.\n+ The use of productive data for testing purposes is avoided as far\
+        \ as possible (if applicable, anonymization or pseudonymization):\n  - Where\
+        \ productive data are used for testing purposes, it shall be ensured that\
+        \ the test system is provided with protective measures comparable to those\
+        \ on the operational system,\n  - Requirements for the lifecycle of test data\
+        \ (e.g. deletion, maximum lifetime on the IT system),\n  - Case-related specifications\
+        \ for the generation of test data are defined."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node179
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.1
+      name: (for very high protection needs)
+      description: "+ The security of purpose built software or significantly customized\
+        \ software is tested (e.g. penetration testing) (C, I, A)\n   - during commissioning\n\
+        \   - in case of significant changes\n   - or at regular intervals"
+      implementation_groups:
+      - very_high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3
+      ref_id: 5.3.2
+      name: To what extent are requirements for network services defined?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node181
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.2
+      name: (must)
+      description: + Requirements regarding the information security of network services
+        are determined and fulfilled.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node182
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.2
+      name: (should)
+      description: '+ A procedure for securing and using network services is defined
+        and implemented.
+
+        + The requirements are agreed in the form of SLAs.
+
+        + Adequate redundancy solutions are implemented.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node183
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.2
+      name: (for high protection needs)
+      description: + Procedures for monitoring the quality of network traffic (e.g.
+        traffic flow analyses, availability measurements) are defined and carried
+        out. (A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3
+      ref_id: 5.3.3
+      name: 'To what extent is the return and secure removal of information assets
+        from external IT services regulated? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node185
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.3
+      name: (must)
+      description: + A procedure for the return and secure removal of information
+        assets from each external IT service is defined and implemented.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node186
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.3
+      name: (should)
+      description: + A description of the termination process is given, adapted to
+        any changes, and contractually regulated.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3
+      ref_id: 5.3.4
+      name: To what extent is information protected in shared external IT services?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node188
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.4
+      name: (must)
+      description: + Effective segregation (e.g. segregation of clients) prevents
+        access to own information by unauthorized users of other organizations.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node189
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.4
+      name: (should)
+      description: "+ The provider\u2019s segregation concept is documented and adapted\
+        \ to any changes. The following aspects are considered:\n  - Separation of\
+        \ data, functions, customer-specific software, operating system, storage system\
+        \ and network,\n  - Risk assessment for the operation of external software\
+        \ within the shared environment."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Supplier Relationships
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6
+      ref_id: 6.1.1
+      name: 'To what extent is information security ensured among contractors and
+        cooperation partners?
+
+
+        '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node192
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.1
+      name: (must)
+      description: '+ Contractors and cooperation partners are subjected to a risk
+        assessment with regard to information security.
+
+        + An appropriate level of information security is ensured by contractual agreements
+        with contractors and cooperation partners.
+
+        + Where applicable, contractual agreements with clients are passed on to contractors
+        and cooperation partners.
+
+        + Compliance with contractual agreements is verified.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node193
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.1
+      name: (should)
+      description: '+ Contractors and cooperation partners are contractually obliged
+        to pass on any requirements regarding an appropriate level of information
+        security to their subcontractors.
+
+        + Service reports and documents by contractors and cooperation partners are
+        reviewed.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node194
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.1
+      name: (for high protection needs)
+      description: + Proof is provided that the information security level of the
+        supplier is adequate for the protection needs of the information (e.g. certificate,
+        attestation, internal audit). (C, I, A)
+      implementation_groups:
+      - high
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node195
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.1
+      name: Further information
+      description: "Within the context of ISA, the term contractor includes both classic\
+        \ suppliers and subcontractors but also classic service providers, freelancers\
+        \ or other partner companies. It also includes cooperation partners (e.g.\
+        \ academic institutions, institutes).\n\nThe explanations below describe a\
+        \ possible procedure for fulfilling the requirements:\n\nIdentification of\
+        \ contractors and specification of protection needs and security requirements:\n\
+        At first, all contractors must be identified (e.g. via the list of creditors\
+        \ of the accountants department) in order to gain an initial overview. \n\
+        For all contractors, the respective protection needs should be specified and\
+        \ the security requirements derived according to their tasks and the relevance\
+        \ to own and customer\u2019s processes. \nGenerally, a large number of contractors\
+        \ is found not to require the assignment of relevant protection needs and\
+        \ to be therefore not subject to security requirements (e.g. suppliers of\
+        \ office stationary). \n\nEnsuring implementation by the contractor:\nIn the\
+        \ next step, the applicable requirements must be made known to all security-relevant\
+        \ contractors in a suitable manner and (contractually) fixed as being mandatory.\
+        \ Finally, a decision should be made as to how the implementation of the security\
+        \ requirements can be appropriately verified. For this purpose, adequate verification\
+        \ processes and procedures should be defined according to the respective risk\
+        \ (and the associated protection needs). Their purpose is to ensure that contractors\
+        \ implement the necessary requirements.\n\nEstablishment in standard processes:\n\
+        The insights gained should be used to develop a comprehensible procedure and\
+        \ to integrate it into the existing processes of the B2B\_/ supplier management.\
+        \ This starts with the selection of the contractor, where aspects of information\
+        \ security should already be considered alongside criteria such as quality,\
+        \ adherence to delivery dates, credit rating etc. The procurement process\
+        \ should be such that the relevance of information security has already been\
+        \ considered beforehand (with respect to the procurement decision; contract\
+        \ design; inspection requirements).\nFurthermore, it is recommended to incorporate\
+        \ information security aspects into existing processes for supplier evaluation\
+        \ which have already been established by e.g. an existing quality management\
+        \ system.\nContractually specified deliverables (e.g. availability requirements)\
+        \ should be verified at regular intervals. This can be done by e.g. regular\
+        \ analysis of service reports and SLAs.  "
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6
+      ref_id: 6.1.2
+      name: To what extent is non-disclosure regarding the exchange of information
+        contractually agreed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node197
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.2
+      name: (must)
+      description: '+ The non-disclosure requirements are determined and fulfilled.
+
+        + Requirements and procedures for applying non-disclosure agreements are known
+        to all persons passing on information in need of protection.
+
+        + Valid non-disclosure agreements are concluded prior to  forwarding sensitive
+        information.
+
+        + The requirements and procedures for the use of non-disclosure agreements
+        and the handling of information requiring protection are reviewed at regular
+        intervals.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node198
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6.1.2
+      name: (should)
+      description: "+ Non-disclosure agreement templates are available and checked\
+        \ for legal applicability.\n+ Non-disclosure agreements include the following\
+        \ information:\n  - the persons/organizations involved,\n  - the type of information\
+        \ covered by the agreement,\n  - the subject of the agreement,\n  - the validity\
+        \ period of the agreement,\n  - the responsibilities of the obliged party.\n\
+        + Non-disclosure agreements include provisions for the handling of sensitive\
+        \ information beyond the contractual relationship.\n+ Options of demonstrating\
+        \ compliance with specifications (e.g. review by an independent third party\
+        \ or audit rights) are defined.\n+ A process for monitoring the validity period\
+        \ of temporary non-disclosure agreements and initiating their extension in\
+        \ due time is defined and implemented."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Compliance
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7.1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7
+      ref_id: 7.1.1
+      name: To what extent is compliance with regulatory and contractual provisions
+        ensured?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node201
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7.1.1
+      name: (must)
+      description: '+ Legal, regulatory, and contractual provisions of relevance to
+        information security (see examples) are determined at regular intervals.
+
+        + Policies regarding compliance with the provisions are defined, implemented,
+        and communicated to the responsible persons.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node202
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7.1.1
+      name: (should)
+      description: + The integrity of records in accordance with the legal, regulatory,
+        or contractual provisions and business requirements is considered.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node203
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7.1.1
+      name: Further information
+      description: "Introduction: \n\nLaws, regulations as well as standards, contracts\
+        \ or even specially imposed requirements can result in requirements for processes,\
+        \ infrastructure, projects and / or workflows. Some of these requirements\
+        \ relate specifically to information security. Control therefore helps to\
+        \ identify and understand the existing requirements and to regulate the handling\
+        \ to meet the requirements. \nReason:\nThe risks arising from non-compliance\
+        \ with specifications can result in serious financial and material damage\
+        \ as well as reputation-damaging consequences in one's own company or with\
+        \ customers and business partners. If requirements and specifications are\
+        \ not complied with or are not determined, this may result in breaches of\
+        \ contract or laws with corresponding consequences or risks for the company\
+        \ and its business partners.\nBasic information: \nIm general, Control is\
+        \ concerned with determining and monitoring compliance with requirements arising\
+        \ from laws, regulations and contracts as well as self-imposed requirements.\
+        \ The focus is on the relevance to the ISMS. It can be helpful here to first\
+        \ identify all relevant requirements, check them regularly and collect them\
+        \ in a kind of legal cadastre. In addition, it is necessary to define, in\
+        \ accordance with the requirements, how the corresponding provisions are to\
+        \ be fulfilled and for which group of persons these provisions are relevant.\
+        \ This can be done, for example, in the context of guidelines, action plans\
+        \ or work instructions that have been made known to the corresponding responsible\
+        \ persons.\nIf requirements arise with regard to the integrity of documents\
+        \ and records, such as protection against loss, retention periods or access\
+        \ authorizations, these must also be recorded and considered."
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7
+      ref_id: 7.1.2
+      name: 'To what extent is the protection of personally identifiable data considered
+        when implementing information security? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node205
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7.1.2
+      name: (must)
+      description: '+ Legal and contractual information security requirements regarding
+        the procedures and processes in the processing of personally identifiable
+        data are determined.
+
+        + Regulations regarding the compliance with legal and contractual requirements
+        for the protection of personally identifiable data are defined and known to
+        the entrusted persons.
+
+        + Processes and procedures for the protection of personally identifiable data
+        are considered in the information security management system.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Prototype Protection
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
+      ref_id: '8.1'
+      name: Physical and Environmental Security
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.1
+      name: To what extent is a security concept available describing minimum requirements
+        regarding the physical and environmental security for prototype protection?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node209
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.1
+      name: (must)
+      description: "+ A security concept under consideration of the following aspects\
+        \ is established: \n - stability of outer skin,\n - view and sight protection,\n\
+        \ - protection against unauthorized entry and access control,\n - intrusion\
+        \ monitoring,\n - documented visitor management,\n - client segregation."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node210
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.1
+      name: (should)
+      description: + Perimeter security.
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.2
+      name: To what extent is perimeter security existent preventing unauthorized
+        access to protected property objects?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node212
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.2
+      name: (must)
+      description: + Unauthorized access to properties is not possible.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node213
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.2
+      name: (should)
+      description: "+ Suitable barriers are in place such as:\n  - artificial barriers\
+        \ (fence systems, walls),\n  - technical barriers (detection),\n  - natural\
+        \ barriers (growth, vegetation)."
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.3
+      name: To what extent is the outer skin of the protected buildings constructed
+        such as to prevent removal or opening of outer-skin components using standard
+        tools?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node215
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.3
+      name: (must)
+      description: + Unauthorized access to buildings/security areas is not possible.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node216
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.3
+      name: (should)
+      description: '+ Solid construction (masonry, concrete, reinforced concrete,
+        or prestressed concrete).
+
+        + Windows and doors in the outer skin are to be built in compliance with RC2
+        or better.'
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.4
+      name: To what extent is view and sight protection ensured in defined security
+        areas?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node218
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.4
+      name: (must)
+      description: + Unauthorized viewing of new developments needing high or very
+        high protection is not possible.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node219
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.4
+      name: (should)
+      description: '+ Sight protection through relevant glass surfaces is ensured.
+
+        + View into defined security areas through open doors/gates/windows is prevented. '
+      implementation_groups:
+      - should
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node220
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.4
+      name: (for vehicles classified as requiring protection)
+      description: + The spatial situation is also suitable for protecting vehicles
+        classified as requiring protection against unauthorized view.
+      implementation_groups:
+      - vehicle
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.5
+      name: To what extent is the protection against unauthorized entry regulated
+        in the form of access control?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node222
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.5
+      name: (must)
+      description: "+ At least one of the following three requirements must be implemented:\n\
+        \  - mechanical locks with documented key assignment,\n  - electronic access\
+        \ systems with documented authorization assignment,\n  - personal access control\
+        \ including documentation."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node223
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.5
+      name: (for vehicles classified as requiring protection)
+      description: + The spatial situation is also suitable for protecting vehicles
+        classified as requiring protection against unauthorized access.
+      implementation_groups:
+      - vehicle
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.6
+      name: To what extent are the premises to be secured monitored for intrusion?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node225
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.6
+      name: (must)
+      description: "+ Intrusion monitoring of the premises to be secured is ensured:\n\
+        \  - An intrusion detection system exists which complies with DIN\_EN\_50131\
+        \ or conforms to VDS or similar and functions with alarm tracking to a certified\
+        \ security service or control unit (e.g., according to DIN\_77200, VdS\_3138),\n\
+        \  - or 24/7 guarding by a certified security service.\n+ Alarm plans are\
+        \ available.\n+ Timely alarm processing is ensured."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.7
+      name: To what extent is a documented visitor management in place?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node227
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.7
+      name: (must)
+      description: '+ Registration obligation for all visitors.
+
+        + Documented non-disclosure obligation prior to access.
+
+        + Publication of security and visitor regulations.
+
+        + Country-specific legal provisions regarding data protection are to be observed.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1
+      ref_id: 8.1.8
+      name: To what extent is on-site client segregation existent?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node229
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.8
+      name: (must)
+      description: "+ Spatial separation by staff-related or technical measures is\
+        \ in effect according to the following aspects:\n  - customers, and/or\n \
+        \ - projects,\n  - where segregation is not in effect, explicit approval by\
+        \ the customer is required."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node230
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.8
+      name: (for vehicles classified as requiring protection)
+      description: + The spatial situation is also suitable for implementing client
+        segregation for vehicles classified as requiring protection.
+      implementation_groups:
+      - vehicle
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
+      ref_id: '8.2'
+      name: Organizational Requirements
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.1
+      name: To what extent are non-disclosure agreements/obligations existent according
+        to the valid contractual law?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node233
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.1
+      name: (must)
+      description: "+ A non-disclosure agreement: \n  - between contractor and customer\
+        \ (company level),\n  - with all employees and project members (personal obligation).\n\
+        + Country-specific legal provisions regarding data protection are to be observed."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.2
+      name: To what extent are requirements for commissioning subcontractors known
+        and fulfilled?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node235
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.2
+      name: (must)
+      description: "+ Approval by the original customer.\n+ contractually valid non-disclosure\
+        \ agreement exists:\n  - between contractor and subcontractor (company level),\n\
+        \  - with all employees and project members of the subcontractor (personal\
+        \ obligation).\n+ Ensuring compliance with the security requirements of the\
+        \ actual customer (proof is obtained).\n+ Proof of the subcontractor\u2019\
+        s compliance with minimum requirements for prototype protection (e.g., certificate,\
+        \ attestation) is provided."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.3
+      name: To what extent do employees and project members evidently participate
+        in training and awareness measures regarding the handling of prototypes?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node237
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.3
+      name: (must)
+      description: "+ Ensuring execution of trainings\_/ awareness programs by the\
+        \ management.\n+ Training of employees and project members when joining the\
+        \ project regarding the handling of prototypes.\n+ Regular (at least annual)\
+        \ training of employees regarding the handling of prototypes.\n+ Ensuring\
+        \ knowledge among employees and project members regarding the respective protection\
+        \ needs and the resulting measures within the company.\n+ Mandatory participation\
+        \ of each employee and project member in the trainings and awareness measures.\n\
+        + The completed measures are to be documented. \n+ The training concept for\
+        \ prototype protection is an integral part of the general training concept\
+        \ (see also control question 2.1.3 Information Security)."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.4
+      name: To what extent are security classifications of the project and the resulting
+        security measures known?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node239
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.4
+      name: (must)
+      description: '+ Ensuring that the security classification and requirements in
+        relation to the project progress are made known to each project member.
+
+        + Consideration of step-by-step plans, measures for secrecy and camouflage,
+        development policies.
+
+        + The requirements are considered as a requirement regarding the information
+        security of the project (see Controls 1.2.3 and 7.1.1 Information Security).'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.5
+      name: To what extent is a process defined for granting access to security areas?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node241
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.5
+      name: (must)
+      description: '+ Responsibilities for access authorization are clearly specified
+        and documented.
+
+        + A process for new assignments, changes and revocations of access rights
+        is in place.
+
+        + Code of conduct in case of the loss/theft of access control means.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.6
+      name: To what extent are regulations for image recording and handling of created
+        image material existent?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node243
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.6
+      name: (must)
+      description: '+ Approval procedures for image recording.
+
+        + Specification for classification/categorization of image material.
+
+        + Secure storage of image material.
+
+        + Secure deletion/disposal of image material no longer required.
+
+        + Secured transmission/shipping of image material to authorized recipients
+        only.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
+      ref_id: 8.2.7
+      name: To what extent is a process for carrying along and using mobile video
+        and photography devices in(to) defined security areas established?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node245
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.7
+      name: (must)
+      description: '+ Specification for carrying along (e.g., sealed/unsealed, etc.).
+
+        + Specification for use (e.g., phone calls, photography, etc.).'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
+      ref_id: '8.3'
+      name: Handling of vehicles, components, and parts
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3
+      ref_id: 8.3.1
+      name: To what extent are transports of vehicles, components or parts classified
+        as requiring protection arranged according to the customer requirements?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node248
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3.1
+      name: (must)
+      description: "+ A process for obtaining customer-specific requirements for the\
+        \ transport of vehicles, components and parts classified as requiring protection\
+        \ is described and implemented. \n+ The security requirements defined by the\
+        \ customer are known and observed.\n+ The logistics/transport companies explicitly\
+        \ approved by the customer are commissioned.\n+ A process for reporting any\
+        \ security-relevant events to the customer is described and implemented."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3
+      ref_id: 8.3.2
+      name: To what extent is it ensured that vehicles, components, and parts classified
+        as requiring protection are parked/stored in accordance with customer requirements?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node250
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3.2
+      name: (must)
+      description: + The customer-specific requirements for parking/storage are verifiably
+        known and observed.
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
+      ref_id: '8.4'
+      name: Requirements for trial vehicles
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4
+      ref_id: 8.4.1
+      name: To what extent are the predefined camouflage regulations implemented by
+        the project members?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node253
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.1
+      name: (must)
+      description: '+ The requirements for using the respective camouflage are known
+        to the project members.
+
+        + Any changes to the camouflage are made upon documented agreement with the
+        customer.
+
+        + A process for the immediate reporting of any damages to the camouflage is
+        described and implemented.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4
+      ref_id: 8.4.2
+      name: To what extent are measures for protecting approved test and trial grounds
+        observed/implemented?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node255
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.2
+      name: (must)
+      description: "+ A process for obtaining customer-specific requirements for the\
+        \ use of trial vehicles classified as requiring protection on test and trial\
+        \ grounds is described and implemented. \n+ The following aspects must be\
+        \ known to users of test and trial grounds: \n  - a current list of customer-approved\
+        \ test and trial grounds\n  - code of conduct for ensuring undisturbed trial\
+        \ operation \n  - customer-defined protective measures These are implemented."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4
+      ref_id: 8.4.3
+      name: To what extent are protective measures for approved test and trial drives
+        in public observed/implemented?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node257
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.3
+      name: (must)
+      description: '+ A process for obtaining customer-specific requirements for the
+        operation of test vehicles classified as requiring protection on public roads
+        is described and implemented.
+
+        + Protective measures defined by the customer are known and observed.
+
+        + The code of conduct in case of special incidents (e.g., breakdown, accident,
+        theft...) is known and observed.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
+      ref_id: '8.5'
+      name: Requirements for events and shootings
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5
+      ref_id: 8.5.1
+      name: To what extent are security requirements for presentations and events
+        involving vehicles, components or parts classified as requiring protection
+        known?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node260
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5.1
+      name: (must)
+      description: '+ A process for obtaining customer-specific requirements for presentations
+        and events involving vehicles, components or parts classified as requiring
+        protection is described and implemented.
+
+        + Established and customer-approved security concepts (organizationally, technically,
+
+        staff-related).
+
+        + Code of conduct in case of special incidents.'
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5
+      ref_id: 8.5.2
+      name: To what extent are the protective measures for film and photo shootings
+        involving vehicles, components or parts classified as requiring protection
+        known?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node262
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5.2
+      name: (must)
+      description: '+ A process for obtaining customer-specific requirements for film
+        and photo shootings involving vehicles, components or parts classified as
+        requiring protection is described and implemented.
+
+        + Proof of approval for the presumably used premises.
+
+        + Established and customer-approved security concepts (organizationally, technically,
+
+        staff-related).
+
+        + Code of conduct in case of special incidents. '
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Data Protection
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.1'
+      name: Data Protection Policies
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.1
+      ref_id: 9.1.1
+      name: To what extent do data protection policies exist?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node266
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.1.1
+      name: (must)
+      description: '+ A policy is created, regularly updated, and approved by the
+        organization''s management.
+
+        '
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.2'
+      name: Organization of Data Protection
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.2
+      ref_id: 9.2.1
+      name: To what extent are the responsibilities for data protection organized?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node269
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.2.1
+      name: (must)
+      description: "+ A data protection officer is appointed, if required by Art.\
+        \ 37 GDPR\n - Determination of whether the appointment of a data protection\
+        \ officer is voluntary or mandatory\n - otherwise determination of a data\
+        \ protection function or comparable\n+ Publication of contact details (e.g.\
+        \ on the Internet)\n+ Integration into the organization's structure\n+ Exercise\
+        \ of the control obligations as defined in Art. 39 (1) (b) GDPR and corresponding\
+        \ documentation\n+ Documentation of the data protection status and report\
+        \ to organization's top management\n+ Equipped with sufficient capacities\
+        \ and resources   \n - Determination of whether the data protection function\
+        \ is full-time or part-time\n - adequate professional qualification\n - regular\
+        \ professional training\n - access to specialist literature\n - support of\
+        \ the data protection officer by data protection coordinators in the companies\
+        \ organizational units, depending on the company size (e.g. marketing, sales,\
+        \ personnel, logistics, development, etc.)"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.3'
+      name: Processing directory
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.3
+      ref_id: 9.3.1
+      name: 'To what extent are processing activities identified and recorded? '
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node272
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.3.1
+      name: (must)
+      description: "+ If required by law, a register of processing activities as defined\
+        \ in Article 30 (1) and/or (2) GDPR (in the latter case only information relating\
+        \ to the order, expressly not other information/details on internal processing)\
+        \ exists and is up to date.\n  - Technical and organizational measures required\
+        \ for processing as required by the information security questionnaire are\
+        \ adequatly implemented for the processing activities\n  - There is a process\
+        \ description / sequence description with defined responsibilities."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.4'
+      name: Data protection impact assessment
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.4
+      ref_id: 9.4.1
+      name: To what extent is adequate handling of high-risk processing activities
+        ensured (data protection impact assessment)?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node275
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.4.1
+      name: (must)
+      description: "+ Processing activities that require a data protection impact\
+        \ assessment are known.\n+ Data protection impact assessments are carried\
+        \ out.\n  - Responsibilities/tasks and support possibilities in the context\
+        \ of data protection impact assessments are defined and known."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.5'
+      name: Data transfers
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5
+      ref_id: 9.5.1
+      name: To what extent is the transfer of data managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node278
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.1
+      name: (must)
+      description: "+ Appropriate processes and workflows for the transmission of\
+        \ data are implemented (e.g. valid contracts within the meaning of Art. 28\
+        \ GDPR, suitable transfer instruments like standard contractual clauses, transfer\
+        \ impact assessments, adequacy decisions)\n  - Ensuring the consent or the\
+        \ right of objection of the person responsible for subcontracting"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5
+      ref_id: 9.5.2
+      name: To what extent are contractual obligations passed through to and enforced
+        at subcontractors and cooperation partners?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node280
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.2
+      name: (must)
+      description: "+ Applicable contractual obligations to clients are passed on\
+        \ to subcontractors and cooperation partners (sub processors).\n+ Compliance\
+        \ with contractual agreements is reviewed.\n  - Contact details of the contact\
+        \ persons of the subcontractor are available and up to date."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5
+      ref_id: 9.5.3
+      name: To what extent are data transfers to third countries managed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node282
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.3
+      name: (must)
+      description: "+ Transfers to third countries are known and systematically recorded.\n\
+        \  - e.g. through corresponding documentation in the processing directory\n\
+        + Sufficient guarantees (Chapter V GDPR, consideration of decisions of the\
+        \ ECJ on international data transfer, Transfer Impact Assessment in case of\
+        \ relevance, especially in the role of data exporter) are available for data\
+        \ transfers.\n+ In the case of data transfers to third countries, it is determined\
+        \ whether the consent of the person responsible is to be obtained for each\
+        \ transfer to third countries."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.6'
+      name: Handling requests and incidents
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6
+      ref_id: 9.6.1
+      name: To what extent are data subject requests processed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node285
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6.1
+      name: (must)
+      description: "+ Requests from data subjects are processed in a timely manner.\n\
+        \  - Procedures are in place to assist the controller in responding to data\
+        \ subject requests.\n  - Employees are trained to the effect that they must\
+        \ immediately contact the respective person responsible in the event of an\
+        \ incoming request from a data subject and coordinate the further procedure\
+        \ with this person."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6
+      ref_id: 9.6.2
+      name: To what extent are data protection incidents processed?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node287
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6.2
+      name: (must)
+      description: "+ Data protection incidents (e.g. unauthorized access to personal\
+        \ data) are processed in a timely manner.\n+ The requirements from 1.6 of\
+        \ the information security questionnaire also take into account data protection\
+        \ incidents or, alternatively, there is an emergency plan for dealing with\
+        \ data protection incidents.\n+ In addition, procedures are established and\
+        \ documented to ensure the following aspects:\n  - immediate notification\
+        \ to the respective responsible person, as far as his order is affected\n\
+        \  - Documentation of the incident handling activities\n  - Training of employees\
+        \ on the defined measures/processes\n  - Support of the respective controller\
+        \ in the processing of data protection incidents"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.7'
+      name: Human Resources
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7
+      ref_id: 9.7.1
+      name: To what extent are employees obliged to maintain confidentiality?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node290
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7.1
+      name: (must)
+      description: "+ Employees whose tasks include the processing of personal data\
+        \ are obliged to maintain confidentiality (even beyond the duration of the\
+        \ employment relationship) and to comply with applicable data protection laws.\
+        \  \n  - The obligation is documented"
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7
+      ref_id: 9.7.2
+      name: To what extent are employees trained in data protection?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node292
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7.2
+      name: (must)
+      description: "+ Employees are trained and sensitized.\n  - Scope, frequency,\
+        \ and content of the training is determined according to the protection needs\
+        \ of the data\n  - Employees in critical areas (e.g. IT administrators) are\
+        \ instructed and trained specifically for their work (e.g. specific training\
+        \ courses or instructions, short videos, etc.)."
+      implementation_groups:
+      - must
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
+      ref_id: '9.8'
+      name: Instructions
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.8.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.8
+      ref_id: 9.8.1
+      name: To what extent are instructions of processing relationships handled?
+    - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node295
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.8.1
+      name: (must)
+      description: "+ The instructions by the controller regarding the processing\
+        \ of personal data are handled.\n+ Procedures and measures are in place to\
+        \ ensure that:\n - Received instructions are documented\n - Instructions can\
+        \ be implemented (e.g. procedures for correcting, deleting, ...)\n - Data\
+        \ is separated by client and specific order or project"
+      implementation_groups:
+      - must

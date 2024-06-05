@@ -1,0 +1,200 @@
+urn: urn:intuitem:risk:library:nis2-directive
+locale: en
+ref_id: NIS2-directive
+name: NIS 2 directive requirements
+description: Requirements from article 21 of directive 2022/2555 of the european parliament
+  and of the council of 14 December 2022 on measures for a high common level of cybersecurity
+  across the Union.
+copyright: European law
+version: 1
+provider: EU
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+- urn:intuitem:risk:library:mitre-attack-v14
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nis2-directive
+    ref_id: NIS2-directive
+    name: NIS 2 directive requirements
+    description: Requirements from article 21 of directive 2022/2555 of the european
+      parliament and of the council of 14 December 2022 on measures for a high common
+      level of cybersecurity across the Union.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nis2-directive:article-21
+      assessable: false
+      depth: 1
+      name: Article 21
+      description: Cybersecurity risk-management measures
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:article-21
+      ref_id: '21.1'
+      description: Member States shall ensure that essential and important entities
+        take appropriate and proportionate technical, operational and organisational
+        measures to manage the risks posed to the security of network and information
+        systems which those entities use for their operations or for the provision
+        of their services, and to prevent or minimise the impact of incidents on recipients
+        of their services and on other services.
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.1.sp2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.1
+      ref_id: 21.1.sp2
+      description: Taking into account the state-of-the-art and, where applicable,
+        relevant European and international standards, as well as the cost of implementation,
+        the measures referred to in the first subparagraph shall ensure a level of
+        security of network and information systems appropriate to the risks posed.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:article-21
+      ref_id: '21.2'
+      description: 'The measures referred to in paragraph 1 shall be based on an all-hazards
+        approach that aims to protect network and information systems and the physical
+        environment of those systems from incidents, and shall include at least the
+        following:'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.a
+      description: policies on risk analysis and information system security;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.b
+      description: incident handling;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.c
+      description: business continuity, such as backup management and disaster recovery,
+        and crisis management;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.BCP
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.d
+      description: supply chain security, including security-related aspects concerning
+        the relationships between each entity and its direct suppliers or service
+        providers;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.SUPPLIER
+      - urn:intuitem:risk:function:doc-pol:DOC.SUPPLIER_REGISTER
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.e
+      description: security in network and information systems acquisition, development
+        and maintenance, including vulnerability handling and disclosure;
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.f
+      description: policies and procedures to assess the effectiveness of cybersecurity
+        risk-management measures;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.g
+      description: basic cyber hygiene practices and cybersecurity training;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.EDUC
+      - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.h
+      description: policies and procedures regarding the use of cryptography and,
+        where appropriate, encryption;
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.CRYPTO
+      - urn:intuitem:risk:function:mitre-attack:M1041
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.i
+      description: human resources security, access control policies and asset management;
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
+      ref_id: 21.2.j
+      description: the use of multi-factor authentication or continuous authentication
+        solutions, secured voice, video and text communications and secured emergency
+        communication systems within the entity, where appropriate.
+      reference_controls:
+      - urn:intuitem:risk:function:mitre-attack:M1032
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:article-21
+      ref_id: '21.3'
+      description: Member States shall ensure that, when considering which measures
+        referred to in paragraph 2, point (d), of this Article are appropriate, entities
+        take into account the vulnerabilities specific to each direct supplier and
+        service provider and the overall quality of products and cybersecurity practices
+        of their suppliers and service providers, including their secure development
+        procedures. Member States shall also ensure that, when considering which measures
+        referred to in that point are appropriate, entities are required to take into
+        account the results of the coordinated security risk assessments of critical
+        supply chains carried out in accordance with Article 22(1).
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:article-21
+      ref_id: '21.4'
+      description: Member States shall ensure that an entity that finds that it does
+        not comply with the measures provided for in paragraph 2 takes, without undue
+        delay, all necessary, appropriate and proportionate corrective measures.
+    - urn: urn:intuitem:risk:req_node:nis2-directive:21.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis2-directive:article-21
+      ref_id: '21.5'
+      description: 'By 17 October 2024, the Commission shall adopt implementing acts
+        laying down the technical and the methodological requirements of the measures
+        referred to in paragraph 2 with regard to DNS service providers, TLD name
+        registries, cloud computing service providers, data centre service providers,
+        content delivery network providers, managed service providers, managed security
+        service providers, providers of online market places, of online search engines
+        and of social networking services platforms, and trust service providers.
+
+
+        The Commission may adopt implementing acts laying down the technical and the
+        methodological requirements, as well as sectoral requirements, as necessary,
+        of the measures referred to in paragraph 2 with regard to essential and important
+        entities other than those referred to in the first subparagraph of this paragraph.
+
+
+        When preparing the implementing acts referred to in the first and second subparagraphs
+        of this paragraph, the Commission shall, to the extent possible, follow European
+        and international standards, as well as relevant technical specifications.
+        The Commission shall exchange advice and cooperate with the Cooperation Group
+        and ENISA on the draft implementing acts in accordance with Article 14(4),
+        point (e).
+
+
+        Those implementing acts shall be adopted in accordance with the examination
+        procedure referred to in Article 39(2).'

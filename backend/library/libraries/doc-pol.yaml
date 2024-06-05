@@ -1,0 +1,511 @@
+urn: urn:intuitem:risk:library:doc-pol
+locale: en
+ref_id: doc-pol
+name: Documents and policies
+description: Typical documents and policies recommended by intuitem
+copyright: "\xA9 intuitem - 2024"
+version: 1
+provider: intuitem
+packager: intuitem
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:function:doc-pol:doc.overview
+    ref_id: DOC.OVERVIEW
+    name: Organization overview document
+    category: process
+    description: 'Objectives of the organization
+
+      Organigram
+
+      ISMS objectives
+
+      CISO responsibilities
+
+      ISMS Management review'
+    annotation: '5.1.a
+
+      5.1.c'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.context
+    ref_id: DOC.CONTEXT
+    name: Context of organization document
+    category: process
+    description: 'Stakeholders
+
+      Authorities
+
+      Special interest groups'
+    annotation: '4.1, 4.2
+
+      5.1.a
+
+      A.5.6
+
+      A.5.5'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.scope
+    ref_id: DOC.SCOPE
+    name: ISMS Scope document
+    category: process
+    description: 'Products and services
+
+      Products and services requiring certification
+
+      Locations
+
+      Organization view
+
+      Business architecture view
+
+      Data architecture view
+
+      Application architecture view
+
+      Technology architecture view
+
+      Network view
+
+      Scope statement'
+    annotation: '4.3'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.legal
+    ref_id: DOC.LEGAL
+    name: legal register
+    category: process
+    description: "Legal requirements \nStatutory requirements \nRegulatory  requirements\
+      \ \nContractual requirements \nIntellectual property rights\nEmployment contracts\n\
+      NDAs"
+    annotation: 'A.5.31
+
+      A.5.32
+
+      A.6.5
+
+      A.6.6'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.soa
+    ref_id: DOC.SOA
+    name: Statement of Applicabilty document
+    category: process
+  - urn: urn:intuitem:risk:function:doc-pol:doc.controls
+    ref_id: DOC.CONTROLS
+    name: Controls accountability matrix
+    category: process
+    annotation: 5.1.c
+  - urn: urn:intuitem:risk:function:doc-pol:doc.audit_plan
+    ref_id: DOC.AUDIT_PLAN
+    name: Audit plan document
+    category: process
+    description: 'Context of the organization
+
+      Leadership
+
+      Planning
+
+      Support
+
+      Operation
+
+      Performance evaluation
+
+      Improvement
+
+      Organizational controls
+
+      People controls
+
+      Physical controls
+
+      Technological controls'
+    annotation: 5.1.e
+  - urn: urn:intuitem:risk:function:doc-pol:doc.competency
+    ref_id: DOC.COMPETENCY
+    name: Competency matrix
+    category: process
+    annotation: 5.1.f
+  - urn: urn:intuitem:risk:function:doc-pol:doc.raci
+    ref_id: DOC.RACI
+    name: Responsibility matrix
+    category: process
+    description: RACI for ISMS
+  - urn: urn:intuitem:risk:function:doc-pol:doc.com
+    ref_id: DOC.COM
+    name: Communication plan document
+    category: process
+    annotation: '7.4'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.risk_register
+    ref_id: DOC.RISK_REGISTER
+    name: Risk register
+    category: process
+    description: 'Risk owner
+
+      Impact
+
+      Likelihood
+
+      Risk level
+
+      Evaluation
+
+      Priority
+
+      Treatment option
+
+      Mitigations - recommended controls'
+    annotation: "6.1\n6.1.2.c.2 \n6.1.2.d.1 \n6.1.2.d.2\n6.1.2.d.3 \n6.1.2.e.1 \n\
+      6.1.2.e.2 \n6.1.3.a \n6.1.3.b "
+  - urn: urn:intuitem:risk:function:doc-pol:doc.so_register
+    ref_id: DOC.SO_REGISTER
+    name: Security objectives register
+    category: process
+    annotation: '6.2'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+    ref_id: DOC.MGMT_REVIEW
+    name: Management review plan document
+    category: process
+    description: 'Review of risks
+
+      Review of security objectives
+
+      Review of security incidents
+
+      Review of vulnerability management
+
+      Review of non-conformities'
+    annotation: "9.3\n6.1.1.e.1 \n6.2.e"
+  - urn: urn:intuitem:risk:function:doc-pol:doc.educ_register
+    ref_id: DOC.EDUC_REGISTER
+    name: Training and awareness register
+    category: process
+    annotation: '7.2'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.doc_register
+    ref_id: DOC.DOC_REGISTER
+    name: Document register
+    category: process
+    description: 'Rules for edition and maintenance
+
+      Version control
+
+      Register
+
+      Continual improvement'
+    annotation: '7.5'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.proc_register
+    ref_id: DOC.PROC_REGISTER
+    name: Operational procedures register
+    category: process
+    description: 'Risk management procdure
+
+      Incident management procedure
+
+      Problem management procedure
+
+      Vulnerability management procedure
+
+      HR procedures
+
+      Change management procedure
+
+      Procedure for externalization
+
+      Physical security procedures
+
+      Privileged access procedure'
+    annotation: '8.1
+
+      A.6.1
+
+      8.1
+
+      8.1.
+
+      A.7.1
+
+      A.8.2'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.nc_log
+    ref_id: DOC.NC_LOG
+    name: Log of non-conformities
+    category: process
+    description: "List of non-conformities (incident, problems, \u2026)\nCorrective\
+      \ action taken"
+    annotation: '10.1'
+  - urn: urn:intuitem:risk:function:doc-pol:doc.internal_rules
+    ref_id: DOC.INTERNAL_RULES
+    name: Rules of procedure document
+    category: process
+    annotation: A.5.4, A.6.2
+  - urn: urn:intuitem:risk:function:doc-pol:doc.asset_register
+    ref_id: DOC.ASSET_REGISTER
+    name: Registry of assets
+    category: process
+    annotation: A.5.9
+  - urn: urn:intuitem:risk:function:doc-pol:doc.supplier_register
+    ref_id: DOC.SUPPLIER_REGISTER
+    name: Registry of suppliers
+    category: process
+    description: Risk management
+  - urn: urn:intuitem:risk:function:doc-pol:pol.main
+    ref_id: POL.MAIN
+    name: Main policy
+    category: policy
+    description: 'information security objectives
+
+      commitment
+
+      Management review
+
+      Applicable policies
+
+      Management of non conformities
+
+      Continual improvement'
+    annotation: '5.2.b
+
+      5.2.c
+
+      9.3.1
+
+      5.1.g'
+  - urn: urn:intuitem:risk:function:doc-pol:pol.educ
+    ref_id: POL.EDUC
+    name: Information security awareness and traning policy
+    category: policy
+    description: 'implications of not respecting
+
+      Security event reporting
+
+      Continual improvement'
+    annotation: '7.3.c
+
+      A.6.8
+
+      5.1.g'
+  - urn: urn:intuitem:risk:function:doc-pol:pol.work
+    ref_id: POL.WORK
+    name: Workstations and teleworking policy
+    category: policy
+    description: 'Workstations
+
+      Mobile devices
+
+      Teleworkding
+
+      Password handling
+
+      Returning of assets
+
+      Continual improvement'
+    annotation: 'A.6.2.1
+
+      A.6.2.2
+
+      A.5.11
+
+      5.1.g'
+  - urn: urn:intuitem:risk:function:doc-pol:pol.crypto
+    ref_id: POL.CRYPTO
+    name: Cryptographic policy
+    category: policy
+    description: 'Key management
+
+      Encryption
+
+      Continual improvement'
+    annotation: 5.1.g
+  - urn: urn:intuitem:risk:function:doc-pol:pol.classif
+    ref_id: POL.CLASSIF
+    name: Information classification and handling policy
+    category: policy
+    description: 'classification
+
+      protection and handling of information
+
+      Poritection and handling of PII
+
+      clear desk
+
+      clear screen
+
+      Protection of records
+
+      Retention rules
+
+      Use of test information
+
+      Continual improvement'
+    annotation: 'A.5.12, A.5.13
+
+      A.5.34
+
+      A.5.33
+
+      A.8.33
+
+      5.1.g'
+  - urn: urn:intuitem:risk:function:doc-pol:pol.audit
+    ref_id: POL.AUDIT
+    name: Internal and external audit policy
+    category: policy
+    description: Protection of audit information
+    annotation: A.8.34
+  - urn: urn:intuitem:risk:function:doc-pol:pol.bcp
+    ref_id: POL.BCP
+    name: Business continuity policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.seg_duty
+    ref_id: POL.SEG_DUTY
+    name: Segregation of duties policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.access
+    ref_id: POL.ACCESS
+    name: Access control policy
+    category: policy
+    description: 'Identification
+
+      authentication
+
+      password management
+
+      RBAC
+
+      Review of access rights
+
+      Provisioning
+
+      Leavers
+
+      Remote access
+
+      Privileged access management
+
+      Third party access
+
+      Monitoring and reporting
+
+      Continual improvement'
+    annotation: 'A.5.15
+
+      5.1.g'
+  - urn: urn:intuitem:risk:function:doc-pol:pol.malware
+    ref_id: POL.MALWARE
+    name: Malware protection policy
+    category: policy
+    description: 'antivirus
+
+      EDR'
+  - urn: urn:intuitem:risk:function:doc-pol:pol.risk
+    ref_id: POL.RISK
+    name: Risk management policy
+    category: policy
+    description: 'Risk management definition
+
+      Risk appetite
+
+      Risk acceptance criteria
+
+      Criteria for risk assessment
+
+      Risk identification
+
+      Risk assessment
+
+      CIAP approach
+
+      Risk reporting
+
+      Risk review
+
+      Risk treatment (mitigation acceptance, transfer)
+
+      Risk evaluation
+
+      Use of ISO27002 controls
+
+      Management of access rights
+
+      Continual improvement'
+    annotation: "6.1.2.a.1 \n6.1.2.a.2 \n6.1.2.b \n6.1.2.c.1 \n6.1.3.c \nA.5.18\n\
+      5.1.g"
+  - urn: urn:intuitem:risk:function:doc-pol:pol.asset
+    ref_id: POL.ASSET
+    name: Asset management policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.backup
+    ref_id: POL.BACKUP
+    name: Backup and restore policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.supplier
+    ref_id: POL.SUPPLIER
+    name: Third party supplier security policy
+    category: policy
+    annotation: A.5.19, A.5.20, A.5.21, A.5.22, A.5.23
+  - urn: urn:intuitem:risk:function:doc-pol:pol.monitor
+    ref_id: POL.MONITOR
+    name: Logging and monitoring policy
+    category: policy
+    description: Logging
+    annotation: A.8.15
+  - urn: urn:intuitem:risk:function:doc-pol:pol.transfer
+    ref_id: POL.TRANSFER
+    name: Information transfer policy
+    category: policy
+    annotation: A.5.14
+  - urn: urn:intuitem:risk:function:doc-pol:pol.secdev
+    ref_id: POL.SECDEV
+    name: Secure development policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.physical
+    ref_id: POL.PHYSICAL
+    name: Physical security policy
+    category: policy
+    description: 'Physical security perimeter
+
+      Secure areas
+
+      Employee access control
+
+      Visitors access control
+
+      Delivery management
+
+      Cabling security
+
+      Continual improvement'
+    annotation: 5.1.g
+  - urn: urn:intuitem:risk:function:doc-pol:pol.network
+    ref_id: POL.NETWORK
+    name: Network security management policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.accept
+    ref_id: POL.ACCEPT
+    name: Acceptable use policy
+    category: policy
+    annotation: A.5.10
+  - urn: urn:intuitem:risk:function:doc-pol:pol.project
+    ref_id: POL.PROJECT
+    name: IS project integration policy
+    category: policy
+  - urn: urn:intuitem:risk:function:doc-pol:pol.threat_intel
+    ref_id: POL.THREAT_INTEL
+    name: Threat intelligence policy
+    category: policy
+    description: 'Known Exploited Vulnerabilities
+
+      Threat actors activity
+
+      Continual improvement'
+    annotation: 5.1.g
+  - urn: urn:intuitem:risk:function:doc-pol:pol.incident
+    ref_id: POL.INCIDENT
+    name: IS incident management policy
+    category: policy
+    description: 'Security incident management
+
+      Vulnerability management'
+    annotation: A.5.24, A.5.25, A.5.26, A.5.27
+  - urn: urn:intuitem:risk:function:doc-pol:pol.maintenance
+    ref_id: POL.MAINTENANCE
+    name: Maintenance policy
+    category: policy
+    description: 'Obsolescence management
+
+      Maintenance contracts
+
+      Change management'
+    annotation: A.7.13

@@ -1,0 +1,1157 @@
+urn: urn:intuitem:risk:library:cmmc-2.0
+locale: en
+ref_id: CMMC-2.0
+name: CMMC version 2.0
+description: Cybersecurity Maturity Model Certification (CMMC)
+copyright: "Copyright 2020, 2021 Carnegie Mellon University and The Johns Hopkins\
+  \ University Applied\nPhysics Laboratory LLC.\nCopyright 2021 Futures, Inc.\nThis\
+  \ material is based upon work funded and supported by the Department of Defense\
+  \ under\nContract No. FA8702-15-D-0002 with Carnegie Mellon University for the operation\
+  \ of the\nSoftware Engineering Institute, a federally funded research and development\
+  \ center, and\nunder Contract No. HQ0034-13-D-0003 and Contract No. N00024-13-D-6400\
+  \ with the Johns\nHopkins University Applied Physics Laboratory LLC, a University\
+  \ Affiliated Research Center.\nThe view, opinions, and/or findings contained in\
+  \ this material are those of the author(s) and\nshould not be construed as an official\
+  \ Government position, policy, or decision, unless\ndesignated by other documentation.\n\
+  NO WARRANTY. THIS MATERIAL IS FURNISHED ON AN \u201CAS-IS\u201D BASIS. CARNEGIE\
+  \ MELLON\nUNIVERSITY AND THE JOHNS HOPKINS UNIVERSITY APPLIED PHYSICS LABORATORY\
+  \ LLC\nMAKE NO WARRANTIES OF ANY KIND, EITHER EXPRESSED OR IMPLIED, AS TO ANY\n\
+  MATTER INCLUDING, BUT NOT LIMITED TO, WARRANTY OF FITNESS FOR PURPOSE OR\nMERCHANTABILITY,\
+  \ EXCLUSIVITY, OR RESULTS OBTAINED FROM USE OF THE MATERIAL\nNOR ANY WARRANTY OF\
+  \ ANY KIND WITH RESPECT TO FREEDOM FROM PATENT,\nTRADEMARK, OR COPYRIGHT INFRINGEMENT.\n\
+  [DISTRIBUTION STATEMENT A] Approved for public release.\nThis work is licensed to\
+  \ the public under the Creative Commons Attribution 4.0 International\nLicense."
+version: 1
+provider: DoD
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cmmc-2.0
+    ref_id: CMMC-2.0
+    name: CMMC version 2.0
+    description: Cybersecurity Maturity Model Certification (CMMC)
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      assessable: false
+      depth: 1
+      ref_id: AC
+      name: ACCESS CONTROL
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L1-3.1.1
+      name: Authorized Access Control
+      description: "Limit information system access to authorized users, processes\
+        \ acting on behalf of authorized users, or devices (including other information\
+        \ systems).\n\u2022 FAR Clause 52.204-21 b.1.i\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.1.1"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L1-3.1.2
+      name: Transaction & Function Control
+      description: "Limit information system access to the types of transactions and\
+        \ functions that authorized users are permitted to execute. \n\u2022 FAR Clause\
+        \ 52.204-21 b.1.ii\n\u2022 NIST SP 800-171 Rev 2 3.1.2"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.3
+      name: Control CUI Flow
+      description: "Control the flow of CUI in accordance with approved authorizations.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.1.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.4
+      name: Separation of Duties
+      description: "Separate the duties of individuals to reduce the risk of malevolent\
+        \ activity without collusion.\n\u2022 NIST SP 800-171 Rev 2 3.1.4\n"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.5
+      name: Least Privilege
+      description: "Employ the principle of least privilege, including for specific\
+        \ security functions and privileged accounts.\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.1.5"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.6
+      name: Non-Privileged Account Use
+      description: "Use non-privileged accounts or roles when accessing nonsecurity\
+        \ functions.\n\u2022 NIST SP 800-171 Rev 2 3.1.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.7
+      name: Privileged Functions
+      description: "Prevent non-privileged users from executing privileged functions\
+        \ and capture the execution of such functions in audit logs.\n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.1.7"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.8
+      name: Unsuccessful Logon Attempts
+      description: "Limit unsuccessful logon attempts. \n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.1.8 "
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.9
+      name: Privacy & Security Notices
+      description: "Provide privacy and security notices consistent with applicable\
+        \ CUI rules.\n\u2022 NIST SP 800-171 Rev 2 3.1.9"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.10
+      name: Session Lock
+      description: "Use session lock with pattern-hiding displays to prevent access\
+        \ and viewing of data after a period of inactivity. \n\u2022 NIST SP 800-171\
+        \ Rev 2 3.1.10"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.11
+      name: Session Termination
+      description: "Terminate (automatically) a user session after a defined condition.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.1.11"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.12
+      name: Control Remote Access
+      description: "Monitor and control remote access sessions.\n\u2022 NIST SP 800-171\
+        \ Rev 2 3.1.12"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.13
+      name: Remote Access Confidentiality
+      description: "Employ cryptographic mechanisms to protect the confidentiality\
+        \ of remote access sessions.\n\u2022 NIST SP 800-171 Rev 2 3.1.13"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.14
+      name: Remote Access Routing
+      description: "Route remote access via managed access control points. \n\u2022\
+        \ NIST SP 800-171 Rev 2 3.1.14"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.15
+      name: Privileged Remote Access
+      description: "Authorize remote execution of privileged commands and remote access\
+        \ to security-relevant information. \n\u2022 NIST SP 800-171 Rev 2 3.1.15"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.16
+      name: Wireless Access Authorization
+      description: "Authorize wireless access prior to allowing such connections.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.1.16"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.17
+      name: Wireless Access Protection
+      description: "Protect wireless access using authentication and encryption. \n\
+        \u2022 NIST SP 800-171 Rev 2 3.1.17"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.18
+      name: Mobile Device Connection
+      description: "Control connection of mobile devices.\n\u2022 NIST SP 800-171\
+        \ Rev 2 3.1.18"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.19
+      name: Encrypt CUI on Mobile
+      description: "Encrypt CUI on mobile devices and mobile computing platforms.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.1.19"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L1-3.1.20
+      name: External Connections
+      description: "Verify and control/limit connections to and use of external information\
+        \ systems. \n\u2022 FAR Clause 52.204-21 b.1.iii\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.1.20"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L2-3.1.21
+      name: Portable Storage Use
+      description: "Limit use of portable storage devices on external systems.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.1.21"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ac
+      ref_id: AC.L1-3.1.22
+      name: Control Public Information
+      description: "Control information posted or processed on publicly accessible\
+        \ information systems.\n\u2022 FAR Clause 52.204-21 b.1.iv\n\u2022 NIST SP\
+        \ 800-171 Rev 2 3.1.22"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:at
+      assessable: false
+      depth: 1
+      ref_id: AT
+      name: AWARENESS AND TRAINING
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:at
+      ref_id: AT.L2-3.2.1
+      name: Role-Based Risk Awareness
+      description: "Ensure that managers, systems administrators, and users of organizational\
+        \ systems are made aware of the security risks associated with their activities\
+        \ and of the applicable policies, standards, and procedures related to the\
+        \ security of those systems.\n\u2022 NIST SP 800-171 Rev 2 3.2.1\n"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:at
+      ref_id: AT.L2-3.2.2
+      name: Role-Based Training
+      description: "Ensure that personnel are trained to carry out their assigned\
+        \ information security-related duties and responsibilities. \n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.2.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:at.l2-3.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:at
+      ref_id: AT.L2-3.2.3
+      name: Insider Threat Awareness
+      description: "Provide security awareness training on recognizing and reporting\
+        \ potential indicators of insider threat.\n\u2022 NIST SP 800-171 Rev 2 3.2.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      assessable: false
+      depth: 1
+      ref_id: AU
+      name: AUDIT AND ACCOUNTABILITY
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.1
+      name: System Auditing
+      description: "Create and retain system audit logs and records to the extent\
+        \ needed to enable the monitoring, analysis, investigation, and reporting\
+        \ of unlawful or unauthorized system activity. \n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.3.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.2
+      name: User Accountability
+      description: "Ensure that the actions of individual system users can be uniquely\
+        \ traced to those users, so they can be held accountable for their actions.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.3.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.3
+      name: Event Review
+      description: "Review and update logged events.\n\u2022 NIST SP 800-171 Rev 2\
+        \ 3.3.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.4
+      name: Audit Failure Alerting
+      description: "Alert in the event of an audit logging process failure. \n\u2022\
+        \ NIST SP 800-171 Rev 2 3.3.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.5
+      name: Audit Correlation
+      description: "Correlate audit record review, analysis, and reporting processes\
+        \ for investigation and response to indications of unlawful, unauthorized,\
+        \ suspicious, or unusual activity.\n\u2022 NIST SP 800-171 Rev 2 3.3.5"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.6
+      name: Reduction & Reporting
+      description: "Provide audit record reduction and report generation to support\
+        \ on-demand analysis and reporting.\n\u2022 NIST SP 800-171 Rev 2 3.3.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.7
+      name: Authoritative Time Source
+      description: "Provide a system capability that compares and synchronizes internal\
+        \ system clocks with an authoritative source to generate time stamps for audit\
+        \ records.\n\u2022 NIST SP 800-171 Rev 2 3.3.7"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.8
+      name: Audit Protection
+      description: "Protect audit information\_and audit logging tools from unauthorized\
+        \ access, modification, and deletion.\n\u2022 NIST SP 800-171 Rev 2 3.3.8"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:au.l2-3.3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:au
+      ref_id: AU.L2-3.3.9
+      name: Audit Management
+      description: "Limit management of audit logging functionality to a subset of\
+        \ privileged users.\_\n\u2022 NIST SP 800-171 Rev 2 3.3.9"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      assessable: false
+      depth: 1
+      ref_id: CM
+      name: CONFIGURATION MANAGEMENT
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.1
+      name: System Baselining
+      description: "Establish and maintain baseline configurations and inventories\
+        \ of organizational systems (including hardware, software, firmware, and documentation)\
+        \ throughout the respective system development life cycles.\n\u2022 NIST SP\
+        \ 800-171 Rev 2 3.4.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.2
+      name: Security Configuration Enforcement
+      description: "Establish and enforce security configuration settings for information\
+        \ technology products employed in organizational systems.\n\u2022 NIST SP\
+        \ 800-171 Rev 2 3.4.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.3
+      name: System Change Management
+      description: "Track, review, approve or disapprove, and log changes to organizational\
+        \ systems. \n\u2022 NIST SP 800-171 Rev 2 3.4.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.4
+      name: Security Impact Analysis
+      description: "Analyze the security impact of changes prior to implementation.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.4.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.5
+      name: Access Restrictions for Change
+      description: "Define, document, approve, and enforce physical and logical access\
+        \ restrictions associated with changes to organizational systems.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.4.5"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.6
+      name: Least Functionality
+      description: "Employ the principle of least functionality by configuring organizational\
+        \ systems to provide only essential capabilities. \n\u2022 NIST SP 800-171\
+        \ Rev 2 3.4.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.7
+      name: Nonessential Functionality
+      description: "Restrict, disable, or prevent the use of nonessential programs,\
+        \ functions, ports, protocols, and services. \n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.4.7"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.8
+      name: Application Execution Policy
+      description: "Apply deny-by-exception (blacklisting) policy to prevent the use\
+        \ of unauthorized software or deny-all, permit-by-exception (whitelisting)\
+        \ policy to allow the execution of authorized software. \n\u2022 NIST SP 800-171\
+        \ Rev 2 3.4.8"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:cm.l2-3.4.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:cm
+      ref_id: CM.L2-3.4.9
+      name: User-Installed Software
+      description: "Control and monitor user-installed software.\n\u2022 NIST SP 800-171\
+        \ Rev 2 3.4.9"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      assessable: false
+      depth: 1
+      ref_id: IA
+      name: IDENTIFICATION AND AUTHENTICATION
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L1-3.5.1
+      name: Identification
+      description: "Identify information system users, processes acting on behalf\
+        \ of users, or devices.\n\u2022 FAR Clause 52.204-21 b.1.v\n\u2022 NIST SP\
+        \ 800-171 Rev 2 3.5.1\n"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l1-3.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L1-3.5.2
+      name: Authentication
+      description: "Authenticate (or verify) the identities of those users, processes,\
+        \ or devices, as a prerequisite to allowing access to organizational information\
+        \ systems.\n\u2022 FAR Clause 52.204-21 b.1.vi\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.5.2"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.3
+      name: Multifactor Authentication
+      description: "Use multifactor authentication for local and network access to\
+        \ privileged accounts and for network access to non-privileged accounts. \n\
+        \u2022 NIST SP 800-171 Rev 2 3.5.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.4
+      name: Replay-Resistant Authentication
+      description: "Employ replay-resistant authentication mechanisms for network\
+        \ access to privileged and non-privileged accounts.\n\u2022 NIST SP 800-171\
+        \ Rev 2 3.5.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.5
+      name: Identifier Reuse
+      description: "Prevent reuse of identifiers for a defined period. \n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.5.5"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.6
+      name: Identifier Handling
+      description: "Disable identifiers after a defined period of inactivity. \n\u2022\
+        \ NIST SP 800-171 Rev 2 3.5.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.7
+      name: Password Complexity
+      description: "Enforce a minimum password complexity and change of characters\
+        \ when new passwords are created.\n\u2022 NIST SP 800-171 Rev 2 3.5.7"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.8
+      name: Password Reuse
+      description: "Prohibit password reuse for a specified number of generations.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.5.8\n"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.9
+      name: Temporary Passwords
+      description: "Allow temporary password use for system logons with an immediate\
+        \ change to a permanent password. \n\u2022 NIST SP 800-171 Rev 2 3.5.9"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.10
+      name: Cryptographically-Protected Passwords
+      description: "Store and transmit only cryptographically-protected passwords.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.5.10"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ia.l2-3.5.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ia
+      ref_id: IA.L2-3.5.11
+      name: Obscure Feedback
+      description: "Obscure feedback of authentication information. \n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.5.11"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ir
+      assessable: false
+      depth: 1
+      ref_id: IR
+      name: INCIDENT RESPONSE
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir
+      ref_id: IR.L2-3.6.1
+      name: Incident Handling
+      description: "Establish an operational incident-handling capability for organizational\
+        \ systems that includes preparation, detection, analysis, containment, recovery,\
+        \ and user response activities.\n\u2022 NIST SP 800-171 Rev 2 3.6.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir
+      ref_id: IR.L2-3.6.2
+      name: Incident Reporting
+      description: "Track, document, and report incidents to designated officials\
+        \ and/or authorities both internal and external to the organization.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.6.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ir.l2-3.6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ir
+      ref_id: IR.L2-3.6.3
+      name: Incident Response Testing
+      description: "Test the organizational incident response capability.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.6.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      assessable: false
+      depth: 1
+      ref_id: MA
+      name: MAINTENANCE
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      ref_id: MA.L2-3.7.1
+      name: Perform Maintenance
+      description: "Perform maintenance on organizational systems.\n\u2022 NIST SP\
+        \ 800-171 Rev 2 3.7.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      ref_id: MA.L2-3.7.2
+      name: System Maintenance Control
+      description: "Provide controls on the tools, techniques, mechanisms, and personnel\
+        \ used to conduct system maintenance.\n\u2022 NIST SP 800-171 Rev 2 3.7.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      ref_id: MA.L2-3.7.3
+      name: Equipment Sanitization
+      description: "Ensure equipment removed for off-site maintenance is sanitized\
+        \ of any CUI. \n\u2022 NIST SP 800-171 Rev 2 3.7.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      ref_id: MA.L2-3.7.4
+      name: Media Inspection
+      description: "Check media containing diagnostic and test programs for malicious\
+        \ code before the media are used in organizational systems. \n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.7.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      ref_id: MA.L2-3.7.5
+      name: Nonlocal Maintenance
+      description: "Require multifactor authentication to establish nonlocal maintenance\
+        \ sessions via external network connections and terminate such connections\
+        \ when nonlocal maintenance is complete.\n\u2022 NIST SP 800-171 Rev 2 3.7.5"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ma.l2-3.7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ma
+      ref_id: MA.L2-3.7.6
+      name: Maintenance Personnel
+      description: "Supervise the maintenance activities of maintenance personnel\
+        \ without required access authorization. \n\u2022 NIST SP 800-171 Rev 2 3.7.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      assessable: false
+      depth: 1
+      ref_id: MP
+      name: MEDIA PROTECTION
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.1
+      name: Media Protection
+      description: "Protect (i.e., physically control and securely store) system media\
+        \ containing CUI, both paper and digital. \n\u2022 NIST SP 800-171 Rev 2 3.8.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.2
+      name: Media Access
+      description: "Limit access to CUI on system media to authorized users.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.8.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l1-3.8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L1-3.8.3
+      name: Media Disposal
+      description: "Sanitize or destroy information system media containing Federal\
+        \ Contract Information before disposal or release for reuse.\n\u2022 FAR Clause\
+        \ 52.204-21 b.1.vii\n\u2022 NIST SP 800-171 Rev 2 3.8.3"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.4
+      name: Media Markings
+      description: "Mark media with necessary CUI markings and distribution limitations.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.8.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.5
+      name: Media Accountability
+      description: "Control access to media containing CUI and maintain accountability\
+        \ for media during transport outside of controlled areas. \n\u2022 NIST SP\
+        \ 800-171 Rev 2 3.8.5"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.6
+      name: Portable Storage Encryption
+      description: "Implement cryptographic mechanisms to protect the confidentiality\
+        \ of CUI stored on digital media during transport unless otherwise protected\
+        \ by alternative physical safeguards. \n\u2022 NIST SP 800-171 Rev 2 3.8.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.7
+      name: Removable Media
+      description: "Control the use of removable media on system components.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.8.7"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.8
+      name: Shared Media
+      description: "Prohibit the use of portable storage devices when such devices\
+        \ have no identifiable owner.\n\u2022 NIST SP 800-171 Rev 2 3.8.8"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:mp.l2-3.8.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:mp
+      ref_id: MP.L2-3.8.9
+      name: Protect Backups
+      description: "Protect the confidentiality of backup CUI at storage locations.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.8.9"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ps
+      assessable: false
+      depth: 1
+      ref_id: PS
+      name: PERSONNEL SECURITY
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps
+      ref_id: PS.L2-3.9.1
+      name: Screen Individuals
+      description: "Screen individuals prior to authorizing access to organizational\
+        \ systems containing CUI.\n\u2022 NIST SP 800-171 Rev 2 3.9.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ps.l2-3.9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ps
+      ref_id: PS.L2-3.9.2
+      name: Personnel Actions
+      description: "Ensure that organizational systems containing CUI are protected\
+        \ during and after personnel actions such as terminations and transfers.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.9.2\n"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      assessable: false
+      depth: 1
+      ref_id: PE
+      name: PHYSICAL PROTECTION
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      ref_id: PE.L1-3.10.1
+      name: Limit Physical Access
+      description: "Limit physical access to organizational information systems, equipment,\
+        \ and the respective operating environments to authorized individuals. \n\u2022\
+        \ FAR Clause 52.204-21 b.1.viii\n\u2022 NIST SP 800-171 Rev 2 3.10.1"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      ref_id: PE.L2-3.10.2
+      name: Monitor Facility
+      description: "Protect and monitor the physical facility and support infrastructure\
+        \ for organizational systems.\n\u2022 NIST SP 800-171 Rev 2 3.10.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      ref_id: PE.L1-3.10.3
+      name: Escort Visitors
+      description: "Escort visitors and monitor visitor activity. \n\u2022 FAR Clause\
+        \ 52.204-21 Partial b.1.ix \n\u2022 NIST SP 800-171 Rev 2 3.10.3"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      ref_id: PE.L1-3.10.4
+      name: Physical Access Logs
+      description: "Maintain audit logs of physical access.\n\u2022 FAR Clause 52.204-21\
+        \ Partial b.1.ix \n\u2022 NIST SP 800-171 Rev 2 3.10.4"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l1-3.10.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      ref_id: PE.L1-3.10.5
+      name: Manage Physical Access
+      description: "Control and manage physical access devices.\n\u2022 FAR Clause\
+        \ 52.204-21 Partial b.1.ix \n\u2022 NIST SP 800-171 Rev 2 3.10.5"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:pe.l2-3.10.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:pe
+      ref_id: PE.L2-3.10.6
+      name: Alternative Work Sites
+      description: "Enforce safeguarding measures for CUI at alternate work sites.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.10.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ra
+      assessable: false
+      depth: 1
+      ref_id: RA
+      name: RISK ASSESSMENT
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra
+      ref_id: RA.L2-3.11.1
+      name: Risk Assessments
+      description: "Periodically assess the risk to organizational operations (including\
+        \ mission, functions, image, or reputation), organizational assets, and individuals,\
+        \ resulting from the operation of organizational systems and the associated\
+        \ processing, storage, or transmission of CUI.\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.11.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra
+      ref_id: RA.L2-3.11.2
+      name: Vulnerability Scan
+      description: "Scan for vulnerabilities in organizational systems and applications\
+        \ periodically and when new vulnerabilities affecting those systems and applications\
+        \ are identified.\_\n\u2022 NIST SP 800-171 Rev 2 3.11.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ra.l2-3.11.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ra
+      ref_id: RA.L2-3.11.3
+      name: Vulnerability Remediation
+      description: "Remediate vulnerabilities in accordance with risk assessments.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.11.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ca
+      assessable: false
+      depth: 1
+      ref_id: CA
+      name: SECURITY ASSESSMENT
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca
+      ref_id: CA.L2-3.12.1
+      name: Security Control Assessment
+      description: "Periodically assess the security controls in organizational systems\
+        \ to determine if the controls are effective in their application.\_\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.12.1"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca
+      ref_id: CA.L2-3.12.2
+      name: Plan of Action
+      description: "Develop and implement plans of action designed to correct deficiencies\
+        \ and reduce or eliminate vulnerabilities in organizational systems.\n\u2022\
+        \ NIST SP 800-171 Rev 2 3.12.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca
+      ref_id: CA.L2-3.12.3
+      name: Security Control Monitoring
+      description: "Monitor security controls on an ongoing basis to ensure the continued\
+        \ effectiveness of the controls.\_\n\u2022 NIST SP 800-171 Rev 2 3.12.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:ca.l2-3.12.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:ca
+      ref_id: CA.L2-3.12.4
+      name: System Security Plan
+      description: "Develop, document, and periodically update system security plans\
+        \ that describe system boundaries, system environments of operation, how security\
+        \ requirements are implemented, and the relationships with or connections\
+        \ to other systems. \n\u2022 NIST SP 800-171 Rev 2 3.12.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      assessable: false
+      depth: 1
+      ref_id: SC
+      name: SYSTEM AND COMMUNICATIONS PROTECTION
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L1-3.13.1
+      name: Boundary Protection
+      description: "Monitor, control, and protect organizational communications (i.e.,\
+        \ information transmitted or received by organizational information systems)\
+        \ at the external boundaries and key internal boundaries of the information\
+        \ systems.\n\u2022 FAR Clause 52.204-21 b.1.x\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.13.1"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.2
+      name: Security Engineering
+      description: "Employ architectural designs, software development techniques,\
+        \ and systems engineering principles that promote effective information security\
+        \ within organizational systems.\n\u2022 NIST SP 800-171 Rev 2 3.13.2"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.3
+      name: Role Separation
+      description: "Separate user functionality from system management functionality.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.13.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.4
+      name: Shared Resource Control
+      description: "Prevent unauthorized and unintended information transfer via shared\
+        \ system resources. \n\u2022 NIST SP 800-171 Rev 2 3.13.4"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l1-3.13.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L1-3.13.5
+      name: Public-Access System Separation
+      description: "Implement subnetworks for publicly accessible system components\
+        \ that are physically or logically separated from internal networks.\n\u2022\
+        \ FAR Clause 52.204-21 b.1.xi\n\u2022 NIST SP 800-171 Rev 2 3.13.5"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.6
+      name: Network Communication by Exception
+      description: "Deny network communications traffic by default and allow network\
+        \ communications traffic by exception (i.e., deny all, permit by exception).\n\
+        \u2022 NIST SP 800-171 Rev 2 3.13.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.7
+      name: Split Tunneling
+      description: "Prevent remote devices from simultaneously establishing non-remote\
+        \ connections with organizational systems and communicating via some other\
+        \ connection to resources in external networks (i.e., split tunneling). \n\
+        \u2022 NIST SP 800-171 Rev 2 3.13.7"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.8
+      name: Data in Transit
+      description: "Implement cryptographic mechanisms to prevent unauthorized disclosure\
+        \ of CUI during transmission unless otherwise protected by alternative physical\
+        \ safeguards.\n\u2022 NIST SP 800-171 Rev 2 3.13.8"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.9
+      name: Connections Termination
+      description: "Terminate network connections associated with communications sessions\
+        \ at the end of the sessions or after a defined period of inactivity. \n\u2022\
+        \ NIST SP 800-171 Rev 2 3.13.9"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.10
+      name: Key Management
+      description: "Establish and manage cryptographic keys for cryptography employed\
+        \ in organizational systems. \n\u2022 NIST SP 800-171 Rev 2 3.13.10"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.11
+      name: CUI Encryption
+      description: "Employ FIPS-validated cryptography when used to protect the confidentiality\
+        \ of CUI. \n\u2022 NIST SP 800-171 Rev 2 3.13.11"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.12
+      name: Collaborative Device Control
+      description: "Prohibit remote activation of collaborative computing devices\
+        \ and provide indication of devices in use to users present at the device.\
+        \ \n\u2022 NIST SP 800-171 Rev 2 3.13.12"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.13
+      name: Mobile Code
+      description: "Control and monitor the use of mobile code. \n\u2022 NIST SP 800-171\
+        \ Rev 2 3.13.13"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.14
+      name: Voice over Internet Protocol
+      description: "Control and monitor the use of Voice over Internet Protocol (VoIP)\
+        \ technologies.\n\u2022 NIST SP 800-171 Rev 2 3.13.14"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.15
+      name: Communications Authenticity
+      description: "Protect the authenticity of communications sessions.\n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.13.15"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:sc.l2-3.13.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:sc
+      ref_id: SC.L2-3.13.16
+      name: Data at Rest
+      description: "Protect the confidentiality of CUI at rest.\n\u2022 NIST SP 800-171\
+        \ Rev 2 3.13.16"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      assessable: false
+      depth: 1
+      ref_id: SI
+      name: SYSTEM AND INFORMATION INTEGRITY
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L1-3.14.1
+      name: Flaw Remediation
+      description: "Identify, report, and correct information and information system\
+        \ flaws in a timely manner.\n\u2022 FAR Clause 52.204-21 b.1.xii\n\u2022 NIST\
+        \ SP 800-171 Rev 2 3.14.1"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L1-3.14.2
+      name: Malicious Code Protection
+      description: "Provide protection from malicious code at appropriate locations\
+        \ within organizational information systems.\n\u2022 FAR Clause 52.204-21\
+        \ b.1.xiii\n\u2022 NIST SP 800-171 Rev 2 3.14.2"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L2-3.14.3
+      name: Security Alerts & Advisories
+      description: "Monitor system security alerts and advisories and take action\
+        \ in response.\n\u2022 NIST SP 800-171 Rev 2 3.14.3"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L1-3.14.4
+      name: Update Malicious Code Protection
+      description: "Update malicious code protection mechanisms when new releases\
+        \ are available.\n\u2022 FAR Clause 52.204-21 b.1.xiv\n\u2022 NIST SP 800-171\
+        \ Rev 2 3.14.4"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l1-3.14.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L1-3.14.5
+      name: System & File Scanning
+      description: "Perform periodic scans of the information system and real-time\
+        \ scans of files from external sources as files are downloaded, opened, or\
+        \ executed.\n\u2022 FAR Clause 52.204-21 b.1.xv\n\u2022 NIST SP 800-171 Rev\
+        \ 2 3.14.5"
+      maturity: 1
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L2-3.14.6
+      name: Monitor Communications for Attacks
+      description: "Monitor organizational systems, including inbound and outbound\
+        \ communications traffic, to detect attacks and indicators of potential attacks.\n\
+        \u2022 NIST SP 800-171 Rev 2 3.14.6"
+      maturity: 2
+    - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cmmc-2.0:si
+      ref_id: SI.L2-3.14.7
+      name: Identify Unauthorized Use
+      description: "Identify unauthorized use of organizational systems. \n\u2022\
+        \ NIST SP 800-171 Rev 2 3.14.7"
+      maturity: 2

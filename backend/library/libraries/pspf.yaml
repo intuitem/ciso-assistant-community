@@ -1,0 +1,542 @@
+urn: urn:intuitem:risk:library:pspf
+locale: en
+ref_id: PSPF
+name: Protective Security Policy Framework
+description: "The Protective Security Policy Framework (PSPF) helps Australian Government\
+  \ entities to protect their people, information and assets, both at home and overseas.\n\
+  \nIt sets out government protective security policy and supports entities to effectively\
+  \ implement the policy across the following outcomes:\n\n    security governance\n\
+  \    information security\n    personnel security\n    physical security."
+copyright: "The Commonwealth of Australia owns all the material we produce. All material\
+  \ presented on this website is provided under a Creative Commons Attribution 3.0\
+  \ Australia licence, with the exception of:\n\n   - the Commonwealth Coat of Arms\
+  \ \u2013 terms of use are available at It\u2019s an Honour - external site\n   -\
+  \ our logo\n   - materials specifically not provided under a Creative Commons attribution\
+  \ 3.0 Australia licence\n   - content supplied by third parties.\n\nLicense details\
+  \ and conditions are available at Creative Commons Attribution 3.0 Australia.\n\n\
+  You should attribute material you get from this website as Australian Government\
+  \ Department of Home Affairs."
+version: 1
+provider: Australian Government
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:pspf
+    ref_id: PSPF
+    name: Protective Security Policy Framework
+    description: "The Protective Security Policy Framework (PSPF) helps Australian\
+      \ Government entities to protect their people, information and assets, both\
+      \ at home and overseas.\n\nIt sets out government protective security policy\
+      \ and supports entities to effectively implement the policy across the following\
+      \ outcomes:\n\n    security governance\n    information security\n    personnel\
+      \ security\n    physical security."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-1
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-1
+      name: Role of Accountable Authority
+    - urn: urn:intuitem:risk:req_node:pspf:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-1
+      ref_id: '1.1'
+      description: The accountable authority is answerable to their minister and the
+        government for the security of their entity.
+    - urn: urn:intuitem:risk:req_node:pspf:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-1
+      ref_id: '1.2'
+      description: 'The accountable authority of each entity must:'
+    - urn: urn:intuitem:risk:req_node:pspf:1.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:1.2
+      ref_id: 1.2.a
+      description: determine their entity's tolerance for security risks.
+    - urn: urn:intuitem:risk:req_node:pspf:1.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:1.2
+      ref_id: 1.2.b
+      description: manage the security risks of their entity.
+    - urn: urn:intuitem:risk:req_node:pspf:1.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:1.2
+      ref_id: 1.2.c
+      description: consider the implications their risk management decisions have
+        for other entities, and share information on risks where appropriate.
+    - urn: urn:intuitem:risk:req_node:pspf:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-1
+      ref_id: '1.3'
+      description: 'The accountable authority of a lead security entity must:'
+    - urn: urn:intuitem:risk:req_node:pspf:1.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:1.3
+      ref_id: 1.3.a
+      description: provide other entities with advice, guidance and services related
+        to government security.
+    - urn: urn:intuitem:risk:req_node:pspf:1.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:1.3
+      ref_id: 1.3.b
+      description: ensure that the security support it provides helps relevant entities
+        achieve and maintain an acceptable level of security.
+    - urn: urn:intuitem:risk:req_node:pspf:1.3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:1.3
+      ref_id: 1.3.c
+      description: establish and document responsibilities and accountabilities for
+        partnerships or security service arrangements with other entities.
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-2
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-2
+      name: Management Structures and Responsibilities
+    - urn: urn:intuitem:risk:req_node:pspf:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-2
+      ref_id: '2.1'
+      description: 'The accountable authority must:'
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1
+      ref_id: 2.1.a
+      description: appoint a Chief Security Officer (CSO) at the Senior Executive
+        Service level to be responsible for security in the entity.
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1
+      ref_id: 2.1.b
+      description: 'empower the CSO to make decisions about:'
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.b.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1.b
+      ref_id: 2.1.b.i
+      description: appointing security advisors within the entity.
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.b.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1.b
+      ref_id: 2.1.b.ii
+      description: the entity's protective security planning.
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.b.iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1.b
+      ref_id: 2.1.b.iii
+      description: the entity's protective security practices and procedures.
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.b.iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1.b
+      ref_id: 2.1.b.iv
+      description: investigating, responding to, and reporting on security incidents.
+    - urn: urn:intuitem:risk:req_node:pspf:2.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:2.1
+      ref_id: 2.1.c
+      description: ensure personnel and contractors are aware of their collective
+        responsibility to foster a positive security culture, and are provided sufficient
+        information and training to support this.
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-3
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-3
+      name: Security Planning and Risk Management
+    - urn: urn:intuitem:risk:req_node:pspf:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-3
+      ref_id: '3.1'
+      description: "Each entity must have in place a security plan approved by the\
+        \ accountable authority to manage the entity\u2019s security risks. The security\
+        \ plan details:"
+    - urn: urn:intuitem:risk:req_node:pspf:3.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:3.1
+      ref_id: 3.1.a
+      description: the security goals and strategic objectives of the entity, including
+        how security risk management intersects with and supports broader business
+        objectives and priorities.
+    - urn: urn:intuitem:risk:req_node:pspf:3.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:3.1
+      ref_id: 3.1.b
+      description: "the threats, risks and vulnerabilities that impact the protection\
+        \ of an entity\u2019s people, information and assets."
+    - urn: urn:intuitem:risk:req_node:pspf:3.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:3.1
+      ref_id: 3.1.c
+      description: "the entity\u2019s tolerance to security risks."
+    - urn: urn:intuitem:risk:req_node:pspf:3.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:3.1
+      ref_id: 3.1.d
+      description: "the maturity of the entity\u2019s capability to manage security\
+        \ risks."
+    - urn: urn:intuitem:risk:req_node:pspf:3.1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:3.1
+      ref_id: 3.1.e
+      description: "the entity\u2019s strategies to implement security risk management,\
+        \ maintain a positive risk culture and deliver against the PSPF"
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-4
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-4
+      name: Security Maturity Monitoring
+    - urn: urn:intuitem:risk:req_node:pspf:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-4
+      ref_id: '4.1'
+      description: Each entity must assess the maturity of its security capability
+        and risk culture by considering its progress against the goals and strategic
+        objectives identified in its security plan.
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-5
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-5
+      name: Reporting on Security
+    - urn: urn:intuitem:risk:req_node:pspf:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-5
+      ref_id: '5.1'
+      description: 'Each entity must report on security:'
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1
+      ref_id: 5.1.a
+      description: 'each financial year to its portfolio minister and the Attorney-General''s
+        Department on:'
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.a.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1.a
+      ref_id: 5.1.a.i
+      description: whether the entity achieved security outcomes through effectively
+        implementing and managing requirements under the PSPF.
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.a.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1.a
+      ref_id: 5.1.a.ii
+      description: "the maturity of the entity\u2019s security capability."
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.a.iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1.a
+      ref_id: 5.1.a.iii
+      description: "key risks to the entity\u2019s people, information and assets."
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.a.iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1.a
+      ref_id: 5.1.a.iv
+      description: details of measures taken to mitigate or otherwise manage identified
+        security risks.
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1
+      ref_id: 5.1.b
+      description: to affected entities whose interests or security arrangements could
+        be affected by the outcome of unmitigated security risks, security incidents
+        or vulnerabilities in PSPF implementation
+    - urn: urn:intuitem:risk:req_node:pspf:5.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:5.1
+      ref_id: 5.1.c
+      description: to the Australian Signals Directorate in relation to cyber security
+        matters.
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-6
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-6
+      name: ' Security Governance for Contracted Goods and Services Providers'
+    - urn: urn:intuitem:risk:req_node:pspf:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-6
+      ref_id: '6.1'
+      description: Each entity is accountable for the security risks arising from
+        procuring goods and services, and must ensure contracted providers comply
+        with relevant PSPF requirements.
+    - urn: urn:intuitem:risk:req_node:pspf:govsec-7
+      assessable: false
+      depth: 1
+      ref_id: GOVSEC-7
+      name: Security Governance for International Sharing
+    - urn: urn:intuitem:risk:req_node:pspf:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:govsec-7
+      ref_id: '7.1'
+      description: Each entity must adhere to any provisions concerning the security
+        of people, information and assets contained in international agreements and
+        arrangements to which Australia is a party.
+    - urn: urn:intuitem:risk:req_node:pspf:infosec-8
+      assessable: false
+      depth: 1
+      ref_id: INFOSEC-8
+      name: Sensitive and Classified Information
+    - urn: urn:intuitem:risk:req_node:pspf:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:infosec-8
+      ref_id: '8.1'
+      description: 'Each entity must:'
+    - urn: urn:intuitem:risk:req_node:pspf:8.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:8.1
+      ref_id: 8.1.a
+      description: identify information asset holdings.
+    - urn: urn:intuitem:risk:req_node:pspf:8.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:8.1
+      ref_id: 8.1.b
+      description: assess the sensitivity and security classification of information
+        asset holdings.
+    - urn: urn:intuitem:risk:req_node:pspf:8.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:8.1
+      ref_id: 8.1.c
+      description: implement operational controls for these assets proportional to
+        their value, importance and sensitivity.
+    - urn: urn:intuitem:risk:req_node:pspf:infosec-9
+      assessable: false
+      depth: 1
+      ref_id: INFOSEC-9
+      name: Access to Information
+    - urn: urn:intuitem:risk:req_node:pspf:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:infosec-9
+      ref_id: '9.1'
+      description: 'Each entity must enable appropriate access to official information.
+        This includes:'
+    - urn: urn:intuitem:risk:req_node:pspf:9.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:9.1
+      ref_id: 9.1.a
+      description: sharing information within the entity, as well as with other relevant
+        stakeholders.
+    - urn: urn:intuitem:risk:req_node:pspf:9.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:9.1
+      ref_id: 9.1.b
+      description: ensuring that those who access sensitive or security classified
+        information have an appropriate security clearance and need to know that information.
+    - urn: urn:intuitem:risk:req_node:pspf:9.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:9.1
+      ref_id: 9.1.c
+      description: "controlling access to supporting ICT systems, networks (including\
+        \ remote access), \n infrastructure and applications."
+    - urn: urn:intuitem:risk:req_node:pspf:infosec-10
+      assessable: false
+      depth: 1
+      ref_id: INFOSEC-10
+      name: Safeguarding Information from Cyber Threats
+    - urn: urn:intuitem:risk:req_node:pspf:10.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:infosec-10
+      ref_id: '10.1'
+      description: 'Each entity must mitigate common and emerging cyber threats by:'
+    - urn: urn:intuitem:risk:req_node:pspf:10.1.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:10.1
+      ref_id: 10.1.a
+      description: 'implementing the following mitigation strategies from the Strategies
+        to Mitigate Cyber Security Incidents:'
+    - urn: urn:intuitem:risk:req_node:pspf:10.1.a.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:10.1.a
+      ref_id: 10.1.a.i
+      description: Application control
+    - urn: urn:intuitem:risk:req_node:pspf:10.1.a.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:10.1.a
+      ref_id: 10.1.a.ii
+      description: Patching applications
+    - urn: urn:intuitem:risk:req_node:pspf:10.1.a.iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:10.1.a
+      ref_id: 10.1.a.iii
+      description: Restricting administrative privileges
+    - urn: urn:intuitem:risk:req_node:pspf:10.1.a.iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:pspf:10.1.a
+      ref_id: 10.1.a.iv
+      description: Patching operating systems
+    - urn: urn:intuitem:risk:req_node:pspf:10.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:10.1
+      ref_id: 10.1.b
+      description: considering which of the remaining mitigations strategies from
+        the Strategies to Mitigate Cyber Security Incidents you need to implement
+        to protect your entity.
+    - urn: urn:intuitem:risk:req_node:pspf:infosec-11
+      assessable: false
+      depth: 1
+      ref_id: INFOSEC-11
+      name: Robust ICT System
+    - urn: urn:intuitem:risk:req_node:pspf:11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:infosec-11
+      ref_id: '11.1'
+      description: "Each entity must ensure the secure operation of their ICT systemsto\
+        \ safeguard information and the continuous delivery of government business\
+        \ by applying the Australian Government Information Security Manual\u2019\
+        s cyber security principlesduring all stages of the lifecycle of each system."
+    - urn: urn:intuitem:risk:req_node:pspf:persec-12
+      assessable: false
+      depth: 1
+      ref_id: PERSEC-12
+      name: Eligibility and Suitability of Personnel
+    - urn: urn:intuitem:risk:req_node:pspf:12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:persec-12
+      ref_id: '12.1'
+      description: Each entity must ensure the eligibility and suitability of its
+        personnel who have access to Australian Government resources (people, information
+        and assets).
+    - urn: urn:intuitem:risk:req_node:pspf:12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:persec-12
+      ref_id: '12.2'
+      description: Entities must use the Australian Government Security Vetting Agency
+        (AGSVA) to conduct vetting, or where authorised, conduct security vetting
+        in a manner consistent with the Personnel Security Vetting Standards.
+    - urn: urn:intuitem:risk:req_node:pspf:persec-13
+      assessable: false
+      depth: 1
+      ref_id: PERSEC-13
+      name: Eligibility and Suitability of Personnel
+    - urn: urn:intuitem:risk:req_node:pspf:13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:persec-13
+      ref_id: '13.1'
+      description: Each entity must assess and manage the ongoing suitability of its
+        personnel and share relevant information of security concern, where appropriate.
+    - urn: urn:intuitem:risk:req_node:pspf:persec-14
+      assessable: false
+      depth: 1
+      ref_id: PERSEC-14
+      name: Separating Personnel
+    - urn: urn:intuitem:risk:req_node:pspf:14.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:persec-14
+      ref_id: '14.1'
+      description: 'Each entity must ensure that separating personnel:'
+    - urn: urn:intuitem:risk:req_node:pspf:14.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:14.1
+      ref_id: 14.1.a
+      description: have their access to Australian Government resources withdrawn.
+    - urn: urn:intuitem:risk:req_node:pspf:14.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:14.1
+      ref_id: 14.1.b
+      description: are informed of any ongoing security obligations.
+    - urn: urn:intuitem:risk:req_node:pspf:physec-15
+      assessable: false
+      depth: 1
+      ref_id: PHYSEC-15
+      name: Physical Security for Entity Resources
+    - urn: urn:intuitem:risk:req_node:pspf:15.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:physec-15
+      ref_id: '15.1'
+      description: 'Each entity must implement physical security measures that minimise
+        or remove the risk of:'
+    - urn: urn:intuitem:risk:req_node:pspf:15.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:15.1
+      ref_id: 15.1.a
+      description: harm to people
+    - urn: urn:intuitem:risk:req_node:pspf:15.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:15.1
+      ref_id: 15.1.b
+      description: information and physical asset resources being made inoperable
+        or inaccessible, or being accessed, used or removed without appropriate authorisation.
+    - urn: urn:intuitem:risk:req_node:pspf:physec-16
+      assessable: false
+      depth: 1
+      ref_id: PHYSEC-16
+      name: Physical Security for Entity Resources
+    - urn: urn:intuitem:risk:req_node:pspf:16.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pspf:physec-16
+      ref_id: '16.1'
+      description: 'Each entity must:'
+    - urn: urn:intuitem:risk:req_node:pspf:16.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:16.1
+      ref_id: 16.1.a
+      description: ensure it fully integrates protective security in the process of
+        planning, selecting, designing and modifying its facilities for the protection
+        of people, information and physical assets.
+    - urn: urn:intuitem:risk:req_node:pspf:16.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:16.1
+      ref_id: 16.1.b
+      description: "in areas where sensitive or security classified information and\
+        \ assets are used, transmitted, stored or discussed, certify its facility\u2019\
+        s physical security zones in accordance with the applicable ASIO Technical\
+        \ Notes."
+    - urn: urn:intuitem:risk:req_node:pspf:16.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pspf:16.1
+      ref_id: 16.1.c
+      description: accredit its security zones.

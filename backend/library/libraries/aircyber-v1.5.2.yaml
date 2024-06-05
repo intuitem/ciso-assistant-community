@@ -1,0 +1,2459 @@
+urn: urn:intuitem:risk:library:aircyber-v1.5.2
+locale: en
+ref_id: AirCyber-v1.5.2
+name: Public AirCyber Maturity Level Matrix
+description: 'AirCyber is the AeroSpace and Defense official standard for Cybersecurity
+  maturity evaluation and increase built by Airbus, Dassault Aviation, Safran and
+  Thales to help the AeroSpace SupplyChain to be more resilient.
+
+  Their joint venture BoostAeroSpace is offering this extract of the AirCyber maturity
+  level matrix to provide further details on this standard, the questions and the
+  AirCyber maturity levels they are associated to.
+
+  AirCyber program uses this maturity level matrix as the base of the cyber maturity
+  evaluation as is the evaluation activity is the very starting point for any cyber
+  maturity progression. Being aware of the problems is the mandatory very first knowledge
+  a company shall know to decide to launch a cybersecurity company program.
+
+  Source: https://boostaerospace.com/aircyber/
+
+  '
+copyright: "\xA9 Boost Aerospace\nThis work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike\
+  \ 4.0 International License. Any commercial use of this work must be contracted\
+  \ with BoostAeroSpace.\nPermission given to include AirCyber in CISO Assistant.\n"
+version: 2
+provider: Boost Aerospace
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:aircyber-v1.5.2
+    ref_id: AirCyber-v1.5.2
+    name: Public AirCyber Maturity Level Matrix
+    description: 'AirCyber is the AeroSpace and Defense official standard for Cybersecurity
+      maturity evaluation and increase built by Airbus, Dassault Aviation, Safran
+      and Thales to help the AeroSpace SupplyChain to be more resilient.
+
+      Their joint venture BoostAeroSpace is offering this extract of the AirCyber
+      maturity level matrix to provide further details on this standard, the questions
+      and the AirCyber maturity levels they are associated to.
+
+      AirCyber program uses this maturity level matrix as the base of the cyber maturity
+      evaluation as is the evaluation activity is the very starting point for any
+      cyber maturity progression. Being aware of the problems is the mandatory very
+      first knowledge a company shall know to decide to launch a cybersecurity company
+      program.
+
+      Source: https://boostaerospace.com/aircyber/
+
+      '
+    implementation_groups_definition:
+    - ref_id: Bronze
+      name: null
+      description: null
+    - ref_id: Silver
+      name: null
+      description: null
+    - ref_id: Gold
+      name: null
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.1
+      assessable: true
+      depth: 1
+      ref_id: '1.1'
+      name: 'Secure access to building  '
+      description: Are access to your buildings, offices and IT facilities controlled
+        and limited (e. g. through the use of locked doors, magnetic card readers,
+        prevention, detection and intervention devices in the event of theft, etc.)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.2
+      assessable: true
+      depth: 1
+      ref_id: '1.2'
+      name: Secure access to servers & technical room
+      description: Is the enclosure of buildings hosting your server rooms and technical
+        rooms secured by a fence, an entrance barrier, video surveillance, and an
+        alarm?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.3
+      assessable: true
+      depth: 1
+      ref_id: '1.3'
+      name: Secure access to building (servers & technical room)
+      description: Is the enclosure of your premises secured by guards with night
+        surveillance, an entrance barrier, video surveillance and an alarm?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.4
+      assessable: true
+      depth: 1
+      ref_id: '1.4'
+      name: 'Visitor escorting '
+      description: Are visitors permanently accompanied on your premises?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.5
+      assessable: true
+      depth: 1
+      ref_id: '1.5'
+      name: Redundancy of the power supply
+      description: Do you use inverters or back-up batteries (to ensure the power
+        supply in case of loss of power)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.6
+      assessable: true
+      depth: 1
+      ref_id: '1.6'
+      name: Clean office policy
+      description: Do you have a clean desktop policy (physical and screen lock) for
+        sensitive papers and removable storage media?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.7
+      assessable: true
+      depth: 1
+      ref_id: '1.7'
+      name: Verify compliance of entities, subsites
+      description: If you have several geographical IT sites, do you visit them to
+        check physical and IT security regularly (min. once every 2 years) ?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1
+      assessable: true
+      depth: 1
+      ref_id: '2.1'
+      name: 'Automatic HW inventory tool centralized '
+      description: 'Do you have an up-to-date inventory of your IT system? (servers,
+        desktop PCs, laptops, printers, network devices, smartphones, etc.)
+
+        Do you have an accurate and up-to-date inventory of the assets (workstation,
+        servers, ...) used for your customers production?'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1.1
+      assessable: true
+      depth: 1
+      ref_id: 2.1.1
+      name: Map of the company network
+      description: Do you have a complete network diagram of your company?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1.2
+      assessable: true
+      depth: 1
+      ref_id: 2.1.2
+      name: Live / automatic update of the company network map
+      description: Is your network diagram automatically updated with network information
+        and service protocols?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1.3
+      assessable: true
+      depth: 1
+      ref_id: 2.1.3
+      name: Automatic HW inventory tool centralized and new device detection.
+      description: "Have you implemented a detection and monitoring solution (NAC,\
+        \ DHCP moni-toring) for the connection of new devices (PC, server, printer,\
+        \ routers, Internet modems\u2026) on your internal network?"
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.2
+      assessable: true
+      depth: 1
+      ref_id: '2.2'
+      name: Inventory of HW devices updated frequently
+      description: 'Is the list of your computer devices regularly updated?
+
+        (servers, desktop PCs, laptops, printers, network device, smartphones, etc.)'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.3
+      assessable: true
+      depth: 1
+      ref_id: '2.3'
+      name: "Sufficient ICT security resources to manage ICT security of the company\
+        \ with respect to the number of IT users / devices / employees\_"
+      description: Is there a person or department assigned to the management the
+        computer systems?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.4
+      assessable: true
+      depth: 1
+      ref_id: '2.4'
+      name: Specify governance with clear roles and responsibilities
+      description: Do you have an information systems security focal point (RSSI or
+        equivalent)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.4.1
+      assessable: true
+      depth: 1
+      ref_id: 2.4.1
+      name: Communicate to all employees' company security policy and directives
+      description: Has your organization implemented an Information Security Policy
+        and associated controls? Do you communicate them to all users and project
+        managers?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.5
+      assessable: true
+      depth: 1
+      ref_id: '2.5'
+      name: 'Policy management for all PCs/Laptops. Standardized client setup. '
+      description: Do you use a tool to ensure that all your workstations (servers,
+        laptops, desk-top PCs) are secure in a consistent way (identical security
+        policies between workstations, gap management, etc.)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.5.1
+      assessable: true
+      depth: 1
+      ref_id: 2.5.1
+      name: Centralized smartphone management [MDM]
+      description: Do you use a tool to ensure that all your smartphones are secure
+        in a con-sistent way (identical security policies between them, gap management,
+        etc.)
+      implementation_groups:
+      - SIlver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.6
+      assessable: true
+      depth: 1
+      ref_id: '2.6'
+      name: Malware protection based on signature list detection
+      description: Do you implement an automatic malware detection tool across the
+        entire IT infrastructure (workstations, servers)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.7
+      assessable: true
+      depth: 1
+      ref_id: '2.7'
+      name: Malware protection detecting abnormal behaviour based on system events
+      description: Have you implemented an automatic malware removal or quarantine
+        tool (anti-malware) on the entire IT device?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.8
+      assessable: true
+      depth: 1
+      ref_id: '2.8'
+      name: 'Light smartphones management : configuration of passwords, anti-virus
+        on open systems like Android'
+      description: 'Are enterprise smartphones managed by your IT team (for example:
+        password and anti-virus policy configuration)?'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.8.1
+      assessable: true
+      depth: 1
+      ref_id: 2.8.1
+      name: 'Light smartphones security policy  '
+      description: Do enterprise smartphones have a dedicated security policy?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.8.2
+      assessable: true
+      depth: 1
+      ref_id: 2.8.2
+      name: Central mobile device applications management and control list of application
+        deployed by users.
+      description: Are enterprise smartphones managed centrally with a tool to control
+        their configuration, security status?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9
+      assessable: true
+      depth: 1
+      ref_id: '2.9'
+      name: 'Centralized secure log collection system from the different ICT sensitive
+        sources '
+      description: Do you use a centralized solution to activate, keep for at least
+        a year and configure the logs of the most important components like firewalls
+        or internet access?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.1
+      assessable: true
+      depth: 1
+      ref_id: 2.9.1
+      name: Log analysis tool allowing forensics
+      description: Do you perform log analysis (e.g. real time analysis, SOC, etc.)
+        of the most important components (servers, workstations, laptops, printers,
+        network equipment, smartphones, etc.)?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.2
+      assessable: true
+      depth: 1
+      ref_id: 2.9.2
+      name: logs check for admin accounts usage
+      description: Do you activate, keep for at least a year and configure the administrator
+        au-thentication logs on network, the server and computer device?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.3
+      assessable: true
+      depth: 1
+      ref_id: 2.9.3
+      name: inventory log sources on ICT sensitive systems
+      description: Do you use a procedure to implement log backup of the most important
+        com-ponents such as firewalls, internet access?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.4
+      assessable: true
+      depth: 1
+      ref_id: 2.9.4
+      name: AD hardening and logging
+      description: Do you secure the default configuration of your Active Directory
+        (AD) server and do you keep at least for a year the logs with the authentication
+        information on the AD? (hardening of the operating system (restrict the authorized
+        com-munication protocols and launched services, prohibit direct Internet access
+        from the server, disable default accounts) and the configuration of the Active
+        Directory service (read-only AD, validation of policies, security rules of
+        work-stations managed via the AD, restriction and security of passwords of
+        privileged accounts...)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.5
+      assessable: true
+      depth: 1
+      ref_id: 2.9.5
+      name: Active Directory complete hardening and associated security alerts
+      description: "Have you finished the security hardening of your active directory\
+        \ server (by applying all best practices or having accepted the residual risks\
+        \ of undeployed measures) and have you configured the generation of detailed\
+        \ alerts in the event of a security incident (configuration of detailed logs,\
+        \ active \u2013 with alerts \u2013 monitoring of the logs)?"
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.10
+      assessable: true
+      depth: 1
+      ref_id: '2.10'
+      name: Automatic and managed back-up / restore process & test
+      description: Do you define and apply an automatic backup policy for critical
+        components with a tested recovery procedure?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.11
+      assessable: true
+      depth: 1
+      ref_id: '2.11'
+      name: Best practice for removable media.
+      description: Have you defined rules concerning the behaviour of users regarding
+        the de-vices they could connect to their computers (prohibit to connect a
+        USB flash drive found by chance, do an antivirus scan of the partners' usb
+        keys, do not connect any strange device on their computers...)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.1
+      assessable: true
+      depth: 1
+      ref_id: '3.1'
+      name: 'Individual identification to all users '
+      description: Does each employee have a nominative identifier on IT production
+        environments?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.1.1
+      assessable: true
+      depth: 1
+      ref_id: 3.1.1
+      name: When required, perform background check before employment.
+      description: When security constraints have been identified, such as national
+        clearance requirements, do you check the background and profile suitability
+        of new hired (e.g. criminal record/nationality) depending on the role they
+        apply to (e.g. senior, IT staff, etc.)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.1.2
+      assessable: true
+      depth: 1
+      ref_id: 3.1.2
+      name: Secure hires and transfers of employees where security constraints have
+        been identified (habilitation required)
+      description: When security constraints have been identified, such as national
+        clearance requirements, do you check the background and profile suitability
+        of new hires (criminal record/nationality)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.2
+      assessable: true
+      depth: 1
+      ref_id: '3.2'
+      name: No admin rights on computers, servers, etc. with day to day user account
+      description: 'Do you confirm that  accounts delivered to users for day to day
+        access to the information system (computer, server, cloud) do not have administrative
+        rights (administrators can change security settings, install software and
+        devices and access all files on the computer)?
+
+        '
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.3
+      assessable: true
+      depth: 1
+      ref_id: '3.3'
+      name: Up to date inventory of admin accounts
+      description: Do you have a complete inventory of privileged (administrative)
+        accounts and do you keep it up to date?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.31
+      assessable: true
+      depth: 1
+      ref_id: '3.31'
+      name: Secure admin accounts management solution
+      description: If you use administrator accounts on machines, do you have a solution
+        in place to control their security (password security, account blocking, remote
+        change, etc.)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.4
+      assessable: true
+      depth: 1
+      ref_id: '3.4'
+      name: Have an awareness process / track awareness deployment to operational
+        security team
+      description: Do you train operational teams (network administrators, security
+        and systems administrators, project managers, developers, CISOs) in information
+        systems security?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.5
+      assessable: true
+      depth: 1
+      ref_id: '3.5'
+      name: "Propose user awareness (e-mails, information system GTC, documentations\u2026\
+        )"
+      description: 'Do you make users aware of the rules, good behavior  and information
+        security instructions governing daily activity?
+
+        Is this confirmed by the signing of an information systems charter specifying
+        the rules and cybersecurity instructions that they must respect, or a legally
+        enforceable equivalent (such as an annex to the internal company regulations,
+        employment contract)?'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.5.1
+      assessable: true
+      depth: 1
+      ref_id: 3.5.1
+      name: Link awareness to HR and offer awareness sessions to new entrants (including
+        trainees) as soon as they are hired / Link yearly objectives to Cyber Awareness.
+      description: Do you set up systematic cybersecurity training for all employees
+        and contractors, adapted or customized according to their role in the company,
+        and do you follow up attendance to this training?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.6
+      assessable: true
+      depth: 1
+      ref_id: '3.6'
+      name: Secure laptops against data spying
+      description: Do users have access to IT security resources related to travel
+        on their laptops? (Screen filter, security cable, VPN, encryption, monitoring,...)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.1
+      assessable: true
+      depth: 1
+      ref_id: '4.1'
+      name: "Management of entry/exit of\_IT\_of all users"
+      description: "Is there an entry and exit procedure for users and administrators?\
+        \ \n(Creation of a specific identifier, signature of a user charter, account\
+        \ deactivation)?\n"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.2
+      assessable: true
+      depth: 1
+      ref_id: '4.2'
+      name: Administrative rights needed to install software
+      description: Do users need administrative rights that require different authentication
+        with an admin account or computer support to install software on their computers?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.21
+      assessable: true
+      depth: 1
+      ref_id: '4.21'
+      name: Centralized, monitored   active management of users (Active Directory)
+        with security alerts
+      description: 'Do you have a centralized and secure management of user accounts
+        capable of detecting abnormal behavior (theft of identifiers, use on non-standard
+        servers, attempt to discover the password...)?  '
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.3
+      assessable: true
+      depth: 1
+      ref_id: '4.3'
+      name: Encrypt passwords
+      description: Do you protect passwords stored on systems (encryption)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.4
+      assessable: true
+      depth: 1
+      ref_id: '4.4'
+      name: Password security rules
+      description: Is there a password management policy (regular change, minimum
+        security constraints, special characters, number of characters, adapted policy
+        for administrators, etc.)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.4.1
+      assessable: true
+      depth: 1
+      ref_id: 4.4.1
+      name: Change default ID and password for devices and services
+      description: Do you change the default passwords and identifiers of the devices
+        of your in-formation system?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.5
+      assessable: true
+      depth: 1
+      ref_id: '4.5'
+      name: 'Rules to update frequently SW and systems. '
+      description: Do you regularly update components (servers, desktop PCs, laptops,
+        printers, network device, smartphones, etc.)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.6
+      assessable: true
+      depth: 1
+      ref_id: '4.6'
+      name: Track frequently system not up to date
+      description: Do you anticipate the end of software and system maintenance?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.6.1
+      assessable: true
+      depth: 1
+      ref_id: 4.6.1
+      name: Third party softwares versions control
+      description: In order to avoid potential vulnerabilities (unknown software,
+        not updated...) do you verify the versions of the software installed on your
+        computer park?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.6.2
+      assessable: true
+      depth: 1
+      ref_id: 4.6.2
+      name: inventory of allowed and forbidden software
+      description: Do you have a list of authorized and prohibited software?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.7
+      assessable: true
+      depth: 1
+      ref_id: '4.7'
+      name: 'CERT : Stay aware of cyberenvironment [CERT alert by ANSSI] / follow
+        news from SW editors'
+      description: 'Do you follow at least every week a procedure of management of
+        security alerts and advisories of CERTs (Computer Emergency Response Teams)
+        and software editors?
+
+        '
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8
+      assessable: true
+      depth: 1
+      ref_id: '4.8'
+      name: attacks or malicious activities detection (e.g. SOC)
+      description: Is there a Security Operation Center (SOC) for detecting issues
+        and monitoring the cybersecurity of the information system?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.1
+      assessable: true
+      depth: 1
+      ref_id: 4.8.1
+      name: centralize    logs interpretation in SIEM
+      description: Do you centralize security incidents and events through events
+        collection tools (SIEM (Security Information Event Management))?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.2
+      assessable: true
+      depth: 1
+      ref_id: 4.8.2
+      name: Monitor and alert on user device activity
+      description: Do you monitor users' devices such as fixed PC, laptop, smartphone,
+        USB key, etc...?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.3
+      assessable: true
+      depth: 1
+      ref_id: 4.8.3
+      name: tool to alert and perform semi-automatic isolation or shut down of systems
+      description: Is there an alert tool to automatically shut down or isolate some
+        elements of the computer system in the event of a major incident?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.4
+      assessable: true
+      depth: 1
+      ref_id: 4.8.4
+      name: Central Network cyber incidents monitoring
+      description: Is there a Network Operations Center (NOC) or similar solution
+        for detecting network security incidents?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.5
+      assessable: true
+      depth: 1
+      ref_id: 4.8.5
+      name: Detect / block unauthorized connection to network
+      description: Do you block unauthorized connections to your network?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.6
+      assessable: true
+      depth: 1
+      ref_id: 4.8.6
+      name: Network traffic abnormal behaviour monitoring
+      description: Have you deployed and monitor network probes to detect malicious
+        or abnormal activities?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.9
+      assessable: true
+      depth: 1
+      ref_id: '4.9'
+      name: Process for cyber incidents management & escalation
+      description: Are there escalation and alert processes for security incidents?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.9.1
+      assessable: true
+      depth: 1
+      ref_id: 4.9.1
+      name: Implement hosts IDS/IPS probes on servers and clients to monitors network
+        or system activities for malicious activities or policy violation.
+      description: Have you implemented solutions on PCs and Servers to detect, block
+        or alert abnormal behaviors (IDS/IPS)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.10
+      assessable: true
+      depth: 1
+      ref_id: '4.10'
+      name: Register to CERT S/W vulnerability and linked to patch follow up
+      description: Have you subscribed to a news feed informing you of new cyber security
+        vulner-abilities and cyber security alerts such as those proposed by government
+        CERTs (ANSSI FR, NIST US), international security monitoring sites?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.11
+      assessable: true
+      depth: 1
+      ref_id: '4.11'
+      name: 'Automatic vulnerability detection plus threat intelligence regarding
+        cyber threat, attacks and vulnerabilities from all sources '
+      description: Have you set up or contracted professional and customized security
+        alert services for your company, its sector of activity, the IT devices you
+        have deployed, etc. (professional or sectoral "CERT")?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.1
+      assessable: true
+      depth: 1
+      ref_id: '5.1'
+      name: "Identify the company's most sensitive servers\_"
+      description: Do you know the most sensitive servers in your information system?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.2
+      assessable: true
+      depth: 1
+      ref_id: '5.2'
+      name: internal firewalls, physical network segmentation to segregate network
+      description: Do you use security device to protect and partition your internal
+        network?  (Firewall, proxy, etc.)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.2.1
+      assessable: true
+      depth: 1
+      ref_id: 5.2.1
+      name: Firewall on laptop and desktop
+      description: Do you use a firewall on client workstations? (laptop, desktop
+        PC)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.2.2
+      assessable: true
+      depth: 1
+      ref_id: 5.2.2
+      name: Yearly Firewall Control
+      description: Do you check the configuration of the firewalls at least once a
+        year?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.3
+      assessable: true
+      depth: 1
+      ref_id: '5.3'
+      name: Secure Network architecture hardened
+      description: 'Do you have a network architecture that prioritize secure communications
+        and allows non-secured protocols if mandatory under specific control and isolation
+        from the rest of the network. For example, encouraging encrypted protocols
+        only and forbidding non-secure protocols (e.g.: configure network and desktop/server
+        firewall to forbid telnet-23 protocols in the local network, forbidding usage
+        of Windows Samba v1 file-sharing protocol or NTLMv1 authentication, etc.)?'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.4
+      assessable: true
+      depth: 1
+      ref_id: '5.4'
+      name: Strong authentication to webmail
+      description: Do you use secure authentication for connecting to your company
+        emails from the Internet (double authentication with phone and/or blocking
+        accounts against password attempts, regular password change, complex password)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.5
+      assessable: true
+      depth: 1
+      ref_id: '5.5'
+      name: ' Strong identification on critical services with alerts'
+      description: 'Do you use strong authentication and monitor (alerts in case of
+        failure) the connection to sensitive devices such as: IT device administration,
+        cloud ser-vices administration and websites?  '
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.5.1
+      assessable: true
+      depth: 1
+      ref_id: 5.5.1
+      name: 'Offer SSO for netw application or E-SSO password manager '
+      description: Do you use SSO (single sign on) features for http or applications
+        with an auto-mated password manager and auto fill?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.6
+      assessable: true
+      depth: 1
+      ref_id: '5.6'
+      name: Dedicated and compartmentalized network for information system administration
+      description: 'Do you use a dedicated, segregated network (internet, user workstation)
+        secured by protocol break (bouncing machine, bastion host, reverse proxy,
+        etc.) for the administration of the information system?
+
+        '
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.6.1
+      assessable: true
+      depth: 1
+      ref_id: 5.6.1
+      name: Control internet/network sharing/merging in devices (usb modem, etc)
+      description: Do you have protection on the workstations to prevent users from
+        opening unsecured Internet networks by connecting for example a modem / 3G
+        USB flash drive, smartphone and at the same time having these same computers
+        connected to the company network?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.7
+      assessable: true
+      depth: 1
+      ref_id: '5.7'
+      name: Limit code execution or propagation of malware / virus, automatic scan
+        of removable devices
+      description: Do you protect yourselves from threats related to the use of removable
+        media (specific security tool, antivirus configuration for USB, hardening
+        computer)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.7.1
+      assessable: true
+      depth: 1
+      ref_id: 5.7.1
+      name: Encrypt data on mobile devices (USB drives, smartphones)
+      description: Do you encrypt sensitive data on removable media without any user
+        interac-tion (transparent automatic encryption)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.8
+      assessable: true
+      depth: 1
+      ref_id: '5.8'
+      name: Forbid or securely manage "BYOD"
+      description: Have all devices (computer, tablet pc, smartphone) connected to
+        the compa-ny's information system been subject to a formal and prior approval
+        proce-dure?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.8.1
+      assessable: true
+      depth: 1
+      ref_id: 5.8.1
+      name: Set container solutions for corporate application / data on mobile device
+        used for both personal and professional and not encrypted
+      description: "Do you have complete control over the professional usage of enterprise\
+        \ appli-cations / data on mobile devices? \n(good separation  of personal\
+        \ and professional environments)\n"
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.9
+      assessable: true
+      depth: 1
+      ref_id: '5.9'
+      name: Internet access filtered (blacklist / categorized)
+      description: 'Are Internet accesses filtered by a proxy server? '
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.9.1
+      assessable: true
+      depth: 1
+      ref_id: 5.9.1
+      name: Web-application firewall for internally internet facing application
+      description: Do you protect your web servers accessible from outside the company's
+        net-work with WAF (web access filtering) device?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.10
+      assessable: true
+      depth: 1
+      ref_id: '5.10'
+      name: 'Internet traffic level NW monitoring with alerting '
+      description: Is there Internet traffic monitoring with alerts but also indicators
+        (KPIs) on the use of company data on the Internet?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.10.1
+      assessable: true
+      depth: 1
+      ref_id: 5.10.1
+      name: 'Encryption for internet links between different sites '
+      description: Do you encrypt your connections between your various sites of your
+        company and your partners?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.10.2
+      assessable: true
+      depth: 1
+      ref_id: 5.10.2
+      name: 'secure internet access to non- categorized websites or personal '
+      description: If you have allowed browsing to non-professional websites, have
+        you deployed a secure browsing solution for these sites that isolates it from
+        the standard computer network?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.11
+      assessable: true
+      depth: 1
+      ref_id: '5.11'
+      name: 'Manage WI-Fi Guest access segregated '
+      description: Do you have a "visitor" Wifi isolated from the rest of the Company's
+        network? (Specific connection, dedicated Wifi?)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.12
+      assessable: true
+      depth: 1
+      ref_id: '5.12'
+      name: '
+
+        Manage Wi-Fi access segregated'
+      description: Do you have a secure Wifi access with a separation of uses? (staff,
+        industrial, professional, visitor, etc.)
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.13
+      assessable: true
+      depth: 1
+      ref_id: '5.13'
+      name: 'Set an email filtering when associated attachments have dangerous extension
+        (.exe for example) or content '
+      description: Is there a system for filtering valid e-mails against malicious
+        ones? (Anti-spam, removal of suspicious attached files, etc...)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.13.1
+      assessable: true
+      depth: 1
+      ref_id: 5.13.1
+      name: 'Encrypt email content easily '
+      description: Do you offer users the possibility to easily encrypt the content
+        of e-mails?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.14
+      assessable: true
+      depth: 1
+      ref_id: '5.14'
+      name: Security access to supplier and subcontractor to information system
+      description: Do you secure network interconnections with your subcontractors
+        and suppli-ers?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.14.1
+      assessable: true
+      depth: 1
+      ref_id: 5.14.1
+      name: ' Secure exchange platform access with suppliers and subcontractors to
+        exchange sensitive data'
+      description: Do you offer a secure exchange platform for your subcontractors
+        and suppli-ers?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.14.2
+      assessable: true
+      depth: 1
+      ref_id: 5.14.2
+      name: Segregate Website and internet accessible services from the rest of the
+        company network.
+      description: If your website is hosted within the company, do you separate your
+        website and Internet-accessible services from the rest of the company's network
+        (via a segregated network zone, e.g. "DMZ")?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.15
+      assessable: true
+      depth: 1
+      ref_id: '5.15'
+      name: ' Detect any new device connected to the network.'
+      description: Do you allow connection to the network only to devices identified
+        and man-aged by the information system?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.17
+      assessable: true
+      depth: 1
+      ref_id: '5.17'
+      name: Policy for external connection to information system
+      description: For remote access to your information system (mobile or on-call
+        users, remote sites) do you systematically implement a security solution that
+        ensures strong identification and  authentication of the user (MFA, login
+        / password, certificates, ...) ?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.1
+      assessable: true
+      depth: 1
+      ref_id: '6.1'
+      name: Define and apply a backup policy for sensitive data
+      description: Is the important data saved regularly?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.2
+      assessable: true
+      depth: 1
+      ref_id: '6.2'
+      name: 'Setup secure and distinct physical sites for backup storage
+
+        '
+      description: Are your backups protected in a secure room?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.3
+      assessable: true
+      depth: 1
+      ref_id: '6.3'
+      name: "Setup secure backup storage on cloud system \n"
+      description: Do you use a centrally managed data storage and backup system,
+        such as a cloud (AWS, O365 Sharepoint, OneDrive, google drive,...)?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.4
+      assessable: true
+      depth: 1
+      ref_id: '6.4'
+      name: 'Hard Disk encryption on desktops '
+      description: Do you encrypt computer, smartphones hard disks  without any user
+        interaction (transparent automatic encryption)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.5
+      assessable: true
+      depth: 1
+      ref_id: '6.5'
+      name: 'data lost prevention solutions with central management of data confidentiality
+        solutions '
+      description: Do you implement enterprise data protection management solutions
+        (leak de-tection of confidential data, roles and responsibilities, etc.)?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.6
+      assessable: true
+      depth: 1
+      ref_id: '6.6'
+      name: 'Proceed to regular controls of the SI and set corrective solution '
+      description: Do you carry out regular security audits (application, network,
+        process), then apply the associated corrective actions?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.6.1
+      assessable: true
+      depth: 1
+      ref_id: 6.6.1
+      name: Verify compliance of entities
+      description: Do you check the compliance of your company's subsidiaries?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.6.2
+      assessable: true
+      depth: 1
+      ref_id: 6.6.2
+      name: 'Optimize firewall rules management with regular audits '
+      description: Do you regularly check the rules of your Firewalls?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.7
+      assessable: true
+      depth: 1
+      ref_id: '6.7'
+      name: Penetration testing for validating IT solutions security, unscheduled
+        penetration testing, technical studies
+      description: Do you carry out regular pentest on your IS and your subsidiaries,
+        then apply the associated corrective actions?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.7.1
+      assessable: true
+      depth: 1
+      ref_id: 6.7.1
+      name: PENTEST of company website. Deploy corrective solutions
+      description: Do you perform pentest on your company's websites and then apply
+        the associ-ated corrective actions?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.7.2
+      assessable: true
+      depth: 1
+      ref_id: 6.7.2
+      name: projects to guarantee that the SIEM and SOC are optimized
+      description: Do you regularly check and update your cyberattack detection capabilities?
+        (for example, updating security supervision rules following the pentest performed
+        on your systems, or security project management to update your detection systems)
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.8
+      assessable: true
+      depth: 1
+      ref_id: '6.8'
+      name: "Encrypt / protect sensitive data sent outside the company (e-mail, USB\
+        \ exchanges\u2026)"
+      description: Have you deployed means and tools allowing users to encrypt sensitive
+        data sent outside of the company?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.9
+      assessable: true
+      depth: 1
+      ref_id: '6.9'
+      name: Common guideline/policy for the data classification in place
+      description: Did you defined a data classification policy according to its use
+        (public, confi-dential company, confidential...) and the protection rules
+        to be applied to this data?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.9.1
+      assessable: true
+      depth: 1
+      ref_id: 6.9.1
+      name: Data tagging and data labelling
+      description: Have you implemented a solution to automatically classify your
+        company's data, or to help users making a decision to protect data that would
+        be classified as sensitive?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.9.2
+      assessable: true
+      depth: 1
+      ref_id: 6.9.2
+      name: "Automatic encryption of data classified as confidential when sent outside\
+        \ company (e-mail, USB key\u2026)"
+      description: Do you have a solution to prevent the sending of unprotected confidential
+        data or to systematically encrypt it before it is saved or sent outside your
+        infor-mation system?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.10
+      assessable: true
+      depth: 1
+      ref_id: '6.10'
+      name: Governance model (roles and responsibilities / data owner)
+      description: Have you defined that your company's data should be associated
+        with identified managers and their responsibilities (HR data, design office
+        data, etc.)
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.0
+      assessable: true
+      depth: 1
+      ref_id: '7.0'
+      name: ICS network segregation
+      description: Do you implement segregation between the production environment
+        and other environments (qualification, preproduction, company information
+        system, etc.)?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.1.1
+      assessable: true
+      depth: 1
+      ref_id: 7.1.1
+      name: 'ICS : Identify most critical device on the industrial network'
+      description: Have you performed an inventory of your industrial control system
+        devices, identifying the most critical components?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.1.2
+      assessable: true
+      depth: 1
+      ref_id: 7.1.2
+      name: 'ICS :  specific backup for critical device of industrial control systems'
+      description: Do you perform backup of your most sensitive industrial control
+        systems (con-figuration, source code and data)?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.1.3
+      assessable: true
+      depth: 1
+      ref_id: 7.1.3
+      name: 'ICS :  Setup distinct physical sites for backup storage'
+      description: Do you regularly verify that the backup of your industrial control
+        systems can be restored without problems?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.2
+      assessable: true
+      depth: 1
+      ref_id: '7.2'
+      name: 'ICS :  mapping of the company network'
+      description: Are the documentation, nomenclature and diagrams of ICS devices
+        kept up to date?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.3
+      assessable: true
+      depth: 1
+      ref_id: '7.3'
+      name: 'ICS : documented crisis management process ?
+
+        '
+      description: Is there a documented crisis management process? (such as, for
+        example, disas-ter recovery after a system crash)
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.4
+      assessable: true
+      depth: 1
+      ref_id: '7.4'
+      name: 'ICS :  documentation for design, components and operation'
+      description: Is the documentation relating to the design, components and operation
+        of ICS stored with an appropriate level of security?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.5
+      assessable: true
+      depth: 1
+      ref_id: '7.5'
+      name: 'ICS : Set IT specific standard & governance'
+      description: Is there a qualified person or department dedicated to the design,
+        operation, and monitoring of ICS device?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.6
+      assessable: true
+      depth: 1
+      ref_id: '7.6'
+      name: 'Industrial IT : Have an IACS security awareness or training program for
+        employees and sub-contractors '
+      description: Is there an ICS security awareness or training program for employees
+        and contractors?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.7
+      assessable: true
+      depth: 1
+      ref_id: '7.7'
+      name: "Industrial IT : \_Make users sign a charter of good conduct"
+      description: Do users, operators and administrators of Industrial Automation
+        and Control Systems (IACS) signed cybersecurity best practices and charter?
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.8
+      assessable: true
+      depth: 1
+      ref_id: '7.8'
+      name: 'ICS : specific patch management'
+      description: Are there procedures in place to manage the life cycle of ICS ?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.9
+      assessable: true
+      depth: 1
+      ref_id: '7.9'
+      name: 'ICS :  dedicated and compartmentalized network for the administration  '
+      description: Do you use a dedicated and partitioned network for the administration
+        of ICS?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.10
+      assessable: true
+      depth: 1
+      ref_id: '7.10'
+      name: 'ICS : Secure industrial network & devices access from company network'
+      description: Is there a specifically defined architecture and management rules?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.11
+      assessable: true
+      depth: 1
+      ref_id: '7.11'
+      name: 'Industrial IT :  Audit the change processes, and dedicated IACS solutions '
+      description: Are ICS change processes and dedicated solutions audited annually?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.12
+      assessable: true
+      depth: 1
+      ref_id: '7.12'
+      name: 'ICS :  process for monitoring threats and vulnerabilities   '
+      description: Are ICS components subject to a threat and vulnerability monitoring
+        process?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.13
+      assessable: true
+      depth: 1
+      ref_id: '7.13'
+      name: 'ICS : Have active monitoring of the IACS (SOC, NOC...) '
+      description: Do you use a security monitoring centre  (SOC, NOC (Network Operations
+        Centre), backup status...) of your network allowing detection of security
+        incidents, back up issues and/or active monitoring of Industrial Information
+        System (ICS)?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.14
+      assessable: true
+      depth: 1
+      ref_id: '7.14'
+      name: 'Investigate after a security incident related to the industrial IT
+
+        '
+      description: When an incident occurs in the production, do you investigate whether
+        it could be caused by a malicious element?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.7.1
+      assessable: true
+      depth: 1
+      ref_id: 9.7.1
+      name: 'Escalation and alerting process with Security hotline '
+      description: Have you implemented, documented and tested, at least once a year,
+        a security problem management procedure to ensure that you can react quickly
+        and in-volve the right internal or external people?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.8
+      assessable: true
+      depth: 1
+      ref_id: '9.8'
+      name: Setup a risk analysis
+      description: 'Have you ever done a cyber-risk analysis on your company? '
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.81
+      assessable: true
+      depth: 1
+      ref_id: '9.81'
+      name: Risk management process (reviewed yearly)
+      description: Do you annually review your company's cyber risk level by reviewing
+        your com-pany's risk analyses?
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.82
+      assessable: true
+      depth: 1
+      ref_id: '9.82'
+      name: Continuous risk assessment with central tool generating KPI presented
+        to management level
+      description: Do you have a computer-based risk management solution that allows
+        you to raise the level of cyber risk and process it in a more or less automated
+        way ?
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext1
+      assessable: true
+      depth: 1
+      ref_id: Ext1
+      name: Save Logs Oustide
+      description: 'Do you outsource cybersecurity logs (outside the environment where
+        they are generated) to ensure their integrity?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext2
+      assessable: true
+      depth: 1
+      ref_id: Ext2
+      name: Logs generation on device
+      description: 'Do you activate security log recording on your equipment?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext3
+      assessable: true
+      depth: 1
+      ref_id: Ext3
+      name: Platform 4 Customers Data exchange
+      description: 'Do you use a secure platform to exchange sensitive information
+        with your customers?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext4
+      assessable: true
+      depth: 1
+      ref_id: Ext4
+      name: Only Corporate Internet
+      description: 'Do you only use the internet access defined within the company?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext5
+      assessable: true
+      depth: 1
+      ref_id: Ext5
+      name: Business Continuity Plan
+      description: 'Do you have a business continuity plan describing the processes
+        and technologies in place to recover from any incident on critical servers,
+        network equipments, laptops and desktops?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext6
+      assessable: true
+      depth: 1
+      ref_id: Ext6
+      name: Suppliers in Continuity plan
+      description: 'Are your crisis management, continuity and disaster recovery plans
+        designed to take into account your providers/suppliers?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext7
+      assessable: true
+      depth: 1
+      ref_id: Ext7
+      name: Cyber Certification
+      description: "Has your organization implemented a set of security guidelines,\
+        \ procedural instructions or processes based on a security standard framework\
+        \ (ISO27001, NIST,\u2026.)?\nIf yes, which framework do you use? \n[Corporate\
+        \ IT]"
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext8
+      assessable: true
+      depth: 1
+      ref_id: Ext8
+      name: Regular PCA review
+      description: 'Is the business continuity plan (BCP) reviewed and tested regularly?
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext9
+      assessable: true
+      depth: 1
+      ref_id: Ext9
+      name: Data regulation policy
+      description: 'Do you identify the type of data you manipulate in order to process
+        them accordingly:
+
+        - personal data
+
+        - country regulated data
+
+        - export control data
+
+        - business sensitive data
+
+        - other types of data (please detail)
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext10
+      assessable: true
+      depth: 1
+      ref_id: Ext10
+      name: IT cartography
+      description: 'Cartography :
+
+        Are Physical devices, Software platforms, systems within the organization
+        inventoried and categorized?
+
+        Do you have a complete cartography of the interfaces of the product with other
+        systems? Does this cartography include all protocols used by the interfaces
+        and the flow matrix?
+
+        [Industrial IT]
+
+        [Corporate IT]
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext11
+      assessable: true
+      depth: 1
+      ref_id: Ext11
+      name: Identify and Access update for customers connexion
+      description: 'When you request a remote access to your customers'' Information
+        System for your employees: do you systematically inform your customers when
+        access must be revoked (e.g. when an employee left your company)?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext12
+      assessable: true
+      depth: 1
+      ref_id: Ext12
+      name: Servers & PC hardening
+      description: 'Do you implement a policy of security hardening of the configuration
+        on your workstations and servers?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext13
+      assessable: true
+      depth: 1
+      ref_id: Ext13
+      name: USB antivirus scan
+      description: 'Does the antivirus automatically scan the servers, workstations
+        and USB keys connected to the production benches?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext14
+      assessable: true
+      depth: 1
+      ref_id: Ext14
+      name: Disable USB autorun
+      description: 'Do you disable autoruns on new plugged devices on computers, laptops
+        and servers ?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext15
+      assessable: true
+      depth: 1
+      ref_id: Ext15
+      name: Antivirus update
+      description: "Do you have a policy for antivirus signatures and engine update,\
+        \ on a weekly basis minimum for all standard devices, with exception management\
+        \ for specific devices? \n[Industrial IT]\n[Corporate IT]"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext16
+      assessable: true
+      depth: 1
+      ref_id: Ext16
+      name: Antivirus central update console
+      description: 'Do you use a centralized management system to update and manage
+        solutions against malicious software/code?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext17
+      assessable: true
+      depth: 1
+      ref_id: Ext17
+      name: Antivirus testing
+      description: "Do you test the effectiveness of malware protection programs?\
+        \ \n[Industrial IT]\n[Corporate IT]"
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext18
+      assessable: true
+      depth: 1
+      ref_id: Ext18
+      name: Data handling rules
+      description: 'Do you set up security measures adapted to the level of classification
+        of the data handled on the media (Laptop, USB, email, ...)?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext19
+      assessable: true
+      depth: 1
+      ref_id: Ext19
+      name: Users access procedure
+      description: 'Is there a procedure for creating, modifying and deleting access
+        for users and administrators involved in production environments?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext20
+      assessable: true
+      depth: 1
+      ref_id: Ext20
+      name: Ending date for users account
+      description: 'Do you always set an end date when creating trainee or external
+        (providers) accounts?
+
+        [Industrial IT]
+
+        [Corporate IT]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext21
+      assessable: true
+      depth: 1
+      ref_id: Ext21
+      name: Suppliers nominative accounts
+      description: 'Do you create nominative accounts for each employee of a provider
+        company?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext22
+      assessable: true
+      depth: 1
+      ref_id: Ext22
+      name: Operating Systems update management
+      description: 'Do you update your systems as recommended by the editors (update,
+        configuration...) ?
+
+        [Industrial IT]
+
+        [Corporate IT]
+
+        [Development Environment]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext23
+      assessable: true
+      depth: 1
+      ref_id: Ext23
+      name: Vulnerability management process
+      description: 'Did you define and implement a vulnerability management process
+        for your services (identification, classification, prioritization, remediation
+        and mitigation of vulnerabilities)?
+
+        [Industrial IT]
+
+        [Corporate IT]
+
+        [Development Environment]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext24
+      assessable: true
+      depth: 1
+      ref_id: Ext24
+      name: Devices destruction process
+      description: 'Do you implement decommissioning processes (disposal report, total
+        deletion of files) before the disposal of assets (workstations, servers)?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext25
+      assessable: true
+      depth: 1
+      ref_id: Ext25
+      name: To remove devices storage
+      description: 'Do media devices awaiting for disposal stored in an environment
+        with restricted and controlled access?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext26
+      assessable: true
+      depth: 1
+      ref_id: Ext26
+      name: Backup review
+      description: 'Are the backup devices subject to regular checks to ensure that
+        they are working properly?
+
+        [Industrial IT]
+
+        [Corporate IT]
+
+        [Development Environment]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext27
+      assessable: true
+      depth: 1
+      ref_id: Ext27
+      name: Crisis management exercices
+      description: 'Do you perform crisis management training/simulation sessions?
+
+        [Industrial IT]
+
+        [Corporate IT]'
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext28
+      assessable: true
+      depth: 1
+      ref_id: Ext28
+      name: Insurance for cyber events
+      description: "Do you have an insurance contract covering the consequences of\
+        \ an incident such as: \n- physical damages\n- IT damages\n- cyber damages\n\
+        - business loss\n[Industrial IT]\n[Corporate IT]"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext29
+      assessable: true
+      depth: 1
+      ref_id: Ext29
+      name: Cyber security certification
+      description: 'Is your organization certified in security? If yes, please provide
+        certificate, and information on certification scope.
+
+        [Industrial IT]
+
+        [Corporate IT]
+
+        [Development Environment]'
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext30
+      assessable: true
+      depth: 1
+      ref_id: Ext30
+      name: Industrial data flows map
+      description: 'vible ?
+
+        EN: Do you have a standard block diagram showing the cycle of the various
+        exchanges (material and immaterial) between your customers and you for product
+        manufacturing, including internal exchanges or deliveries using removable
+        media?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext31
+      assessable: true
+      depth: 1
+      ref_id: Ext31
+      name: Data sensitivity in ICS
+      description: 'Do you take into account, in the industrial environment, the sensitivity
+        of the information exchanged with your customers?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext32
+      assessable: true
+      depth: 1
+      ref_id: Ext32
+      name: Dev, Products Customers projects standard
+      description: 'Has a Project Security Management Plan been developed, implemented
+        and communicated to your customers to ensure that all stakeholders understand
+        the project expectations and their roles and responsibilities?
+
+        (Does this Plan include the point of contact responsible of cybersecurity
+        activities during the project?)
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext33
+      assessable: true
+      depth: 1
+      ref_id: Ext33
+      name: Incident management process
+      description: 'Do you have an incident management process (including data breaches
+        incident management) which includes the notification of customers when an
+        incident implies product or services provided to them?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext34
+      assessable: true
+      depth: 1
+      ref_id: Ext34
+      name: Customers project data control
+      description: 'Do you identify the location of your customers data / assets that
+        are processed / operated in the frame of the project (including if relevant
+        your customer''s personal data), in particular when they are stored in a cloud
+        context (including backup and disaster recovery locations)?
+
+        If the answer is yes, please provide explanations/details on the  locations.
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext35
+      assessable: true
+      depth: 1
+      ref_id: Ext35
+      name: Customers data protection directive implemented
+      description: 'Do you process data sent by your customers or created in the frame
+        of the project in accordance with the latest version of your customers  Protection
+        of Information directive?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext36
+      assessable: true
+      depth: 1
+      ref_id: Ext36
+      name: Dev Cloud customer data segregation
+      description: 'Do you use cloud environments to store and process your customers
+        or production data?
+
+        If yes, do you segregate data by customers  logically at least in all environments
+        (production, backup...)?
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext37
+      assessable: true
+      depth: 1
+      ref_id: Ext37
+      name: ICS availability limit
+      description: 'Did you identify and define the maximum tolerable delay of interruption
+        of your production in relation to your customers contracts?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext38
+      assessable: true
+      depth: 1
+      ref_id: Ext38
+      name: Least privilege dev. Env.
+      description: 'Do you grant access to the development environments in accordance
+        with the least privilege principle (to not provide access to all environments
+        to all users but to use a configuration with user groups associated to specific
+        equipment)?
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext39
+      assessable: true
+      depth: 1
+      ref_id: Ext39
+      name: Products logs
+      description: "Do you have a default logging policy for products delivered to\
+        \ customers that records key product actions?  \n[Product]"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext40
+      assessable: true
+      depth: 1
+      ref_id: Ext40
+      name: Customers data location & connections
+      description: 'Are you able to list the physical production sites included in
+        the services provided to your customers?
+
+        Do you have an up-to-date diagram showing the network interconnections between
+        your customers and you (IP mapping, servers, and addressing)?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext41
+      assessable: true
+      depth: 1
+      ref_id: Ext41
+      name: Supply chain risk assessment
+      description: 'Did you implement a cyber supply chain risk assessment process
+        to identify, prioritize and assess your suppliers and third-party partners
+        of information systems, components, and services?
+
+        [Industrial IT]
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext42
+      assessable: true
+      depth: 1
+      ref_id: Ext42
+      name: ICS Cyber focal point
+      description: 'Is a cybersecurity referent (focal point) identified for the production
+        means?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext43
+      assessable: true
+      depth: 1
+      ref_id: Ext43
+      name: ICS security rules & awareness
+      description: 'Did you define security rules to be applied to production environments
+        and trained the appropriate employees?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext44
+      assessable: true
+      depth: 1
+      ref_id: Ext44
+      name: ICS workstations update
+      description: 'Are production workstations regularly updated?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext45
+      assessable: true
+      depth: 1
+      ref_id: Ext45
+      name: Spare PC Update
+      description: 'Do you ensure that workstations in stock (spare) are updated before
+        re-entry into service?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext46
+      assessable: true
+      depth: 1
+      ref_id: Ext46
+      name: ICS users' identification
+      description: 'Do you have the technical or process means to identify the author
+        of an action on the production environments (authentication logs, correlation
+        between shift planning and accounts used)?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext47
+      assessable: true
+      depth: 1
+      ref_id: Ext47
+      name: logs for ICS systems & antivirus
+      description: "Are systems and antivirus logs enabled on production environments?\
+        \ \n[Industrial IT]"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext48
+      assessable: true
+      depth: 1
+      ref_id: Ext48
+      name: ICS privileges accounts policy
+      description: 'Did you implement security measures governing the use of privileged
+        accounts (creation, modification, deletion, specific rules in case of generic
+        account usage)?
+
+        If yes, please detail.
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext49
+      assessable: true
+      depth: 1
+      ref_id: Ext49
+      name: ICS shared accounts strong authent
+      description: 'If shared accounts are used on production environments, do you
+        implement security measures other than a password to log in to production
+        environments (physical access control to the room hosting the production workstations
+        and/or transparent screen lock software solutions)?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext50
+      assessable: true
+      depth: 1
+      ref_id: Ext50
+      name: ICS Update
+      description: 'Do you perform production equipment updates at least twice a year?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext51
+      assessable: true
+      depth: 1
+      ref_id: Ext51
+      name: ICS default password update
+      description: 'Do you change the default passwords and credentials on your customers
+        production environments?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext52
+      assessable: true
+      depth: 1
+      ref_id: Ext52
+      name: Control ICS mainframe connections
+      description: 'Do you have the means to detect foreign or unauthorized connections
+        to the servers used by your industrial systems in order to qualify and block
+        them if necessary?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext53
+      assessable: true
+      depth: 1
+      ref_id: Ext53
+      name: ICS secure Radio-Air networks
+      description: 'Is the production wifi network dedicated and isolated from other
+        wifi networks?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext54
+      assessable: true
+      depth: 1
+      ref_id: Ext54
+      name: ICS wireless hardening
+      description: 'Do you disable wifi/wireless connections on equipment (industrial
+        production benches) by default ?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext55
+      assessable: true
+      depth: 1
+      ref_id: Ext55
+      name: ICS USB storage cleaning
+      description: 'Do you use sheep dip accessible to all users to ensure the safety
+        of removable media used for your customers production?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext56
+      assessable: true
+      depth: 1
+      ref_id: Ext56
+      name: ICS removables policy
+      description: 'Do you implement specifics restrictions or measures for the use
+        of removable devices in production environments?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext57
+      assessable: true
+      depth: 1
+      ref_id: Ext57
+      name: USB cleaning multiple antivirus
+      description: 'One of the antivirus used on sheep dip is different from the one
+        used on the workstations?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext58
+      assessable: true
+      depth: 1
+      ref_id: Ext58
+      name: ICS BYOD policy
+      description: 'Did you implement security measures to manage and secure the use
+        of BYOD in your customers production environments (including network connection,
+        anti-malware protection...)?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext59
+      assessable: true
+      depth: 1
+      ref_id: Ext59
+      name: ICS production customers incident process
+      description: 'Do you have a crisis/incident management process for your customers''
+        production incidents that is shared with  your customers? (Notification to
+        your customer Security Manager)
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext60
+      assessable: true
+      depth: 1
+      ref_id: Ext60
+      name: ICS charter for suppliers
+      description: 'Is the Charter signed by all internal or external users involved
+        in production environments?
+
+        Do you archive these documents?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext61
+      assessable: true
+      depth: 1
+      ref_id: Ext61
+      name: ICS cyber risk analysis
+      description: 'Did you perform a cyber risk analysis on your production information
+        systems?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext62
+      assessable: true
+      depth: 1
+      ref_id: Ext62
+      name: ICS Cyber risk annual review
+      description: 'Do you update (at least once a year) risks identified on your
+        production information systems?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext63
+      assessable: true
+      depth: 1
+      ref_id: Ext63
+      name: ICS PCA update with Risks
+      description: 'Are risks identified during the risks analysis taken into account
+        in the company''s BCP risk?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext64
+      assessable: true
+      depth: 1
+      ref_id: Ext64
+      name: ICS backup room security
+      description: 'Is physical access to the storage room of the backups controlled
+        (where applicable)?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext65
+      assessable: true
+      depth: 1
+      ref_id: Ext65
+      name: ICS specific PCA
+      description: 'Do you have an IT contingency plan for production environments
+        including machines and production benches?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext66
+      assessable: true
+      depth: 1
+      ref_id: Ext66
+      name: Archives restricted access
+      description: 'Is access to the archives restricted or protected using physical
+        access control (keys, badges...)?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext67
+      assessable: true
+      depth: 1
+      ref_id: Ext67
+      name: Customers data backup policy
+      description: 'Does your backup policy take into account the data and products
+        provided to your customers?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext68
+      assessable: true
+      depth: 1
+      ref_id: Ext68
+      name: ICS Customers Servers ID
+      description: 'Are you able to identify the server rooms used as part of each
+        customers'' service delivery?
+
+        [Industrial IT]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext69
+      assessable: true
+      depth: 1
+      ref_id: Ext69
+      name: Customers security channel
+      description: 'Do you have the contact details of your customers'' points of
+        contact to alert in the event of a security incident and vice versa contact
+        points are transmitted to your customers in order to respond in the event
+        of an alert?
+
+        [Industrial IT]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext70
+      assessable: true
+      depth: 1
+      ref_id: Ext70
+      name: ICS security audits
+      description: "Do you perform regular audits (compliance and/or technical) on\
+        \ your supply chain connected to your information system or when regular equipment/material\
+        \ exchange occur? \nIf yes, please precise the frequency.\n[Industrial IT]"
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext71
+      assessable: true
+      depth: 1
+      ref_id: Ext71
+      name: Customers policy to suppliers
+      description: 'Do you contractually cascade your customers security requirements
+        on your suppliers and third-party partners so they can implement the appropriate
+        measures to meet the project security requirements?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext72
+      assessable: true
+      depth: 1
+      ref_id: Ext72
+      name: Dev settings backups
+      description: 'Do you perform a regular configuration backup in order to restore
+        the environments in case of a security incident?
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext73
+      assessable: true
+      depth: 1
+      ref_id: Ext73
+      name: Dev. Cyber languages guide
+      description: 'Do you have a secure code guideline or standard for each development
+        language that is used by your developers?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext74
+      assessable: true
+      depth: 1
+      ref_id: Ext74
+      name: Cyber Dev Standard
+      description: 'Are developers systematically trained on best secure development
+        practices based on a standard ?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext75
+      assessable: true
+      depth: 1
+      ref_id: Ext75
+      name: Dev, Products libraries vulnerabilities identification
+      description: 'At each project start, do you have a process to identify and validate
+        the software or libraries versions, in order to ensure that these software
+        and libraries used in the product and the development environment are free
+        from known vulnerabilities?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext76
+      assessable: true
+      depth: 1
+      ref_id: Ext76
+      name: Dev env. Vulnerabilities monitoring
+      description: "During the development phase, do you have an active vulnerability\
+        \ assessment process in order to control the development environments and\
+        \ ensure the lack of known vulnerabilities in the framework (operating system,\
+        \ libraries, \u2026) ?\n[Development Environment]"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext77
+      assessable: true
+      depth: 1
+      ref_id: Ext77
+      name: Dev, Products components inventory
+      description: 'At each project start, do you have a process to identify and validate
+        the firmware versions and the hardware COTS, in order to ensure that these
+        items used in the product and the development environment are free from known
+        vulnerabilities and product and environment are secure?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext78
+      assessable: true
+      depth: 1
+      ref_id: Ext78
+      name: Products hardening policy
+      description: 'Do you include hardening principles to reduce the attack surface?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext79
+      assessable: true
+      depth: 1
+      ref_id: Ext79
+      name: Hardening of products
+      description: 'At each project start, do you perform configuration hardening
+        of the development environments including for instance the deactivation of
+        unnecessary unused components, ports, protocols or functions?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext80
+      assessable: true
+      depth: 1
+      ref_id: Ext80
+      name: Public Dev storage policy
+      description: 'If you store your developments code in public collaborative sharing
+        spaces (GITHUB, cloud services, etc.), do you have a development storage policy
+        that makes it possible for example to identify when this practice is not authorised?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext81
+      assessable: true
+      depth: 1
+      ref_id: Ext81
+      name: Product, Dev code audit
+      description: 'In order to verify secure code and design rules implementation,
+        do you systematically perform a code audit, at least at the end of the product
+        development, and do you ensure that correctives measures resulting from the
+        audit are implemented?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext82
+      assessable: true
+      depth: 1
+      ref_id: Ext82
+      name: Products security testing
+      description: 'In order to ensure the implementation of secure code and design
+        rules, are security tests performed as a minimum before delivery and/or throughout
+        the product development cycle?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext83
+      assessable: true
+      depth: 1
+      ref_id: Ext83
+      name: Code security tools
+      description: 'Do you use tools to perform code security checks (e.g. Static
+        or Dynamic Application Security Testing)?
+
+        [Product]
+
+        [Development Environment]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext84
+      assessable: true
+      depth: 1
+      ref_id: Ext84
+      name: Products pen test
+      description: 'Do you perform a penetration test on products before releasing
+        them to your customers?
+
+        [Product]'
+      implementation_groups:
+      - Silver
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext85
+      assessable: true
+      depth: 1
+      ref_id: Ext85
+      name: Products risk analysis
+      description: 'Do you have a Security By Design policy involving a systematic
+        review of the applicability of a risk analysis carried out on products/services
+        prior to their delivery to your customers in order to identify risks and measures
+        to control them and do you inform your customers of this before delivery?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext86
+      assessable: true
+      depth: 1
+      ref_id: Ext86
+      name: Products clean check
+      description: 'Do you perform malware and vulnerability checks before delivery
+        (initial or update)?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext87
+      assessable: true
+      depth: 1
+      ref_id: Ext87
+      name: Products integrity process
+      description: 'In case of suspicion of an altered product, do you have the capability
+        to perform forensics in order to identify the way the software has been tampered
+        with?
+
+        [Product]'
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext88
+      assessable: true
+      depth: 1
+      ref_id: Ext88
+      name: Dev env. Virus scan
+      description: 'Do you perform antivirus or anti-malware checks on the code repositories
+        in order to ensure the lack of malicious code?
+
+        [Development Environment]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext89
+      assessable: true
+      depth: 1
+      ref_id: Ext89
+      name: Products code integrity verification
+      description: 'During the delivery phase, are you able to perform tests (hashing
+        function, signature) to ensure software''s integrity or authenticity included
+        in the developped solution?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext90
+      assessable: true
+      depth: 1
+      ref_id: Ext90
+      name: Products data storage security
+      description: "Before the delivery phase, do you inspect and sanitize storage\
+        \ media and materials before their use, to ensure that they are free of malicious\
+        \ code? \nOnce inspection is carried out, do you store storage media / materials\
+        \ in a secure area ?\n[Product]"
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext91
+      assessable: true
+      depth: 1
+      ref_id: Ext91
+      name: Product changes approval
+      description: 'After deployment, do you approve changes on the product based
+        on the same security activities defined in the Project Security Management
+        Plan?
+
+        [Product]'
+      implementation_groups:
+      - Bronze
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext92
+      assessable: true
+      depth: 1
+      ref_id: Ext92
+      name: Dev. Security infrastructure
+      description: ' Did you deploy security components on your customers development
+        environments in order to ensure the security:
+
+        - Defence in depth equipment (IDS, IPS)
+
+        - Privilege Access Management (PAM)
+
+        - Monitoring means (NOC, SOC)?
+
+        [Development Environment]'
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext93
+      assessable: true
+      depth: 1
+      ref_id: Ext93
+      name: Prod, Dev cybersecurity certification
+      description: "Does your development process include cyber activities permitting\
+        \ to achieve product cyber certification when it is necessary? \nPlease detail\
+        \ corresponding cyber certifications which can be achieved through your process.\n\
+        [Product]\n[Development Environment]"
+      implementation_groups:
+      - Gold
+    - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext94
+      assessable: true
+      depth: 1
+      ref_id: Ext94
+      name: RGPD respect for customers data
+      description: 'In the event your product or service process your customer''s
+        personal data, do you ensure that you comply with GDPR regulation (data location,
+        data retention, mechanisms ensuring access/modification/deletion to data)?
+
+        [Product]'
+      implementation_groups:
+      - Bronze

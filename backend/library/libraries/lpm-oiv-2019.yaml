@@ -1,0 +1,1408 @@
+urn: urn:intuitem:risk:library:lpm-oiv-2019
+locale: fr
+ref_id: LPM-OIV-2019
+name: "R\xE8gles OIV"
+description: " R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9S D'IMPORTANCE\
+  \ VITALE \" ACTIVIT\xC9S CIVILES DE L'\xC9TAT \"\nArr\xEAt\xE9 du 29 mai 2019 fixant\
+  \ les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9s de d\xE9claration des syst\xE8\
+  mes d'information d'importance vitale et des incidents de s\xE9curit\xE9 relatives\
+  \ au secteur d'activit\xE9s d'importance vitale \xAB Activit\xE9s civiles de l'Etat\
+  \ \xBB et pris en application des articles R. 1332-41-1, R. 1332-41-2 et R. 1332-41-10\
+  \ du code de la d\xE9fense\nhttps://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
+copyright: "Loi fran\xE7aise"
+version: 1
+provider: "Gouvernement fran\xE7ais"
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:lpm-oiv-2019
+    ref_id: LPM-OIV-2019
+    name: "R\xE8gles OIV"
+    description: " R\xC8GLES DE S\xC9CURIT\xC9 RELATIVES AU SECTEUR D'ACTIVIT\xC9\
+      S D'IMPORTANCE VITALE \" ACTIVIT\xC9S CIVILES DE L'\xC9TAT \"\nArr\xEAt\xE9\
+      \ du 29 mai 2019 fixant les r\xE8gles de s\xE9curit\xE9 et les modalit\xE9s\
+      \ de d\xE9claration des syst\xE8mes d'information d'importance vitale et des\
+      \ incidents de s\xE9curit\xE9 relatives au secteur d'activit\xE9s d'importance\
+      \ vitale \xAB Activit\xE9s civiles de l'Etat \xBB et pris en application des\
+      \ articles R. 1332-41-1, R. 1332-41-2 et R. 1332-41-10 du code de la d\xE9fense\n\
+      https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000038565011"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: "R\xE8gle relative \xE0 la politique de s\xE9curit\xE9 des syst\xE8mes\
+        \ d'information"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      description: "L'op\xE9rateur d'importance vitale \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre une politique de s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ (PSSI)."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      description: "La PSSI d\xE9crit l'ensemble des moyens organisationnels et techniques\
+        \ mis en \u0153uvre par l'op\xE9rateur afin d'assurer la s\xE9curit\xE9 de\
+        \ ses syst\xE8mes d'information d'importance vitale (SIIV). En particulier,\
+        \ elle :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node4
+      description: "- pr\xE9cise les objectifs et les orientations strat\xE9giques\
+        \ en mati\xE8re de s\xE9curit\xE9 des SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node4
+      description: "- d\xE9crit l'organisation de la gouvernance de la s\xE9curit\xE9\
+        \ et notamment les r\xF4les et les responsabilit\xE9s du personnel interne\
+        \ et du personnel externe (prestataires, fournisseurs, etc.) \xE0 l'\xE9gard\
+        \ de la s\xE9curit\xE9 des SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node4
+      description: "- pr\xE9voit un plan de sensibilisation \xE0 la s\xE9curit\xE9\
+        \ des SIIV au profit de l'ensemble du personnel ainsi qu'un plan de formation\
+        \ \xE0 la s\xE9curit\xE9 des SIIV au profit des personnes ayant des responsabilit\xE9\
+        s particuli\xE8res, notamment les personnes en charge de l'administration\
+        \ et de la s\xE9curit\xE9 des SIIV et les utilisateurs disposant de droits\
+        \ d'acc\xE8s privil\xE9gi\xE9s aux SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node4
+      description: "- fixe les mesures de s\xE9curit\xE9 g\xE9n\xE9rales, notamment\
+        \ en mati\xE8re de contr\xF4le du personnel interne et du personnel externe,\
+        \ de s\xE9curit\xE9 physique des SIIV, de gestion des ressources mat\xE9rielles\
+        \ et logicielles, de contr\xF4le d'acc\xE8s aux SIIV, d'exploitation et d'administration\
+        \ des SIIV et de s\xE9curit\xE9 des ressources, des r\xE9seaux et des postes\
+        \ de travail ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node4
+      description: "- d\xE9finit les proc\xE9dures suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node9
+      description: "- la proc\xE9dure d'homologation de s\xE9curit\xE9 des SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node9
+      description: "- les proc\xE9dures de contr\xF4le et d'audit de la s\xE9curit\xE9\
+        \ des SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node9
+      description: "- la proc\xE9dure de maintien en conditions de s\xE9curit\xE9\
+        \ des ressources des SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node9
+      description: "- la proc\xE9dure de traitement des incidents de s\xE9curit\xE9\
+        \ affectant les SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node9
+      description: "- les proc\xE9dures de gestion de crises en cas d'attaques informatiques\
+        \ visant des SIIV et de continuit\xE9 des activit\xE9s d'importance vitale."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      description: "La PSSI et ses documents d'application sont approuv\xE9s formellement\
+        \ par la direction de l'op\xE9rateur."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      description: "L'op\xE9rateur \xE9labore au profit de sa direction, au moins\
+        \ annuellement, un rapport sur la mise en \u0153uvre de la PSSI et de ses\
+        \ documents d'application."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      description: "Ce rapport pr\xE9cise notamment l'\xE9tat des lieux des risques,\
+        \ le niveau de s\xE9curit\xE9 des SIIV et les actions de s\xE9curisation men\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:1
+      description: "La PSSI, ses documents d'application et les rapports sur leur\
+        \ mise en \u0153uvre sont tenus \xE0 la disposition de l'Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "R\xE8gle relative \xE0 l'homologation de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "L'op\xE9rateur d'importance vitale proc\xE8de \xE0 l'homologation\
+        \ de s\xE9curit\xE9 de chaque syst\xE8me d'information d'importance vitale\
+        \ (SIIV), en mettant en \u0153uvre la proc\xE9dure d'homologation pr\xE9vue\
+        \ par sa politique de s\xE9curit\xE9 des syst\xE8mes d'information (PSSI)."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "L'homologation d'un syst\xE8me est une d\xE9cision formelle prise\
+        \ par l'op\xE9rateur qui atteste que les risques pesant sur la s\xE9curit\xE9\
+        \ de ce syst\xE8me ont \xE9t\xE9 identifi\xE9s et que les mesures n\xE9cessaires\
+        \ pour le prot\xE9ger sont mises en \u0153uvre. Elle atteste \xE9galement\
+        \ que les \xE9ventuels risques r\xE9siduels ont \xE9t\xE9 identifi\xE9s et\
+        \ accept\xE9s par l'op\xE9rateur."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "Dans le cadre de l'homologation, un audit de la s\xE9curit\xE9\
+        \ du SIIV doit \xEAtre r\xE9alis\xE9. Cet audit vise \xE0 v\xE9rifier l'application\
+        \ et l'efficacit\xE9 des mesures de s\xE9curit\xE9 du SIIV et notamment le\
+        \ respect des r\xE8gles de s\xE9curit\xE9 mentionn\xE9es dans le pr\xE9sent\
+        \ arr\xEAt\xE9. L'audit doit permettre d'\xE9valuer le niveau de s\xE9curit\xE9\
+        \ du SIIV au regard des menaces et des vuln\xE9rabilit\xE9s connues. Il comporte\
+        \ notamment la r\xE9alisation d'un audit d'architecture, d'un audit de configuration\
+        \ et d'un audit organisationnel et physique."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "Cet audit est r\xE9alis\xE9 dans le respect des r\xE8gles fix\xE9\
+        es par le r\xE9f\xE9rentiel en mati\xE8re d'audit de s\xE9curit\xE9 des syst\xE8\
+        mes d'information pr\xE9vu \xE0 l'article 10 du d\xE9cret n\xB0 2015-350 du\
+        \ 27 mars 2015 relatif \xE0 la qualification des produits de s\xE9curit\xE9\
+        \ et des prestataires de service de confiance pour les besoins de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "L'op\xE9rateur peut r\xE9aliser lui-m\xEAme l'audit ou recourir\
+        \ \xE0 un prestataire qualifi\xE9 dans les conditions pr\xE9vues au chapitre\
+        \ III du d\xE9cret n\xB0 2015-350 du 27 mars 2015 pr\xE9cit\xE9."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "A l'issue de l'audit, l'op\xE9rateur ou, le cas \xE9ch\xE9ant,\
+        \ le prestataire \xE9labore un rapport d'audit qui expose les constatations\
+        \ sur les mesures appliqu\xE9es et sur le respect des r\xE8gles de s\xE9curit\xE9\
+        \ pr\xE9vues par le pr\xE9sent arr\xEAt\xE9. Le rapport pr\xE9cise si le niveau\
+        \ de s\xE9curit\xE9 atteint est conforme aux objectifs de s\xE9curit\xE9,\
+        \ compte tenu des menaces et des vuln\xE9rabilit\xE9s connues. Il formule\
+        \ des recommandations pour rem\xE9dier aux \xE9ventuelles non-conformit\xE9\
+        s et vuln\xE9rabilit\xE9s d\xE9couvertes."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "L'op\xE9rateur prend la d\xE9cision d'homologuer un SIIV sur la\
+        \ base du dossier d'homologation comportant notamment :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node27
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node26
+      description: "- l'analyse de risques et les objectifs de s\xE9curit\xE9 du SIIV\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node28
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node26
+      description: "- les mesures de s\xE9curit\xE9 appliqu\xE9es au SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node29
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node26
+      description: "- les rapports d'audit de la s\xE9curit\xE9 du SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node30
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node26
+      description: "- les risques r\xE9siduels et les raisons justifiant leur acceptation."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "La validit\xE9 de l'homologation est r\xE9examin\xE9e par l'op\xE9\
+        rateur au moins tous les trois ans et lors de chaque \xE9v\xE9nement ou \xE9\
+        volution de nature \xE0 modifier le contexte d\xE9crit dans le dossier d'homologation.\
+        \ Chaque r\xE9examen de l'homologation est consign\xE9 dans le dossier d'homologation.\
+        \ L'op\xE9rateur proc\xE8de au renouvellement de l'homologation d\xE8s qu'elle\
+        \ n'est plus valide."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "L'op\xE9rateur tient \xE0 la disposition de l'Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d'information les d\xE9cisions et dossiers\
+        \ d'homologation, notamment les rapports d'audit. Ces documents confidentiels\
+        \ sont susceptibles de contenir des informations dont la r\xE9v\xE9lation\
+        \ est r\xE9prim\xE9e par les dispositions de l'article 226-13 du code p\xE9\
+        nal. Ils sont, le cas \xE9ch\xE9ant, couverts par le secret de la d\xE9fense\
+        \ nationale."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node33
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:2
+      description: "La pr\xE9sente r\xE8gle relative \xE0 l'homologation s'applique\
+        \ sans pr\xE9judice des dispositions pr\xE9vues par l'arr\xEAt\xE9 du 30 novembre\
+        \ 2011 portant approbation de l'instruction g\xE9n\xE9rale interminist\xE9\
+        rielle n\xB0 1300 sur la protection du secret de la d\xE9fense nationale,\
+        \ en mati\xE8re d'homologation des syst\xE8mes d'information traitant des\
+        \ informations classifi\xE9es."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "R\xE8gle relative \xE0 la cartographie"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:3
+      description: "L'op\xE9rateur d'importance vitale \xE9labore et tient \xE0 jour,\
+        \ pour chaque syst\xE8me d'information d'importance vitale (SIIV), les \xE9\
+        l\xE9ments de cartographie suivants :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node36
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- les noms et les fonctions des applications, supportant les activit\xE9\
+        s de l'op\xE9rateur, install\xE9es sur le SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node37
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- le cas \xE9ch\xE9ant, les plages d'adresses IP de sortie du\
+        \ SIIV vers internet ou un r\xE9seau tiers, ou accessibles depuis ces r\xE9\
+        seaux ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node38
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- le cas \xE9ch\xE9ant, les plages d'adresses IP associ\xE9es\
+        \ aux diff\xE9rents sous-syst\xE8mes composant le SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node39
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- la description fonctionnelle et les lieux d'installation du\
+        \ SIIV et de ses diff\xE9rents sous-syst\xE8mes ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node40
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- la description fonctionnelle des points d'interconnexion du\
+        \ SIIV et de ses diff\xE9rents sous-syst\xE8mes avec des r\xE9seaux tiers,\
+        \ notamment la description des \xE9quipements et des fonctions de filtrage\
+        \ et de protection mis en \u0153uvre au niveau de ces interconnexions ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node41
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- l'inventaire et l'architecture des dispositifs d'administration\
+        \ du SIIV permettant de r\xE9aliser notamment les op\xE9rations d'installation\
+        \ \xE0 distance, de mise \xE0 jour, de supervision, de gestion des configurations,\
+        \ d'authentification ainsi que de gestion des comptes et des droits d'acc\xE8\
+        s ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node42
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- la liste des comptes disposant de droits d'acc\xE8s privil\xE9\
+        gi\xE9s (appel\xE9s \" comptes privil\xE9gi\xE9s \") au SIIV. Cette liste\
+        \ pr\xE9cise pour chaque compte le niveau et le p\xE9rim\xE8tre des droits\
+        \ d'acc\xE8s associ\xE9s, notamment les comptes sur lesquels portent ces droits\
+        \ (comptes d'utilisateurs, comptes de messagerie, comptes de processus, etc.)\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node43
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node35
+      description: "- l'inventaire, l'architecture et le positionnement des services\
+        \ de r\xE9solution de noms d'h\xF4te, de messagerie, de relais internet et\
+        \ d'acc\xE8s distant mis en \u0153uvre par le SIIV."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node44
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:3
+      description: "Les \xE9l\xE9ments de cartographie ainsi r\xE9unis sont des documents\
+        \ confidentiels susceptibles de contenir des informations dont la r\xE9v\xE9\
+        lation est r\xE9prim\xE9e par les dispositions de l'article 226-13 du code\
+        \ p\xE9nal. Ils sont, le cas \xE9ch\xE9ant, couverts par le secret de la d\xE9\
+        fense nationale."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node45
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:3
+      description: "Sur demande de l'Agence nationale de la s\xE9curit\xE9 des syst\xE8\
+        mes d'information, l'op\xE9rateur lui communique les \xE9l\xE9ments de cartographie\
+        \ mis \xE0 jour sur un support \xE9lectronique, dans un format qui peut \xEA\
+        tre lu par les principaux logiciels bureautiques accessibles au public."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "R\xE8gle relative au maintien en conditions de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node47
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:4
+      description: "L'op\xE9rateur d'importance vitale \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre une proc\xE9dure de maintien en conditions de s\xE9\
+        curit\xE9 des ressources mat\xE9rielles et logicielles de ses syst\xE8mes\
+        \ d'information d'importance vitale (SIIV), conform\xE9ment \xE0 sa politique\
+        \ de s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node48
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:4
+      description: "Cette proc\xE9dure d\xE9finit les conditions permettant de maintenir\
+        \ le niveau de s\xE9curit\xE9 des ressources des SIIV en fonction de l'\xE9\
+        volution des vuln\xE9rabilit\xE9s et des menaces et notamment la politique\
+        \ d'installation de toute nouvelle version et mesure correctrice de s\xE9\
+        curit\xE9 d'une ressource et les v\xE9rifications \xE0 effectuer avant l'installation.\
+        \ Elle pr\xE9voit que :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node49
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node48
+      description: "- l'op\xE9rateur se tient inform\xE9 des vuln\xE9rabilit\xE9s\
+        \ et des mesures correctrices de s\xE9curit\xE9 susceptibles de concerner\
+        \ les ressources mat\xE9rielles et logicielles de ses SIIV, qui sont diffus\xE9\
+        es notamment par les fournisseurs ou les fabricants de ces ressources ou par\
+        \ des centres de pr\xE9vention et d'alerte en mati\xE8re de cyber s\xE9curit\xE9\
+        \ tels que le CERT-FR (( www. cert. ssi. gouv. fr) ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node50
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node48
+      description: "- sauf en cas de difficult\xE9s techniques ou op\xE9rationnelles\
+        \ justifi\xE9es, l'op\xE9rateur installe et maintient toutes les ressources\
+        \ mat\xE9rielles et logicielles de ses SIIV dans des versions support\xE9\
+        es par leurs fournisseurs ou leurs fabricants et mises \xE0 jour du point\
+        \ de vue de la s\xE9curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node51
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node48
+      description: "- pr\xE9alablement \xE0 l'installation de toute nouvelle version,\
+        \ l'op\xE9rateur s'assure de l'origine de cette version et de son int\xE9\
+        grit\xE9, et analyse l'impact de cette version sur le SIIV concern\xE9 d'un\
+        \ point de vue technique et op\xE9rationnel ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node52
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node48
+      description: "- d\xE8s qu'il a connaissance d'une mesure correctrice de s\xE9\
+        curit\xE9 concernant une de ses ressources, et sauf en cas de difficult\xE9\
+        s techniques ou op\xE9rationnelles justifi\xE9es, l'op\xE9rateur en planifie\
+        \ l'installation apr\xE8s avoir effectu\xE9 les v\xE9rifications mentionn\xE9\
+        es \xE0 l'alin\xE9a pr\xE9c\xE9dent, et proc\xE8de \xE0 cette installation\
+        \ dans les d\xE9lais pr\xE9vus par la proc\xE9dure de maintien en conditions\
+        \ de s\xE9curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node53
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node48
+      description: "- lorsque des raisons techniques ou op\xE9rationnelles le justifient,\
+        \ l'op\xE9rateur peut d\xE9cider, pour certaines ressources de ses SIIV, de\
+        \ ne pas installer une version support\xE9e par le fournisseur ou le fabricant\
+        \ de la ressource concern\xE9e ou de ne pas installer une mesure correctrice\
+        \ de s\xE9curit\xE9. Dans ce cas, l'op\xE9rateur met en \u0153uvre des mesures\
+        \ techniques ou organisationnelles pr\xE9vues par la proc\xE9dure de maintien\
+        \ en conditions de s\xE9curit\xE9 pour r\xE9duire les risques li\xE9s \xE0\
+        \ l'utilisation d'une version obsol\xE8te ou comportant des vuln\xE9rabilit\xE9\
+        s connues. L'op\xE9rateur d\xE9crit dans le dossier d'homologation du SIIV\
+        \ concern\xE9 ces mesures de r\xE9duction des risques et les raisons techniques\
+        \ ou op\xE9rationnelles ayant emp\xEAch\xE9 l'installation d'une version support\xE9\
+        e ou d'une mesure correctrice de s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "R\xE8gle relative \xE0 la journalisation"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node55
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      description: "L'op\xE9rateur d'importance vitale met en \u0153uvre sur chaque\
+        \ syst\xE8me d'information d'importance vitale (SIIV) un syst\xE8me de journalisation\
+        \ qui enregistre les \xE9v\xE9nements relatifs \xE0 l'authentification des\
+        \ utilisateurs, \xE0 la gestion des comptes et des droits d'acc\xE8s, \xE0\
+        \ l'acc\xE8s aux ressources, aux modifications des r\xE8gles de s\xE9curit\xE9\
+        \ du SIIV ainsi qu'au fonctionnement du SIIV."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node56
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      description: "L'op\xE9rateur d'importance vitale met en \u0153uvre sur chaque\
+        \ syst\xE8me d'information d'importance vitale (SIIV) un syst\xE8me de journalisation\
+        \ qui enregistre les \xE9v\xE9nements relatifs \xE0 l'authentification des\
+        \ utilisateurs, \xE0 la gestion des comptes et des droits d'acc\xE8s, \xE0\
+        \ l'acc\xE8s aux ressources, aux modifications des r\xE8gles de s\xE9curit\xE9\
+        \ du SIIV ainsi qu'au fonctionnement du SIIV."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      description: "Le syst\xE8me de journalisation porte sur les \xE9quipements suivants\
+        \ lorsqu'ils g\xE9n\xE8rent les \xE9v\xE9nements mentionn\xE9s au 1er alin\xE9\
+        a :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node58
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: "- les serveurs applicatifs supportant les activit\xE9s d'importance\
+        \ vitale ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node59
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: "- les serveurs d'infrastructure syst\xE8me ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node60
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: "- les serveurs d'infrastructure r\xE9seau ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node61
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: "- les \xE9quipements de s\xE9curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node62
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: "- les postes d'ing\xE9nierie et de maintenance des syst\xE8mes\
+        \ industriels ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node63
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: "- les \xE9quipements r\xE9seau ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node64
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node57
+      description: '- les postes d''administration.'
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node65
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      description: "Les \xE9v\xE9nements enregistr\xE9s par le syst\xE8me de journalisation\
+        \ sont horodat\xE9s au moyen de sources de temps synchronis\xE9es."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node66
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      description: "Ils sont, pour chaque SIIV, centralis\xE9s et archiv\xE9s pendant\
+        \ une dur\xE9e d'au moins six mois."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node67
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:5
+      description: "Le format d'archivage des \xE9v\xE9nements permet de r\xE9aliser\
+        \ des recherches automatis\xE9es sur ces \xE9v\xE9nements."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "R\xE8gle relative \xE0 la corr\xE9lation et l'analyse de journaux"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node69
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:6
+      description: "L'op\xE9rateur d'importance vitale met en \u0153uvre un syst\xE8\
+        me de corr\xE9lation et d'analyse de journaux qui exploite les \xE9v\xE9nements\
+        \ enregistr\xE9s par le syst\xE8me de journalisation install\xE9 sur chacun\
+        \ des syst\xE8mes d'information d'importance vitale (SIIV), afin de d\xE9\
+        tecter des \xE9v\xE9nements susceptibles d'affecter la s\xE9curit\xE9 des\
+        \ SIIV."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node70
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:6
+      description: "Le syst\xE8me de corr\xE9lation et d'analyse de journaux est install\xE9\
+        \ et exploit\xE9 sur un syst\xE8me d'information mis en place exclusivement\
+        \ \xE0 des fins de d\xE9tection d'\xE9v\xE9nements susceptibles d'affecter\
+        \ la s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node71
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:6
+      description: "L'op\xE9rateur ou le prestataire mandat\xE9 \xE0 cet effet installe\
+        \ et exploite ce syst\xE8me de corr\xE9lation et d'analyse de journaux en\
+        \ s'appuyant sur les exigences du r\xE9f\xE9rentiel en mati\xE8re de d\xE9\
+        tection des incidents de s\xE9curit\xE9 pr\xE9vu \xE0 l'article 10 du d\xE9\
+        cret n\xB0 2015-350 du 27 mars 2015 relatif \xE0 la qualification des produits\
+        \ de s\xE9curit\xE9 et des prestataires de service de confiance pour les besoins\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: "R\xE8gle relative \xE0 la d\xE9tection"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node73
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:7
+      description: "L'op\xE9rateur d'importance vitale met en \u0153uvre, en application\
+        \ de l'article R. 1332-41-3 du code de la d\xE9fense, un syst\xE8me de d\xE9\
+        tection qualifi\xE9 de type \" sonde d'analyse de fichiers et de protocoles\
+        \ \"."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node74
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:7
+      description: "Les sondes d'analyse de fichiers et de protocoles analysent les\
+        \ flux de donn\xE9es transitant par ces sondes afin de rechercher des \xE9\
+        v\xE9nements susceptibles d'affecter la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ d'importance vitale (SIIV). Elles sont positionn\xE9es de mani\xE8re \xE0\
+        \ pouvoir analyser l'ensemble des flux \xE9chang\xE9s entre les SIIV et les\
+        \ syst\xE8mes d'information tiers \xE0 ceux de l'op\xE9rateur."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node75
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:7
+      description: "Ces syst\xE8mes de d\xE9tection sont exploit\xE9s selon les r\xE8\
+        gles fix\xE9es par le r\xE9f\xE9rentiel en mati\xE8re de d\xE9tection des\
+        \ incidents de s\xE9curit\xE9 pr\xE9vu \xE0 l'article 10 du d\xE9cret n\xB0\
+        \ 2015-350 du 27 mars 2015 relatif \xE0 la qualification des produits de s\xE9\
+        curit\xE9 et des prestataires de service de confiance pour les besoins de\
+        \ la s\xE9curit\xE9 des syst\xE8mes d'information. Ils sont exploit\xE9s par\
+        \ un service de l'Etat ou un prestataire qualifi\xE9 \xE0 cet effet dans les\
+        \ conditions pr\xE9vues par le d\xE9cret pr\xE9cit\xE9."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: "R\xE8gle relative au traitement des incidents de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node77
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:8
+      description: "L'op\xE9rateur d'importance vitale \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre une proc\xE9dure de traitement des incidents affectant\
+        \ le fonctionnement ou la s\xE9curit\xE9 de ses syst\xE8mes d'information\
+        \ d'importance vitale (SIIV), conform\xE9ment \xE0 sa politique de s\xE9curit\xE9\
+        \ des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node78
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:8
+      description: "L'op\xE9rateur ou le prestataire mandat\xE9 \xE0 cet effet proc\xE8\
+        de au traitement des incidents en s'appuyant sur les exigences du r\xE9f\xE9\
+        rentiel en mati\xE8re de r\xE9ponse aux incidents de s\xE9curit\xE9 pr\xE9\
+        vu \xE0 l'article 10 du d\xE9cret n\xB0 2015-350 du 27 mars 2015 relatif \xE0\
+        \ la qualification des produits de s\xE9curit\xE9 et des prestataires de service\
+        \ de confiance pour les besoins de la s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node79
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:8
+      description: "Un syst\xE8me d'information sp\xE9cifique doit \xEAtre mis en\
+        \ place pour traiter les incidents, notamment pour stocker les relev\xE9s\
+        \ techniques relatifs aux analyses des incidents. Ce syst\xE8me est cloisonn\xE9\
+        \ vis-\xE0-vis du SIIV concern\xE9 par l'incident."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node80
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:8
+      description: "L'op\xE9rateur conserve les relev\xE9s techniques relatifs aux\
+        \ analyses des incidents pendant une dur\xE9e d'au moins six mois. Il tient\
+        \ ces relev\xE9s techniques \xE0 la disposition de l'Agence nationale de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node81
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:8
+      description: "Les relev\xE9s techniques sont des documents confidentiels susceptibles\
+        \ de contenir des informations dont la r\xE9v\xE9lation est r\xE9prim\xE9\
+        e par les dispositions de l'article 226-13 du code p\xE9nal. Ils sont, le\
+        \ cas \xE9ch\xE9ant, couverts par le secret de la d\xE9fense nationale."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: "R\xE8gle relative au traitement des alertes"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node83
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:9
+      description: "L'op\xE9rateur d'importance vitale met en place un service de\
+        \ permanence lui permettant de prendre connaissance, \xE0 tout moment et sans\
+        \ d\xE9lai, d'informations transmises par l'Agence nationale de la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information relatives \xE0 des incidents, des vuln\xE9\
+        rabilit\xE9s et des menaces."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node84
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:9
+      description: "Il met en \u0153uvre une proc\xE9dure pour traiter les informations\
+        \ ainsi re\xE7ues et le cas \xE9ch\xE9ant prendre les mesures de s\xE9curit\xE9\
+        \ n\xE9cessaires \xE0 la protection de ses syst\xE8mes d'information d'importance\
+        \ vitale (SIIV)."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node85
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:9
+      description: "L'op\xE9rateur communique \xE0 l'Agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information les coordonn\xE9es (nom du service,\
+        \ num\xE9ro de t\xE9l\xE9phone et adresse \xE9lectronique) tenues \xE0 jour\
+        \ du service de permanence pr\xE9vu \xE0 l'alin\xE9a pr\xE9c\xE9dent."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: "R\xE8gle relative \xE0 la gestion de crises"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node87
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:10
+      description: "L'op\xE9rateur d'importance vitale \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre une proc\xE9dure de gestion de crises en cas d'attaques\
+        \ informatiques majeures, conform\xE9ment \xE0 sa politique de s\xE9curit\xE9\
+        \ des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node88
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:10
+      description: "Cette proc\xE9dure d\xE9crit les moyens techniques et organisationnels\
+        \ dont dispose l'op\xE9rateur pour mettre en \u0153uvre les mesures d\xE9\
+        cid\xE9es par le Premier ministre en cas de crises, notamment les mesures\
+        \ suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node89
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node88
+      description: "- configurer les syst\xE8mes d'information de mani\xE8re \xE0\
+        \ \xE9viter les attaques ou \xE0 en limiter les effets. Cette configuration\
+        \ peut viser :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node90
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node89
+      description: "- \xE0 proscrire l'utilisation de supports de stockage amovibles\
+        \ ou la connexion d'\xE9quipements nomades aux syst\xE8mes d'information de\
+        \ l'op\xE9rateur ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node91
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node89
+      description: "- \xE0 installer une mesure correctrice de s\xE9curit\xE9 sur\
+        \ un syst\xE8me d'information particulier ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node92
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node89
+      description: "- \xE0 restreindre le routage ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node93
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node88
+      description: "- mettre en place des r\xE8gles de filtrage sur les r\xE9seaux\
+        \ ou des configurations particuli\xE8res sur les \xE9quipements terminaux.\
+        \ Cette mesure peut viser :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node94
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node93
+      description: "- \xE0 effectuer des restrictions d'acc\xE8s sous forme de listes\
+        \ blanches et de listes noires d'utilisateurs ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node95
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node93
+      description: "- \xE0 bloquer les \xE9changes de fichiers d'un type particulier\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node96
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node93
+      description: "- \xE0 isoler de tout r\xE9seau des sites internet, des applications,\
+        \ ou des \xE9quipements informatiques de l'op\xE9rateur en sollicitant le\
+        \ cas \xE9ch\xE9ant l'appui des op\xE9rateurs publics de communications \xE9\
+        lectroniques ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node97
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node88
+      description: "- isoler du r\xE9seau internet les syst\xE8mes d'information de\
+        \ l'op\xE9rateur. Cette mesure impose de d\xE9connecter physiquement ou logiquement\
+        \ les interfaces r\xE9seau des syst\xE8mes d'information concern\xE9s."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node98
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:10
+      description: "La proc\xE9dure pr\xE9cise les conditions dans lesquelles ces\
+        \ mesures peuvent \xEAtre appliqu\xE9es compte tenu des contraintes techniques\
+        \ et organisationnelles de mise en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: "R\xE8gle relative \xE0 l'identification"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node100
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:11
+      description: "L'op\xE9rateur d'importance vitale cr\xE9e des comptes individuels\
+        \ pour tous les utilisateurs (y compris les utilisateurs ayant des comptes\
+        \ privil\xE9gi\xE9s ou des comptes d'administration) et pour les processus\
+        \ automatiques acc\xE9dant aux ressources de ses syst\xE8mes d'information\
+        \ d'importance vitale (SIIV)."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node101
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:11
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de cr\xE9er de comptes individuels pour les utilisateurs ou pour les\
+        \ processus automatiques, l'op\xE9rateur met en place des mesures permettant\
+        \ de r\xE9duire le risque li\xE9 \xE0 l'utilisation de comptes partag\xE9\
+        s et d'assurer la tra\xE7abilit\xE9 de l'utilisation de ces comptes."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node102
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:11
+      description: "Dans ce cas, l'op\xE9rateur d\xE9crit ces mesures dans le dossier\
+        \ d'homologation du SIIV concern\xE9 et les raisons justifiant le recours\
+        \ \xE0 des comptes partag\xE9s."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node103
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:11
+      description: "L'op\xE9rateur d\xE9sactive sans d\xE9lai les comptes qui ne sont\
+        \ plus n\xE9cessaires."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: "R\xE8gle relative \xE0 l'authentification"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node105
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:12
+      description: "L'op\xE9rateur d'importance vitale prot\xE8ge les acc\xE8s aux\
+        \ ressources de ses syst\xE8mes d'information d'importance vitale (SIIV),\
+        \ que ce soit par un utilisateur ou par un processus automatique, au moyen\
+        \ d'un m\xE9canisme d'authentification impliquant un \xE9l\xE9ment secret."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node106
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:12
+      description: "L'op\xE9rateur d\xE9finit, conform\xE9ment \xE0 sa politique de\
+        \ s\xE9curit\xE9 des syst\xE8mes d'information, les r\xE8gles de gestion des\
+        \ \xE9l\xE9ments secrets d'authentification mis en \u0153uvre dans ses SIIV."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node107
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:12
+      description: "Lorsque la ressource le permet techniquement, les \xE9l\xE9ments\
+        \ secrets d'authentification doivent pouvoir \xEAtre modifi\xE9s par l'op\xE9\
+        rateur chaque fois que cela est n\xE9cessaire. Dans ce cas, l'op\xE9rateur\
+        \ respecte les r\xE8gles suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node108
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node107
+      description: "- l'op\xE9rateur doit modifier les \xE9l\xE9ments secrets d'authentification\
+        \ lorsqu'ils ont \xE9t\xE9 install\xE9s par le fabricant ou le fournisseur\
+        \ de la ressource, avant sa mise en service. A cet effet, l'op\xE9rateur s'assure\
+        \ aupr\xE8s du fabricant ou du fournisseur qu'il dispose des moyens et des\
+        \ droits permettant de r\xE9aliser ces op\xE9rations ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node109
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node107
+      description: "- l'\xE9l\xE9ment secret d'authentification d'un compte partag\xE9\
+        \ doit \xEAtre renouvel\xE9 r\xE9guli\xE8rement et \xE0 chaque retrait d'un\
+        \ utilisateur de ce compte ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node110
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node107
+      description: "- les utilisateurs qui n'en ont pas la responsabilit\xE9, ne peuvent\
+        \ pas modifier les \xE9l\xE9ments secrets d'authentification. Ils ne peuvent\
+        \ pas non plus acc\xE9der \xE0 ces \xE9l\xE9ments en clair ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node111
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node107
+      description: "- lorsque les \xE9l\xE9ments secrets d'authentification sont des\
+        \ mots de passe, les utilisateurs ne doivent pas les r\xE9utiliser entre comptes\
+        \ privil\xE9gi\xE9s ou entre un compte privil\xE9gi\xE9 et un compte non privil\xE9\
+        gi\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node112
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node107
+      description: "- lorsque les \xE9l\xE9ments secrets d'authentification sont des\
+        \ mots de passe, ceux-ci sont conformes aux r\xE8gles de l'art telles que\
+        \ celles pr\xE9conis\xE9es par l'Agence nationale de la s\xE9curit\xE9 des\
+        \ syst\xE8mes d'information, en mati\xE8re de complexit\xE9 (longueur du mot\
+        \ de passe et types de caract\xE8res), en tenant compte du niveau de complexit\xE9\
+        \ maximal permis par la ressource concern\xE9e, et en mati\xE8re de renouvellement."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node113
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:12
+      description: "Lorsque la ressource ne permet pas techniquement de modifier l'\xE9\
+        l\xE9ment secret d'authentification, l'op\xE9rateur met en place un contr\xF4\
+        le d'acc\xE8s appropri\xE9 \xE0 la ressource concern\xE9e ainsi que des mesures\
+        \ de tra\xE7abilit\xE9 des acc\xE8s et de r\xE9duction du risque li\xE9 \xE0\
+        \ l'utilisation d'un \xE9l\xE9ment secret d'authentification fixe."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node114
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:12
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation du SIIV\
+        \ concern\xE9 ces mesures et les raisons techniques ayant emp\xEAch\xE9 la\
+        \ modification de l'\xE9l\xE9ment secret d'authentification."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:13
+      assessable: false
+      depth: 1
+      ref_id: '13'
+      name: "R\xE8gle relative aux droits d'acc\xE8s"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node116
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:13
+      description: "L'op\xE9rateur d'importance vitale d\xE9finit, conform\xE9ment\
+        \ \xE0 sa politique de s\xE9curit\xE9 des syst\xE8mes d'information, les r\xE8\
+        gles de gestion et d'attribution des droits d'acc\xE8s aux ressources de ses\
+        \ syst\xE8mes d'information d'importance vitale (SIIV), et respecte les r\xE8\
+        gles suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node117
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node116
+      description: "- l'op\xE9rateur n'attribue \xE0 un utilisateur ou \xE0 un processus\
+        \ automatique les droits d'acc\xE8s \xE0 une ressource que si cet acc\xE8\
+        s est strictement n\xE9cessaire \xE0 l'exercice des missions de l'utilisateur\
+        \ ou au fonctionnement du processus automatique ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node118
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node116
+      description: "- l'op\xE9rateur d\xE9finit les acc\xE8s aux diff\xE9rentes fonctionnalit\xE9\
+        s de cette ressource et en attribue les droits uniquement aux utilisateurs\
+        \ et aux processus automatiques qui en ont strictement le besoin ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node119
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node116
+      description: "- les droits d'acc\xE8s sont r\xE9vis\xE9s p\xE9riodiquement,\
+        \ au moins tous les ans, par l'op\xE9rateur. Cette r\xE9vision porte sur les\
+        \ liens entre les comptes, les droits d'acc\xE8s associ\xE9s et les ressources\
+        \ ou les fonctionnalit\xE9s qui en font l'objet ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node120
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node116
+      description: "- l'op\xE9rateur \xE9tablit et tient \xE0 jour la liste des comptes\
+        \ privil\xE9gi\xE9s. Toute modification d'un compte privil\xE9gi\xE9 (ajout,\
+        \ suppression, suspension ou modification des droits associ\xE9s) fait l'objet\
+        \ d'un contr\xF4le formel de l'op\xE9rateur destin\xE9 \xE0 v\xE9rifier que\
+        \ les droits d'acc\xE8s aux ressources et fonctionnalit\xE9s sont attribu\xE9\
+        s selon le principe du moindre privil\xE8ge (seuls les droits strictement\
+        \ n\xE9cessaires sont accord\xE9s) et en coh\xE9rence avec les besoins d'utilisation\
+        \ du compte."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:14
+      assessable: false
+      depth: 1
+      ref_id: '14'
+      name: "R\xE8gle relative aux comptes d'administration"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node122
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:14
+      description: "L'op\xE9rateur d'importance vitale cr\xE9e des comptes (appel\xE9\
+        s \"comptes d'administration\") destin\xE9s aux seules personnes (appel\xE9\
+        es administrateurs) charg\xE9es d'effectuer les op\xE9rations d'administration\
+        \ (installation, configuration, gestion, maintenance, supervision, etc.) des\
+        \ ressources de ses syst\xE8mes d'information d'importance vitale (SIIV)."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node123
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:14
+      description: "L'op\xE9rateur d\xE9finit, conform\xE9ment \xE0 sa politique de\
+        \ s\xE9curit\xE9 des syst\xE8mes d'information, les r\xE8gles de gestion et\
+        \ d'attribution des comptes d'administration de ses SIIV, et respecte les\
+        \ r\xE8gles suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node124
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node123
+      description: "- l'attribution des droits aux administrateurs respecte le principe\
+        \ du moindre privil\xE8ge (seuls les droits strictement n\xE9cessaires sont\
+        \ accord\xE9s). En particulier, afin de limiter la port\xE9e des droits individuels,\
+        \ ils sont attribu\xE9s \xE0 chaque administrateur en les restreignant autant\
+        \ que possible au p\xE9rim\xE8tre fonctionnel et technique dont cet administrateur\
+        \ est responsable ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node125
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node123
+      description: "- un compte d'administration est utilis\xE9 exclusivement pour\
+        \ se connecter \xE0 un syst\xE8me d'information d'administration (syst\xE8\
+        me d'information utilis\xE9 pour les op\xE9rations d'administration des ressources)\
+        \ ou \xE0 une ressource administr\xE9e ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node126
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node123
+      description: "- les op\xE9rations d'administration sont effectu\xE9es exclusivement\
+        \ \xE0 partir de comptes d'administration, et inversement, les comptes d'administration\
+        \ sont utilis\xE9s exclusivement pour les op\xE9rations d'administration ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node127
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node123
+      description: "- lorsque l'administration d'une ressource ne peut pas techniquement\
+        \ \xEAtre effectu\xE9e \xE0 partir d'un compte sp\xE9cifique d'administration,\
+        \ l'op\xE9rateur met en place des mesures permettant d'assurer la tra\xE7\
+        abilit\xE9 et le contr\xF4le des op\xE9rations d'administration r\xE9alis\xE9\
+        es sur cette ressource et des mesures de r\xE9duction du risque li\xE9 \xE0\
+        \ l'utilisation d'un compte non sp\xE9cifique \xE0 l'administration. Il d\xE9\
+        crit dans le dossier d'homologation du SIIV concern\xE9 ces mesures ainsi\
+        \ que les raisons techniques ayant emp\xEAch\xE9 l'utilisation d'un compte\
+        \ d'administration ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node128
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node123
+      description: "- l'op\xE9rateur \xE9tablit et tient \xE0 jour la liste des comptes\
+        \ d'administration de ses SIIV et les g\xE8re en tant que comptes privil\xE9\
+        gi\xE9s."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:15
+      assessable: false
+      depth: 1
+      ref_id: '15'
+      name: "R\xE8gle relative aux syst\xE8mes d'information d'administration"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:15
+      description: "L'op\xE9rateur d'importance vitale applique les r\xE8gles suivantes\
+        \ aux syst\xE8mes d'information utilis\xE9s pour effectuer l'administration\
+        \ de ses syst\xE8mes d'information d'importance vitale (SIIV), qui sont appel\xE9\
+        s \"syst\xE8mes d'information d'administration\" :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node131
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- les ressources mat\xE9rielles et logicielles des syst\xE8mes\
+        \ d'information d'administration sont g\xE9r\xE9es et configur\xE9es par l'op\xE9\
+        rateur ou, le cas \xE9ch\xE9ant, par le prestataire qu'il a mandat\xE9 pour\
+        \ r\xE9aliser les op\xE9rations d'administration ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node132
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- les ressources mat\xE9rielles et logicielles des syst\xE8mes\
+        \ d'information d'administration sont utilis\xE9es exclusivement pour r\xE9\
+        aliser des op\xE9rations d'administration. Cependant, lorsque des raisons\
+        \ techniques ou organisationnelles le justifient, le poste de travail physique\
+        \ de l'administrateur peut \xEAtre utilis\xE9 pour r\xE9aliser des op\xE9\
+        rations autres que des op\xE9rations d'administration. Dans ce cas, des m\xE9\
+        canismes de durcissement du syst\xE8me d'exploitation du poste de travail\
+        \ et de cloisonnement doivent \xEAtre mis en place pour permettre d'isoler\
+        \ l'environnement logiciel utilis\xE9 pour ces autres op\xE9rations de l'environnement\
+        \ logiciel utilis\xE9 pour les op\xE9rations d'administration ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node133
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- un environnement logiciel utilis\xE9 pour effectuer des op\xE9\
+        rations d'administration ne doit pas \xEAtre utilis\xE9 \xE0 d'autres fins,\
+        \ comme l'acc\xE8s \xE0 des sites ou serveurs de messagerie sur internet ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node134
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- un utilisateur ne doit pas se connecter \xE0 un syst\xE8me d'information\
+        \ d'administration au moyen d'un environnement logiciel utilis\xE9 pour d'autres\
+        \ fonctions que des op\xE9rations d'administration ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node135
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- les flux de donn\xE9es associ\xE9s \xE0 des op\xE9rations autres\
+        \ que des op\xE9rations d'administration doivent, lorsqu'ils transitent sur\
+        \ les syst\xE8mes d'information d'administration, \xEAtre cloisonn\xE9s au\
+        \ moyen de m\xE9canismes de chiffrement et d'authentification conformes aux\
+        \ r\xE8gles pr\xE9conis\xE9es par l'Agence nationale de la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node136
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- les syst\xE8mes d'information d'administration sont connect\xE9\
+        s aux ressources \xE0 administrer au travers d'une liaison r\xE9seau physique\
+        \ utilis\xE9e exclusivement pour les op\xE9rations d'administration. Ces ressources\
+        \ sont administr\xE9es au travers de leur interface d'administration physique.\
+        \ Lorsque des raisons techniques emp\xEAchent d'administrer une ressource\
+        \ au travers d'une liaison r\xE9seau physique ou de son interface d'administration\
+        \ physique, l'op\xE9rateur met en \u0153uvre des mesures de r\xE9duction du\
+        \ risque telles que des mesures de s\xE9curit\xE9 logique. Dans ce cas, il\
+        \ d\xE9crit ces mesures et leurs justifications dans le dossier d'homologation\
+        \ du SIIV concern\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node137
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- lorsqu'ils ne circulent pas dans le syst\xE8me d'information\
+        \ d'administration, les flux d'administration sont prot\xE9g\xE9s par des\
+        \ m\xE9canismes de chiffrement et d'authentification conformes aux r\xE8gles\
+        \ pr\xE9conis\xE9es par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8\
+        mes d'information. Si le chiffrement et l'authentification de ces flux ne\
+        \ sont pas possibles pour des raisons techniques, l'op\xE9rateur met en \u0153\
+        uvre des mesures permettant de prot\xE9ger la confidentialit\xE9 et l'int\xE9\
+        grit\xE9 de ces flux et de renforcer le contr\xF4le et la tra\xE7abilit\xE9\
+        \ des op\xE9rations d'administration. Dans ce cas, il d\xE9crit ces mesures\
+        \ et leurs justifications dans le dossier d'homologation du SIIV concern\xE9\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node138
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node130
+      description: "- les journaux enregistrant les \xE9v\xE9nements g\xE9n\xE9r\xE9\
+        s par les ressources utilis\xE9es par les administrateurs ne contiennent aucun\
+        \ mot de passe ou autre \xE9l\xE9ment secret d'authentification en clair ou\
+        \ sous forme d'empreinte cryptographique."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:16
+      assessable: false
+      depth: 1
+      ref_id: '16'
+      name: "R\xE8gle relative au cloisonnement"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node140
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:16
+      description: "L'op\xE9rateur d'importance vitale proc\xE8de au cloisonnement\
+        \ de ses syst\xE8mes d'information d'importance vitale (SIIV) afin de limiter\
+        \ la propagation des attaques informatiques au sein de ses syst\xE8mes ou\
+        \ ses sous-syst\xE8mes. Il respecte les r\xE8gles suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node141
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node140
+      description: "- chaque SIIV est cloisonn\xE9 physiquement ou logiquement vis-\xE0\
+        -vis des autres syst\xE8mes d'information de l'op\xE9rateur et des syst\xE8\
+        mes d'information de tiers ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node142
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node140
+      description: "- lorsqu'un SIIV est lui-m\xEAme constitu\xE9 de sous-syst\xE8\
+        mes, ceux-ci sont cloisonn\xE9s entre eux physiquement ou logiquement. Un\
+        \ sous-syst\xE8me peut \xEAtre constitu\xE9 pour assurer une fonctionnalit\xE9\
+        \ ou un ensemble homog\xE8ne de fonctionnalit\xE9s d'un SIIV ou encore pour\
+        \ isoler des ressources d'un SIIV n\xE9cessitant un m\xEAme besoin de s\xE9\
+        curit\xE9 ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node143
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node140
+      description: "- seules les interconnexions strictement n\xE9cessaires au bon\
+        \ fonctionnement et \xE0 la s\xE9curit\xE9 d'un SIIV sont mises en place entre\
+        \ le SIIV et les autres syst\xE8mes ou entre les sous-syst\xE8mes du SIIV."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node144
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:16
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation de chaque\
+        \ SIIV les m\xE9canismes de cloisonnement qu'il met en place."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:17
+      assessable: false
+      depth: 1
+      ref_id: '17'
+      name: "R\xE8gle relative au filtrage"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node146
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:17
+      description: "L'op\xE9rateur d'importance vitale met en place des m\xE9canismes\
+        \ de filtrage des flux de donn\xE9es circulant dans ses syst\xE8mes d'information\
+        \ d'importance vitale (SIIV) afin de bloquer la circulation des flux inutiles\
+        \ au fonctionnement de ses syst\xE8mes et susceptibles de faciliter des attaques\
+        \ informatiques. Il respecte les r\xE8gles suivantes :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node147
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node146
+      description: "- l'op\xE9rateur d\xE9finit les r\xE8gles de filtrage des flux\
+        \ de donn\xE9es (filtrage sur les adresses r\xE9seau, sur les protocoles,\
+        \ sur les num\xE9ros de port, etc.) permettant de limiter la circulation des\
+        \ flux aux seuls flux de donn\xE9es n\xE9cessaires au fonctionnement et \xE0\
+        \ la s\xE9curit\xE9 de ses SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node148
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node146
+      description: "- les flux entrants et sortants des SIIV ainsi que les flux entre\
+        \ sous-syst\xE8mes des SIIV sont filtr\xE9s au niveau de leurs interconnexions\
+        \ de mani\xE8re \xE0 ne permettre la circulation que des seuls flux strictement\
+        \ n\xE9cessaires au fonctionnement et \xE0 la s\xE9curit\xE9 des SIIV. Les\
+        \ flux qui ne sont pas conformes aux r\xE8gles de filtrage sont bloqu\xE9\
+        s par d\xE9faut ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node149
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node146
+      description: "- l'op\xE9rateur \xE9tablit et tient \xE0 jour une liste des r\xE8\
+        gles de filtrage mentionnant l'ensemble des r\xE8gles en vigueur ou supprim\xE9\
+        es depuis moins d'un an. Cette liste pr\xE9cise pour chaque r\xE8gle :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node150
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node149
+      description: "- le motif et la date de la mise en \u0153uvre, de la modification\
+        \ ou de la suppression de la r\xE8gle ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node151
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node149
+      description: "- les modalit\xE9s techniques de mise en \u0153uvre de la r\xE8\
+        gle."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node152
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:17
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation de chaque\
+        \ SIIV les m\xE9canismes de filtrage qu'il met en place."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:18
+      assessable: false
+      depth: 1
+      ref_id: '18'
+      name: "R\xE8gle relative aux acc\xE8s \xE0 distance"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node154
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:18
+      description: "L'op\xE9rateur d'importance vitale prot\xE8ge les acc\xE8s \xE0\
+        \ ses syst\xE8mes d'information d'importance vitale (SIIV) effectu\xE9s \xE0\
+        \ travers des syst\xE8mes d'information tiers."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node155
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:18
+      description: "En particulier, lorsque l'op\xE9rateur ou un prestataire qu'il\
+        \ a mandat\xE9 \xE0 cet effet acc\xE8de \xE0 un SIIV \xE0 travers un syst\xE8\
+        me d'information tiers \xE0 ceux de l'op\xE9rateur ou du prestataire, l'op\xE9\
+        rateur applique ou fait appliquer \xE0 son prestataire les r\xE8gles suivantes\
+        \ :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node156
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node155
+      description: "- l'acc\xE8s au SIIV est prot\xE9g\xE9 par des m\xE9canismes de\
+        \ chiffrement et d'authentification conformes aux r\xE8gles pr\xE9conis\xE9\
+        es par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node157
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node155
+      description: "- le m\xE9canisme d'authentification utilis\xE9 est renforc\xE9\
+        \ en mettant en \u0153uvre une authentification \xE0 double facteur (authentification\
+        \ impliquant \xE0 la fois un \xE9l\xE9ment secret et un autre \xE9l\xE9ment\
+        \ propre \xE0 l'utilisateur) ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node158
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node155
+      description: "- les \xE9quipements utilis\xE9s pour acc\xE9der au SIIV sont\
+        \ g\xE9r\xE9s et configur\xE9s par l'op\xE9rateur ou, le cas \xE9ch\xE9ant,\
+        \ par le prestataire. Les m\xE9moires de masse de ces \xE9quipements sont\
+        \ en permanence prot\xE9g\xE9es par des m\xE9canismes de chiffrement et d'authentification\
+        \ conformes aux r\xE8gles pr\xE9conis\xE9es par l'Agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:19
+      assessable: false
+      depth: 1
+      ref_id: '19'
+      name: "R\xE8gle relative \xE0 l'installation de services et d'\xE9quipements"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node160
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:19
+      description: "L'op\xE9rateur d'importance vitale respecte les r\xE8gles suivantes\
+        \ lorsqu'il installe des services et des \xE9quipements sur ses syst\xE8mes\
+        \ d'information d'importance vitale (SIIV) :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node161
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node160
+      description: "- l'op\xE9rateur installe sur ses SIIV les seuls services et fonctionnalit\xE9\
+        s qui sont indispensables au fonctionnement ou \xE0 la s\xE9curit\xE9 de ses\
+        \ SIIV. L'op\xE9rateur d\xE9sactive les services et les fonctionnalit\xE9\
+        s qui ne sont pas indispensables, notamment ceux install\xE9s par d\xE9faut,\
+        \ et les d\xE9sinstalle si cela est possible. Lorsque la d\xE9sinstallation\
+        \ n'est pas possible, l'op\xE9rateur le mentionne dans le dossier d'homologation\
+        \ du SIIV concern\xE9 en pr\xE9cisant les services et fonctionnalit\xE9s concern\xE9\
+        s et les mesures de r\xE9duction du risque mises en \u0153uvre ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node162
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node160
+      description: "- l'op\xE9rateur ne connecte \xE0 ses SIIV que des \xE9quipements,\
+        \ mat\xE9riels p\xE9riph\xE9riques et supports amovibles qu'il a d\xFBment\
+        \ r\xE9pertori\xE9s et qui sont indispensables au fonctionnement ou \xE0 la\
+        \ s\xE9curit\xE9 de ses SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node163
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node160
+      description: "- les supports amovibles inscriptibles connect\xE9s aux SIIV sont\
+        \ utilis\xE9s exclusivement pour les besoins de ces SIIV ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node164
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node160
+      description: "- l'op\xE9rateur proc\xE8de, avant chaque utilisation de supports\
+        \ amovibles, \xE0 l'analyse de leur contenu, notamment \xE0 la recherche de\
+        \ code malveillant. L'op\xE9rateur met en place, sur les \xE9quipements auxquels\
+        \ sont connect\xE9s ces supports amovibles, des m\xE9canismes de protection\
+        \ contre les risques d'ex\xE9cution de code malveillant provenant de ces supports."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:20
+      assessable: false
+      depth: 1
+      ref_id: '20'
+      name: "R\xE8gle relative aux indicateurs"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:20
+      description: "L'op\xE9rateur d'importance vitale \xE9value et tient \xE0 jour,\
+        \ pour chaque syst\xE8me d'information d'importance vitale (SIIV), les indicateurs\
+        \ suivants :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node167
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- des indicateurs relatifs au maintien en conditions de s\xE9\
+        curit\xE9 des ressources :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node168
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- le pourcentage de postes utilisateurs dont les ressources syst\xE8\
+        mes ne sont pas install\xE9es dans une version support\xE9e par le fournisseur\
+        \ ou le fabricant ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node169
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- le pourcentage de serveurs dont les ressources syst\xE8mes ne\
+        \ sont pas install\xE9es dans une version support\xE9e par le fournisseur\
+        \ ou le fabricant ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node170
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- le pourcentage de postes utilisateurs dont les ressources syst\xE8\
+        mes ne sont pas mises \xE0 jour ou corrig\xE9es du point de vue de la s\xE9\
+        curit\xE9 depuis au moins 15 jours \xE0 compter de la disponibilit\xE9 des\
+        \ versions mises \xE0 jour ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node171
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- le pourcentage de serveurs dont les ressources syst\xE8mes ne\
+        \ sont pas mises \xE0 jour ou corrig\xE9es du point de vue de la s\xE9curit\xE9\
+        \ depuis au moins 15 jours \xE0 compter de la disponibilit\xE9 des versions\
+        \ mises \xE0 jour ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node172
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- des indicateurs relatifs aux droits d'acc\xE8s des utilisateurs\
+        \ et \xE0 l'authentification des acc\xE8s aux ressources :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node173
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node172
+      description: "- le pourcentage d'utilisateurs acc\xE9dant au SIIV au moyen de\
+        \ comptes partag\xE9s ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node174
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node172
+      description: "- le pourcentage d'utilisateurs acc\xE9dant au SIIV au moyen de\
+        \ comptes privil\xE9gi\xE9s ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node175
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node172
+      description: "- le pourcentage de ressources dont les \xE9l\xE9ments secrets\
+        \ d'authentification ne peuvent pas \xEAtre modifi\xE9s par l'op\xE9rateur\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node176
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node166
+      description: "- des indicateurs relatifs \xE0 l'administration des ressources\
+        \ :"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node177
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node176
+      description: "- le pourcentage de ressources administr\xE9es dont l'administration\
+        \ est effectu\xE9e \xE0 partir d'un compte non sp\xE9cifique d'administration\
+        \ ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node178
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node176
+      description: "- le pourcentage de ressources administr\xE9es dont l'administration\
+        \ ne peut pas \xEAtre effectu\xE9e au travers d'une liaison r\xE9seau physique\
+        \ ou d'une interface d'administration physique ;"
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node179
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node176
+      description: "- le pourcentage de ressources administr\xE9es dont les flux d'administration\
+        \ ne peuvent pas \xEAtre prot\xE9g\xE9s par des m\xE9canismes de chiffrement\
+        \ et d'authentification lorsque ces flux ne circulent pas dans le syst\xE8\
+        me d'information d'administration."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node180
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:20
+      description: "L'op\xE9rateur pr\xE9cise pour chaque indicateur la m\xE9thode\
+        \ d'\xE9valuation employ\xE9e et, le cas \xE9ch\xE9ant, la marge d'incertitude\
+        \ de son \xE9valuation. Lorsqu'un indicateur \xE9volue de fa\xE7on significative\
+        \ par rapport \xE0 l'\xE9valuation pr\xE9c\xE9dente, l'op\xE9rateur en pr\xE9\
+        cise les raisons."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node181
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:20
+      description: "Les indicateurs ainsi r\xE9unis sont des documents confidentiels\
+        \ susceptibles de contenir des informations dont la r\xE9v\xE9lation est r\xE9\
+        prim\xE9e par les dispositions de l'article 226-13 du code p\xE9nal. Ils sont,\
+        \ le cas \xE9ch\xE9ant, couverts par le secret de la d\xE9fense nationale."
+    - urn: urn:intuitem:risk:req_node:lpm-oiv-2019:node182
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lpm-oiv-2019:20
+      description: "L'op\xE9rateur communique, une fois par an, \xE0 l'Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d'information, ces indicateurs mis\
+        \ \xE0 jour sur un support \xE9lectronique, dans un format qui peut \xEAtre\
+        \ lu par les principaux logiciels bureautiques accessibles au public."

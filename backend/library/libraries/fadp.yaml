@@ -1,0 +1,1978 @@
+urn: urn:intuitem:risk:library:fadp
+locale: en
+ref_id: FADP
+name: 'Federal Act on Data Protection '
+description: 'Federal Act on Data Protection (Data Protection Act, FADP) of 25 September
+  2020 (Status as of 1 September 2023)
+
+  by the Federal Assembly of the Swiss Confederation
+
+  source: https://www.fedlex.admin.ch/eli/cc/2022/491/en'
+copyright: Swiss law
+version: 1
+provider: Swiss confederation
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:fadp
+    ref_id: FADP
+    name: 'Federal Act on Data Protection '
+    description: 'Federal Act on Data Protection (Data Protection Act, FADP) of 25
+      September 2020 (Status as of 1 September 2023)
+
+      by the Federal Assembly of the Swiss Confederation'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:fadp:chapter-1
+      assessable: false
+      depth: 1
+      ref_id: Chapter 1
+      name: Purpose, Scope of Application and Federal Supervisory Authority
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_1"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-1
+      ref_id: "Art.\_1"
+      name: Purpose
+    - urn: urn:intuitem:risk:req_node:fadp:1.1
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_1"
+      ref_id: '1.1'
+      description: This Act has the purpose of protecting the personality and fundamental
+        rights of natural persons whose personal data is processed.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_2"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-1
+      ref_id: "Art.\_2"
+      name: Personal and material scope of application
+    - urn: urn:intuitem:risk:req_node:fadp:2.1
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_2"
+      ref_id: '2.1'
+      description: 'This Act applies to the processing of personal data of natural
+        persons by:'
+    - urn: urn:intuitem:risk:req_node:fadp:2.1.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:2.1
+      ref_id: 2.1.a
+      description: private persons;
+    - urn: urn:intuitem:risk:req_node:fadp:2.1.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:2.1
+      ref_id: 2.1.b
+      description: federal bodies.
+    - urn: urn:intuitem:risk:req_node:fadp:2.2
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_2"
+      ref_id: '2.2'
+      description: 'It does not apply to:'
+    - urn: urn:intuitem:risk:req_node:fadp:2.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:2.2
+      ref_id: 2.2.a
+      description: personal data being processed by a natural person exclusively for
+        personal use;
+    - urn: urn:intuitem:risk:req_node:fadp:2.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:2.2
+      ref_id: 2.2.b
+      description: personal data being processed by the Federal Assembly and parliamentary
+        committees as part of their deliberations;
+    - urn: urn:intuitem:risk:req_node:fadp:2.2.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:2.2
+      ref_id: 2.2.c
+      description: personal data being processed by institutional beneficiaries under
+        Article 2 paragraph 1 of the Host State Act of 22 June 2007[1] who enjoy immunity
+        from jurisdiction in Switzerland.
+    - urn: urn:intuitem:risk:req_node:fadp:2.3
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_2"
+      ref_id: '2.3'
+      description: The applicable procedural law regulates the processing of personal
+        data and the data subject's rights in court proceedings and in proceedings
+        governed by federal procedural regulations. This Act applies to first instance
+        administrative proceedings.
+    - urn: urn:intuitem:risk:req_node:fadp:2.4
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_2"
+      ref_id: '2.4'
+      description: The public registers for private legal transactions, and in particular
+        the access to these registers and the data subject's rights, shall be regulated
+        by the specific provisions of the applicable federal law. If the specific
+        provisions do not contain any rules, this Act applies.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-1
+      ref_id: Art. 3
+      name: Territorial scope of application
+    - urn: urn:intuitem:risk:req_node:fadp:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-3
+      ref_id: '3.1'
+      description: This Act applies to circumstances that have an effect in Switzerland,
+        even if they were initiated abroad.
+    - urn: urn:intuitem:risk:req_node:fadp:3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-3
+      ref_id: '3.2'
+      description: For rights under private law, the Federal Act of 18 December 1987[2]
+        on Private International Law applies. In addition, the provisions on the territorial
+        scope of application of the Criminal Code[3] are reserved.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-1
+      ref_id: Art. 4
+      name: Federal Data Protection and Information Commissioner
+    - urn: urn:intuitem:risk:req_node:fadp:4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-4
+      ref_id: '4.1'
+      description: The Federal Data Protection and Information Commissioner (FDPIC)
+        supervises the application of the federal data protection regulations.
+    - urn: urn:intuitem:risk:req_node:fadp:4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-4
+      ref_id: '4.2'
+      description: 'The following are exempted from supervision by the FDPIC:'
+    - urn: urn:intuitem:risk:req_node:fadp:4.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:4.2
+      ref_id: 4.2.a
+      description: the Federal Assembly;
+    - urn: urn:intuitem:risk:req_node:fadp:4.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:4.2
+      ref_id: 4.2.b
+      description: the Federal Council;
+    - urn: urn:intuitem:risk:req_node:fadp:4.2.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:4.2
+      ref_id: 4.2.c
+      description: the federal courts;
+    - urn: urn:intuitem:risk:req_node:fadp:4.2.d
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:4.2
+      ref_id: 4.2.d
+      description: the Office of the Attorney General of Switzerland in relation to
+        processing personal data as part of criminal proceedings;
+    - urn: urn:intuitem:risk:req_node:fadp:4.2.e
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:4.2
+      ref_id: 4.2.e
+      description: federal authorities in relation to processing personal data in
+        terms of a judicial activity or proceedings for international mutual assistance
+        in criminal matters.
+    - urn: urn:intuitem:risk:req_node:fadp:chapter-2
+      assessable: false
+      depth: 1
+      ref_id: Chapter 2
+      name: General Provisions
+    - urn: urn:intuitem:risk:req_node:fadp:node27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-2
+      name: Section 1
+      description: Definitions and Principles
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_5"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: "Art.\_5"
+      name: Definitions
+    - urn: urn:intuitem:risk:req_node:fadp:5.1
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_5"
+      ref_id: '5.1'
+      description: 'In this Act:'
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.a
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.a
+      description: personal data means any information relating to an identified or
+        identifiable natural person;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.b
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.b
+      description: data subject means a natural person whose personal data is processed;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.c
+      description: ' sensitive personal data means:'
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c.1
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      ref_id: 5.1.c.1
+      description: data relating to religious, philosophical, political or trade union-related
+        views or activities,
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c.2
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      ref_id: 5.1.c.2
+      description: data relating to health, the private sphere or affiliation to a
+        race or ethnicity,
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c.3
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      ref_id: 5.1.c.3
+      description: genetic data,
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c.4
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      ref_id: 5.1.c.4
+      description: biometric data that uniquely identifies a natural person,
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c.5
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      ref_id: 5.1.c.5
+      description: data relating to administrative and criminal proceedings or sanctions,
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.c.6
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1.c
+      ref_id: 5.1.c.6
+      description: data relating to social assistance measures;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.d
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.d
+      description: processing means any handling of personal data, irrespective of
+        the means and procedures used, in particular the collection, storage, keeping,
+        use, modification, disclosure, archiving, deletion or destruction of data;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.e
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.e
+      description: disclosure means transmitting personal data or making such data
+        accessible;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.f
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.f
+      description: profiling means any form of automated processing of personal data
+        consisting of the use of personal data to evaluate certain personal aspects
+        relating to a natural person, in particular to analyse or predict aspects
+        concerning that natural person's performance at work, economic situation,
+        health, personal preferences, interests, reliability, behaviour, location
+        or movements;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.g
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.g
+      description: high-risk profiling means profiling that poses a high risk to the
+        data subject's personality or fundamental rights by matching data that allow
+        an assessment to be made of essential aspects of the personality of a natural
+        person;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.h
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.h
+      description: 'breach of data security means a breach of security that leads
+        to the accidental or unlawful loss, deletion, destruction or modification
+        or unauthorised disclosure or access to personal data; '
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.i
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.i
+      description: federal body means an authority or service of the Confederation
+        or a person entrusted to carry out public tasks on behalf of the Confederation;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.j
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.j
+      description: controller means a private person who or federal body which, alone
+        or jointly with others, determines the purpose and the means of processing
+        personal data;
+    - urn: urn:intuitem:risk:req_node:fadp:5.1.k
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:5.1
+      ref_id: 5.1.k
+      description: processor means a private person or federal body that processes
+        personal data on behalf of the controller.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: "Art.\_6"
+      name: Principles
+    - urn: urn:intuitem:risk:req_node:fadp:6.1
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.1'
+      description: Personal data must be processed lawfully.
+    - urn: urn:intuitem:risk:req_node:fadp:6.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.2'
+      description: The processing must be carried out in good faith and be proportionate.
+    - urn: urn:intuitem:risk:req_node:fadp:6.3
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.3'
+      description: Personal data may only be collected for a specific purpose that
+        the data subject can recognise; personal data may only be further processed
+        in a manner that is compatible with this purpose.
+    - urn: urn:intuitem:risk:req_node:fadp:6.4
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.4'
+      description: They shall be destroyed or anonymised as soon as they are no longer
+        required for the purpose of processing.
+    - urn: urn:intuitem:risk:req_node:fadp:6.5
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.5'
+      description: Any person who processes personal data must satisfy themselves
+        that the data are accurate. They must take all appropriate measures to correct,
+        delete or destroy data that are incorrect or incomplete insofar as the purpose
+        for which they are collected or processed is concerned. The appropriateness
+        of the measures depends in particular on the form and the extent of the processing
+        and on the risk that the processing poses to the data subject's personality
+        or fundamental rights.
+    - urn: urn:intuitem:risk:req_node:fadp:6.6
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.6'
+      description: If the consent of the data subject is required, such consent is
+        only valid if given voluntarily for one or more specific instances of processing
+        based on appropriate information.
+    - urn: urn:intuitem:risk:req_node:fadp:6.7
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_6"
+      ref_id: '6.7'
+      description: 'The consent must be explicitly given for:'
+    - urn: urn:intuitem:risk:req_node:fadp:6.7.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:6.7
+      ref_id: 6.7.a
+      description: processing sensitive personal data;
+    - urn: urn:intuitem:risk:req_node:fadp:6.7.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:6.7
+      ref_id: 6.7.b
+      description: high-risk profiling by a private person; or
+    - urn: urn:intuitem:risk:req_node:fadp:6.7.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:6.7
+      ref_id: 6.7.c
+      description: profiling by a federal body.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_7"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: "Art.\_7"
+      name: Data protection by design and data protection by default
+    - urn: urn:intuitem:risk:req_node:fadp:7.1
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_7"
+      ref_id: '7.1'
+      description: The controller is obliged to arrange the data processing in technical
+        and organisational terms so that the data protection regulations, and in particular
+        the principles under Article 6, are respected. It shall take account of this
+        from the planning stage.
+    - urn: urn:intuitem:risk:req_node:fadp:7.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_7"
+      ref_id: '7.2'
+      description: The technical and organisational measures must in particular be
+        appropriate with regard to the state of the art, the nature and the extent
+        of the data processing and the risk that the processing poses to the data
+        subject's personality or fundamental rights.
+    - urn: urn:intuitem:risk:req_node:fadp:7.3
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_7"
+      ref_id: '7.3'
+      description: The controller is obliged to ensure by means of suitable default
+        settings that the processing of personal data is limited to the minimum required
+        for the purpose intended, unless the data subject specifies otherwise.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_8"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: "Art.\_8"
+      name: Data security
+    - urn: urn:intuitem:risk:req_node:fadp:8.1
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_8"
+      ref_id: '8.1'
+      description: 'The controller and the processor shall guarantee a level of data
+        security appropriate to the risk by taking suitable technical and organisational
+        measures. '
+    - urn: urn:intuitem:risk:req_node:fadp:8.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_8"
+      ref_id: '8.2'
+      description: The measures must make it possible to avoid breaches of data security.
+    - urn: urn:intuitem:risk:req_node:fadp:8.3
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_8"
+      ref_id: '8.3'
+      description: The Federal Council shall issue provisions on the minimum requirements
+        for data security.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: Art. 9
+      name: Processing by processors
+    - urn: urn:intuitem:risk:req_node:fadp:9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-9
+      ref_id: '9.1'
+      description: 'The processing of personal data may be assigned by contract or
+        by the legislation to a processor if:'
+    - urn: urn:intuitem:risk:req_node:fadp:9.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:9.1
+      ref_id: 9.1.a
+      description: the data is processed only in the manner in which the controller
+        itself is permitted to do it; and
+    - urn: urn:intuitem:risk:req_node:fadp:9.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:9.1
+      ref_id: 9.1.b
+      description: no statutory or contractual duty of confidentiality prohibits assignment.
+    - urn: urn:intuitem:risk:req_node:fadp:9.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-9
+      ref_id: '9.2'
+      description: 'The controller must satisfy itself in particular that the processor
+        is able to guarantee data security. '
+    - urn: urn:intuitem:risk:req_node:fadp:9.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-9
+      ref_id: '9.3'
+      description: The processor may only assign processing to a third party with
+        prior approval from the controller.
+    - urn: urn:intuitem:risk:req_node:fadp:9.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-9
+      ref_id: '9.4'
+      description: It may claim the same grounds for justification as the controller.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: Art. 10
+      name: Data protection officer
+    - urn: urn:intuitem:risk:req_node:fadp:10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-10
+      ref_id: '10.1'
+      description: Private controllers may appoint a data protection officer.
+    - urn: urn:intuitem:risk:req_node:fadp:10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-10
+      ref_id: '10.2'
+      description: 'The data protection officer is the contact point for the data
+        subjects and for the authorities responsible for data protection in Switzerland.
+        He or she has the following tasks in particular: '
+    - urn: urn:intuitem:risk:req_node:fadp:10.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:10.2
+      ref_id: 10.2.a
+      description: 'training and advising the private controller in matters of data
+        protection; '
+    - urn: urn:intuitem:risk:req_node:fadp:10.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:10.2
+      ref_id: 10.2.b
+      description: providing support on applying the data protection regulations.
+    - urn: urn:intuitem:risk:req_node:fadp:10.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-10
+      ref_id: '10.3'
+      description: 'Private controllers may invoke the exception in Article 23 paragraph
+        4 if the following requirements are satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:10.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:10.3
+      ref_id: 10.3.a
+      description: The data protection officer exercises his or her function towards
+        the controller in a professionally independent manner and is not bound by
+        any instructions.
+    - urn: urn:intuitem:risk:req_node:fadp:10.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:10.3
+      ref_id: 10.3.b
+      description: 'He or she does not carry out any activities that are incompatible
+        with his or her tasks as a data protection officer. '
+    - urn: urn:intuitem:risk:req_node:fadp:10.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:10.3
+      ref_id: 10.3.c
+      description: 'He or she has the required expertise. '
+    - urn: urn:intuitem:risk:req_node:fadp:10.3.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:10.3
+      ref_id: 10.3.d
+      description: 'The controller publishes the contact details of the data protection
+        officer and notifies the FDPIC thereof. '
+    - urn: urn:intuitem:risk:req_node:fadp:10.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-10
+      ref_id: '10.4'
+      description: The Federal Council shall regulate the appointment of data protection
+        officers by federal bodies.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_11"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: "Art.\_11"
+      name: Code of conduct
+    - urn: urn:intuitem:risk:req_node:fadp:11.1
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_11"
+      ref_id: '11.1'
+      description: Professional, industry and trade associations that are authorised
+        to safeguard the economic interests of their members in their articles of
+        association and federal bodies may submit codes of conduct to the FDPIC.
+    - urn: urn:intuitem:risk:req_node:fadp:11.2
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_11"
+      ref_id: '11.2'
+      description: The FDPIC shall state and publish his or her opinions on the codes
+        of conduct.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: Art. 12
+      name: Record of processing activities
+    - urn: urn:intuitem:risk:req_node:fadp:12.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-12
+      ref_id: '12.1'
+      description: 'The controller and the processor shall each maintain a record
+        of their processing activities. '
+    - urn: urn:intuitem:risk:req_node:fadp:12.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-12
+      ref_id: '12.2'
+      description: 'The controller''s record shall as a minimum contain: '
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.a
+      description: the identity of the controller;
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.b
+      description: the purpose of processing;
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.c
+      description: a description of the categories of data subjects and the categories
+        of processed personal data;
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.d
+      description: the categories of recipients;
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.e
+      description: if possible, the retention period for the personal data or the
+        criteria for determining this period;
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.f
+      description: if possible, a general description of the measures taken to guarantee
+        data security under Article 8;
+    - urn: urn:intuitem:risk:req_node:fadp:12.2.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:12.2
+      ref_id: 12.2.g
+      description: if the data are disclosed abroad, details of the State concerned
+        and the guarantees under Article 16 paragraph 2.
+    - urn: urn:intuitem:risk:req_node:fadp:12.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-12
+      ref_id: '12.3'
+      description: The processor's record shall contain information on identity of
+        the processor and of the controller, the categories of processing carried
+        out on behalf of the controller, and the information mentioned in paragraph
+        2 letters f and g.
+    - urn: urn:intuitem:risk:req_node:fadp:12.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-12
+      ref_id: '12.4'
+      description: The federal bodies shall notify the FDPIC of their records of processing
+        activities.
+    - urn: urn:intuitem:risk:req_node:fadp:12.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-12
+      ref_id: '12.5'
+      description: The Federal Council shall provide exceptions for legal entities
+        that have fewer than 250 employees and whose data processing poses a negligible
+        risk of harm to the personality of the data subjects.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_13"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node27
+      ref_id: "Art.\_13"
+      name: Certification
+    - urn: urn:intuitem:risk:req_node:fadp:13.1
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_13"
+      ref_id: '13.1'
+      description: The manufacturers of data processing systems or programs and controllers
+        and processors may have their systems, products and services evaluated by
+        recognised independent certification bodies.
+    - urn: urn:intuitem:risk:req_node:fadp:13.2
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_13"
+      ref_id: '13.2'
+      description: The Federal Council shall issue regulations on the recognition
+        of certification procedures and the introduction of a data protection quality
+        mark. In doing so, it shall take account of international law and the internationally
+        recognised technical standards.
+    - urn: urn:intuitem:risk:req_node:fadp:node103
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-2
+      name: Section 2
+      description: Data Processing by Private Controllers with Registered Office or
+        Domicile Abroad
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_14"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node103
+      ref_id: "Art.\_14"
+      name: Representative
+    - urn: urn:intuitem:risk:req_node:fadp:14.1
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_14"
+      ref_id: '14.1'
+      description: 'Private controllers with registered office or domicile abroad
+        shall appoint a representative in Switzerland if they process the personal
+        data of persons in Switzerland and the data processing meets the following
+        requirements: '
+    - urn: urn:intuitem:risk:req_node:fadp:14.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:14.1
+      ref_id: 14.1.a
+      description: The processing is connected with the offer of goods or services
+        or the monitoring of the behaviour of persons in Switzerland.
+    - urn: urn:intuitem:risk:req_node:fadp:14.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:14.1
+      ref_id: 14.1.b
+      description: The processing is on a large scale.
+    - urn: urn:intuitem:risk:req_node:fadp:14.1.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:14.1
+      ref_id: 14.1.c
+      description: The processing is carried out regularly.
+    - urn: urn:intuitem:risk:req_node:fadp:14.1.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:14.1
+      ref_id: 14.1.d
+      description: The processing poses a high risk to the personality of the data
+        subjects.
+    - urn: urn:intuitem:risk:req_node:fadp:14.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_14"
+      ref_id: '14.2'
+      description: 'The representative shall serve as the contact point for the data
+        subjects and the FDPIC. '
+    - urn: urn:intuitem:risk:req_node:fadp:14.3
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_14"
+      ref_id: '14.3'
+      description: 'The controller shall publish the name and the address of the representative. '
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_15"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node103
+      ref_id: "Art.\_15"
+      name: Duties of the representative
+    - urn: urn:intuitem:risk:req_node:fadp:15.1
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_15"
+      ref_id: '15.1'
+      description: The representative shall maintain a record of controller's processing
+        activities that contains the information set out in Article 12 paragraph 2.
+    - urn: urn:intuitem:risk:req_node:fadp:15.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_15"
+      ref_id: '15.2'
+      description: On request, he or she shall provide the FDPIC with the information
+        contained in the record.
+    - urn: urn:intuitem:risk:req_node:fadp:15.3
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_15"
+      ref_id: '15.3'
+      description: On request, the representative shall provide data subjects with
+        information on how they can exercise their rights.
+    - urn: urn:intuitem:risk:req_node:fadp:node116
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-2
+      name: Section 3
+      description: Cross-Border Disclosure of Personal Data
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_16"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node116
+      ref_id: "Art.\_16"
+      name: Principles
+    - urn: urn:intuitem:risk:req_node:fadp:16.1
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_16"
+      ref_id: '16.1'
+      description: 'Personal data may be disclosed abroad if the Federal Council has
+        decided that the legislation of the State concerned or the international body
+        guarantees an adequate level of protection. '
+    - urn: urn:intuitem:risk:req_node:fadp:16.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_16"
+      ref_id: '16.2'
+      description: 'In the absence of a decision by the Federal Council under paragraph
+        1, personal data may be disclosed abroad only if an adequate level of data
+        protection is guaranteed by: '
+    - urn: urn:intuitem:risk:req_node:fadp:16.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:16.2
+      ref_id: 16.2.a
+      description: a treaty under international law;
+    - urn: urn:intuitem:risk:req_node:fadp:16.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:16.2
+      ref_id: 16.2.b
+      description: data protection clauses in an agreement between the controller
+        or the processor and its contractual partner, notice of which has been given
+        to the FDPIC beforehand;
+    - urn: urn:intuitem:risk:req_node:fadp:16.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:16.2
+      ref_id: 16.2.c
+      description: specific guarantees drawn up by the competent federal body, notice
+        of which has been given to the FDPIC beforehand;
+    - urn: urn:intuitem:risk:req_node:fadp:16.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:16.2
+      ref_id: 16.2.d
+      description: standard data protection clauses that the FDPIC has approved, issued
+        or recognised beforehand; or
+    - urn: urn:intuitem:risk:req_node:fadp:16.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:16.2
+      ref_id: 16.2.e
+      description: binding corporate rules that have been approved in advance by the
+        FDPIC or by the authority responsible for data protection in a State that
+        guarantees an adequate level of protection.
+    - urn: urn:intuitem:risk:req_node:fadp:16.3
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_16"
+      ref_id: '16.3'
+      description: The Federal Council may provide for other suitable guarantees in
+        line with paragraph 2.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_17"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node116
+      ref_id: "Art.\_17"
+      name: Exceptions
+    - urn: urn:intuitem:risk:req_node:fadp:17.1
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_17"
+      ref_id: '17.1'
+      description: 'In derogation from Article 16 paragraphs 1 and 2, personal data
+        may be disclosed abroad in the following cases:'
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1
+      ref_id: 17.1.a
+      description: The data subject has explicitly consented to disclosure.
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.b
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1
+      ref_id: 17.1.b
+      description: 'Disclosure is directly connected with the conclusion or performance
+        of a contract: '
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.b.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1.b
+      ref_id: 17.1.b.1
+      description: between the controller and the data subject; or
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.b.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1.b
+      ref_id: 17.1.b.2
+      description: between the controller and its contractual partner in the interests
+        the data subject.
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.c
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1
+      ref_id: 17.1.c
+      description: 'Disclosure is necessary in order to: '
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.c.1
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1.c
+      ref_id: 17.1.c.1
+      description: safeguard an overriding public interest; or
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.c.2
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1.c
+      ref_id: 17.1.c.2
+      description: establish, exercise or enforce legal rights before a court or another
+        competent foreign authority.
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1
+      ref_id: 17.1.d
+      description: Disclosure is necessary to protect the life or the physical integrity
+        of the data subject or a third party, and it is not possible to obtain the
+        consent of the data subject within a reasonable time.
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1
+      ref_id: 17.1.e
+      description: The data subject has made the data generally accessible and has
+        not explicitly prohibited processing.
+    - urn: urn:intuitem:risk:req_node:fadp:17.1.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:17.1
+      ref_id: 17.1.f
+      description: The data originate from a statutory register that is public or
+        accessible to persons with a legitimate interest, provided the statutory requirements
+        for access are met in the case concerned.
+    - urn: urn:intuitem:risk:req_node:fadp:17.2
+      assessable: true
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_17"
+      ref_id: '17.2'
+      description: The controller or the processor shall inform the FDPIC on request
+        about the disclosure of personal data under paragraph 1 letters b number 2,
+        c and d.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_18"
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:node116
+      ref_id: "Art.\_18"
+      name: Publication of personal data in electronic form
+    - urn: urn:intuitem:risk:req_node:fadp:18.1
+      assessable: false
+      depth: 4
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_18"
+      ref_id: '18.1'
+      description: If personal data are made generally accessible by means of automated
+        information and communications services in order to provide information to
+        the general public, this is not deemed to be disclosure abroad, even if the
+        data are accessible from abroad.
+    - urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      assessable: false
+      depth: 1
+      ref_id: Chapter 3
+      name: Duties of the Controller and of the Processor
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_19"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      ref_id: "Art.\_19"
+      name: Duty to provide information when collecting personal data
+    - urn: urn:intuitem:risk:req_node:fadp:19.1
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_19"
+      ref_id: '19.1'
+      description: The controller shall inform the data subject in an appropriate
+        manner when collecting personal data; this duty to provide information also
+        applies if the data is not collected from the data subject.
+    - urn: urn:intuitem:risk:req_node:fadp:19.2
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_19"
+      ref_id: '19.2'
+      description: 'It shall provide the data subject on collecting the data with
+        the information required for the data subject to exercise their rights under
+        this Act and to guarantee transparent data processing; it shall provide the
+        following information as a minimum:'
+    - urn: urn:intuitem:risk:req_node:fadp:19.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:19.2
+      ref_id: 19.2.a
+      description: the controller's identity and contact details;
+    - urn: urn:intuitem:risk:req_node:fadp:19.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:19.2
+      ref_id: 19.2.b
+      description: the purpose of processing;
+    - urn: urn:intuitem:risk:req_node:fadp:19.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:19.2
+      ref_id: 19.2.c
+      description: if applicable, the recipients or the categories of recipients to
+        which personal data is disclosed.
+    - urn: urn:intuitem:risk:req_node:fadp:19.3
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_19"
+      ref_id: '19.3'
+      description: If the data is not collected from the data subject, the controller
+        shall also inform the data subject of the categories of processed personal
+        data.
+    - urn: urn:intuitem:risk:req_node:fadp:19.4
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_19"
+      ref_id: '19.4'
+      description: If the personal data are disclosed abroad, the controller shall
+        also inform the data subject of the State or the international body to which
+        such data are disclosed and if applicable of the guarantees under Article
+        16 paragraph 2 or the application of an exception under Article 17.
+    - urn: urn:intuitem:risk:req_node:fadp:19.5
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_19"
+      ref_id: '19.5'
+      description: "If the data is not collected from the data subject, the controller\
+        \ shall also inform the data subject of the information specified in paragraphs\
+        \ 2\u20134 at the latest one month after receiving the data. If the controller\
+        \ discloses the personal data before the expiry of this deadline, it shall\
+        \ inform the data subject at the time of disclosure at the latest."
+    - urn: urn:intuitem:risk:req_node:fadp:art.-20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      ref_id: Art. 20
+      name: Exceptions from the duty to provide information and restrictions
+    - urn: urn:intuitem:risk:req_node:fadp:20.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-20
+      ref_id: '20.1'
+      description: 'The duty to provide information under Article 19 ceases to apply
+        if one of the following requirements is satisfied: '
+    - urn: urn:intuitem:risk:req_node:fadp:20.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.1
+      ref_id: 20.1.a
+      description: The data subject already has the information concerned.
+    - urn: urn:intuitem:risk:req_node:fadp:20.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.1
+      ref_id: 20.1.b
+      description: The processing is required by law.
+    - urn: urn:intuitem:risk:req_node:fadp:20.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.1
+      ref_id: 20.1.c
+      description: The controller is a private person who is required by law to preserve
+        confidentiality.
+    - urn: urn:intuitem:risk:req_node:fadp:20.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.1
+      ref_id: 20.1.d
+      description: The requirements of Article 27 are satisfied.
+    - urn: urn:intuitem:risk:req_node:fadp:20.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-20
+      ref_id: '20.2'
+      description: 'If the personal data is not collected from the data subject, the
+        duty to provide information also ceases to apply if any one of the following
+        requirements is satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:20.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.2
+      ref_id: 20.2.a
+      description: It is not possible to provide the information.
+    - urn: urn:intuitem:risk:req_node:fadp:20.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.2
+      ref_id: 20.2.b
+      description: Providing the information requires disproportionate effort.
+    - urn: urn:intuitem:risk:req_node:fadp:20.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-20
+      ref_id: '20.3'
+      description: 'The controller may restrict, delay or dispense with the provision
+        of the information in the following cases:'
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3
+      ref_id: 20.3.a
+      description: 'It is required to do so because of overriding third party interests. '
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3
+      ref_id: 20.3.b
+      description: Providing the information defeats the purpose of the processing.
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3
+      ref_id: 20.3.c
+      description: 'The controller is a private person and the following requirements
+        are satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.c.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3.c
+      ref_id: 20.3.c.1
+      description: 'The controller is required to do so because of its own overriding
+        interests. '
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.c.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3.c
+      ref_id: 20.3.c.2
+      description: The controller does not intend to disclose the personal data to
+        third parties.
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3
+      ref_id: 20.3.d
+      description: 'The controller is a federal body and any one of the following
+        requirements is satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.d.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3.d
+      ref_id: 20.3.d.1
+      description: 'The measure is required to satisfy overriding public interests,
+        in particular to protect Switzerland''s internal or external security. '
+    - urn: urn:intuitem:risk:req_node:fadp:20.3.d.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:20.3.d
+      ref_id: 20.3.d.2
+      description: The communication of the information may compromise an enquiry,
+        an investigation or administrative or judicial proceedings.
+    - urn: urn:intuitem:risk:req_node:fadp:20.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-20
+      ref_id: '20.4'
+      description: Legal entities that belong to the same group of companies are not
+        third parties within the meaning of paragraph 3 letter c number 2.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_21"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      ref_id: "Art.\_21"
+      name: Duty to provide information in the case of an automated individual decision
+    - urn: urn:intuitem:risk:req_node:fadp:21.1
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_21"
+      ref_id: '21.1'
+      description: 'The controller shall inform the data subject about any decision
+        that is based exclusively on automated processing and that has a legal consequence
+        for or a considerable adverse effect on the data subject (automated individual
+        decision). '
+    - urn: urn:intuitem:risk:req_node:fadp:21.2
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_21"
+      ref_id: '21.2'
+      description: It shall on request allow the data subject to express their point
+        of view. The data subject may request that the automated individual decision
+        be reviewed by a natural person.
+    - urn: urn:intuitem:risk:req_node:fadp:21.3
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_21"
+      ref_id: '21.3'
+      description: 'Paragraphs 1 and 2 do not apply if: '
+    - urn: urn:intuitem:risk:req_node:fadp:21.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:21.3
+      ref_id: 21.3.a
+      description: the automated individual decision is directly connected with the
+        conclusion or the processing of a contract between the controller and the
+        data subject and the data subject's request is granted; or
+    - urn: urn:intuitem:risk:req_node:fadp:21.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:21.3
+      ref_id: 21.3.b
+      description: 'the data subject has explicitly consented to the decision being
+        automated. '
+    - urn: urn:intuitem:risk:req_node:fadp:21.4
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_21"
+      ref_id: '21.4'
+      description: 'If the automated individual decision is issued by a federal body,
+        it must designate the decision accordingly. Paragraph 2 does not apply if,
+        in accordance with Article 30 paragraph 2 of the Administrative Procedure
+        Act of 20 December 1968[4] (APA) or another federal act, the data subject
+        is not entitled to a hearing before the decision is taken. '
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_22"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      ref_id: "Art.\_22"
+      name: Data protection impact assessment
+    - urn: urn:intuitem:risk:req_node:fadp:22.1
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_22"
+      ref_id: '22.1'
+      description: If processing is likely to result in a high risk to the data subject's
+        personality or fundamental rights, the controller shall carry out a data protection
+        impact assessment beforehand. If several similar processing procedures are
+        planned, a joint assessment may be carried out.
+    - urn: urn:intuitem:risk:req_node:fadp:22.2
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_22"
+      ref_id: '22.2'
+      description: 'The existence of a high risk, in particular when using new technologies,
+        depends on the nature, extent, circumstances and purpose of the processing.
+        A high risk arises in particular: '
+    - urn: urn:intuitem:risk:req_node:fadp:22.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:22.2
+      ref_id: 22.2.a
+      description: in the case of the large-scale processing of sensitive personal
+        data;
+    - urn: urn:intuitem:risk:req_node:fadp:22.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:22.2
+      ref_id: 22.2.b
+      description: if public areas are systematically monitored on a large scale.
+    - urn: urn:intuitem:risk:req_node:fadp:22.3
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_22"
+      ref_id: '22.3'
+      description: 'The data protection impact assessment shall include a description
+        of the planned processing, an evaluation of the risks to the data subject''s
+        personality or fundamental rights and a description of the measures to protect
+        personality and fundamental rights. '
+    - urn: urn:intuitem:risk:req_node:fadp:22.4
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_22"
+      ref_id: '22.4'
+      description: 'Private controllers are exempt from having to carry out a data
+        protection impact assessment if they are required by law to process the data. '
+    - urn: urn:intuitem:risk:req_node:fadp:22.5
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_22"
+      ref_id: '22.5'
+      description: 'A private controller may dispense with carrying out a data protection
+        impact assessment if it uses a system, product or service that is certified
+        under Article 13 for the intended use, or if it complies with a code of conduct
+        under Article 11 that satisfies the following requirements: '
+    - urn: urn:intuitem:risk:req_node:fadp:22.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:22.5
+      ref_id: 22.5.a
+      description: The code of conduct is based on a data protection impact assessment.
+    - urn: urn:intuitem:risk:req_node:fadp:22.5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:22.5
+      ref_id: 22.5.b
+      description: It provides for measures to protect the personality and the data
+        subject's fundamental rights.
+    - urn: urn:intuitem:risk:req_node:fadp:22.5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:22.5
+      ref_id: 22.5.c
+      description: 'It has been submitted to the FDPIC. '
+    - urn: urn:intuitem:risk:req_node:fadp:art.-23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      ref_id: Art. 23
+      name: Consultation of the FDPIC
+    - urn: urn:intuitem:risk:req_node:fadp:23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-23
+      ref_id: '23.1'
+      description: If the data protection impact assessment indicates that the planned
+        processing despite the measures planned by the controller will still pose
+        a high risk to the personality or the data subject's fundamental rights, the
+        controller shall seek the FDPIC's opinion beforehand.
+    - urn: urn:intuitem:risk:req_node:fadp:23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-23
+      ref_id: '23.2'
+      description: 'The FDPIC shall inform the controller within two months of any
+        objections to the planned processing. This deadline may be extended by one
+        month if the data processing is complex. '
+    - urn: urn:intuitem:risk:req_node:fadp:23.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-23
+      ref_id: '23.3'
+      description: 'If the FDPIC objects to the planned processing, he or she shall
+        propose suitable measures to the controller. '
+    - urn: urn:intuitem:risk:req_node:fadp:23.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-23
+      ref_id: '23.4'
+      description: A private controller may dispense with consulting the FDPIC if
+        it has consulted the data protection officer under Article 10.
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-3
+      ref_id: "Art.\_24"
+      name: Notifications of data security breaches
+    - urn: urn:intuitem:risk:req_node:fadp:24.1
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      ref_id: '24.1'
+      description: 'The controller shall notify the FDPIC of any breach of data security
+        that is likely to lead to a high risk to the data subject''s personality or
+        fundamental rights as quickly as possible. '
+    - urn: urn:intuitem:risk:req_node:fadp:24.2
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      ref_id: '24.2'
+      description: 'In the notification, it shall as a minimum specify the nature
+        of the breach of data security, its consequences and the measures taken or
+        planned. '
+    - urn: urn:intuitem:risk:req_node:fadp:24.3
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      ref_id: '24.3'
+      description: The processor shall notify the controller of any breach of data
+        security as quickly as possible.
+    - urn: urn:intuitem:risk:req_node:fadp:24.4
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      ref_id: '24.4'
+      description: 'The controller shall inform the data subject if this is required
+        for their protection or if the FDPIC so requests. '
+    - urn: urn:intuitem:risk:req_node:fadp:24.5
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      ref_id: '24.5'
+      description: 'It may limit, delay or dispense with the provision of information
+        to the data subject if:'
+    - urn: urn:intuitem:risk:req_node:fadp:24.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:24.5
+      ref_id: 24.5.a
+      description: 'there is a reason for doing so pursuant to Article 26 paragraph
+        1 letter b or paragraph 2 letter b or the provision of information is prohibited
+        by a statutory duty of confidentiality; '
+    - urn: urn:intuitem:risk:req_node:fadp:24.5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:24.5
+      ref_id: 24.5.b
+      description: the provision of information is impossible or requires disproportionate
+        effort; or
+    - urn: urn:intuitem:risk:req_node:fadp:24.5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:24.5
+      ref_id: 24.5.c
+      description: 'the provision of information to the data subject is equally guaranteed
+        by making a public announcement. '
+    - urn: urn:intuitem:risk:req_node:fadp:24.6
+      assessable: true
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_24"
+      ref_id: '24.6'
+      description: A notification made pursuant to this Article may only be used against
+        the person required to notify in criminal proceedings with that person's consent.
+    - urn: urn:intuitem:risk:req_node:fadp:chapter-4
+      assessable: false
+      depth: 1
+      ref_id: Chapter 4
+      name: Rights of the Data Subject
+    - urn: urn:intuitem:risk:req_node:fadp:art.-25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-4
+      ref_id: Art. 25
+      name: Right to information
+    - urn: urn:intuitem:risk:req_node:fadp:25.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.1'
+      description: Any person may request information from the controller on whether
+        personal data relating to them is being processed.
+    - urn: urn:intuitem:risk:req_node:fadp:25.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.2'
+      description: 'The data subject shall receive the information required to be
+        able to exercise their rights under this Act and to guarantee transparent
+        data processing. In every case, they are entitled to the following information:'
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.a
+      description: the identity and the contact details of the controller;
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.b
+      description: 'the processed personal data as such; '
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.c
+      description: the purpose of processing;
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.d
+      description: the retention period for the personal data or, if this is not possible,
+        the criteria for determining this period;
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.e
+      description: the available information about the source of the personal data,
+        if it has not been collected from the data subject;
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.f
+      description: if applicable, whether an automated individual decision has been
+        taken and the logic behind the decision;
+    - urn: urn:intuitem:risk:req_node:fadp:25.2.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:25.2
+      ref_id: 25.2.g
+      description: "if applicable, the recipients or the categories of recipients\
+        \ to which personal data is disclosed, as well as the information specified\
+        \ in Article 19 paragraph\_4."
+    - urn: urn:intuitem:risk:req_node:fadp:25.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.3'
+      description: 'The data subject may consent to having personal data relating
+        to their health communicated by a health profession of their choice. '
+    - urn: urn:intuitem:risk:req_node:fadp:25.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.4'
+      description: If the controller arranges for personal data to be processed by
+        a processor, it remains under a duty to provide information.
+    - urn: urn:intuitem:risk:req_node:fadp:25.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.5'
+      description: No one may waive their right to information in advance.
+    - urn: urn:intuitem:risk:req_node:fadp:25.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.6'
+      description: The controller must provide information free of charge. The Federal
+        Council may provide for exceptions, in particular if the effort required is
+        disproportionate.
+    - urn: urn:intuitem:risk:req_node:fadp:25.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-25
+      ref_id: '25.7'
+      description: The information shall in general be provided within 30 days.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-4
+      ref_id: Art. 26
+      name: Limitations on the right to information
+    - urn: urn:intuitem:risk:req_node:fadp:26.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-26
+      ref_id: '26.1'
+      description: 'The controller may refuse to provide information, or restrict
+        or delay the provision of information if:'
+    - urn: urn:intuitem:risk:req_node:fadp:26.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.1
+      ref_id: 26.1.a
+      description: a formal law so provides, in particular in order to preserve professional
+        secrecy;
+    - urn: urn:intuitem:risk:req_node:fadp:26.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.1
+      ref_id: 26.1.b
+      description: this is required to safeguard overriding third-party interests;
+        or
+    - urn: urn:intuitem:risk:req_node:fadp:26.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.1
+      ref_id: 26.1.c
+      description: the request for information is obviously unjustified, in particular
+        if does not serve the purpose of data protection or is clearly frivolous.
+    - urn: urn:intuitem:risk:req_node:fadp:26.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-26
+      ref_id: '26.2'
+      description: 'Furthermore, it is possible to refuse, restrict or delay the provision
+        of information in the following cases: '
+    - urn: urn:intuitem:risk:req_node:fadp:26.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.2
+      ref_id: 26.2.a
+      description: 'The controller is a private person and the following requirements
+        are satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:26.2.a.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.2.a
+      ref_id: 26.2.a.1
+      description: The controller's own overriding interests require the measure.
+    - urn: urn:intuitem:risk:req_node:fadp:26.2.a.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.2.a
+      ref_id: 26.2.a.2
+      description: The controller does not intend to disclose the personal data to
+        third parties.
+    - urn: urn:intuitem:risk:req_node:fadp:26.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.2
+      ref_id: 26.2.b
+      description: 'The controller is a federal body, and one of the following requirements
+        is satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:26.2.b.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.2.b
+      ref_id: 26.2.b.1
+      description: 'The measure is required to satisfy overriding public interests,
+        in particular Switzerland''s internal or external security. '
+    - urn: urn:intuitem:risk:req_node:fadp:26.2.b.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:26.2.b
+      ref_id: 26.2.b.2
+      description: The communication of the information may compromise an enquiry,
+        an investigation or administrative or judicial proceedings.
+    - urn: urn:intuitem:risk:req_node:fadp:26.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-26
+      ref_id: '26.3'
+      description: Legal entities that belong to the same group of companies are not
+        third parties within the meaning of paragraph 2 letter a number 2.
+    - urn: urn:intuitem:risk:req_node:fadp:26.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-26
+      ref_id: '26.4'
+      description: 'The controller must indicate why it is refusing, restricting or
+        delaying the provision of the information. '
+    - urn: "urn:intuitem:risk:req_node:fadp:art.\_27"
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-4
+      ref_id: "Art.\_27"
+      name: Limitation on the right to information for the media
+    - urn: urn:intuitem:risk:req_node:fadp:27.1
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_27"
+      ref_id: '27.1'
+      description: 'If personal data are processed exclusively for their publication
+        in the editorial section of a periodically published medium, the controller
+        may refuse, restrict or delay the provision of information for one of the
+        following reasons:'
+    - urn: urn:intuitem:risk:req_node:fadp:27.1.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:27.1
+      ref_id: 27.1.a
+      description: The data reveals the sources of the information.
+    - urn: urn:intuitem:risk:req_node:fadp:27.1.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:27.1
+      ref_id: 27.1.b
+      description: The provision of information would allow access to drafts of publications.
+    - urn: urn:intuitem:risk:req_node:fadp:27.1.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:27.1
+      ref_id: 27.1.c
+      description: The provision of information would compromise the freedom of the
+        public to shape their own opinions.
+    - urn: urn:intuitem:risk:req_node:fadp:27.2
+      assessable: false
+      depth: 3
+      parent_urn: "urn:intuitem:risk:req_node:fadp:art.\_27"
+      ref_id: '27.2'
+      description: Journalists may also refuse, restrict or delay the provision of
+        information if they are using the personal data exclusively as an aid to their
+        own personal work.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-28
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-4
+      ref_id: Art. 28
+      name: Right to data portability
+    - urn: urn:intuitem:risk:req_node:fadp:28.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-28
+      ref_id: '28.1'
+      description: 'Any person may request the controller to deliver the personal
+        data that they have disclosed to it in a conventional electronic format if:'
+    - urn: urn:intuitem:risk:req_node:fadp:28.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:28.1
+      ref_id: 28.1.a
+      description: the controller is carrying out the automated processing of the
+        data; and
+    - urn: urn:intuitem:risk:req_node:fadp:28.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:28.1
+      ref_id: 28.1.b
+      description: the data are being processed with the consent of the data subject
+        or in direct connection with the conclusion or the performance of a contract
+        between the controller and the data subject.
+    - urn: urn:intuitem:risk:req_node:fadp:28.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-28
+      ref_id: '28.2'
+      description: 'The data subject may also request the controller to transfer their
+        personal data to another controller if the requirements in paragraph 1 are
+        met and no disproportionate effort is required. '
+    - urn: urn:intuitem:risk:req_node:fadp:28.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-28
+      ref_id: '28.3'
+      description: The controller must deliver or transfer the personal data free
+        of charge. The Federal Council may provide for exceptions, in particular if
+        the effort is disproportionate.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-29
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-4
+      ref_id: Art. 29
+      name: Restrictions on the right to data portability
+    - urn: urn:intuitem:risk:req_node:fadp:29.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-29
+      ref_id: '29.1'
+      description: The controller may refuse, restrict or delay the delivery or transfer
+        of personal data for the reasons set out in Article 26 paragraphs 1 and 2.
+    - urn: urn:intuitem:risk:req_node:fadp:29.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-29
+      ref_id: '29.2'
+      description: The controller must give reasons why it has decided to refuse,
+        restrict or delay the delivery or transfer.
+    - urn: urn:intuitem:risk:req_node:fadp:chapter-5
+      assessable: false
+      depth: 1
+      ref_id: Chapter 5
+      name: Special Provisions on Data Processing by Private Persons
+    - urn: urn:intuitem:risk:req_node:fadp:art.-30
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-5
+      ref_id: Art. 30
+      name: Breaches of personality rights
+    - urn: urn:intuitem:risk:req_node:fadp:30.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-30
+      ref_id: '30.1'
+      description: Any person who processes personal data must not unlawfully breach
+        the data subjects' personality rights.
+    - urn: urn:intuitem:risk:req_node:fadp:30.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-30
+      ref_id: '30.2'
+      description: 'A breach of personality rights arises in particular if:'
+    - urn: urn:intuitem:risk:req_node:fadp:30.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:30.2
+      ref_id: 30.2.a
+      description: personal data are processed contrary to the principles of Articles
+        6 and 8;
+    - urn: urn:intuitem:risk:req_node:fadp:30.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:30.2
+      ref_id: 30.2.b
+      description: personal data are processed contrary to the express wishes of the
+        data subject;
+    - urn: urn:intuitem:risk:req_node:fadp:30.2.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:30.2
+      ref_id: 30.2.c
+      description: sensitive personal data are disclosed to third parties.
+    - urn: urn:intuitem:risk:req_node:fadp:30.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-30
+      ref_id: '30.3'
+      description: In general no breach of personality rights arises if the data subject
+        makes the personal data generally accessible and has not explicitly prohibited
+        any processing.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-31
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-5
+      ref_id: Art. 31
+      name: Grounds for justification
+    - urn: urn:intuitem:risk:req_node:fadp:31.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-31
+      ref_id: '31.1'
+      description: 'A breach of personality rights is unlawful unless it is justified
+        by the consent of the data subject, by an overriding private or public interest,
+        or by the law. '
+    - urn: urn:intuitem:risk:req_node:fadp:31.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-31
+      ref_id: '31.2'
+      description: 'The controller may have an overriding interest in the following
+        cases in particular:'
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2
+      ref_id: 31.2.a
+      description: The controller processes personal data relating to a contracting
+        party in direct connection with the conclusion or the performance of a contract.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2
+      ref_id: 31.2.b
+      description: The controller is or intends to be in commercial competition with
+        another person and for this purpose processes personal data that are not disclosed
+        to third parties; legal entities that belong to the same group of companies
+        as the controller are not regarded as third parties for the purposes of this
+        provision.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2
+      ref_id: 31.2.c
+      description: 'The controller processes personal data to verify the creditworthiness
+        of the data subject, provided the following requirements are satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.c.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.c
+      ref_id: 31.2.c.1
+      description: 'The matter involves neither sensitive personal data nor high-risk
+        profiling. '
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.c.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.c
+      ref_id: 31.2.c.2
+      description: The data are only disclosed to third parties if the third parties
+        require the data for the conclusion or the performance of a contract with
+        the data subject.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.c.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.c
+      ref_id: 31.2.c.3
+      description: The data are no more than ten years old.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.c.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.c
+      ref_id: 31.2.c.4
+      description: The data subject has attained the age of majority.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2
+      ref_id: 31.2.d
+      description: The controller processes the personal data professionally and exclusively
+        for publication in the editorial section of a periodically published medium
+        or the controller uses the data, if they are not published, as an aid to their
+        own personal work.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2
+      ref_id: 31.2.e
+      description: 'The controller processes the personal data for purposes not related
+        to specific persons, in particular for research, planning or statistics, provided
+        the following requirements are satisfied:'
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.e.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.e
+      ref_id: 31.2.e.1
+      description: The controller anonymises the data as soon as the purpose of processing
+        permits; if anonymity is impossible or if it requires disproportionate effort,
+        the controller shall take appropriate measures to prevent the identification
+        of the data subject.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.e.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.e
+      ref_id: 31.2.e.2
+      description: If the matter involves sensitive personal data, the controller
+        shall disclose such data to third parties in such a manner that the data subject
+        is not identifiable; if this is not possible, it must be guaranteed that the
+        third parties only process the data for purposes unrelated to the data subject's
+        person.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.e.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2.e
+      ref_id: 31.2.e.3
+      description: The results are published in such a manner that data subjects are
+        not identifiable.
+    - urn: urn:intuitem:risk:req_node:fadp:31.2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:31.2
+      ref_id: 31.2.f
+      description: The controller collects personal data relating to a public figure
+        that relate to that person's public activities.
+    - urn: urn:intuitem:risk:req_node:fadp:art.-32
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:fadp:chapter-5
+      ref_id: Art. 32
+      name: Legal rights
+    - urn: urn:intuitem:risk:req_node:fadp:32.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-32
+      ref_id: '32.1'
+      description: 'The data subject may request that incorrect personal data be corrected
+        unless: '
+    - urn: urn:intuitem:risk:req_node:fadp:32.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:32.1
+      ref_id: 32.1.a
+      description: a statutory provision prohibits the correction;
+    - urn: urn:intuitem:risk:req_node:fadp:32.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:32.1
+      ref_id: 32.1.b
+      description: the personal data are processed for archiving purposes that are
+        in the public interest.
+    - urn: urn:intuitem:risk:req_node:fadp:32.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-32
+      ref_id: '32.2'
+      description: "Actions to protect the personality are governed by the Articles\
+        \ 28, 28a and 28g\u201328l of the Civil Code. The applicant may in particular\
+        \ request that:"
+    - urn: urn:intuitem:risk:req_node:fadp:32.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:32.2
+      ref_id: 32.2.a
+      description: a specific data processing activity be prohibited;
+    - urn: urn:intuitem:risk:req_node:fadp:32.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:32.2
+      ref_id: 32.2.b
+      description: a specific disclosure of personal data to third parties be prohibited;
+    - urn: urn:intuitem:risk:req_node:fadp:32.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:fadp:32.2
+      ref_id: 32.2.c
+      description: personal data be deleted or destroyed.
+    - urn: urn:intuitem:risk:req_node:fadp:32.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-32
+      ref_id: '32.3'
+      description: 'If neither the accuracy nor the inaccuracy of the relevant personal
+        data can be established, the applicant may request that the data be marked
+        as being disputed. '
+    - urn: urn:intuitem:risk:req_node:fadp:32.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:fadp:art.-32
+      ref_id: '32.4'
+      description: The applicant may also request that any correction, deletion or
+        destruction, prohibition of processing or disclosure to third parties, marking
+        as disputed or judgment be communicated to third parties or be published.

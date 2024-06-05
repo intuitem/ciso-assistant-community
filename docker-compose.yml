@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=True
+      - AUTH_TOKEN_TTL=7200
+      - DEFAULT_FROM_EMAIL=support@networkgate.lt
+      - EMAIL_HOST=mailhog
+      - EMAIL_PORT=1025
+      - EMAIL_HOST_USER=support@networkgate.lt
+      - EMAIL_HOST_PASSWORD=anu3ak3saabnjbd
+      - EMAIL_USE_TLS=True      
+    volumes:
+      - ./db:/code/db
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    depends_on:
+      - backend
+
+  caddy:
+    container_name: caddy
+    image: caddy:2.7.6
+    restart: unless-stopped
+    ports:
+      - 8443:8443
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - https://localhost:8443
+      - --to
+      - frontend:3000
+    volumes:
+      - ./db:/data
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"

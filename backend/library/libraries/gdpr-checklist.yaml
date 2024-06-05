@@ -1,0 +1,312 @@
+urn: urn:intuitem:risk:library:gdpr-checklist
+locale: en
+ref_id: GDPR-checklist
+name: GDPR checklist for data controllers
+description: GDPR.EU checklist for data controllers  (https://gdpr.eu/checklist/)
+copyright: "Terms and conditions\n\nThe following terms and conditions govern all\
+  \ use of the gdpr.eu website and all content, services and products available at\
+  \ or through the website (taken together, the \u201CWebsite\u201D). The Website\
+  \ is owned and operated by Proton Technologies AG (the \u201CCompany\u201D). The\
+  \ Website is offered subject to your acceptance without modification of all the\
+  \ terms and conditions contained herein and all other operating rules, policies\
+  \ and procedures that may be published from time to time on the Website (taken together,\
+  \ the \u201CAgreement\u201D).\n\nPlease read this Agreement carefully before accessing\
+  \ or using the Website. By accessing or using any part of the Website, you agree\
+  \ to become bound by the terms and conditions of this Agreement. If you do not agree\
+  \ to all the terms and conditions of this Agreement, then you may not access the\
+  \ Website or use any services. The Website is available only to individuals who\
+  \ are at least 13 years old.\n\nContent of the Website\n\nThe Website and its content,\
+  \ mainly but not limited to its articles and guides, do not constitute and are not\
+  \ intended to constitute legal advice and do not establish an attorney-client relationship.\
+  \ If you need legal advice, please contact an attorney directly. The Company does\
+  \ not make any warranty about the validity of the content, despite its best efforts\
+  \ to keep the content up to date and as accurate as possible.\n\nComments section\n\
+  \nComments are welcomed and encouraged on the Website, but there are some instances\
+  \ where comments will be edited or deleted as follows:\n\nComments deemed to be\
+  \ spam or solely promotional in nature will be deleted. Including a link to relevant\
+  \ content is permitted, but comments should be relevant to the post topic.\nComments\
+  \ including profanity will be deleted.\nComments containing language or concepts\
+  \ that could be deemed offensive will be deleted. This may include abusive, threatening,\
+  \ pornographic, offensive, misleading or libelous language.\nComments that harass\
+  \ other posters will be deleted. Please be respectful toward other contributors.\n\
+  Indemnification\n\nYou agree that the Company, and any parents, subsidiaries, officers,\
+  \ employees or third-party contractors cannot be held responsible for any third-party\
+  \ claim, demand or damages, including reasonable attorneys\u2019 fees, arising out\
+  \ of your use of this Website.\n\nPrivacy\n\nOur Privacy Policy explains the way\
+  \ we handle and protect your personal data in relation to your use and browsing\
+  \ of the Website. By agreeing to the present terms and conditions and to be able\
+  \ to use the Service, you also agree to our Privacy Policy.\n\nModification to terms\
+  \ of service\n\nWithin the limits of applicable law, the Company reserves the right\
+  \ to review and change this Agreement at any time. You are responsible for regularly\
+  \ reviewing these terms and conditions. Continued use and browsing of the Website\
+  \ after such changes shall constitute your consent to such changes.\n\nApplicable\
+  \ Law\n\nThis Agreement shall be governed in all respects by the substantive laws\
+  \ of Switzerland. Any controversy, claim, or dispute arising out of or relating\
+  \ to the Agreement shall be subject to the jurisdiction of the competent courts\
+  \ of the Canton of Geneva, the jurisdiction of the Swiss Federal Court being expressly\
+  \ reserved."
+version: 1
+provider: GDPR.EU
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:gdpr-checklist
+    ref_id: GDPR-checklist
+    name: GDPR checklist for data controllers
+    description: GDPR.EU checklist for data controllers  (https://gdpr.eu/checklist/)
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node2
+      assessable: false
+      depth: 1
+      name: Lawful basis and transparency
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node2
+      name: Conduct an information audit to determine what information you process
+        and who has access to it.
+      description: "Organizations that have at least 250 employees or conduct higher-risk\
+        \ data processing are required to keep an up-to-date and detailed\_list of\
+        \ their processing activities (article 30)\_and be prepared to show that list\
+        \ to regulators upon request. The best way to demonstrate GDPR compliance\
+        \ is using a\_data protection impact assessment (article 35).\nOrganizations\
+        \ with fewer than 250 employees should also conduct an assessment because\
+        \ it will make complying with the GDPR's other requirements easier. In your\
+        \ list, you should include: the purposes of the processing, what kind of data\
+        \ you process, who has access to it in your organization, any third parties\
+        \ (and where they are located) that have access, what you're doing to protect\
+        \ the data (e.g. encryption), and when you plan to erase it (if possible)."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node2
+      name: Have a legal justification for your data processing activities.
+      description: "Processing of data is illegal under the GDPR unless you can justify\
+        \ it according to one of six conditions listed in\_Article 6. There are other\
+        \ provisions related to children and special categories of personal data in\_\
+        Articles 7-11. Review these provisions, choose a lawful basis for processing,\
+        \ and document your rationale. Note that if you choose \"consent\" as your\
+        \ lawful basis, there are\_extra obligations, including giving data subjects\
+        \ the ongoing opportunity to revoke consent. If \"legitimate interests\" is\
+        \ your lawful basis, you must be able to demonstrate you have conducted a\
+        \ privacy impact assessment."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node2
+      name: Provide clear information about your data processing and legal justification
+        in your privacy policy.
+      description: You need to tell people that you're collecting their data and why
+        (Article 12). You should explain how the data is processed, who has access
+        to it, and how you're keeping it safe. This information should be included
+        in your privacy policy and provided to data subjects at the time you collect
+        their data. It must be presented "in a concise, transparent, intelligible
+        and easily accessible form, using clear and plain language, in particular
+        for any information addressed specifically to a child."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
+      assessable: false
+      depth: 1
+      name: Data security
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
+      name: Take data protection into account at all times, from the moment you begin
+        developing a product to each time you process data.
+      description: "You must follow the principles of \"data protection by design\
+        \ and by default,\" including implementing \"appropriate technical and organizational\
+        \ measures\" to protect data. In other words, data protection is something\
+        \ you now have to consider whenever you do anything with other people's personal\
+        \ data. You also need to make sure any processing of personal data adheres\
+        \ to the data protection principles outlined in\_Article 5. Technical measures\
+        \ include encryption, and organizational measures are things like limiting\
+        \ the amount of personal data you collect or deleting data you no longer need.\
+        \ The point is that it needs to be something you and your employees are always\
+        \ aware of."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
+      name: Encrypt, pseudonymize, or anonymize personal data wherever possible.
+      description: "Most of the productivity tools used by businesses are now available\
+        \ with\_end-to-end encryption\_built in, including email, messaging, notes,\
+        \ and cloud storage. The GDPR requires organizations to\_use encryption or\
+        \ pseudeonymization\_whenever feasible."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
+      name: Create an internal security policy for your team members, and build awareness
+        about data protection.
+      description: "Even if your technical security is strong,\_operational security\_\
+        can still be a weak link. Create a security policy that ensures your team\
+        \ members are knowledgeable about data security. It should include guidance\
+        \ about email security, passwords, two-factor authentication, device encryption,\
+        \ and\_VPNs. Employees who have access to personal data and non-technical\
+        \ employees should receive extra training in the requirements of the GDPR."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
+      name: Know when to conduct a data protection impact assessment, and have a process
+        in place to carry it out.
+      description: "A\_data protection impact assessment\_(aka privacy impact assessment)\
+        \ is a way to help you understand how your product or service could jeopardize\
+        \ your customers' data, as well as how to minimize those risks. The UK Information\
+        \ Commissioner's Office (ICO) has a data protection impact assessment checklist\
+        \ on its website. The GDPR requires organizations to carry out this kind of\
+        \ analysis whenever they plan to use people's data in such a way that it's\
+        \ \"likely to result in a high risk to [their] rights and freedoms.\" The\
+        \ ICO recommends just doing it anytime you're about to process personal data."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
+      name: Have a process in place to notify the authorities and your data subjects
+        in the event of a data breach.
+      description: "If there's a data breach and personal data is exposed, you are\
+        \ required to\_notify the supervisory authority\_in your jurisdiction within\
+        \ 72 hours. A list of many of the EU member states supervisory authorities\
+        \ can be found here. The GDPR does not specify whom you should notify if you\
+        \ are not an EU-based organization. For those in English-speaking non-EU countries,\
+        \ you may find it easiest to notify the Office of the Data Protection Commissioner\
+        \ in Ireland. You are also required to quickly\_communicate data breaches\
+        \ to your data subjects\_unless the breach is unlikely to put them at risk\
+        \ (for instance, if the stolen data is encrypted)."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
+      assessable: false
+      depth: 1
+      name: Accountability and governance
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
+      name: Designate someone responsible for ensuring GDPR compliance across your
+        organization.
+      description: Another part of "data protection by design and by default" (article
+        25) is making sure someone in your organization is accountable for GDPR compliance.
+        This person should be empowered to evaluate data protection policies and the
+        implementation of those policies.
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
+      name: Sign a data processing agreement between your organization and any third
+        parties that process personal data on your behalf.
+      description: "This includes any third-party services that handle the personal\
+        \ data of your data subjects, including analytics software, email services,\
+        \ cloud servers, etc. The vast majority of services have a standard\_data\
+        \ processing agreement\_available on their websites for you to review. They\
+        \ spell out the rights and obligations of each party for GDPR compliance.\
+        \ You should only use third parties that are reliable and can make sufficient\
+        \ data protection guarantees."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
+      name: If your organization is outside the EU, appoint a representative within
+        one of the EU member states.
+      description: If you process data relating to people in one particular member
+        state, you need to appoint a representative in that country who can communicate
+        on your behalf with data protection authorities. The GDPR and its official
+        supporting documents do not give guidance for situations where processing
+        affects EU individuals across multiple member states. Until this requirement
+        is interpreted, it may be prudent to designate a representative in a member
+        state that uses your language. Some organizations, like public bodies, are
+        not required to appoint a representative in the EU.
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
+      name: Appoint a Data Protection Officer (if necessary)
+      description: "There are three circumstances in which organizations are required\
+        \ to have a\_Data Protection Officer\_(DPO), but it's not a bad idea to have\
+        \ one even if the rule doesn't apply to you. The DPO should be an expert on\
+        \ data protection whose job is to monitor GDPR compliance, assess data protection\
+        \ risks, advise on data protection impact assessments, and cooperate with\
+        \ regulators."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      assessable: false
+      depth: 1
+      name: Privacy rights
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: It's easy for your customers to request and receive all the information
+        you have about them.
+      description: "People have the\_right to see what personal data you have about\
+        \ them\_(Article 15) and how you're using it. They also have a right to know\
+        \ how long you plan to store their information and the reason for keeping\
+        \ it that length of time. You have to send them the first copy of this information\
+        \ for free but can charge a reasonable fee for subsequent copies. Make sure\
+        \ you can verify the identity of the person requesting the data. You should\
+        \ be able to comply with such requests within a month."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: It's easy for your customers to correct or update inaccurate or incomplete
+        information.
+      description: Do your best to keep data up to date by putting a data quality
+        process in place, and make it easy for your customers to view (Article 15)
+        and update their personal information for accuracy and completeness. Make
+        sure you can verify the identity of the person requesting the data. You should
+        be able to comply with requests under Article 16 within a month.
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: It's easy for your customers to request to have their personal data deleted.
+      description: People generally have the right to ask you to delete all the personal
+        data you have about them, and you have to honor their request within about
+        a month. There are a five grounds on which you can deny the request, such
+        as the exercise of freedom of speech or compliance with a legal obligation.
+        You must also try to verify the identity of the person making the request.
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: It's easy for your customers to ask you to stop processing their data.
+      description: Your data subjects can request to restrict or stop processing of
+        their data (Article 18) if certain grounds apply, mainly if there's some dispute
+        about the lawfulness of the processing or the accuracy of the data. You are
+        required to honor their request within about a month. While processing is
+        restricted, you're still allowed to keep storing their data. You must notify
+        the data subject before you begin processing their data again.
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: It's easy for your customers to receive a copy of their personal data
+        in a format that can be easily transferred to another company.
+      description: This means that you should be able to send their personal data
+        (Article 20) in a commonly readable format (e.g. a spreadsheet) either to
+        them or to a third party they designate. This may seem unfair from a business
+        standpoint in that you may have to turn over your customers' data to a competitor.
+        But from privacy standpoint, the idea is that people own their data, not you.
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: It's easy for your customers to object to you processing their data.
+      description: If you're processing their data for the purposes of direct marketing,
+        you have to stop processing it immediately (Article 21) for that purpose.
+        Otherwise, you may be able to challenge their objection if you can demonstrate
+        "compelling legitimate grounds."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      name: If you make decisions about people based on automated processes, you have
+        a procedure to protect their rights.
+      description: Some types of organizations use automated processes (Article 22)
+        to help them make decisions about people that have legal or "similarly significant"
+        effects. If you think that applies to you, you'll need to set up a procedure
+        to ensure you are protecting their rights, freedoms, and legitimate interests.
+        You need to make it easy for people to request human intervention, to weigh
+        in on decisions, and to challenge decisions you've already made.
