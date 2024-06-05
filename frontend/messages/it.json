@@ -460,7 +460,7 @@
 	"domainManager": "Manager di dominio",
 	"analyst": "Analista",
 	"successfullyCreatedObject": "L'oggetto {object} è stato creato con successo",
-	"successfullyUpdatedObject": "L'oggetto {object} è stato aggiornato con successo",
+	"successfullyUpdatedObject": "L'oggetto {object}: {name} è stato aggiornato con successo",
 	"successfullySavedObject": "L'oggetto {object} è stato salvato con successo",
 	"successfullyDeletedObject": "L'oggetto {object} è stato eliminato con successo",
 	"successfullyDeletedLibrary": "La biblioteca è stata eliminata con successo",
@@ -474,6 +474,7 @@
 	"attachmentDeleted": "L'allegato è stato eliminato con successo",
 	"librarySuccessfullyLoaded": "La biblioteca è stata caricata con successo",
 	"noLibraryDetected": "Nessuna biblioteca rilevata",
+	"errorImportingLibrary": "Errore durante l'importazione della biblioteca",
 	"passwordSuccessfullyChanged": "La tua password è stata cambiata con successo",
 	"passwordSuccessfullyReset": "La tua password è stata reimpostata con successo",
 	"passwordSuccessfullySet": "La tua password è stata impostata con successo",
@@ -497,6 +498,7 @@
 	"lowSOK": "La forza della conoscenza che supporta la valutazione è bassa",
 	"mediumSOK": "La forza della conoscenza che supporta la valutazione è media",
 	"highSOK": "La forza della conoscenza che supporta la valutazione è alta",
+	"libraryImportError": "Si è verificato un errore durante l'importazione della tua biblioteca.",
 	"libraryAlreadyLoadedError": "Questa biblioteca è già stata caricata.",
 	"invalidLibraryFileError": "File di biblioteca non valido. Assicurati che il formato sia corretto.",
 	"taintedFormMessage": "Vuoi lasciare questa pagina? Le modifiche apportate potrebbero non essere salvate.",
@@ -552,7 +554,5 @@
 	"appliedControlNoReferenceControl": "Per il controllo applicato non è selezionato alcun controllo di riferimento",
 	"evidenceNoFile": "Nessun file è stato caricato nelle prove",
 	"requirementAppliedControlHelpText": "Le evidenze legate alle misure selezionate verranno automaticamente associate al requisito.",
-	"requirementEvidenceHelpText": "Questa scheda ti consente di aggiungere ulteriori prove al requisito.",
-	"errorImportingLibrary": "Errore durante l'importazione della biblioteca",
-	"libraryImportError": "Si è verificato un errore durante l'importazione della tua biblioteca."
+	"requirementEvidenceHelpText": "Questa scheda ti consente di aggiungere ulteriori prove al requisito."
 }
