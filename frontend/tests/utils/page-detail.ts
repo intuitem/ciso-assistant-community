@@ -33,8 +33,8 @@ export class PageDetail extends BasePage {
 
 		await this.isToastVisible(
 			'The .+: ' +
-				({ ...buildParams, ...editedValues }.name || { ...buildParams, ...editedValues }.email) +
-				' has been successfully updated'
+				({ ...buildParams, ...editedValues }.email) ?? '' +
+				'object has been successfully updated'
 		);
 		return editedValues;
 	}
