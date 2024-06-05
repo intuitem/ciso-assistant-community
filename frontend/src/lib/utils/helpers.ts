@@ -8,17 +8,17 @@ export function formatStringToDate(inputString: string, locale: string = 'en') {
 }
 
 export const escapeHTML = (str: string) =>
-  str.replace(
-    /[&<>'"]/g,
-    tag =>
-      ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      }[tag] || tag)
-  );
+	str.replace(
+		/[&<>'"]/g,
+		(tag) =>
+			({
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				"'": '&#39;',
+				'"': '&quot;'
+			}[tag] || tag)
+	);
 
 export const isURL = (url: string) => {
 	try {
