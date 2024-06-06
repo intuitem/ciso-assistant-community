@@ -460,7 +460,7 @@
 	"domainManager": "Domain manager",
 	"analyst": "Analyst",
 	"successfullyCreatedObject": "The {object} object has been successfully created",
-	"successfullyUpdatedObject": "The {object} object: {name} has been successfully updated",
+	"successfullyUpdatedObject": "The {object} object has been successfully updated",
 	"successfullySavedObject": "The {object} object has been successfully saved",
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
 	"successfullyDeletedLibrary": "The library has been successfully deleted",
