@@ -56,3 +56,8 @@ export function formatScoreValue(value: number, max_score: number) {
 	}
 	return (value * 100) / max_score;
 }
+
+export function getSecureRedirect(url: any): string {
+	const SECURE_REDIRECT_URL_REGEX = /^\/(?!.*\/\/)[^\s]*$/;
+	return typeof url === 'string' && SECURE_REDIRECT_URL_REGEX.test(url) ? url : '';
+}

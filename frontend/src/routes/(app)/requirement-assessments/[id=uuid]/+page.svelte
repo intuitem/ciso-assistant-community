@@ -20,6 +20,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getOptions } from '$lib/utils/crud';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
 		getModalStore,
@@ -43,7 +44,7 @@
 	function cancel(): void {
 		var currentUrl = window.location.href;
 		var url = new URL(currentUrl);
-		var nextValue = url.searchParams.get('next');
+		var nextValue = getSecureRedirect(url.searchParams.get('next'));
 		if (nextValue) window.location.href = nextValue;
 	}
 

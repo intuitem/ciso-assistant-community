@@ -1,5 +1,6 @@
 import { superValidate } from 'sveltekit-superforms';
 import type { LayoutServerLoad } from './$types';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import { redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
@@ -35,7 +36,8 @@ export const load: LayoutServerLoad = async (event) => {
 			);
 			throw redirect(
 				302,
-				event.url.searchParams.get('next') || `/${model.urlModel}/${riskAcceptance.id}`
+				getSecureRedirect(event.url.searchParams.get('next')) ||
+					`/${model.urlModel}/${riskAcceptance.id}`
 			);
 		}
 	}

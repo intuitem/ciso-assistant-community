@@ -4,6 +4,7 @@ import { fail, type Actions } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import { redirect } from '@sveltejs/kit';
 
 import { localItems, toCamelCase } from '$lib/utils/locales';
@@ -100,7 +101,8 @@ export const actions: Actions = {
 		);
 		redirect(
 			302,
-			event.url.searchParams.get('next') ?? `/${event.params.model}/${event.params.id}`
+			getSecureRedirect(event.url.searchParams.get('next')) ??
+				`/${event.params.model}/${event.params.id}`
 		);
 	}
 };

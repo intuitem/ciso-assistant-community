@@ -460,7 +460,7 @@
 	"domainManager": "Domeinbeheerder",
 	"analyst": "Analist",
 	"successfullyCreatedObject": "Het {object} object is succesvol aangemaakt",
-	"successfullyUpdatedObject": "Het {object} object: {name} is succesvol bijgewerkt",
+	"successfullyUpdatedObject": "Het {object} object is succesvol bijgewerkt",
 	"successfullySavedObject": "Het {object} object is succesvol opgeslagen",
 	"successfullyDeletedObject": "Het {object} object is succesvol verwijderd",
 	"successfullyDeletedLibrary": "De bibliotheek is succesvol verwijderd",
