@@ -32,7 +32,7 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'error',
-					message: localItems(languageTag())[resText]
+					message: localItems()[resText]
 				},
 				event
 			);
