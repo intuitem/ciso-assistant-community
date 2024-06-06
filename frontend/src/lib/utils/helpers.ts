@@ -7,6 +7,19 @@ export function formatStringToDate(inputString: string, locale: string = 'en') {
 	});
 }
 
+export const escapeHTML = (str: string) =>
+	str.replace(
+		/[&<>'"]/g,
+		(tag) =>
+			({
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				"'": '&#39;',
+				'"': '&quot;'
+			}[tag] || tag)
+	);
+
 export const isURL = (url: string) => {
 	try {
 		new URL(url);
@@ -42,4 +55,9 @@ export function formatScoreValue(value: number, max_score: number) {
 		return 0;
 	}
 	return (value * 100) / max_score;
+}
+
+export function getSecureRedirect(url: any): string {
+	const SECURE_REDIRECT_URL_REGEX = /^\/(?!.*\/\/)[^\s]*$/;
+	return typeof url === 'string' && SECURE_REDIRECT_URL_REGEX.test(url) ? url : '';
 }
