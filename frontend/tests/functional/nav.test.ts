@@ -12,7 +12,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 
 	await test.step('navigation link are working properly', async () => {
-		const locals = localItems(languageTag());
+		const locals = localItems();
 		for await (const [key, value] of sideBar.items) {
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {

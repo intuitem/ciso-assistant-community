@@ -1267,6 +1267,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "inactive": "#fca5a5",
                 "no status": "#e5e7eb",
             }
+            status = AppliedControl.Status.choices
             compliance_assessment_object = self.get_object()
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments()
@@ -1285,6 +1286,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     applied_control
                 )
             data = {
+                "status_text": status,
                 "color_map": color_map,
                 "context": context,
                 "compliance_assessment": compliance_assessment_object,

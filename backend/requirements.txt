@@ -19,3 +19,4 @@ python-dotenv==1.0.1
 drf-spectacular==0.27.2
 django-rest-knox==4.2.0
 pre-commit==3.7.0
+bleach==6.1.0

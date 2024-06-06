@@ -16,7 +16,7 @@
 
 	for (const index in values) {
 		if (values[index].localName) {
-			values[index].name = localItems(languageTag())[values[index].localName];
+			values[index].name = localItems()[values[index].localName];
 		}
 	}
 

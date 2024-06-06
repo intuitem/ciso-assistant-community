@@ -85,7 +85,7 @@
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.treatmentStatus()}</p>
 					<p class="text-sm font-semibold">
-						{localItems(languageTag())[toCamelCase(data.scenario.treatment)]}
+						{localItems()[toCamelCase(data.scenario.treatment)]}
 					</p>
 				</span>
 			</div>
@@ -120,8 +120,8 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_proba]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.current_proba)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.current_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.current_proba)]}
+						{localItems()[toCamelCase(data.scenario.current_proba)]}
 					{:else}
 						{data.scenario.current_proba}
 					{/if}
@@ -134,8 +134,8 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_impact]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.current_impact)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.current_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.current_impact)]}
+						{localItems()[toCamelCase(data.scenario.current_impact)]}
 					{:else}
 						{data.scenario.current_impact}
 					{/if}
@@ -148,8 +148,8 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {data.scenario.current_level.hexcolor}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.current_level.name)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.current_level.name)]}
+					{#if localItems()[toCamelCase(data.scenario.current_level.name)]}
+						{localItems()[toCamelCase(data.scenario.current_level.name)]}
 					{:else}
 						{data.scenario.current_level.name}
 					{/if}
@@ -170,8 +170,8 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_proba]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.residual_proba)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.residual_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_proba)]}
+						{localItems()[toCamelCase(data.scenario.residual_proba)]}
 					{:else}
 						{data.scenario.residual_proba}
 					{/if}
@@ -184,8 +184,8 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_impact]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.residual_impact)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.residual_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_impact)]}
+						{localItems()[toCamelCase(data.scenario.residual_impact)]}
 					{:else}
 						{data.scenario.residual_impact}
 					{/if}
@@ -198,8 +198,8 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {data.scenario.residual_level.hexcolor}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.residual_level.name)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.residual_level.name)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_level.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_level.name)]}
 					{:else}
 						{data.scenario.residual_level.name}
 					{/if}
@@ -215,10 +215,10 @@
 					{data.scenario.strength_of_knowledge.symbol}
 				{/if}
 				<span class="font-semibold">
-					{#if localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}
+					{#if localItems()[toCamelCase(data.scenario.strength_of_knowledge.name)]}
+						{localItems()[toCamelCase(data.scenario.strength_of_knowledge.name)]}
 					{:else}
-						{localItems(languageTag())['undefined']}
+						{localItems()['undefined']}
 					{/if}
 				</span>
 			</p>

@@ -5,7 +5,6 @@ __pycache__
 *~$*
 staticfiles/*
 static/
-*.mo
 .env
 .vscode
 *.sqlite3

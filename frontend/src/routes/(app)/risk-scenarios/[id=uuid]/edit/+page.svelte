@@ -8,6 +8,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
 		getModalStore,
 		getToastStore,
@@ -52,7 +53,7 @@
 		if (browser) {
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
-			var nextValue = url.searchParams.get('next');
+			var nextValue = getSecureRedirect(url.searchParams.get('next'));
 			if (nextValue) window.location.href = nextValue;
 		}
 	}
@@ -71,7 +72,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -113,7 +114,7 @@
 			}
 		));
 	}
-	const next = $page.url.searchParams.get('next');
+	const next = getSecureRedirect($page.url.searchParams.get('next'));
 
 	function riskColorMap() {
 		let color_map = {};

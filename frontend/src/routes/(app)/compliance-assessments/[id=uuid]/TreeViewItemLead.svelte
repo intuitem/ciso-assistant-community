@@ -12,7 +12,7 @@
 	export let isScored: boolean;
 	export let max_score: number;
 
-	const lead = localItems(languageTag())[statusI18n] ?? statusDisplay ?? '';
+	const lead = localItems()[statusI18n] ?? statusDisplay ?? '';
 
 	$: classesText = statusColor === '#000000' ? 'text-white' : '';
 </script>
