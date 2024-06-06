@@ -98,11 +98,12 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const translate_error = localItems(languageTag())[response.error];
+				const translate_error = localItems()[response.error];
 				const toast_error_message =
 					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
 
 				setFlash({ type: 'error', message: toast_error_message }, event);
+				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}
 			setFlash({ type: 'success', message: m.librarySuccessfullyLoaded() }, event);

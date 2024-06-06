@@ -25,12 +25,13 @@ class Command(BaseCommand):
             library_files = [path]
         for fname in library_files:
             # logger.info("Begin library file storage", filename=fname)
-            library = StoredLibrary.store_library_file(fname, True)
-            if library:
-                logger.info(
-                    "Successfully stored library",
-                    filename=fname,
-                    library=library,
-                )
-            # else:
-            #     logger.info("Library is up to date", filename=fname)
+            try:
+                library = StoredLibrary.store_library_file(fname, True)
+                if library:
+                    logger.info(
+                        "Successfully stored library",
+                        filename=fname,
+                        library=library,
+                    )
+            except:
+                logger.error("Invalid library file", filename=fname)

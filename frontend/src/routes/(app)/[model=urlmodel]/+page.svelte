@@ -26,7 +26,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]
+			title: localItems()['add' + capitalizeFirstLetter(data.model.localName)]
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -36,9 +36,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: localItems(languageTag())[
-					'add' + capitalizeFirstLetter(data.model.localName)
-				].toLowerCase(),
+				body: localItems()['add' + capitalizeFirstLetter(data.model.localName)].toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
@@ -56,7 +54,7 @@
 						data-testid="add-button"
 						on:click={modalCreateForm}
 						><i class="fa-solid fa-plus mr-2" />
-						{localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]}
+						{localItems()['add' + capitalizeFirstLetter(data.model.localName)]}
 					</button>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
