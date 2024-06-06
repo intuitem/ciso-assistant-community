@@ -319,7 +319,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+				message: m.successfullyUpdatedObject({ object: model })
 			},
 			event
 		);
