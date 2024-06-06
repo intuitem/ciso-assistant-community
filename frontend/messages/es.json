@@ -460,7 +460,7 @@
 	"domainManager": "Gerente de dominio",
 	"analyst": "Analista",
 	"successfullyCreatedObject": "El objeto {object} se ha creado con éxito",
-	"successfullyUpdatedObject": "El objeto {object}: {name} se ha actualizado con éxito",
+	"successfullyUpdatedObject": "El objeto {object} se ha actualizado con éxito",
 	"successfullySavedObject": "El objeto {object} se ha guardado con éxito",
 	"successfullyDeletedObject": "El objeto {object} se ha eliminado con éxito",
 	"successfullyDeletedLibrary": "La biblioteca se ha eliminado con éxito",
