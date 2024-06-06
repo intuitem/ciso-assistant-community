@@ -6,7 +6,7 @@ import tempfile
 import uuid
 import zipfile
 from datetime import datetime
-from typing import Any
+from typing import Any, Tuple, List
 from uuid import UUID
 from datetime import date, timedelta
 
@@ -1582,211 +1582,78 @@ def generate_html(
             p = req.parent_urn
             req = None if not (p) else node_per_urn[p]
 
-    def bar_graph(node: RequirementNode):
-        """return bar graph filtered by top node (Null for all)"""
-        content = ""
-        compliance_assessments_status = []
-        candidates = [
-            c
-            for c in assessments.filter(requirement__assessable=True)
-            if not (node) or c == node or node in ancestors[c]
-        ]
-        total = len(candidates)
-        if total > 0:
-            for st in RequirementAssessment.Status:
-                count = len([c for c in candidates if c.status == st])
-                compliance_assessments_status.append((st, round(count * 100 / total)))
-        content += (
-            '<div class="flex bg-gray-300 rounded-full overflow-hidden h-4 w-2/3">'
-        )
-        for stat in reversed(compliance_assessments_status):
-            if stat[1] > 0:
-                content += '<div class="flex flex-col justify-center overflow-hidden text-xs font-semibold text-center '
-                if stat[0] == "in_progress":
-                    content += "bg-blue-500"
-                elif stat[0] == "non_compliant":
-                    content += "bg-red-500"
-                elif stat[0] == "partially_compliant":
-                    content += "bg-yellow-400"
-                elif stat[0] == "compliant":
-                    content += "bg-green-500"
-                elif stat[0] == "not_applicable":
-                    content += "bg-black text-white dark:bg-white dark:text-black"
-                content += '" style="width:' + str(stat[1]) + '%"> '
-                if stat[0] != "to_do":
-                    content += str(stat[1]) + "%"
-
-                content += "</div>"
-        content += "</div></div>"
-        return content
-
-    content = """
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://unpkg.com/dezui@latest">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Compliance report</title>
-    </head>
-    <body class="container container-tablet">
-    """
-    content += '<hr class="dotted">'
-    content += '<div class="flex flex-row space-x-4 justify-center items-center mb-4">'
-    content += f"<h1 class='text-3xl'>{compliance_assessment.name}: {compliance_assessment.framework}</h1>"
-    content += bar_graph(None)
-    content += "</div>"
-    table = """
-    <thead>
-    </thead>
-    <tbody>
-    """
-    content += '<div class="flex flex-row space-x-4 mb-4">'
-
-    content += "<div>"
-    content += "<p class='font-semibold'>Authors</p>"
-    content += "<ul>"
-    for author in compliance_assessment.authors.all():
-        content += f"<li>{author}</li>"
-    content += "</ul>"
-    content += "</div>"
-
-    content += "<div>"
-    content += "<p class='font-semibold'>Reviewers</p>"
-    content += "<ul>"
-    for group in compliance_assessment.reviewers.all():
-        content += f"<li>{group}</li>"
-    content += "</ul>"
-    content += "</div>"
-
-    content += "<div>"
-    content += "<p class='font-semibold'>Selected implementation groups</p>"
-    content += "<ul>"
-    for group in compliance_assessment.get_selected_implementation_groups():
-        content += f"<li>{group}</li>"
-    content += "</ul>"
-    content += "</div>"
-
-    content += "</div>"
-
-    def generate_html_rec(requirement_node: RequirementNode):
+    def generate_data_rec(requirement_node: RequirementNode):
         selected_evidences = []
-        table = ""
         children_nodes = [
             req for req in requirement_nodes if req.parent_urn == requirement_node.urn
         ]
-        if not requirement_node.assessable:
-            _display = requirement_node.display_long
-            table += f'<p class="font-semibold">{_display}  </p>'
-            if children_nodes:
-                table += bar_graph(requirement_node)
-        else:
+
+        node_data = {
+            "requirement_node": requirement_node,
+            "children": [],
+            "assessments": None,
+            "bar_graph": None,
+            "direct_evidences": [],
+            "applied_controls": [],
+            "status": "",
+            "color_class": "",
+        }
+
+        node_data["bar_graph"] = True if children_nodes else False
+
+        if requirement_node.assessable:
             assessment = RequirementAssessment.objects.filter(
                 requirement__urn=requirement_node.urn,
                 compliance_assessment=compliance_assessment,
             ).first()
 
-            table += "<div>"
-            table += "<div class='flex flex-col shadow-md border rounded-lg px-4 py-2 m-2 ml-0 items-center "
-            match assessment.status:
-                case "compliant":
-                    table += "border-t-2 border-t-green-500 border-green-500'>"
-                case "to_do":
-                    table += "border-t-2 border-t-gray-300 border-gray-300'>"
-                case "in_progress":
-                    table += "border-t-2 border-t-blue-500 border-blue-500'>"
-                case "non_compliant":
-                    table += "border-t-2 border-t-red-500 border-red-500'>"
-                case "partially_compliant":
-                    table += "border-t-2 border-t-yellow-400 border-yellow-400'>"
-                case "not_applicable":
-                    table += "border-t-2 border-t-black border-black'>"
-            table += '<div class="flex flex-row justify-between w-full">'
-            table += f"<p class='font-semibold'>{assessment.requirement}</p>"
-            table += "<p class='text-white text-center rounded-lg whitespace-nowrap px-2 py-1 "
-            match assessment.status:
-                case "compliant":
-                    table += f"bg-green-500'>{assessment.get_status_display()}</p>"
-                case "to_do":
-                    table += f"bg-gray-300'>{assessment.get_status_display()}</p>"
-                case "in_progress":
-                    table += f"bg-blue-500'>{assessment.get_status_display()}</p>"
-                case "non_compliant":
-                    table += f"bg-red-500'>{assessment.get_status_display()}</p>"
-                case "partially_compliant":
-                    table += f"bg-yellow-400'>{assessment.get_status_display()}</p>"
-                case "not_applicable":
-                    table += (
-                        f"bg-black tewt-white'>{assessment.get_status_display()}</p>"
-                    )
-            table += "</div>"
-            table += (
-                f"<p class='text-left w-full'>{assessment.requirement.description}</p>"
-            )
-            table += "</div>"
-            if children_nodes:
-                table += bar_graph(requirement_node)
+            if assessment:
+                node_data["assessments"] = assessment
+                node_data["status"] = assessment.get_status_display()
+                node_data["color_class"] = color_css_class(assessment.status)
+                direct_evidences = assessment.evidences.all()
+                if direct_evidences:
+                    selected_evidences += direct_evidences
+                    node_data["direct_evidences"] = direct_evidences
 
-            direct_evidences = assessment.evidences.all()
-            if direct_evidences:
-                selected_evidences += direct_evidences
-                table += '<div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200">'
-                table += (
-                    '<div class="grid grid-cols-2 justify-items-left font-semibold">'
-                )
-                table += f'<p>{("Associated evidence")}:</p>'
-                table += "</div>"
-                for direct_evidence in direct_evidences:
-                    if direct_evidence.attachment:
-                        table += f'<li> <a class="text-indigo-700 hover:text-indigo-500" target="_blank" href="evidences/{direct_evidence.attachment}">{direct_evidence.name}</a></li>'
-                    else:
-                        table += f"<li> {direct_evidence.name}</li>"
-                table += "</div>"
+                measures = assessment.applied_controls.all()
+                if measures:
+                    applied_controls = []
+                    for measure in measures:
+                        evidences = measure.evidences.all()
+                        applied_controls.append(
+                            {
+                                "measure": measure,
+                                "evidences": evidences,
+                            }
+                        )
+                        selected_evidences += evidences
+                    node_data["applied_controls"] = applied_controls
 
-            measures = assessment.applied_controls.all()
-            if measures:
-                table += '<div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200">'
-                evidences = ""
-                table += (
-                    '<div class="grid grid-cols-2 justify-items-left font-semibold">'
-                )
-                table += f'<p>{("Applied controls")}:</p>'
-                table += f'<p>{("Associated evidence")}:</p>'
-                table += "</div>"
-                table += '<div class="flex flex-row">'
-                table += '<div class="flex flex-col items-left w-1/2">'
-                for measure in measures:
-                    table += f"<li> {measure.name}: {measure.get_status_display()}</li>"
-                    for evidence in measure.evidences.all():
-                        selected_evidences.append(evidence)
-                        if evidence.attachment:
-                            evidences += f'<li> <a class="text-indigo-700 hover:text-indigo-500" target="_blank" href="evidences/{evidence.attachment}">{measure.name}/{evidence.name}</a></li>'
-                        else:
-                            evidences += f"<li> {evidence.name}</li>"
-                table += "</div>"
-                table += (
-                    f'<div class="flex flex-col items-left w-1/2">{evidences}</div>'
-                )
-                table += "</div></div>"
-            table += "</div>"
         for child_node in children_nodes:
-            (table2, selected_evidences2) = generate_html_rec(child_node)
-            table += table2
-            selected_evidences += selected_evidences2
-        return (table, selected_evidences)
+            child_data, child_evidences = generate_data_rec(child_node)
+            node_data["children"].append(child_data)
+            selected_evidences += child_evidences
+
+        return node_data, selected_evidences
 
     top_level_nodes = [req for req in requirement_nodes if not req.parent_urn]
+    top_level_nodes_data = []
     for requirement_node in top_level_nodes:
-        (table2, selected_evidences2) = generate_html_rec(requirement_node)
-        table += table2
-        selected_evidences += selected_evidences2
-    table += "</tbody><br/>"
-    content += table
-    content += """
-    </body>
-    </html>
-    """
+        node_data, node_evidences = generate_data_rec(requirement_node)
+        top_level_nodes_data.append(node_data)
+        selected_evidences += node_evidences
 
-    return (content, list(set(selected_evidences)))
+    data = {
+        "compliance_assessment": compliance_assessment,
+        "top_level_nodes": top_level_nodes_data,
+        "assessments": assessments,
+        "ancestors": ancestors,
+    }
+
+    return render_to_string("core/audit_report_pdf.html", data), list(
+        set(selected_evidences)
+    )
 
 
 def export_mp_csv(request):
