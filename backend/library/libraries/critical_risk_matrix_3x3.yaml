@@ -16,22 +16,28 @@ objects:
         - abbreviation: L
           name: Low
           description: Unfrequent event
+          hexcolor: '#92D050'
         - abbreviation: M
           name: Medium
           description: Occasional event
+          hexcolor: '#FFFF00'
         - abbreviation: H
           name: High
           description: Frequent event
+          hexcolor: '#FF0000'
       impact:
         - abbreviation: L
           name: Low
           description: Low impact
+          hexcolor: '#92D050'
         - abbreviation: M
           name: Medium
           description: Medium impact
+          hexcolor: '#FFFF00'
         - abbreviation: H
           name: High
           description: High impact
+          hexcolor: '#FF0000'
       risk:
         - abbreviation: L
           name: Low
