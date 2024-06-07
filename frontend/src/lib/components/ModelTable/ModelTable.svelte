@@ -165,7 +165,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{localItems(languageTag())[heading]}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{localItems()[heading]}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
@@ -210,7 +210,7 @@
 									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-											{localItems(languageTag())[text]}
+											{localItems()[text]}
 										</span>
 									{/if}
 								{/each}
@@ -247,8 +247,8 @@
                   {/if}
                 {:else if value && value.hexcolor}
                   <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">
-					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
-						{localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+					{#if localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
+						{localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
 					{:else}
 						{value.name ?? value.str ?? '-'}
 					{/if}
@@ -256,8 +256,8 @@
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
-					{#if localItems(languageTag())[toCamelCase(value)]}
-						{localItems(languageTag())[toCamelCase(value)]}
+					{#if localItems()[toCamelCase(value)]}
+						{localItems()[toCamelCase(value)]}
 					{:else}
 						{value ?? '-'}
 					{/if}
@@ -298,7 +298,7 @@
                   {/if}
                 </svelte:fragment>
                 <svelte:fragment slot="tail">
-                  <svelte:component this={actionsComponent} meta={row.meta ?? {}}/>
+                  <svelte:component this={actionsComponent} meta={row.meta ?? {}} {actionsURLModel}/>
                 </svelte:fragment>
               </TableRowActions>
             {/if}

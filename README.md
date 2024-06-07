@@ -118,7 +118,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 40. NIST SP 800-171 rev3 (2024) 🇺🇸
 41. ENISA: 5G Security Controls Matrix 🇪🇺
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
-43. Agile Security Framework (ASF) - by intuitem. A baseline of 14 security domains for flash assessment and custom frameworks 🤗   
+43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
+44. EU AI Act 🇪🇺🤖
 
 ### Community contributions
 
@@ -141,7 +142,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - FBI CJIS
 - Secure Controls Framework (SCF)
 - CCPA
-- AI Act
 - Part-IS
 - SOX
 - NIST 800-82
@@ -149,11 +149,13 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
-### Add your own library (framework, threat catalog, reference controls catalog or matrix)
+## Add your own library
 
-Have a look in the tools directory and its dedicated readme. The convert_library.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
+A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
 
-You will also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+Take a look at the `tools` directory and its dedicated readme. The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
+
+You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
 ## Community
 
@@ -277,7 +279,7 @@ export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBU
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 
 # Authentication options
-export AUTH_TOKEN_TTL=900 # optional, default value is 900 seconds (15 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
@@ -417,7 +419,7 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/ 
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/
 
 To interact with it:
 

@@ -22,7 +22,7 @@ export const load = (async ({ fetch, params }) => {
 	const requirementAssessment = await res.json();
 
 	const compliance_assessment_score = await fetch(
-		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score`
+		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
 	).then((res) => res.json());
 	const requirement = await fetch(
 		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
@@ -318,7 +318,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+				message: m.successfullyUpdatedObject({ object: model })
 			},
 			event
 		);
@@ -406,7 +406,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 				})
 			},
 			event

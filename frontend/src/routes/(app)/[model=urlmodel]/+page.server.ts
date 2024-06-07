@@ -151,7 +151,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyCreatedObject({
-						object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+						object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 					})
 				},
 				event
@@ -161,7 +161,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 				})
 			},
 			event
@@ -190,7 +190,7 @@ export const actions: Actions = {
 				const response = await res.json();
 				console.log(response);
 				if (response.error) {
-					setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
+					setFlash({ type: 'error', message: localItems()[response.error] }, event);
 					return fail(403, { form: deleteForm });
 				}
 				if (response.non_field_errors) {
@@ -204,7 +204,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDeletedObject({
-						object: localItems(languageTag())[toCamelCase(toCamelCase(model))].toLowerCase()
+						object: localItems()[toCamelCase(toCamelCase(model))].toLowerCase()
 					})
 				},
 				event
