@@ -25,6 +25,7 @@
 	const toastStore: ToastStore = getToastStore();
 
 	export let data;
+
 	$: data.relatedModels = Object.fromEntries(Object.entries(data.relatedModels).sort());
 
 	if (data.model.detailViewFields) {
@@ -276,7 +277,23 @@
 							</h4>
 						</div>
 						{#if model.table}
-							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
+							<!-- Using data.urlModel.replace("-","_") may not work with some url models (right now it just transforms "applied-controls" to "applied_controls" because we need to access model.foreignKeys.applied_controls) -->
+							{@const containerReferences = model.addOption
+								? new Set(
+										model.foreignKeys[data.urlModel.replace('-', '_')]
+											.filter((obj) => obj.id === data.data.id)[0]
+											[urlmodel].map((obj) => obj.id)
+								  )
+								: undefined}
+							<ModelTable
+								source={model.table}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								addOption={model.addOption}
+								containerObject={data.data}
+								containerModel={data.model}
+								{containerReferences}
+							>
 								<button
 									slot="addButton"
 									class="btn variant-filled-primary self-end my-auto"

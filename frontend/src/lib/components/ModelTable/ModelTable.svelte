@@ -11,7 +11,6 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
-	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
@@ -61,6 +60,11 @@
 	export let regionFootCell: CssClasses = '';
 
 	export let displayActions = true;
+
+	export let addOption: boolean = false;
+	export let containerModel: object | undefined; // Find a better name for this prop ?
+	export let containerObject: object | undefined; // Find a better name for this prop ?
+	export let containerReferences: Set<string> = new Set();
 
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
@@ -282,10 +286,14 @@
                 URLModel={actionsURLModel}
                 detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
                 editURL={!(row.meta.builtin || row.meta.urn) ? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
-                {row}
+                row={row.meta}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
                 preventDelete={preventDelete(row)}
+								{containerModel}
+								{containerObject}
+								{containerReferences}
+								{addOption}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}

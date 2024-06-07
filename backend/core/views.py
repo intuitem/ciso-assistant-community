@@ -34,7 +34,12 @@ from rest_framework.decorators import (
 from rest_framework.parsers import FileUploadParser
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from rest_framework.status import (
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+)
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
 from weasyprint import HTML
@@ -554,6 +559,42 @@ class AppliedControlViewSet(BaseModelViewSet):
         "evidences",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+
+    @action(detail=True, methods=["post"], name="Add an evidence to an applied control")
+    def add_evidence(self, request, pk):
+        evidence = request.data.get("evidence")
+        if evidence is None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        try:
+            applied_control = AppliedControl.objects.get(id=pk)
+        except:
+            return Response("Applied control not found", status=HTTP_404_NOT_FOUND)
+        try:
+            evidence_to_add = Evidence.objects.get(id=evidence)
+        except:
+            return Response("Evidence not found", status=HTTP_404_NOT_FOUND)
+        # It would be faster to directly put an UUID in .add to avoid fetching the evidence from the database for nothing
+        applied_control.evidences.add(evidence_to_add)
+        return Response(status=HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True, methods=["post"], name="Remove an evidence to an applied control"
+    )
+    def remove_evidence(self, request, pk):
+        evidence = request.data.get("evidence")
+        if evidence is None:
+            return Response(status=HTTP_400_BAD_REQUEST)
+        try:
+            applied_control = AppliedControl.objects.get(id=pk)
+        except:
+            return Response("Applied control not found", status=HTTP_404_NOT_FOUND)
+        try:
+            evidence_to_remove = Evidence.objects.get(id=evidence)
+        except:
+            return Response("Evidence not found", status=HTTP_404_NOT_FOUND)
+        # It would be faster to directly put an UUID in .remove to avoid fetching the evidence from the database for nothing
+        applied_control.evidences.remove(evidence_to_remove)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

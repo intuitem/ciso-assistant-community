@@ -19,6 +19,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 	type RelatedModel = {
 		urlModel: urlModel;
+		addOption: boolean;
 		info: ModelMapEntry;
 		table: TableSource;
 		deleteForm: SuperValidated<AnyZodObject>;
@@ -43,7 +44,9 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
-				const relEndpoint = `${BASE_API_URL}/${e.urlModel}/?${e.field}=${params.id}`;
+				const relEndpoint = e.displayAll
+					? `${BASE_API_URL}/${e.urlModel}/`
+					: `${BASE_API_URL}/${e.urlModel}/?${e.field}=${params.id}`;
 				const res = await fetch(relEndpoint);
 				const revData = await res.json().then((res) => res.results);
 
@@ -62,6 +65,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				};
 
 				const info = getModelInfo(e.urlModel);
+				const addOption = Boolean(e.addOption);
 				const urlModel = e.urlModel;
 
 				const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
@@ -116,6 +120,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				}
 				relatedModels[e.urlModel] = {
 					urlModel,
+					addOption,
 					info,
 					table,
 					deleteForm,
