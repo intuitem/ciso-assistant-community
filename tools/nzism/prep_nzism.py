@@ -1,5 +1,5 @@
 """
-simple script to transform the official MZISM XML file to an Excel file for CISO assistant framework conversion tool
+simple script to transform the official NZISM XML file to an Excel file for CISO assistant framework conversion tool
 """
 
 import openpyxl
@@ -27,6 +27,7 @@ def process_paragraph(level, paragraph):
     paragraph_assessable = ""
     paragraph_classification = ""
     paragraph_cid = ""
+    paragraph_name = ""
 
     if(paragraph.has_attr("compliance")):
         paragraph_compliance = paragraph["compliance"]
@@ -37,26 +38,27 @@ def process_paragraph(level, paragraph):
 
     if(paragraph.has_attr("cid")):
         paragraph_cid = f"CID: {paragraph["cid"]}"
+        paragraph_name = f"Control; System Classification(s): {paragraph_classification}; Compliance: {paragraph_compliance} [{paragraph_cid}]"
 
     output_table.append(
-        (paragraph_assessable, level, paragraph_id, paragraph_cid, paragraph_description, paragraph_classification)
+        (paragraph_assessable, level, paragraph_id, paragraph_name, paragraph_description, paragraph_classification)
     )
 
 
-# parser = argparse.ArgumentParser(
-#     prog="convert_nzism",
-#     description="convert NZISM's XML file to CISO Assistant Excel file",
-# )
-# parser.add_argument("filename", help="name of NZISM XML file")
-# parser.add_argument("folderpath", help="path to the NZISM XML File, also used for output")
-# parser.add_argument("version", help="version of NZISM")
-# parser.add_argument("packager", help="name of packager entity", default="DEFEND Ltd")
+parser = argparse.ArgumentParser(
+    prog="convert_nzism",
+    description="convert NZISM's XML file to CISO Assistant Excel file",
+)
+parser.add_argument("filename", help="name of NZISM XML file")
+parser.add_argument("folderpath", help="path to the NZISM XML File, also used for output")
+parser.add_argument("version", help="version of NZISM")
+parser.add_argument("packager", help="name of packager entity", default="DEFEND Ltd")
 
-# args = parser.parse_args()
-folder_path = "./tools/nzism" #args.folderpath
-input_file_name = f"{folder_path}/NZISM-ISM Document-V.-3.7-February-2024.xml" #args.filename
-version = "3.7" #args.version
-packager = "DEFEND" #args.packager
+args = parser.parse_args()
+folder_path = args.folderpath
+input_file_name = f"{folder_path}/{args.filename}"
+version = args.version
+packager = args.packager
 output_file_name = f"{folder_path}/nzism-{version}.xlsx"
 
 print("parsing", input_file_name)
