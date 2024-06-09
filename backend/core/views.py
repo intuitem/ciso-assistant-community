@@ -64,9 +64,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.model:
             return None
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, self.model
-        )[0]
+        object_ids_view = None
+        if self.request.method == "GET":
+            if q := re.match("/api/[\w-]+/([0-9a-f-]+)", self.request.path):
+                """"get_queryset is called by Django even for an individual object via get_object
+                https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
+                id = UUID(q.group(1))
+                if RoleAssignment.is_object_readable(self.request.user, self.model, id):
+                    object_ids_view = [id]
+        if not object_ids_view:
+            object_ids_view = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, self.model
+            )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
 
@@ -1339,12 +1348,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
+        score = self.get_object()
         return Response(
             {
-                "score": self.get_object().get_global_score(),
-                "max_score": self.get_object().max_score,
-                "min_score": self.get_object().min_score,
-                "scores_definition": self.get_object().scores_definition,
+                "score": score.get_global_score(),
+                "max_score": score.max_score,
+                "min_score": score.min_score,
+                "scores_definition": score.scores_definition,
             }
         )
 
