@@ -1,9 +1,13 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from ciso_assistant.settings import (
+    CISO_ASSISTANT_SUPERUSER_EMAIL,
+    DATABASES,
+    SQLITE_FILE,
+)
 import os
 from django.core.management import call_command
-
+import sqlite3
 
 READER_PERMISSIONS_LIST = [
     "view_project",
@@ -366,4 +370,9 @@ class CoreConfig(AppConfig):
     def ready(self):
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
+            if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+                print("setting WAL mode for sqlite3")
+                conn = sqlite3.connect(SQLITE_FILE, isolation_level=None)
+                conn.execute("pragma journal_mode=wal")
+                conn.close()
             post_migrate.connect(startup, sender=self)
