@@ -62,8 +62,8 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{#if localItems(languageTag())[toCamelCase(option.label)]}
-						{localItems(languageTag())[toCamelCase(option.label)]}
+					{#if localItems()[toCamelCase(option.label)]}
+						{localItems()[toCamelCase(option.label)]}
 					{:else}
 						{option.label}
 					{/if}
