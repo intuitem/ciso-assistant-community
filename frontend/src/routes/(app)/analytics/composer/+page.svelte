@@ -51,7 +51,7 @@
 				<div>
 					<div class="items-center justify-center h-96">
 						<BarChart
-							name="mtg"
+							name="composer"
 							labels={data.applied_control_status.labels}
 							values={data.applied_control_status.values}
 						/>
