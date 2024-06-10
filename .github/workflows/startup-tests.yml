@@ -107,7 +107,9 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps
       - name: Build the Docker app
-        run: docker compose build
+        run: |
+          docker compose exec backend python manage.py migrate
+          docker compose -f docker-compose-build.yml up -d --build
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -115,8 +117,6 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 5
-          docker compose exec backend python manage.py migrate
           docker compose exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.working-directory }}
