@@ -108,7 +108,6 @@ jobs:
         run: npx playwright install --with-deps
       - name: Build the Docker app
         run: |
-          docker compose exec backend python manage.py migrate
           docker compose -f docker-compose-build.yml up -d --build
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
