@@ -8,14 +8,14 @@ env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   working-directory: ./frontend
-  
+
 jobs:
   startup-functional-test:
     runs-on: ubuntu-20.04
 
     services:
       postgres:
-        image: postgres:14.1
+        image: postgres:14.12
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -31,13 +31,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: lts/*
       - name: Install requirements
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -72,7 +72,6 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py makemigrations
           python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
@@ -108,7 +107,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps
       - name: Build the Docker app
-        run: docker compose up -d --build
+        run: docker compose -f docker-compose-build.yml up -d
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -116,8 +115,8 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          docker compose exec backend python manage.py migrate
-          docker compose exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
+          sleep 30 # give the migrations time to finish (included in the up on the previous step)
+          docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.working-directory }}
         run: |
