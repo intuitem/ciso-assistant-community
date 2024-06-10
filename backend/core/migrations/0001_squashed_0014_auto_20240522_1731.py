@@ -122,8 +122,11 @@ def adapt_libraries(apps, schema_editor):
 
 
 import time
+
+
 def sleep_test(apps, schema_editor):
     time.sleep(5)
+
 
 def fix_urns_for_enisa_5g_scm(apps, schema_editor):
     enisa_5g_scm_stored_library = StoredLibrary.objects.filter(
@@ -176,7 +179,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             code=sleep_test,
         ),
-
         migrations.CreateModel(
             name="Asset",
             fields=[
