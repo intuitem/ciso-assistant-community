@@ -72,7 +72,6 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py makemigrations
           python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
@@ -108,7 +107,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps
       - name: Build the Docker app
-        run: docker compose -f docker-compose-build.yml up -d --build
+        run: docker compose build -f docker-compose-build.yml
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
