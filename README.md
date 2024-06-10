@@ -57,7 +57,15 @@ CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/),
 > [!TIP]
 > The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
-Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server, _clone_ the repo and run:
+Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server:
+
+clone the repo:
+
+```
+git clone https://github.com/intuitem/ciso-assistant-community.git
+```
+
+and run the starter script
 
 ```sh
 ./docker-compose.sh
