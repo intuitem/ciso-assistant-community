@@ -200,6 +200,7 @@
 						/>
 						<DonutChart
 							classesContainer="flex-1 card p-4 bg-white"
+							name="riskScenariosStatus"
 							title={m.riskScenariosStatus()}
 							values={data.riskScenariosPerStatus.values}
 						/>
@@ -283,6 +284,7 @@
 
 							<DonutChart
 								s_label={cur_rsk_label}
+								name="current_risk_level"
 								values={data.risks_count_per_level.current}
 								colors={data.risks_count_per_level.current.map((object) => object.color)}
 							/>
@@ -292,6 +294,7 @@
 
 							<DonutChart
 								s_label={rsd_rsk_label}
+								name="residual_risk_level"
 								values={data.risks_count_per_level.residual}
 								colors={data.risks_count_per_level.residual.map((object) => object.color)}
 							/>
@@ -364,6 +367,7 @@
 									<div class="w-3/5 h-32">
 										<DonutChart
 											s_label={m.complianceAssessments()}
+											name="complianceAssessments"
 											values={compliance_assessment.donut.values}
 										/>
 									</div>
