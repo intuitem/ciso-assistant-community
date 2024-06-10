@@ -57,7 +57,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
         clean_value = html.unescape(bleach.clean(value, strip=True))
         if clean_value != value:
             raise serializers.ValidationError(
-                "The name must not contain characters from HTML tags or attributes."
+                "The name is not valid due to HTML tags or attributes"
             )
         return value
 
