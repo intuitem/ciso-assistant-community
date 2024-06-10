@@ -116,6 +116,7 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
+          sleep 5
           docker compose exec backend python manage.py migrate
           docker compose exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
