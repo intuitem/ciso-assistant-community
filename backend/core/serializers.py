@@ -1,6 +1,7 @@
 from typing import Any
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
+
 from core.models import *
 from iam.models import *
 
@@ -10,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
-import structlog
+import structlog, bleach, html
 
 logger = structlog.get_logger(__name__)
 
@@ -51,6 +52,14 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
+
+    def validate_name(self, value):
+        clean_value = html.unescape(bleach.clean(value, strip=True))
+        if clean_value != value:
+            raise serializers.ValidationError(
+                "The name is not valid due to HTML tags or attributes"
+            )
+        return value
 
     class Meta:
         model: models.Model

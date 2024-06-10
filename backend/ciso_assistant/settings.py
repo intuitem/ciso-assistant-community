@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     "core",
     "cal",
     "django_filters",
+    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",
@@ -142,6 +143,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "pyinstrument.middleware.ProfilerMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
@@ -149,8 +152,8 @@ LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
 
 AUTH_TOKEN_TTL = int(
-    os.environ.get("AUTH_TOKEN_TTL", default=60 * 15)
-)  # defaults to 15 minutes
+    os.environ.get("AUTH_TOKEN_TTL", default=60 * 60)
+)  # defaults to 60 minutes
 AUTH_TOKEN_AUTO_REFRESH = (
     os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
 )  # prevents token from expiring while user is active
@@ -210,6 +213,14 @@ if DEBUG:
     INSTALLED_APPS.append("django.contrib.staticfiles")
     STATIC_URL = "/static/"
     STATIC_ROOT = BASE_DIR / "static"
+
+    INTERNAL_IPS = [
+        "127.0.0.1",
+    ]
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    }
 
 TEMPLATES = [
     {
