@@ -68,4 +68,4 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}"  />
+<div id={chart_id} class="{width} {height} {classesContainer}" />
