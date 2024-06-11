@@ -5,13 +5,40 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import Typewriter from 'svelte-typewriter';
+	import { onMount } from 'svelte';
 
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { redirectToProvider } from '$lib/allauth';
 
 	export let data: PageData;
 
-	const cursor = false;
+	
+
+	// onMount(() => {
+	// 	var myHeaders = new Headers();
+	// 	myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+	// 	myHeaders.append("Cookie", "csrftoken=6r97z10ETbmk9YbzMs94THfigy7G5joO; sessionid=a9ntqwovzdqubh2xtedjlxfhf5sy7q3u");
+
+	// 	var urlencoded = new URLSearchParams();
+	// 	urlencoded.append("provider", "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata");
+	// 	urlencoded.append("callback_url", "http://127.0.0.1:8000/api");
+	// 	urlencoded.append("process", "login");
+
+	// 	var requestOptions = {
+	// 	mode: 'no-cors',
+	// 	method: 'POST',
+	// 	headers: myHeaders,
+	// 	body: urlencoded,
+	// 	redirect: 'follow'
+	// 	};
+
+	// 	const res = fetch("http://127.0.0.1:8000/api/_allauth/browser/v1/auth/provider/redirect", requestOptions)
+	// 	.then(response => console.log(response))
+	// 	.then(result => console.log(result))
+	// 	.catch(error => console.log('error', error));
+	// 	console.log(res);
+	// });
 </script>
 
 <div class="relative h-screen w-screen bg-slate-200">
@@ -78,6 +105,7 @@
 								</p>
 							</SuperForm>
 						</div>
+						<button on:click={() => redirectToProvider("http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata", "http://localhost:5173/api", "login")}>sso</button>
 					</div>
 				</div>
 			</div>
