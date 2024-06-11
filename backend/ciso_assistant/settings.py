@@ -99,7 +99,8 @@ DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+# ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = ['*']
 logger.info("ALLOWED_HOSTS: %s", ALLOWED_HOSTS)
 CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
@@ -130,6 +131,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "knox",
     "drf_spectacular",
+    'allauth',
+    'allauth.account',
+    'allauth.headless',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.saml',
 ]
 
 MIDDLEWARE = [
@@ -137,16 +143,17 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = "login"
+LOGIN_REDIRECT_URL = "/api"
+LOGOUT_REDIRECT_URL = "/api"
 
 AUTH_TOKEN_TTL = int(
     os.environ.get("AUTH_TOKEN_TTL", default=60 * 15)
@@ -321,4 +328,73 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.7.0",
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
+}
+
+#SSO with allauth
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+ACCOUNT_ADAPTER = 'iam.adapter.MyAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'iam.adapter.MySocialAccountAdapter'
+
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+HEADLESS_ONLY = True
+
+# HEADLESS_FRONTEND_URLS = {
+#     "socialaccount_login_error": "http://localhost:5173/",
+# }
+
+SOCIALACCOUNT_PROVIDERS = {
+    "saml": {
+        # Here, each app represents the SAML provider configuration of one
+        # organization.
+        'EMAIL_AUTHENTICATION': True,
+        "VERIFIED_EMAIL": True,
+        "APPS": [
+            {
+                "name": "Keycloack",
+                "provider_id": "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata",
+                "client_id": "keycloack",
+                "settings": {
+                    "attribute_mapping": {
+                        "uid": "",
+                        "email_verified": "",
+                        "email": "emailAdress",
+                    },
+                    "idp": {
+                        "entity_id": "http://localhost:8080/realms/cisodev",
+                        "metadata_url": "http://localhost:8080/realms/cisodev/protocol/saml/descriptor",
+                    },
+                    "sp": {
+                        "entity_id": "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata",
+                    },
+                    "advanced": {
+                        "allow_repeat_attribute_name": True,
+                        "allow_single_label_domains": False,
+                        "authn_request_signed": False,
+                        "digest_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+                        "logout_request_signed": False,
+                        "logout_response_signed": False,
+                        "metadata_signed": False,
+                        "name_id_encrypted": False,
+                        "reject_deprecated_algorithm": True,
+                        # Due to security concerns, IdP initiated SSO is rejected by default.
+                        "reject_idp_initiated_sso": True,
+                        "signature_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+                        "want_assertion_encrypted": False,
+                        "want_assertion_signed": False,
+                        "want_attribute_statement": True,
+                        "want_message_signed": False,
+                        "want_name_id": False,
+                        "want_name_id_encrypted": False,
+                    },
+                },
+            },
+        ],
+    }
 }
