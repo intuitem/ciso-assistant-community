@@ -26,6 +26,7 @@ READER_PERMISSIONS_LIST = [
     "view_loadedlibrary",
     "view_storedlibrary",
     "view_user",
+    "view_identityprovider",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -50,6 +51,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_identityprovider",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -104,6 +106,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_identityprovider",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -163,6 +166,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_identityprovider",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -245,6 +249,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_loadedlibrary",
     "backup",
     "restore",
+    "view_identityprovider",
+    "add_identityprovider",
+    "change_identityprovider",
+    "delete_identityprovider",
 ]
 
 

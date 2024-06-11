@@ -61,6 +61,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "description"]
     model: models.Model
 
+    serializers_module = "core.serializers"
+
     def get_queryset(self):
         if not self.model:
             return None
@@ -82,7 +84,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
         # Dynamically import the serializer module and get the serializer class
-        serializer_module = importlib.import_module("core.serializers")
+        serializer_module = importlib.import_module(self.serializers_module)
         serializer_class = getattr(serializer_module, serializer_name)
 
         return serializer_class
