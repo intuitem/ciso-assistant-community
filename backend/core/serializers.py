@@ -1,17 +1,15 @@
 from typing import Any
+
+import structlog
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
-
-
-from core.models import *
-from iam.models import *
-
-from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.db import models
-from core.serializer_fields import FieldsRelatedField
+from iam.models import *
+from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
-import structlog, html
+from core.models import *
+from core.serializer_fields import FieldsRelatedField
 
 logger = structlog.get_logger(__name__)
 
