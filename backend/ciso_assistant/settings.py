@@ -100,7 +100,7 @@ logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 # ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 logger.info("ALLOWED_HOSTS: %s", ALLOWED_HOSTS)
 CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
@@ -131,11 +131,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "knox",
     "drf_spectacular",
-    'allauth',
-    'allauth.account',
-    'allauth.headless',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.saml',
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.saml",
 ]
 
 MIDDLEWARE = [
@@ -330,30 +330,30 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
 }
 
-#SSO with allauth
+# SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = "email"
 
-ACCOUNT_ADAPTER = 'iam.adapter.MyAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'iam.adapter.MySocialAccountAdapter'
+ACCOUNT_ADAPTER = "iam.adapter.MyAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "iam.adapter.MySocialAccountAdapter"
 
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 HEADLESS_ONLY = True
 
-# HEADLESS_FRONTEND_URLS = {
-#     "socialaccount_login_error": "http://localhost:5173/",
-# }
+HEADLESS_FRONTEND_URLS = {
+    "socialaccount_login_error": "http://localhost:5173/",
+}
 
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
         # Here, each app represents the SAML provider configuration of one
         # organization.
-        'EMAIL_AUTHENTICATION': True,
+        "EMAIL_AUTHENTICATION": True,
         "VERIFIED_EMAIL": True,
         "APPS": [
             {

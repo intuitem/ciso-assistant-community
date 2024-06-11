@@ -1,5 +1,6 @@
 from .views import *
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
+from iam.sso.saml.views import FinishACSView
 
 
 from django.urls import include, path
@@ -55,8 +56,9 @@ urlpatterns = [
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
-    path('accounts/', include('allauth.urls')),
+    path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
+    path("accounts/saml/", include("iam.sso.saml.urls")),
 ]
 
 if DEBUG:

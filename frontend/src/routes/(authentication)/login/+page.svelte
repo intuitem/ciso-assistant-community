@@ -13,8 +13,6 @@
 
 	export let data: PageData;
 
-	
-
 	// onMount(() => {
 	// 	var myHeaders = new Headers();
 	// 	myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -105,7 +103,14 @@
 								</p>
 							</SuperForm>
 						</div>
-						<button on:click={() => redirectToProvider("http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata", "http://localhost:5173/api", "login")}>sso</button>
+						<button
+							on:click={() =>
+								redirectToProvider(
+									'http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata',
+									'http://localhost:5173/',
+									'login'
+								)}>sso</button
+						>
 					</div>
 				</div>
 			</div>
