@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 
 from .views import (
@@ -24,4 +24,5 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("sso/", include("iam.sso.urls")),
 ]
