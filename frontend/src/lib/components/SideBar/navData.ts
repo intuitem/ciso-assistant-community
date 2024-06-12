@@ -76,7 +76,7 @@ export const navData = {
 					name: 'mappedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
 					href: '/applied-controls'
-				},
+				}
 			]
 		},
 		{
@@ -85,7 +85,7 @@ export const navData = {
 				{
 					name: 'assetInventory',
 					fa_icon: 'fa-solid fa-gem',
-					href: '/assets',
+					href: '/assets'
 				},
 				{
 					name: 'policiesAndProcedures',
@@ -96,38 +96,38 @@ export const navData = {
 				{
 					name: 'trainingAndEduction',
 					fa_icon: 'fa-solid fa-graduation-cap',
-					href: '/policies',
+					href: '/policies'
 				},
 				{
 					name: 'changeManagement',
 					fa_icon: 'fa-solid fa-wrench',
-					href: '/policies',
+					href: '/policies'
 				},
 				{
 					name: 'incidentManagement',
 					fa_icon: 'fa-solid fa-medkit',
-					href: '/policies',
+					href: '/policies'
 				},
 				{
 					name: 'configurationManagement',
 					fa_icon: 'fa-solid fa-tasks',
-					href: '/policies',
+					href: '/policies'
 				},
 				{
 					name: 'patchManagement',
 					fa_icon: 'fa-solid fa-sitemap',
-					href: '/policies',
+					href: '/policies'
 				},
 				{
 					name: 'thirdPartyAuditReports',
 					fa_icon: 'fa-solid fa-table',
-					href: '/policies',
+					href: '/policies'
 				},
 				{
 					name: 'reports',
 					fa_icon: 'fa-solid fa-book',
-					href: '/policies',
-				},
+					href: '/policies'
+				}
 			]
 		},
 		{
@@ -168,7 +168,7 @@ export const navData = {
 					name: 'complianceAuditReports',
 					fa_icon: 'fa-solid fa-book',
 					href: '/compliance-assessments' // update path
-				},
+				}
 			]
 		},
 		{

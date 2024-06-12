@@ -64,7 +64,7 @@ export function localItems(languageTag: string): LocalItems {
 		overview: m.overview({ languageTag: languageTag }),
 		dashboard: m.dashboard({ languageTag: languageTag }),
 		context: m.context({ languageTag: languageTag }),
-		repository: m.repository({languageTag: languageTag}),
+		repository: m.repository({ languageTag: languageTag }),
 		governance: m.governance({ languageTag: languageTag }),
 		risk: m.risk({ languageTag: languageTag }),
 		compliance: m.compliance({ languageTag: languageTag }),
