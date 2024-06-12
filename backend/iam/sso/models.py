@@ -47,6 +47,10 @@ class IdentityProvider(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return self.name
 
+    def get_provider_display(self):
+        _providers = {p[0]: p[1] for p in providers.registry.as_choices()}
+        return _providers.get(self.provider)
+
     def get_provider(self, request):
         provider_class = providers.registry.get_class(self.provider)
         return provider_class(request=request, app=self)
