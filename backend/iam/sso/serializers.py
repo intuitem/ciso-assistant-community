@@ -6,6 +6,8 @@ from core.serializers import BaseModelSerializer
 
 
 class IdentityProviderReadSerializer(BaseModelSerializer):
+    provider = serializers.CharField(read_only=True, source="get_provider_display")
+
     class Meta:
         model = IdentityProvider
         fields = "__all__"
