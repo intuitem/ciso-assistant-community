@@ -99,8 +99,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: functional-tests-report
+          name: functional-tests-report-${{ matrix.playwright-browser }}
           path: |
-            ${{ env.working-directory }}/tests/${{ matrix.playwright-browser }}results/
-            ${{ env.working-directory }}/tests/${{ matrix.playwright-browser }}reports/
+            ${{ env.working-directory }}/tests/results/
+            ${{ env.working-directory }}/tests/reports/
           retention-days: 5

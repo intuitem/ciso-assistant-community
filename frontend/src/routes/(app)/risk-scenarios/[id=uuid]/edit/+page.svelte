@@ -8,6 +8,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 	import {
 		getModalStore,
 		getToastStore,
@@ -52,7 +53,7 @@
 		if (browser) {
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
-			var nextValue = url.searchParams.get('next');
+			var nextValue = getSecureRedirect(url.searchParams.get('next'));
 			if (nextValue) window.location.href = nextValue;
 		}
 	}
@@ -71,7 +72,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -113,15 +114,12 @@
 			}
 		));
 	}
-	const next = $page.url.searchParams.get('next');
+	const next = getSecureRedirect($page.url.searchParams.get('next'));
 
-	function riskColorMap() {
-		let color_map = {};
-		data.riskMatrix.risk.forEach((risk, i) => {
-			color_map[i] = risk.hexcolor;
-		});
-		return color_map;
-	}
+	const probabilityColorMap = data.riskMatrix.probability.map(
+		(probability) => probability.hexcolor
+	);
+	const impactColorMap = data.riskMatrix.impact.map((impact) => impact.hexcolor);
 </script>
 
 <div>
@@ -217,7 +215,7 @@
 						<Select
 							{form}
 							options={data.probabilityChoices}
-							color_map={riskColorMap()}
+							color_map={probabilityColorMap}
 							field="current_proba"
 							label={m.currentProba()}
 						/>
@@ -225,7 +223,7 @@
 						<Select
 							{form}
 							options={data.impactChoices}
-							color_map={riskColorMap()}
+							color_map={impactColorMap}
 							field="current_impact"
 							label={m.currentImpact()}
 						/>
@@ -271,7 +269,7 @@
 						<Select
 							{form}
 							options={data.probabilityChoices}
-							color_map={riskColorMap()}
+							color_map={probabilityColorMap}
 							field="residual_proba"
 							label={m.residualProba()}
 						/>
@@ -279,7 +277,7 @@
 						<Select
 							{form}
 							options={data.impactChoices}
-							color_map={riskColorMap()}
+							color_map={impactColorMap}
 							field="residual_impact"
 							label={m.residualImpact()}
 						/>

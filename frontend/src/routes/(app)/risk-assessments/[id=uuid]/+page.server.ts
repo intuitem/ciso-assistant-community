@@ -46,7 +46,7 @@ export const actions: Actions = {
 			return message(
 				createForm,
 				m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
+					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
 				})
 			);
 		}
@@ -82,7 +82,7 @@ export const actions: Actions = {
 			return message(
 				deleteForm,
 				m.successfullyDeletedObject({
-					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
+					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
 				})
 			);
 		}
