@@ -9,6 +9,7 @@ services:
       - ALLOWED_HOSTS=backend
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
+      - AUTH_TOKEN_TTL=7200
     volumes:
       - ./db:/code/db
 
@@ -26,6 +27,8 @@ services:
   caddy:
     container_name: caddy
     image: caddy:2.7.6
+    depends_on:
+      - frontend
     restart: unless-stopped
     ports:
       - 8443:8443
@@ -37,4 +40,4 @@ services:
       - --to
       - frontend:3000
     volumes:
-      - ./db:/data
+      - ./caddy_data:/data

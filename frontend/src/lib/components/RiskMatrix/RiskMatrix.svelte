@@ -37,7 +37,8 @@
 			{@const reverseIndex = displayedRiskMatrix.length - i - 1}
 			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
 			<div
-				class="flex flex-col items-center justify-center bg-gray-200"
+				class="flex flex-col items-center justify-center bg-gray-200 border-dotted border-black border-2"
+				style="background: {probability.hexcolor}"
 				data-testid="probability-row-header"
 			>
 				<span class="font-semibold text-center" data-testid="probability-name"
@@ -68,7 +69,8 @@
 		<div />
 		{#each parsedRiskMatrix.impact as impact}
 			<div
-				class="flex flex-col items-center justify-center bg-gray-200 h-20"
+				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2"
+				style="background: {impact.hexcolor}"
 				data-testid="impact-col-header"
 			>
 				<span class="font-semibold" data-testid="impact-name">{impact.name}</span>

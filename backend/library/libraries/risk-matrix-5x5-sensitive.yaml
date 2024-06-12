@@ -18,43 +18,53 @@ objects:
       abbreviation: AC
       name: rare
       description: rare
+      hexcolor: '#BBF7D0'
     - id: 1
       abbreviation: LI
       name: unlikely
       description: unlikely
+      hexcolor: '#BEF264'
     - id: 2
       abbreviation: MO
       name: moderate
       description: moderate
+      hexcolor: '#FEF08A'
     - id: 3
       abbreviation: UN
       name: likely
       description: likely
+      hexcolor: '#FBBF24'
     - id: 4
       abbreviation: RA
       name: almost certain
       description: almost certain
+      hexcolor: '#F87171'
     impact:
     - id: 0
       abbreviation: IN
       name: insignificant
       description: insignificant
+      hexcolor: '#BBF7D0'
     - id: 1
       abbreviation: MI
       name: minor
       description: minor
+      hexcolor: '#BEF264'
     - id: 2
       abbreviation: SI
       name: significant
       description: significant
+      hexcolor: '#FEF08A'
     - id: 3
       abbreviation: MA
       name: major
       description: major
+      hexcolor: '#FBBF24'
     - id: 4
       abbreviation: SE
       name: severe
       description: severe
+      hexcolor: '#F87171'
     risk:
     - id: 0
       abbreviation: LO

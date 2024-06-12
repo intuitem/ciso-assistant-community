@@ -124,7 +124,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{localItems(languageTag())[toCamelCase(key)]}
+							{localItems()[toCamelCase(key)]}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -157,8 +157,8 @@
 										)?.urlModel
 									}/${value.id}`}
 									<a href={itemHref} class="anchor">{value.str}</a>
-								{:else if localItems(languageTag())[toCamelCase(value.str ?? value)]}
-									{localItems(languageTag())[toCamelCase(value.str ?? value)]}
+								{:else if localItems()[toCamelCase(value.str ?? value)]}
+									{localItems()[toCamelCase(value.str ?? value)]}
 								{:else}
 									{value.str ?? value}
 								{/if}
@@ -184,6 +184,7 @@
 		<div class="w-1/2">
 			<DonutChart
 				s_label={m.complianceAssessments()}
+				name="compliance_assessment"
 				values={compliance_assessment_donut_values.values}
 				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
 			/>

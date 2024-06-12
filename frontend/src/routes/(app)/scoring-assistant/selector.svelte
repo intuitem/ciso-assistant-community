@@ -14,11 +14,11 @@
 	$: dispatch('change', value);
 </script>
 
-<div>{localItems(languageTag())[text]}</div>
+<div>{localItems()[text]}</div>
 <select class="select w-full" {id} bind:value {disabled}>
 	{#each choices as text, i}
 		<option class="text-{i}" value={i}
-			>{i}{#if text} - {localItems(languageTag())[text]}{/if}</option
+			>{i}{#if text} - {localItems()[text]}{/if}</option
 		>
 	{/each}
 </select>
