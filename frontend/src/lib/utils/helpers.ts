@@ -1,4 +1,4 @@
-export function formatStringToDate(inputString: string, locale: string = 'en') {
+export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
 	return date.toLocaleDateString(locale, {
 		year: 'numeric',
@@ -6,19 +6,6 @@ export function formatStringToDate(inputString: string, locale: string = 'en') {
 		day: 'numeric'
 	});
 }
-
-export const escapeHTML = (str: string) =>
-	str.replace(
-		/[&<>'"]/g,
-		(tag) =>
-			({
-				'&': '&amp;',
-				'<': '&lt;',
-				'>': '&gt;',
-				"'": '&#39;',
-				'"': '&quot;'
-			}[tag] || tag)
-	);
 
 export const isURL = (url: string) => {
 	try {
