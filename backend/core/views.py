@@ -128,7 +128,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get write data")
     def object(self, request, pk):
         serializer_name = f"{self.model.__name__}WriteSerializer"
-        serializer_module = importlib.import_module("core.serializers")
+        serializer_module = importlib.import_module(self.serializers_module)
         serializer_class = getattr(serializer_module, serializer_name)
 
         return Response(serializer_class(super().get_object()).data)
