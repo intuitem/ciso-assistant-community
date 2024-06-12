@@ -1,6 +1,7 @@
 from typing import Any
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
+
 from core.models import *
 from iam.models import *
 

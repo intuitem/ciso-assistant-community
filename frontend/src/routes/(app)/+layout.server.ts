@@ -8,6 +8,6 @@ export const load = loadFlash(async ({ locals, url, cookies }) => {
 	if (!locals.user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
 	}
-	setLanguageTag(cookies.get('lang') || sourceLanguageTag);
+	setLanguageTag(cookies.get('ciso_lang') || sourceLanguageTag);
 	return { user: locals.user };
 }) satisfies LayoutServerLoad;

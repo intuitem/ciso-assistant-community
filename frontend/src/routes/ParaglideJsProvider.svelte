@@ -7,18 +7,19 @@
 	} from '$paraglide/runtime';
 	import { onDestroy, onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { getCookie, deleteCookie } from '$lib/utils/cookies';
+	import { getCookie, deleteCookie, setCookie } from '$lib/utils/cookies';
 
 	onMount(() => {
 		// const valueFromSession = sessionStorage.getItem('lang') || sourceLanguageTag;
-		const valueFromCookies = getCookie('lang') || sourceLanguageTag;
+		const valueFromCookies = getCookie('ciso_lang') || sourceLanguageTag;
 		// @ts-ignore
+		setCookie('ciso_lang', valueFromCookies);
 		setLanguageTag(valueFromCookies);
 	});
 
 	onDestroy(() => {
 		if (browser) {
-			deleteCookie('lang');
+			deleteCookie('ciso_lang');
 			// sessionStorage.removeItem('lang');
 		}
 	});

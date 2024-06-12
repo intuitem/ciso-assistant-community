@@ -20,6 +20,7 @@
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { getSecureRedirect } from '$lib/utils/helpers';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -36,7 +37,7 @@
 		if (browser) {
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
-			var nextValue = url.searchParams.get('next');
+			var nextValue = getSecureRedirect(url.searchParams.get('next'));
 			if (nextValue) window.location.href = nextValue;
 		}
 	}
@@ -303,6 +304,7 @@
 		<HiddenInput {form} field="requirement_assessments" />
 		<FileInput
 			{form}
+			allowPaste={true}
 			helpText={object.attachment
 				? `${m.attachmentWarningText()}: ${object.attachment}`
 				: m.attachmentHelpText()}

@@ -39,7 +39,7 @@
 		value = event?.target?.value;
 		setLanguageTag(value);
 		// sessionStorage.setItem('lang', value);
-		setCookie('lang', value);
+		setCookie('ciso_lang', value);
 	}
 
 	const popupUser: PopupSettings = {
