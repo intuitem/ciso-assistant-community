@@ -193,7 +193,7 @@
 					{form}
 					options={getOptions({ objects: data.foreignKeys['assets'] })}
 					field="assets"
-					label={m.assets()}
+					label={m.assetInventory()}
 					helpText={m.riskScenarioAssetHelpText()}
 				/>
 				<ModelTable source={data.tables['assets']} URLModel="assets" />

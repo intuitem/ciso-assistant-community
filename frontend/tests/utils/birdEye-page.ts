@@ -1,9 +1,9 @@
 import { expect, type Page } from './test-utils.js';
 import { BasePage } from './base-page.js';
 
-export class AnalyticsPage extends BasePage {
+export class BirdEyePage extends BasePage {
 	constructor(public readonly page: Page) {
-		super(page, '/analytics', 'Analytics');
+		super(page, '/bird-eye', 'BirdEye');
 		// this.page.goto('/analytics');
 	}
 }

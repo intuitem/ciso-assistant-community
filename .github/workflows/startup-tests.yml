@@ -8,7 +8,7 @@ env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   working-directory: ./frontend
-  
+
 jobs:
   startup-functional-test:
     runs-on: ubuntu-20.04
@@ -122,7 +122,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: |
           response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
-          server_reponse='{"type":"redirect","status":302,"location":"/analytics"}'
+          server_reponse='{"type":"redirect","status":302,"location":"/bird-eye"}'
           if [[ "$response" == "$server_reponse" ]]; then
             echo "Success"
             exit 0

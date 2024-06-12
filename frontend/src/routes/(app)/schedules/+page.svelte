@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Calendar from '$lib/components/Calendar/Calendar.svelte';
+	import Schedules from '$lib/components/Schedules/Schedules.svelte';
 
 	export let data;
 	const applied_controls = data.applied_controls;
@@ -24,4 +24,4 @@
 	}
 </script>
 
-<Calendar {info} />
+<Schedules {info} />

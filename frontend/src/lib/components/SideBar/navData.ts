@@ -12,12 +12,12 @@ export const navData = {
 		// 	]
 		// },
 		{
-			name: 'overview',
+			name: 'dashboard',
 			items: [
 				{
-					name: 'analytics',
+					name: 'birdEye',
 					fa_icon: 'fa-solid fa-gauge',
-					href: '/analytics',
+					href: '/bird-eye',
 					permissions: [
 						'view_project',
 						'view_riskscenario',
@@ -27,9 +27,9 @@ export const navData = {
 					]
 				},
 				{
-					name: 'calendar',
+					name: 'schedules',
 					fa_icon: 'fa-solid fa-calendar-days',
-					href: '/calendar',
+					href: '/schedules',
 					permissions: [
 						'view_appliedcontrol',
 						'view_riskacceptance',
@@ -40,8 +40,18 @@ export const navData = {
 			]
 		},
 		{
-			name: 'context',
+			name: 'repository',
 			items: [
+				{
+					name: 'frameworks',
+					fa_icon: 'fa-solid fa-folder',
+					href: '/frameworks'
+				},
+				{
+					name: 'riskMatrices',
+					fa_icon: 'fa-solid fa-table-cells-large',
+					href: '/risk-matrices'
+				},
 				{
 					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
@@ -53,31 +63,71 @@ export const navData = {
 					href: '/reference-controls'
 				},
 				{
+					name: 'evidences',
+					fa_icon: 'fa-solid fa-file',
+					href: '/evidences'
+				},
+				{
 					name: 'appliedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
 					href: '/applied-controls'
 				},
 				{
-					name: 'assets',
-					fa_icon: 'fa-solid fa-gem',
-					href: '/assets'
-				}
+					name: 'mappedControls',
+					fa_icon: 'fa-solid fa-fire-extinguisher',
+					href: '/applied-controls'
+				},
 			]
 		},
 		{
 			name: 'governance',
 			items: [
 				{
-					name: 'policies',
+					name: 'assetInventory',
+					fa_icon: 'fa-solid fa-gem',
+					href: '/assets',
+				},
+				{
+					name: 'policiesAndProcedures',
 					fa_icon: 'fa-solid fa-user',
 					href: '/policies',
 					permissions: ['view_appliedcontrol']
 				},
 				{
-					name: 'riskMatrices',
-					fa_icon: 'fa-solid fa-table-cells-large',
-					href: '/risk-matrices'
-				}
+					name: 'trainingAndEduction',
+					fa_icon: 'fa-solid fa-graduation-cap',
+					href: '/policies',
+				},
+				{
+					name: 'changeManagement',
+					fa_icon: 'fa-solid fa-wrench',
+					href: '/policies',
+				},
+				{
+					name: 'incidentManagement',
+					fa_icon: 'fa-solid fa-medkit',
+					href: '/policies',
+				},
+				{
+					name: 'configurationManagement',
+					fa_icon: 'fa-solid fa-tasks',
+					href: '/policies',
+				},
+				{
+					name: 'patchManagement',
+					fa_icon: 'fa-solid fa-sitemap',
+					href: '/policies',
+				},
+				{
+					name: 'thirdPartyAuditReports',
+					fa_icon: 'fa-solid fa-table',
+					href: '/policies',
+				},
+				{
+					name: 'reports',
+					fa_icon: 'fa-solid fa-book',
+					href: '/policies',
+				},
 			]
 		},
 		{
@@ -97,6 +147,11 @@ export const navData = {
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/risk-acceptances'
+				},
+				{
+					name: 'riskRegister',
+					fa_icon: 'fa-solid fa-book',
+					href: '/risk-acceptances'
 				}
 			]
 		},
@@ -110,15 +165,10 @@ export const navData = {
 					href: '/compliance-assessments'
 				},
 				{
-					name: 'evidences',
-					fa_icon: 'fa-solid fa-file',
-					href: '/evidences'
+					name: 'complianceAuditReports',
+					fa_icon: 'fa-solid fa-book',
+					href: '/compliance-assessments' // update path
 				},
-				{
-					name: 'frameworks',
-					fa_icon: 'fa-solid fa-folder',
-					href: '/frameworks'
-				}
 			]
 		},
 		{
@@ -153,7 +203,7 @@ export const navData = {
 		},
 
 		{
-			name: 'extra',
+			name: 'config',
 			items: [
 				{
 					name: 'xRays',

@@ -164,7 +164,7 @@
 						/>
 						<CounterCard
 							count={counters.policies}
-							label={m.policies()}
+							label={m.policiesAndProcedures()}
 							faIcon="fas fa-file-alt"
 							href="/policies"
 						/>

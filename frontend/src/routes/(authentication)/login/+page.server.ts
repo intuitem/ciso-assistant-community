@@ -10,7 +10,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 export const load: PageServerLoad = async ({ request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
-		redirect(302, '/analytics');
+		redirect(302, '/bird-eye');
 	}
 
 	const form = await superValidate(request, zod(loginSchema));
@@ -63,6 +63,6 @@ export const actions: Actions = {
 			secure: true
 		});
 
-		redirect(302, url.searchParams.get('next') || '/analytics');
+		redirect(302, url.searchParams.get('next') || '/bird-eye');
 	}
 };

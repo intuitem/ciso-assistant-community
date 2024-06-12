@@ -38,7 +38,7 @@
 			/>
 			{#if data.risk_assessment && data.risk_assessment.length > 0}
 				<a
-					href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
+					href={`/bird-eye/composer/?risk_assessment=${data.risk_assessment}`}
 					class="btn variant-filled-primary">{m.processButton()}</a
 				>
 			{:else}
