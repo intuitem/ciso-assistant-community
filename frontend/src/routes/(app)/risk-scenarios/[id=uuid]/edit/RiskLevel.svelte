@@ -54,8 +54,8 @@
 			class="flex font-medium w-32 justify-center p-2 rounded-token"
 			style="background-color: {riskLevel.hexcolor}"
 		>
-			{#if localItems()[toCamelCase(riskLevel.name)]}
-				{localItems()[toCamelCase(riskLevel.name)]}
+			{#if m[toCamelCase(riskLevel.name)]()}
+				{m[toCamelCase(riskLevel.name)]() ?? riskLevel.name}
 			{:else}
 				{riskLevel.name}
 			{/if}

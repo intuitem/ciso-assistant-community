@@ -54,7 +54,7 @@
 						data-testid="add-button"
 						on:click={modalCreateForm}
 						><i class="fa-solid fa-plus mr-2" />
-						{localItems()['add' + capitalizeFirstLetter(data.model.localName)]}
+						{m['add' + capitalizeFirstLetter(data.model.localName)]()}
 					</button>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"

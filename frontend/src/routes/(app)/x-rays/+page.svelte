@@ -115,7 +115,7 @@
 														{#if error.object.name}<a class="anchor" href={error.link}
 																>{error.object.name}</a
 															>:{/if}
-														{localItems()[error.msgid]}
+														{m[error.msgid]()}
 													</li>
 												{/each}
 											</ul>
@@ -139,7 +139,7 @@
 														{#if warning.object.name}
 															<a class="anchor" href={warning.link}>{warning.object.name}</a>:
 														{/if}
-														{localItems()[warning.msgid]}
+														{m[warning.msgid]()}
 													</li>
 												{/each}
 											</ul>
@@ -163,7 +163,7 @@
 														{#if info.object.name}<a class="anchor" href={info.link}
 																>{info.object.name}</a
 															>:{/if}
-														{localItems()[info.msgid]}
+														{m[info.msgid]()}
 													</li>
 												{/each}
 											</ul>
@@ -205,7 +205,7 @@
 														{#if error.object.name}<a class="anchor" href={error.link}
 																>{error.object.name}</a
 															>:{/if}
-														{localItems()[error.msgid]}
+														{m[error.msgid]()}
 													</li>
 												{/each}
 											</ul>
@@ -229,7 +229,7 @@
 														{#if warning.object.name}<a class="anchor" href={warning.link}
 																>{warning.object.name}</a
 															>:{/if}
-														{localItems()[warning.msgid]}
+														{m[warning.msgid]()}
 													</li>
 												{/each}
 											</ul>
@@ -253,7 +253,7 @@
 														{#if info.object.name}<a class="anchor" href={info.link}
 																>{info.object.name}</a
 															>:{/if}
-														{localItems()[info.msgid]}
+														{m[info.msgid]()}
 													</li>
 												{/each}
 											</ul>

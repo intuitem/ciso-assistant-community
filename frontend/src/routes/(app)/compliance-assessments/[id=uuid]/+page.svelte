@@ -124,7 +124,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{localItems()[toCamelCase(key)]}
+							{m[toCamelCase(key)]() ?? key}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -157,8 +157,8 @@
 										)?.urlModel
 									}/${value.id}`}
 									<a href={itemHref} class="anchor">{value.str}</a>
-								{:else if localItems()[toCamelCase(value.str ?? value)]}
-									{localItems()[toCamelCase(value.str ?? value)]}
+								{:else if m[toCamelCase(value.str ?? value)]()}
+									{m[toCamelCase(value.str ?? value)]() ?? value.str ?? value}
 								{:else}
 									{value.str ?? value}
 								{/if}

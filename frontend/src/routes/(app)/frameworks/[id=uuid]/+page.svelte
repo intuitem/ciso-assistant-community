@@ -51,7 +51,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{localItems()[toCamelCase(key)]}
+							{m[toCamelCase(key)]() ?? key}
 						{/if}
 					</div>
 					<ul class="text-sm">

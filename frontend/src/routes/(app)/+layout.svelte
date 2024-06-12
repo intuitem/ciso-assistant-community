@@ -8,7 +8,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 
 	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages.js';
 
 	let sidebarOpen = true;
 
@@ -26,8 +26,8 @@
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4">
 			<span class="text-2xl font-bold pb-1" id="page-title">
-				{#if localItems()[$pageTitle]}
-					{localItems()[$pageTitle]}
+				{#if $pageTitle && m[$pageTitle]}
+					{m[$pageTitle]() ?? $pageTitle}
 				{:else}
 					{$pageTitle}
 				{/if}

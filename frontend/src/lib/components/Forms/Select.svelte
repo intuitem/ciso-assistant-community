@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages.js';
 	import type { AnyZodObject } from 'zod';
 
 	let _class = '';
@@ -62,8 +62,8 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{#if localItems()[toCamelCase(option.label)]}
-						{localItems()[toCamelCase(option.label)]}
+					{#if m[toCamelCase(option.label)]()}
+						{m[toCamelCase(option.label)]()}
 					{:else}
 						{option.label}
 					{/if}

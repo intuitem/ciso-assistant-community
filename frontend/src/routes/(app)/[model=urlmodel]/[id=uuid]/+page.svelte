@@ -188,7 +188,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{localItems()[toCamelCase(key)]}
+						{m[toCamelCase(key)]() ?? key}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -233,8 +233,8 @@
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
-								{:else if localItems()[toCamelCase((value.str || value.name) ?? value)]}
-									{localItems()[toCamelCase((value.str || value.name) ?? value)]}
+								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+									{m[toCamelCase((value.str || value.name) ?? value)]()}
 								{:else}
 									{(value.str || value.name) ?? value}
 								{/if}
@@ -261,7 +261,7 @@
 		<TabGroup justify="justify-center">
 			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-					{localItems()[model.info.localNamePlural]}
+					{m[model.info.localNamePlural]()}
 					{#if model.table.body.length > 0}
 						<span class="badge variant-soft-secondary">{model.table.body.length}</span>
 					{/if}
@@ -272,7 +272,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{localItems()['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
+								{m['associated' + capitalizeFirstLetter(model.info.localNamePlural)]()}
 							</h4>
 						</div>
 						{#if model.table}

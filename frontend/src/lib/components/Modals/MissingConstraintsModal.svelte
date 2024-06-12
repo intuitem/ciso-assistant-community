@@ -28,7 +28,7 @@
 			{#if value}
 				{m.missingMandatoyObjects1({ model: $modalStore[0].body })}:
 				{#each value as key}
-					<li class="font-bold">{localItems()[toCamelCase(key)]}</li>
+					<li class="font-bold">{m[toCamelCase(key)]() ?? key}</li>
 				{/each}
 				{m.missingMandatoyObjects2()}.
 			{/if}

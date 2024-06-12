@@ -65,8 +65,8 @@
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
-				{#if localItems()[c.label]}
-					{localItems()[c.label]}
+				{#if m[c.label]}
+					{m[c.label]()}
 				{:else}
 					{c.label}
 				{/if}
@@ -82,8 +82,8 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if localItems()[c.label]}
-							{localItems()[c.label]}
+						{#if m[c.label]}
+							{m[c.label]()}
 						{:else}
 							{c.label}
 						{/if}
@@ -93,8 +93,8 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if localItems()[c.label]}
-							{localItems()[c.label]}
+						{#if m[c.label]()}
+							{m[c.label]()}
 						{:else}
 							{c.label}
 						{/if}
