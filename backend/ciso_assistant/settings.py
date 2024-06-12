@@ -349,6 +349,9 @@ HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": "http://localhost:5173/",
 }
 
+ENTITY_ID = os.environ.get("ENTITY_ID", "")
+METADATA_URL = os.environ.get("METADATA_URL", "")
+
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
         # Here, each app represents the SAML provider configuration of one
@@ -357,21 +360,21 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
         "APPS": [
             {
-                "name": "Keycloack",
-                "provider_id": "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata",
-                "client_id": "keycloack",
+                "name": "Entra",
+                "provider_id": "http://127.0.0.1:8000/api/accounts/saml/entra/metadata",
+                "client_id": "entra",
                 "settings": {
                     "attribute_mapping": {
                         "uid": "",
                         "email_verified": "",
-                        "email": "emailAdress",
+                        "email": "",
                     },
                     "idp": {
-                        "entity_id": "http://localhost:8080/realms/cisodev",
-                        "metadata_url": "http://localhost:8080/realms/cisodev/protocol/saml/descriptor",
+                        "entity_id": ENTITY_ID,
+                        "metadata_url": METADATA_URL,
                     },
                     "sp": {
-                        "entity_id": "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata",
+                        "entity_id": "http://127.0.0.1:8000/api/accounts/saml/entra/metadata",
                     },
                     "advanced": {
                         "allow_repeat_attribute_name": True,

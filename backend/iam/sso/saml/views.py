@@ -109,7 +109,7 @@ class FinishACSView(SAMLViewMixin, View):
             if next_url:
                 login.state["next"] = next_url
         print("LOGIN STATE", login.state)
-        email = auth._friendlyname_attributes.get("email")[0]
+        email = auth._nameid
         user = User.objects.get(email=email)
         token = generate_token(user)
         login.state["next"] += f"sso/authenticate/{token}"
