@@ -10,6 +10,8 @@
 
 	export let form;
 
+	label = label ?? field;
+
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');

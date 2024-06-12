@@ -218,7 +218,34 @@ export const IdentityProviderSchema = z.object({
 	client_id: z.string(),
 	secret: z.string().optional(),
 	key: z.string().optional(),
-	settings: z.any().optional()
+
+	// SAML specific fields
+	attribute_mapping_uid: z.string().optional(),
+	attribute_mapping_email_verified: z.string().optional(),
+	attribute_mapping_email: z.string().optional(),
+	idp_entity_id: z.string().optional(),
+	metadata_url: z.string().optional(),
+	sso_url: z.string().optional(),
+	slo_url: z.string().optional(),
+	x509cert: z.string().optional(),
+	sp_entity_id: z.string().optional(),
+	allow_repeat_attribute_name: z.boolean().default(true),
+	allow_single_label_domains: z.boolean().default(false),
+	authn_request_signed: z.boolean().default(false),
+	digest_algorithm: z.string().default('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'),
+	logout_request_signed: z.boolean().default(false),
+	logout_response_signed: z.boolean().default(false),
+	metadata_signed: z.boolean().default(false),
+	name_id_encrypted: z.boolean().default(false),
+	reject_deprecated_algorithm: z.boolean().default(true),
+	reject_idp_initiated_sso: z.boolean().default(true),
+	signature_algorithm: z.string().default('http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'),
+	want_assertion_encrypted: z.boolean().default(false),
+	want_assertion_signed: z.boolean().default(false),
+	want_attribute_statement: z.boolean().default(true),
+	want_message_signed: z.boolean().default(false),
+	want_name_id: z.boolean().default(false),
+	want_name_id_encrypted: z.boolean().default(false)
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

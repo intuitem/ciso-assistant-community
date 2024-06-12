@@ -411,7 +411,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'identityProviders',
 		verboseName: 'Identity provider',
 		verboseNamePlural: 'Identity providers',
-		path: 'iam/sso/'
+		selectFields: [{ field: 'provider' }]
 	}
 };
 

@@ -73,7 +73,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(model.info.localName)]
+			title: m['add' + capitalizeFirstLetter(model.info.localName)]()
 		};
 		modalStore.trigger(modal);
 	}
@@ -188,7 +188,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{localItems()[toCamelCase(key)]}
+						{m[toCamelCase(key)]()}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -233,8 +233,8 @@
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
-								{:else if localItems()[toCamelCase((value.str || value.name) ?? value)]}
-									{localItems()[toCamelCase((value.str || value.name) ?? value)]}
+								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+									{m[toCamelCase((value.str || value.name) ?? value)]()}
 								{:else}
 									{(value.str || value.name) ?? value}
 								{/if}
