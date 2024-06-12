@@ -37,7 +37,8 @@ export const URL_MODEL = [
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
-	'libraries'
+	'libraries',
+	'identity-providers'
 ] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
