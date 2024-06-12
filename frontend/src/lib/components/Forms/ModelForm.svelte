@@ -423,6 +423,13 @@
 		{#if shape.is_active}
 			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
+	{:else if URLModel === 'identity-providers'}
+		<TextField {form} field="provider" label={m.provider()} />
+		<TextField {form} field="provider_id" label={m.providerId()} />
+		<TextField {form} field="client_id" label={m.clientId()} />
+		<TextField {form} field="secret" label={m.secret()} />
+		<TextField {form} field="key" label={m.key()} />
+		<TextArea {form} field="settings" label={m.settings()} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

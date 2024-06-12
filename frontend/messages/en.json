@@ -540,5 +540,13 @@
 	"exportBackupDescription": "This will serialize and create a backup of the database, including users and RBAC. Evidences and other files are not included in the backup.",
 	"importBackupDescription": "This will deserialize and restore the database from a backup. This will overwrite all existing data, including users and RBAC and cannot be undone.",
 	"requirementAppliedControlHelpText": "Evidences linked to the selected measures will be automatically associated with the requirement.",
-	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement."
+	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement.",
+	"providerId": "Provider ID",
+	"clientId": "Client ID",
+	"secret": "Secret",
+	"key": "Key",
+	"settings": "Settings",
+	"identityProvider": "Identity provider",
+	"identityProviders": "Identity providers",
+	"addIdentityProvider": "Add identity provider"
 }

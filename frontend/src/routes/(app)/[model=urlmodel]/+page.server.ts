@@ -81,6 +81,7 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
+		const model: ModelInfo = getModelInfo(event.params.model!);
 		const endpoint = `${BASE_API_URL}/${event.params.model}/`;
 
 		const fileFields = Object.fromEntries(

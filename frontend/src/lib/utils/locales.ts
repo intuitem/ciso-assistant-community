@@ -188,6 +188,7 @@ export function localItems(languageTag: string): LocalItems {
 		addProject: m.addProject({ languageTag: languageTag }),
 		addUser: m.addUser({ languageTag: languageTag }),
 		addPolicy: m.addPolicy({ languageTag: languageTag }),
+		addIdentityProvider: m.addIdentityProvider({ languageTag: languageTag }),
 		associatedThreats: m.associatedThreats({ languageTag: languageTag }),
 		associatedReferenceControls: m.associatedReferenceControls({ languageTag: languageTag }),
 		associatedAppliedControls: m.associatedAppliedControls({ languageTag: languageTag }),
@@ -365,7 +366,14 @@ export function localItems(languageTag: string): LocalItems {
 		incoming: m.incoming({ languageTag: languageTag }),
 		today: m.today({ languageTag: languageTag }),
 		outdated: m.outdated({ languageTag: languageTag }),
-		flashMode: m.flashMode({ languageTag: languageTag })
+		flashMode: m.flashMode({ languageTag: languageTag }),
+		identityProvider: m.identityProvider({ languageTag: languageTag }),
+		identityProviders: m.identityProviders({ languageTag: languageTag }),
+		settings: m.settings({ languageTag: languageTag }),
+		key: m.key({ languageTag: languageTag }),
+		secret: m.secret({ languageTag: languageTag }),
+		clientId: m.clientId({ languageTag: languageTag }),
+		providerId: m.providerId({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }

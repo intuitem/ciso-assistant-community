@@ -211,6 +211,16 @@ export const EvidenceSchema = baseNamedObject({
 	link: z.string().optional().nullable()
 });
 
+export const IdentityProviderSchema = z.object({
+	provider: z.string(),
+	provider_id: z.string().optional(),
+	name: z.string(),
+	client_id: z.string(),
+	secret: z.string().optional(),
+	key: z.string().optional(),
+	settings: z.any().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -226,7 +236,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
 	evidences: EvidenceSchema,
-	users: UserCreateSchema
+	users: UserCreateSchema,
+	'identity-providers': IdentityProviderSchema
 };
 
 export const modelSchema = (model: string) => {
