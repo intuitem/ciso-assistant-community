@@ -426,12 +426,51 @@
 			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
 	{:else if URLModel === 'identity-providers'}
-		<TextField {form} field="provider" label={m.provider()} />
+		<AutocompleteSelect
+			{form}
+			options={model.selectOptions['provider']}
+			field="provider"
+			label={m.provider()}
+		/>
 		<TextField {form} field="provider_id" label={m.providerId()} />
 		<TextField {form} field="client_id" label={m.clientId()} />
 		<TextField {form} field="secret" label={m.secret()} />
 		<TextField {form} field="key" label={m.key()} />
-		<TextArea {form} field="settings" label={m.settings()} />
+		{#if data.provider === 'saml'}
+			Attribute mapping
+			<TextField {form} field="attribute_mapping_uid" />
+			<TextField {form} field="attribute_mapping_email_verified" />
+			<TextField {form} field="attribute_mapping_email" />
+
+			IdP configuration
+			<TextField {form} field="idp_entity_id" />
+			<TextField {form} field="metadata_url" />
+			<TextField {form} field="sso_url" />
+			<TextField {form} field="slo_url" />
+			<TextField {form} field="x509cert" />
+
+			SP configuration
+			<TextField {form} field="sp_entity_id" />
+
+			Advanced settings
+			<Checkbox {form} field="allow_repeat_attribute_name" />
+			<Checkbox {form} field="allow_single_label_domains" />
+			<Checkbox {form} field="authn_request_signed" />
+			<TextField {form} field="digest_algorithm" />
+			<Checkbox {form} field="logout_request_signed" />
+			<Checkbox {form} field="logout_response_signed" />
+			<Checkbox {form} field="metadata_signed" />
+			<Checkbox {form} field="name_id_encrypted" />
+			<Checkbox {form} field="reject_deprecated_algorithm" />
+			<Checkbox {form} field="reject_idp_initiated_sso" />
+			<TextField {form} field="signature_algorithm" />
+			<Checkbox {form} field="want_assertion_encrypted" />
+			<Checkbox {form} field="want_assertion_signed" />
+			<Checkbox {form} field="want_attribute_statement" />
+			<Checkbox {form} field="want_message_signed" />
+			<Checkbox {form} field="want_name_id" />
+			<Checkbox {form} field="want_name_id_encrypted" />
+		{/if}
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

@@ -148,6 +148,11 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
+				},
+				{
+					name: 'identityProviders',
+					fa_icon: 'fa-solid fa-id-card',
+					href: '/identity-providers'
 				}
 			]
 		},

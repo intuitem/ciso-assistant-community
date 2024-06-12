@@ -6,8 +6,7 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { checkConstraints } from '$lib/utils/crud';
 
 	export let data: PageData;
@@ -26,7 +25,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.model.localName)]
+			title: m['add' + capitalizeFirstLetter(data.model.localName)]()
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -36,7 +35,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: localItems()['add' + capitalizeFirstLetter(data.model.localName)].toLowerCase(),
+				body: m['add' + capitalizeFirstLetter(data.model.localName)]().toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
@@ -54,7 +53,7 @@
 						data-testid="add-button"
 						on:click={modalCreateForm}
 						><i class="fa-solid fa-plus mr-2" />
-						{localItems()['add' + capitalizeFirstLetter(data.model.localName)]}
+						{m['add' + capitalizeFirstLetter(data.model.localName)]()}
 					</button>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"

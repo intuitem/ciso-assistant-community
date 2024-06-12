@@ -15,4 +15,5 @@
 	foreignKeys={data.foreignKeys}
 	model={data.model}
 	origin="edit"
+	debug
 />

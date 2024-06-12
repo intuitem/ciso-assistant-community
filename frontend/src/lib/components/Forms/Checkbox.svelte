@@ -5,6 +5,8 @@
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 
+	label = label ?? field;
+
 	export let form;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);

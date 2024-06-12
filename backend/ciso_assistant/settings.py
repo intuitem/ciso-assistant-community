@@ -360,50 +360,7 @@ HEADLESS_FRONTEND_URLS = {
 
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
-        # Here, each app represents the SAML provider configuration of one
-        # organization.
         "EMAIL_AUTHENTICATION": True,
         "VERIFIED_EMAIL": True,
-        "APPS": [
-            {
-                "name": "Keycloack",
-                "provider_id": "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata",
-                "client_id": "keycloack",
-                "settings": {
-                    "attribute_mapping": {
-                        "uid": "",
-                        "email_verified": "",
-                        "email": "emailAdress",
-                    },
-                    "idp": {
-                        "entity_id": "http://localhost:8080/realms/cisodev",
-                        "metadata_url": "http://localhost:8080/realms/cisodev/protocol/saml/descriptor",
-                    },
-                    "sp": {
-                        "entity_id": "http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata",
-                    },
-                    "advanced": {
-                        "allow_repeat_attribute_name": True,
-                        "allow_single_label_domains": False,
-                        "authn_request_signed": False,
-                        "digest_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-                        "logout_request_signed": False,
-                        "logout_response_signed": False,
-                        "metadata_signed": False,
-                        "name_id_encrypted": False,
-                        "reject_deprecated_algorithm": True,
-                        # Due to security concerns, IdP initiated SSO is rejected by default.
-                        "reject_idp_initiated_sso": True,
-                        "signature_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-                        "want_assertion_encrypted": False,
-                        "want_assertion_signed": False,
-                        "want_attribute_statement": True,
-                        "want_message_signed": False,
-                        "want_name_id": False,
-                        "want_name_id_encrypted": False,
-                    },
-                },
-            },
-        ],
-    }
+    },
 }
