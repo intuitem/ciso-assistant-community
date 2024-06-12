@@ -2,12 +2,12 @@ import { localItems } from '../../src/lib/utils/locales.js';
 import { languageTag, setLanguageTag, availableLanguageTags } from '../../src/paraglide/runtime.js';
 import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
 
-test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
+test('sidebar navigation tests', async ({ logedPage, birdEyePage, sideBar, page }) => {
 	test.slow();
 
 	await test.step('proper redirection to the analytics page after login', async () => {
-		await analyticsPage.hasUrl();
-		await analyticsPage.hasTitle();
+		await birdEyePage.hasUrl();
+		await birdEyePage.hasTitle();
 		setHttpResponsesListener(page);
 	});
 
@@ -59,7 +59,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 
 	await test.step('translation panel is working properly', async () => {
-		await analyticsPage.goto();
+		await birdEyePage.goto();
 		const locales = [...availableLanguageTags];
 		const index = locales.indexOf('en');
 		if (index !== -1) {

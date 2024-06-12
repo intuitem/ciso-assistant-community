@@ -1,7 +1,7 @@
 import { test as base, expect as baseExpect, type Page } from '@playwright/test';
 import { SideBar } from './sidebar.js';
 import { LoginPage } from './login-page.js';
-import { AnalyticsPage } from './analytics-page.js';
+import { BirdEyePage } from './birdEye-page.js';
 import { PageContent } from './page-content.js';
 import { FormFieldType as type } from './form-content.js';
 import { Mailer } from './mailer.js';
@@ -14,7 +14,7 @@ type Fixtures = {
 	mailer: Mailer;
 	sideBar: SideBar;
 	pages: { [page: string]: PageContent };
-	analyticsPage: AnalyticsPage;
+	birdEyePage: BirdEyePage;
 	assetsPage: PageContent;
 	complianceAssessmentsPage: PageContent;
 	evidencesPage: PageContent;
@@ -90,8 +90,8 @@ export const test = base.extend<Fixtures>({
 		});
 	},
 
-	analyticsPage: async ({ page }, use) => {
-		await use(new AnalyticsPage(page));
+	birdEyePage: async ({ page }, use) => {
+		await use(new BirdEyePage(page));
 	},
 
 	complianceAssessmentsPage: async ({ page }, use) => {

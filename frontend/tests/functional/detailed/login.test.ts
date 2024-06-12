@@ -12,7 +12,7 @@ baseTest.skip('login page as expected title', async ({ page }) => {
 
 test('login / logout process is working properly', async ({
 	loginPage,
-	analyticsPage,
+	birdEyePage,
 	sideBar,
 	page
 }) => {
@@ -20,7 +20,7 @@ test('login / logout process is working properly', async ({
 	await expect.soft(page.getByTestId('login')).toBeVisible();
 	await loginPage.checkForUndefinedText();
 	await loginPage.login();
-	await analyticsPage.hasUrl();
+	await birdEyePage.hasUrl();
 	await sideBar.logout();
 });
 
