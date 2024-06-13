@@ -447,7 +447,7 @@
 			<TextField {form} field="metadata_url" />
 			<TextField {form} field="sso_url" />
 			<TextField {form} field="slo_url" />
-			<TextField {form} field="x509cert" />
+			<TextArea {form} field="x509cert" />
 
 			SP configuration
 			<TextField {form} field="sp_entity_id" />
