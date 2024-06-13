@@ -220,9 +220,15 @@ export const IdentityProviderSchema = z.object({
 	key: z.string().optional(),
 
 	// SAML specific fields
-	attribute_mapping_uid: z.string().optional(),
-	attribute_mapping_email_verified: z.string().optional(),
-	attribute_mapping_email: z.string().optional(),
+	attribute_mapping_uid: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_email_verified: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_email: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
 	idp_entity_id: z.string().optional(),
 	metadata_url: z.string().url().optional(),
 	sso_url: z.string().url().optional(),
