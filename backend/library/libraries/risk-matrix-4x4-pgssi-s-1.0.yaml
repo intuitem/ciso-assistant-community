@@ -18,28 +18,36 @@ objects:
         - abbreviation: 1
           name: Exceptionnel
           description: Evènement Exceptionnel
+          hexcolor: '#02A45A'
         - abbreviation: 2
           name: Peu probable
           description: Evènement Peu probable
+          hexcolor: '#FFCE02'
         - abbreviation: 3
           name: Possible
           description: Evènement Possible
+          hexcolor: '#FFA600'
         - abbreviation: 4
           name: Quasi certain
           description: Evènement Quasi certain
+          hexcolor: '#FF1A00'
       impact:
         - abbreviation: 1
           name: Mineure
           description: Gravité Mineure
+          hexcolor: '#02A45A'
         - abbreviation: 2
           name: Significatif
           description: Gravité Significative
+          hexcolor: '#FFCE02'
         - abbreviation: 3
           name: Importante
           description: Gravité Importante
+          hexcolor: '#FFA600'
         - abbreviation: 4
           name: Critique
           description: Gravité Critique
+          hexcolor: '#FF1A00'
       risk:
         - abbreviation: 1
           name: Limité

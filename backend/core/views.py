@@ -64,9 +64,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if not self.model:
             return None
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, self.model
-        )[0]
+        object_ids_view = None
+        if self.request.method == "GET":
+            if q := re.match("/api/[\w-]+/([0-9a-f-]+)", self.request.path):
+                """"get_queryset is called by Django even for an individual object via get_object
+                https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
+                id = UUID(q.group(1))
+                if RoleAssignment.is_object_readable(self.request.user, self.model, id):
+                    object_ids_view = [id]
+        if not object_ids_view:
+            object_ids_view = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, self.model
+            )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
 
@@ -1063,7 +1072,9 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(), None
+                RequirementNode.objects.filter(framework=_framework).all(),
+                None,
+                _framework.max_score,
             )
         )
 
@@ -1265,6 +1276,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "inactive": "#fca5a5",
                 "no status": "#e5e7eb",
             }
+            status = AppliedControl.Status.choices
             compliance_assessment_object = self.get_object()
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments()
@@ -1283,6 +1295,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     applied_control
                 )
             data = {
+                "status_text": status,
                 "color_map": color_map,
                 "context": context,
                 "compliance_assessment": compliance_assessment_object,
@@ -1335,12 +1348,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
+        score = self.get_object()
         return Response(
             {
-                "score": self.get_object().get_global_score(),
-                "max_score": self.get_object().max_score,
-                "min_score": self.get_object().min_score,
-                "scores_definition": self.get_object().scores_definition,
+                "score": score.get_global_score(),
+                "max_score": score.max_score,
+                "min_score": score.min_score,
+                "scores_definition": score.scores_definition,
             }
         )
 
@@ -1366,6 +1380,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             RequirementAssessment.objects.filter(
                 compliance_assessment=self.get_object()
             ).all(),
+            _framework.max_score,
         )
         implementation_groups = self.get_object().selected_implementation_groups
         return Response(
@@ -1546,7 +1561,11 @@ def generate_html(
     ).all()
 
     implementation_groups = compliance_assessment.selected_implementation_groups
-    graph = get_sorted_requirement_nodes(list(requirement_nodes), list(assessments))
+    graph = get_sorted_requirement_nodes(
+        list(requirement_nodes),
+        list(assessments),
+        compliance_assessment.framework.max_score,
+    )
     graph = filter_graph_by_implementation_groups(graph, implementation_groups)
     flattened_graph = flatten_dict(graph)
 
@@ -1604,6 +1623,7 @@ def generate_html(
     content = """
     <html lang="en">
     <head>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="https://unpkg.com/dezui@latest">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Compliance report</title>
@@ -1729,7 +1749,7 @@ def generate_html(
                 table += (
                     '<div class="grid grid-cols-2 justify-items-left font-semibold">'
                 )
-                table += f'<p>{("Applied applied controls")}:</p>'
+                table += f'<p>{("Applied controls")}:</p>'
                 table += f'<p>{("Associated evidence")}:</p>'
                 table += "</div>"
                 table += '<div class="flex flex-row">'

@@ -6,4 +6,4 @@
 	export const meta: any = undefined;
 </script>
 
-<span>{cell.folder} - {localItems(languageTag())[toCamelCase(cell.role)]}</span>
+<span>{cell.folder} - {localItems()[toCamelCase(cell.role)]}</span>

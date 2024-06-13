@@ -98,7 +98,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyCreatedObject({
-						object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+						object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 					})
 				},
 				event
@@ -108,7 +108,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 				})
 			},
 			event
@@ -146,7 +146,7 @@ export const actions: Actions = {
 			return message(
 				deleteForm,
 				m.successfullyDeletedObject({
-					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
+					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
 				})
 			);
 		}
@@ -181,7 +181,7 @@ export const actions: Actions = {
 		return message(
 			rejectForm,
 			m.successfullyRejectedObject({
-				object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
 				id: id
 			})
 		);
@@ -215,7 +215,7 @@ export const actions: Actions = {
 		return message(
 			acceptForm,
 			m.successfullyValidatedObject({
-				object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
 				id: id
 			})
 		);
@@ -249,7 +249,7 @@ export const actions: Actions = {
 		return message(
 			revokeForm,
 			m.successfullyRevokedObject({
-				object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
 				id: id
 			})
 		);

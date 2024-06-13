@@ -7,7 +7,7 @@
 	import * as m from '$paraglide/messages';
 
 	export let data;
-	let loading = false;
+	let loading = { form: false, library: '' };
 	const showRisks = true;
 	interface LibraryObjects {
 		[key: string]: any;
@@ -69,6 +69,22 @@
 	}
 
 	$: displayImportButton = !(data.library.is_loaded ?? true);
+
+	async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
+		const data = new FormData(event.currentTarget);
+
+		const response = await fetch(event.currentTarget.action, {
+			method: 'POST',
+			body: data
+		});
+
+		const result: ActionResult = deserialize(await response.text());
+
+		if (result.type === 'success') {
+			await invalidateAll();
+		}
+		applyAction(result);
+	}
 </script>
 
 <div class="card bg-white p-4 shadow space-y-4">
@@ -77,17 +93,22 @@
 			<h1 class="font-medium text-xl">{data.library.name}</h1>
 			<div>
 				{#if displayImportButton}
-					{#if loading}
+					{#if loading.form}
 						<ProgressRadial width="w-6" meter="stroke-primary-500" />
 					{:else}
 						<form
 							method="post"
+							action="/libraries/{data.library.urn}?/load"
 							use:enhance={() => {
-								loading = true;
+								loading.form = true;
+								loading.library = data.library.urn;
 								return async ({ update }) => {
+									loading.form = false;
+									loading.library = '';
 									update();
 								};
 							}}
+							on:submit={handleSubmit}
 						>
 							<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
 								<i class="fa-solid fa-file-import" />

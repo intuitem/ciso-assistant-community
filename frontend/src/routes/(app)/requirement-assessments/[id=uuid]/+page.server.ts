@@ -8,6 +8,7 @@ import * as m from '$paraglide/messages';
 import { languageTag } from '$paraglide/runtime';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -22,7 +23,7 @@ export const load = (async ({ fetch, params }) => {
 	const requirementAssessment = await res.json();
 
 	const compliance_assessment_score = await fetch(
-		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score`
+		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
 	).then((res) => res.json());
 	const requirement = await fetch(
 		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
@@ -259,7 +260,7 @@ export const actions: Actions = {
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		redirect(
 			302,
-			event.url.searchParams.get('next') ||
+			getSecureRedirect(event.url.searchParams.get('next')) ||
 				`/compliance-assessments/${object.compliance_assessment}/`
 		);
 	},
@@ -318,7 +319,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+				message: m.successfullyUpdatedObject({ object: model })
 			},
 			event
 		);
@@ -406,7 +407,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 				})
 			},
 			event

@@ -2,6 +2,7 @@
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
+	import { localItems } from '$lib/utils/locales';
 
 	export let data: PageData;
 
@@ -110,7 +111,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
-													<li>{error.msg}</li>
+													<li>
+														{#if error.object.name}<a class="anchor" href={error.link}
+																>{error.object.name}</a
+															>:{/if}
+														{localItems()[error.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
@@ -129,7 +135,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
-													<li>{warning.msg}</li>
+													<li>
+														{#if warning.object.name}
+															<a class="anchor" href={warning.link}>{warning.object.name}</a>:
+														{/if}
+														{localItems()[warning.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
@@ -148,7 +159,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
-													<li>{info.msg}</li>
+													<li>
+														{#if info.object.name}<a class="anchor" href={info.link}
+																>{info.object.name}</a
+															>:{/if}
+														{localItems()[info.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
@@ -185,7 +201,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
-													<li>{error.msg}</li>
+													<li>
+														{#if error.object.name}<a class="anchor" href={error.link}
+																>{error.object.name}</a
+															>:{/if}
+														{localItems()[error.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
@@ -204,7 +225,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
-													<li>{warning.msg}</li>
+													<li>
+														{#if warning.object.name}<a class="anchor" href={warning.link}
+																>{warning.object.name}</a
+															>:{/if}
+														{localItems()[warning.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
@@ -223,7 +249,12 @@
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
-													<li>{info.msg}</li>
+													<li>
+														{#if info.object.name}<a class="anchor" href={info.link}
+																>{info.object.name}</a
+															>:{/if}
+														{localItems()[info.msgid]}
+													</li>
 												{/each}
 											</ul>
 										</div>
