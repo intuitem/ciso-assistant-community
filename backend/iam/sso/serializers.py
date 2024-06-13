@@ -1,12 +1,13 @@
+from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from rest_framework import serializers
 from .models import IdentityProvider
-from pprint import pprint
 
 from core.serializers import BaseModelSerializer
 
 
 class IdentityProviderReadSerializer(BaseModelSerializer):
     provider = serializers.CharField(read_only=True, source="get_provider_display")
+    settings = serializers.CharField(read_only=True)
 
     class Meta:
         model = IdentityProvider
@@ -14,14 +15,29 @@ class IdentityProviderReadSerializer(BaseModelSerializer):
 
 
 class IdentityProviderWriteSerializer(BaseModelSerializer):
-    attribute_mapping_uid = serializers.CharField(
-        required=False, allow_blank=True, allow_null=True, write_only=True
+    attribute_mapping_uid = serializers.ListField(
+        child=serializers.CharField(
+            required=False, allow_blank=True, allow_null=True, write_only=True
+        ),
+        write_only=True,
+        required=False,
+        allow_null=True,
     )
-    attribute_mapping_email_verified = serializers.CharField(
-        required=False, allow_blank=True, allow_null=True, write_only=True
+    attribute_mapping_email_verified = serializers.ListField(
+        child=serializers.CharField(
+            required=False, allow_blank=True, allow_null=True, write_only=True
+        ),
+        write_only=True,
+        required=False,
+        allow_null=True,
     )
-    attribute_mapping_email = serializers.CharField(
-        required=False, allow_blank=True, allow_null=True, write_only=True
+    attribute_mapping_email = serializers.ListField(
+        child=serializers.CharField(
+            required=False, allow_blank=True, allow_null=True, write_only=True
+        ),
+        write_only=True,
+        required=False,
+        allow_null=True,
     )
     idp_entity_id = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
@@ -77,35 +93,38 @@ class IdentityProviderWriteSerializer(BaseModelSerializer):
         if validated_data.get("provider") == "saml":
             settings = self.build_saml_settings(validated_data)
             validated_data["settings"] = settings
-            pprint(validated_data)
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
         if validated_data.get("provider") == "saml":
             settings = self.build_saml_settings(validated_data)
             validated_data["settings"] = settings
-            pprint(validated_data)
         return super().update(instance, validated_data)
 
     def build_saml_settings(self, validated_data):
+        default_attribute_mapping = SAMLProvider.default_attribute_mapping
+        attribute_mapping = {
+            "uid": validated_data.pop("attribute_mapping_uid", None),
+            "email_verified": validated_data.pop(
+                "attribute_mapping_email_verified", None
+            ),
+            "email": validated_data.pop("attribute_mapping_email", None),
+        }
         return {
             "attribute_mapping": {
-                "uid": validated_data.pop("attribute_mapping_uid", None),
-                "email_verified": validated_data.pop(
-                    "attribute_mapping_email_verified", None
-                ),
-                "email": validated_data.pop("attribute_mapping_email", None),
+                key: value if value is not None else default_attribute_mapping[key]
+                for key, value in attribute_mapping.items()
             },
             "idp": {
-                "entity_id": validated_data.pop("idp_entity_id", None),
-                "metadata_url": validated_data.pop("metadata_url", None),
-                "sso_url": validated_data.pop("sso_url", None),
-                "slo_url": validated_data.pop("slo_url", None),
+                "entity_id": validated_data.pop("idp_entity_id", ""),
+                "metadata_url": validated_data.pop("metadata_url", ""),
+                "sso_url": validated_data.pop("sso_url", ""),
+                "slo_url": validated_data.pop("slo_url", ""),
                 "x509cert": validated_data.pop("x509cert", ""),
             },
             "sp": {
                 # Optional entity ID of the SP. If not set, defaults to the `saml_metadata` urlpattern
-                "entity_id": validated_data.pop("sp_entity_id", None),
+                "entity_id": validated_data.pop("sp_entity_id", ""),
             },
             # Advanced settings.
             "advanced": {
