@@ -106,7 +106,7 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'locale', 'overview']
 	},
 	'identity-providers': {
-		head: ['name', 'provider'],
-		body: ['name', 'provider']
+		head: ['name', 'provider', 'providerId'],
+		body: ['name', 'provider', 'provider_id']
 	}
 };
