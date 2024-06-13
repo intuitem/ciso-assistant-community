@@ -110,7 +110,10 @@ class FinishACSView(SAMLViewMixin, View):
                 login.state["next"] = next_url
         print("LOGIN STATE", login.state)
         email = auth._nameid
-        user = User.objects.get(email=email)
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return render_authentication_error(request, provider, error="failedSSO")
         token = generate_token(user)
         login.state["next"] += f"sso/authenticate/{token}"
         return complete_social_login(request, login)

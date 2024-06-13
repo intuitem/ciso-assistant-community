@@ -1,6 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
 
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
@@ -46,6 +48,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	await ensureCsrfToken(event);
 
 	if (event.locals.user) return await resolve(event);
+
+	const errorId = new URL(event.request.url).searchParams.get('error');
+	if (errorId) {
+		setFlash({ type: 'error', message: m.failedSSO() }, event);
+		redirect(302, `/`);
+	}
 
 	const user = await validateUserSession(event);
 	if (user) {
