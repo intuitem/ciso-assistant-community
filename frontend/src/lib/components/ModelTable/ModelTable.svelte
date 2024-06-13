@@ -165,7 +165,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{localItems()[heading]}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{m[heading]() ?? heading}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
