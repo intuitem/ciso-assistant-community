@@ -9,7 +9,7 @@
 </style>
 
 <main class="p-2 m-2 main">
-    <h1 class="flex justify-center">Action plan</h1>
+    <h1 class="flex justify-center">{% trans "Action plan" %}</h1>
     <div class="bg-white p-2 m-2 space-x-3 flex flex-row justify-center">
         <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ compliance_assessment.project.folder }}</p>
         <p class="font-semibold text-lg">/</p>
@@ -21,10 +21,17 @@
     </div>
     <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated applied controls" %}: </p>
     <p class="m-2 p-2" style="color: #374151">{% trans "Separated by status and sorted by eta" %}</p>
-    {% for status, applied_controls in context.items%}
+    {{ status }}
+    {% for status, applied_controls in context.items %}
         {% for status_color, color in color_map.items %}
-            {% if status_color == status %}
-                <p class="flex p-2 m-2 text-lg font-semibold justify-center" style="background-color: {{color}}">{% trans status|title %}:</p>
+            {% if status_color == status and status == "no status" %}
+                <p class="flex p-2 m-2 text-lg font-semibold justify-center" style="background-color: {{color}}">{% trans "No status" %}</p>
+            {% else %}
+                {% for text in status_text %}
+                    {% if status_color == status and text.0 == status %}
+                        <p class="flex p-2 m-2 text-lg font-semibold justify-center" style="background-color: {{color}}">{{ text.1 }}:</p>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
         {% endfor %}
         <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-row">  

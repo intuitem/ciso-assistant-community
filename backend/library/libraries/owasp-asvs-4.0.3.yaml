@@ -4,7 +4,7 @@ ref_id: OWASP-ASVS-4.0.3
 name: OWASP ASVS 4.0.3
 description: OWASP Application Security Verification Standard. https://owasp.org/www-project-application-security-verification-standard/
 copyright: CC BY-SA 3.0 - The OWASP Foundation
-version: 1
+version: 2
 provider: OWASP
 packager: intuitem
 objects:
@@ -13,6 +13,16 @@ objects:
     ref_id: OWASP-ASVS-4.0.3
     name: OWASP ASVS 4.0.3
     description: 'OWASP Application Security Verification Standard '
+    implementation_groups_definition:
+    - ref_id: L1
+      name: Level 1
+      description: First steps, automated, or whole of portfolio view
+    - ref_id: L2
+      name: Level 2
+      description: Most applications
+    - ref_id: L3
+      name: Level 3
+      description: High value, high assurance, or high safety
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1
       assessable: false
@@ -32,6 +42,9 @@ objects:
       ref_id: V1.1.1
       description: Verify the use of a secure software development lifecycle that
         addresses security in all stages of development. ([C1](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.2
       assessable: true
       depth: 3
@@ -40,6 +53,9 @@ objects:
       description: Verify the use of threat modeling for every design change or sprint
         planning to identify threats, plan for countermeasures, facilitate appropriate
         risk responses, and guide security testing.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.3
       assessable: true
       depth: 3
@@ -48,6 +64,9 @@ objects:
       description: Verify that all user stories and features contain functional security
         constraints, such as "As a user, I should be able to view and edit my profile.
         I should not be able to view or edit anyone else's profile"
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.4
       assessable: true
       depth: 3
@@ -55,6 +74,9 @@ objects:
       ref_id: V1.1.4
       description: Verify documentation and justification of all the application's
         trust boundaries, components, and significant data flows.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.5
       assessable: true
       depth: 3
@@ -62,6 +84,9 @@ objects:
       ref_id: V1.1.5
       description: Verify definition and security analysis of the application's high-level
         architecture and all connected remote services. ([C1](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.6
       assessable: true
       depth: 3
@@ -70,6 +95,9 @@ objects:
       description: Verify implementation of centralized, simple (economy of design),
         vetted, secure, and reusable security controls to avoid duplicate, missing,
         ineffective, or insecure controls. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.1.7
       assessable: true
       depth: 3
@@ -77,6 +105,9 @@ objects:
       ref_id: V1.1.7
       description: Verify availability of a secure coding checklist, security requirements,
         guideline, or policy to all developers and testers.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2
       assessable: false
       depth: 2
@@ -90,6 +121,9 @@ objects:
       ref_id: V1.2.1
       description: Verify the use of unique or special low-privilege operating system
         accounts for all application components, services, and servers. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.2
       assessable: true
       depth: 3
@@ -98,6 +132,9 @@ objects:
       description: Verify that communications between application components, including
         APIs, middleware and data layers, are authenticated. Components should have
         the least necessary privileges needed. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.3
       assessable: true
       depth: 3
@@ -106,6 +143,9 @@ objects:
       description: Verify that the application uses a single vetted authentication
         mechanism that is known to be secure, can be extended to include strong authentication,
         and has sufficient logging and monitoring to detect account abuse or breaches.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.2.4
       assessable: true
       depth: 3
@@ -114,6 +154,9 @@ objects:
       description: Verify that all authentication pathways and identity management
         APIs implement consistent authentication security control strength, such that
         there are no weaker alternatives per the risk of the application.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4
       assessable: false
       depth: 2
@@ -128,6 +171,9 @@ objects:
       description: Verify that trusted enforcement points, such as access control
         gateways, servers, and serverless functions, enforce access controls. Never
         enforce access controls on the client.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4.4
       assessable: true
       depth: 3
@@ -137,6 +183,9 @@ objects:
         mechanism for accessing protected data and resources. All requests must pass
         through this single mechanism to avoid copy and paste or insecure alternative
         paths. ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.4.5
       assessable: true
       depth: 3
@@ -145,6 +194,9 @@ objects:
       description: Verify that attribute or feature-based access control is used whereby
         the code checks the user's authorization for a feature/data item rather than
         just their role. Permissions should still be allocated using roles. ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5
       assessable: false
       depth: 2
@@ -159,6 +211,9 @@ objects:
       description: Verify that input and output requirements clearly define how to
         handle and process data based on type, content, and applicable laws, regulations,
         and other policy compliance.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.2
       assessable: true
       depth: 3
@@ -168,6 +223,9 @@ objects:
         clients. If this is not possible, ensure that adequate integrity controls
         (and possibly encryption if sensitive data is sent) are enforced to prevent
         deserialization attacks including object injection.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.3
       assessable: true
       depth: 3
@@ -175,6 +233,9 @@ objects:
       ref_id: V1.5.3
       description: Verify that input validation is enforced on a trusted service layer.
         ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.5.4
       assessable: true
       depth: 3
@@ -182,6 +243,9 @@ objects:
       ref_id: V1.5.4
       description: Verify that output encoding occurs close to or by the interpreter
         for which it is intended. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6
       assessable: false
       depth: 2
@@ -196,6 +260,9 @@ objects:
       description: Verify that there is an explicit policy for management of cryptographic
         keys and that a cryptographic key lifecycle follows a key management standard
         such as NIST SP 800-57.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.2
       assessable: true
       depth: 3
@@ -203,6 +270,9 @@ objects:
       ref_id: V1.6.2
       description: Verify that consumers of cryptographic services protect key material
         and other secrets by using key vaults or API based alternatives.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.3
       assessable: true
       depth: 3
@@ -210,6 +280,9 @@ objects:
       ref_id: V1.6.3
       description: Verify that all keys and passwords are replaceable and are part
         of a well-defined process to re-encrypt sensitive data.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.6.4
       assessable: true
       depth: 3
@@ -218,6 +291,9 @@ objects:
       description: Verify that the architecture treats client-side secrets--such as
         symmetric keys, passwords, or API tokens--as insecure and never uses them
         to protect or access sensitive data.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.7
       assessable: false
       depth: 2
@@ -231,6 +307,9 @@ objects:
       ref_id: V1.7.1
       description: Verify that a common logging format and approach is used across
         the system. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.7.2
       assessable: true
       depth: 3
@@ -238,6 +317,9 @@ objects:
       ref_id: V1.7.2
       description: Verify that logs are securely transmitted to a preferably remote
         system for analysis, detection, alerting, and escalation. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.8
       assessable: false
       depth: 2
@@ -251,6 +333,9 @@ objects:
       ref_id: V1.8.1
       description: Verify that all sensitive data is identified and classified into
         protection levels.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.8.2
       assessable: true
       depth: 3
@@ -260,6 +345,9 @@ objects:
         requirements, such as encryption requirements, integrity requirements, retention,
         privacy and other confidentiality requirements, and that these are applied
         in the architecture.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.9
       assessable: false
       depth: 2
@@ -274,6 +362,9 @@ objects:
       description: Verify the application encrypts communications between components,
         particularly when these components are in different containers, systems, sites,
         or cloud providers. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.9.2
       assessable: true
       depth: 3
@@ -282,6 +373,9 @@ objects:
       description: Verify that application components verify the authenticity of each
         side in a communication link to prevent person-in-the-middle attacks. For
         example, application components should validate TLS certificates and chains.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.10
       assessable: false
       depth: 2
@@ -297,6 +391,9 @@ objects:
         to ensure that check-ins are accompanied by issues or change tickets. The
         source code control system should have access control and identifiable users
         to allow traceability of any changes.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11
       assessable: false
       depth: 2
@@ -310,6 +407,9 @@ objects:
       ref_id: V1.11.1
       description: Verify the definition and documentation of all application components
         in terms of the business or security functions they provide.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11.2
       assessable: true
       depth: 3
@@ -317,6 +417,9 @@ objects:
       ref_id: V1.11.2
       description: Verify that all high-value business logic flows, including authentication,
         session management and access control, do not share unsynchronized state.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.11.3
       assessable: true
       depth: 3
@@ -325,6 +428,8 @@ objects:
       description: Verify that all high-value business logic flows, including authentication,
         session management and access control are thread safe and resistant to time-of-check
         and time-of-use race conditions.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.12
       assessable: false
       depth: 2
@@ -341,6 +446,9 @@ objects:
         or from an unrelated domain, such as a cloud file storage bucket. Implement
         a suitable Content Security Policy (CSP) to reduce the risk from XSS vectors
         or other attacks from the uploaded file.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14
       assessable: false
       depth: 2
@@ -355,6 +463,9 @@ objects:
       description: Verify the segregation of components of differing trust levels
         through well-defined security controls, firewall rules, API gateways, reverse
         proxies, cloud-based security groups, or similar mechanisms.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.2
       assessable: true
       depth: 3
@@ -362,6 +473,9 @@ objects:
       ref_id: V1.14.2
       description: Verify that binary signatures, trusted connections, and verified
         endpoints are used to deploy binaries to remote devices.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.3
       assessable: true
       depth: 3
@@ -369,6 +483,9 @@ objects:
       ref_id: V1.14.3
       description: Verify that the build pipeline warns of out-of-date or insecure
         components and takes appropriate actions.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.4
       assessable: true
       depth: 3
@@ -378,6 +495,9 @@ objects:
         build and verify the secure deployment of the application, particularly if
         the application infrastructure is software defined, such as cloud environment
         build scripts.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.5
       assessable: true
       depth: 3
@@ -387,6 +507,9 @@ objects:
         and/or isolate at the network level to delay and deter attackers from attacking
         other applications, especially when they are performing sensitive or dangerous
         actions such as deserialization. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v1.14.6
       assessable: true
       depth: 3
@@ -395,6 +518,9 @@ objects:
       description: Verify the application does not use unsupported, insecure, or deprecated
         client-side technologies such as NSAPI plugins, Flash, Shockwave, ActiveX,
         Silverlight, NACL, or client-side Java applets.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2
       assessable: false
       depth: 1
@@ -413,6 +539,10 @@ objects:
       ref_id: V2.1.1
       description: Verify that user set passwords are at least 12 characters in length
         (after multiple spaces are combined). ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.2
       assessable: true
       depth: 3
@@ -420,6 +550,10 @@ objects:
       ref_id: V2.1.2
       description: Verify that passwords of at least 64 characters are permitted,
         and that passwords of more than 128 characters are denied. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.3
       assessable: true
       depth: 3
@@ -427,6 +561,10 @@ objects:
       ref_id: V2.1.3
       description: Verify that password truncation is not performed. However, consecutive
         multiple spaces may be replaced by a single space. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.4
       assessable: true
       depth: 3
@@ -434,12 +572,20 @@ objects:
       ref_id: V2.1.4
       description: Verify that any printable Unicode character, including language
         neutral characters such as spaces and Emojis are permitted in passwords.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1
       ref_id: V2.1.5
       description: Verify users can change their password.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.6
       assessable: true
       depth: 3
@@ -447,6 +593,10 @@ objects:
       ref_id: V2.1.6
       description: Verify that password change functionality requires the user's current
         and new password.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.7
       assessable: true
       depth: 3
@@ -460,6 +610,10 @@ objects:
         plain text password is not sent or used in verifying the breach status of
         the password. If the password is breached, the application must require the
         user to set a new non-breached password. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.8
       assessable: true
       depth: 3
@@ -467,6 +621,10 @@ objects:
       ref_id: V2.1.8
       description: Verify that a password strength meter is provided to help users
         set a stronger password.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.9
       assessable: true
       depth: 3
@@ -475,6 +633,10 @@ objects:
       description: Verify that there are no password composition rules limiting the
         type of characters permitted. There should be no requirement for upper or
         lower case or numbers or special characters. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.10
       assessable: true
       depth: 3
@@ -482,6 +644,10 @@ objects:
       ref_id: V2.1.10
       description: Verify that there are no periodic credential rotation or password
         history requirements.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.11
       assessable: true
       depth: 3
@@ -489,6 +655,10 @@ objects:
       ref_id: V2.1.11
       description: Verify that "paste" functionality, browser password helpers, and
         external password managers are permitted.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.1.12
       assessable: true
       depth: 3
@@ -497,6 +667,10 @@ objects:
       description: Verify that the user can choose to either temporarily view the
         entire masked password, or temporarily view the last typed character of the
         password on platforms that do not have this as built-in functionality.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2
       assessable: false
       depth: 2
@@ -515,6 +689,10 @@ objects:
         restrictions, or risk-based restrictions such as location, first login on
         a device, recent attempts to unlock the account, or similar. Verify that no
         more than 100 failed attempts per hour is possible on a single account.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.2
       assessable: true
       depth: 3
@@ -525,6 +703,10 @@ objects:
         replacement for more secure authentication methods. Verify that stronger methods
         are offered before weak methods, users are aware of the risks, or that proper
         measures are in place to limit the risks of account compromise.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.3
       assessable: true
       depth: 3
@@ -536,6 +718,10 @@ objects:
         - rather than SMS or email - is preferred, but in the absence of push notifications,
         SMS or email is acceptable as long as no sensitive information is disclosed
         in the notification.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.4
       assessable: true
       depth: 3
@@ -545,6 +731,8 @@ objects:
         of multi-factor authentication, cryptographic devices with intent (such as
         connected keys with a push to authenticate), or at higher AAL levels, client-side
         certificates.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.5
       assessable: true
       depth: 3
@@ -553,6 +741,8 @@ objects:
       description: Verify that where a Credential Service Provider (CSP) and the application
         verifying authentication are separated, mutually authenticated TLS is in place
         between the two endpoints.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.6
       assessable: true
       depth: 3
@@ -560,6 +750,8 @@ objects:
       ref_id: V2.2.6
       description: Verify replay resistance through the mandated use of One-time Passwords
         (OTP) devices, cryptographic authenticators, or lookup codes.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.2.7
       assessable: true
       depth: 3
@@ -567,6 +759,8 @@ objects:
       ref_id: V2.2.7
       description: Verify intent to authenticate by requiring the entry of an OTP
         token or user-initiated action such as a button press on a FIDO hardware key.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3
       assessable: false
       depth: 2
@@ -582,6 +776,10 @@ objects:
         be securely randomly generated, SHOULD be at least 6 characters long, and
         MAY contain letters and numbers, and expire after a short period of time.
         These initial secrets must not be permitted to become the long term password.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3.2
       assessable: true
       depth: 3
@@ -589,6 +787,9 @@ objects:
       ref_id: V2.3.2
       description: Verify that enrollment and use of user-provided authentication
         devices are supported, such as a U2F or FIDO tokens.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.3.3
       assessable: true
       depth: 3
@@ -596,6 +797,9 @@ objects:
       ref_id: V2.3.3
       description: Verify that renewal instructions are sent with sufficient time
         to renew time bound authenticators.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4
       assessable: false
       depth: 2
@@ -612,6 +816,9 @@ objects:
         key derivation or password hashing function. Key derivation and password hashing
         functions take a password, a salt, and a cost factor as inputs when generating
         a password hash. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.2
       assessable: true
       depth: 3
@@ -620,6 +827,9 @@ objects:
       description: Verify that the salt is at least 32 bits in length and be chosen
         arbitrarily to minimize salt value collisions among stored hashes. For each
         credential, a unique salt value and the resulting hash SHALL be stored. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.3
       assessable: true
       depth: 3
@@ -628,6 +838,9 @@ objects:
       description: Verify that if PBKDF2 is used, the iteration count SHOULD be as
         large as verification server performance will allow, typically at least 100,000
         iterations. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.4
       assessable: true
       depth: 3
@@ -635,6 +848,9 @@ objects:
       ref_id: V2.4.4
       description: Verify that if bcrypt is used, the work factor SHOULD be as large
         as verification server performance will allow, with a minimum of 10. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.4.5
       assessable: true
       depth: 3
@@ -647,6 +863,9 @@ objects:
         revision of SP 800-131A. The secret salt value SHALL be stored separately
         from the hashed passwords (e.g., in a specialized device like a hardware security
         module).
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5
       assessable: false
       depth: 2
@@ -660,6 +879,10 @@ objects:
       ref_id: V2.5.1
       description: Verify that a system generated initial activation or recovery secret
         is not sent in clear text to the user. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.2
       assessable: true
       depth: 3
@@ -667,6 +890,10 @@ objects:
       ref_id: V2.5.2
       description: Verify password hints or knowledge-based authentication (so-called
         "secret questions") are not present.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.3
       assessable: true
       depth: 3
@@ -674,6 +901,10 @@ objects:
       ref_id: V2.5.3
       description: Verify password credential recovery does not reveal the current
         password in any way. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.4
       assessable: true
       depth: 3
@@ -681,6 +912,10 @@ objects:
       ref_id: V2.5.4
       description: Verify shared or default accounts are not present (e.g. "root",
         "admin", or "sa").
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.5
       assessable: true
       depth: 3
@@ -688,6 +923,10 @@ objects:
       ref_id: V2.5.5
       description: Verify that if an authentication factor is changed or replaced,
         that the user is notified of this event.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.6
       assessable: true
       depth: 3
@@ -696,6 +935,10 @@ objects:
       description: Verify forgotten password, and other recovery paths use a secure
         recovery mechanism, such as time-based OTP (TOTP) or other soft token, mobile
         push, or another offline recovery mechanism. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.5.7
       assessable: true
       depth: 3
@@ -704,6 +947,9 @@ objects:
       description: Verify that if OTP or multi-factor authentication factors are lost,
         that evidence of identity proofing is performed at the same level as during
         enrollment.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6
       assessable: false
       depth: 2
@@ -716,6 +962,9 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6
       ref_id: V2.6.1
       description: Verify that lookup secrets can be used only once.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6.2
       assessable: true
       depth: 3
@@ -724,6 +973,9 @@ objects:
       description: Verify that lookup secrets have sufficient randomness (112 bits
         of entropy), or if less than 112 bits of entropy, salted with a unique and
         random 32-bit salt and hashed with an approved one-way hash.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.6.3
       assessable: true
       depth: 3
@@ -731,6 +983,9 @@ objects:
       ref_id: V2.6.3
       description: Verify that lookup secrets are resistant to offline attacks, such
         as predictable values.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7
       assessable: false
       depth: 2
@@ -745,6 +1000,10 @@ objects:
       description: Verify that clear text out of band (NIST "restricted") authenticators,
         such as SMS or PSTN, are not offered by default, and stronger alternatives
         such as push notifications are offered first.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.2
       assessable: true
       depth: 3
@@ -752,6 +1011,10 @@ objects:
       ref_id: V2.7.2
       description: Verify that the out of band verifier expires out of band authentication
         requests, codes, or tokens after 10 minutes.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.3
       assessable: true
       depth: 3
@@ -759,6 +1022,10 @@ objects:
       ref_id: V2.7.3
       description: Verify that the out of band verifier authentication requests, codes,
         or tokens are only usable once, and only for the original authentication request.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.4
       assessable: true
       depth: 3
@@ -766,6 +1033,10 @@ objects:
       ref_id: V2.7.4
       description: Verify that the out of band authenticator and verifier communicates
         over a secure independent channel.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.5
       assessable: true
       depth: 3
@@ -773,6 +1044,9 @@ objects:
       ref_id: V2.7.5
       description: Verify that the out of band verifier retains only a hashed version
         of the authentication code.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.7.6
       assessable: true
       depth: 3
@@ -781,6 +1055,9 @@ objects:
       description: Verify that the initial authentication code is generated by a secure
         random number generator, containing at least 20 bits of entropy (typically
         a six digital random number is sufficient).
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8
       assessable: false
       depth: 2
@@ -793,6 +1070,10 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8
       ref_id: V2.8.1
       description: Verify that time-based OTPs have a defined lifetime before expiring.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.2
       assessable: true
       depth: 3
@@ -801,6 +1082,9 @@ objects:
       description: Verify that symmetric keys used to verify submitted OTPs are highly
         protected, such as by using a hardware security module or secure operating
         system based key storage.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.3
       assessable: true
       depth: 3
@@ -808,6 +1092,9 @@ objects:
       ref_id: V2.8.3
       description: Verify that approved cryptographic algorithms are used in the generation,
         seeding, and verification of OTPs.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.4
       assessable: true
       depth: 3
@@ -815,6 +1102,9 @@ objects:
       ref_id: V2.8.4
       description: Verify that time-based OTP can be used only once within the validity
         period.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.5
       assessable: true
       depth: 3
@@ -823,6 +1113,9 @@ objects:
       description: Verify that if a time-based multi-factor OTP token is re-used during
         the validity period, it is logged and rejected with secure notifications being
         sent to the holder of the device.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.6
       assessable: true
       depth: 3
@@ -831,6 +1124,9 @@ objects:
       description: Verify physical single-factor OTP generator can be revoked in case
         of theft or other loss. Ensure that revocation is immediately effective across
         logged in sessions, regardless of location.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.8.7
       assessable: true
       depth: 3
@@ -839,6 +1135,9 @@ objects:
       description: Verify that biometric authenticators are limited to use only as
         secondary factors in conjunction with either something you have and something
         you know.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9
       assessable: false
       depth: 2
@@ -854,6 +1153,9 @@ objects:
         securely and protected against disclosure, such as using a Trusted Platform
         Module (TPM) or Hardware Security Module (HSM), or an OS service that can
         use this secure storage.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9.2
       assessable: true
       depth: 3
@@ -862,6 +1164,9 @@ objects:
       description: Verify that the challenge nonce is at least 64 bits in length,
         and statistically unique or unique over the lifetime of the cryptographic
         device.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.9.3
       assessable: true
       depth: 3
@@ -869,6 +1174,9 @@ objects:
       ref_id: V2.9.3
       description: Verify that approved cryptographic algorithms are used in the generation,
         seeding, and verification.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10
       assessable: false
       depth: 2
@@ -882,6 +1190,9 @@ objects:
       ref_id: V2.10.1
       description: Verify that intra-service secrets do not rely on unchanging credentials
         such as passwords, API keys or shared accounts with privileged access.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.2
       assessable: true
       depth: 3
@@ -890,6 +1201,9 @@ objects:
       description: Verify that if passwords are required for service authentication,
         the service account used is not a default credential. (e.g. root/root or admin/admin
         are default in some services during installation).
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.3
       assessable: true
       depth: 3
@@ -897,6 +1211,9 @@ objects:
       ref_id: V2.10.3
       description: Verify that passwords are stored with sufficient protection to
         prevent offline recovery attacks, including local system access.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v2.10.4
       assessable: true
       depth: 3
@@ -907,6 +1224,9 @@ objects:
         in the source code or stored within source code repositories. Such storage
         SHOULD resist offline attacks. The use of a secure software key store (L1),
         hardware TPM, or an HSM (L3) is recommended for password storage.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3
       assessable: false
       depth: 1
@@ -924,6 +1244,10 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.1
       ref_id: V3.1.1
       description: Verify the application never reveals session tokens in URL parameters.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2
       assessable: false
       depth: 2
@@ -937,6 +1261,10 @@ objects:
       ref_id: V3.2.1
       description: Verify the application generates a new session token on user authentication.
         ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.2
       assessable: true
       depth: 3
@@ -944,6 +1272,10 @@ objects:
       ref_id: V3.2.2
       description: Verify that session tokens possess at least 64 bits of entropy.
         ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.3
       assessable: true
       depth: 3
@@ -952,6 +1284,10 @@ objects:
       description: Verify the application only stores session tokens in the browser
         using secure methods such as appropriately secured cookies (see section 3.4)
         or HTML 5 session storage.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.2.4
       assessable: true
       depth: 3
@@ -959,6 +1295,9 @@ objects:
       ref_id: V3.2.4
       description: Verify that session tokens are generated using approved cryptographic
         algorithms. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3
       assessable: false
       depth: 2
@@ -973,6 +1312,10 @@ objects:
       description: Verify that logout and expiration invalidate the session token,
         such that the back button or a downstream relying party does not resume an
         authenticated session, including across relying parties. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.2
       assessable: true
       depth: 3
@@ -981,6 +1324,10 @@ objects:
       description: If authenticators permit users to remain logged in, verify that
         re-authentication occurs periodically both when actively used or after an
         idle period. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.3
       assessable: true
       depth: 3
@@ -990,6 +1337,9 @@ objects:
         active sessions after a successful password change (including change via password
         reset/recovery), and that this is effective across the application, federated
         login (if present), and any relying parties.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.3.4
       assessable: true
       depth: 3
@@ -997,6 +1347,9 @@ objects:
       ref_id: V3.3.4
       description: Verify that users are able to view and (having re-entered login
         credentials) log out of any or all currently active sessions and devices.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4
       assessable: false
       depth: 2
@@ -1010,6 +1363,10 @@ objects:
       ref_id: V3.4.1
       description: Verify that cookie-based session tokens have the 'Secure' attribute
         set. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.2
       assessable: true
       depth: 3
@@ -1017,6 +1374,10 @@ objects:
       ref_id: V3.4.2
       description: Verify that cookie-based session tokens have the 'HttpOnly' attribute
         set. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.3
       assessable: true
       depth: 3
@@ -1024,6 +1385,10 @@ objects:
       ref_id: V3.4.3
       description: Verify that cookie-based session tokens utilize the 'SameSite'
         attribute to limit exposure to cross-site request forgery attacks. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.4
       assessable: true
       depth: 3
@@ -1031,6 +1396,10 @@ objects:
       ref_id: V3.4.4
       description: Verify that cookie-based session tokens use the "__Host-" prefix
         so cookies are only sent to the host that initially set the cookie.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.4.5
       assessable: true
       depth: 3
@@ -1040,6 +1409,10 @@ objects:
         with other applications that set or use session cookies that might disclose
         the session cookies, set the path attribute in cookie-based session tokens
         using the most precise path possible. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5
       assessable: false
       depth: 2
@@ -1053,6 +1426,9 @@ objects:
       ref_id: V3.5.1
       description: Verify the application allows users to revoke OAuth tokens that
         form trust relationships with linked applications.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5.2
       assessable: true
       depth: 3
@@ -1060,6 +1436,9 @@ objects:
       ref_id: V3.5.2
       description: Verify the application uses session tokens rather than static API
         secrets and keys, except with legacy implementations.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.5.3
       assessable: true
       depth: 3
@@ -1068,6 +1447,9 @@ objects:
       description: Verify that stateless session tokens use digital signatures, encryption,
         and other countermeasures to protect against tampering, enveloping, replay,
         null cipher, and key substitution attacks.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.6
       assessable: false
       depth: 2
@@ -1082,6 +1464,8 @@ objects:
       description: Verify that Relying Parties (RPs) specify the maximum authentication
         time to Credential Service Providers (CSPs) and that CSPs re-authenticate
         the user if they haven't used a session within that period.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.6.2
       assessable: true
       depth: 3
@@ -1090,6 +1474,8 @@ objects:
       description: Verify that Credential Service Providers (CSPs) inform Relying
         Parties (RPs) of the last authentication event, to allow RPs to determine
         if they need to re-authenticate the user.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v3.7
       assessable: false
       depth: 2
@@ -1104,6 +1490,10 @@ objects:
       description: Verify the application ensures a full, valid login session or requires
         re-authentication or secondary verification before allowing any sensitive
         transactions or account modifications.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4
       assessable: false
       depth: 1
@@ -1123,6 +1513,10 @@ objects:
       description: Verify that the application enforces access control rules on a
         trusted service layer, especially if client-side access control is present
         and could be bypassed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.2
       assessable: true
       depth: 3
@@ -1131,6 +1525,10 @@ objects:
       description: Verify that all user and data attributes and policy information
         used by access controls cannot be manipulated by end users unless specifically
         authorized.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.3
       assessable: true
       depth: 3
@@ -1140,6 +1538,10 @@ objects:
         only be able to access functions, data files, URLs, controllers, services,
         and other resources, for which they possess specific authorization. This implies
         protection against spoofing and elevation of privilege. ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.1.5
       assessable: true
       depth: 3
@@ -1147,6 +1549,10 @@ objects:
       ref_id: V4.1.5
       description: Verify that access controls fail securely including when an exception
         occurs. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.2
       assessable: false
       depth: 2
@@ -1162,6 +1568,10 @@ objects:
         Direct Object Reference (IDOR) attacks targeting creation, reading, updating
         and deletion of records, such as creating or updating someone else's record,
         viewing everyone's records, or deleting all records.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.2.2
       assessable: true
       depth: 3
@@ -1170,6 +1580,10 @@ objects:
       description: Verify that the application or framework enforces a strong anti-CSRF
         mechanism to protect authenticated functionality, and effective anti-automation
         or anti-CSRF protects unauthenticated functionality.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3
       assessable: false
       depth: 2
@@ -1183,6 +1597,10 @@ objects:
       ref_id: V4.3.1
       description: Verify administrative interfaces use appropriate multi-factor authentication
         to prevent unauthorized use.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3.2
       assessable: true
       depth: 3
@@ -1192,6 +1610,10 @@ objects:
         desired. Additionally, applications should not allow discovery or disclosure
         of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn
         folders.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v4.3.3
       assessable: true
       depth: 3
@@ -1201,6 +1623,9 @@ objects:
         up or adaptive authentication) for lower value systems, and / or segregation
         of duties for high value applications to enforce anti-fraud controls as per
         the risk of application and past fraud.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5
       assessable: false
       depth: 1
@@ -1221,6 +1646,10 @@ objects:
         pollution attacks, particularly if the application framework makes no distinction
         about the source of request parameters (GET, POST, cookies, headers, or environment
         variables).
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.2
       assessable: true
       depth: 3
@@ -1229,6 +1658,10 @@ objects:
       description: Verify that frameworks protect against mass parameter assignment
         attacks, or that the application has countermeasures to protect against unsafe
         parameter assignment, such as marking fields private or similar. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.3
       assessable: true
       depth: 3
@@ -1237,6 +1670,10 @@ objects:
       description: Verify that all input (HTML form fields, REST requests, URL parameters,
         HTTP headers, cookies, batch files, RSS feeds, etc) is validated using positive
         validation (allow lists). ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.4
       assessable: true
       depth: 3
@@ -1247,6 +1684,10 @@ objects:
         card numbers, e-mail addresses, telephone numbers, or validating that two
         related fields are reasonable, such as checking that suburb and zip/postcode
         match). ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.1.5
       assessable: true
       depth: 3
@@ -1255,6 +1696,10 @@ objects:
       description: Verify that URL redirects and forwards only allow destinations
         which appear on an allow list, or show a warning when redirecting to potentially
         untrusted content.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2
       assessable: false
       depth: 2
@@ -1269,6 +1714,10 @@ objects:
       description: Verify that all untrusted HTML input from WYSIWYG editors or similar
         is properly sanitized with an HTML sanitizer library or framework feature.
         ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.2
       assessable: true
       depth: 3
@@ -1276,6 +1725,10 @@ objects:
       ref_id: V5.2.2
       description: Verify that unstructured data is sanitized to enforce safety measures
         such as allowed characters and length.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.3
       assessable: true
       depth: 3
@@ -1283,6 +1736,10 @@ objects:
       ref_id: V5.2.3
       description: Verify that the application sanitizes user input before passing
         to mail systems to protect against SMTP or IMAP injection.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.4
       assessable: true
       depth: 3
@@ -1291,6 +1748,10 @@ objects:
       description: Verify that the application avoids the use of eval() or other dynamic
         code execution features. Where there is no alternative, any user input being
         included must be sanitized or sandboxed before being executed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.5
       assessable: true
       depth: 3
@@ -1298,6 +1759,10 @@ objects:
       ref_id: V5.2.5
       description: Verify that the application protects against template injection
         attacks by ensuring that any user input being included is sanitized or sandboxed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.6
       assessable: true
       depth: 3
@@ -1306,6 +1771,10 @@ objects:
       description: Verify that the application protects against SSRF attacks, by validating
         or sanitizing untrusted data or HTTP file metadata, such as filenames and
         URL input fields, and uses allow lists of protocols, domains, paths and ports.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.7
       assessable: true
       depth: 3
@@ -1314,6 +1783,10 @@ objects:
       description: Verify that the application sanitizes, disables, or sandboxes user-supplied
         Scalable Vector Graphics (SVG) scriptable content, especially as they relate
         to XSS resulting from inline scripts, and foreignObject.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.2.8
       assessable: true
       depth: 3
@@ -1322,6 +1795,10 @@ objects:
       description: Verify that the application sanitizes, disables, or sandboxes user-supplied
         scriptable or expression template language content, such as Markdown, CSS
         or XSL stylesheets, BBCode, or similar.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3
       assessable: false
       depth: 2
@@ -1339,6 +1816,10 @@ objects:
         \ as the context requires, especially from untrusted inputs (e.g. names with\
         \ Unicode or apostrophes, such as \u201E\xC5\u2260\u201E\xC5\xEC or O'Hara).\
         \ ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))"
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.2
       assessable: true
       depth: 3
@@ -1347,6 +1828,10 @@ objects:
       description: Verify that output encoding preserves the user's chosen character
         set and locale, such that any Unicode character point is valid and safely
         handled. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.3
       assessable: true
       depth: 3
@@ -1355,6 +1840,10 @@ objects:
       description: Verify that context-aware, preferably automated - or at worst,
         manual - output escaping protects against reflected, stored, and DOM based
         XSS. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.4
       assessable: true
       depth: 3
@@ -1363,6 +1852,10 @@ objects:
       description: Verify that data selection or database queries (e.g. SQL, HQL,
         ORM, NoSQL) use parameterized queries, ORMs, entity frameworks, or are otherwise
         protected from database injection attacks. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.5
       assessable: true
       depth: 3
@@ -1371,6 +1864,10 @@ objects:
       description: Verify that where parameterized or safer mechanisms are not present,
         context-specific output encoding is used to protect against injection attacks,
         such as the use of SQL escaping to protect against SQL injection. ([C3, C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.6
       assessable: true
       depth: 3
@@ -1378,6 +1875,10 @@ objects:
       ref_id: V5.3.6
       description: Verify that the application protects against JSON injection attacks,
         JSON eval attacks, and JavaScript expression evaluation. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.7
       assessable: true
       depth: 3
@@ -1386,6 +1887,10 @@ objects:
       description: Verify that the application protects against LDAP injection vulnerabilities,
         or that specific security controls to prevent LDAP injection have been implemented.
         ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.8
       assessable: true
       depth: 3
@@ -1394,6 +1899,10 @@ objects:
       description: Verify that the application protects against OS command injection
         and that operating system calls use parameterized OS queries or use contextual
         command line output encoding. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.9
       assessable: true
       depth: 3
@@ -1401,6 +1910,10 @@ objects:
       ref_id: V5.3.9
       description: Verify that the application protects against Local File Inclusion
         (LFI) or Remote File Inclusion (RFI) attacks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.3.10
       assessable: true
       depth: 3
@@ -1408,6 +1921,10 @@ objects:
       ref_id: V5.3.10
       description: Verify that the application protects against XPath injection or
         XML injection attacks. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4
       assessable: false
       depth: 2
@@ -1421,6 +1938,9 @@ objects:
       ref_id: V5.4.1
       description: Verify that the application uses memory-safe string, safer memory
         copy and pointer arithmetic to detect or prevent stack, buffer, or heap overflows.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4.2
       assessable: true
       depth: 3
@@ -1428,6 +1948,9 @@ objects:
       ref_id: V5.4.2
       description: Verify that format strings do not take potentially hostile input,
         and are constant.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.4.3
       assessable: true
       depth: 3
@@ -1435,6 +1958,9 @@ objects:
       ref_id: V5.4.3
       description: Verify that sign, range, and input validation techniques are used
         to prevent integer overflows.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5
       assessable: false
       depth: 2
@@ -1448,6 +1974,10 @@ objects:
       ref_id: V5.5.1
       description: Verify that serialized objects use integrity checks or are encrypted
         to prevent hostile object creation or data tampering. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.2
       assessable: true
       depth: 3
@@ -1457,6 +1987,10 @@ objects:
         only use the most restrictive configuration possible and to ensure that unsafe
         features such as resolving external entities are disabled to prevent XML eXternal
         Entity (XXE) attacks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.3
       assessable: true
       depth: 3
@@ -1465,6 +1999,10 @@ objects:
       description: Verify that deserialization of untrusted data is avoided or is
         protected in both custom code and third-party libraries (such as JSON, XML
         and YAML parsers).
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v5.5.4
       assessable: true
       depth: 3
@@ -1473,6 +2011,10 @@ objects:
       description: Verify that when parsing JSON in browsers or JavaScript-based backends,
         JSON.parse is used to parse the JSON document. Do not use eval() to parse
         JSON.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6
       assessable: false
       depth: 1
@@ -1492,6 +2034,9 @@ objects:
       description: Verify that regulated private data is stored encrypted while at
         rest, such as Personally Identifiable Information (PII), sensitive personal
         information, or data assessed likely to be subject to EU's GDPR.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.1.2
       assessable: true
       depth: 3
@@ -1500,6 +2045,9 @@ objects:
       description: Verify that regulated health data is stored encrypted while at
         rest, such as medical records, medical device details, or de-anonymized research
         records.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.1.3
       assessable: true
       depth: 3
@@ -1508,6 +2056,9 @@ objects:
       description: Verify that regulated financial data is stored encrypted while
         at rest, such as financial accounts, defaults or credit history, tax records,
         pay history, beneficiaries, or de-anonymized market or research records.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2
       assessable: false
       depth: 2
@@ -1521,6 +2072,10 @@ objects:
       ref_id: V6.2.1
       description: Verify that all cryptographic modules fail securely, and errors
         are handled in a way that does not enable Padding Oracle attacks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.2
       assessable: true
       depth: 3
@@ -1529,6 +2084,9 @@ objects:
       description: Verify that industry proven or government approved cryptographic
         algorithms, modes, and libraries are used, instead of custom coded cryptography.
         ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.3
       assessable: true
       depth: 3
@@ -1536,6 +2094,9 @@ objects:
       ref_id: V6.2.3
       description: Verify that encryption initialization vector, cipher configuration,
         and block modes are configured securely using the latest advice.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.4
       assessable: true
       depth: 3
@@ -1544,6 +2105,9 @@ objects:
       description: Verify that random number, encryption or hashing algorithms, key
         lengths, rounds, ciphers or modes, can be reconfigured, upgraded, or swapped
         at any time, to protect against cryptographic breaks. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.5
       assessable: true
       depth: 3
@@ -1553,6 +2117,9 @@ objects:
         modes (i.e. PKCS#1 v1.5, etc.), ciphers with small block sizes (i.e. Triple-DES,
         Blowfish, etc.), and weak hashing algorithms (i.e. MD5, SHA1, etc.) are not
         used unless required for backwards compatibility.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.6
       assessable: true
       depth: 3
@@ -1561,6 +2128,9 @@ objects:
       description: Verify that nonces, initialization vectors, and other single use
         numbers must not be used more than once with a given encryption key. The method
         of generation must be appropriate for the algorithm being used.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.7
       assessable: true
       depth: 3
@@ -1569,6 +2139,8 @@ objects:
       description: Verify that encrypted data is authenticated via signatures, authenticated
         cipher modes, or HMAC to ensure that ciphertext is not altered by an unauthorized
         party.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.2.8
       assessable: true
       depth: 3
@@ -1577,6 +2149,8 @@ objects:
       description: Verify that all cryptographic operations are constant-time, with
         no 'short-circuit' operations in comparisons, calculations, or returns, to
         avoid leaking information.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3
       assessable: false
       depth: 2
@@ -1592,6 +2166,9 @@ objects:
         and random strings are generated using the cryptographic module's approved
         cryptographically secure random number generator when these random values
         are intended to be not guessable by an attacker.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3.2
       assessable: true
       depth: 3
@@ -1600,6 +2177,9 @@ objects:
       description: Verify that random GUIDs are created using the GUID v4 algorithm,
         and a Cryptographically-secure Pseudo-random Number Generator (CSPRNG). GUIDs
         created using other pseudo-random number generators may be predictable.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.3.3
       assessable: true
       depth: 3
@@ -1608,6 +2188,8 @@ objects:
       description: Verify that random numbers are created with proper entropy even
         when the application is under heavy load, or that the application degrades
         gracefully in such circumstances.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.4
       assessable: false
       depth: 2
@@ -1621,6 +2203,9 @@ objects:
       ref_id: V6.4.1
       description: Verify that a secrets management solution such as a key vault is
         used to securely create, store, control access to and destroy secrets. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v6.4.2
       assessable: true
       depth: 3
@@ -1629,6 +2214,9 @@ objects:
       description: Verify that key material is not exposed to the application but
         instead uses an isolated security module like a vault for cryptographic operations.
         ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7
       assessable: false
       depth: 1
@@ -1648,6 +2236,10 @@ objects:
       description: Verify that the application does not log credentials or payment
         details. Session tokens should only be stored in logs in an irreversible,
         hashed form. ([C9, C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.2
       assessable: true
       depth: 3
@@ -1655,6 +2247,10 @@ objects:
       ref_id: V7.1.2
       description: Verify that the application does not log other sensitive data as
         defined under local privacy laws or relevant security policy. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.3
       assessable: true
       depth: 3
@@ -1663,6 +2259,9 @@ objects:
       description: Verify that the application logs security relevant events including
         successful and failed authentication events, access control failures, deserialization
         failures and input validation failures. ([C5, C7](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.1.4
       assessable: true
       depth: 3
@@ -1671,6 +2270,9 @@ objects:
       description: Verify that each log event includes necessary information that
         would allow for a detailed investigation of the timeline when an event happens.
         ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.2
       assessable: false
       depth: 2
@@ -1685,6 +2287,9 @@ objects:
       description: Verify that all authentication decisions are logged, without storing
         sensitive session tokens or passwords. This should include requests with relevant
         metadata needed for security investigations.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.2.2
       assessable: true
       depth: 3
@@ -1693,6 +2298,9 @@ objects:
       description: Verify that all access control decisions can be logged and all
         failed decisions are logged. This should include requests with relevant metadata
         needed for security investigations.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3
       assessable: false
       depth: 2
@@ -1706,6 +2314,9 @@ objects:
       ref_id: V7.3.1
       description: Verify that all logging components appropriately encode data to
         prevent log injection. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3.3
       assessable: true
       depth: 3
@@ -1713,6 +2324,9 @@ objects:
       ref_id: V7.3.3
       description: Verify that security logs are protected from unauthorized access
         and modification. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.3.4
       assessable: true
       depth: 3
@@ -1721,6 +2335,9 @@ objects:
       description: Verify that time sources are synchronized to the correct time and
         time zone. Strongly consider logging only in UTC if systems are global to
         assist with post-incident forensic analysis. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4
       assessable: false
       depth: 2
@@ -1735,6 +2352,10 @@ objects:
       description: Verify that a generic message is shown when an unexpected or security
         sensitive error occurs, potentially with a unique ID which support personnel
         can use to investigate. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4.2
       assessable: true
       depth: 3
@@ -1743,6 +2364,9 @@ objects:
       description: Verify that exception handling (or a functional equivalent) is
         used across the codebase to account for expected and unexpected error conditions.
         ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v7.4.3
       assessable: true
       depth: 3
@@ -1750,6 +2374,9 @@ objects:
       ref_id: V7.4.3
       description: Verify that a "last resort" error handler is defined which will
         catch all unhandled exceptions. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8
       assessable: false
       depth: 1
@@ -1768,6 +2395,9 @@ objects:
       ref_id: V8.1.1
       description: Verify the application protects sensitive data from being cached
         in server components such as load balancers and application caches.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.2
       assessable: true
       depth: 3
@@ -1776,6 +2406,9 @@ objects:
       description: Verify that all cached or temporary copies of sensitive data stored
         on the server are protected from unauthorized access or purged/invalidated
         after the authorized user accesses the sensitive data.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.3
       assessable: true
       depth: 3
@@ -1783,6 +2416,9 @@ objects:
       ref_id: V8.1.3
       description: Verify the application minimizes the number of parameters in a
         request, such as hidden fields, Ajax variables, cookies and header values.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.4
       assessable: true
       depth: 3
@@ -1791,6 +2427,9 @@ objects:
       description: Verify the application can detect and alert on abnormal numbers
         of requests, such as by IP, user, total per hour or day, or whatever makes
         sense for the application.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.5
       assessable: true
       depth: 3
@@ -1798,6 +2437,8 @@ objects:
       ref_id: V8.1.5
       description: Verify that regular backups of important data are performed and
         that test restoration of data is performed.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.1.6
       assessable: true
       depth: 3
@@ -1805,6 +2446,8 @@ objects:
       ref_id: V8.1.6
       description: Verify that backups are stored securely to prevent data from being
         stolen or corrupted.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2
       assessable: false
       depth: 2
@@ -1818,6 +2461,10 @@ objects:
       ref_id: V8.2.1
       description: Verify the application sets sufficient anti-caching headers so
         that sensitive data is not cached in modern browsers.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2.2
       assessable: true
       depth: 3
@@ -1825,6 +2472,10 @@ objects:
       ref_id: V8.2.2
       description: Verify that data stored in browser storage (such as localStorage,
         sessionStorage, IndexedDB, or cookies) does not contain sensitive data.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.2.3
       assessable: true
       depth: 3
@@ -1832,6 +2483,10 @@ objects:
       ref_id: V8.2.3
       description: Verify that authenticated data is cleared from client storage,
         such as the browser DOM, after the client or session is terminated.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3
       assessable: false
       depth: 2
@@ -1846,6 +2501,10 @@ objects:
       description: Verify that sensitive data is sent to the server in the HTTP message
         body or headers, and that query string parameters from any HTTP verb do not
         contain sensitive data.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.2
       assessable: true
       depth: 3
@@ -1853,6 +2512,10 @@ objects:
       ref_id: V8.3.2
       description: Verify that users have a method to remove or export their data
         on demand.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.3
       assessable: true
       depth: 3
@@ -1861,6 +2524,10 @@ objects:
       description: Verify that users are provided clear language regarding collection
         and use of supplied personal information and that users have provided opt-in
         consent for the use of that data before it is used in any way.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.4
       assessable: true
       depth: 3
@@ -1869,6 +2536,10 @@ objects:
       description: Verify that all sensitive data created and processed by the application
         has been identified, and ensure that a policy is in place on how to deal with
         sensitive data. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.5
       assessable: true
       depth: 3
@@ -1877,6 +2548,9 @@ objects:
       description: Verify accessing sensitive data is audited (without logging the
         sensitive data itself), if the data is collected under relevant data protection
         directives or where logging of access is required.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.6
       assessable: true
       depth: 3
@@ -1885,6 +2559,9 @@ objects:
       description: Verify that sensitive information contained in memory is overwritten
         as soon as it is no longer required to mitigate memory dumping attacks, using
         zeroes or random data.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.7
       assessable: true
       depth: 3
@@ -1893,6 +2570,9 @@ objects:
       description: Verify that sensitive or private information that is required to
         be encrypted, is encrypted using approved algorithms that provide both confidentiality
         and integrity. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v8.3.8
       assessable: true
       depth: 3
@@ -1901,6 +2581,9 @@ objects:
       description: Verify that sensitive personal information is subject to data retention
         classification, such that old or out of date data is deleted automatically,
         on a schedule, or as the situation requires.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9
       assessable: false
       depth: 1
@@ -1919,6 +2602,10 @@ objects:
       ref_id: V9.1.1
       description: Verify that TLS is used for all client connectivity, and does not
         fall back to insecure or unencrypted communications. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1.2
       assessable: true
       depth: 3
@@ -1926,6 +2613,10 @@ objects:
       ref_id: V9.1.2
       description: Verify using up to date TLS testing tools that only strong cipher
         suites are enabled, with the strongest cipher suites set as preferred.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1.3
       assessable: true
       depth: 3
@@ -1934,45 +2625,69 @@ objects:
       description: Verify that only the latest recommended versions of the TLS protocol
         are enabled, such as TLS 1.2 and TLS 1.3. The latest version of the TLS protocol
         should be the preferred option.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9
+      ref_id: V9.2
+      name: Server Communication Security
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.1
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1
+      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
       ref_id: V9.2.1
       description: Verify that connections to and from the server use trusted TLS
         certificates. Where internally generated or self-signed certificates are used,
         the server must be configured to only trust specific internal CAs and specific
         self-signed certificates. All others should be rejected.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.2
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1
+      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
       ref_id: V9.2.2
       description: Verify that encrypted communications such as TLS is used for all
         inbound and outbound connections, including for management ports, monitoring,
         authentication, API, or web service calls, database, cloud, serverless, mainframe,
         external, and partner connections. The server must not fall back to insecure
         or unencrypted protocols.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.3
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1
+      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
       ref_id: V9.2.3
       description: Verify that all encrypted connections to external systems that
         involve sensitive information or functions are authenticated.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.4
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1
+      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
       ref_id: V9.2.4
       description: Verify that proper certification revocation, such as Online Certificate
         Status Protocol (OCSP) Stapling, is enabled and configured.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2.5
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.1
+      parent_urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v9.2
       ref_id: V9.2.5
       description: Verify that backend TLS connection failures are logged.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10
       assessable: false
       depth: 1
@@ -1992,6 +2707,8 @@ objects:
       description: Verify that a code analysis tool is in use that can detect potentially
         malicious code, such as time functions, unsafe file operations and network
         connections.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2
       assessable: false
       depth: 2
@@ -2007,6 +2724,9 @@ objects:
         do not contain unauthorized phone home or data collection capabilities. Where
         such functionality exists, obtain the user's permission for it to operate
         before collecting any data.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.2
       assessable: true
       depth: 3
@@ -2015,6 +2735,9 @@ objects:
       description: Verify that the application does not ask for unnecessary or excessive
         permissions to privacy related features or sensors, such as contacts, cameras,
         microphones, or location.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.3
       assessable: true
       depth: 3
@@ -2025,6 +2748,8 @@ objects:
         or keys, code obfuscation, undocumented binary blobs, rootkits, or anti-debugging,
         insecure debugging features, or otherwise out of date, insecure, or hidden
         functionality that could be used maliciously if discovered.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.4
       assessable: true
       depth: 3
@@ -2032,6 +2757,8 @@ objects:
       ref_id: V10.2.4
       description: Verify that the application source code and third party libraries
         do not contain time bombs by searching for date and time related functions.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.5
       assessable: true
       depth: 3
@@ -2040,6 +2767,8 @@ objects:
       description: Verify that the application source code and third party libraries
         do not contain malicious code, such as salami attacks, logic bypasses, or
         logic bombs.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.2.6
       assessable: true
       depth: 3
@@ -2047,6 +2776,8 @@ objects:
       ref_id: V10.2.6
       description: Verify that the application source code and third party libraries
         do not contain Easter eggs or any other potentially unwanted functionality.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3
       assessable: false
       depth: 2
@@ -2062,6 +2793,10 @@ objects:
         feature, updates should be obtained over secure channels and digitally signed.
         The update code must validate the digital signature of the update before installing
         or executing the update.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3.2
       assessable: true
       depth: 3
@@ -2071,6 +2806,10 @@ objects:
         as code signing or subresource integrity. The application must not load or
         execute code from untrusted sources, such as loading includes, modules, plugins,
         code, or libraries from untrusted sources or the Internet.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v10.3.3
       assessable: true
       depth: 3
@@ -2083,6 +2822,10 @@ objects:
         buckets (*autogen-bucket-id*.cloud.example.com) or similar. Protections can
         include ensuring that DNS names used by applications are regularly checked
         for expiry or change.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11
       assessable: false
       depth: 1
@@ -2101,6 +2844,10 @@ objects:
       ref_id: V11.1.1
       description: Verify that the application will only process business logic flows
         for the same user in sequential step order and without skipping steps.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.2
       assessable: true
       depth: 3
@@ -2109,6 +2856,10 @@ objects:
       description: Verify that the application will only process business logic flows
         with all steps being processed in realistic human time, i.e. transactions
         are not submitted too quickly.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.3
       assessable: true
       depth: 3
@@ -2116,6 +2867,10 @@ objects:
       ref_id: V11.1.3
       description: Verify the application has appropriate limits for specific business
         actions or transactions which are correctly enforced on a per user basis.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.4
       assessable: true
       depth: 3
@@ -2124,6 +2879,10 @@ objects:
       description: Verify that the application has anti-automation controls to protect
         against excessive calls such as mass data exfiltration, business logic requests,
         file uploads or denial of service attacks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.5
       assessable: true
       depth: 3
@@ -2132,6 +2891,10 @@ objects:
       description: Verify the application has business logic limits or validation
         to protect against likely business risks or threats, identified using threat
         modeling or similar methodologies.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.6
       assessable: true
       depth: 3
@@ -2139,6 +2902,9 @@ objects:
       ref_id: V11.1.6
       description: Verify that the application does not suffer from "Time Of Check
         to Time Of Use" (TOCTOU) issues or other race conditions for sensitive operations.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.7
       assessable: true
       depth: 3
@@ -2147,6 +2913,9 @@ objects:
       description: Verify that the application monitors for unusual events or activity
         from a business logic perspective. For example, attempts to perform actions
         out of order or actions which a normal user would never attempt. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v11.1.8
       assessable: true
       depth: 3
@@ -2154,6 +2923,9 @@ objects:
       ref_id: V11.1.8
       description: Verify that the application has configurable alerting when automated
         attacks or unusual activity is detected.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12
       assessable: false
       depth: 1
@@ -2172,6 +2944,10 @@ objects:
       ref_id: V12.1.1
       description: Verify that the application will not accept large files that could
         fill up storage or cause a denial of service.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.1.2
       assessable: true
       depth: 3
@@ -2180,6 +2956,9 @@ objects:
       description: Verify that the application checks compressed files (e.g. zip,
         gz, docx, odt) against maximum allowed uncompressed size and against maximum
         number of files before uncompressing the file.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.1.3
       assessable: true
       depth: 3
@@ -2188,6 +2967,9 @@ objects:
       description: Verify that a file size quota and maximum number of files per user
         is enforced to ensure that a single user cannot fill up the storage with too
         many files, or excessively large files.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.2
       assessable: false
       depth: 2
@@ -2201,6 +2983,9 @@ objects:
       ref_id: V12.2.1
       description: Verify that files obtained from untrusted sources are validated
         to be of expected type based on the file's content.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3
       assessable: false
       depth: 2
@@ -2215,6 +3000,10 @@ objects:
       description: Verify that user-submitted filename metadata is not used directly
         by system or framework filesystems and that a URL API is used to protect against
         path traversal.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.2
       assessable: true
       depth: 3
@@ -2222,6 +3011,10 @@ objects:
       ref_id: V12.3.2
       description: Verify that user-submitted filename metadata is validated or ignored
         to prevent the disclosure, creation, updating or removal of local files (LFI).
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.3
       assessable: true
       depth: 3
@@ -2230,6 +3023,10 @@ objects:
       description: Verify that user-submitted filename metadata is validated or ignored
         to prevent the disclosure or execution of remote files via Remote File Inclusion
         (RFI) or Server-side Request Forgery (SSRF) attacks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.4
       assessable: true
       depth: 3
@@ -2239,6 +3036,10 @@ objects:
         (RFD) by validating or ignoring user-submitted filenames in a JSON, JSONP,
         or URL parameter, the response Content-Type header should be set to text/plain,
         and the Content-Disposition header should have a fixed filename.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.5
       assessable: true
       depth: 3
@@ -2246,6 +3047,10 @@ objects:
       ref_id: V12.3.5
       description: Verify that untrusted file metadata is not used directly with system
         API or libraries, to protect against OS command injection.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.3.6
       assessable: true
       depth: 3
@@ -2254,6 +3059,9 @@ objects:
       description: Verify that the application does not include and execute functionality
         from untrusted sources, such as unverified content distribution networks,
         JavaScript libraries, node npm libraries, or server-side DLLs.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.4
       assessable: false
       depth: 2
@@ -2267,6 +3075,10 @@ objects:
       ref_id: V12.4.1
       description: Verify that files obtained from untrusted sources are stored outside
         the web root, with limited permissions.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.4.2
       assessable: true
       depth: 3
@@ -2274,6 +3086,10 @@ objects:
       ref_id: V12.4.2
       description: Verify that files obtained from untrusted sources are scanned by
         antivirus scanners to prevent upload and serving of known malicious content.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.5
       assessable: false
       depth: 2
@@ -2290,6 +3106,10 @@ objects:
         leakage. For example, backup files (e.g. .bak), temporary working files (e.g.
         .swp), compressed files (.zip, .tar.gz, etc) and other extensions commonly
         used by editors should be blocked unless required.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.5.2
       assessable: true
       depth: 3
@@ -2297,6 +3117,10 @@ objects:
       ref_id: V12.5.2
       description: Verify that direct requests to uploaded files will never be executed
         as HTML/JavaScript content.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v12.6
       assessable: false
       depth: 2
@@ -2311,6 +3135,10 @@ objects:
       description: Verify that the web or application server is configured with an
         allow list of resources or systems to which the server can send requests or
         load data/files from.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13
       assessable: false
       depth: 1
@@ -2330,6 +3158,10 @@ objects:
       description: Verify that all application components use the same encodings and
         parsers to avoid parsing attacks that exploit different URI or file parsing
         behavior that could be used in SSRF and RFI attacks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.3
       assessable: true
       depth: 3
@@ -2337,6 +3169,10 @@ objects:
       ref_id: V13.1.3
       description: Verify API URLs do not expose sensitive information, such as the
         API key, session tokens etc.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.4
       assessable: true
       depth: 3
@@ -2345,6 +3181,9 @@ objects:
       description: Verify that authorization decisions are made at both the URI, enforced
         by programmatic or declarative security at the controller or router, and at
         the resource level, enforced by model-based permissions.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.1.5
       assessable: true
       depth: 3
@@ -2353,6 +3192,9 @@ objects:
       description: Verify that requests containing unexpected or missing content types
         are rejected with appropriate headers (HTTP response status 406 Unacceptable
         or 415 Unsupported Media Type).
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2
       assessable: false
       depth: 2
@@ -2367,6 +3209,10 @@ objects:
       description: Verify that enabled RESTful HTTP methods are a valid choice for
         the user or action, such as preventing normal users using DELETE or PUT on
         protected API or resources.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.2
       assessable: true
       depth: 3
@@ -2374,6 +3220,10 @@ objects:
       ref_id: V13.2.2
       description: Verify that JSON schema validation is in place and verified before
         accepting input.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.3
       assessable: true
       depth: 3
@@ -2383,6 +3233,10 @@ objects:
         from Cross-Site Request Forgery via the use of at least one or more of the
         following: double submit cookie pattern, CSRF nonces, or Origin request header
         checks.'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.5
       assessable: true
       depth: 3
@@ -2390,6 +3244,9 @@ objects:
       ref_id: V13.2.5
       description: Verify that REST services explicitly check the incoming Content-Type
         to be the expected one, such as application/xml or application/json.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.2.6
       assessable: true
       depth: 3
@@ -2401,6 +3258,9 @@ objects:
         protection. Per-message digital signatures can provide additional assurance
         on top of the transport protections for high-security applications but bring
         with them additional complexity and risks to weigh against the benefits.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.3
       assessable: false
       depth: 2
@@ -2415,6 +3275,10 @@ objects:
       description: Verify that XSD schema validation takes place to ensure a properly
         formed XML document, followed by validation of each input field before any
         processing of that data takes place.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.3.2
       assessable: true
       depth: 3
@@ -2422,6 +3286,9 @@ objects:
       ref_id: V13.3.2
       description: Verify that the message payload is signed using WS-Security to
         ensure reliable transport between client and service.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.4
       assessable: false
       depth: 2
@@ -2437,6 +3304,9 @@ objects:
         and amount limiting is used to prevent GraphQL or data layer expression Denial
         of Service (DoS) as a result of expensive, nested queries. For more advanced
         scenarios, query cost analysis should be used.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v13.4.2
       assessable: true
       depth: 3
@@ -2444,6 +3314,9 @@ objects:
       ref_id: V13.4.2
       description: Verify that GraphQL or other data layer authorization logic should
         be implemented at the business logic layer instead of the GraphQL layer.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14
       assessable: false
       depth: 1
@@ -2463,6 +3336,9 @@ objects:
       description: Verify that the application build and deployment processes are
         performed in a secure and repeatable way, such as CI / CD automation, automated
         configuration management, and automated deployment scripts.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.2
       assessable: true
       depth: 3
@@ -2472,6 +3348,9 @@ objects:
         buffer overflow protections and warnings, including stack randomization, data
         execution prevention, and to break the build if an unsafe pointer, memory,
         format string, integer, or string operations are found.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.3
       assessable: true
       depth: 3
@@ -2479,6 +3358,9 @@ objects:
       ref_id: V14.1.3
       description: Verify that server configuration is hardened as per the recommendations
         of the application server and frameworks in use.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.4
       assessable: true
       depth: 3
@@ -2488,6 +3370,9 @@ objects:
         can be re-deployed using automated deployment scripts, built from a documented
         and tested runbook in a reasonable time, or restored from backups in a timely
         fashion.
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.1.5
       assessable: true
       depth: 3
@@ -2495,6 +3380,8 @@ objects:
       ref_id: V14.1.5
       description: Verify that authorized administrators can verify the integrity
         of all security-relevant configurations to detect tampering.
+      implementation_groups:
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2
       assessable: false
       depth: 2
@@ -2508,6 +3395,10 @@ objects:
       ref_id: V14.2.1
       description: Verify that all components are up to date, preferably using a dependency
         checker during build or compile time. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.2
       assessable: true
       depth: 3
@@ -2515,6 +3406,10 @@ objects:
       ref_id: V14.2.2
       description: Verify that all unneeded features, documentation, sample applications
         and configurations are removed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.3
       assessable: true
       depth: 3
@@ -2524,6 +3419,10 @@ objects:
         CSS or web fonts, are hosted externally on a Content Delivery Network (CDN)
         or external provider, Subresource Integrity (SRI) is used to validate the
         integrity of the asset.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.4
       assessable: true
       depth: 3
@@ -2531,6 +3430,9 @@ objects:
       ref_id: V14.2.4
       description: Verify that third party components come from pre-defined, trusted
         and continually maintained repositories. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.5
       assessable: true
       depth: 3
@@ -2538,6 +3440,9 @@ objects:
       ref_id: V14.2.5
       description: Verify that a Software Bill of Materials (SBOM) is maintained of
         all third party libraries in use. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.2.6
       assessable: true
       depth: 3
@@ -2546,6 +3451,9 @@ objects:
       description: Verify that the attack surface is reduced by sandboxing or encapsulating
         third party libraries to expose only the required behaviour into the application.
         ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))
+      implementation_groups:
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.3
       assessable: false
       depth: 2
@@ -2560,6 +3468,10 @@ objects:
       description: Verify that web or application server and application framework
         debug modes are disabled in production to eliminate debug features, developer
         consoles, and unintended security disclosures.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.3.3
       assessable: true
       depth: 3
@@ -2567,6 +3479,10 @@ objects:
       ref_id: V14.3.3
       description: Verify that the HTTP headers or any part of the HTTP response do
         not expose detailed version information of system components.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4
       assessable: false
       depth: 2
@@ -2582,6 +3498,10 @@ objects:
         Also specify a safe character set (e.g., UTF-8, ISO-8859-1) if the content
         types are text/*, /+xml and application/xml. Content must match with the provided
         Content-Type header.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.2
       assessable: true
       depth: 3
@@ -2590,6 +3510,10 @@ objects:
       description: 'Verify that all API responses contain a Content-Disposition: attachment;
         filename="api.json" header (or other appropriate filename for the content
         type).'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.3
       assessable: true
       depth: 3
@@ -2598,6 +3522,10 @@ objects:
       description: Verify that a Content Security Policy (CSP) response header is
         in place that helps mitigate impact for XSS attacks like HTML, DOM, JSON,
         and JavaScript injection vulnerabilities.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.4
       assessable: true
       depth: 3
@@ -2605,6 +3533,10 @@ objects:
       ref_id: V14.4.4
       description: 'Verify that all responses contain a X-Content-Type-Options: nosniff
         header.'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.5
       assessable: true
       depth: 3
@@ -2613,6 +3545,10 @@ objects:
       description: 'Verify that a Strict-Transport-Security header is included on
         all responses and for all subdomains, such as Strict-Transport-Security: max-age=15724800;
         includeSubdomains.'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.6
       assessable: true
       depth: 3
@@ -2621,6 +3557,10 @@ objects:
       description: Verify that a suitable Referrer-Policy header is included to avoid
         exposing sensitive information in the URL through the Referer header to untrusted
         parties.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.4.7
       assessable: true
       depth: 3
@@ -2630,6 +3570,10 @@ objects:
         in a third-party site by default and that embedding of the exact resources
         is only allowed where necessary by using suitable Content-Security-Policy:
         frame-ancestors and X-Frame-Options response headers.'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5
       assessable: false
       depth: 2
@@ -2644,6 +3588,10 @@ objects:
       description: Verify that the application server only accepts the HTTP methods
         in use by the application/API, including pre-flight OPTIONS, and logs/alerts
         on any requests that are not valid for the application context.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.2
       assessable: true
       depth: 3
@@ -2652,6 +3600,10 @@ objects:
       description: Verify that the supplied Origin header is not used for authentication
         or access control decisions, as the Origin header can easily be changed by
         an attacker.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.3
       assessable: true
       depth: 3
@@ -2660,6 +3612,10 @@ objects:
       description: Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin
         header uses a strict allow list of trusted domains and subdomains to match
         against and does not support the "null" origin.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
     - urn: urn:intuitem:risk:req_node:owasp-asvs-4.0.3:v14.5.4
       assessable: true
       depth: 3
@@ -2667,3 +3623,6 @@ objects:
       ref_id: V14.5.4
       description: Verify that HTTP headers added by a trusted proxy or SSO devices,
         such as a bearer token, are authenticated by the application.
+      implementation_groups:
+      - L2
+      - L3

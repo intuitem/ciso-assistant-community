@@ -14,9 +14,7 @@
 
 	let applied_control_status: AppliedControlStatus = data.applied_control_status;
 	for (const item in applied_control_status.labels) {
-		applied_control_status.labels[item] = localItems(languageTag())[
-			applied_control_status.localLables[item]
-		];
+		applied_control_status.labels[item] = localItems()[applied_control_status.localLables[item]];
 	}
 </script>
 
@@ -53,7 +51,7 @@
 				<div>
 					<div class="items-center justify-center h-96">
 						<BarChart
-							name="mtg"
+							name="composer"
 							labels={data.applied_control_status.labels}
 							values={data.applied_control_status.values}
 						/>

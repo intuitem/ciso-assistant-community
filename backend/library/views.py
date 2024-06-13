@@ -149,7 +149,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
         preview = preview_library(framework)
         return Response(
-            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
+            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None, None)
         )
 
     @action(detail=False, methods=["post"], url_path="upload")
@@ -181,7 +181,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyLoadedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except yaml.YAMLError:
+        except:
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
@@ -297,7 +297,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
 
         framework = lib.frameworks.first()
         requirement_nodes = framework.requirement_nodes.all()
-        return Response(get_sorted_requirement_nodes(requirement_nodes, None))
+        return Response(get_sorted_requirement_nodes(requirement_nodes, None, None))
 
     @action(detail=True, methods=["get"], url_path="update")
     def _update(self, request, pk):
