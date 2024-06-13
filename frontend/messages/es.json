@@ -553,6 +553,9 @@
 	"evidenceNoFile": "La evidencia no tiene ningún archivo subido",
 	"requirementAppliedControlHelpText": "Las evidencias vinculadas a las medidas seleccionadas se asociarán automáticamente al requisito.",
 	"requirementEvidenceHelpText": "Esta pestaña le permite agregar evidencias adicionales al requisito.",
+	"failedSSO": "La autenticación SSO falló; comuníquese con su administrador",
+	"loginSSO": "Inicie sesión en SSO",
+	"or": "o",
 	"errorImportingLibrary": "Error al importar la biblioteca",
 	"libraryImportError": "Ocurrió un error durante la importación de su biblioteca."
 }

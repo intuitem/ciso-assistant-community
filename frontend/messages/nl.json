@@ -553,6 +553,9 @@
 	"evidenceNoFile": "Er is geen bestand geüpload voor bewijsmateriaal",
 	"requirementAppliedControlHelpText": "Bewijsstukken die verband houden met de geselecteerde maatregelen worden automatisch aan de eis gekoppeld.",
 	"requirementEvidenceHelpText": "Op dit tabblad kunt u extra bewijsstukken aan de eis toevoegen.",
+	"failedSSO": "SSO-authenticatie mislukt. Neem contact op met uw beheerder",
+	"loginSSO": "Log in op SSO",
+	"or": "of",
 	"errorImportingLibrary": "Fout bij het importeren van de bibliotheek",
 	"libraryImportError": "Er is een fout opgetreden tijdens het importeren van je bibliotheek."
 }
