@@ -474,7 +474,6 @@
 	"attachmentDeleted": "De bijlage is succesvol verwijderd",
 	"librarySuccessfullyLoaded": "De bibliotheek is succesvol geladen",
 	"noLibraryDetected": "Geen bibliotheek gedetecteerd",
-	"errorImportingLibrary": "Fout bij het importeren van de bibliotheek",
 	"passwordSuccessfullyChanged": "Je wachtwoord is succesvol gewijzigd",
 	"passwordSuccessfullyReset": "Je wachtwoord is succesvol gereset",
 	"passwordSuccessfullySet": "Je wachtwoord is succesvol ingesteld",
@@ -498,7 +497,6 @@
 	"lowSOK": "De sterkte van de kennis die de beoordeling ondersteunt is laag",
 	"mediumSOK": "De sterkte van de kennis die de beoordeling ondersteunt is medium",
 	"highSOK": "De sterkte van de kennis die de beoordeling ondersteunt is hoog",
-	"libraryImportError": "Er is een fout opgetreden tijdens het importeren van je bibliotheek.",
 	"libraryAlreadyLoadedError": "Deze bibliotheek is al geladen.",
 	"invalidLibraryFileError": "Ongeldig bibliotheekbestand. Zorg ervoor dat het formaat correct is.",
 	"taintedFormMessage": "Wil je deze pagina verlaten? Wijzigingen die je hebt aangebracht, worden mogelijk niet opgeslagen.",
@@ -554,5 +552,7 @@
 	"appliedControlNoReferenceControl": "Voor de toegepaste regeling is geen referentieregeling geselecteerd",
 	"evidenceNoFile": "Er is geen bestand geüpload voor bewijsmateriaal",
 	"requirementAppliedControlHelpText": "Bewijsstukken die verband houden met de geselecteerde maatregelen worden automatisch aan de eis gekoppeld.",
-	"requirementEvidenceHelpText": "Op dit tabblad kunt u extra bewijsstukken aan de eis toevoegen."
+	"requirementEvidenceHelpText": "Op dit tabblad kunt u extra bewijsstukken aan de eis toevoegen.",
+	"errorImportingLibrary": "Fout bij het importeren van de bibliotheek",
+	"libraryImportError": "Er is een fout opgetreden tijdens het importeren van je bibliotheek."
 }
