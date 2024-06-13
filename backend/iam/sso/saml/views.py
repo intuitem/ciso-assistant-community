@@ -19,8 +19,6 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from rest_framework.views import csrf_exempt
 
-from pprint import pprint
-
 import structlog
 
 from iam.models import User
@@ -108,8 +106,7 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["process"] = AuthProcess.LOGIN
             if next_url:
                 login.state["next"] = next_url
-        print("LOGIN STATE", login.state)
-        email = auth._friendlyname_attributes.get("email")[0]
+        email = auth._nameid
         user = User.objects.get(email=email)
         token = generate_token(user)
         login.state["next"] += f"sso/authenticate/{token}"
