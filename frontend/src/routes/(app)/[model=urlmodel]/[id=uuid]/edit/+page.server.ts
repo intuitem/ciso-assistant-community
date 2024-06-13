@@ -94,7 +94,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: localItems()[toCamelCase(modelVerboseName.toLowerCase())].toLowerCase()
+					object: m[toCamelCase(modelVerboseName.toLowerCase())]().toLowerCase()
 				})
 			},
 			event
