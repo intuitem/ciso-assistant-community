@@ -564,5 +564,7 @@
 	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement.",
 	"failedSSO": "Failed to authenticate with SSO, please contact your administrator",
 	"loginSSO": "Login with SSO",
-	"or": "or"
+	"or": "or",
+	"errorImportingLibrary": "Error during library import",
+	"libraryImportError": "An error occurred during library import"
 }

@@ -560,5 +560,7 @@
 	"appliedControlNoReferenceControl": "La mesure appliquée n'a aucune mesure de référence sélectionnée",
 	"evidenceNoFile": "Aucun fichier n'a été téléchargé pour les preuves",
 	"requirementAppliedControlHelpText": "Les preuves liées aux mesures sélectionnées seront automatiquement associées à l'exigence.",
-	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence."
+	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence.",
+	"errorImportingLibrary": "Erreur lors de l'importation de la bibliothèque",
+	"libraryImportError": "Une erreur s'est produite lors de l'importation de la bibliothèque"
 }
