@@ -20,3 +20,4 @@ drf-spectacular==0.27.2
 django-rest-knox==4.2.0
 pre-commit==3.7.0
 django-allauth[socialaccount]>=0.63.3
+lxml>=4.6.5,!=4.7.0,<=5.2.1
