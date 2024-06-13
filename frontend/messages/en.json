@@ -562,5 +562,7 @@
 	"evidenceNoFile": "Evidence has no file uploaded",
 	"requirementAppliedControlHelpText": "Evidences linked to the selected measures will be automatically associated with the requirement.",
 	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement.",
-	"failedSSO": "Failed to authenticate with SSO, please contact your administrator"
+	"failedSSO": "Failed to authenticate with SSO, please contact your administrator",
+	"loginSSO": "Login with SSO",
+	"or": "or"
 }

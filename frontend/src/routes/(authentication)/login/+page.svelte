@@ -78,13 +78,19 @@
 								</p>
 							</SuperForm>
 						</div>
+						<div class="flex items-center justify-center w-full space-x-2">
+							<hr class="w-64 items-center bg-gray-200 border-0">
+							<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+							<hr class="w-64 items-center bg-gray-200 border-0">
+						</div>
 						<button
+							class="btn bg-gradient-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
 							on:click={() =>
 								redirectToProvider(
 									'http://127.0.0.1:8000/api/accounts/saml/entra/metadata',
 									'http://localhost:5173/',
 									'login'
-								)}>sso</button
+								)}>{m.loginSSO()}</button
 						>
 					</div>
 				</div>
