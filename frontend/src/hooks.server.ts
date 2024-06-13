@@ -3,6 +3,7 @@ import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
+import { setLanguageTag } from '$paraglide/runtime';
 
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
@@ -51,6 +52,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const errorId = new URL(event.request.url).searchParams.get('error');
 	if (errorId) {
+		setLanguageTag(event.cookies.get('ciso_lang'));
 		setFlash({ type: 'error', message: m.failedSSO() }, event);
 		redirect(302, `/`);
 	}
