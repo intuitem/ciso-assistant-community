@@ -15,11 +15,23 @@ erDiagram
     ROLE_ASSIGNMENT }o--|| ROLE      : contains
 
     USER {
-        string email
+        string  email
+        boolean is_sso
     }
 
     USER_GROUP {
         string name
+    }
+
+    SSO_SETTINGS {
+        boolean enabled
+        string  name
+        string  provider
+        string  provider_id
+        string  client_id
+        string  oidc_secret
+        string  oidc_key
+        json    saml_settings
     }
 
 ```
@@ -1025,3 +1037,9 @@ Built-in objects are predefined in CISO Assistant. They can be viewed following 
 Types that can be built-in are: folders, roles, role assignments and groups.
 
 Names of built-in objects can be internationalized.
+
+## SSO
+
+A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+
+SSO Settings are defined in a dedicated object SSO_SETTINGS.
