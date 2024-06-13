@@ -553,6 +553,9 @@
 	"evidenceNoFile": "Für den Beweis wurde keine Datei hochgeladen",
 	"requirementAppliedControlHelpText": "Mit den ausgewählten Maßnahmen verknüpfte Nachweise werden automatisch der Anforderung zugeordnet.",
 	"requirementEvidenceHelpText": "Über diese Registerkarte können Sie der Anforderung weitere Nachweise hinzufügen.",
+	"failedSSO": "SSO-Authentifizierung fehlgeschlagen, bitte wenden Sie sich an Ihren Administrator",
+	"loginSSO": "Melden Sie sich bei SSO an",
+	"or": "oder",
 	"errorImportingLibrary": "Fehler beim Importieren der Bibliothek",
 	"libraryImportError": "Beim Importieren Ihrer Bibliothek ist ein Fehler aufgetreten."
 }
