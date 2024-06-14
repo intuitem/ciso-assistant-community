@@ -29,15 +29,15 @@ objects:
       disruptions and threats. These requirements are homogenous across the EU, with
       the aim of preventing and mitigating cyber threats.
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node2
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-i
       assessable: false
       depth: 1
-      name: 'TITLE I '
+      ref_id: TITLE I
       description: GENERAL PRINCIPLE
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-1
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-i
       ref_id: Article 1
       description: Overall risk profile and complexity
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
@@ -82,16 +82,16 @@ objects:
       description: "the potential impact of the ICT risk on confidentiality, integrity\
         \ and availability of data, and of the disruptions on the continuity and availability\
         \ of the financial entity\u2019s activities."
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-ii
       assessable: false
       depth: 1
-      name: TITLE II
+      ref_id: TITLE II
       description: FURTHER HARMONISATION OF ICT RISK MANAGEMENT TOOLS, METHODS, PROCESSES,
         AND POLICIES IN ACCORDANCE WITH ARTICLE 15 OF REGULATION (EU) 2022/2554
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-ii
       name: CHAPTER I
       description: ICT SECURITY POLICIES, PROCEDURES, PROTOCOLS, AND TOOLS
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-1
@@ -2233,7 +2233,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node309
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-ii
       name: CHAPTER II
       description: HUMAN RESOURCES POLICY AND ACCESS CONTROL
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-19
@@ -2519,7 +2519,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node347
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-ii
       name: CHAPTER III
       description: ICT-RELATED INCIDENT DETECTION AND RESPONSE
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-22
@@ -2771,7 +2771,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node381
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-ii
       name: CHAPTER IV
       description: ICT BUSINESS CONTINUITY MANAGEMENT
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
@@ -3361,7 +3361,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node460
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-ii
       name: CHAPTER V
       description: REPORT ON THE ICT RISK MANAGEMENT FRAMEWORK REVIEW
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-27
@@ -3621,16 +3621,16 @@ objects:
         analysis of the impact of the changes on the financial entity's digital operational
         resilience strategy, on the financial entity's ICT internal control framework,
         and on the financial entity's ICT risk management governance.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iii
       assessable: false
       depth: 1
-      name: TITLE III
+      ref_id: TITLE III
       description: SIMPLIFIED ICT RISK MANAGEMENT FRAMEWORK FOR FINANCIAL ENTITIES
         REFERRED TO IN ARTICLE 16(1) OF REGULATION (EU) 2022/2554
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node496
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iii
       name: CHAPTER I
       description: SIMPLIFIED ICT RISK MANAGEMENT FRAMEWORK
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
@@ -3948,7 +3948,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iii
       name: CHAPTER II
       description: FURTHER ELEMENTS OF SYSTEMS, PROTOCOLS, AND TOOLS TO MINIMISE THE
         IMPACT OF ICT RISK
@@ -4285,7 +4285,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node579
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iii
       name: CHAPTER III
       description: ICT BUSINESS CONTINUITY MANAGEMENT
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-39
@@ -4431,7 +4431,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node598
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iii
       name: CHAPTER IV
       description: REPORT ON THE REVIEW OF THE SIMPLIFIED ICT RISK MANAGEMENT FRAMEWORK
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-41
@@ -4569,15 +4569,15 @@ objects:
       ref_id: 41.2.h
       description: overall conclusions on the review of the simplified ICT risk management
         framework, including any further planned developments.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node617
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iv
       assessable: false
       depth: 1
-      name: TITLE IV
+      ref_id: TITLE IV
       description: FINAL PROVISIONS
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-42
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node617
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:title-iv
       ref_id: Article 42
       description: Entry into force
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node619
