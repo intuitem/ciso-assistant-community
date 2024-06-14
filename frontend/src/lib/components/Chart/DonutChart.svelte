@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
 	export let name: string;
 	export let s_label = '';
