@@ -26,15 +26,15 @@ objects:
       and business continuity throughout the life cycle of contractual arrangements
       with such ICT third-party service providers.
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node2
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-1
       assessable: false
       depth: 1
-      name: Article 1
+      ref_id: Article 1
       description: Overall risk profile and complexity
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node3
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-1
       description: "The policy on the use of ICT services supporting critical or important\
         \ functions provided by ICT third-party service providers (the \u2018policy\u2019\
         ) shall take into account the size and the overall risk profile of the financial\
@@ -124,30 +124,30 @@ objects:
       description: "the potential impact of disruptions in the provision of the ICT\
         \ services supporting critical or important functions on the continuity of\
         \ the financial entity\u2019s activities and on the availability of its services."
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node14
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-2
       assessable: false
       depth: 1
-      name: Article 2
+      ref_id: Article 2
       description: Group application
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node15
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node14
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-2
       description: Where this Regulation applies on a sub-consolidated or consolidated
         basis, the parent undertaking that is responsible for providing the consolidated
         or sub-consolidated financial statements for the group shall ensure that the
         policy is implemented consistently in all financial entities that are part
         of the group and is adequate for the effective application of this Regulation
         at all relevant levels of the group.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       assessable: false
       depth: 1
-      name: Article 3
+      ref_id: Article 3
       description: Governance arrangements
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.1'
       description: The management body shall review the policy at least once a year
         and update it where necessary. Changes made to the policy shall be implemented
@@ -157,7 +157,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.2'
       description: The policy shall establish or refer to a methodology for determining
         which ICT services support critical or important functions. The policy shall
@@ -165,7 +165,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.3
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.3'
       description: The policy shall clearly assign the internal responsibilities for
         the approval, management, control, and documentation of relevant contractual
@@ -176,7 +176,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.4
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.4'
       description: Without prejudice to the final responsibility of the financial
         entity to effectively oversee relevant contractual arrangements, the policy
@@ -187,7 +187,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.5
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.5'
       description: The policy shall clearly identify the role or member of senior
         management responsible for monitoring the relevant contractual arrangements.
@@ -199,7 +199,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.6
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.6'
       description: 'The policy shall ensure that the contractual arrangements are
         consistent with the following:'
@@ -234,7 +234,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.7
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.7'
       description: The policy shall require that ICT services supporting critical
         or important functions provided by ICT third party service providers are subject
@@ -242,7 +242,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.8
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-3
       ref_id: '3.8'
       description: 'The policy shall explicitly specify that the contractual arrangements:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:3.8.a
@@ -274,16 +274,16 @@ objects:
       description: are to require that the financial entity, its auditors, and competent
         authorities have effective access to data and premises relating to the use
         of ICT services supporting critical or important functions.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node33
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-4
       assessable: false
       depth: 1
-      name: Article 4
+      ref_id: Article 4
       description: Main phases of the life cycle for the adoption and use of contractual
         arrangements
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node34
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node33
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-4
       description: 'The policy shall specify the requirements, including the rules,
         the responsibilities and the processes, for each main phase of the lifecycle
         of the contractual arrangement, covering at least the following:'
@@ -335,22 +335,22 @@ objects:
       ref_id: 4.f
       description: the exit strategies and termination processes as set out in Article
         10.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node41
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-5
       assessable: false
       depth: 1
-      name: Article 5
+      ref_id: Article 5
       description: Ex-ante risk assessment
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:5.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node41
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-5
       ref_id: '5.1'
       description: The policy shall require that the business needs of the financial
         entity are defined before a contractual arrangement is concluded.
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:5.2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node41
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-5
       ref_id: '5.2'
       description: The policy shall require that a risk assessment is conducted at
         financial entity level and, where applicable, at consolidated and sub-consolidated
@@ -358,7 +358,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node44
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node41
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-5
       description: 'The risk assessment shall take into account all the relevant requirements
         laid down in Regulation (EU) 2022/2554 and applicable sectoral Union legislation.
         It shall consider, in particular, the impact of the provision of ICT services
@@ -420,15 +420,15 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node44
       ref_id: 5.2.i
       description: ICT concentration risks at entity level.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node54
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-6
       assessable: false
       depth: 1
-      name: Article 6
+      ref_id: Article 6
       description: Due diligence
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:6.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node54
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-6
       ref_id: '6.1'
       description: 'The policy shall set out an appropriate and proportionate process
         for selecting and assessing the prospective ICT third-party service providers
@@ -494,7 +494,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:6.2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node54
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-6
       ref_id: '6.2'
       description: "The policy shall specify the required level of assurance concerning\
         \ the effectiveness of ICT third-party service providers\u2019 risk management\
@@ -506,7 +506,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:6.3
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node54
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-6
       ref_id: '6.3'
       description: "The policy shall determine the due diligence process for selecting\
         \ and assessing the prospective ICT third-party service providers and shall\
@@ -549,21 +549,21 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:6.4
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node54
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-6
       ref_id: '6.4'
       description: "Financial entities shall ensure an appropriate level of assurance\
         \ on the ICT third- party service provider\u2019s performance, taking into\
         \ account the elements listed in\nparagraph 3, points (a) to (e). Where appropriate,\
         \ more than one element listed in those points shall be used."
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node70
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-7
       assessable: false
       depth: 1
-      name: Article 7
+      ref_id: Article 7
       description: Conflicts of interest
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:7.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node70
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-7
       ref_id: '7.1'
       description: 'The policy shall specify the appropriate measures to identify,
         prevent and manage actual or potential conflicts of interest arising from
@@ -574,7 +574,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:7.2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node70
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-7
       ref_id: '7.2'
       description: 'Where ICT services supporting critical or important functions
         are provided by ICT intra-group service providers, the policy shall specify
@@ -582,15 +582,15 @@ objects:
 
         conditions, including the financial conditions, for the ICT services are to
         be taken objectively.'
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node73
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-8
       assessable: false
       depth: 1
-      name: Article 8
+      ref_id: Article 8
       description: Contractual clauses
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:8.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node73
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-8
       ref_id: '8.1'
       description: 'The policy shall specify that the relevant contractual arrangement
         are to be in written form and are to include all the elements referred to
@@ -602,7 +602,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:8.2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node73
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-8
       ref_id: '8.2'
       description: ' The policy shall specify that the relevant contractual arrangements
         are to include the right for the financial entity to access information, to
@@ -643,7 +643,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:8.3
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node73
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-8
       ref_id: '8.3'
       description: 'The financial entity shall not over time rely solely on certifications
         referred to in paragraph 2, point (c), or audit reports referred to in point
@@ -713,20 +713,20 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:8.4
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node73
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-8
       ref_id: '8.4'
       description: The policy shall ensure that material changes to the contractual
         agreement are to be formalised in a written document which is dated and signed
         by all parties and shall specify the renewal process for the contractual arrangements.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node90
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-9
       assessable: false
       depth: 1
-      name: Article 9
+      ref_id: Article 9
       description: Monitoring of the contractual arrangements
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:9.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node90
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-9
       ref_id: '9.1'
       description: "The policy shall require that the contractual arrangements specify\
         \ the measures and key indicators to monitor, on an ongoing basis, the performance\
@@ -740,7 +740,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:9.2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node90
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-9
       ref_id: '9.2'
       description: "The policy shall specify how the financial entity is to assess\
         \ whether the ICT third- party service providers used for the ICT services\
@@ -792,7 +792,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:9.3
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node90
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-9
       ref_id: '9.3'
       description: "The policy shall specify that the assessment referred to in paragraph\
         \ 2 is to be documented and its results to be used to update the financial\
@@ -800,7 +800,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:9.4
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node90
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-9
       ref_id: '9.4'
       description: The policy shall establish the appropriate measures that the financial
         entity is to adopt if it identifies shortcomings of the ICT third-party service
@@ -811,15 +811,15 @@ objects:
         measures is to be monitored in order to ensure that they are effectively complied
         with within a defined timeframe, taking into account the materiality of the
         shortcomings.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node100
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-10
       assessable: false
       depth: 1
-      name: Article 10
+      ref_id: Article 10
       description: Exit from and termination of the contractual arrangements
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node101
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node100
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-10
       description: 'The policy shall contain requirements for a documented exit plan
         for each contractual
 
@@ -848,19 +848,19 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node105
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node100
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-10
       description: The exit plan shall be realistic, feasible, based on plausible
         scenarios and reasonable assumptions and shall have a planned implementation
         schedule compatible with the exit and termination terms established in the
         contractual arrangements.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node106
+    - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-11
       assessable: false
       depth: 1
-      name: Article 11
+      ref_id: Article 11
       description: Entry into force
     - urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node107
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:node106
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ictservices-supporting:article-11
       description: This Regulation shall enter into force on the twentieth day following
         its publication in the Official Journal of the European Union.
