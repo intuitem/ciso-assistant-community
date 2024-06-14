@@ -9577,7 +9577,7 @@ objects:
       description: "The CSP SHALL validate each piece of evidence with a process that\
         \ can achieve the same strength as the evidence presented (see \u2018y\u2019\
         \ above). For example, if two forms of STRONG identity evidence are presented,\
-        \ each piece of evidence will be validated at a strength ofSTRONG."
+        \ each piece of evidence will be validated at a strength of STRONG."
       annotation: "SUPPLEMENTAL GUIDANCE: The goal of identity validation is to collect\
         \ the most appropriate identity evidence (e.g., a passport, driver\u2019s\
         \ license) from the applicant and determine its authenticity, validity, and\
@@ -9793,35 +9793,26 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)
       ref_id: IA-12(3)-ff
-      description: 'Trusted Referee: The use of trusted referees is optional for CSPs;
-        that is, if a CSP chooses to use trusted referees for identity proofing and
-        enrollment, then the following requirements, (1) through (3), would apply.
-        The use of trusted referees is intended to assist in the identity proofing
-        and enrollment for populations that are unable to meet IAL2 identity proofing
-        requirements, or otherwise would be challenged to perform identity proofing
-        and enrollment process requirements. Such populations may include, but are
-        not limited to:'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1027
-      assessable: true
-      depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)
-      description: "\u2022\tdisabled individuals; \n\u2022\telderly individuals; \n\
-        \u2022\thomeless individuals, \n\u2022\tindividuals with little or no access\
-        \ to online services or computing devices; \n\u2022\tunbanked and individuals\
-        \ with little or no credit history; \n\u2022\tvictims of identity theft; \n\
-        \u2022\tchildren under 18; and \n\u2022\timmigrants."
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1028
-      assessable: true
-      depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)
-      description: In addition to those requirements presented in the General section
-        of this document, as well as the applicable IAL requirements, CSPs that use
-        trusted referees in their identity proofing services must demonstrate conformance
-        with the requirements contained in this section.
+      description: "Trusted Referee: The use of trusted referees is optional for CSPs;\
+        \ that is, if a CSP chooses to use trusted referees for identity proofing\
+        \ and enrollment, then the following requirements, (1) through (3), would\
+        \ apply. The use of trusted referees is intended to assist in the identity\
+        \ proofing and enrollment for populations that are unable to meet IAL2 identity\
+        \ proofing requirements, or otherwise would be challenged to perform identity\
+        \ proofing and enrollment process requirements. Such populations may include,\
+        \ but are not limited to:\n\u2022\tdisabled individuals; \n\u2022\telderly\
+        \ individuals; \n\u2022\thomeless individuals, \n\u2022\tindividuals with\
+        \ little or no access to online services or computing devices; \n\u2022\t\
+        unbanked and individuals with little or no credit history; \n\u2022\tvictims\
+        \ of identity theft; \n\u2022\tchildren under 18; and \n\u2022\timmigrants.\n\
+        In addition to those requirements presented in the General section of this\
+        \ document, as well as the applicable IAL requirements, CSPs that use trusted\
+        \ referees in their identity proofing services must demonstrate conformance\
+        \ with the requirements contained in this section."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)-ff-1
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1028
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)-ff
       ref_id: IA-12(3)-ff-1
       description: "If the CSP uses trusted referees, then\u2026The CSP SHALL establish\
         \ written policy and procedures as to how a trusted referee is determined\
@@ -9838,7 +9829,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)-ff-2
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1028
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)-ff
       ref_id: IA-12(3)-ff-2
       description: "If the CSP uses trusted referees, then\u2026The CSP SHALL proof\
         \ the trusted referee at the same IAL as the applicant proofing."
@@ -9849,7 +9840,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)-ff-3
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1028
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(3)-ff
       ref_id: IA-12(3)-ff-3
       description: "If the CSP uses trusted referees, then\u2026The CSP SHALL determine\
         \ the minimum evidence required to bind the relationship between the trusted\
@@ -9875,7 +9866,7 @@ objects:
       description: Require that a registration code or notice of proofing be delivered
         through an out-of-band channel to verify the users address (physical or digital)
         of record.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1034
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1032
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(5)
@@ -9932,7 +9923,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(5)
       ref_id: IA-12(5)-d
       description: Note that IAL2-7 applies only to in-person proofing at IAL2.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1038
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1036
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(5)
@@ -9954,7 +9945,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(5)
       ref_id: IA-12(5)-e
       description: 'For remote identity proofing at IAL2:'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1040
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1038
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(5)
@@ -10023,7 +10014,7 @@ objects:
         code to a phone number validated in records, a proofing notification may be
         sent to the postal address validated in records or obtained from validated
         and verified evidence, such as a driver''s license.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1045
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1043
       assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ia-12(5)
@@ -10046,7 +10037,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7.1
       ref_id: 5.7.1.1
       name: Least Functionality
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1049
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1047
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7.1.1
@@ -10059,7 +10050,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7.1
       ref_id: 5.7.1.2
       name: Network Diagram
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1051
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1049
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7.1.2
@@ -10067,7 +10058,7 @@ objects:
         the interconnectivity of the agency network, to criminal justice information,
         systems and services is maintained in a current status.See Appendix C for
         sample network diagrams.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1052
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1050
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7.1.2
@@ -10107,7 +10098,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7
       ref_id: 5.7.2
       name: Security of Configuration Documentation
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1058
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1056
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.7.2
@@ -10189,7 +10180,7 @@ objects:
       ref_id: MP-1-c-2
       description: Procedures at least annually and following any security incidents
         involving digital and/or non-digital media.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1070
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1068
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-1
@@ -10221,13 +10212,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.8
       ref_id: MP-2
       name: MEDIA ACCESS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1072
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1070
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-2
       description: Restrict access to digital and non-digital media to authorized
         individuals.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1073
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1071
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-2
@@ -10263,7 +10254,7 @@ objects:
       ref_id: MP-3-b
       description: Exempt digital and non-digital media containing CJI from marking
         if the media remain within physically secure locations or controlled areas.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1075
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-3
@@ -10282,48 +10273,48 @@ objects:
         policies, regulations, standards, and guidelines. Executive Order 13556 mandates
         the marking of CUI. The following categories of CJI fall under the designated
         NARA categories which direct marking as indicated.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1078
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1076
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1075
       description: "1.Biometric Data\u2014data derived from one or more intrinsic\
         \ physical or behavioral traits of humans typically for the purpose of uniquely\
         \ identifying individuals from within a population. Used to identify individuals,\
         \ to include: fingerprints, palm prints, iris scans, and facial recognition\
         \ data. NARA CUI Category: Sensitive Personally Identifiable Information.\
         \ NARA Banner Marking: CUI"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1079
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1075
       description: "2.Identity History Data\u2014textual data that corresponds with\
         \ an individual\u2019s biometric data, providing a history of criminal and/or\
         \ civil events for the identified individual. NARA CUI Category: Criminal\
         \ History Records Information. NARA Banner Marking: CUI//SP-CHRI"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1080
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1078
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1075
       description: "3.Biographic Data\u2014information about individuals associated\
         \ with a unique case, and not necessarily connected to identity data. Biographic\
         \ data does not provide a history of an individual, only information related\
         \ to a unique case. NARA CUI Category: General Law Enforcement. NARA Banner\
         \ Marking: CUI"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1081
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1079
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1075
       description: "4.Property Data\u2014information about vehicles and property associated\
         \ with crime when accompanied by any personally identifiable information (PII).\
         \ NARA CUI Category: General Law Enforcement. NARA Banner Marking: CUI"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1082
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1080
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1077
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1075
       description: "5.Case/Incident History\u2014information about the history of\
         \ criminal incidents. NARA CUI Category: General Law Enforcement. NARA Banner\
         \ Marking: CUI"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1083
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1081
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-3
@@ -10353,7 +10344,7 @@ objects:
       ref_id: MP-4-b
       description: Protect system media types defined in MP-4a until the media are
         destroyed or sanitized using approved equipment, techniques, and procedures.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1087
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1085
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-4
@@ -10416,7 +10407,7 @@ objects:
       ref_id: MP-5-d
       description: Restrict the activities associated with the transport of system
         media to authorized personnel.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1093
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1091
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-5
@@ -10468,7 +10459,7 @@ objects:
       ref_id: MP-6-b
       description: Employ sanitization mechanisms with the strength and integrity
         commensurate with the security category or classification of the information.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1097
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1095
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-6
@@ -10527,7 +10518,7 @@ objects:
       description: Prohibit the use of digital media devices on all agency owned or
         controlled systems that store, process, or transmit criminal justice information
         when such devices have no identifiable owner.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1102
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1100
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:mp-7
@@ -10632,7 +10623,7 @@ objects:
       description: Procedures annually and following any physical, environmental,
         or security related incidents involving CJI or systems used to process, store,
         or transmit CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1114
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1112
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-1
@@ -10691,7 +10682,7 @@ objects:
       ref_id: PE-2-d
       description: Remove individuals from the facility access list when access is
         no longer required.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1120
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1118
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-2
@@ -10780,7 +10771,7 @@ objects:
       ref_id: PE-3-h
       description: If the above conditions cannot be met refer to the requirements
         listed in PE-17.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1132
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1130
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-3
@@ -10808,14 +10799,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-4
       name: ACCESS CONTROL FOR TRANSMISSION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1134
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1132
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-4
       description: Control physical access to information system distribution and
         transmission lines and devices within organizational facilities using agency-implemented
         procedures and controls.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1135
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1133
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-4
@@ -10833,14 +10824,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-5
       name: ACCESS CONTROL FOR OUTPUT DEVICES
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1137
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1135
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-5
       description: Control physical access to output from monitors, printers, scanners,
         audio devices, facsimile machines, and copiers to prevent unauthorized individuals
         from obtaining the output.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1138
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1136
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-5
@@ -10881,7 +10872,7 @@ objects:
       ref_id: PE-6-c
       description: Coordinate results of reviews and investigations with the organizational
         incident response capability.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1143
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1141
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-6
@@ -10917,13 +10908,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-6
       ref_id: PE-6(1)
       name: MONITORING PHYSICAL ACCESS | INTRUSION ALARMS AND SURVEILLANCE EQUIPMENT
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1145
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1143
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-6(1)
       description: Monitor physical access to the facility where the system resides
         using physical intrusion alarms and surveillance equipment.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1146
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1144
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-6(1)
@@ -10963,7 +10954,7 @@ objects:
       description: Report anomalies in visitor access records to organizational personnel
         with physical and environmental protection responsibilities and organizational
         personnel with information security responsibilities.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1151
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1149
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-8
@@ -10980,7 +10971,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-8
       ref_id: PE-8(3)
       name: VISITOR ACCESS RECORDS | LIMIT PERSONALLY IDENTIFIABLE INFORMATION ELEMENTS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1153
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1151
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-8(3)
@@ -10990,7 +10981,7 @@ objects:
 
         Note: Access to visitor access records is restricted to authorized agency
         personnel.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1154
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1152
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-8(3)
@@ -11005,7 +10996,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-9
       name: POWER EQUIPMENT AND CABLING
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1156
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1154
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-9
@@ -11014,7 +11005,7 @@ objects:
 
         Note:This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1157
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1155
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-9
@@ -11055,7 +11046,7 @@ objects:
 
         Note:This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1162
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1160
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-10
@@ -11069,7 +11060,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-11
       name: EMERGENCY POWER
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1164
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1162
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-11
@@ -11079,7 +11070,7 @@ objects:
 
         Note:This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1165
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1163
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-11
@@ -11101,7 +11092,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-12
       name: EMERGENCY LIGHTING
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1167
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1165
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-12
@@ -11111,7 +11102,7 @@ objects:
 
         Note: This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1168
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1166
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-12
@@ -11128,7 +11119,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-13
       name: FIRE PROTECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1170
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1168
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-13
@@ -11137,7 +11128,7 @@ objects:
 
         Note: This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1171
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1169
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-13
@@ -11156,7 +11147,7 @@ objects:
       ref_id: PE-13(1)
       name: "(1) FIRE PROTECTION | DETECTION SYSTEMS \u2014 AUTOMATIC ACTIVATION AND\
         \ NOTIFICATION"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1173
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1171
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-13(1)
@@ -11167,7 +11158,7 @@ objects:
 
         Note:This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1174
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1172
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-13(1)
@@ -11200,7 +11191,7 @@ objects:
 
         Note: This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1176
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-14
@@ -11217,7 +11208,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.9
       ref_id: PE-15
       name: WATER DAMAGE PROTECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1180
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-15
@@ -11227,7 +11218,7 @@ objects:
 
         Note:This control only applies to data centers as defined in Appendix A Terms
         and Definitions.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1181
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1179
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-15
@@ -11256,7 +11247,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-16
       ref_id: PE-16-b
       description: Maintain records of the system components.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1185
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1183
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-16
@@ -11323,7 +11314,7 @@ objects:
       ref_id: PE-17-d
       description: Provide a means for employees to communicate with information security
         and privacy personnel in case of incidents.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1195
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1193
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pe-17
@@ -11414,7 +11405,7 @@ objects:
       description: Procedures annually and following any changes and security incidents
         involving unauthorized access to CJI or systems used to process, store, or
         transmit CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1207
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1205
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-1
@@ -11446,13 +11437,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-2
       name: SEPARATION OF SYSTEM AND USER FUNCTIONALITY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1209
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1207
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-2
       description: Separate user functionality, including user interface services,
         from system management functionality.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1210
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1208
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-2
@@ -11478,13 +11469,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-4
       name: INFORMATION IN SHARED SYSTEM RESOURCES
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1212
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1210
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-4
       description: Prevent unauthorized and unintended information transfer via shared
         system resources.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1213
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1211
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-4
@@ -11527,7 +11518,7 @@ objects:
       description: 'Employ the following controls to achieve the denial-of-service
         objective: boundary protection devices and intrusion detection or prevention
         devices.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1217
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1215
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-5
@@ -11572,7 +11563,7 @@ objects:
       description: Connect to external networks or systems only through managed interfaces
         consisting of boundary protection devices arranged in accordance with an organizational
         security and privacy architecture.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1222
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1220
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7
@@ -11603,12 +11594,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7
       ref_id: SC-7(3)
       name: BOUNDARY PROTECTION | ACCESS POINTS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1224
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1222
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(3)
       description: Limit the number of external network connections to the system.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1225
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1223
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(3)
@@ -11685,7 +11676,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(4)
       ref_id: SC-7(4)-h
       description: Filter unauthorized control plane traffic from external networks.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1235
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1233
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(4)
@@ -11703,14 +11694,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7
       ref_id: SC-7(5)
       name: "BOUNDARY PROTECTION | DENY BY DEFAULT \u2014 ALLOW BY EXCEPTION"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1237
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1235
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(5)
       description: Deny network communications traffic by default and allow network
         communications traffic by exception at boundary devices for information systems
         used to process, store, or transmit CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1238
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1236
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(5)
@@ -11727,13 +11718,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7
       ref_id: SC-7(7)
       name: BOUNDARY PROTECTION | SPLIT TUNNELING FOR REMOTE DEVICES
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1240
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1238
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(7)
       description: Prevent split tunneling for remote devices connecting to organizational
         systems.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1241
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1239
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(7)
@@ -11763,7 +11754,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7
       ref_id: SC-7(8)
       name: BOUNDARY PROTECTION | ROUTE TRAFFIC TO AUTHENTICATED PROXY SERVERS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1243
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1241
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(8)
@@ -11771,7 +11762,7 @@ objects:
         except traffic specifically exempted by organizational personnel with information
         security responsibilities, to all untrusted networks through authenticated
         proxy servers at managed interfaces.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1244
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1242
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(8)
@@ -11796,7 +11787,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7
       ref_id: SC-7(24)
       name: BOUNDARY PROTECTION | PERSONALLY IDENTIFIABLE INFORMATION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1246
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1244
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(24)
@@ -11804,7 +11795,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(24)-a
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1246
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1244
       ref_id: SC-7(24)-a
       description: 'Apply the following processing rules to data elements of personally
         identifiable information: all applicable laws, executive orders, directives,
@@ -11812,23 +11803,23 @@ objects:
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(24)-b
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1246
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1244
       ref_id: SC-7(24)-b
       description: Monitor for permitted processing at the external interfaces to
         the system and at key internal boundaries within the system
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(24)-c
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1246
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1244
       ref_id: SC-7(24)-c
       description: Document each processing exception; and
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(24)-d
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1246
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1244
       ref_id: SC-7(24)-d
       description: Review and remove exceptions that are no longer supported.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1251
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1249
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-7(24)
@@ -11843,19 +11834,19 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-8
       name: TRANSMISSION CONFIDENTIALITY AND INTEGRITY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1253
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1251
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-8
       description: Protect the confidentiality and integrity of transmitted information.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1254
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1252
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-8
       description: Metadata derived from unencrypted CJI shall be protected in the
         same manner as CJI and shall not be used for any advertising or other commercial
         purposes by any cloud service provider or other associated entity.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1255
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1253
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-8
@@ -11894,13 +11885,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-8
       ref_id: SC-8(1)
       name: TRANSMISSION CONFIDENTIALITY AND INTEGRITY | CRYPTOGRAPHIC PROTECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1257
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1255
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-8(1)
       description: Implement cryptographic mechanisms to prevent unauthorized disclosure
         and detect unauthorized changes or access to CJI during transmission.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1258
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1256
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-8(1)
@@ -11918,7 +11909,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-10
       name: NETWORK DISCONNECT
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1260
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1258
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-10
@@ -11931,7 +11922,7 @@ objects:
         the purpose of receiving alert notifications (i.e., receive only terminals
         or ROT) and used within physically secure location facilities that remain
         staffed when in operation, are exempt from this requirement.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1261
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1259
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-10
@@ -11951,7 +11942,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-12
       name: CRYPTOGRAPHIC KEY ESTABLISHMENT AND MANAGEMENT
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1263
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1261
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-12
@@ -11959,7 +11950,7 @@ objects:
         within the system in accordance with the following key management requirements:
         encryption key generation, distribution, storage, access, and destruction
         is controlled by the agency.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1264
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1262
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-12
@@ -12005,7 +11996,7 @@ objects:
         current review for FIPS 140-3 compliancy can be used in the interim until
         certification is complete.FIPS 1402 certificates will not be acceptable after
         September 21, 2026.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1268
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1266
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-13
@@ -12046,7 +12037,7 @@ objects:
       ref_id: SC-15-b
       description: Provide an explicit indication of use to users physically present
         at the devices.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1272
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1270
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-15
@@ -12077,7 +12068,7 @@ objects:
       ref_id: SC-17-b
       description: Include only approved trust anchors in trust stores or certificate
         stores managed by the organization.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1276
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-17
@@ -12111,7 +12102,7 @@ objects:
       ref_id: SC-18-b
       description: Authorize, monitor, and control the use of mobile code within the
         system.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1280
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1278
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-18
@@ -12153,7 +12144,7 @@ objects:
         and (if the child supports secure resolution services) to enable verification
         of a chain of trust among parent and child domains, when operating as part
         of a distributed, hierarchical namespace.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1284
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1282
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-20
@@ -12177,14 +12168,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-21
       name: SECURE NAME/ADDRESS RESOLUTION SERVICE (RECURSIVE OR CACHING RESOLVER)
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1286
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1284
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-21
       description: Request and perform data origin authentication and data integrity
         verification on the name/address resolution responses the system receives
         from authoritative sources.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1285
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-21
@@ -12205,14 +12196,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-22
       name: ARCHITECTURE AND PROVISIONING FOR NAME/ADDRESS RESOLUTION SERVICE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-22
       description: Ensure the systems that collectively provide name/address resolution
         service for an organization are fault-tolerant and implement internal and
         external role separation.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1290
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1288
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-22
@@ -12236,12 +12227,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-23
       name: SESSION AUTHENTICITY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1292
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1290
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-23
       description: Protect the authenticity of communications sessions.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1293
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1291
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-23
@@ -12258,7 +12249,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-28
       name: PROTECTION OF INFORMATION AT REST
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1295
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1293
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-28
@@ -12280,7 +12271,7 @@ objects:
         \ and Combating Serious Crime agreements, fugitive extracts, and exchanges\
         \ made for humanitarian and criminal investigatory purposes in particular\
         \ circumstances)."
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1296
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1294
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-28
@@ -12315,14 +12306,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-28
       ref_id: SC-28(1)
       name: PROTECTION OF INFORMATION AT REST | CRYPTOGRAPHIC PROTECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1298
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1296
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-28(1)
       description: Implement cryptographic mechanisms to prevent unauthorized disclosure
         and modification of the following information at rest on information systems
         and digital media outside physically secure locations:CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1299
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1297
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-28(1)
@@ -12340,13 +12331,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.10
       ref_id: SC-39
       name: PROCESS ISOLATION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1301
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1299
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-39
       description: Maintain a separate execution domain for each executing system
         process.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1302
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1300
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sc-39
@@ -12382,7 +12373,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.1
       ref_id: 5.11.1.1
       name: Triennial Compliance Audits by the FBI CJIS Division
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1306
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1304
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.1.1
@@ -12402,7 +12393,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.1
       ref_id: 5.11.1.2
       name: Triennial Security Audits by the FBI CJIS Division
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1308
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1306
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.1.2
@@ -12418,7 +12409,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11
       ref_id: 5.11.2
       name: Audits by the CSA
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1310
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1308
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.2
@@ -12466,7 +12457,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11
       ref_id: 5.11.3
       name: Special Security Inquiries and Audits
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1316
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1314
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.3
@@ -12481,7 +12472,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11
       ref_id: 5.11.4
       name: Compliance Subcommittees
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1318
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1316
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.4
@@ -12494,7 +12485,7 @@ objects:
         sanctions process procedures are available at CJIS.gov (Law Enforcement Enterprise
         Portal) CJIS Special Interest Groups CE Subcommittee Section and CJIS Section
         of FBI.gov.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1319
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1317
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.11.4
@@ -12645,7 +12636,7 @@ objects:
       description: The granting agency shall maintain a list of personnel who have
         been authorized unescorted access to unencrypted CJI and shall, upon request,
         provide a current copy of the access list to the CSO.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1335
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1333
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12.1
@@ -12657,7 +12648,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12
       ref_id: 5.12.2
       name: Personnel Termination
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1337
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1335
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12.2
@@ -12673,7 +12664,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12
       ref_id: 5.12.3
       name: Personnel Transfer
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1339
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1337
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12.3
@@ -12687,7 +12678,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12
       ref_id: 5.12.4
       name: Personnel Sanctions
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1341
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1339
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.12.4
@@ -12699,7 +12690,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5
       ref_id: '5.13'
       name: 'Policy Area 13: Mobile Devices'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1343
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1341
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
@@ -12726,14 +12717,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1
       ref_id: 5.13.1.1
       name: 802.11 Wireless Protocols
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1346
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1344
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.1
       description: Wired Equivalent Privacy (WEP) and Wi-Fi Protected Access (WPA)
         cryptographic algorithms, used by all pre-802.11i protocols, do not meet the
         requirements for FIPS 140-2 and shall not be used.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1347
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1345
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.1
@@ -12872,7 +12863,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.2
       ref_id: 5.13.1.2.1
       name: Cellular Service Abroad
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1366
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1364
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.2
@@ -12890,7 +12881,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.2
       ref_id: 5.13.1.2.2
       name: Voice Transmissions Over Cellular Devices
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1368
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1366
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.2
@@ -12902,7 +12893,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1
       ref_id: 5.13.1.3
       name: Bluetooth
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1370
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1368
       assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.3
@@ -12912,7 +12903,7 @@ objects:
         of business and consumer devices, including cell phones, laptops, automobiles,
         medical devices, printers, keyboards, mice, headsets, and biometric capture
         devices.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1371
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1369
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.3
@@ -12929,7 +12920,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.3
       ref_id: 5.13.1.4
       name: Mobile Hotspots
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1373
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1371
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.4
@@ -12981,12 +12972,12 @@ objects:
         \ Refer to the requirements in Section 5.10.1.2 Encryption for item #1. Refer\
         \ to the requirements in Section 5.6.2.1.1.1 Basic Password Standards for\
         \ item #3. Only password attributes #1, #2 and #3 are required."
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1380
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1378
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.4
       description: OR
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1381
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1379
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.1.4
@@ -12998,7 +12989,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
       ref_id: 5.13.2
       name: Mobile Device Management (MDM)
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1383
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1381
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.2
@@ -13006,7 +12997,7 @@ objects:
         sound security controls for mobile devices and allows for centralized oversight
         of configuration control, application usage, and device protection and recovery,
         if so desired by the agency.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1384
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1382
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.2
@@ -13016,7 +13007,7 @@ objects:
         limited-feature operating systems.MDM systems and applications coupled with
         device specific technical policy can provide a robust method for device configuration
         management if properly implemented.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1385
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1383
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.2
@@ -13106,7 +13097,7 @@ objects:
       ref_id: 5.13.2-2-k
       description: Automatic device wiping after a specified number of failed access
         attempts
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1399
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1397
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.2
@@ -13123,7 +13114,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
       ref_id: 5.13.3
       name: Wireless Device Risk Mitigations
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1401
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1399
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.3
@@ -13184,7 +13175,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
       ref_id: 5.13.4
       name: System Integrity
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1410
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1408
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4
@@ -13200,7 +13191,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4
       ref_id: 5.13.4.1
       name: Patching/Updates
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1412
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1410
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.1
@@ -13208,7 +13199,7 @@ objects:
         always on connection cannot be guaranteed for patching and updating.Devices
         without always-on cellular connections may not be reachable for extended periods
         of time by the MDM or solution either to report status or initiate patching.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1413
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1411
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.1
@@ -13220,7 +13211,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4
       ref_id: 5.13.4.2
       name: Malicious Code Protection
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1415
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1413
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.2
@@ -13229,7 +13220,7 @@ objects:
         to a central management console in a manner analogous to traditional virus
         scan detection of unauthorized software and can provide a high degree of confidence
         that only known software or applications are installed on the device.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1416
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1414
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.2
@@ -13243,7 +13234,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4
       ref_id: 5.13.4.3
       name: Personal Firewall
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1418
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1416
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.3
@@ -13283,7 +13274,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.3
       ref_id: 5.13.4.3-5
       description: Maintain an IP traffic log.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1424
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1422
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.4.3
@@ -13300,7 +13291,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
       ref_id: 5.13.5
       name: Incident Response
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1426
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1424
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.5
@@ -13311,7 +13302,7 @@ objects:
         with illicit data access either on the device itself or within online data
         resources associated with the device through an application or specialized
         interface.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1427
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1425
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.5
@@ -13371,7 +13362,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
       ref_id: 5.13.6
       name: Access Control
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1437
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1435
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.6
@@ -13384,7 +13375,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13
       ref_id: 5.13.7
       name: Identification and Authentication
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1439
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1437
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7
@@ -13397,7 +13388,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7
       ref_id: 5.13.7.1
       name: Local Device Authentication
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1441
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1439
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.1
@@ -13410,7 +13401,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7
       ref_id: 5.13.7.2
       name: Advanced Authentication
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1443
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1441
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2
@@ -13423,7 +13414,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2
       ref_id: 5.13.7.2.1
       name: Compensating Controls
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1445
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1443
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1
@@ -13437,38 +13428,38 @@ objects:
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1-1
       assessable: true
       depth: 7
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1445
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1443
       ref_id: 5.13.7.2.1-1
       description: Meet the intent of the CJIS Security Policy AA requirement
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1-2
       assessable: true
       depth: 7
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1445
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1443
       ref_id: 5.13.7.2.1-2
       description: Provide a similar level of protection or security as the original
         AA requirement
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1-3
       assessable: true
       depth: 7
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1445
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1443
       ref_id: 5.13.7.2.1-3
       description: Not rely upon the existing requirements for AA as compensating
         controls
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1-4
       assessable: true
       depth: 7
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1445
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1443
       ref_id: 5.13.7.2.1-4
       description: Expire upon the CSO approved date or when a compliant AA solution
         is implemented.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1450
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1448
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1
       description: Additionally, compensating controls may rely upon other, non-AA,
         existing requirements as compensating controls and/or be combined with new
         controls to create compensating controls.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1451
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1449
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1
@@ -13477,7 +13468,7 @@ objects:
         and not an impersonator or (in the case of agency-issued device used by multiple
         users) controls that reduce the risk of exposure if information is accessed
         by an unauthorized party.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1452
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1450
       assessable: true
       depth: 6
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.2.1
@@ -13493,7 +13484,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7
       ref_id: 5.13.7.3
       name: Device Certificates
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1454
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1452
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.3
@@ -13504,7 +13495,7 @@ objects:
         or authentication in a larger scheme, a device certificate alone placed on
         the device shall not be considered valid proof that the device is being operated
         by an authorized user.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1455
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1453
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.13.7.3
@@ -13558,7 +13549,7 @@ objects:
       description: 'Provide the following options for alternative sources for continued
         support for unsupported components: original manufacturer support, or original
         contracted vendor support.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1463
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1461
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:sa-22
@@ -13660,7 +13651,7 @@ objects:
       description: Procedures annually and following any security incidents involving
         unauthorized access to CJI or systems used to process, store, or transmit
         CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1475
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1473
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-1-c
@@ -13712,22 +13703,22 @@ objects:
       ref_id: SI-2-c
       description: Install security-relevant software and firmware updates within
         the number of days listed after the release of the updates;
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1480
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1478
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2-c
       description: "\u2022\tCritical \u2013 15 days"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1481
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1479
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2-c
       description: "\u2022\tHigh \u2013 30 days"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1482
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1480
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2-c
       description: "\u2022\tMedium \u2013 60 days"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1483
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1481
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2-c
@@ -13739,7 +13730,7 @@ objects:
       ref_id: SI-2-d
       description: Incorporate flaw remediation into the organizational configuration
         management process.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1485
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1483
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2
@@ -13774,7 +13765,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2
       ref_id: SI-2(2)
       name: FLAW REMEDIATION | AUTOMATED FLAW REMEDIATION STATUS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1487
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1485
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2(2)
@@ -13782,7 +13773,7 @@ objects:
         software and firmware updates installed using vulnerability scanning tools
         as least quarterly or following any security incidents involving CJI or systems
         used to process, store, or transmit CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1488
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1486
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-2(2)
@@ -13841,7 +13832,7 @@ objects:
       description: Address the receipt of false positives during malicious code detection
         and eradication and the resulting potential impact on the availability of
         the system.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1496
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1494
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-3
@@ -13995,7 +13986,7 @@ objects:
         protection software, scanning tools, audit record monitoring software, network
         monitoring, and firewall monitoring software logs to organizational personnel
         with information security responsibilities weekly.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1515
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1513
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4
@@ -14040,13 +14031,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4
       ref_id: SI-4(2)
       name: SYSTEM MONITORING | AUTOMATED TOOLS AND MECHANISMS FOR REALTIME ANALYSIS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1517
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1515
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4(2)
       description: Employ automated tools and mechanisms to support near real-time
         analysis of events.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1518
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1516
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4(2)
@@ -14083,7 +14074,7 @@ objects:
         of malicious code or unauthorized use of legitimate code or credentials within
         organizational systems or propagating among system components, signaling to
         external systems, and the unauthorized exporting of information.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1522
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1520
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4(4)
@@ -14101,7 +14092,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4
       ref_id: SI-4(5)
       name: SYSTEM MONITORING | SYSTEM-GENERATED ALERTS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1524
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1522
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4(5)
@@ -14109,7 +14100,7 @@ objects:
         when the following systemgenerated indications of compromise or potential
         compromise occur: inappropriate or unusual activities with security or privacy
         implications.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1525
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1523
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-4(5)
@@ -14162,7 +14153,7 @@ objects:
       ref_id: SI-5-d
       description: Implement security directives in accordance with established time
         frames, or notify the issuing organization of the degree of noncompliance.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1531
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1529
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-5
@@ -14200,7 +14191,7 @@ objects:
         firmware, and information are detected: notify organizational personnel responsible
         for software, firmware, and/or information integrity and implement incident
         response procedures as appropriate.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1535
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1533
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-7
@@ -14222,14 +14213,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-7
       ref_id: SI-7(1)
       name: SOFTWARE, FIRMWARE, AND INFORMATION INTEGRITY | INTEGRITY CHECKS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1537
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1535
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-7(1)
       description: Perform an integrity check of software, firmware, and information
         systems that contain or process CJI at agency-defined transitional states
         or security relevant events at least weekly or in an automated fashion.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1538
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1536
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-7(1)
@@ -14244,7 +14235,7 @@ objects:
       ref_id: SI-7(7)
       name: SOFTWARE, FIRMWARE, AND INFORMATION INTEGRITY | INTEGRATION OF DETECTION
         AND RESPONSE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1540
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1538
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-7(7)
@@ -14252,7 +14243,7 @@ objects:
         into the organizational incident response capability:unauthorized changes
         to established configuration setting or the unauthorized elevation of system
         privileges.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1541
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1539
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-7(7)
@@ -14283,7 +14274,7 @@ objects:
       ref_id: SI-8-b
       description: Update spam protection mechanisms when new releases are available
         in accordance with organizational configuration management policy and procedures.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1545
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1543
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-8
@@ -14299,12 +14290,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-8
       ref_id: SI-8(2)
       name: SPAM PROTECTION | AUTOMATIC UPDATES
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1547
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1545
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-8(2)
       description: Automatically update spam protection mechanisms at least daily.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1548
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1546
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-8(2)
@@ -14317,14 +14308,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.15
       ref_id: SI-10
       name: INFORMATION INPUT VALIDATION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1550
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1548
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-10
       description: Check the validity of the following information inputs:all inputs
         to web/application servers, database servers, and any system or application
         input that might receive or process CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1551
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1549
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-10
@@ -14370,7 +14361,7 @@ objects:
       ref_id: SI-11-b
       description: Reveal error messages only to organizational personnel with information
         security responsibilities.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1555
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1553
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-11
@@ -14390,14 +14381,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.15
       ref_id: SI-12
       name: INFORMATION MANAGEMENT AND RETENTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1557
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1555
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12
       description: 'Manage and retain information within the system and information
         output from the system in accordance with applicable laws, executive orders,
         directives, regulations, policies, standards, guidelines and operational requirements. '
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1558
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1556
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12
@@ -14423,14 +14414,14 @@ objects:
       ref_id: SI-12(1)
       name: INFORMATION MANAGEMENT AND RETENTION | LIMIT PERSONALLY IDENTIFIABLE INFORMATION
         ELEMENTS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1560
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1558
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12(1)
       description: Limit personally identifiable information being processed in the
         information life cycle to the minimum PII necessary to achieve the purpose
         for which it is collected (see Section 4.3).
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1561
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1559
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12(1)
@@ -14449,14 +14440,14 @@ objects:
       ref_id: SI-12(2)
       name: INFORMATION MANAGEMENT AND RETENTION | MINIMIZE PERSONALLY IDENTIFIABLE
         INFORMATION IN TESTING, TRAINING, AND RESEARCH
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1563
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1561
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12(2)
       description: Use the following techniques to minimize the use of personally
         identifiable information for research, testing, or training:data obfuscation,
         randomization, anonymization, or use of synthetic data.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1564
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1562
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12(2)
@@ -14474,13 +14465,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12
       ref_id: SI-12(3)
       name: INFORMATION MANAGEMENT AND RETENTION | INFORMATION DISPOSAL
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1566
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1564
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12(3)
       description: Use the following techniques to dispose of, destroy, or erase information
         following the retention period:as defined in MP-6.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1567
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1565
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-12(3)
@@ -14495,14 +14486,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.15
       ref_id: SI-16
       name: MEMORY PROTECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1569
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1567
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-16
       description: Implement the following controls to protect the system memory from
         unauthorized code execution:data execution prevention and address space layout
         randomization.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1570
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1568
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:si-16
@@ -14588,7 +14579,7 @@ objects:
       description: Procedures annually and following any security incidents involving
         unauthorized access to CJI or systems used to process, store, or transmit
         CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1582
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1580
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-1
@@ -14698,7 +14689,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-2-f
       ref_id: MA-2-f-5
       description: Name(s) of entity performing maintenance including escort if required.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1595
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1593
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-2-f
@@ -14733,7 +14724,7 @@ objects:
       ref_id: MA-3-b
       description: Review previously approved system maintenance tools prior to each
         use.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1599
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1597
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3
@@ -14761,13 +14752,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3
       ref_id: MA-3(1)
       name: MAINTENANCE TOOLS | INSPECT TOOLS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1601
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1599
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(1)
       description: Inspect the maintenance tools used by maintenance personnel for
         improper or unauthorized modifications.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1602
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1600
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(1)
@@ -14783,13 +14774,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3
       ref_id: MA-3(2)
       name: MAINTENANCE TOOLS | INSPECT MEDIA
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1604
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1602
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(2)
       description: Check media containing diagnostic and test programs for malicious
         code before the media are used in the system.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1605
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1603
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(2)
@@ -14803,7 +14794,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3
       ref_id: MA-3(3)
       name: MAINTENANCE TOOLS | PREVENT UNAUTHORIZED REMOVAL
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1607
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1605
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(3)
@@ -14812,31 +14803,31 @@ objects:
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(3)-a
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1607
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1605
       ref_id: MA-3(3)-a
       description: Verifying that there is no organizational information contained
         on the equipment;
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(3)-b
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1607
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1605
       ref_id: MA-3(3)-b
       description: Sanitizing or destroying the equipment;
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(3)-c
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1607
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1605
       ref_id: MA-3(3)-c
       description: Retaining the equipment within the facility; or
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(3)-d
       assessable: true
       depth: 6
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1607
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1605
       ref_id: MA-3(3)-d
       description: Obtaining an exemption from organizational personnel with system
         maintenance responsibilities explicitly authorizing removal of the equipment
         from the facility.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1612
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1610
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-3(3)
@@ -14885,7 +14876,7 @@ objects:
       ref_id: MA-4-e
       description: Terminate session and network connections when nonlocal maintenance
         is completed.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1619
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1617
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-4
@@ -14931,7 +14922,7 @@ objects:
       description: Designate organizational personnel with required access authorizations
         and technical competence to supervise the maintenance activities of personnel
         who do not possess the required access authorizations.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1624
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1622
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-5
@@ -14955,14 +14946,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.16
       ref_id: MA-6
       name: TIMELY MAINTENANCE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1626
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1624
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-6
       description: Obtain maintenance support and/or spare parts for critical system
         components that process, store, and transmit CJI within agency-defined recovery
         time and recovery point objectives of failure.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1627
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1625
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ma-6
@@ -15048,7 +15039,7 @@ objects:
       description: Procedures annually and following any security incidents involving
         unauthorized access to CJI or systems used to process, store, or transmit
         CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1639
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1637
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-1
@@ -15219,7 +15210,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-2
       ref_id: PL-2-e
       description: Protect the plans from unauthorized disclosure and modification.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1661
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1659
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-2
@@ -15240,10 +15231,10 @@ objects:
         reviews).The CJISSECPOL describes the different types of requirements that
         are relevant to organizations during the system development life cycle and
         the relationship between requirements and controls.'
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1662
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1660
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1661
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1659
       description: "Organizations may develop a single, integrated security and privacy\
         \ plan or maintain separate plans. Security and privacy plans relate security\
         \ and privacy requirements to a set of controls and control enhancements.\
@@ -15315,7 +15306,7 @@ objects:
       description: Require individuals who have acknowledged a previous version of
         the rules of behavior to read and re-acknowledge annually, or when the rules
         are revised or updated.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1668
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1666
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-4
@@ -15344,7 +15335,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-4
       ref_id: PL-4(1)
       name: RULES OF BEHAVIOR | SOCIAL MEDIA AND EXTERNAL SITE/APPLICATION USAGE RESTRICTIONS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1670
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1668
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-4(1)
@@ -15369,7 +15360,7 @@ objects:
       description: Use of organization-provided identifiers (e.g., email addresses)
         and authentication secrets (e.g., passwords) for creating accounts on external
         sites/applications.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1674
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1672
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-4
@@ -15440,7 +15431,7 @@ objects:
       description: Reflect planned architecture changes in security and privacy plans,
         Concept of Operations (CONOPS), criticality analysis, organizational procedures,
         and procurements and acquisitions.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1683
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1681
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-8
@@ -15487,12 +15478,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.17
       ref_id: PL-9
       name: CENTRAL MANAGEMENT
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1685
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1683
       assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-9
       description: The CJISSECPOL is centrally managed by the FBI CJIS ISO.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1686
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1684
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-9
@@ -15532,12 +15523,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.17
       ref_id: PL-10
       name: BASELINE SELECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1688
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1686
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-10
       description: Select a control baseline for the system.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1689
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1687
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-10
@@ -15571,13 +15562,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.17
       ref_id: PL-11
       name: BASELINE TAILORING
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1691
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1689
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-11
       description: Tailor the selected control baseline by applying specified tailoring
         actions.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1692
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1690
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:pl-11
@@ -15671,7 +15662,7 @@ objects:
       description: Procedures annually and following any security incidents involving
         unauthorized access to CJI or systems used to process, store, or transmit
         CJI, or training simulations or exercises.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1703
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1701
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.18-c
@@ -15802,7 +15793,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2
       ref_id: CP-2-h
       description: Protect the contingency plan from unauthorized disclosure and modification.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1720
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1718
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2
@@ -15834,13 +15825,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2
       ref_id: CP-2(1)
       name: CONTINGENCY PLAN | COORDINATE WITH RELATED PLANS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1722
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1720
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2(1)
       description: Coordinate contingency plan development with organizational elements
         responsible for related plans.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1723
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1721
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2(1)
@@ -15856,13 +15847,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2
       ref_id: CP-2(3)
       name: CONTINGENCY PLAN | RESUME MISSION AND BUSINESS FUNCTIONS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1725
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1723
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2(3)
       description: Plan for the resumption of essential mission and business functions
         within twenty-four (24) hours of contingency plan activation.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1726
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1724
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2(3)
@@ -15879,13 +15870,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2
       ref_id: CP-2(8)
       name: CONTINGENCY PLAN | IDENTIFY CRITICAL ASSETS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1728
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1726
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2(8)
       description: Identify critical system assets supporting essential mission and
         business functions
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1729
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1727
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-2(8)
@@ -15943,7 +15934,7 @@ objects:
       description: Review and update contingency training content annually and following
         any security incidents involving unauthorized access to CJI or systems used
         to process, store, or transmit CJI, or training simulations or exercises.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1736
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1734
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-3
@@ -15995,7 +15986,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-4
       ref_id: CP-4-c
       description: Initiate corrective actions, if needed.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1741
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1739
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-4
@@ -16014,13 +16005,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-4
       ref_id: CP-4(1)
       name: CONTINGENCY PLAN TESTING | COORDINATE WITH RELATED PLANS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1743
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1741
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-4(1)
       description: Coordinate contingency plan testing with organizational elements
         responsible for related plans.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1744
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1742
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-4(1)
@@ -16053,7 +16044,7 @@ objects:
       ref_id: CP-6-b
       description: Ensure that the alternate storage site provides controls equivalent
         to that of the primary site.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1748
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1746
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6
@@ -16077,13 +16068,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6
       ref_id: CP-6(1)
       name: ALTERNATE STORAGE SITE | SEPARATION FROM PRIMARY SITE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1750
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1748
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6(1)
       description: Identify an alternate storage site that is sufficiently separated
         from the primary storage site to reduce susceptibility to the same threats.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1751
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1749
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6(1)
@@ -16100,14 +16091,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6
       ref_id: CP-6(3)
       name: ALTERNATE STORAGE SITE | ACCESSIBILITY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1753
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1751
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6(3)
       description: Identify potential accessibility problems to the alternate storage
         site in the event of an area-wide disruption or disaster and outline explicit
         mitigation actions.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1754
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1752
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-6(3)
@@ -16149,7 +16140,7 @@ objects:
       ref_id: CP-7-c
       description: Provide controls at the alternate processing site that are equivalent
         to those at the primary site.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1759
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1757
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7
@@ -16174,13 +16165,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7
       ref_id: CP-7(1)
       name: ALTERNATE PROCESSING SITE | SEPARATION FROM PRIMARY SITE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1761
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1759
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7(1)
       description: Identify an alternate processing site that is sufficiently separated
         from the primary processing site to reduce susceptibility to the same threats.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1762
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1760
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7(1)
@@ -16197,14 +16188,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7
       ref_id: CP-7(2)
       name: ALTERNATE PROCESSING SITE | ACCESSIBILITY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1764
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1762
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7(2)
       description: Identify potential accessibility problems to alternate processing
         sites in the event of an areawide disruption or disaster and outlines explicit
         mitigation actions.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1765
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1763
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7(2)
@@ -16217,14 +16208,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7
       ref_id: CP-7(3)
       name: ALTERNATE PROCESSING SITE | PRIORITY OF SERVICE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1767
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1765
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7(3)
       description: Develop alternate processing site agreements that contain priority-of-service
         provisions in accordance with availability requirements (including recovery
         time objectives).
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1768
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1766
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-7(3)
@@ -16240,7 +16231,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.18
       ref_id: CP-8
       name: TELECOMMUNICATIONS SERVICES
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1770
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1768
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-8
@@ -16249,7 +16240,7 @@ objects:
         and business functions within the time period as defined in the system contingency
         plan(s) when the primary telecommunications capabilities are unavailable at
         either the primary or alternate processing or storage sites.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1771
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1769
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-8
@@ -16286,7 +16277,7 @@ objects:
       description: Request Telecommunications Service Priority for all telecommunications
         services used for national security emergency preparedness if the primary
         and/or alternate telecommunications services are provided by a common carrier.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1775
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1773
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-8(1)
@@ -16308,13 +16299,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-8
       ref_id: CP-8(2)
       name: TELECOMMUNICATIONS SERVICES | SINGLE POINTS OF FAILURE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1777
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1775
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-8(2)
       description: Obtain alternate telecommunications services to reduce the likelihood
         of sharing a single point of failure with primary telecommunications services.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1778
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1776
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-8(2)
@@ -16357,7 +16348,7 @@ objects:
       ref_id: CP-9-d
       description: Protect the confidentiality, integrity, and availability of backup
         information.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1784
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1782
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9
@@ -16380,13 +16371,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9
       ref_id: CP-9(1)
       name: SYSTEM BACKUP | TESTING FOR RELIABILITY AND INTEGRITY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1786
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1784
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9(1)
       description: Test backup information as required by the contingency plans to
         verify media reliability and information integrity.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1787
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1785
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9(1)
@@ -16405,13 +16396,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9
       ref_id: CP-9(8)
       name: SYSTEM BACKUP | CRYPTOGRAPHIC PROTECTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1789
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1787
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9(8)
       description: Implement cryptographic mechanisms to prevent unauthorized disclosure
         and modification of CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1790
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1788
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-9(8)
@@ -16429,14 +16420,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.18
       ref_id: CP-10
       name: SYSTEM RECOVERY AND RECONSTITUTION
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1792
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1790
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-10
       description: Provide for the recovery and reconstitution of the system to a
         known state within the timeframe as required by the contingency plans after
         a disruption, compromise, or failure.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1793
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1791
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-10
@@ -16461,12 +16452,12 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-10
       ref_id: CP-10(2)
       name: SYSTEM RECOVERY AND RECONSTITUTION | TRANSACTION RECOVERY
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1795
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1793
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-10(2)
       description: Implement transaction recovery for systems that are transaction-based.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1796
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1794
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:cp-10(2)
@@ -16550,7 +16541,7 @@ objects:
       description: Procedures annually and following any security incidents involving
         unauthorized access to CJI or systems used to process, store, or transmit
         CJI.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1808
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1806
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-1-c
@@ -16603,7 +16594,7 @@ objects:
       ref_id: RA-2-c
       description: Verify that the authorizing official or authorizing official designated
         representative reviews and approves the security categorization decision.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1813
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1811
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-2
@@ -16698,7 +16689,7 @@ objects:
       description: Update the risk assessment at least quarterly or when there are
         significant changes to the system, its environment of operation, or other
         conditions that may impact the security or privacy state of the system.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1824
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1822
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-3
@@ -16776,22 +16767,22 @@ objects:
       ref_id: RA-5-d
       description: Remediate legitimate vulnerabilities within the number of days
         listed;
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1833
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1831
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5-d
       description: "\u2022\tCritical\u201315 days"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1834
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1832
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5-d
       description: "\u2022\tHigh\u201330 days"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1835
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1833
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5-d
       description: "\u2022\tMedium\u201360 days"
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1836
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1834
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5-d
@@ -16812,7 +16803,7 @@ objects:
       ref_id: RA-5-f
       description: Employ vulnerability monitoring tools that include the capability
         to readily update the vulnerabilities to be scanned.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1839
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1837
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5
@@ -16851,7 +16842,7 @@ objects:
         \ for which to scan. Organizations also consider using scanning tools that\
         \ express vulnerability impact by the Common Vulnerability Scoring System\
         \ (CVSS)."
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1840
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1838
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5
@@ -16879,14 +16870,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5
       ref_id: RA-5(2)
       name: VULNERABILITY MONITORING AND SCANNING | UPDATE VULNERABILITIES TO BE SCANNED
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1842
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1840
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5(2)
       description: Update the system vulnerabilities to be scanned within 24 hours
         prior to running a new scan or when new vulnerabilities are identified and
         reported.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1843
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1841
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5(2)
@@ -16902,14 +16893,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5
       ref_id: RA-5(5)
       name: VULNERABILITY MONITORING AND SCANNING | PRIVILEGED ACCESS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1845
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1843
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5(5)
       description: Implement privileged access authorization to information system
         components containing or processing CJI for vulnerability scanning activities
         requiring privileged access.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1846
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1844
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5(5)
@@ -16927,13 +16918,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5
       ref_id: RA-5(11)
       name: VULNERABILITY MONITORING AND SCANNING | PUBLIC DISCLOSURE PROGRAM
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1848
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1846
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5(11)
       description: Establish a public reporting channel for receiving reports of vulnerabilities
         in organizational systems and system components.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1849
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1847
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-5(11)
@@ -16951,13 +16942,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.19
       ref_id: RA-7
       name: RISK RESPONSE
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1851
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1849
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-7
       description: Respond to findings from security and privacy assessments, monitoring,
         and audits in accordance with organizational risk tolerance.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1852
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1850
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-7
@@ -16979,7 +16970,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:5.19
       ref_id: RA-9
       name: CRITICALITY ANALYSIS
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1854
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1852
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-9
@@ -16987,7 +16978,7 @@ objects:
         a criticality analysis for information system components containing or processing
         CJI at the planning, design, development, testing, implementation, and maintenance
         stages of the system development life cycle.
-    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1855
+    - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1853
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:ra-9
