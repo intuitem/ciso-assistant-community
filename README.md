@@ -128,6 +128,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
 43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
 44. EU AI Act 🇪🇺🤖
+45. FBI CJIS 🇺🇸👮
 
 ### Community contributions
 
@@ -135,6 +136,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
 4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
 
 <br/>
 
@@ -147,13 +149,12 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- FBI CJIS
+- NCSC Cyber Assessment Framework (CAF)
 - Secure Controls Framework (SCF)
 - CCPA
 - Part-IS
 - SOX
 - NIST 800-82
-- NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
