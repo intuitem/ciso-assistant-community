@@ -124,6 +124,7 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "core",
+    "settings",
     "cal",
     "django_filters",
     # "debug_toolbar",
