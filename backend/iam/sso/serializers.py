@@ -1,20 +1,20 @@
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from rest_framework import serializers
-from .models import IdentityProvider
+from .models import SSOSettings
 
 from core.serializers import BaseModelSerializer
 
 
-class IdentityProviderReadSerializer(BaseModelSerializer):
+class SSOSettingsReadSerializer(BaseModelSerializer):
     provider = serializers.CharField(read_only=True, source="get_provider_display")
     settings = serializers.CharField(read_only=True)
 
     class Meta:
-        model = IdentityProvider
+        model = SSOSettings
         fields = "__all__"
 
 
-class IdentityProviderWriteSerializer(BaseModelSerializer):
+class SSOSettingsWriteSerializer(BaseModelSerializer):
     attribute_mapping_uid = serializers.ListField(
         child=serializers.CharField(
             required=False, allow_blank=True, allow_null=True, write_only=True
@@ -86,7 +86,7 @@ class IdentityProviderWriteSerializer(BaseModelSerializer):
     want_name_id_encrypted = serializers.BooleanField(required=False, write_only=True)
 
     class Meta:
-        model = IdentityProvider
+        model = SSOSettings
         fields = "__all__"
 
     def create(self, validated_data):
