@@ -1,8 +1,7 @@
 urn: urn:intuitem:risk:library:rts-dora-ict-risk-management
 locale: en
 ref_id: RTS-DORA-ICT-risk-management
-name: Regulatory Technical Standards (RTS) on ICT risk management framework and on
-  simplified ICT risk management framework
+name: RTS on ICT risk management framework and on simplified ICT risk management framework
 description: One of the objectives of Regulation (EU) 2022/2554 on digital operational
   resilience for the financial sector (DORA) is to set out uniform requirements for
   the security of network and information systems of companies and organisations operating
@@ -19,8 +18,8 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:rts-dora-ict-risk-management
     ref_id: RTS-DORA-ICT-risk-management
-    name: Regulatory Technical Standards (RTS) on ICT risk management framework and
-      on simplified ICT risk management framework
+    name: RTS on ICT risk management framework and on simplified ICT risk management
+      framework
     description: One of the objectives of Regulation (EU) 2022/2554 on digital operational
       resilience for the financial sector (DORA) is to set out uniform requirements
       for the security of network and information systems of companies and organisations
@@ -35,47 +34,52 @@ objects:
       depth: 1
       name: 'TITLE I '
       description: GENERAL PRINCIPLE
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node3
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node2
-      name: Article 1
+      ref_id: Article 1
       description: Overall risk profile and complexity
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
       assessable: true
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-1
       description: 'When developing and implementing the ICT security policies, procedures,
         protocols and tools referred to in Title II and the simplified ICT risk management
         framework referred to in Title III, the size and the overall risk profile
         of the financial entity, and the nature, scale and elements of increased or
         reduced complexity of its services, activities and operations shall be taken
         into account, including elements relating to:'
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node5
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:1.a
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
-      description: (a) encryption and cryptography;
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node6
+      ref_id: 1.a
+      description: encryption and cryptography;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:1.b
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
-      description: (b) ICT operations security;
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node7
+      ref_id: 1.b
+      description: ICT operations security;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:1.c
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
-      description: (c) network security;
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node8
+      ref_id: 1.c
+      description: network security;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:1.d
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
-      description: (d) ICT project and change management;
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node9
+      ref_id: 1.d
+      description: ICT project and change management;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:1.e
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node4
-      description: "(e) the potential impact of the ICT risk on confidentiality, integrity\
+      ref_id: 1.e
+      description: "the potential impact of the ICT risk on confidentiality, integrity\
         \ and availability of data, and of the disruptions on the continuity and availability\
         \ of the financial entity\u2019s activities."
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
@@ -90,22 +94,22 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
       name: CHAPTER I
       description: ICT SECURITY POLICIES, PROCEDURES, PROTOCOLS, AND TOOLS
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node12
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 1
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node13
+      ref_id: SECTION 1
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-2
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node12
-      name: Article 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-1
+      ref_id: Article 2
       description: General elements of ICT security policies, procedures, protocols,
         and tools
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:2.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node13
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-2
       ref_id: '2.1'
       description: 'Financial entities shall ensure that their ICT security policies,
         information security, and related procedures, protocols, and tools as referred
@@ -141,7 +145,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:2.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node13
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-2
       ref_id: '2.2'
       description: 'Financial entities shall ensure that the ICT security policies
         referred to in paragraph 1:'
@@ -244,21 +248,21 @@ objects:
       description: take into account material changes concerning the financial entity,
         including material changes to the activities or processes of the financial
         entity, to the cyber threat landscape, or to applicable legal obligations.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node34
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 2
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node35
+      ref_id: SECTION 2
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-3
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node34
-      name: Article 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-2
+      ref_id: Article 3
       description: ICT risk management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node36
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node35
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-3
       description: 'Financial entities shall develop, document, and implement ICT
         risk management policies and procedures that shall contain all of the following:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:3.a
@@ -401,7 +405,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node57
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node35
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-3
       description: 'For the purposes of the first paragraph, point (c), the procedure
         referred to in that point shall ensure:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node58
@@ -422,22 +426,22 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node57
       description: (c)the assessment of whether the financial entity has taken actions
         to correct or improve those measures where necessary.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node61
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-3
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 3
+      ref_id: SECTION 3
       description: ICT ASSET MANAGEMENT
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node62
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-4
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node61
-      name: Article 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-3
+      ref_id: Article 4
       description: ICT asset management policy
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:4.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node62
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-4
       ref_id: '4.1'
       description: As part of the ICT security policies, procedures, protocols, and
         tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -446,7 +450,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:4.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node62
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-4
       ref_id: '4.2'
       description: 'The policy on management of ICT assets referred to in paragraph
         1 shall:'
@@ -536,23 +540,23 @@ objects:
         those financial entities keep records of the information necessary to perform
         a specific ICT risk assessment on all legacy ICT systems referred to in Article
         8(7) of Regulation (EU) 2022/2554.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node77
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-5
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node61
-      name: Article 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-3
+      ref_id: Article 5
       description: ICT asset management procedure
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:5.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node77
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-5
       ref_id: '5.1'
       description: ' Financial entities shall develop, document, and implement a procedure
         for the management of ICT assets.'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:5.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node77
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-5
       ref_id: '5.2'
       description: 'The procedure for management of ICT assets referred to in paragraph
         1 shall specify the criteria to perform the criticality assessment of information
@@ -573,22 +577,22 @@ objects:
       description: how the loss of confidentiality, integrity, and availability of
         such information assets and ICT assets would impact the business processes
         and activities of the financial entities.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node82
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-4
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 4
+      ref_id: SECTION 4
       description: ENCRYPTION AND CRYPTOGRAPHY
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node82
-      name: Article 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-4
+      ref_id: Article 6
       description: Encryption and cryptographic controls
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:6.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       ref_id: '6.1'
       description: As part of their ICT security policies, procedures, protocols,
         and tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -597,7 +601,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:6.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       ref_id: '6.2'
       description: 'Financial entities shall design the policy on encryption and cryptographic
         controls referred to in paragraph 1 on the basis of the results of an approved
@@ -633,7 +637,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node90
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       description: For the purposes of point (b), where encryption of data in use
         is not possible, financial entities shall process data in use in a separated
         and protected environment, or take equivalent measures to ensure the confidentiality,
@@ -641,7 +645,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:6.3
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       ref_id: '6.3'
       description: Financial entities shall include in the policy on encryption and
         cryptographic controls referred to in paragraph 1 criteria for the selection
@@ -655,7 +659,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:6.4
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       ref_id: '6.4'
       description: Financial entities shall include in the policy on encryption and
         cryptographic controls referred to in paragraph 1 provisions for updating
@@ -668,22 +672,22 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:6.5
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node83
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-6
       ref_id: '6.5'
       description: Financial entities shall include in the policy on encryption and
         cryptographic controls referred to in paragraph 1 a requirement to record
         the adoption of mitigation and monitoring measures adopted in accordance with
         paragraphs 3 and 4 and to provide a reasoned explanation for doing so.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node94
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-7
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node82
-      name: Article 7
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-4
+      ref_id: Article 7
       description: Cryptographic key management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:7.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node94
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-7
       ref_id: '7.1'
       description: Financial entities shall include in the cryptographic key management
         policy referred to in Article 6(2), point (d), requirements for managing cryptographic
@@ -693,7 +697,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:7.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node94
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-7
       ref_id: '7.2'
       description: Financial entities shall identify and implement controls to protect
         cryptographic keys through their whole lifecycle against loss, unauthorised
@@ -703,7 +707,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:7.3
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node94
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-7
       ref_id: '7.3'
       description: Financial entities shall develop and implement methods to replace
         the cryptographic keys in the case of loss, or where those keys are compromised
@@ -711,7 +715,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:7.4
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node94
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-7
       ref_id: '7.4'
       description: Financial entities shall create and maintain a register for all
         certificates and certificate-storing devices for at least ICT assets supporting
@@ -720,26 +724,26 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:7.5
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node94
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-7
       ref_id: '7.5'
       description: Financial entities shall ensure the prompt renewal of certificates
         in advance of their expiration.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node100
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-5
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 5
+      ref_id: SECTION 5
       description: ICT OPERATIONS SECURITY
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node101
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-8
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node100
-      name: Article 8
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-5
+      ref_id: Article 8
       description: Policies and procedures for ICT operations
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:8.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node101
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-8
       ref_id: '8.1'
       description: As part of the ICT security policies, procedures, protocols, and
         tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -750,7 +754,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:8.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node101
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-8
       ref_id: '8.2'
       description: 'The policies and procedures for ICT operations referred to in
         paragraph 1 shall
@@ -866,14 +870,14 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node120
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node101
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-8
       description: For the purposes of point (b)(v), the separation shall consider
         all of the components of the environment, including accounts, data or connections,
         as required by Article 13(1), point (a)
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node121
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node101
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-8
       description: For the purposes of point (b)(vii), the policies and procedures
         referred to in paragraph 1 shall provide that the instances in which testing
         is performed in a production environment are clearly identified, reasoned,
@@ -881,16 +885,16 @@ objects:
         in accordance with Article 16(6). Financial entities shall ensure the availability,
         confidentiality, integrity, and authenticity of ICT systems and production
         data during development and test activities in the production environment.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node122
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-9
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node100
-      name: Article 9
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-5
+      ref_id: Article 9
       description: Capacity and performance management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:9.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node122
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-9
       ref_id: '9.1'
       description: 'As part of the ICT security policies, procedures, protocols, and
         tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -935,22 +939,22 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:9.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node122
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-9
       ref_id: '9.2'
       description: The capacity and performance management procedures referred to
         in paragraph 1 shall ensure that financial entities take measures that are
         appropriate to cater for the specificities of ICT systems with long or complex
         procurement or approval processes or ICT systems that are resource-intensive.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node100
-      name: Article 10
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-5
+      ref_id: Article 10
       description: Vulnerability and patch management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:10.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       ref_id: '10.1'
       description: As part of the ICT security policies, procedures, protocols, and
         tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -958,7 +962,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:10.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       ref_id: '10.2'
       description: 'The vulnerability management procedures referred to in paragraph
         1 shall:'
@@ -1053,7 +1057,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node146
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       description: For the purposes of point (b), financial entities shall perform
         the automated vulnerability scanning and assessments on ICT assets for the
         ICT assets supporting critical or important functions on at least a weekly
@@ -1061,14 +1065,14 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node147
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       description: For the purposes of point (c), financial entities shall request
         that ICT third-party service providers investigate the relevant vulnerabilities,
         determine the root causes, and implement appropriate mitigating action.
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node148
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       description: For the purposes of point (d), financial entities shall, where
         appropriate in collaboration with the ICT third-party service provider, monitor
         the version and possible updates of the third-party libraries. In case of
@@ -1079,7 +1083,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node149
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       description: For the purposes of point (f), financial entities shall consider
         the criticality of the vulnerability, the classification established in accordance
         with Article 8(1) of Regulation (EU) 2022/2554, and the risk profile of the
@@ -1087,7 +1091,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:10.3
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       ref_id: '10.3'
       description: As part of the ICT security policies, procedures, protocols, and
         tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -1095,7 +1099,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:10.4
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node131
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-10
       ref_id: '10.4'
       description: ' The patch management procedures referred to in paragraph 3 shall:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:10.4.a
@@ -1126,16 +1130,16 @@ objects:
       ref_id: 10.4.d
       description: set deadlines for the installation of software and hardware patches
         and updates and escalation procedures in case those deadlines cannot be met.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node156
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-11
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node100
-      name: Article 11
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-5
+      ref_id: Article 11
       description: Data and system security
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:11.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node156
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-11
       ref_id: '11.1'
       description: As part of the ICT security policies, procedures, protocols, and
         tools referred to in Article 9(2) of Regulation (EU) 2022/2554, financial
@@ -1144,7 +1148,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:11.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node156
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-11
       ref_id: '11.2'
       description: 'The data and system security procedure referred to in paragraph
         1 shall contain all of the following elements related to data and ICT system
@@ -1259,7 +1263,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node173
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node156
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-11
       description: For the purposes of point (b), the secure configuration baseline
         referred to in that point shall take into account leading practices and appropriate
         techniques laid down in the standards defined in Article 2, point (1), of
@@ -1267,7 +1271,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node174
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node156
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-11
       description: 'For the purposes of point (k), financial entities shall consider
         the following:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node175
@@ -1302,16 +1306,16 @@ objects:
         related to the infrastructure used by the ICT third-party service provider
         for its ICT services, considering leading practices, and standards as defined
         in Article 2, point (1), of Regulation (EU) No 1025/2012.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node179
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-12
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node100
-      name: Article 12
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-5
+      ref_id: Article 12
       description: Logging
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:12.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node179
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-12
       ref_id: '12.1'
       description: Financial entities shall, as part of the safeguards against intrusions
         and data misuse, develop, document, and implement logging procedures, protocols
@@ -1319,7 +1323,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:12.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node179
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-12
       ref_id: '12.2'
       description: 'The logging procedures, protocols, and tools referred to in paragraph
         1 shall contain all of the following:'
@@ -1402,27 +1406,27 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node193
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node179
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-12
       description: For the purposes of point (a), financial entities shall establish
         the retention period, taking into account the business and information security
         objectives, the reason for recording the event in the logs, and the results
         of the ICT risk assessment.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node194
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-6
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 6
+      ref_id: SECTION 6
       description: NETWORK SECURITY
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node195
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-13
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node194
-      name: Article 13
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-6
+      ref_id: Article 13
       description: Network security management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:13.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node195
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-13
       ref_id: '13.1'
       description: 'Financial entities shall, as part of the safeguards ensuring the
         security of network against intrusions and data misuse, develop, document,
@@ -1566,7 +1570,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node215
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node195
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-13
       description: For the purposes of point (h), financial entities shall perform
         the review of firewall rules and connections filters on a regular basis in
         accordance with the classification established in accordance with Article
@@ -1574,16 +1578,16 @@ objects:
         involved. For ICT systems that support critical or important functions, financial
         entities shall verify the adequacy of the existing firewall rules and connection
         filters at least every 6 months.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node216
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-14
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node194
-      name: Article 14
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-6
+      ref_id: Article 14
       description: Securing information in transit
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:14.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node216
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-14
       ref_id: '14.1'
       description: 'As part of the safeguards to preserve the availability, authenticity,
         integrity and confidentiality of data, financial entities shall develop, document,
@@ -1616,28 +1620,28 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:14.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node216
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-14
       ref_id: '14.2'
       description: Financial entities shall design the policies, procedures, protocols,
         and tools to protect the information in transit referred to in paragraph 1
         on the basis of the results of the approved data classification and of the
         ICT risk assessment.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node222
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-7
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 7
+      ref_id: SECTION 7
       description: ICT PROJECT AND CHANGE MANAGEMENT
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node223
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-15
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node222
-      name: Article 15
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-7
+      ref_id: Article 15
       description: ICT project management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:15.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node223
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-15
       ref_id: '15.1'
       description: As part of the safeguards to preserve the availability, authenticity,
         integrity, and confidentiality of data, financial entities shall develop,
@@ -1645,7 +1649,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:15.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node223
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-15
       ref_id: '15.2'
       description: "The ICT project management policy referred to in paragraph 1 shall\
         \ specify the elements that ensure the effective management of the ICT projects\
@@ -1654,7 +1658,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:15.3
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node223
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-15
       ref_id: '15.3'
       description: 'The ICT project management policy referred to in paragraph 1 shall
         contain all of the following:'
@@ -1705,7 +1709,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:15.4
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node223
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-15
       ref_id: '15.4'
       description: The ICT project management policy referred to in paragraph 1 shall
         ensure the secure ICT project implementation through the provision of the
@@ -1714,7 +1718,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:15.5
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node223
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-15
       ref_id: '15.5'
       description: 'In accordance with the ICT project risk assessment referred to
         in paragraph 3, point (d), the ICT project management policy referred to in
@@ -1734,16 +1738,16 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:15.5
       ref_id: 15.5.b
       description: periodically and, where necessary, on an event-driven basis.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node222
-      name: Article 16
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-7
+      ref_id: Article 16
       description: ICT systems acquisition, development, and maintenance
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.1'
       description: 'As part of the safeguards to preserve the availability, authenticity,
         integrity, and confidentiality of data, financial entities shall develop,
@@ -1789,7 +1793,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.2'
       description: "Financial entities shall develop, document, and implement an ICT\
         \ systems\u2019 acquisition, development, and maintenance procedure for the\
@@ -1802,7 +1806,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node246
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       description: 'Central counterparties shall, in addition to the requirements
         laid down in the first subparagraph, involve, as appropriate, in the design
         and conduct of the testing referred to in the first subparagraph:'
@@ -1824,7 +1828,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node250
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       description: Central securities depositories shall, in addition to the requirements
         laid down in the first subparagraph, involve, as appropriate, in the design
         and conduct of the testing referred to in the first subparagraph
@@ -1859,7 +1863,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.3
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.3'
       description: 'The procedure referred to in paragraph 2 shall contain the performance
         of source code reviews covering both static and dynamic testing. That testing
@@ -1888,7 +1892,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.4
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.4'
       description: The procedure referred to in paragraph 2 shall contain security
         testing of software packages no later than at the integration phase, in accordance
@@ -1896,7 +1900,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.5
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.5'
       description: 'The procedure referred to in paragraph 2 shall provide that:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.5.a
@@ -1918,7 +1922,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.6
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.6'
       description: By way of derogation from paragraph 5, the procedure referred to
         in paragraph 2 may provide that production data are stored only for specific
@@ -1928,7 +1932,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.7
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.7'
       description: The procedure referred to in paragraph 2 shall contain the implementation
         of controls to protect the integrity of the source code of ICT systems that
@@ -1937,7 +1941,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.8
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.8'
       description: The procedure referred to in paragraph 2 shall provide that proprietary
         software and, where feasible, the source code provided by ICT third-party
@@ -1947,21 +1951,21 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:16.9
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node238
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-16
       ref_id: '16.9'
       description: Paragraph 1 to 8 of this Article shall also apply to ICT systems
         developed or managed by users outside the ICT function, using a risk-based
         approach.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node268
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-17
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node222
-      name: Article 17
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-7
+      ref_id: Article 17
       description: ICT change management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:17.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node268
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-17
       ref_id: '17.1'
       description: 'As part of the safeguards to preserve the availability, authenticity,
         integrity, and confidentiality of data, financial entities shall include in
@@ -2072,7 +2076,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:17.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node268
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-17
       ref_id: '17.2'
       description: After having made significant changes to their ICT systems, central
         counterparties and central securities depositories shall submit their ICT
@@ -2080,7 +2084,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node286
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node268
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-17
       description: 'Central counterparties shall involve, as appropriate, in the design
         and conduct of the testing referred to in the first subparagraph:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node287
@@ -2101,7 +2105,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node290
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node268
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-17
       description: 'Central securities depositories shall, as appropriate, involve
         in the design and conduct of the testing referred to in the first subparagraph:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node291
@@ -2130,21 +2134,21 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node290
       description: (e) any other institutions with which central securities depositories
         have identified interdependencies in their ICT business continuity policy
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node296
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-8
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node11
-      name: SECTION 8
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node297
+      ref_id: SECTION 8
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-18
       assessable: false
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node296
-      name: Article 18
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:section-8
+      ref_id: Article 18
       description: Physical and environmental security
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:18.1
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node297
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-18
       ref_id: '18.1'
       description: As part of the safeguards to preserve the availability, authenticity,
         integrity, and confidentiality of data, financial entities shall specify,
@@ -2156,7 +2160,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:18.2
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node297
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-18
       ref_id: '18.2'
       description: 'The physical and environmental security policy referred to in
         paragraph 1 shall contain all of the following:'
@@ -2214,7 +2218,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node307
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node297
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-18
       description: For the purposes of point (b), the measures to protect from environmental
         threats and hazards shall be commensurate with the importance of the premises,
         data centres, sensitive designated areas, and the criticality of the operations
@@ -2222,7 +2226,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node308
       assessable: true
       depth: 5
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node297
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-18
       description: For the purposes of point (c), the physical and environmental security
         policy referred to in paragraph 1 shall contain measures to provide appropriate
         protection to unattended ICT assets.
@@ -2232,16 +2236,16 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
       name: CHAPTER II
       description: HUMAN RESOURCES POLICY AND ACCESS CONTROL
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node310
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-19
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node309
-      name: Article 19
+      ref_id: Article 19
       description: Human resources policy
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node311
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node310
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-19
       description: 'Financial entities shall include in their human resource policy
         or other relevant policies all of the following ICT security related elements:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:19.a
@@ -2283,16 +2287,16 @@ objects:
       description: for the staff, to return to the financial entity, upon termination
         of employment, all ICT assets and tangible information assets in their possession
         that belong to the financial entity.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node317
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-20
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node309
-      name: Article 20
+      ref_id: Article 20
       description: Identity management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:20.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node317
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-20
       ref_id: '20.1'
       description: "As part of their control of access management rights, financial\
         \ entities shall develop, document, and implement identity management policies\
@@ -2302,7 +2306,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:20.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node317
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-20
       ref_id: '20.2'
       description: 'The identity management policies and procedures referred to in
         paragraph 1 shall contain all of the following:'
@@ -2326,7 +2330,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node322
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node317
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-20
       description: For the purposes of point (a), financial entities shall maintain
         records of all identity assignments. Those records shall be kept following
         a reorganisation of the financial entity or after the end of the contractual
@@ -2335,20 +2339,20 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node323
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node317
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-20
       description: For the purposes of point (b), financial entities shall, where
         feasible and appropriate, deploy automated solutions for the lifecycle identity
         management process.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node324
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-21
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node309
-      name: Article 21
+      ref_id: Article 21
       description: Access control
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node325
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node324
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-21
       description: 'As part of their control of access management rights, financial
         entities shall develop, document, and implement a policy that contains all
         of the following:'
@@ -2484,7 +2488,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node343
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node324
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-21
       description: For the purposes of point (e)(i), financial entities shall establish
         the retention period taking into account the business and information security
         objectives, the reasons for recording the event in the logs, and the results
@@ -2492,7 +2496,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node344
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node324
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-21
       description: For the purposes of point (e)(ii), financial entities shall, where
         possible, use dedicated accounts for the performance of administrative tasks
         on ICT systems. Where feasible and appropriate, financial entities shall deploy
@@ -2500,7 +2504,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node345
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node324
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-21
       description: For the purposes of point (g)(i), the identification and logging
         shall be commensurate with the importance of the premises, data centres, sensitive
         designated areas, and the criticality of the operations or ICT systems located
@@ -2508,7 +2512,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node346
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node324
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-21
       description: For the purposes of point (g)(iii), the monitoring shall be commensurate
         to the classification established in accordance with Article 8(1) of Regulation
         (EU) 2022/2554 and the criticality of the area accessed.
@@ -2518,16 +2522,16 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
       name: CHAPTER III
       description: ICT-RELATED INCIDENT DETECTION AND RESPONSE
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node348
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-22
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node347
-      name: Article 22
+      ref_id: Article 22
       description: ICT-related incident management policy
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node349
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node348
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-22
       description: 'As part of the mechanisms to detect anomalous activities, including
         ICT network performance issues and ICT-related incidents, financial entities
         shall develop, document, and implement an ICT-related incident policy through
@@ -2597,27 +2601,27 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node358
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node348
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-22
       description: For the purposes of point (d), financial entities shall retain
         the evidence referred to in that point in a secure manner.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node347
-      name: Article 23
+      ref_id: Article 23
       description: Anomalous activities detection and criteria for ICT-related incidents
         detection and response
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:23.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       ref_id: '23.1'
       description: Financial entities shall set clear roles and responsibilities to
         effectively detect and respond to ICT-related incidents and anomalous activities.
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:23.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       ref_id: '23.2'
       description: 'The mechanism to promptly detect anomalous activities, including
         ICT network performance issues and ICT-related incidents, as referred to in
@@ -2681,7 +2685,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node369
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       description: For the purposes of point (b), the tools referred to in that point
         shall contain the tools that provide automated alerts based on pre-defined
         rules to identify anomalies affecting the completeness and integrity of the
@@ -2689,7 +2693,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:23.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       ref_id: '23.3'
       description: Financial entities shall protect any recording of the anomalous
         activities against tampering and unauthorised access at rest, in transit and,
@@ -2697,7 +2701,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:23.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       ref_id: '23.4'
       description: 'Financial entities shall log all relevant information for each
         detected anomalous activity enabling:'
@@ -2724,7 +2728,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:23.5
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       ref_id: '23.5'
       description: 'Financial entities shall consider all of the following criteria
         to trigger the ICT-related incident detection and response processes referred
@@ -2760,7 +2764,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:23.6
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node359
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-23
       ref_id: '23.6'
       description: For the purposes of paragraph 5, financial entities shall also
         consider the criticality of the services affected.
@@ -2770,16 +2774,16 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
       name: CHAPTER IV
       description: ICT BUSINESS CONTINUITY MANAGEMENT
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node381
-      name: Article 24
+      ref_id: Article 24
       description: Components of the ICT business continuity policy
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:24.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       ref_id: '24.1'
       description: 'Financial entities shall include in their ICT business continuity
         policy referred to in Article 11(1) of Regulation (EU) 2022/2554 all of the
@@ -2902,7 +2906,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:24.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       ref_id: '24.2'
       description: 'In addition to the requirements referred to in paragraph 1, central
         counterparties shall ensure that their ICT business continuity policy:'
@@ -2963,13 +2967,13 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node408
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       description: For the purposes of point (a), central counterparties shall complete
         end of day procedures and payments on the required time and day in all circumstances.
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node409
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       description: For the purposes of point (c)(i), arrangements referred to in that
         point shall address the availability of adequate human resources, the maximum
         downtime of critical functions, and fail over and recovery to a secondary
@@ -2977,14 +2981,14 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node410
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       description: For the purposes of point (c)(ii), the secondary processing site
         referred to in that point shall have a geographical risk profile which is
         distinct from that of the primary site.
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:24.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       ref_id: '24.3'
       description: 'In addition to the requirements referred to in paragraph 1, central
         securities depositories shall ensure that their ICT business continuity policy:'
@@ -3007,7 +3011,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:24.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node382
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-24
       ref_id: '24.4'
       description: 'In addition to the requirements referred to in paragraph 1, trading
         venues shall ensure that their ICT business continuity policy ensures that:'
@@ -3025,16 +3029,16 @@ objects:
       ref_id: 24.4.b
       description: the maximum amount of data that may be lost from any IT service
         of the trading venue after a disruptive incident is close to zero.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node381
-      name: Article 25
+      ref_id: Article 25
       description: Testing of the ICT business continuity plans
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:25.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       ref_id: '25.1'
       description: "When testing the ICT business continuity plans in accordance with\
         \ Article 11(6), of Regulation (EU) 2022/2554, financial entities shall take\
@@ -3044,7 +3048,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:25.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       ref_id: '25.2'
       description: "Financial entities shall assess through the testing of their ICT\
         \ business continuity plans referred to in paragraph 1 whether they are able\
@@ -3095,14 +3099,14 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node425
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       description: For the purposes of point (a), financial entities shall always
         include in the testing the scenarios considered for the development of the
         business continuity plans.
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node426
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       description: "For the purposes of point (b), financial entities shall duly consider\
         \ scenarios linked to insolvency or failures of the ICT third-party service\
         \ providers or linked to political risks in the ICT third-party service providers\u2019\
@@ -3110,7 +3114,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node427
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       description: 'For the purposes of point (c), the testing shall verify whether
         at least critical or
 
@@ -3121,7 +3125,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:25.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       ref_id: '25.3'
       description: 'In addition to the requirements referred to in paragraph 2, central
         counterparties shall involve in the testing of their ICT business continuity
@@ -3149,7 +3153,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:25.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       ref_id: '25.4'
       description: 'In addition to the requirements referred to in paragraph 2, central
         securities depositories shall involve in the testing of their ICT business
@@ -3188,21 +3192,21 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:25.5
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node417
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-25
       ref_id: '25.5'
       description: Financial entities shall document the results of the testing referred
         to in paragraph 1. Any identified deficiencies resulting from that testing
         shall be analysed, addressed,and reported to the management body.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node439
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-26
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node381
-      name: Article 26
+      ref_id: Article 26
       description: ICT response and recovery plans
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:26.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node439
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-26
       ref_id: '26.1'
       description: "When developing the ICT response and recovery plans referred to\
         \ in Article 11(3) of Regulation (EU) 2022/2554, financial entities shall\
@@ -3258,13 +3262,13 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node447
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node439
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-26
       description: For the purposes of point (d), financial entities shall clearly
         specify roles and responsibilities.
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:26.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node439
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-26
       ref_id: '26.2'
       description: 'The ICT response and recovery plans referred to in paragraph 1
         shall identify relevant scenarios, including scenarios of severe business
@@ -3339,7 +3343,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:26.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node439
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-26
       ref_id: '26.3'
       description: Where the primary recovery measures may not be feasible in the
         short term because of costs, risks, logistics, or unforeseen circumstances,
@@ -3348,7 +3352,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:26.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node439
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-26
       ref_id: '26.4'
       description: As part of the ICT response and recovery plans referred to in paragraph
         1, financial entities shall consider and implement continuity measures to
@@ -3360,17 +3364,17 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node10
       name: CHAPTER V
       description: REPORT ON THE ICT RISK MANAGEMENT FRAMEWORK REVIEW
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node461
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-27
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node460
-      name: Article 27
+      ref_id: Article 27
       description: Format and content of the report on the review of the ICT risk
         management framework
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:27.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node461
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-27
       ref_id: '27.1'
       description: Financial entities shall submit the report on the review of the
         ICT risk management framework referred to in Article 6(5) of Regulation (EU)
@@ -3378,7 +3382,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:27.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node461
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-27
       ref_id: '27.2'
       description: 'Financial entities shall include all of the following information
         in the report referred to in paragraph 1:'
@@ -3601,7 +3605,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node493
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node461
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-27
       description: For the purposes of point (c), where the review was initiated following
         supervisory instructions, or conclusions derived from relevant digital operational
         resilience testing or audit processes, the report shall contain explicit references
@@ -3612,7 +3616,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node494
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node461
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-27
       description: For the purposes of point (f), the description shall contain an
         analysis of the impact of the changes on the financial entity's digital operational
         resilience strategy, on the financial entity's ICT internal control framework,
@@ -3629,16 +3633,16 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
       name: CHAPTER I
       description: SIMPLIFIED ICT RISK MANAGEMENT FRAMEWORK
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node496
-      name: Article 28
+      ref_id: Article 28
       description: Governance and organisation
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:28.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       ref_id: '28.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall have in place an internal governance and control framework
@@ -3647,7 +3651,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:28.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       ref_id: '28.2'
       description: 'The financial entities referred to in paragraph 1 shall, as part
         of their simplified ICT risk management framework, ensure that their management
@@ -3740,7 +3744,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:28.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       ref_id: '28.3'
       description: The financial entities referred to in paragraph 1 may, in accordance
         with Union and national sectoral law, outsource the tasks of verifying compliance
@@ -3751,7 +3755,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:28.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       ref_id: '28.4'
       description: The financial entities referred to in paragraph 1 shall ensure
         an appropriate segregation and the independence of control functions and internal
@@ -3759,7 +3763,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:28.5
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       ref_id: '28.5'
       description: "The financial entities referred to in paragraph 1 shall ensure\
         \ that their simplified ICT risk management framework is subject to an internal\
@@ -3770,21 +3774,21 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:28.6
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node497
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-28
       ref_id: '28.6'
       description: Based on the outcome of the audit referred to in paragraph 5, the
         financial entities referred to in paragraph 1 shall ensure the timely verification
         and remediation of critical ICT audit findings.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node515
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-29
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node496
-      name: Article 29
+      ref_id: Article 29
       description: Information security policy and measures
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:29.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node515
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-29
       ref_id: '29.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall develop, document, and implement an information security
@@ -3795,7 +3799,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:29.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node515
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-29
       ref_id: '29.2'
       description: Based on their information security policy referred to in paragraph
         1, the financial entities referred to in paragraph 1 shall establish and implement
@@ -3804,19 +3808,19 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node518
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node515
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-29
       description: The ICT security measures shall include all of the measures referred
         to in Articles 30 to 38.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node519
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-30
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node496
-      name: Article 30
+      ref_id: Article 30
       description: Classification of information assets and ICT assets
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:30.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node519
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-30
       ref_id: '30.1'
       description: As part of the simplified ICT risk management framework referred
         to in Article 16(1), point (a), of Regulation (EU) 2022/2554, the financial
@@ -3827,20 +3831,20 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:30.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node519
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-30
       ref_id: '30.2'
       description: The financial entities referred to in paragraph 1 shall identify
         all critical or important functions supported by ICT third-party service providers.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node522
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-31
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node496
-      name: Article 31
+      ref_id: Article 31
       description: ICT risk management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:31.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node522
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-31
       ref_id: '31.1'
       description: 'The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall include in their simplified ICT risk management framework
@@ -3885,7 +3889,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:31.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node522
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-31
       ref_id: '31.2'
       description: "The financial entities referred to in paragraph 1 shall carry\
         \ out and document the ICT risk assessment periodically commensurate to the\
@@ -3893,7 +3897,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:31.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node522
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-31
       ref_id: '31.3'
       description: The financial entities referred to in paragraph 1 shall continuously
         monitor threats and vulnerabilities that are relevant to their critical or
@@ -3902,21 +3906,21 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:31.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node522
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-31
       ref_id: '31.4'
       description: The financial entities referred to in paragraph 1 shall set out
         alert thresholds and criteria to trigger and initiate ICT-related incident
         response processes.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node532
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-32
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node496
-      name: Article 32
+      ref_id: Article 32
       description: Physical and environmental security
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:32.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node532
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-32
       ref_id: '32.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall identify and implement physical security measures designed
@@ -3926,7 +3930,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:32.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node532
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-32
       ref_id: '32.2'
       description: The measures referred to in paragraph 1 shall protect the premises
         of financial entities and, where applicable, data centres of financial entities
@@ -3935,7 +3939,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:32.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node532
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-32
       ref_id: '32.3'
       description: The protection from environmental threats and hazards shall be
         commensurate with the importance of the premises concerned and, where applicable,
@@ -3948,16 +3952,16 @@ objects:
       name: CHAPTER II
       description: FURTHER ELEMENTS OF SYSTEMS, PROTOCOLS, AND TOOLS TO MINIMISE THE
         IMPACT OF ICT RISK
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node537
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-33
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
-      name: Article 33
+      ref_id: Article 33
       description: Access Control
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:33.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node537
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-33
       ref_id: '33.1'
       description: 'The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall develop, document, and implement procedures for the control
@@ -4005,7 +4009,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node544
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node537
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-33
       description: For the purposes of point (c), the financial entity shall assign
         privileged, emergency, and administrator access on a need-to-use or an ad-hoc
         basis for all ICT systems, and shall be logged in accordance with Article
@@ -4013,22 +4017,22 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node545
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node537
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-33
       description: "For the purposes of point (d), financial entities shall use strong\
         \ authentication methods that are based on leading practices for remote access\
         \ to the financial entities\u2019 network, for privileged access, and for\
         \ access to ICT assets supporting critical or important functions that are\
         \ publicly available."
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node546
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-34
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
-      name: Article 34
+      ref_id: Article 34
       description: ICT operations security
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node547
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node546
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-34
       description: 'The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall, as part of their systems, protocols, and tools, and
         for all ICT assets:'
@@ -4102,20 +4106,20 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node557
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node546
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-34
       description: For the purposes of point (f), financial entities shall align the
         level of detail of the logs with their purpose and usage of the ICT asset
         producing those logs.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node558
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-35
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
-      name: Article 35
+      ref_id: Article 35
       description: Data, system and network security
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node559
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node558
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-35
       description: 'The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall, as part of their systems, protocols, and tools, develop
         and implement safeguards that ensure the security of networks against intrusions
@@ -4179,16 +4183,16 @@ objects:
         \ teleworking and the use of private endpoint devices does not adversely impact\
         \ the financial entity\u2019s ability to carry out its critical activities\
         \ in an adequate, timely, and secure manner."
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node567
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-36
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
-      name: Article 36
+      ref_id: Article 36
       description: ICT security testing
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:36.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node567
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-36
       ref_id: '36.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall establish and implement an ICT security testing plan
@@ -4200,7 +4204,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:36.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node567
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-36
       ref_id: '36.2'
       description: The financial entities referred to in paragraph 1 shall review,
         asses and test ICT security measures, taking into consideration the overall
@@ -4208,22 +4212,22 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:36.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node567
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-36
       ref_id: '36.3'
       description: The financial entities referred to in paragraph 1 shall monitor
         and evaluate the results of the security tests and update their security measures
         accordingly without undue delay in the case of ICT systems supporting critical
         or important functions.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node571
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-37
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
-      name: Article 37
+      ref_id: Article 37
       description: ICT systems acquisition, development, and maintenance
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node572
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node571
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-37
       description: 'The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall design and implement, where appropriate, a procedure
         governing the acquisition, development, and maintenance of ICT systems following
@@ -4252,16 +4256,16 @@ objects:
       description: identify measures to mitigate the risk of unintentional alteration
         or intentional manipulation of the ICT systems during development and implementation
         in the production environment.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node576
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-38
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node536
-      name: Article 38
+      ref_id: Article 38
       description: ICT project and change management
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:38.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node576
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-38
       ref_id: '38.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall develop, document, and implement an ICT project management
@@ -4271,7 +4275,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:38.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node576
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-38
       ref_id: '38.2'
       description: "The financial entities referred to in paragraph 1 shall develop,\
         \ document, and implement an ICT change management procedure to ensure that\
@@ -4284,16 +4288,16 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
       name: CHAPTER III
       description: ICT BUSINESS CONTINUITY MANAGEMENT
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node580
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-39
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node579
-      name: Article 39
+      ref_id: Article 39
       description: Components of the ICT business continuity plan
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:39.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node580
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-39
       ref_id: '39.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall develop their ICT business continuity plans considering
@@ -4304,7 +4308,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:39.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node580
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-39
       ref_id: '39.2'
       description: 'The ICT business continuity plans referred to in paragraph 1 shall:'
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:39.2.a
@@ -4386,20 +4390,20 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node593
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node580
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-39
       description: For the purposes of point (f), the measures referred to in that
         point shall provide for the mitigation of failures of critical third-party
         providers.
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node594
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-40
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node579
-      name: Article 40
+      ref_id: Article 40
       description: Testing of business continuity plans
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:40.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node594
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-40
       ref_id: '40.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall test their business continuity plans referred to in Article
@@ -4409,7 +4413,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:40.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node594
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-40
       ref_id: '40.2'
       description: The testing of business continuity plans referred to in paragraph
         1 shall demonstrate that the financial entities referred to in that paragraph
@@ -4418,7 +4422,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:40.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node594
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-40
       ref_id: '40.3'
       description: The financial entities referred to in paragraph 1 shall document
         the results of the testing of business continuity plans and any identified
@@ -4430,17 +4434,17 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node495
       name: CHAPTER IV
       description: REPORT ON THE REVIEW OF THE SIMPLIFIED ICT RISK MANAGEMENT FRAMEWORK
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node599
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-41
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node598
-      name: Article 41
+      ref_id: Article 41
       description: Format and content of the report on the review of the simplified
         ICT risk management framework
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:41.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node599
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-41
       ref_id: '41.1'
       description: The financial entities referred to in Article 16(1) of Regulation
         (EU) 2022/2554 shall submit the report on the review of the ICT risk management
@@ -4449,7 +4453,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:41.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node599
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-41
       ref_id: '41.2'
       description: 'The report referred to in paragraph 1 shall contain all of the
         following information:'
@@ -4570,16 +4574,16 @@ objects:
       depth: 1
       name: TITLE IV
       description: FINAL PROVISIONS
-    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node618
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-42
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node617
-      name: Article 42
+      ref_id: Article 42
       description: Entry into force
     - urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node619
       assessable: false
       depth: 3
-      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:node618
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-risk-management:article-42
       description: 'This Regulation shall enter into force on the twentieth day following
         that of its publication in
 
