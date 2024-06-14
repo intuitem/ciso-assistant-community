@@ -37,19 +37,19 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             )
 
     def list_apps(self, request, provider=None, client_id=None):
-        """IdentityProvider's can be setup in the database, or, via
+        """SSOSettings's can be setup in the database, or, via
         `settings.SOCIALACCOUNT_PROVIDERS`.  This methods returns a uniform list
         of all known apps matching the specified criteria, and blends both
         (db/settings) sources of data.
         """
         # NOTE: Avoid loading models at top due to registry boot...
-        from .sso.models import IdentityProvider
+        from .sso.models import SSOSettings
 
         # Map provider to the list of apps.
         provider_to_apps = {}
 
         # First, populate it with the DB backed apps.
-        db_apps = IdentityProvider.objects.all()
+        db_apps = SSOSettings.objects.all()
         if provider:
             db_apps = db_apps.filter(Q(provider=provider) | Q(provider_id=provider))
         if client_id:
@@ -69,7 +69,7 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
 
             apps = provider_to_apps.setdefault(p, [])
             for config in app_configs:
-                app = IdentityProvider(provider=p)
+                app = SSOSettings(provider=p)
                 for field in [
                     "name",
                     "provider_id",
@@ -100,7 +100,7 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         return apps
 
     def get_app(self, request, provider, client_id=None):
-        from .sso.models import IdentityProvider
+        from .sso.models import SSOSettings
 
         apps = self.list_apps(request, provider=provider, client_id=client_id)
         if len(apps) > 1:
@@ -109,5 +109,5 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
                 raise MultipleObjectsReturned
             apps = visible_apps
         elif len(apps) == 0:
-            raise IdentityProvider.DoesNotExist()
+            raise SSOSettings.DoesNotExist()
         return apps[0]

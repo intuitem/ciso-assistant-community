@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import IdentityProvider
+from .models import SSOSettings
 from rest_framework.decorators import action
 from allauth.socialaccount import providers
 
@@ -9,8 +9,8 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "iam.sso.serializers"
 
 
-class IdentityProviderViewSet(BaseModelViewSet):
-    model = IdentityProvider
+class SSOSettingsViewSet(BaseModelViewSet):
+    model = SSOSettings
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
