@@ -81,7 +81,7 @@
 						<button
 							on:click={() =>
 								redirectToProvider(
-									'http://127.0.0.1:8000/api/accounts/saml/keycloack/metadata',
+									'http://127.0.0.1:8000/api/accounts/saml/entra/metadata',
 									'http://localhost:5173/',
 									'login'
 								)}>sso</button

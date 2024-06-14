@@ -1,4 +1,4 @@
-from iam.sso.views import IdentityProviderViewSet
+from iam.sso.views import SSOSettingsViewSet
 from .views import *
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
 from iam.sso.saml.views import FinishACSView
@@ -44,7 +44,7 @@ router.register(
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
 router.register(
-    r"identity-providers", IdentityProviderViewSet, basename="identity-providers"
+    r"identity-providers", SSOSettingsViewSet, basename="identity-providers"
 )
 
 
@@ -52,6 +52,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),
+    path("settings/", include("settings.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("license/", license, name="license"),

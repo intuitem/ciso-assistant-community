@@ -148,11 +148,6 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
-				},
-				{
-					name: 'identityProviders',
-					fa_icon: 'fa-solid fa-id-card',
-					href: '/identity-providers'
 				}
 			]
 		},
@@ -183,12 +178,13 @@ export const navData = {
 					fa_icon: 'fa-solid fa-floppy-disk',
 					href: '/backup-restore',
 					permissions: ['backup']
+				},
+				{
+					name: 'globalSettings',
+					fa_icon: 'fa-solid fa-cog',
+					href: '/settings',
+					permissions: ['change_globalsettings']
 				}
-				// {
-				// 	name: 'License management',
-				// 	fa_icon: 'fa-solid fa-file-invoice',
-				// 	href: '/license-management'
-				// }
 			]
 		}
 	]

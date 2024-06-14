@@ -33,7 +33,9 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         if not perms:
             return False
         _codename = perms[0].split(".")[1]
-        if request.method in ["GET", "OPTIONS", "HEAD"] and obj.is_published:
+        if request.method in ["GET", "OPTIONS", "HEAD"] and getattr(
+            obj, "is_published", False
+        ):
             return True
         perm = Permission.objects.get(codename=_codename)
         # special case of risk acceptance approval
