@@ -1,5 +1,7 @@
 from django.db import models
 
+from iam.models import Folder, FolderMixin
+
 
 class GlobalSettings(models.Model):
     """
@@ -21,6 +23,13 @@ class GlobalSettings(models.Model):
     )
     # Value of the setting.
     value = models.JSONField()
+
+    folder = models.ForeignKey(
+        Folder,
+        on_delete=models.CASCADE,
+        related_name="%(class)s_folder",
+        default=Folder.get_root_folder,
+    )
 
     def __str__(self):
         return self.name

@@ -426,19 +426,14 @@
 			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
 	{:else if URLModel === 'identity-providers'}
-		<AutocompleteSelect
-			{form}
-			options={model.selectOptions['provider']}
-			field="provider"
-			label={m.provider()}
-		/>
+		<TextField {form} field="provider" label={m.provider()} />
 		<TextField {form} field="provider_id" label={m.providerId()} />
 		<TextField {form} field="client_id" label={m.clientId()} />
 		<TextField {form} field="secret" label={m.secret()} />
 		<TextField {form} field="key" label={m.key()} />
 		{#if data.provider === 'saml'}
 			Attribute mapping
-			<TextField {form} field="attribute_mapping_uid" />
+			<AutocompleteSelect {form} field="attribute_mapping_uid" />
 			<TextField {form} field="attribute_mapping_email_verified" />
 			<TextField {form} field="attribute_mapping_email" />
 

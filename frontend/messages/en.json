@@ -569,5 +569,6 @@
 	"settings": "Settings",
 	"identityProvider": "Identity provider",
 	"identityProviders": "Identity providers",
-	"addIdentityProvider": "Add identity provider"
+	"addIdentityProvider": "Add identity provider",
+	"globalSettings": "Global settings"
 }
