@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
-	// export let name: string;
+	export let name: string;
 	export let s_label = '';
 
 	export let width = 'w-auto';
@@ -20,10 +19,10 @@
 		}
 	}
 
-	let chart_element: HTMLElement | null = null;
+	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(chart_element, null, { renderer: 'svg' });
+		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		// specify chart configuration item and data
 		let option = {
@@ -93,4 +92,4 @@
 	});
 </script>
 
-<div class="{width} {height} {classesContainer}" bind:this={chart_element} />
+<div id={chart_id} class="{width} {height} {classesContainer}" />

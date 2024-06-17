@@ -6,8 +6,8 @@ services:
     image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend
-      - CISO_ASSISTANT_URL=https://localhost:8443
+      - ALLOWED_HOSTS=backend,u24.proxmox.lan
+      - CISO_ASSISTANT_URL=https://u24.proxmox.lan:8443
       - DJANGO_DEBUG=True
       - AUTH_TOKEN_TTL=7200
     volumes:
@@ -27,17 +27,10 @@ services:
   caddy:
     container_name: caddy
     image: caddy:2.7.6
-    depends_on:
-      - frontend
     restart: unless-stopped
     ports:
       - 8443:8443
-    command:
-      - caddy
-      - reverse-proxy
-      - --from
-      - https://localhost:8443
-      - --to
-      - frontend:3000
+      - 9443:9443
     volumes:
-      - ./caddy_data:/data
+      - ./db:/data
+      - ./Caddyfile:/etc/caddy/Caddyfile

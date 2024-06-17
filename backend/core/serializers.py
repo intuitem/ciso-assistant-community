@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
-import structlog, bleach
+import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -52,14 +52,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
-
-    def validate_name(self, value):
-        clean_value = bleach.clean(value, tags=[], attributes={})
-        if clean_value != value:
-            raise serializers.ValidationError(
-                "The name must not contain characters from HTML tags or attributes."
-            )
-        return value
 
     class Meta:
         model: models.Model

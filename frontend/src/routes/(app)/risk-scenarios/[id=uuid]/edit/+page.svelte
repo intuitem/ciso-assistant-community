@@ -116,13 +116,10 @@
 	}
 	const next = getSecureRedirect($page.url.searchParams.get('next'));
 
-	function riskColorMap() {
-		let color_map = {};
-		data.riskMatrix.risk.forEach((risk, i) => {
-			color_map[i] = risk.hexcolor;
-		});
-		return color_map;
-	}
+	const probabilityColorMap = data.riskMatrix.probability.map(
+		(probability) => probability.hexcolor
+	);
+	const impactColorMap = data.riskMatrix.impact.map((impact) => impact.hexcolor);
 </script>
 
 <div>
@@ -218,7 +215,7 @@
 						<Select
 							{form}
 							options={data.probabilityChoices}
-							color_map={riskColorMap()}
+							color_map={probabilityColorMap}
 							field="current_proba"
 							label={m.currentProba()}
 						/>
@@ -226,7 +223,7 @@
 						<Select
 							{form}
 							options={data.impactChoices}
-							color_map={riskColorMap()}
+							color_map={impactColorMap}
 							field="current_impact"
 							label={m.currentImpact()}
 						/>
@@ -272,7 +269,7 @@
 						<Select
 							{form}
 							options={data.probabilityChoices}
-							color_map={riskColorMap()}
+							color_map={probabilityColorMap}
 							field="residual_proba"
 							label={m.residualProba()}
 						/>
@@ -280,7 +277,7 @@
 						<Select
 							{form}
 							options={data.impactChoices}
-							color_map={riskColorMap()}
+							color_map={impactColorMap}
 							field="residual_impact"
 							label={m.residualImpact()}
 						/>
