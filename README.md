@@ -108,7 +108,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
-25. TISAX (VDA ISA) 🚘
+25. TISAX (VDA ISA) v5.1 and v6.0 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
 28. CIS Controls v8\* 🌐
