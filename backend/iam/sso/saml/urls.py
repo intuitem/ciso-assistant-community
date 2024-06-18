@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     re_path(
-        r"^/(?P<organization_slug>[^/]+)/",
+        r"^(?P<organization_slug>[^/]+)/",
         include(
             [
                 path(

@@ -61,9 +61,11 @@ urlpatterns = [
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "accounts/saml/", include("iam.sso.saml.urls")
+    ),  # NOTE: This has to be placed before the allauth urls, otherwise our ACS implementation will not be used
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
-    path("accounts/saml/", include("iam.sso.saml.urls")),
 ]
 
 if DEBUG:
