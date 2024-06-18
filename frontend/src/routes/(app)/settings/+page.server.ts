@@ -18,17 +18,15 @@ import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
-	const settings = await fetch(`${BASE_API_URL}/settings/`)
-		.then((res) => res.json())
-		.then((data) => data.results);
+	const settings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
 
 	const selectOptions: Record<string, any> = {};
 
-	const settingsModel = getModelInfo('identity-providers');
+	const model = getModelInfo('identity-providers');
 
-	if (settingsModel.selectFields) {
-		for (const selectField of settingsModel.selectFields) {
-			const url = `${BASE_API_URL}/risk-settingss/${selectField.field}/`;
+	if (model.selectFields) {
+		for (const selectField of model.selectFields) {
+			const url = `${BASE_API_URL}/settings/sso/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
 				selectOptions[selectField.field] = await response.json().then((data) =>
@@ -43,10 +41,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
-	settingsModel.selectOptions = selectOptions;
+	model.selectOptions = selectOptions;
 
-	const form = await superValidate(zod(IdentityProviderSchema));
-	return { settings, form, settingsModel };
+	const form = await superValidate(settings, zod(IdentityProviderSchema), { errors: false });
+	return { settings, form, model };
 };
 
 export const actions: Actions = {
