@@ -426,7 +426,13 @@
 			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
 	{:else if URLModel === 'identity-providers'}
-		<TextField {form} field="provider" label={m.provider()} />
+		<TextField {form} field="provider_name" label={m.name()} />
+		<AutocompleteSelect
+			{form}
+			field="provider"
+			options={model.selectOptions['provider']}
+			label={m.provider()}
+		/>
 		<TextField {form} field="provider_id" label={m.providerId()} />
 		<TextField {form} field="client_id" label={m.clientId()} />
 		<TextField {form} field="secret" label={m.secret()} />
