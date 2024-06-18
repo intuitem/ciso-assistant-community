@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('settings', '0001_initial'),
+        ("settings", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='globalsettings',
-            name='value',
+            model_name="globalsettings",
+            name="value",
             field=models.JSONField(default=dict),
         ),
     ]
