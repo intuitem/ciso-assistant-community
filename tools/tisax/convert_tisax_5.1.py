@@ -114,21 +114,21 @@ for tab in dataframe:
             if control_number and re.fullmatch(r"\d", control_number):
                 level = 2
                 print(control_number, control_question)
-                output_table.append(("", 1, control_number, control_question, "", ""))
+                output_table.append(("", 1, control_number, control_question.strip(), "", ""))
             if control_number and re.fullmatch(r"\d\.\d+", control_number):
                 level = 3
                 print(control_number, control_question)
-                output_table.append(("", 2, control_number, "", control_question, ""))
+                output_table.append(("", 2, control_number, "", control_question.strip(), ""))
                 if req_must:
-                    output_table.append(("x", 3, "", "(must)", req_must, "must"))
+                    output_table.append(("x", 3, "", "(must)", req_must.strip(), "must"))
             if control_number and re.fullmatch(r"\d\.\d+\.\d+", control_number):
                 if control_question and re.match(r"Superseded by", control_question):
                     print("skipping", control_number)
-                output_table.append(("", level, control_number, "", control_question, ""))
-                output_table.append(("x", level + 1, "", "(must)", req_must, "must"))
+                output_table.append(("", level, control_number, "", control_question.strip(), ""))
+                output_table.append(("x", level + 1, "", "(must)", req_must.strip(), "must"))
                 if req_should and req_should != "None":
                     output_table.append(
-                        ("x", level + 1, "", "(should)", req_should, "should")
+                        ("x", level + 1, "", "(should)", req_should.strip(), "should")
                     )
                 if req_high and req_high != "None":
                     output_table.append(
@@ -137,7 +137,7 @@ for tab in dataframe:
                             level + 1,
                             "",
                             "(for high protection needs)",
-                            req_high,
+                            req_high.strip(),
                             "high",
                         )
                     )
@@ -148,7 +148,7 @@ for tab in dataframe:
                             level + 1,
                             "",
                             "(for very high protection needs)",
-                            req_very_high,
+                            req_very_high.strip(),
                             "very_high",
                         )
                     )
@@ -159,7 +159,7 @@ for tab in dataframe:
                             level + 1,
                             "",
                             "(for Simplified Group Assessments)",
-                            req_sga,
+                            req_sga.strip(),
                             "SGA",
                         )
                     )
@@ -170,13 +170,13 @@ for tab in dataframe:
                             level + 1,
                             "",
                             "(for vehicles classified as requiring protection)",
-                            req_vehicle,
+                            req_vehicle.strip(),
                             "vehicle",
                         )
                     )
                 if further_info:
                     output_table.append(
-                        ("", level + 1, "", "Further information", further_info)
+                        ("", level + 1, "", "Further information", further_info.strip())
                     )
 
 print("generating", output_file_name)
