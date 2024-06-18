@@ -16,7 +16,7 @@
 		spanish: m.spanish(),
 		german: m.german(),
 		dutch: m.dutch(),
-		italian: m.italian()
+		italian: m.italian(),
 		polish: m.polish()
 	};
 
