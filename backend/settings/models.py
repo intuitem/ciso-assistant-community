@@ -22,7 +22,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         default=Names.GENERAL,
     )
     # Value of the setting.
-    value = models.JSONField()
+    value = models.JSONField(default=dict)
 
     def __str__(self):
         return self.name
