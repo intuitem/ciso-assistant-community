@@ -19,6 +19,8 @@ class SSOSettingsQuerySet(QuerySet):
                 _settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
                 self._result_cache = [
                     SSOSettings(
+                        id=_settings.id,
+                        name=_settings.name,
                         provider=_settings.value.get("provider"),
                         provider_id=_settings.value.get("provider_id"),
                         provider_name=_settings.value.get("provider_name"),
@@ -81,8 +83,11 @@ class SSOSettings(GlobalSettings):
         managed = False
         proxy = True
 
+    def get_name(self):
+        return GlobalSettings.Names.SSO.label
+
     def __str__(self):
-        return self.provider_name or "sso"
+        return self.get_name()
 
     def save(self, *args, **kwargs):
         _settings = self.global_settings
