@@ -84,7 +84,6 @@ class SSOSettings(GlobalSettings):
 
     class Meta:
         managed = False
-        proxy = True
 
     def get_name(self):
         return GlobalSettings.Names.SSO.label
