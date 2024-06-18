@@ -114,17 +114,17 @@ for tab in dataframe:
             if control_number and re.fullmatch(r"\d", control_number):
                 level = 2
                 print(control_number, control_question)
-                output_table.append(("", 1, control_number, control_question, ""))
+                output_table.append(("", 1, control_number, control_question, "", ""))
             if control_number and re.fullmatch(r"\d\.\d+", control_number):
                 level = 3
                 print(control_number, control_question)
-                output_table.append(("", 2, control_number, control_question, ""))
+                output_table.append(("", 2, control_number, "", control_question, ""))
                 if req_must:
                     output_table.append(("x", 3, "", "(must)", req_must, "must"))
             if control_number and re.fullmatch(r"\d\.\d+\.\d+", control_number):
                 if control_question and re.match(r"Superseded by", control_question):
                     print("skipping", control_number)
-                output_table.append(("", level, control_number, control_question, ""))
+                output_table.append(("", level, control_number, "", control_question, ""))
                 output_table.append(("x", level + 1, "", "(must)", req_must, "must"))
                 if req_should and req_should != "None":
                     output_table.append(

@@ -118,13 +118,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1
       ref_id: '1.1'
-      name: Information Security Policies
+      description: Information Security Policies
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.1.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.1
       ref_id: 1.1.1
-      name: TOTOTo what extent are information security policies available?
+      description: To what extent are information security policies available?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node5
       assessable: true
       depth: 4
@@ -158,13 +158,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1
       ref_id: '1.2'
-      name: Organization of Information Security
+      description: Organization of Information Security
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.2.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.2
       ref_id: 1.2.1
-      name: TOTOTo what extent is information security managed within the organization?
+      description: To what extent is information security managed within the organization?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node9
       assessable: true
       depth: 4
@@ -185,7 +185,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.2
       ref_id: 1.2.2
-      name: TOTOTo what extent are information security responsibilities organized?
+      description: To what extent are information security responsibilities organized?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node11
       assessable: true
       depth: 4
@@ -226,8 +226,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.2
       ref_id: 1.2.3
-      name: TOTOTo what extent are information security requirements taken into account
-        in projects?
+      description: To what extent are information security requirements taken into
+        account in projects?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node15
       assessable: true
       depth: 4
@@ -266,7 +266,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.2
       ref_id: 1.2.4
-      name: TOTOTo what extent are the responsibilities between external IT service
+      description: To what extent are the responsibilities between external IT service
         providers and the own organization defined?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node19
       assessable: true
@@ -322,13 +322,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1
       ref_id: '1.3'
-      name: Asset Management
+      description: Asset Management
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.3.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.3
       ref_id: 1.3.1
-      name: 'TOTOTo what extent are information assets identified and recorded? '
+      description: 'To what extent are information assets identified and recorded? '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node24
       assessable: true
       depth: 4
@@ -356,8 +356,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.3
       ref_id: 1.3.2
-      name: TOTOTo what extent are information assets classified and managed in terms
-        of their protection needs?
+      description: To what extent are information assets classified and managed in
+        terms of their protection needs?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node27
       assessable: true
       depth: 4
@@ -386,8 +386,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.3
       ref_id: 1.3.3
-      name: "TOTOTo what extent is it ensured that only evaluated and approved external\
-        \ IT services are used for processing the organization\u2019s information\
+      description: "To what extent is it ensured that only evaluated and approved\
+        \ external IT services are used for processing the organization\u2019s information\
         \ assets?"
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node30
       assessable: true
@@ -425,13 +425,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1
       ref_id: '1.4'
-      name: IS Risk Management
+      description: IS Risk Management
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.4.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.4
       ref_id: 1.4.1
-      name: TOTOTo what extent are information security risks managed?
+      description: To what extent are information security risks managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node34
       assessable: true
       depth: 4
@@ -470,14 +470,14 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1
       ref_id: '1.5'
-      name: Assessments
+      description: Assessments
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.5.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.5
       ref_id: 1.5.1
-      name: TOTOTo what extent is compliance with information security ensured in
-        procedures and processes?
+      description: To what extent is compliance with information security ensured
+        in procedures and processes?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node38
       assessable: true
       depth: 4
@@ -510,7 +510,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.5
       ref_id: 1.5.2
-      name: TOTOTo what extent is the ISMS reviewed by an independent authority?
+      description: To what extent is the ISMS reviewed by an independent authority?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node41
       assessable: true
       depth: 4
@@ -536,13 +536,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1
       ref_id: '1.6'
-      name: Incident Management
+      description: Incident Management
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:1.6.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:1.6
       ref_id: 1.6.1
-      name: TOTOTo what extent are information security events processed?
+      description: To what extent are information security events processed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node45
       assessable: true
       depth: 4
@@ -595,8 +595,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:2
       ref_id: 2.1.1
-      name: TOTOTo what extent is the qualification of employees for sensitive work
-        fields ensured?
+      description: To what extent is the qualification of employees for sensitive
+        work fields ensured?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node50
       assessable: true
       depth: 3
@@ -630,8 +630,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:2
       ref_id: 2.1.2
-      name: TOTOTo what extent is all staff contractually bound to comply with information
-        security policies?
+      description: To what extent is all staff contractually bound to comply with
+        information security policies?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node53
       assessable: true
       depth: 3
@@ -661,8 +661,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:2
       ref_id: 2.1.3
-      name: TOTOTo what extent is staff made aware of and trained with respect to
-        the risks arising from the handling of information?
+      description: To what extent is staff made aware of and trained with respect
+        to the risks arising from the handling of information?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node56
       assessable: true
       depth: 3
@@ -697,7 +697,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:2
       ref_id: 2.1.4
-      name: TOTOTo what extent is teleworking regulated?
+      description: To what extent is teleworking regulated?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node59
       assessable: true
       depth: 3
@@ -748,7 +748,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:3
       ref_id: 3.1.1
-      name: TOTOTo what extent are security zones managed to protect information assets?
+      description: To what extent are security zones managed to protect information
+        assets?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node65
       assessable: true
       depth: 3
@@ -821,7 +822,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:3
       ref_id: 3.1.2
-      name: TOTOTo what extent is information security ensured in exceptional situations?
+      description: To what extent is information security ensured in exceptional situations?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node70
       assessable: true
       depth: 3
@@ -857,7 +858,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:3
       ref_id: 3.1.3
-      name: TOTOTo what extent is the handling of supporting assets managed?
+      description: To what extent is the handling of supporting assets managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node73
       assessable: true
       depth: 3
@@ -882,8 +883,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:3
       ref_id: 3.1.4
-      name: TOTOTo what extent is the handling of mobile IT devices and mobile data
-        storage devices managed?
+      description: To what extent is the handling of mobile IT devices and mobile
+        data storage devices managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node76
       assessable: true
       depth: 3
@@ -925,13 +926,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4
       ref_id: '4.1'
-      name: Identity Management
+      description: Identity Management
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:4.1.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4.1
       ref_id: 4.1.1
-      name: TOTOTo what extent is the use of identification means managed?
+      description: To what extent is the use of identification means managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node82
       assessable: true
       depth: 4
@@ -969,7 +970,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4.1
       ref_id: 4.1.2
-      name: TOTOTo what extent is the user access to network services, IT systems
+      description: To what extent is the user access to network services, IT systems
         and IT applications secured?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node86
       assessable: true
@@ -1023,8 +1024,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4.1
       ref_id: 4.1.3
-      name: 'TOTOTo what extent are user accounts and login information securely managed
-        and applied? '
+      description: 'To what extent are user accounts and login information securely
+        managed and applied? '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node91
       assessable: true
       depth: 4
@@ -1084,13 +1085,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4
       ref_id: '4.2'
-      name: Access Management
+      description: Access Management
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:4.2.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:4.2
       ref_id: 4.2.1
-      name: TOTOTo what extent are access rights assigned and managed?
+      description: To what extent are access rights assigned and managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node95
       assessable: true
       depth: 4
@@ -1157,13 +1158,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5
       ref_id: '5.1'
-      name: Cryptography
+      description: Cryptography
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:5.1.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.1
       ref_id: 5.1.1
-      name: TOTOTo what extent is the use of cryptographic procedures managed?
+      description: To what extent is the use of cryptographic procedures managed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node103
       assessable: true
       depth: 4
@@ -1204,7 +1205,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.1
       ref_id: 5.1.2
-      name: TOTOTo what extent is information protected during transfer?
+      description: To what extent is information protected during transfer?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node107
       assessable: true
       depth: 4
@@ -1253,13 +1254,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5
       ref_id: '5.2'
-      name: Operations Security
+      description: Operations Security
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.1
-      name: 'TOTOTo what extent are changes managed? '
+      description: 'To what extent are changes managed? '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node113
       assessable: true
       depth: 4
@@ -1299,7 +1300,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.2
-      name: TOTOTo what extent are development and testing environments separated
+      description: To what extent are development and testing environments separated
         from operational environments?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node117
       assessable: true
@@ -1331,7 +1332,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.3
-      name: TOTOTo what extent are IT systems protected against malware?
+      description: To what extent are IT systems protected against malware?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node120
       assessable: true
       depth: 4
@@ -1369,7 +1370,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.4
-      name: TOTOTo what extent are event logs recorded and analyzed?
+      description: To what extent are event logs recorded and analyzed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node123
       assessable: true
       depth: 4
@@ -1434,7 +1435,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.5
-      name: 'TOTOTo what extent are vulnerabilities identified and addressed? '
+      description: 'To what extent are vulnerabilities identified and addressed? '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node128
       assessable: true
       depth: 4
@@ -1466,7 +1467,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.6
-      name: TOTOTo what extent are IT systems technically checked (system audit)?
+      description: To what extent are IT systems technically checked (system audit)?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node131
       assessable: true
       depth: 4
@@ -1505,7 +1506,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.2
       ref_id: 5.2.7
-      name: 'TOTOTo what extent is the network of the organization managed?
+      description: 'To what extent is the network of the organization managed?
 
 
         '
@@ -1550,13 +1551,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5
       ref_id: '5.3'
-      name: System acquisitions, requirement management and development
+      description: System acquisitions, requirement management and development
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:5.3.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.3
       ref_id: 5.3.1
-      name: TOTOTo what extent is information security considered in new or further
+      description: To what extent is information security considered in new or further
         developed IT systems?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node139
       assessable: true
@@ -1599,7 +1600,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.3
       ref_id: 5.3.2
-      name: TOTOTo what extent are requirements for network services defined?
+      description: To what extent are requirements for network services defined?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node142
       assessable: true
       depth: 4
@@ -1637,8 +1638,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.3
       ref_id: 5.3.3
-      name: 'TOTOTo what extent is the return and secure removal of information assets
-        from external IT services regulated? '
+      description: 'To what extent is the return and secure removal of information
+        assets from external IT services regulated? '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node146
       assessable: true
       depth: 4
@@ -1662,7 +1663,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:5.3
       ref_id: 5.3.4
-      name: TOTOTo what extent is information protected in shared external IT services?
+      description: To what extent is information protected in shared external IT services?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node149
       assessable: true
       depth: 4
@@ -1694,7 +1695,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:6
       ref_id: 6.1.1
-      name: 'TOTOTo what extent is information security ensured among contractors
+      description: 'To what extent is information security ensured among contractors
         and cooperation partners?
 
 
@@ -1783,7 +1784,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:6
       ref_id: 6.1.2
-      name: TOTOTo what extent is non-disclosure regarding the exchange of information
+      description: To what extent is non-disclosure regarding the exchange of information
         contractually agreed?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node158
       assessable: true
@@ -1831,7 +1832,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:7
       ref_id: 7.1.1
-      name: TOTOTo what extent is compliance with regulatory and contractual provisions
+      description: To what extent is compliance with regulatory and contractual provisions
         ensured?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node162
       assessable: true
@@ -1859,7 +1860,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:7
       ref_id: 7.1.2
-      name: 'TOTOTo what extent is the protection of personally identifiable data
+      description: 'To what extent is the protection of personally identifiable data
         taken into account when implementing information security? '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node165
       assessable: true
@@ -1888,13 +1889,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8
       ref_id: '8.1'
-      name: Physical and Environmental Security
+      description: Physical and Environmental Security
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.1
-      name: TOTOTo what extent is a security concept available describing minimum
+      description: To what extent is a security concept available describing minimum
         requirements regarding the physical and environmental security for prototype
         protection?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node169
@@ -1921,7 +1922,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.2
-      name: TOTOTo what extent is perimeter security existent preventing unauthorized
+      description: To what extent is perimeter security existent preventing unauthorized
         access to protected property objects?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node172
       assessable: true
@@ -1946,7 +1947,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.3
-      name: TOTOTo what extent is the outer skin of the protected buildings constructed
+      description: To what extent is the outer skin of the protected buildings constructed
         such as to prevent removal or opening of outer-skin components using standard
         tools?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node175
@@ -1974,8 +1975,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.4
-      name: TOTOTo what extent is view and sight protection ensured in defined security
-        areas?
+      description: To what extent is view and sight protection ensured in defined
+        security areas?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node178
       assessable: true
       depth: 4
@@ -2009,7 +2010,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.5
-      name: TOTOTo what extent is the protection against unauthorized entry regulated
+      description: To what extent is the protection against unauthorized entry regulated
         in the form of access control?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node182
       assessable: true
@@ -2036,7 +2037,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.6
-      name: TOTOTo what extent are the premises to be secured monitored for intrusion?
+      description: To what extent are the premises to be secured monitored for intrusion?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node185
       assessable: true
       depth: 4
@@ -2055,7 +2056,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.7
-      name: TOTOTo what extent is a documented visitor management in place?
+      description: To what extent is a documented visitor management in place?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node187
       assessable: true
       depth: 4
@@ -2075,7 +2076,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.1
       ref_id: 8.1.8
-      name: TOTOTo what extent is on-site client segregation existent?
+      description: To what extent is on-site client segregation existent?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node189
       assessable: true
       depth: 4
@@ -2101,13 +2102,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8
       ref_id: '8.2'
-      name: Organizational Requirements
+      description: Organizational Requirements
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.1
-      name: TOTOTo what extent are non-disclosure agreements/obligations existent
+      description: To what extent are non-disclosure agreements/obligations existent
         according to the valid contractual law?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node193
       assessable: true
@@ -2124,8 +2125,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.2
-      name: TOTOTo what extent are requirements for commissioning subcontractors known
-        and fulfilled?
+      description: To what extent are requirements for commissioning subcontractors
+        known and fulfilled?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node195
       assessable: true
       depth: 4
@@ -2145,7 +2146,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.3
-      name: TOTOTo what extent do employees and project members evidently participate
+      description: To what extent do employees and project members evidently participate
         in training and awareness measures regarding the handling of prototypes?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node197
       assessable: true
@@ -2169,8 +2170,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.4
-      name: TOTOTo what extent are security classifications of the project and the
-        resulting security measures known?
+      description: To what extent are security classifications of the project and
+        the resulting security measures known?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node199
       assessable: true
       depth: 4
@@ -2191,7 +2192,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.5
-      name: TOTOTo what extent is a process defined for granting access to security
+      description: To what extent is a process defined for granting access to security
         areas?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node201
       assessable: true
@@ -2212,8 +2213,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.6
-      name: TOTOTo what extent are regulations for image recording and handling of
-        created image material existent?
+      description: To what extent are regulations for image recording and handling
+        of created image material existent?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node203
       assessable: true
       depth: 4
@@ -2236,8 +2237,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.2
       ref_id: 8.2.7
-      name: TOTOTo what extent is a process for carrying along and using mobile video
-        and photography devices in(to) defined security areas established?
+      description: To what extent is a process for carrying along and using mobile
+        video and photography devices in(to) defined security areas established?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node205
       assessable: true
       depth: 4
@@ -2253,14 +2254,14 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8
       ref_id: '8.3'
-      name: Handling of vehicles, components and parts
+      description: Handling of vehicles, components and parts
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:8.3.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.3
       ref_id: 8.3.1
-      name: TOTOTo what extent are transports of vehicles, components or parts classified
-        as requiring protection arranged according to the customer requirements?
+      description: To what extent are transports of vehicles, components or parts
+        classified as requiring protection arranged according to the customer requirements?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node208
       assessable: true
       depth: 4
@@ -2279,8 +2280,9 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.3
       ref_id: 8.3.2
-      name: TOTOTo what extent is it ensured that vehicles, components and parts classified
-        as requiring protection are parked/stored in accordance with customer requirements?
+      description: To what extent is it ensured that vehicles, components and parts
+        classified as requiring protection are parked/stored in accordance with customer
+        requirements?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node210
       assessable: true
       depth: 4
@@ -2295,13 +2297,13 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8
       ref_id: '8.4'
-      name: Requirements for trial vehicles
+      description: Requirements for trial vehicles
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:8.4.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.4
       ref_id: 8.4.1
-      name: TOTOTo what extent are the predefined camouflage regulations implemented
+      description: To what extent are the predefined camouflage regulations implemented
         by the project members?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node213
       assessable: true
@@ -2323,7 +2325,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.4
       ref_id: 8.4.2
-      name: TOTOTo what extent are measures for protecting approved test and trial
+      description: To what extent are measures for protecting approved test and trial
         grounds observed/implemented?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node215
       assessable: true
@@ -2343,7 +2345,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.4
       ref_id: 8.4.3
-      name: TOTOTo what extent are protective measures for approved test and trial
+      description: To what extent are protective measures for approved test and trial
         drives in public observed/implemented?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node217
       assessable: true
@@ -2365,14 +2367,14 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8
       ref_id: '8.5'
-      name: Requirements for events and shootings
+      description: Requirements for events and shootings
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:8.5.1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.5
       ref_id: 8.5.1
-      name: TOTOTo what extent are security requirements for presentations and events
-        involving vehicles, components or parts classified as requiring protection
+      description: To what extent are security requirements for presentations and
+        events involving vehicles, components or parts classified as requiring protection
         known?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node220
       assessable: true
@@ -2395,7 +2397,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:8.5
       ref_id: 8.5.2
-      name: TOTOTo what extent are the protective measures for film and photo shootings
+      description: To what extent are the protective measures for film and photo shootings
         involving vehicles, components or parts classified as requiring protection
         known?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node222
@@ -2426,7 +2428,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:9
       ref_id: '9.1'
-      name: To what extent is the implementation of data protection organized?
+      description: To what extent is the implementation of data protection organized?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node225
       assessable: true
       depth: 3
@@ -2450,8 +2452,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:9
       ref_id: '9.2'
-      name: To what extent are organizational measures taken in order to ensure that
-        personally identifiable data is processed in conformance with legislation?
+      description: To what extent are organizational measures taken in order to ensure
+        that personally identifiable data is processed in conformance with legislation?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node227
       assessable: true
       depth: 3
@@ -2493,7 +2495,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:9
       ref_id: '9.3'
-      name: To what extent is it ensured that the internal processes or workflows
+      description: To what extent is it ensured that the internal processes or workflows
         are carried out according to the currently valid data protection regulations
         and that these are regularly subjected to a quality check?
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node229
@@ -2521,8 +2523,8 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:tisax-v5.1:9
       ref_id: '9.4'
-      name: 'To what extent are the relevant processing procedures documented with
-        regard to their admissibility according to data protection law?
+      description: 'To what extent are the relevant processing procedures documented
+        with regard to their admissibility according to data protection law?
 
         '
     - urn: urn:intuitem:risk:req_node:tisax-v5.1:node231
