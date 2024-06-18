@@ -1,0 +1,6 @@
+> git add -A -- C:\Users\Administrator\Downloads\ciso-assistant-community-1.3.2\ciso-assistant-community\frontend\src\paraglide\messages.js
+The following paths are ignored by one of your .gitignore files:
+frontend/src/paraglide/messages.js
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
