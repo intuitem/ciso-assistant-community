@@ -245,6 +245,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_loadedlibrary",
     "backup",
     "restore",
+    "view_globalsettings",
     "change_globalsettings",
 ]
 
