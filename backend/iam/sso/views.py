@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .models import SSOSettings
-from .serializers import SSOSettingsReadSerializer
+from .serializers import SSOSettingsReadSerializer, SSOSettingsWriteSerializer
 from rest_framework.decorators import action
 from allauth.socialaccount import providers
 
@@ -25,7 +25,14 @@ class SSOSettingsViewSet(BaseModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    @action(detail=False, name="Get provider choices")
+    @action(detail=True, name="Get provider choices")
     def provider(self, request):
         _providers = providers.registry.as_choices()
         return Response({p[0]: p[1] for p in _providers})
+
+    def get_object(self):
+        return SSOSettings.objects.get()
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk=None):
+        return Response(SSOSettingsWriteSerializer(self.get_object()).data)

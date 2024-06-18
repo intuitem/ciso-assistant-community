@@ -21,10 +21,13 @@ class SSOSettingsQuerySet(QuerySet):
                     SSOSettings(
                         id=_settings.id,
                         name=_settings.name,
+                        created_at=_settings.created_at,
+                        updated_at=_settings.updated_at,
+                        is_published=_settings.is_published,
                         provider=_settings.value.get("provider"),
-                        provider_id=_settings.value.get("provider_id"),
-                        provider_name=_settings.value.get("provider_name"),
                         client_id=_settings.value.get("client_id"),
+                        provider_id=_settings.value.get("provider_id"),
+                        provider_name=_settings.value.get("name"),
                         secret=_settings.value.get("secret"),
                         key=_settings.value.get("key"),
                         settings=_settings.value.get("settings"),
@@ -90,17 +93,7 @@ class SSOSettings(GlobalSettings):
         return self.get_name()
 
     def save(self, *args, **kwargs):
-        _settings = self.global_settings
-        _settings.value = {
-            "provider": self.provider,
-            "provider_id": self.provider_id,
-            "provider_name": self.provider_name,
-            "client_id": self.client_id,
-            "secret": self.secret,
-            "key": self.key,
-            "settings": self.settings,
-        }
-        _settings.save()
+        raise NotImplementedError("SSOSettings is read-only.")
 
     def get_provider_display(self):
         _providers = {p[0]: p[1] for p in providers.registry.as_choices()}
