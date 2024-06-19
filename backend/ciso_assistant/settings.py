@@ -4,7 +4,7 @@ Django settings for ciso_assistant project.
 CORS are not managed by backend, so CORS library is not used
 
 if "POSTGRES_NAME" environment variable defined, the database engine is posgresql
-and the other env variables are POSGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
+and the other env variables are POSTGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
 else it is sqlite, and no env variable is required
 
 """
@@ -358,7 +358,7 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 HEADLESS_ONLY = True
 
 HEADLESS_FRONTEND_URLS = {
-    "socialaccount_login_error": CISO_ASSISTANT_URL,
+    "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
 }
 
 SOCIALACCOUNT_PROVIDERS = {

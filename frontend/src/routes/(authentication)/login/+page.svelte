@@ -8,7 +8,7 @@
 
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { redirectToProvider } from '$lib/allauth';
+	import { redirectToProvider } from '$lib/allauth.js';
 
 	export let data: PageData;
 </script>

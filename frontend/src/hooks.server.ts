@@ -54,7 +54,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (errorId) {
 		setLanguageTag(event.cookies.get('ciso_lang'));
 		setFlash({ type: 'error', message: m.failedSSO() }, event);
-		redirect(302, `/`);
+		redirect(302, '/login');
 	}
 
 	const user = await validateUserSession(event);
