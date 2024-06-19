@@ -14,6 +14,7 @@ from allauth.socialaccount.providers.saml.views import (
     render_authentication_error,
 )
 from django.http import HttpRequest, HttpResponseRedirect
+from django.http.response import Http404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -22,6 +23,7 @@ from rest_framework.views import csrf_exempt
 import structlog
 
 from iam.models import User
+from iam.sso.models import SSOSettings
 from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
@@ -43,6 +45,8 @@ class ACSView(SAMLViewMixin, View):
 
 class FinishACSView(SAMLViewMixin, View):
     def dispatch(self, request, organization_slug):
+        if len(SSOSettings.objects.all()) == 0:
+            raise Http404()
         provider = self.get_provider(organization_slug)
         acs_session = LoginSession(request, "saml_acs_session", "saml-acs-session")
         acs_request = None
