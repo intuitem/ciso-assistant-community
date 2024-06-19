@@ -63,7 +63,7 @@ export function localItems(): LocalItems {
 		german: m.german(),
 		dutch: m.dutch(),
 		italian: m.italian(),
-		polish:m.polish(),
+		polish: m.polish(),
 		home: m.home(),
 		edit: m.edit(),
 		overview: m.overview(),
