@@ -19,7 +19,7 @@
 
 <div>
 	{#if label !== undefined && !$$props.hidden}
-		{#if $constraints?.required}
+		{#if $constraints?.required || $$props.required}
 			<label class="text-sm font-semibold" for={field}
 				>{label} <span class="text-red-500">*</span></label
 			>

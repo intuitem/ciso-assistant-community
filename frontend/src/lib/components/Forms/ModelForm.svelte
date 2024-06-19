@@ -459,8 +459,18 @@
 				<AccordionItem open>
 					<svelte:fragment slot="summary">{m.SAMLIdPConfiguration()}</svelte:fragment>
 					<svelte:fragment slot="content">
-						<TextField {form} field="idp_entity_id" label={m.IdPEntityID()} />
-						<TextField {form} field="metadata_url" label={m.metadataURL()} />
+						<TextField
+							{form}
+							field="idp_entity_id"
+							label={m.IdPEntityID()}
+							required={data.provider === 'saml'}
+						/>
+						<TextField
+							{form}
+							field="metadata_url"
+							label={m.metadataURL()}
+							required={data.provider === 'saml'}
+						/>
 						<TextField hidden {form} field="sso_url" label={m.SSOURL()} />
 						<TextField hidden {form} field="slo_url" label={m.SLOURL()} />
 						<TextArea hidden {form} field="x509cert" label={m.x509Cert()} />
@@ -470,7 +480,12 @@
 				<AccordionItem>
 					<svelte:fragment slot="summary">{m.SPConfiguration()}</svelte:fragment>
 					<svelte:fragment slot="content">
-						<TextField {form} field="sp_entity_id" label={m.SPEntityID()} />
+						<TextField
+							{form}
+							field="sp_entity_id"
+							label={m.SPEntityID()}
+							required={data.provider === 'saml'}
+						/>
 					</svelte:fragment>
 				</AccordionItem>
 
