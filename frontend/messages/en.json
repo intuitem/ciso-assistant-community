@@ -604,5 +604,10 @@
 	"wantNameID": "Want name ID",
 	"wantNameIDEncrypted": "Want name ID encrypted",
 	"IdPConfiguration": "IdP configuration",
-	"enableSSO": "Enable SSO"
+	"enableSSO": "Enable SSO",
+	"failedSSO": "SSO authentication failed, please contact your administrator",
+	"loginSSO": "Login with SSO",
+	"or": "or",
+	"errorImportingLibrary": "Error during library import",
+	"libraryImportError": "An error occurred during library import"
 }
