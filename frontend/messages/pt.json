@@ -561,5 +561,10 @@
 	"appliedControlNoReferenceControl": "O controle aplicado não tem nenhum controle de referência selecionado",
 	"evidenceNoFile": "A evidência não tem nenhum arquivo carregado",
 	"requirementAppliedControlHelpText": "As evidências vinculadas às medidas selecionadas serão automaticamente associadas ao requisito.",
-	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito."
+	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito.",
+	"failedSSO": "Falha na autenticação SSO. Entre em contato com seu administrador",
+	"loginSSO": "Faça login no SSO",
+	"or": "ou",
+	"errorImportingLibrary": "Erro durante a importação da biblioteca",
+	"libraryImportError": "Ocorreu um erro durante a importação da biblioteca"
 }
