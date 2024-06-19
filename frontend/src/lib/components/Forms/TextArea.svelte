@@ -19,7 +19,7 @@
 </script>
 
 <div class={regionContainer}>
-	{#if label !== undefined}
+	{#if label !== undefined && !$$props.hidden}
 		{#if $constraints?.required}
 			<label class="text-sm font-semibold" for={field}
 				>{label} <span class="text-red-500">*</span></label
