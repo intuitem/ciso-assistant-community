@@ -207,6 +207,9 @@ REST_KNOX = {
     "MIN_REFRESH_INTERVAL": 60,
 }
 
+# Empty outside of debug mode so that allauth middleware does not raise an error
+STATIC_URL = ""
+
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
         "rest_framework.renderers.BrowsableAPIRenderer"
