@@ -24,6 +24,7 @@ class SSOSettingsQuerySet(QuerySet):
                         created_at=_settings.created_at,
                         updated_at=_settings.updated_at,
                         is_published=_settings.is_published,
+                        is_enabled=_settings.value.get("is_enabled"),
                         provider=_settings.value.get("provider"),
                         client_id=_settings.value.get("client_id"),
                         provider_id=_settings.value.get("provider_id"),
@@ -56,6 +57,11 @@ class SSOSettingsManager(models.Manager):
 class SSOSettings(GlobalSettings):
     objects = SSOSettingsManager()
 
+    is_enabled = models.BooleanField(
+        verbose_name=_("is enabled"),
+        default=False,
+    )
+
     provider = models.CharField(
         verbose_name=_("provider"),
         max_length=30,
@@ -70,6 +76,7 @@ class SSOSettings(GlobalSettings):
         verbose_name=_("client id"),
         max_length=191,
         help_text=_("App ID, or consumer key"),
+        default="0",
     )
     secret = models.CharField(
         verbose_name=_("secret key"),
