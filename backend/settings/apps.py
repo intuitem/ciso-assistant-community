@@ -46,9 +46,11 @@ def startup(sender: AppConfig, **kwargs):
         },
     }
 
-    GlobalSettings.objects.get_or_create(
-        name=GlobalSettings.Names.SSO, value={"client_id": "0", "settings": settings}
-    )
+    if not GlobalSettings.objects.filter(name=GlobalSettings.Names.SSO).exists():
+        GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.SSO,
+            value={"client_id": "0", "settings": settings},
+        )
 
 
 class SettingsConfig(AppConfig):
