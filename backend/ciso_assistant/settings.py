@@ -99,8 +99,7 @@ DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
-# ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 logger.info("ALLOWED_HOSTS: %s", ALLOWED_HOSTS)
 CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
@@ -359,11 +358,8 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 HEADLESS_ONLY = True
 
 HEADLESS_FRONTEND_URLS = {
-    "socialaccount_login_error": "http://localhost:5173/",
+    "socialaccount_login_error": CISO_ASSISTANT_URL,
 }
-
-ENTITY_ID = os.environ.get("ENTITY_ID", "")
-METADATA_URL = os.environ.get("METADATA_URL", "")
 
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
