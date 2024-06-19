@@ -21,6 +21,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -426,52 +427,97 @@
 			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
 	{:else if URLModel === 'identity-providers'}
-		<TextField {form} field="provider_name" label={m.name()} />
-		<AutocompleteSelect
-			{form}
-			field="provider"
-			options={model.selectOptions['provider']}
-			label={m.provider()}
-		/>
-		<TextField {form} field="provider_id" label={m.providerId()} />
-		<TextField {form} field="client_id" label={m.clientId()} />
-		<TextField {form} field="secret" label={m.secret()} />
-		<TextField {form} field="key" label={m.key()} />
-		{#if data.provider === 'saml'}
-			Attribute mapping
-			<AutocompleteSelect {form} field="attribute_mapping_uid" />
-			<TextField {form} field="attribute_mapping_email_verified" />
-			<TextField {form} field="attribute_mapping_email" />
+		<Accordion>
+			<Checkbox {form} field="is_enabled" label={m.enableSSO()} />
+			<AutocompleteSelect
+				{form}
+				hide={model.selectOptions['provider'].length < 2}
+				field="provider"
+				options={model.selectOptions['provider']}
+				label={m.provider()}
+			/>
+			{#if data.provider !== 'saml'}
+				<AccordionItem open>
+					<svelte:fragment slot="summary">{m.IdPConfiguration()}</svelte:fragment>
+					<svelte:fragment slot="content">
+						<TextField {form} field="provider_name" label={m.name()} />
+						<TextField hidden {form} field="provider_id" label={m.providerID()} />
+						<TextField
+							{form}
+							field="client_id"
+							label={m.clientID()}
+							helpText={m.clientIDHelpText()}
+						/>
+						{#if data.provider !== 'saml'}
+							<TextField {form} field="secret" label={m.secret()} helpText={m.secretHelpText()} />
+							<TextField {form} field="key" label={m.key()} />
+						{/if}
+					</svelte:fragment>
+				</AccordionItem>
+			{/if}
+			{#if data.provider === 'saml'}
+				<AccordionItem open>
+					<svelte:fragment slot="summary">{m.SAMLIdPConfiguration()}</svelte:fragment>
+					<svelte:fragment slot="content">
+						<TextField {form} field="idp_entity_id" label={m.IdPEntityID()} />
+						<TextField {form} field="metadata_url" label={m.metadataURL()} />
+						<TextField hidden {form} field="sso_url" label={m.SSOURL()} />
+						<TextField hidden {form} field="slo_url" label={m.SLOURL()} />
+						<TextArea hidden {form} field="x509cert" label={m.x509Cert()} />
+					</svelte:fragment>
+				</AccordionItem>
 
-			IdP configuration
-			<TextField {form} field="idp_entity_id" />
-			<TextField {form} field="metadata_url" />
-			<TextField {form} field="sso_url" />
-			<TextField {form} field="slo_url" />
-			<TextArea {form} field="x509cert" />
+				<AccordionItem>
+					<svelte:fragment slot="summary">{m.SPConfiguration()}</svelte:fragment>
+					<svelte:fragment slot="content">
+						<TextField {form} field="sp_entity_id" label={m.SPEntityID()} />
+					</svelte:fragment>
+				</AccordionItem>
 
-			SP configuration
-			<TextField {form} field="sp_entity_id" />
+				<AccordionItem
+					><svelte:fragment slot="summary">{m.advancedSettings()}</svelte:fragment>
+					<svelte:fragment slot="content">
+						<TextField {form} field="attribute_mapping_uid" label={m.attributeMappingUID()} />
+						<TextField
+							{form}
+							field="attribute_mapping_email_verified"
+							label={m.attributeMappingEmailVerified()}
+						/>
+						<TextField {form} field="attribute_mapping_email" label={m.attributeMappingEmail()} />
 
-			Advanced settings
-			<Checkbox {form} field="allow_repeat_attribute_name" />
-			<Checkbox {form} field="allow_single_label_domains" />
-			<Checkbox {form} field="authn_request_signed" />
-			<TextField {form} field="digest_algorithm" />
-			<Checkbox {form} field="logout_request_signed" />
-			<Checkbox {form} field="logout_response_signed" />
-			<Checkbox {form} field="metadata_signed" />
-			<Checkbox {form} field="name_id_encrypted" />
-			<Checkbox {form} field="reject_deprecated_algorithm" />
-			<Checkbox {form} field="reject_idp_initiated_sso" />
-			<TextField {form} field="signature_algorithm" />
-			<Checkbox {form} field="want_assertion_encrypted" />
-			<Checkbox {form} field="want_assertion_signed" />
-			<Checkbox {form} field="want_attribute_statement" />
-			<Checkbox {form} field="want_message_signed" />
-			<Checkbox {form} field="want_name_id" />
-			<Checkbox {form} field="want_name_id_encrypted" />
-		{/if}
+						<Checkbox
+							{form}
+							field="allow_repeat_attribute_name"
+							label={m.allowRepeatAttributeName()}
+						/>
+						<Checkbox
+							{form}
+							field="allow_single_label_domains"
+							label={m.allowSingleLabelDomains()}
+						/>
+						<Checkbox {form} field="authn_request_signed" label={m.authnRequestSigned()} />
+						<TextField {form} field="digest_algorithm" label={m.digestAlgorithm()} />
+						<Checkbox {form} field="logout_request_signed" label={m.logoutRequestSigned()} />
+						<Checkbox {form} field="logout_response_signed" label={m.logoutResponseSigned()} />
+						<Checkbox {form} field="metadata_signed" label={m.metadataSigned()} />
+						<Checkbox {form} field="name_id_encrypted" label={m.nameIDEncrypted()} />
+						<Checkbox
+							{form}
+							field="reject_deprecated_algorithm"
+							label={m.rejectDeprecatedAlgorithm()}
+						/>
+						<Checkbox {form} field="reject_idp_initiated_sso" label={m.rejectIdPInitiatedSSO()} />
+						<TextField {form} field="signature_algorithm" label={m.signatureAlgorithm()} />
+						<Checkbox {form} field="want_assertion_encrypted" label={m.wantAssertionEncrypted()} />
+						<Checkbox {form} field="want_assertion_signed" label={m.wantAssertionSigned()} />
+						<Checkbox {form} field="want_attribute_statement" label={m.wantAttributeStatement()} />
+						<Checkbox {form} field="want_message_signed" label={m.wantMessageSigned()} />
+						<Checkbox {form} field="want_name_id" label={m.wantNameID()} />
+						<Checkbox {form} field="want_name_id_encrypted" label={m.wantNameIDEncrypted()} />
+					</svelte:fragment>
+				</AccordionItem>
+			{/if}
+		</Accordion>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
