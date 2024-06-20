@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ -f "Caddyfile" ]]; then
+    echo "Caddyfile already exists. Please remove it before generating a new one."
+    exit 0
+fi
+
 prompt_for_input() {
     local var_name="$1"
     local prompt_message="$2"
