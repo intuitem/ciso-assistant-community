@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend
+      - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
     volumes:
@@ -18,6 +18,7 @@ services:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:9443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
@@ -31,12 +32,7 @@ services:
     restart: unless-stopped
     ports:
       - 8443:8443
-    command:
-      - caddy
-      - reverse-proxy
-      - --from
-      - https://localhost:8443
-      - --to
-      - frontend:3000
+      - 9443:9443
     volumes:
       - ./db:/data
+      - ./Caddyfile:/etc/caddy/Caddyfile
