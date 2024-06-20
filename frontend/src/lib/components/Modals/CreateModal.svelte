@@ -42,6 +42,6 @@
 				<i class="fa-solid fa-xmark" />
 			</div>
 		</div>
-		<ModelForm {form} {suggestions} {parent} {model} {closeModal} action="?/{formAction}" debug />
+		<ModelForm {form} {suggestions} {parent} {model} {closeModal} action="?/{formAction}" {debug} />
 	</div>
 {/if}
