@@ -1,7 +1,7 @@
 import { getCSRFToken } from './django.js';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BACKEND_API_EXPOSED_URL } from '$lib/utils/constants';
 
-const BASE_URL = `${BASE_API_URL}`;
+const BASE_URL = `${BACKEND_API_EXPOSED_URL}`;
 
 export const AuthProcess = Object.freeze({
 	LOGIN: 'login',

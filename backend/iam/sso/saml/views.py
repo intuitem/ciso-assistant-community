@@ -47,7 +47,10 @@ class FinishACSView(SAMLViewMixin, View):
     def dispatch(self, request, organization_slug):
         if len(SSOSettings.objects.all()) == 0:
             raise Http404()
-        provider = self.get_provider(organization_slug)
+        try:
+            provider = self.get_provider(organization_slug)
+        except:
+            return render_authentication_error(request, None)
         acs_session = LoginSession(request, "saml_acs_session", "saml-acs-session")
         acs_request = None
         acs_request_data = acs_session.store.get("request")
