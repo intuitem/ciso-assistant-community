@@ -108,5 +108,8 @@ export const listViewFields = {
 	'identity-providers': {
 		head: ['name', 'provider', 'providerId'],
 		body: ['name', 'provider', 'provider_id']
-	}
+	},
+	'settings': {
+		breadcrumb_link_disabled: false
+	},
 };
