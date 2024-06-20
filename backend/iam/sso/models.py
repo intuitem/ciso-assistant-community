@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
 
 from allauth.socialaccount.models import providers
-from settings.models import GlobalSettings
+from global_settings.models import GlobalSettings
 
 
 class SSOSettingsQuerySet(QuerySet):
