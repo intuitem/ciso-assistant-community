@@ -1,7 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import {
-	getModelInfo,
-} from '$lib/utils/crud';
+import { getModelInfo } from '$lib/utils/crud';
 import { IdentityProviderSchema, modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
