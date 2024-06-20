@@ -360,7 +360,7 @@ def startup(sender: AppConfig, **kwargs):
             print(e)  # NOTE: Add this exception in the logger
 
     default_attribute_mapping = SAMLProvider.default_attribute_mapping
-            
+
     settings = {
         "attribute_mapping": {
             "uid": default_attribute_mapping["uid"],
