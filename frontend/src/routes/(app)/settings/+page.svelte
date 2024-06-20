@@ -3,6 +3,7 @@
 	import { IdentityProviderSchema } from '$lib/utils/schemas';
 
 	export let data;
+
 </script>
 
 <ModelForm form={data.form} schema={IdentityProviderSchema} model={data.model} />

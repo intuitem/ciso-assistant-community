@@ -571,7 +571,6 @@
 	"identityProvider": "Identity provider",
 	"identityProviders": "Identity providers",
 	"addIdentityProvider": "Add identity provider",
-	"globalSettings": "Global settings",
 	"clientIDHelpText": "App ID, or consumer key",
 	"secretHelpText": "API secret, client secret, or consumer secret",
 	"SAMLIdPConfiguration": "SAML IdP configuration",
