@@ -55,7 +55,7 @@ def startup(sender: AppConfig, **kwargs):
 
 class SettingsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "settings"
+    name = "global_settings"
 
     def ready(self):
         # avoid post_migrate handler if we are in the main, as it interferes with restore

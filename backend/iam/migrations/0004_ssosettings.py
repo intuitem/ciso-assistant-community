@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("iam", "0003_alter_folder_updated_at_alter_role_updated_at_and_more"),
-        ("settings", "0001_initial"),
+        ("global_settings", "0001_initial"),
     ]
 
     operations = [
@@ -53,6 +53,6 @@ class Migration(migrations.Migration):
                 "managed": False,
                 "proxy": True,
             },
-            bases=("settings.globalsettings",),
+            bases=("global_settings.globalsettings",),
         ),
     ]

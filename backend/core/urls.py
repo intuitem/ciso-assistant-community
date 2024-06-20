@@ -52,7 +52,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),
-    path("settings/", include("settings.urls")),
+    path("settings/", include("global_settings.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("license/", license, name="license"),

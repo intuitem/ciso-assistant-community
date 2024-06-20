@@ -1,7 +1,7 @@
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from rest_framework import serializers
 
-from settings.models import GlobalSettings
+from global_settings.models import GlobalSettings
 from .models import SSOSettings
 
 from core.serializers import BaseModelSerializer
