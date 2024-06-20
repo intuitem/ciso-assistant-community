@@ -180,7 +180,7 @@ export const navData = {
 					permissions: ['backup']
 				},
 				{
-					name: 'globalSettings',
+					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
 					permissions: ['change_globalsettings']
