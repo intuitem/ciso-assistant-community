@@ -51,7 +51,6 @@ class LogoutView(views.APIView):
     def post(self, request) -> Response:
         try:
             logger.info("logout request", user=request.user)
-            print("logout request", request.user)
             logout(request)
             logger.info("logout successful", user=request.user)
         except Exception as e:
