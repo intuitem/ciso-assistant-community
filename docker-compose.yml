@@ -37,7 +37,6 @@ services:
       - 8443:8443
     volumes:
       - ./caddy_data:/data
-      - ./Caddyfile:/etc/caddy/Caddyfile
     command: |
       sh -c 'echo $CISO_ASSISTANT_URL "{
       reverse_proxy /api/iam/sso/redirect backend:8000
