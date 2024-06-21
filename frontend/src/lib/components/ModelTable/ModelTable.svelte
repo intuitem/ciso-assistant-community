@@ -210,7 +210,11 @@
 									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-											{localItems()[text]}
+                    {#if Object.hasOwn(m, text)}
+                      {m[text]()}
+                    {:else}
+                      {text}
+                    {/if}
 										</span>
 									{/if}
 								{/each}

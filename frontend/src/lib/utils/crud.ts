@@ -517,6 +517,14 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
 			}
 		}
+	},
+	users: {
+		email: {
+			key: 'is_sso',
+			values: {
+				true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
+			}
+		}
 	}
 };
 
