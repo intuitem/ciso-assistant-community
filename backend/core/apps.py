@@ -4,6 +4,9 @@ from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
 import os
 from django.core.management import call_command
 
+from structlog import get_logger
+
+logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
     "view_project",
@@ -399,10 +402,12 @@ def startup(sender: AppConfig, **kwargs):
     }
 
     if not GlobalSettings.objects.filter(name=GlobalSettings.Names.SSO).exists():
-        GlobalSettings.objects.get_or_create(
+        logger.info("SSO settings not found, creating default settings")
+        sso_settings = GlobalSettings.objects.create(
             name=GlobalSettings.Names.SSO,
             value={"client_id": "0", "settings": settings},
         )
+        logger.info("SSO settings created", settings=sso_settings.value)
 
     call_command("storelibraries")
 
