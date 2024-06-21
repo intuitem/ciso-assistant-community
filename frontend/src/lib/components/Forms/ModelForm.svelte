@@ -436,22 +436,36 @@
 				field="provider"
 				options={model.selectOptions['provider']}
 				label={m.provider()}
+				disabled={!data.is_enabled}
 			/>
 			{#if data.provider !== 'saml'}
 				<AccordionItem open>
 					<svelte:fragment slot="summary">{m.IdPConfiguration()}</svelte:fragment>
 					<svelte:fragment slot="content">
-						<TextField {form} field="provider_name" label={m.name()} />
-						<TextField hidden {form} field="provider_id" label={m.providerID()} />
+						<TextField {form} field="provider_name" label={m.name()} disabled={!data.is_enabled} />
+						<TextField
+							hidden
+							{form}
+							field="provider_id"
+							label={m.providerID()}
+							disabled={!data.is_enabled}
+						/>
 						<TextField
 							{form}
 							field="client_id"
 							label={m.clientID()}
 							helpText={m.clientIDHelpText()}
+							disabled={!data.is_enabled}
 						/>
 						{#if data.provider !== 'saml'}
-							<TextField {form} field="secret" label={m.secret()} helpText={m.secretHelpText()} />
-							<TextField {form} field="key" label={m.key()} />
+							<TextField
+								{form}
+								field="secret"
+								label={m.secret()}
+								helpText={m.secretHelpText()}
+								disabled={!data.is_enabled}
+							/>
+							<TextField {form} field="key" label={m.key()} disabled={!data.is_enabled} />
 						{/if}
 					</svelte:fragment>
 				</AccordionItem>
@@ -467,16 +481,36 @@
 							field="idp_entity_id"
 							label={m.IdPEntityID()}
 							required={data.provider === 'saml'}
+							disabled={!data.is_enabled}
 						/>
 						<TextField
 							{form}
 							field="metadata_url"
 							label={m.metadataURL()}
 							required={data.provider === 'saml'}
+							disabled={!data.is_enabled}
 						/>
-						<TextField hidden {form} field="sso_url" label={m.SSOURL()} />
-						<TextField hidden {form} field="slo_url" label={m.SLOURL()} />
-						<TextArea hidden {form} field="x509cert" label={m.x509Cert()} />
+						<TextField
+							hidden
+							{form}
+							field="sso_url"
+							label={m.SSOURL()}
+							disabled={!data.is_enabled}
+						/>
+						<TextField
+							hidden
+							{form}
+							field="slo_url"
+							label={m.SLOURL()}
+							disabled={!data.is_enabled}
+						/>
+						<TextArea
+							hidden
+							{form}
+							field="x509cert"
+							label={m.x509Cert()}
+							disabled={!data.is_enabled}
+						/>
 					</svelte:fragment>
 				</AccordionItem>
 
@@ -490,6 +524,7 @@
 							field="sp_entity_id"
 							label={m.SPEntityID()}
 							required={data.provider === 'saml'}
+							disabled={!data.is_enabled}
 						/>
 					</svelte:fragment>
 				</AccordionItem>
@@ -499,58 +534,138 @@
 						><span class="font-semibold">{m.advancedSettings()}</span></svelte:fragment
 					>
 					<svelte:fragment slot="content">
-						<TextField {form} field="attribute_mapping_uid" label={m.attributeMappingUID()} />
+						<TextField
+							{form}
+							field="attribute_mapping_uid"
+							label={m.attributeMappingUID()}
+							disabled={!data.is_enabled}
+						/>
 						<TextField
 							{form}
 							field="attribute_mapping_email_verified"
 							label={m.attributeMappingEmailVerified()}
+							disabled={!data.is_enabled}
 						/>
-						<TextField {form} field="attribute_mapping_email" label={m.attributeMappingEmail()} />
+						<TextField
+							{form}
+							field="attribute_mapping_email"
+							label={m.attributeMappingEmail()}
+							disabled={!data.is_enabled}
+						/>
 
 						<Checkbox
 							{form}
 							field="allow_repeat_attribute_name"
 							label={m.allowRepeatAttributeName()}
+							disabled={!data.is_enabled}
 						/>
 						<Checkbox
 							{form}
 							field="allow_single_label_domains"
 							label={m.allowSingleLabelDomains()}
+							disabled={!data.is_enabled}
 						/>
-						<Checkbox {form} field="authn_request_signed" hidden label={m.authnRequestSigned()} />
-						<TextField {form} field="digest_algorithm" hidden label={m.digestAlgorithm()} />
-						<Checkbox {form} field="logout_request_signed" hidden label={m.logoutRequestSigned()} />
+						<Checkbox
+							{form}
+							field="authn_request_signed"
+							hidden
+							label={m.authnRequestSigned()}
+							disabled={!data.is_enabled}
+						/>
+						<TextField
+							{form}
+							field="digest_algorithm"
+							hidden
+							label={m.digestAlgorithm()}
+							disabled={!data.is_enabled}
+						/>
+						<Checkbox
+							{form}
+							field="logout_request_signed"
+							hidden
+							label={m.logoutRequestSigned()}
+							disabled={!data.is_enabled}
+						/>
 						<Checkbox
 							{form}
 							field="logout_response_signed"
 							hidden
 							label={m.logoutResponseSigned()}
+							disabled={!data.is_enabled}
 						/>
-						<Checkbox {form} field="metadata_signed" hidden label={m.metadataSigned()} />
-						<Checkbox {form} field="name_id_encrypted" hidden label={m.nameIDEncrypted()} />
+						<Checkbox
+							{form}
+							field="metadata_signed"
+							hidden
+							label={m.metadataSigned()}
+							disabled={!data.is_enabled}
+						/>
+						<Checkbox
+							{form}
+							field="name_id_encrypted"
+							hidden
+							label={m.nameIDEncrypted()}
+							disabled={!data.is_enabled}
+						/>
 						<Checkbox
 							{form}
 							hidden
 							field="reject_deprecated_algorithm"
 							label={m.rejectDeprecatedAlgorithm()}
+							disabled={!data.is_enabled}
 						/>
-						<Checkbox {form} field="reject_idp_initiated_sso" label={m.rejectIdPInitiatedSSO()} />
-						<TextField {form} field="signature_algorithm" hidden label={m.signatureAlgorithm()} />
+						<Checkbox
+							{form}
+							field="reject_idp_initiated_sso"
+							label={m.rejectIdPInitiatedSSO()}
+							disabled={!data.is_enabled}
+						/>
+						<TextField
+							{form}
+							field="signature_algorithm"
+							hidden
+							label={m.signatureAlgorithm()}
+							disabled={!data.is_enabled}
+						/>
 						<Checkbox
 							{form}
 							field="want_assertion_encrypted"
 							hidden
 							label={m.wantAssertionEncrypted()}
+							disabled={!data.is_enabled}
 						/>
-						<Checkbox {form} field="want_assertion_signed" hidden label={m.wantAssertionSigned()} />
-						<Checkbox {form} field="want_attribute_statement" label={m.wantAttributeStatement()} />
-						<Checkbox {form} field="want_message_signed" hidden label={m.wantMessageSigned()} />
-						<Checkbox {form} field="want_name_id" label={m.wantNameID()} />
+						<Checkbox
+							{form}
+							field="want_assertion_signed"
+							hidden
+							label={m.wantAssertionSigned()}
+							disabled={!data.is_enabled}
+						/>
+						<Checkbox
+							{form}
+							field="want_attribute_statement"
+							label={m.wantAttributeStatement()}
+							disabled={!data.is_enabled}
+						/>
+						<Checkbox
+							{form}
+							field="want_message_signed"
+							hidden
+							label={m.wantMessageSigned()}
+							disabled={!data.is_enabled}
+						/>
+						<Checkbox
+							{form}
+							field="want_name_id"
+							label={m.wantNameID()}
+							disabled={!data.is_enabled}
+						/>
 						<Checkbox
 							{form}
 							field="want_name_id_encrypted"
 							hidden
 							label={m.wantNameIDEncrypted()}
+							disabled={!data.is_enabled}
 						/>
 					</svelte:fragment>
 				</AccordionItem>
