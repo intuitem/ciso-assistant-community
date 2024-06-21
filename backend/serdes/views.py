@@ -21,9 +21,9 @@ class ExportBackupView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
+        response["Content-Disposition"] = (
+            f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
+        )
 
         response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
         # Here we dump th data to stdout
