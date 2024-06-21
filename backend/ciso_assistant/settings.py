@@ -4,7 +4,7 @@ Django settings for ciso_assistant project.
 CORS are not managed by backend, so CORS library is not used
 
 if "POSTGRES_NAME" environment variable defined, the database engine is posgresql
-and the other env variables are POSGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
+and the other env variables are POSTGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
 else it is sqlite, and no env variable is required
 
 """
@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     "django_structlog",
     "tailwind",
     "iam",
+    "global_settings",
     "core",
     "cal",
     "django_filters",
@@ -131,6 +132,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "knox",
     "drf_spectacular",
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.saml",
 ]
 
 MIDDLEWARE = [
@@ -143,13 +149,13 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
-    # "pyinstrument.middleware.ProfilerMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = "login"
+# we leave these for the API UI tools - even if Django templates and Admin are not used anymore
+LOGIN_REDIRECT_URL = "/api"
+LOGOUT_REDIRECT_URL = "/api"
 
 AUTH_TOKEN_TTL = int(
     os.environ.get("AUTH_TOKEN_TTL", default=60 * 60)
@@ -200,6 +206,9 @@ REST_KNOX = {
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
     "MIN_REFRESH_INTERVAL": 60,
 }
+
+# Empty outside of debug mode so that allauth middleware does not raise an error
+STATIC_URL = ""
 
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
@@ -332,4 +341,32 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.7.0",
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
+}
+
+# SSO with allauth
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+ACCOUNT_ADAPTER = "iam.adapter.MyAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "iam.adapter.MySocialAccountAdapter"
+
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+HEADLESS_ONLY = True
+
+HEADLESS_FRONTEND_URLS = {
+    "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    "saml": {
+        "EMAIL_AUTHENTICATION": True,
+        "VERIFIED_EMAIL": True,
+    },
 }
