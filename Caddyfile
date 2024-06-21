@@ -1,12 +1,8 @@
 # Basic Caddyfile for local deployment with SAML endpoints exposed, you can adapt it to your needs.
 
 localhost:8443 {
-    reverse_proxy frontend:3000
-}
-
-localhost:9443 {
     reverse_proxy /api/iam/sso/redirect/ backend:8000
     reverse_proxy /api/accounts/saml/0/acs/ backend:8000
     reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+    reverse_proxy /* frontend:3000
 }
-
