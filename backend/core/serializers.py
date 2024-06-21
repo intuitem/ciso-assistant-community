@@ -274,6 +274,7 @@ class UserReadSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "is_sso",
         ]
 
 

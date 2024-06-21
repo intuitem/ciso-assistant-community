@@ -53,7 +53,7 @@ export const getOptions = ({
 	const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 	const options = objects
 		.map((object) => {
-			let my_label =
+			const my_label =
 				label != 'auto'
 					? object[label]
 					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
@@ -126,6 +126,7 @@ export interface ModelMapEntry {
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
 	filters?: SelectField[];
+	path?: string;
 }
 
 type ModelMap = {
@@ -392,17 +393,25 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'stored-libraries': {
 		name: 'storedlibrary',
-		localName: 'stored library',
-		localNamePlural: 'stored libraries',
+		localName: 'storedLibrary',
+		localNamePlural: 'storedLibraries',
 		verboseName: 'stored Library',
 		verboseNamePlural: 'stored Libraries'
 	},
 	'loaded-libraries': {
 		name: 'loadedlibrary',
-		localName: 'loaded library',
-		localNamePlural: 'loaded libraries',
+		localName: 'loadedLibrary',
+		localNamePlural: 'loadedLibraries',
 		verboseName: 'loaded Library',
 		verboseNamePlural: 'loaded Libraries'
+	},
+	'sso-settings': {
+		name: 'ssoSettings',
+		localName: 'ssoSettings',
+		localNamePlural: 'ssoSettings',
+		verboseName: 'SSO settings',
+		verboseNamePlural: 'SSO settings',
+		selectFields: [{ field: 'provider' }]
 	}
 };
 
@@ -506,6 +515,14 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 			key: 'lc_status',
 			values: {
 				Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
+			}
+		}
+	},
+	users: {
+		email: {
+			key: 'is_sso',
+			values: {
+				true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
 			}
 		}
 	}

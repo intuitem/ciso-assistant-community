@@ -7,8 +7,7 @@
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages.js';
 
 	let sidebarOpen = true;
 
@@ -26,8 +25,8 @@
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4">
 			<span class="text-2xl font-bold pb-1" id="page-title">
-				{#if localItems()[$pageTitle]}
-					{localItems()[$pageTitle]}
+				{#if Object.hasOwn(m, $pageTitle)}
+					{m[$pageTitle]()}
 				{:else}
 					{$pageTitle}
 				{/if}

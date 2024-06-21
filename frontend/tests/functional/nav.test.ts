@@ -1,6 +1,7 @@
 import { localItems } from '../../src/lib/utils/locales.js';
-import { languageTag, setLanguageTag, availableLanguageTags } from '../../src/paraglide/runtime.js';
-import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
+import * as m from '$paraglide/messages.js';
+import { availableLanguageTags, setLanguageTag } from '../../src/paraglide/runtime.js';
+import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	test.slow();
@@ -12,7 +13,6 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 
 	await test.step('navigation link are working properly', async () => {
-		const locals = localItems();
 		for await (const [key, value] of sideBar.items) {
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {
@@ -27,8 +27,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 						continue;
 					}
 					await expect(page).toHaveURL(item.href);
-					await logedPage.hasTitle(locals[item.name]);
-					await logedPage.hasBreadcrumbPath([locals[item.name]]);
+					await logedPage.hasTitle(m[item.name]());
+					await logedPage.hasBreadcrumbPath([m[item.name]()]);
 				}
 			}
 		}
@@ -94,7 +94,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 });
 
-test('sidebar component tests', async ({ logedPage, sideBar, page }) => {
+test('sidebar component tests', async ({ logedPage, sideBar }) => {
 	await test.step('sidebar can be collapsed and expanded', async () => {
 		sideBar.toggleButton.click();
 		await expect(sideBar.toggleButton).toHaveClass(/rotate-180/);

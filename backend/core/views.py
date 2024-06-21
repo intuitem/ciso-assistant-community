@@ -61,6 +61,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "description"]
     model: models.Model
 
+    serializers_module = "core.serializers"
+
     def get_queryset(self):
         if not self.model:
             return None
@@ -91,7 +93,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
         # Dynamically import the serializer module and get the serializer class
-        serializer_module = importlib.import_module("core.serializers")
+        serializer_module = importlib.import_module(self.serializers_module)
         serializer_class = getattr(serializer_module, serializer_name)
 
         return serializer_class
@@ -135,7 +137,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get write data")
     def object(self, request, pk):
         serializer_name = f"{self.model.__name__}WriteSerializer"
-        serializer_module = importlib.import_module("core.serializers")
+        serializer_module = importlib.import_module(self.serializers_module)
         serializer_class = getattr(serializer_module, serializer_name)
 
         return Response(serializer_class(super().get_object()).data)
