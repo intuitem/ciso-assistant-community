@@ -188,7 +188,11 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{m[toCamelCase(key)]()}
+						{#if Object.hasOwn(m, toCamelCase(key))}
+							{m[toCamelCase(key)]()}
+						{:else}
+							{key}
+						{/if}
 					</div>
 					<ul class="text-sm">
 						<li

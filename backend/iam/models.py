@@ -243,7 +243,7 @@ class UserManager(BaseUserManager):
             folder=_get_root_folder(),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
-        user.password = make_password(password if password else str(uuid.uuid4()))
+        user.password = make_password(password) if password else None
         user.save(using=self._db)
 
         logger.info("user created sucessfully", user=user)
@@ -285,7 +285,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
+    password = models.CharField(_("password"), max_length=128, blank=True, null=True)
     first_login = models.BooleanField(default=True)
+    is_sso = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -326,6 +328,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
+
+    def check_password(self, raw_password):
+        if self.password is None:
+            return False
+        return super().check_password(raw_password)
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
