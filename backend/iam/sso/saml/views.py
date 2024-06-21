@@ -1,4 +1,3 @@
-from allauth.account.utils import Login
 from allauth.socialaccount.models import SocialLogin
 from allauth.socialaccount.providers.saml.views import (
     AuthError,
@@ -113,12 +112,22 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["process"] = AuthProcess.LOGIN
             if next_url:
                 login.state["next"] = next_url
-        email = auth._nameid
         try:
+            email = auth._nameid
             user = User.objects.get(email=email)
+            idp_first_name = auth._attributes.get(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+            )[0]
+            idp_last_name = auth._attributes.get(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+            )[0]
+            if user.first_name != idp_first_name:
+                user.first_name = idp_first_name
+            if user.last_name != idp_last_name:
+                user.last_name = idp_last_name
             if user.password is None:
                 user.is_sso = True
-                user.save()
+            user.save()
             token = generate_token(user)
             login.state["next"] += f"sso/authenticate/{token}"
             return complete_social_login(request, login)
