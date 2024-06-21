@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("global_settings", "0001_initial"),
         ("iam", "0003_alter_folder_updated_at_alter_role_updated_at_and_more"),
