@@ -29,6 +29,7 @@
 	export let closeModal = false;
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
+	export let cancelButton = true;
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -457,7 +458,7 @@
 			{/if}
 			{#if data.provider === 'saml'}
 				<AccordionItem open>
-					<svelte:fragment slot="summary">{m.SAMLIdPConfiguration()}</svelte:fragment>
+					<svelte:fragment slot="summary"><span class="font-semibold">{m.SAMLIdPConfiguration()}</span></svelte:fragment>
 					<svelte:fragment slot="content">
 						<TextField
 							{form}
@@ -478,7 +479,7 @@
 				</AccordionItem>
 
 				<AccordionItem>
-					<svelte:fragment slot="summary">{m.SPConfiguration()}</svelte:fragment>
+					<svelte:fragment slot="summary"><span class="font-semibold">{m.SPConfiguration()}</span></svelte:fragment>
 					<svelte:fragment slot="content">
 						<TextField
 							{form}
@@ -490,7 +491,7 @@
 				</AccordionItem>
 
 				<AccordionItem
-					><svelte:fragment slot="summary">{m.advancedSettings()}</svelte:fragment>
+					><svelte:fragment slot="summary"><span class="font-semibold">{m.advancedSettings()}</span></svelte:fragment>
 					<svelte:fragment slot="content">
 						<TextField {form} field="attribute_mapping_uid" label={m.attributeMappingUID()} />
 						<TextField
@@ -548,12 +549,14 @@
 				type="submit">{m.save()}</button
 			>
 		{:else}
-			<button
-				class="btn bg-gray-400 text-white font-semibold w-full"
-				data-testid="cancel-button"
-				type="button"
-				on:click={cancel}>{m.cancel()}</button
-			>
+			{#if cancelButton}
+				<button
+					class="btn bg-gray-400 text-white font-semibold w-full"
+					data-testid="cancel-button"
+					type="button"
+					on:click={cancel}>{m.cancel()}</button
+				>
+			{/if}
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
