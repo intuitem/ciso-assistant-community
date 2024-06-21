@@ -17,7 +17,6 @@ if [ -f db/ciso-assistant.sqlite3 ]; then
     echo "You should launch 'docker compose up -d'."
 else
     prepare_meta_file
-    bash generate-caddyfile.sh
 
     # Build and start the containers
     docker compose -f docker-compose-build.yml build
