@@ -6,6 +6,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const settings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
@@ -73,5 +74,6 @@ export const actions: Actions = {
 			});
 			return fail(400, { form });
 		}
+		setFlash({ type: 'success', message: m.ssoSettingsupdated() }, event);
 	}
 };
