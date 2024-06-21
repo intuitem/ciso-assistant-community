@@ -116,8 +116,11 @@ class FinishACSView(SAMLViewMixin, View):
         email = auth._nameid
         try:
             user = User.objects.get(email=email)
+            if user.password is None:
+                user.is_sso = True
+                user.save()
+            token = generate_token(user)
+            login.state["next"] += f"sso/authenticate/{token}"
+            return complete_social_login(request, login)
         except:
             return render_authentication_error(request, provider, error="failedSSO")
-        token = generate_token(user)
-        login.state["next"] += f"sso/authenticate/{token}"
-        return complete_social_login(request, login)
