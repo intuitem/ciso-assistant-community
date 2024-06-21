@@ -43,10 +43,6 @@ router.register(
 )
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
-router.register(
-    r"identity-providers", SSOSettingsViewSet, basename="identity-providers"
-)
-
 
 urlpatterns = [
     path("", include(router.urls)),
