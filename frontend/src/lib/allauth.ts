@@ -9,7 +9,7 @@ export const AuthProcess = Object.freeze({
 });
 
 export const URLs = Object.freeze({
-	REDIRECT_TO_PROVIDER: BASE_URL + '/iam/sso/redirect'
+	REDIRECT_TO_PROVIDER: BASE_URL + '/iam/sso/redirect/'
 });
 
 function postForm(action, data) {
