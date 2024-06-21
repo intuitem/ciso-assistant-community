@@ -21,16 +21,22 @@ class ExportBackupView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
-        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
 
         response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
         # Here we dump th data to stdout
         # NOTE: We will not be able to dump selected folders with this method.
         management.call_command(
             dumpdata.Command(),
-            exclude=["contenttypes", "auth.permission", "sessions.session"],
+            exclude=[
+                "contenttypes",
+                "auth.permission",
+                "sessions.session",
+                "iam.ssosettings",
+                "knox.authtoken",
+            ],
             indent=4,
             stdout=response,
             natural_foreign=True,
@@ -56,7 +62,12 @@ class LoadBackupView(APIView):
                 "-",
                 format="json",
                 verbosity=0,
-                exclude=["contenttypes", "auth.permission", "sessions.session"],
+                exclude=[
+                    "contenttypes",
+                    "auth.permission",
+                    "sessions.session",
+                    "knox.authtoken",
+                ],
             )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
