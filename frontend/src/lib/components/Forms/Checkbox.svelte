@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ComponentProps } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	export let label: string | undefined = undefined;
@@ -12,10 +13,12 @@
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$: boolValue = value as Writable<boolean>;
+
+	$: classesFormField = (hidden: boolean) => (hidden ? 'hidden' : '');
 </script>
 
 <div>
-	<div class="flex flex-row space-x-2 items-center">
+	<div class="flex flex-row space-x-2 items-center {classesFormField($$props.hidden)}">
 		{#if label !== undefined}
 			{#if $constraints?.required}
 				<label class="text-sm font-semibold" for={field}

@@ -510,25 +510,41 @@
 							field="allow_single_label_domains"
 							label={m.allowSingleLabelDomains()}
 						/>
-						<Checkbox {form} field="authn_request_signed" label={m.authnRequestSigned()} />
-						<TextField {form} field="digest_algorithm" label={m.digestAlgorithm()} />
-						<Checkbox {form} field="logout_request_signed" label={m.logoutRequestSigned()} />
-						<Checkbox {form} field="logout_response_signed" label={m.logoutResponseSigned()} />
-						<Checkbox {form} field="metadata_signed" label={m.metadataSigned()} />
-						<Checkbox {form} field="name_id_encrypted" label={m.nameIDEncrypted()} />
+						<Checkbox {form} field="authn_request_signed" hidden label={m.authnRequestSigned()} />
+						<TextField {form} field="digest_algorithm" hidden label={m.digestAlgorithm()} />
+						<Checkbox {form} field="logout_request_signed" hidden label={m.logoutRequestSigned()} />
 						<Checkbox
 							{form}
+							field="logout_response_signed"
+							hidden
+							label={m.logoutResponseSigned()}
+						/>
+						<Checkbox {form} field="metadata_signed" hidden label={m.metadataSigned()} />
+						<Checkbox {form} field="name_id_encrypted" hidden label={m.nameIDEncrypted()} />
+						<Checkbox
+							{form}
+							hidden
 							field="reject_deprecated_algorithm"
 							label={m.rejectDeprecatedAlgorithm()}
 						/>
 						<Checkbox {form} field="reject_idp_initiated_sso" label={m.rejectIdPInitiatedSSO()} />
-						<TextField {form} field="signature_algorithm" label={m.signatureAlgorithm()} />
-						<Checkbox {form} field="want_assertion_encrypted" label={m.wantAssertionEncrypted()} />
-						<Checkbox {form} field="want_assertion_signed" label={m.wantAssertionSigned()} />
+						<TextField {form} field="signature_algorithm" hidden label={m.signatureAlgorithm()} />
+						<Checkbox
+							{form}
+							field="want_assertion_encrypted"
+							hidden
+							label={m.wantAssertionEncrypted()}
+						/>
+						<Checkbox {form} field="want_assertion_signed" hidden label={m.wantAssertionSigned()} />
 						<Checkbox {form} field="want_attribute_statement" label={m.wantAttributeStatement()} />
-						<Checkbox {form} field="want_message_signed" label={m.wantMessageSigned()} />
+						<Checkbox {form} field="want_message_signed" hidden label={m.wantMessageSigned()} />
 						<Checkbox {form} field="want_name_id" label={m.wantNameID()} />
-						<Checkbox {form} field="want_name_id_encrypted" label={m.wantNameIDEncrypted()} />
+						<Checkbox
+							{form}
+							field="want_name_id_encrypted"
+							hidden
+							label={m.wantNameIDEncrypted()}
+						/>
 					</svelte:fragment>
 				</AccordionItem>
 			{/if}
