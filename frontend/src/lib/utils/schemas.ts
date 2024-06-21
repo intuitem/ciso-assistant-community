@@ -213,7 +213,7 @@ export const EvidenceSchema = baseNamedObject({
 
 export const IdentityProviderSchema = z.object({
 	is_enabled: z.boolean().optional(),
-	provider: z.string(),
+	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string(),
 	client_id: z.string(),
