@@ -153,6 +153,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
+# we leave these for the API UI tools - even if Django templates and Admin are not used anymore
 LOGIN_REDIRECT_URL = "/api"
 LOGOUT_REDIRECT_URL = "/api"
 
