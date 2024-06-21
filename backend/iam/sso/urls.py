@@ -1,13 +1,7 @@
-from django.urls import include, path
-from rest_framework import routers
+from django.urls import path
 
-from .views import SSOSettingsViewSet, RedirectToProviderView
-
-
-router = routers.DefaultRouter()
-
+from .views import RedirectToProviderView
 
 urlpatterns = [
-    path("", include(router.urls)),
-    path("redirect", RedirectToProviderView.as_view(), name="sso-redirect"),
+    path("redirect/", RedirectToProviderView.as_view(), name="sso-redirect"),
 ]
