@@ -211,7 +211,7 @@ export const EvidenceSchema = baseNamedObject({
 	link: z.string().optional().nullable()
 });
 
-export const IdentityProviderSchema = z.object({
+export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
@@ -271,7 +271,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
-	'identity-providers': IdentityProviderSchema
+	'sso-settings': SSOSettingsSchema
 };
 
 export const modelSchema = (model: string) => {

@@ -405,12 +405,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'loaded Library',
 		verboseNamePlural: 'loaded Libraries'
 	},
-	'identity-providers': {
-		name: 'identityprovider',
-		localName: 'identityProvider',
-		localNamePlural: 'identityProviders',
-		verboseName: 'Identity provider',
-		verboseNamePlural: 'Identity providers',
+	'sso-settings': {
+		name: 'ssoSettings',
+		localName: 'ssoSettings',
+		localNamePlural: 'ssoSettings',
+		verboseName: 'SSO settings',
+		verboseNamePlural: 'SSO settings',
 		selectFields: [{ field: 'provider' }]
 	}
 };

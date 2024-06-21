@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { IdentityProviderSchema, modelSchema } from '$lib/utils/schemas';
+import { SSOSettingsSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -8,12 +8,12 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import * as m from '$paraglide/messages';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ fetch }) => {
 	const settings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
 
 	const selectOptions: Record<string, any> = {};
 
-	const model = getModelInfo('identity-providers');
+	const model = getModelInfo('sso-settings');
 
 	if (model.selectFields) {
 		for (const selectField of model.selectFields) {
@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model.selectOptions = selectOptions;
 
-	const form = await superValidate(settings, zod(IdentityProviderSchema), { errors: false });
+	const form = await superValidate(settings, zod(SSOSettingsSchema), { errors: false });
 	return { settings, form, model };
 };
 
@@ -46,7 +46,7 @@ export const actions: Actions = {
 			return fail(400, { form: null });
 		}
 
-		const schema = modelSchema('identity-providers');
+		const schema = SSOSettingsSchema;
 		const form = await superValidate(formData, zod(schema));
 		// NOTE: /sso had-coded for development
 		const endpoint = `${BASE_API_URL}/settings/sso/`;

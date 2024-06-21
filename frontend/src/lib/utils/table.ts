@@ -105,7 +105,7 @@ export const listViewFields = {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview']
 	},
-	'identity-providers': {
+	'sso-settings': {
 		head: ['name', 'provider', 'providerId'],
 		body: ['name', 'provider', 'provider_id']
 	}

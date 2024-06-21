@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-	import { IdentityProviderSchema } from '$lib/utils/schemas';
+	import { SSOSettingsSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
@@ -18,7 +18,7 @@
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
 		<ModelForm
 			form={data.form}
-			schema={IdentityProviderSchema}
+			schema={SSOSettingsSchema}
 			model={data.model}
 			cancelButton={false}
 		/>

@@ -427,7 +427,7 @@
 		{#if shape.is_active}
 			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
-	{:else if URLModel === 'identity-providers'}
+	{:else if URLModel === 'sso-settings'}
 		<Accordion>
 			<Checkbox {form} field="is_enabled" label={m.enableSSO()} />
 			<AutocompleteSelect
