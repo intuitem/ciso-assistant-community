@@ -49,6 +49,7 @@ class FinishACSView(SAMLViewMixin, View):
         try:
             provider = self.get_provider(organization_slug)
         except:
+            logger.error("Could not get provider")
             return render_authentication_error(request, None)
         acs_session = LoginSession(request, "saml_acs_session", "saml-acs-session")
         acs_request = None
@@ -131,5 +132,10 @@ class FinishACSView(SAMLViewMixin, View):
             token = generate_token(user)
             login.state["next"] += f"sso/authenticate/{token}"
             return complete_social_login(request, login)
+        except User.DoesNotExist:
+            logger.warning("User does not exist")
+            return render_authentication_error(
+                request, provider, error="UserDoesNotExist"
+            )
         except:
             return render_authentication_error(request, provider, error="failedSSO")

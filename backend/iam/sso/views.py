@@ -7,6 +7,9 @@ from allauth.socialaccount import providers
 from allauth.headless.base.views import APIView
 from allauth.headless.socialaccount.forms import RedirectToProviderForm
 from allauth.socialaccount.providers.saml.views import render_authentication_error
+from structlog import get_logger
+
+logger = get_logger(__name__)
 
 
 class RedirectToProviderView(APIView):
@@ -31,6 +34,7 @@ class RedirectToProviderView(APIView):
                 headless=True,
             )
         except:
+            logger.error("Cannot perform redirection, Check your IdP URLs")
             return render_authentication_error(request, provider, error="failedSSO")
 
 
