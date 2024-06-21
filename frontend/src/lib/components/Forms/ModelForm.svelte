@@ -458,7 +458,9 @@
 			{/if}
 			{#if data.provider === 'saml'}
 				<AccordionItem open>
-					<svelte:fragment slot="summary"><span class="font-semibold">{m.SAMLIdPConfiguration()}</span></svelte:fragment>
+					<svelte:fragment slot="summary"
+						><span class="font-semibold">{m.SAMLIdPConfiguration()}</span></svelte:fragment
+					>
 					<svelte:fragment slot="content">
 						<TextField
 							{form}
@@ -479,7 +481,9 @@
 				</AccordionItem>
 
 				<AccordionItem>
-					<svelte:fragment slot="summary"><span class="font-semibold">{m.SPConfiguration()}</span></svelte:fragment>
+					<svelte:fragment slot="summary"
+						><span class="font-semibold">{m.SPConfiguration()}</span></svelte:fragment
+					>
 					<svelte:fragment slot="content">
 						<TextField
 							{form}
@@ -491,7 +495,9 @@
 				</AccordionItem>
 
 				<AccordionItem
-					><svelte:fragment slot="summary"><span class="font-semibold">{m.advancedSettings()}</span></svelte:fragment>
+					><svelte:fragment slot="summary"
+						><span class="font-semibold">{m.advancedSettings()}</span></svelte:fragment
+					>
 					<svelte:fragment slot="content">
 						<TextField {form} field="attribute_mapping_uid" label={m.attributeMappingUID()} />
 						<TextField

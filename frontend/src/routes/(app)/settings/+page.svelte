@@ -10,6 +10,11 @@
 <SettingsLayout>
 	<div class="p-4" slot="sso">
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
-		<ModelForm form={data.form} schema={IdentityProviderSchema} model={data.model} cancelButton={false}/>
+		<ModelForm
+			form={data.form}
+			schema={IdentityProviderSchema}
+			model={data.model}
+			cancelButton={false}
+		/>
 	</div>
 </SettingsLayout>
