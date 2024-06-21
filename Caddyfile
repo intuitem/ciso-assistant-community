@@ -5,7 +5,7 @@ localhost:8443 {
 }
 
 localhost:9443 {
-    reverse_proxy /api/iam/sso/redirect backend:8000
+    reverse_proxy /api/iam/sso/redirect/ backend:8000
     reverse_proxy /api/accounts/saml/0/acs/ backend:8000
     reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
 }
