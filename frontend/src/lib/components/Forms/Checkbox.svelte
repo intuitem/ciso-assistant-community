@@ -37,6 +37,7 @@
 				bind:checked={$boolValue}
 				{...$constraints}
 				{...$$restProps}
+				disabled={$$props.disabled}
 			/>
 		</div>
 	</div>
