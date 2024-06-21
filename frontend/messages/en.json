@@ -611,5 +611,6 @@
 	"libraryImportError": "An error occurred during library import",
 	"ssoSettingsupdated": "SSO settings updated",
 	"ssoSettings": "SSO settings",
-	"ssoSettingsDescription": "Configure your Single Sign-On settings here."
+	"ssoSettingsDescription": "Configure your Single Sign-On settings here.",
+	"sso": "SSO"
 }
