@@ -611,5 +611,6 @@
 	"ssoSettingsupdated": "SSO settings updated",
 	"ssoSettings": "SSO settings",
 	"ssoSettingsDescription": "Configure your Single Sign-On settings here.",
-	"sso": "SSO"
+	"sso": "SSO",
+	"isSso": "Is SSO"
 }
