@@ -14,11 +14,16 @@
 
 	$: boolValue = value as Writable<boolean>;
 
-	$: classesFormField = (hidden: boolean) => (hidden ? 'hidden' : '');
+	$: classesHidden = (hidden: boolean) => (hidden ? 'hidden' : '');
+	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
 </script>
 
 <div>
-	<div class="flex flex-row space-x-2 items-center {classesFormField($$props.hidden)}">
+	<div
+		class="flex flex-row space-x-2 items-center {classesHidden($$props.hidden)} {classesDisabled(
+			$$props.disabled
+		)}"
+	>
 		{#if label !== undefined}
 			{#if $constraints?.required}
 				<label class="text-sm font-semibold" for={field}
