@@ -1,8 +1,10 @@
-# Basic Caddyfile for local deployment with SAML endpoints exposed, you can adapt it to your needs.
+# u24.proxmox.lan is an example for a remote host, adjust to your case when using this variant
+u24.proxmox.lan:8443 {
+    reverse_proxy frontend:3000
+    tls internal
+}
 
-localhost:8443 {
-    reverse_proxy /api/iam/sso/redirect/ backend:8000
-    reverse_proxy /api/accounts/saml/0/acs/ backend:8000
-    reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
-    reverse_proxy /* frontend:3000
+u24.proxmox.lan:9443 {
+    reverse_proxy backend:8000
+    tls internal
 }
