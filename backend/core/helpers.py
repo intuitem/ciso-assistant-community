@@ -44,6 +44,17 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
 }
 
 
+def color_css_class(status):
+    return {
+        "compliant": "green-500",
+        "to_do": "gray-300",
+        "in_progress": "blue-500",
+        "non_compliant": "red-500",
+        "partially_compliant": "yellow-400",
+        "not_applicable": "black",
+    }.get(status)
+
+
 def applied_control_priority(user: User):
     def get_quadrant(applied_control):
         if applied_control.effort in ["S", "M"]:
