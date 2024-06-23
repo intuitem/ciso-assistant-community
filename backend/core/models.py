@@ -2132,6 +2132,10 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.state = state
         if state == "accepted":
             self.accepted_at = datetime.now()
+            # iterate over the risk scenarios to set their treatment to accepted
+            for scenario in self.risk_scenarios.all():
+                scenario.treatment = "accept"
+                scenario.save()
         if state == "rejected":
             self.rejected_at = datetime.now()
         elif state == "revoked":
