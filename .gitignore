@@ -9,3 +9,4 @@ temp/
 db/
 .dccache
 /backend/profiles
+docker-compose.yml

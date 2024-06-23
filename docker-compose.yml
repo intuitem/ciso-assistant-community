@@ -11,10 +11,10 @@ services:
       - DJANGO_DEBUG=True
       - AUTH_TOKEN_TTL=7200
       - DEFAULT_FROM_EMAIL=support@networkgate.lt
-      - EMAIL_HOST=mailhog
-      - EMAIL_PORT=1025
+      - EMAIL_HOST=smtp.hostinger.com
+      - EMAIL_PORT=587
       - EMAIL_HOST_USER=support@networkgate.lt
-      - EMAIL_HOST_PASSWORD=anu3ak3saabnjbd
+      - EMAIL_HOST_PASSWORD=j48Hb3Kn4$D&
       - EMAIL_USE_TLS=True      
     volumes:
       - ./db:/code/db
