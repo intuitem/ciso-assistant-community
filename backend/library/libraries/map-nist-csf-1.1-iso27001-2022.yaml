@@ -12,11 +12,16 @@ dependencies:
   - urn:intuitem:risk:library:iso27001-2022
 objects:
   requirement_mapping_set:
-    urn: urn:intuitem:risk:requireemnt_mapping_set:nist-csf-1.1-to-iso27001-2022
-    ref_id: NIST-CSF-1.1 to ISO/IEC 27001:2022
-    name: NIST-CSF-1.1 to ISO/IEC 27001:2022
-    requirement_mappings:
-      - reference_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
-      - relationship: subset
-      - related_requirements:
-          - urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+    - urn: urn:intuitem:risk:requireemnt_mapping_set:nist-csf-1.1-to-iso27001-2022
+      ref_id: NIST-CSF-1.1 to ISO/IEC 27001:2022
+      name: NIST-CSF-1.1 to ISO/IEC 27001:2022
+      reference_framework: urn:intuitem:risk:reference_framework:nist-csf-1.1
+      related_framework: urn:intuitem:risk:reference_framework:iso27001-2022
+      reference_requirements:
+        - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
+          mappings:
+            - relationship: subset
+              rationale: functional
+              related_requirements:
+                - urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+              annotation: Ipsum ut nisi Lorem fugiat ad est voluptate ullamco ea eu.
