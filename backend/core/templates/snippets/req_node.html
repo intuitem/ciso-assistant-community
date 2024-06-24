@@ -14,7 +14,9 @@
                 <div class='font-semibold'>{{ node.assessments.requirement }}</div>
                 <div class='text-white text-center rounded-lg whitespace-nowrap px-2 py-1 bg-{{ node.color_class }}'>{{ node.status }}</div>
             </div>
-            <div class='text-left w-full'>{{ node.assessments.requirement.description }}</div>
+            {% if node.assessments.requirement.description %}
+                <div class='text-left w-full'>{{ node.assessments.requirement.description }}</div>
+            {% endif %}
         </div>
         {% if node.bar_graph %}
             {% bar_graph assessments ancestors node.requirement_node %}
@@ -22,7 +24,7 @@
         {% if node.direct_evidences %}
             <div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200 direct_evidences_block">
                 <div class="grid grid-cols-2 justify-items-left font-semibold">
-                    <div>Associated evidence:</div>
+                    <div>{% trans "Associated evidence:" %}</div>
                 </div>
                 {% for evidence in node.direct_evidences %}
                     {% if evidence.attachment %}
@@ -36,8 +38,8 @@
         {% if node.applied_controls %}
             <div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200 applied_controls_block">
                 <div class="grid grid-cols-2 justify-items-left font-semibold">
-                    <div>Applied controls:</div>
-                    <div>Associated evidence:</div>
+                    <div>{% trans "Applied controls:" %}</div>
+                    <div>{% trans "Evidence of applied controls:" %}</div>
                 </div>
                 <div class="flex flex-row">
                     <div class="flex flex-col items-left w-1/2">
