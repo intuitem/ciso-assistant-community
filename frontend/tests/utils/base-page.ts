@@ -28,11 +28,7 @@ export abstract class BasePage {
 		await expect(this.page).toHaveURL(this.url);
 	}
 
-	async hasBreadcrumbPath(
-		paths: (string | RegExp)[],
-		fullPath: boolean = true,
-		origin: string = 'Home'
-	) {
+	async hasBreadcrumbPath(paths: (string | RegExp)[], fullPath = true, origin = 'Home') {
 		paths.unshift(new RegExp('.+' + origin));
 		if (fullPath) {
 			await expect.soft(this.breadcrumbs).toHaveText(paths);

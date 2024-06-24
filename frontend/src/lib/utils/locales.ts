@@ -32,6 +32,10 @@ export const LOCALE_MAP = {
 	it: {
 		name: 'italian',
 		flag: '🇮🇹'
+	},
+	pl: {
+		name: 'polish',
+		flag: '🇵🇱'
 	}
 };
 
@@ -59,6 +63,7 @@ export function localItems(): LocalItems {
 		german: m.german(),
 		dutch: m.dutch(),
 		italian: m.italian(),
+		polish: m.polish(),
 		home: m.home(),
 		edit: m.edit(),
 		overview: m.overview(),

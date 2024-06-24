@@ -16,34 +16,44 @@ objects:
         - abbreviation: TF
           name: Très faible
           description: Événement très peu fréquent
+          hexcolor: '#BBF7D0'
         - abbreviation: F
           name: Faible
           description: Événement peu fréquent
+          hexcolor: '##BEF264'
         - abbreviation: M
           name: Moyen
           description: Événement occasionnel
+          hexcolor: '#FEF08A'
         - abbreviation: E
           name: Élevé
           description: Événement fréquent
+          hexcolor: '#FBBF24'
         - abbreviation: TE
           name: Très élevé
           description: Événement très fréquent
+          hexcolor: '#F87171'
       impact:
         - abbreviation: TF
           name: Très faible
           description: Impact très faible
+          hexcolor: '#BBF7D0'
         - abbreviation: F
           name: Faible
           description: Impact faible
+          hexcolor: '#BEF264'
         - abbreviation: M
           name: Moyen
           description: Impact moyen
+          hexcolor: '#FEF08A'
         - abbreviation: E
           name: Élevé
           description: Impact élevé
+          hexcolor: '#FBBF24'
         - abbreviation: TE
           name: Très élevé
           description: Impact très élevé
+          hexcolor: '#F87171'
       risk:
         - abbreviation: TF
           name: Très faible

@@ -15,7 +15,8 @@
 
 	initializeStores();
 
-	import { Modal, Toast } from '@skeletonlabs/skeleton';
+	import Toast from '$lib/components/Toast/Toast.svelte';
+	import Modal from '$lib/components/Modals/Modal.svelte';
 	import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton';
 
 	import { getFlash } from 'sveltekit-flash-message';

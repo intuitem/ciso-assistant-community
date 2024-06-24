@@ -1,8 +1,10 @@
 from django import template
+from django.utils.safestring import mark_safe
 
 from ciso_assistant.settings import VERSION, BUILD, DEBUG
 from core.utils import COUNTRY_FLAGS, LANGUAGES
 from core.models import RequirementAssessment
+from core.helpers import color_css_class
 
 register = template.Library()
 
@@ -56,3 +58,33 @@ def country_name(country_code):
 @register.filter(name="isinstance")
 def isinstance_filter(val, instance_type):
     return isinstance(val, eval(instance_type))
+
+
+@register.simple_tag
+def bar_graph(assessments, ancestors, node=None):
+    compliance_assessments_status = []
+    candidates = [
+        c
+        for c in assessments.filter(requirement__assessable=True)
+        if not node or c == node or node in ancestors.get(c, set())
+    ]
+    total = len(candidates)
+    if total > 0:
+        for st in RequirementAssessment.Status:
+            count = len([c for c in candidates if c.status == st])
+            compliance_assessments_status.append((st, round(count * 100 / total)))
+
+    content = '<div class="flex bg-gray-300 rounded-full overflow-hidden h-4 w-2/3">'
+    for status, percentage in reversed(compliance_assessments_status):
+        if percentage > 0:
+            color = f"bg-{color_css_class(status)}"
+            if color == "bg-black":
+                color += " text-white dark:bg-white dark:text-black"
+            content += f"""
+            <div class="flex flex-col justify-center overflow-hidden text-xs font-semibold text-center {color}" style="width:{percentage}%">
+            """
+            if status != "to_do":
+                content += f"{percentage}%"
+            content += "</div>"
+    content += "</div>"
+    return mark_safe(content)
