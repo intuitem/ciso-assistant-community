@@ -1,0 +1,22 @@
+urn: urn:intuitem:risk:library:map-nist-csf-1.1-iso27001-2022
+locale: en
+ref_id: Map NIST-CSF-1.1 to ISO/IEC 27001:2022
+name: Map NIST-CSF-1.1 to ISO/IEC 27001:2022
+description: Map NIST-CSF-1.1 to ISO/IEC 27001:2022
+copyright: copyright
+version: 1
+provider: NIST & ISO/IEC
+packager: intuitem
+dependencies:
+  - urn:intuitem:risk:library:nist-csf-1.1
+  - urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:requireemnt_mapping_set:nist-csf-1.1-to-iso27001-2022
+    ref_id: NIST-CSF-1.1 to ISO/IEC 27001:2022
+    name: NIST-CSF-1.1 to ISO/IEC 27001:2022
+    requirement_mappings:
+      - reference_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
+      - relationship: subset
+      - related_requirements:
+          - urn:intuitem:risk:req_node:iso27001-2022:a.5.15
