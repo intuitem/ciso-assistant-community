@@ -41,10 +41,6 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
-    locale = models.CharField(
-        max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
-    )
-    default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider")
     )
@@ -85,7 +81,17 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
         return self.display_short
 
 
-class LibraryMixin(ReferentialObjectMixin):
+class I18nObjectMixin(models.Model):
+    locale = models.CharField(
+        max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
+    )
+    default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
+
+    class Meta:
+        abstract = True
+
+
+class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         abstract = True
         unique_together = [["urn", "locale", "version"]]
@@ -408,16 +414,17 @@ class LibraryUpdater:
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
 
-                new_requirement_node, created = (
-                    RequirementNode.objects.update_or_create(
-                        urn=requirement_node["urn"].lower(),
-                        defaults=requirement_node_dict,
-                        create_defaults={
-                            **referential_object_dict,
-                            **requirement_node_dict,
-                            "framework": new_framework,
-                        },
-                    )
+                (
+                    new_requirement_node,
+                    created,
+                ) = RequirementNode.objects.update_or_create(
+                    urn=requirement_node["urn"].lower(),
+                    defaults=requirement_node_dict,
+                    create_defaults={
+                        **referential_object_dict,
+                        **requirement_node_dict,
+                        "framework": new_framework,
+                    },
                 )
 
                 if created:
@@ -570,7 +577,7 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
+class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -601,7 +608,7 @@ class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
         return self.name
 
 
-class ReferenceControl(ReferentialObjectMixin):
+class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -658,7 +665,7 @@ class ReferenceControl(ReferentialObjectMixin):
             )
 
 
-class RiskMatrix(ReferentialObjectMixin):
+class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -740,7 +747,7 @@ class RiskMatrix(ReferentialObjectMixin):
         return self.name
 
 
-class Framework(ReferentialObjectMixin):
+class Framework(ReferentialObjectMixin, I18nObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -803,7 +810,7 @@ class Framework(ReferentialObjectMixin):
         return node_dict
 
 
-class RequirementNode(ReferentialObjectMixin):
+class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     threats = models.ManyToManyField(
         "Threat",
         blank=True,
