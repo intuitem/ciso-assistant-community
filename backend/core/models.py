@@ -974,6 +974,18 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def filename(self):
         return os.path.basename(self.attachment.name)
 
+    def get_size(self):
+        if not self.attachment:
+            return None
+        # get the attachment size with the correct unit
+        size = self.attachment.size
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1024 * 1024:
+            return f"{size / 1024:.1f} KB"
+        else:
+            return f"{size / 1024 / 1024:.1f} MB"
+
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
