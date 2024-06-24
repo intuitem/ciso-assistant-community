@@ -2156,3 +2156,88 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+class RequirementMapping(models.Model):
+    class Relationships(models.TextChoices):
+        SUPERSET = "superset", _("Superset")
+        SUBSET = "subset", _("Subset")
+        EQUAL = "equal", _("Equal")
+        INTERSECT = "intersect", _("Intersect")
+        NOT_RELATED = "not_related", _("Not related")
+
+    class Rationales(models.TextChoices):
+        SYNTACTIC = "syntactic", _("Syntactic")
+        SEMANTIC = "semantic", _("Semantic")
+        FUNCTIONAL = "functional", _("Functional")
+
+    reference_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference requirement"),
+    )
+    related_requirements = models.ManyToManyField(
+        RequirementNode,
+        verbose_name=_("Related requirements"),
+        related_name="related_requirements",
+    )
+    relationship = models.CharField(
+        max_length=20,
+        choices=Relationships.choices,
+        default="not_related",
+        verbose_name=_("Relationship"),
+    )
+    rationale = models.CharField(
+        max_length=20,
+        choices=Rationales.choices,
+        verbose_name=_("Rationale"),
+    )
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+
+
+class RequirementMappingSet(ReferentialObjectMixin):
+    reference_framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference framework"),
+        related_name="reference_framework",
+    )
+    related_framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        verbose_name=_("Related framework"),
+        related_name="related_framework",
+    )
+    mappings = models.ManyToManyField(
+        RequirementMapping,
+        verbose_name=_("Mappings"),
+        related_name="mappings",
+    )
+    version = models.IntegerField(
+        null=False,
+        verbose_name=_("Version"),
+        default=1,
+        help_text=_("Version of the mapping set"),
+    )
+
+    # NOTE: This is a proposition to handle versioning of the mapping set frameworks.
+    # This should be discussed before being implemented.
+    #
+    # reference_framework_version = models.CharField(
+    #     max_length=100,
+    #     blank=True,
+    #     null=True,
+    #     help_text=_(
+    #         "Version of the reference framework, may include boundaries (e.g. >=1,<4)"
+    #     ),
+    #     verbose_name=_("Reference framework version"),
+    # )
+    # related_framework_version = models.CharField(
+    #     max_length=100,
+    #     blank=True,
+    #     null=True,
+    #     help_text=_(
+    #         "Version of the related framework, may include boundaries (e.g. >=1,<4)"
+    #     ),
+    #     verbose_name=_("Related framework version"),
+    # )
