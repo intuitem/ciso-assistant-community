@@ -38,7 +38,9 @@
 		if (extension === null) return null;
 		// We could implement some contextual data in the filename (for example the evidence name or the name of an object this evidence is related to etc...)
 		const date = new Date();
-		return `${date.getDay()}-${date.getMonth()}-${date.getFullYear()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}_${date.getMilliseconds()}.${extension}`;
+		return `${date.getDate()}-${
+			date.getMonth() + 1
+		}-${date.getFullYear()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}_${date.getMilliseconds()}.${extension}`;
 	}
 
 	function onPaste(event: ClipboardEvent) {

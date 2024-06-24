@@ -151,6 +151,7 @@ class Folder(NameDescriptionMixin):
             ["project", "folder"],
             ["risk_assessment", "project", "folder"],
             ["risk_scenario", "risk_assessment", "project", "folder"],
+            ["compliance_assessment", "project", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -222,16 +223,6 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
         }
 
-    @staticmethod
-    def get_user_groups(user):
-        # pragma pylint: disable=no-member
-        """get the list of user groups containing the user given in parameter"""
-        user_group_list = []
-        for user_group in UserGroup.objects.all():
-            if user in user_group.user_set.all():
-                user_group_list.append(user_group)
-        return user_group_list
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -295,6 +286,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
+    is_sso = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -434,13 +426,8 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 raise primary_exception
 
     def get_user_groups(self):
-        # pragma pylint: disable=no-member
-        """get the list of user groups containing the user"""
-        user_group_list = []
-        for user_group in UserGroup.objects.all():
-            if self in user_group.user_set.all():
-                user_group_list.append((user_group.__str__(), user_group.builtin))
-        return user_group_list
+        """get the list of user groups containing the user in the form (group_name, builtin)"""
+        return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
 
     @property
     def has_backup_permission(self) -> bool:
@@ -537,6 +524,22 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     return True
                 f = f.parent_folder
         return False
+
+    @staticmethod
+    def is_object_readable(
+        user: AbstractBaseUser | AnonymousUser, object_type: Any, id: uuid
+    ) -> bool:
+        """
+        Determines if a user has read on an object by id
+        """
+        obj = object_type.objects.filter(id=id).first()
+        if not obj:
+            return False
+        class_name = object_type.__name__.lower()
+        permission = Permission.objects.get(codename="view_" + class_name)
+        return RoleAssignment.is_access_allowed(
+            user, permission, Folder.get_folder(obj)
+        )
 
     @staticmethod
     def get_accessible_folders(
@@ -670,14 +673,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def is_user_assigned(self, user) -> bool:
         """Determines if a user is assigned to the role assignment"""
         return user == self.user or (
-            self.user_group and self.user_group in UserGroup.get_user_groups(user)
+            self.user_group and self.user_group in user.user_groups.all()
         )
 
     @staticmethod
     def get_role_assignments(user):
         """get all role assignments attached to a user directly or indirectly"""
         assignments = list(user.roleassignment_set.all())
-        for user_group in UserGroup.get_user_groups(user):
+        for user_group in user.user_groups.all():
             assignments += list(user_group.roleassignment_set.all())
         return assignments
 

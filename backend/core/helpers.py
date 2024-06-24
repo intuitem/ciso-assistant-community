@@ -10,6 +10,8 @@ from core.serializers import ReferenceControlReadSerializer, ThreatReadSerialize
 from .models import *
 from .utils import camel_case
 
+from typing import List, Dict, Optional
+
 
 def flatten_dict(
     d: MutableMapping, parent_key: str = "", sep: str = "."
@@ -40,6 +42,17 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "on_hold": "#ee6666",
     "transfer": "#91cc75",
 }
+
+
+def color_css_class(status):
+    return {
+        "compliant": "green-500",
+        "to_do": "gray-300",
+        "in_progress": "blue-500",
+        "non_compliant": "red-500",
+        "partially_compliant": "yellow-400",
+        "not_applicable": "black",
+    }.get(status)
 
 
 def applied_control_priority(user: User):
@@ -206,8 +219,8 @@ def get_compliance_assessment_stats(
 
 def get_sorted_requirement_nodes(
     requirement_nodes: list,
-    requirements_assessed: list | None,
-    max_score: int,
+    requirements_assessed: Optional[list] = None,
+    max_score: int = 0,
 ) -> dict:
     """
     Recursive function to build framework groups tree
@@ -217,124 +230,98 @@ def get_sorted_requirement_nodes(
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
-
     """
 
-    # TODO: pass the framework attributes later on instead of max_score
-
-    # cope for old version not creating order_id correctly
+    # Cope for old version not creating order_id correctly
     for req in requirement_nodes:
         if req.order_id is None:
             req.order_id = req.created_at
 
-    requirement_assessment_from_requirement_id = (
-        {str(ra.requirement_id): ra for ra in requirements_assessed}
-        if requirements_assessed
-        else {}
-    )
+    requirement_assessment_from_requirement_id = {
+        str(ra.requirement_id): ra for ra in (requirements_assessed or [])
+    }
 
-    def get_sorted_requirement_nodes_rec(
-        requirement_nodes: list,
-        requirements_assessed: list,
-        start: list,
-    ) -> dict:
+    # Build a dictionary to quickly access children nodes
+    children_dict = {}
+    for node in requirement_nodes:
+        if node.parent_urn not in children_dict:
+            children_dict[node.parent_urn] = []
+        children_dict[node.parent_urn].append(node)
+
+    # Sort children nodes by order_id
+    for key in children_dict:
+        children_dict[key].sort(key=lambda x: x.order_id)
+
+    def get_sorted_requirement_nodes_rec(start: list) -> dict:
         """
         Recursive function to build framework groups tree, within get_sorted_requirements_nodes
         start: the initial list
         """
         result = {}
         for node in start:
-            children = sorted(
-                [
-                    requirement_node
-                    for requirement_node in requirement_nodes
-                    if requirement_node.parent_urn == node.urn
-                ],
-                key=lambda x: x.order_id,
-            )
-            req_as = (
-                requirement_assessment_from_requirement_id[str(node.id)]
-                if requirements_assessed
-                else None
-            )
-            result[str(node.id)] = {
+            req_as = requirement_assessment_from_requirement_id.get(str(node.id))
+
+            node_data = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
-                "implementation_groups": (
-                    node.implementation_groups if node.implementation_groups else None
-                ),
-                "ra_id": str(req_as.id) if requirements_assessed else None,
-                "status": req_as.status if requirements_assessed else None,
-                "is_scored": req_as.is_scored if requirements_assessed else None,
-                "score": req_as.score if requirements_assessed else None,
-                "max_score": (max_score if requirements_assessed else None),
-                "status_display": (
-                    req_as.get_status_display() if requirements_assessed else None
-                ),
-                "status_i18n": (
-                    camel_case(req_as.status) if requirements_assessed else None
-                ),
+                "implementation_groups": node.implementation_groups or None,
+                "ra_id": str(req_as.id) if req_as else None,
+                "status": req_as.status if req_as else None,
+                "is_scored": req_as.is_scored if req_as else None,
+                "score": req_as.score if req_as else None,
+                "max_score": max_score if req_as else None,
+                "status_display": req_as.get_status_display() if req_as else None,
+                "status_i18n": camel_case(req_as.status) if req_as else None,
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
                 "description": node.description,
-                "children": get_sorted_requirement_nodes_rec(
-                    requirement_nodes, requirements_assessed, children
-                ),
+                "children": {},
             }
-            for req in sorted(
-                [
-                    requirement_node
-                    for requirement_node in requirement_nodes
-                    if requirement_node.parent_urn == node.urn
-                ],
-                key=lambda x: x.order_id,
-            ):
-                if requirements_assessed:
-                    req_as = requirement_assessment_from_requirement_id[str(req.id)]
-                    result[str(node.id)]["children"][str(req.id)].update(
-                        {
-                            "urn": req.urn,
-                            "ref_id": req.ref_id,
-                            "implementation_groups": (
-                                req.implementation_groups
-                                if req.implementation_groups
-                                else None
-                            ),
-                            "name": req.name,
-                            "description": req.description,
-                            "ra_id": str(req_as.id),
-                            "status": req_as.status,
-                            "is_scored": req_as.is_scored,
-                            "score": req_as.score,
-                            "max_score": max_score,
-                            "status_display": req_as.get_status_display(),
-                            "status_i18n": camel_case(req_as.status),
-                            "style": "leaf",
-                        }
-                    )
-                else:
-                    result[str(node.id)]["children"][str(req.id)].update(
-                        {
-                            "urn": req.urn,
-                            "ref_id": req.ref_id,
-                            "name": req.name,
-                            "description": req.description,
-                            "style": "leaf",
-                        }
-                    )
+
+            result[str(node.id)] = node_data
+
+            # Process children nodes recursively
+            children = children_dict.get(node.urn, [])
+            child_nodes = get_sorted_requirement_nodes_rec(children)
+            result[str(node.id)]["children"] = child_nodes
+
+            # Update each child node with associated requirements
+            for child in children:
+                child_req_as = requirement_assessment_from_requirement_id.get(
+                    str(child.id)
+                )
+
+                child_data = {
+                    "urn": child.urn,
+                    "ref_id": child.ref_id,
+                    "implementation_groups": child.implementation_groups or None,
+                    "name": child.name,
+                    "description": child.description,
+                    "ra_id": str(child_req_as.id) if child_req_as else None,
+                    "status": child_req_as.status if child_req_as else None,
+                    "is_scored": child_req_as.is_scored if child_req_as else None,
+                    "score": child_req_as.score if child_req_as else None,
+                    "max_score": max_score if child_req_as else None,
+                    "status_display": child_req_as.get_status_display()
+                    if child_req_as
+                    else None,
+                    "status_i18n": camel_case(child_req_as.status)
+                    if child_req_as
+                    else None,
+                    "style": "leaf",
+                }
+
+                result[str(node.id)]["children"][str(child.id)].update(child_data)
+
         return result
 
-    tree = get_sorted_requirement_nodes_rec(
-        requirement_nodes,
-        requirements_assessed,
-        sorted(
-            [rn for rn in requirement_nodes if not rn.parent_urn],
-            key=lambda x: x.order_id,
-        ),
-    )
+    top_level_nodes = [rn for rn in requirement_nodes if not rn.parent_urn]
+    top_level_nodes.sort(key=lambda x: x.order_id)
+
+    tree = get_sorted_requirement_nodes_rec(top_level_nodes)
     return tree
 
 

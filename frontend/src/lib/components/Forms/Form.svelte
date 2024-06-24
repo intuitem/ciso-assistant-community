@@ -42,11 +42,12 @@
 		taintedMessage: taintedMessage
 	});
 
-	const { form, message /*, tainted*/, delayed, errors, allErrors, enhance } = _form;
+	const { form, message, tainted, delayed, errors, allErrors, enhance } = _form;
 </script>
 
 {#if debug}
 	<SuperDebug data={$form} />
+	<SuperDebug data={$tainted} />
 	<SuperDebug data={$errors} />
 {/if}
 
@@ -67,5 +68,6 @@
 		errors={$errors}
 		allErrors={$allErrors}
 		delayed={$delayed}
+		tainted={$tainted}
 	/>
 </form>

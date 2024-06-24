@@ -184,6 +184,7 @@
 		<div class="w-1/2">
 			<DonutChart
 				s_label={m.complianceAssessments()}
+				name="compliance_assessment"
 				values={compliance_assessment_donut_values.values}
 				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
 			/>

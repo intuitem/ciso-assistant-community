@@ -16,34 +16,44 @@ objects:
         - abbreviation: VL
           name: Very Low
           description: Very unfrequent event
+          hexcolor: '#BBF7D0'
         - abbreviation: L
           name: Low
           description: Unfrequent event
+          hexcolor: '#BEF264'
         - abbreviation: M
           name: Medium
           description: Occasional event
+          hexcolor: '#FEF08A'
         - abbreviation: H
           name: High
           description: Frequent event
+          hexcolor: '#FBBF24'
         - abbreviation: VH
           name: Very High
           description: Very frequent event
+          hexcolor: '#F87171'
       impact:
         - abbreviation: VL
           name: Very Low
           description: Very low impact
+          hexcolor: '#BBF7D0'
         - abbreviation: L
           name: Low
           description: Low impact
+          hexcolor: '#BEF264'
         - abbreviation: M
           name: Medium
           description: Medium impact
+          hexcolor: '#FEF08A'
         - abbreviation: H
           name: High
           description: High impact
+          hexcolor: '#FBBF24'
         - abbreviation: VH
           name: Very High
           description: Very high impact
+          hexcolor: '#F87171'
       risk:
         - abbreviation: VL
           name: Very Low
