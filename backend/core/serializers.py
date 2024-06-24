@@ -436,6 +436,7 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 
 class EvidenceReadSerializer(BaseModelSerializer):
     attachment = serializers.CharField(source="filename")
+    size = serializers.CharField(source="get_size")
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
