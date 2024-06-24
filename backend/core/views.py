@@ -1653,7 +1653,7 @@ def generate_html(
         "ancestors": ancestors,
     }
 
-    return render_to_string("core/audit_report_pdf.html", data), list(
+    return render_to_string("core/audit_report.html", data), list(
         set(selected_evidences)
     )
 
