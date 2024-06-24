@@ -458,6 +458,7 @@ Set DJANGO_DEBUG=False for security reason.
 - DE: German
 - NL: Dutch
 - IT: Italian
+- PL: Polish
 
 
 ## Built With 💜

@@ -35,7 +35,7 @@ export const LOCALE_MAP = {
 	},
 	pl: {
 		name: 'polish',
-		flag: 'pl'
+		flag: '🇵🇱'
 	}
 };
 
