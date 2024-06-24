@@ -305,7 +305,7 @@ msgstr "Définition du score"
 
 #: models.py:750
 msgid "Implementation groups definition"
-msgstr "Définition des groupes de mise en œuvre"
+msgstr "Définition des groupes d'implémentation"
 
 #: models.py:761 models.py:824 models.py:1705
 #: templates/core/action_plan_pdf.html:20
@@ -326,7 +326,7 @@ msgstr "ID de commande"
 
 #: models.py:832
 msgid "Implementation groups"
-msgstr "Groupes de mise en œuvre"
+msgstr "Groupes d'implémentation"
 
 #: models.py:834
 msgid "Assessable"
@@ -812,7 +812,7 @@ msgstr "Résultat"
 
 #: models.py:1715 templates/core/audit_report.html:40
 msgid "Selected implementation groups"
-msgstr "Groupes de mise en œuvre sélectionnés"
+msgstr "Groupes d'implémentation sélectionnés"
 
 #: models.py:1725 models.py:2032
 msgid "Compliance assessment"
