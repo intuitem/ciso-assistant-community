@@ -2176,21 +2176,22 @@ class RequirementMapping(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("Reference requirement"),
     )
-    related_requirements = models.ManyToManyField(
-        RequirementNode,
-        verbose_name=_("Related requirements"),
-        related_name="related_requirements",
-    )
     relationship = models.CharField(
         max_length=20,
         choices=Relationships.choices,
         default="not_related",
         verbose_name=_("Relationship"),
     )
+    related_requirements = models.ManyToManyField(
+        RequirementNode,
+        verbose_name=_("Related requirements"),
+        related_name="related_requirements",
+    )
     rationale = models.CharField(
         max_length=20,
         choices=Rationales.choices,
         verbose_name=_("Rationale"),
+        default="syntactic",
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
@@ -2241,3 +2242,10 @@ class RequirementMappingSet(ReferentialObjectMixin):
     #     ),
     #     verbose_name=_("Related framework version"),
     # )
+
+    def save(self, *args, **kwargs) -> None:
+        if self.reference_framework == self.related_framework:
+            raise ValidationError(
+                _("Reference and related frameworks must be different")
+            )
+        return super().save(*args, **kwargs)
