@@ -1205,23 +1205,23 @@ class TestRequirementMapping:
 
     @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
     def test_requirement_mapping_creation(self):
-        reference_requirement = RequirementNode.objects.filter(
+        focal_requirement = RequirementNode.objects.filter(
             urn="urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1"
         ).last()
-        focal_requirement = RequirementNode.objects.get(
+        reference_requirement = RequirementNode.objects.get(
             urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.15"
         )
 
         mapping = RequirementMapping.objects.create(
-            reference_requirement=reference_requirement,
+            focal_requirement=focal_requirement,
             relationship=RequirementMapping.Relationships.SUBSET,
         )
 
-        mapping.focal_requirements.add(focal_requirement)
+        mapping.reference_requirements.add(reference_requirement)
 
-        assert mapping.reference_requirement == reference_requirement
+        assert mapping.focal_requirement == focal_requirement
         assert mapping.relationship == RequirementMapping.Relationships.SUBSET
-        assert focal_requirement in mapping.focal_requirements.all()
+        assert reference_requirement in mapping.reference_requirements.all()
 
 
 @pytest.mark.django_db
