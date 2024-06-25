@@ -14,8 +14,8 @@
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
-	export let status: string | undefined = undefined;
-	export let statusCounts: Record<string, number> | undefined;
+	export let result: string | undefined = undefined;
+	export let resultCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
 	export let max_score: number;
 
@@ -28,9 +28,8 @@
 		reference_controls,
 		children,
 		canEditRequirementAssessment,
-		status,
 		max_score,
-		statusCounts,
+		resultCounts,
 		assessable,
 		...$$restProps
 	} as const;
@@ -62,45 +61,43 @@
 		Object.keys(children).length > 0 &&
 		assessableNodes.length - (node.assessable ? 1 : 0) > 0;
 
-	const REQUIREMENT_ASSESSMENT_STATUS = [
+	const REQUIREMENT_ASSESSMENT_RESULT = [
 		'compliant',
-		'partially_compliant',
-		'in_progress',
-		'non_compliant',
-		'not_applicable',
-		'to_do'
+		'non_compliant_major',
+		'non_compliant_minor',
+		'not_applicable'
 	] as const;
 
-	type StatusPercentage = {
-		status: (typeof REQUIREMENT_ASSESSMENT_STATUS)[number];
+	type ResultPercentage = {
+		result: (typeof REQUIREMENT_ASSESSMENT_RESULT)[number];
 		percentage: {
 			value: number;
 			display: string;
 		};
 	};
 
-	const orderedStatusPercentages: StatusPercentage[] = REQUIREMENT_ASSESSMENT_STATUS.map(
-		(status) => {
-			if (!statusCounts) return { status, percentage: { value: 0, display: '0' } };
-			const value = statusCounts[status] || 0;
+	const orderedResultPercentages: ResultPercentage[] = REQUIREMENT_ASSESSMENT_RESULT.map(
+		(result) => {
+			if (!resultCounts) return { result: result, percentage: { value: 0, display: '0' } };
+			const value = resultCounts[result] || 0;
 			const percentValue: number = (value / assessableNodes.length) * 100;
 			const percentage = {
 				value: percentValue,
 				display: percentValue.toFixed(0)
 			};
-			return { status, percentage };
+			return { result: result, percentage };
 		}
 	);
 
 	function nodeScore(): number {
-		if (!statusCounts) return -1;
-		let mean = statusCounts['total_score'] / statusCounts['scored'];
+		if (!resultCounts) return -1;
+		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
 
 	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
-	$: classesPercentText = (statusColor: string) => (statusColor === '#000000' ? 'text-white' : '');
+	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
 </script>
 
 <div class="flex flex-row justify-between space-x-8">
@@ -213,16 +210,14 @@
 			<div
 				class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
 			>
-				{#each orderedStatusPercentages as sp}
+				{#each orderedResultPercentages as rp}
 					<div
 						class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-							complianceColorMap[sp.status]
+							complianceColorMap[rp.result]
 						)}"
-						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+						style="width: {rp.percentage.value}%; background-color: {complianceColorMap[rp.result]}"
 					>
-						{#if sp.status !== 'to_do'}
-							{sp.percentage.display}%
-						{/if}
+						{rp.percentage.display}%
 					</div>
 				{/each}
 			</div>

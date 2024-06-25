@@ -1,25 +1,28 @@
 <script lang="ts">
 	import { displayScoreColor } from '$lib/utils/helpers';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+
+	import * as m from '$paraglide/messages';
 
 	export let statusI18n: string;
 	export let statusDisplay: string;
+	export let resultI18n: string;
+	export let resultDisplay: string;
 	export let statusColor: string;
+	export let resultColor: string;
 	export let assessable: boolean;
 	export let score: number;
 	export let isScored: boolean;
 	export let max_score: number;
 
-	const lead = localItems()[statusI18n] ?? statusDisplay ?? '';
+	const lead = Object.hasOwn(m, resultI18n) ? m[resultI18n]() : resultDisplay ?? '';
 
-	$: classesText = statusColor === '#000000' ? 'text-white' : '';
+	$: classesText = resultColor == '#000000' ? 'text-white' : '';
 </script>
 
 {#if assessable}
 	<div class="flex flex-row space-x-2 items-center">
-		<span class="badge {classesText} h-fit" style="background-color: {statusColor};">
+		<span class="badge {classesText} h-fit" style="background-color: {resultColor};">
 			{lead}
 		</span>
 		{#if score !== null && statusI18n !== 'notApplicable' && isScored}
