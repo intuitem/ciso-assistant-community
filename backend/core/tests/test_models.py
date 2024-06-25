@@ -1208,7 +1208,7 @@ class TestRequirementMapping:
         reference_requirement = RequirementNode.objects.filter(
             urn="urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1"
         ).last()
-        related_requirement = RequirementNode.objects.get(
+        focal_requirement = RequirementNode.objects.get(
             urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.15"
         )
 
@@ -1217,11 +1217,11 @@ class TestRequirementMapping:
             relationship=RequirementMapping.Relationships.SUBSET,
         )
 
-        mapping.related_requirements.add(related_requirement)
+        mapping.focal_requirements.add(focal_requirement)
 
         assert mapping.reference_requirement == reference_requirement
         assert mapping.relationship == RequirementMapping.Relationships.SUBSET
-        assert related_requirement in mapping.related_requirements.all()
+        assert focal_requirement in mapping.focal_requirements.all()
 
 
 @pytest.mark.django_db
@@ -1239,20 +1239,20 @@ class TestRequirementMappingSet:
             name="Requirement Mapping Set",
             description="Requirement Mapping Set description",
             reference_framework=csf1_1,
-            related_framework=iso27001,
+            focal_framework=iso27001,
         )
         assert requirement_mapping_set.name == "Requirement Mapping Set"
         assert (
             requirement_mapping_set.description == "Requirement Mapping Set description"
         )
         assert requirement_mapping_set.folder == root_folder
-        assert requirement_mapping_set.related_framework == iso27001
+        assert requirement_mapping_set.focal_framework == iso27001
         assert requirement_mapping_set.reference_framework == csf1_1
         assert requirement_mapping_set.mappings.count() == 0
         assert requirement_mapping_set.version == 1
 
     @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
-    def test_requirement_mapping_set_reference_and_related_frameworks_must_be_distinct(
+    def test_requirement_mapping_set_reference_and_focal_frameworks_must_be_distinct(
         self,
     ):
         csf1_1 = Framework.objects.get(urn="urn:intuitem:risk:framework:nist-csf-1.1")
@@ -1261,5 +1261,5 @@ class TestRequirementMappingSet:
                 name="Requirement Mapping Set",
                 description="Requirement Mapping Set description",
                 reference_framework=csf1_1,
-                related_framework=csf1_1,
+                focal_framework=csf1_1,
             )
