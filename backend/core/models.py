@@ -2171,10 +2171,10 @@ class RequirementMapping(models.Model):
         SEMANTIC = "semantic", _("Semantic")
         FUNCTIONAL = "functional", _("Functional")
 
-    reference_requirement = models.ForeignKey(
+    focal_requirements = models.ManyToManyField(
         RequirementNode,
-        on_delete=models.CASCADE,
-        verbose_name=_("Reference requirement"),
+        verbose_name=_("Related requirements"),
+        related_name="focal_requirements",
     )
     relationship = models.CharField(
         max_length=20,
@@ -2182,10 +2182,10 @@ class RequirementMapping(models.Model):
         default="not_related",
         verbose_name=_("Relationship"),
     )
-    related_requirements = models.ManyToManyField(
+    reference_requirement = models.ForeignKey(
         RequirementNode,
-        verbose_name=_("Related requirements"),
-        related_name="related_requirements",
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference requirement"),
     )
     rationale = models.CharField(
         max_length=20,
@@ -2203,11 +2203,11 @@ class RequirementMappingSet(ReferentialObjectMixin):
         verbose_name=_("Reference framework"),
         related_name="reference_framework",
     )
-    related_framework = models.ForeignKey(
+    focal_framework = models.ForeignKey(
         Framework,
         on_delete=models.CASCADE,
-        verbose_name=_("Related framework"),
-        related_name="related_framework",
+        verbose_name=_("Focal framework"),
+        related_name="focal_framework",
     )
     mappings = models.ManyToManyField(
         RequirementMapping,
@@ -2233,7 +2233,7 @@ class RequirementMappingSet(ReferentialObjectMixin):
     #     ),
     #     verbose_name=_("Reference framework version"),
     # )
-    # related_framework_version = models.CharField(
+    # focal_framework_version = models.CharField(
     #     max_length=100,
     #     blank=True,
     #     null=True,
@@ -2244,7 +2244,7 @@ class RequirementMappingSet(ReferentialObjectMixin):
     # )
 
     def save(self, *args, **kwargs) -> None:
-        if self.reference_framework == self.related_framework:
+        if self.reference_framework == self.focal_framework:
             raise ValidationError(
                 _("Reference and related frameworks must be different")
             )
