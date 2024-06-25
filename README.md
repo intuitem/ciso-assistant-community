@@ -150,13 +150,16 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- NCSC Cyber Assessment Framework (CAF)
-- Secure Controls Framework (SCF)
 - CCPA
+- NCSC Cyber Assessment Framework (CAF)
+- NCSC Cyber Essentials
+- Secure Controls Framework (SCF)
 - Part-IS
 - SOX
 - NIST 800-82
-- UK Cyber Essentials
+- Korea ISA: ISMS-P
+- ENS Esquema Nacional de seguridad (español)
+
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
 ## Add your own library
