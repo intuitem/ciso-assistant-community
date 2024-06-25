@@ -82,6 +82,15 @@ class RequirementNodeImporter:
             )
 
 
+class RequirementMappingSetImporter:
+    REQUIRED_FIELDS = {"urn", "name", "mapping"}
+    OBJECT_FIELDS = {"requirement_mappings"}
+
+    def __init__(self, data: dict):
+        self.data = data
+        self._requirement_mappings = []
+
+
 # The couple (URN, locale) is unique. ===> Check it in the future
 class FrameworkImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
@@ -377,6 +386,9 @@ class LibraryImporter:
                 invalid_risk_matrix_error,
             )
 
+    def init_requirement_mapping_sets(self, data: dict):
+        ...
+
     def init_framework(self, framework_data: dict) -> Union[str, None]:
         self._framework_importer = FrameworkImporter(framework_data)
         return self._framework_importer.init()
@@ -404,6 +416,9 @@ class LibraryImporter:
             ) is not None:
                 print("framework_import_error", framework_import_error)
                 return framework_import_error
+
+        if "requirement_mapping_sets" in library_objects:
+            requirement_mapping_sets_data = library_objects["requirement_mapping_sets"]
 
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
