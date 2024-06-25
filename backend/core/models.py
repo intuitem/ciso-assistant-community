@@ -2171,10 +2171,10 @@ class RequirementMapping(models.Model):
         SEMANTIC = "semantic", _("Semantic")
         FUNCTIONAL = "functional", _("Functional")
 
-    focal_requirements = models.ManyToManyField(
+    reference_requirements = models.ManyToManyField(
         RequirementNode,
-        verbose_name=_("Related requirements"),
-        related_name="focal_requirements",
+        verbose_name=_("reference requirements"),
+        related_name="reference_requirements",
     )
     relationship = models.CharField(
         max_length=20,
@@ -2182,10 +2182,10 @@ class RequirementMapping(models.Model):
         default="not_related",
         verbose_name=_("Relationship"),
     )
-    reference_requirement = models.ForeignKey(
+    focal_requirement = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
-        verbose_name=_("Reference requirement"),
+        verbose_name=_("Focal requirement"),
     )
     rationale = models.CharField(
         max_length=20,
