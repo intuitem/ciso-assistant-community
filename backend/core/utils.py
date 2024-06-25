@@ -5,6 +5,8 @@ import hashlib
 
 
 def camel_case(s):
+    if s is None:
+        return None
     s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
 
     return "".join([s[0].lower(), s[1:]])
