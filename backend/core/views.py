@@ -1528,6 +1528,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
 
+    @action(detail=False, name="Get result choices")
+    def result(self, request):
+        return Response(dict(RequirementAssessment.Results.choices))
+
 
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
