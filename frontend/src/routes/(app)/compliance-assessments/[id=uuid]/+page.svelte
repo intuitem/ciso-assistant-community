@@ -63,8 +63,10 @@
 				id: id,
 				content: TreeViewItemContent,
 				contentProps: { ...node, canEditRequirementAssessment },
-				lead: node.result ? TreeViewItemLead : '',
+				lead: TreeViewItemLead,
 				leadProps: {
+					result: node.result,
+					status: node.status,
 					statusI18n: node.status_i18n,
 					resultI18n: node.result_i18n,
 					assessable: node.assessable,
