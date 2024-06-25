@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://unpkg.com/dezui@latest">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Audit report</title>
+    <title>{% trans "Audit report" %}</title>
     <style>
         .direct_evidences_block, .applied_controls_block{
             list-style-position: inside;
@@ -21,7 +21,7 @@
     </div>
     <div class="flex flex-row space-x-4 mb-4">
         <div>
-            <p class='font-semibold'>Authors</p>
+            <p class='font-semibold'>{% trans "Authors "%}</p>
             <ul>
                 {% for author in compliance_assessment.authors.all %}
                     <li>{{ author }}</li>
@@ -29,7 +29,7 @@
             </ul>
         </div>
         <div>
-            <p class='font-semibold'>Reviewers</p>
+            <p class='font-semibold'>{%trans "Reviewers" %}</p>
             <ul>
                 {% for group in compliance_assessment.reviewers.all %}
                     <li>{{ group }}</li>
@@ -37,7 +37,7 @@
             </ul>
         </div>
         <div>
-            <p class='font-semibold'>Selected implementation groups</p>
+            <p class='font-semibold'>{% trans "Selected implementation groups" %}</p>
             <ul>
                 {% for group in compliance_assessment.get_selected_implementation_groups %}
                     <li>{{ group }}</li>

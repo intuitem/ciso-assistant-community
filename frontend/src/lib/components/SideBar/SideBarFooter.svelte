@@ -31,7 +31,7 @@
 		nl: 'Nederlands',
 		de: 'Deutsch',
 		it: 'Italiano',
-		pl: 'Polish'
+		pl: 'Polski'
 	};
 
 	let value = languageTag();
