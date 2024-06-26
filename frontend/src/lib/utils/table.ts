@@ -107,6 +107,55 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const THREAT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: row => row.meta.threats,
+	filter: (rowThreatName, threatName) => {
+		if (!threatName)
+			return true;
+		return rowThreatName === threatName;
+	},
+	filterProps: (rows, _) => {
+		const threatSet = new Set();
+		for (const row of rows) {
+			for (const threat of row.meta.threats) {
+				threatSet.add(threat.str);
+			}
+		}
+		const options = [...threatSet].sort();
+		return { options };
+	},
+	extraProps: {
+		defaultOptionName: 'Select threat...'
+	}
+};
+
+const ASSET_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: row => {
+		console.log(row);
+		return row.meta.assets;
+	},
+	filter: (rowAssetName, assetName) => {
+		if (!assetName)
+			return true;
+		return rowAssetName === assetName;
+	},
+	filterProps: (rows, _) => {
+		const assetSet = new Set();
+		for (const row of rows) {
+			for (const asset of row.meta.assets) {
+				assetSet.add(asset.str);
+			}
+		}
+		const options = [...assetSet].sort();
+		return { options };
+	},
+	extraProps: {
+		defaultOptionName: 'Select asset...'
+	}
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: row => row.framework.str,
@@ -191,7 +240,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			domain: DOMAIN_FILTER_FROM_META_PROJECT,
 			project: PROJECT_FILTER_FROM_META,
 			treatment: TREATMENT_FILTER,
-			risk_assessment: RISK_ASSESSMENT_FILTER
+			risk_assessment: RISK_ASSESSMENT_FILTER,
+			threats: THREAT_FILTER,
+			assets: ASSET_FILTER
 		}
 	},
 	'risk-acceptances': {
