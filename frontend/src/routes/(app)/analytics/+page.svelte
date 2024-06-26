@@ -371,17 +371,19 @@
 											values={compliance_assessment.donut.values}
 										/>
 									</div>
-									<div class="absolute top-0 right-0 mt-2 space-x-1">
-										<a
-											href="/compliance-assessments/{compliance_assessment.id}/export"
-											class="btn variant-filled-primary"
-											><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
-										</a>
-										<a
-											href="/compliance-assessments/{compliance_assessment.id}/edit"
-											class="btn variant-filled-primary"
-											><i class="fa-solid fa-edit mr-2" /> {m.edit()}
-										</a>
+									<div class="absolute top-2 right-4 mt-2 space-x-1">
+										<div class="flex flex-col space-y-1">
+											<a
+												href="/compliance-assessments/{compliance_assessment.id}/edit"
+												class="btn variant-filled-primary"
+												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
+											</a>
+											<a
+												href="/compliance-assessments/{compliance_assessment.id}/export"
+												class="btn variant-filled-primary"
+												><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+											</a>
+										</div>
 									</div>
 								</div>
 							{/each}
