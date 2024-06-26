@@ -99,6 +99,14 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 	}
 }
 
+const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: row => row.meta.risk_assessment.str,
+	extraProps: {
+		defaultOptionName: 'Select risk assessment...'
+	}
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: row => row.framework.str,
@@ -182,7 +190,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		filters: {
 			domain: DOMAIN_FILTER_FROM_META_PROJECT,
 			project: PROJECT_FILTER_FROM_META,
-			treatment: TREATMENT_FILTER
+			treatment: TREATMENT_FILTER,
+			risk_assessment: RISK_ASSESSMENT_FILTER
 		}
 	},
 	'risk-acceptances': {
