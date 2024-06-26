@@ -26,11 +26,34 @@ interface ListViewFieldsConfig {
 	};
 }
 
+const DOMAIN_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.folder.str,
+	extraProps: {
+		defaultOptionName: 'Select domain...'
+	}
+};
+
+const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
+	...DOMAIN_FILTER,
+	getColumn: (row) => row.project.folder.str,
+};
+
+const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
+	...DOMAIN_FILTER,
+	getColumn: (row) => row.meta.folder.str,
+};
+
+const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
+	...DOMAIN_FILTER,
+	getColumn: (row) => row.meta.project.folder.str,
+};
+
 const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.project.str,
 	extraProps: {
-		defaultOptionName: 'Select project...'
+		defaultOptionName: 'Select project...' // Make translations
 	}
 };
 
@@ -38,7 +61,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.str,
 	extraProps: {
-		defaultOptionName: 'Select framework...'
+		defaultOptionName: 'Select framework...' // Make translations
 	}
 };
 
@@ -46,7 +69,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.locale,
 	extraProps: {
-		defaultOptionName: 'Select language...',
+		defaultOptionName: 'Select language...', // Make translations
 		OptionLabels: LOCALE_DISPLAY_MAP
 	}
 };
@@ -63,7 +86,7 @@ const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
 		return value ? !builtin : true;
 	},
 	extraProps: {
-		title: "Only display matrix libraries"
+		title: "Only display matrix libraries" // Make translations
 	}
 };
 
@@ -74,24 +97,34 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	projects: {
 		head: ['name', 'description', 'domain'],
-		body: ['name', 'description', 'folder']
+		body: ['name', 'description', 'folder'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain'],
 		body: ['name', 'description', 'provider', 'folder'],
-		meta: ['id', 'urn']
+		meta: ['id', 'urn'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
+			domain: DOMAIN_FILTER_FROM_PROJECT,
 			project: PROJECT_FILTER
 		}
 	},
 	threats: {
 		head: ['ref', 'name', 'description', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
-		meta: ['id', 'urn']
+		meta: ['id', 'urn'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	'risk-scenarios': {
 		head: ['name', 'threats', 'riskAssessment', 'appliedControls', 'currentLevel', 'residualLevel'],
@@ -102,28 +135,46 @@ export const listViewFields: ListViewFieldsConfig = {
 			'applied_controls',
 			'current_level',
 			'residual_level'
-		]
+		],
+		filters: {
+			domain: DOMAIN_FILTER_FROM_META_PROJECT
+		}
 	},
 	'risk-acceptances': {
 		head: ['name', 'description', 'riskScenarios'],
-		body: ['name', 'description', 'risk_scenarios']
+		body: ['name', 'description', 'risk_scenarios'],
+		filters: {
+			domain: DOMAIN_FILTER_FROM_META
+		}
 	},
 	'applied-controls': {
 		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control']
+		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	policies: {
 		head: ['name', 'description', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'eta', 'folder', 'reference_control']
+		body: ['name', 'description', 'eta', 'folder', 'reference_control'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	'reference-controls': {
 		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
-		meta: ['id', 'urn']
+		meta: ['id', 'urn'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	assets: {
 		head: ['name', 'description', 'businessValue', 'domain'],
-		body: ['name', 'description', 'business_value', 'folder']
+		body: ['name', 'description', 'business_value', 'folder'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	users: {
 		head: ['email', 'firstName', 'lastName'],
@@ -145,12 +196,16 @@ export const listViewFields: ListViewFieldsConfig = {
 	frameworks: {
 		head: ['name', 'description', 'provider', 'complianceAssessments', 'domain'],
 		body: ['name', 'description', 'provider', 'compliance_assessments', 'folder'],
-		meta: ['id', 'urn']
+		meta: ['id', 'urn'],
+		filters: {
+			domain: DOMAIN_FILTER
+		}
 	},
 	'compliance-assessments': {
 		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project'],
 		filters: {
+			domain: DOMAIN_FILTER_FROM_PROJECT,
 			project: PROJECT_FILTER,
 			framework: FRAMEWORK_FILTER
 		}
@@ -162,7 +217,10 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	evidences: {
 		head: ['name', 'file', 'description'],
-		body: ['name', 'attachment', 'description']
+		body: ['name', 'attachment', 'description'],
+		filters: {
+			domain: DOMAIN_FILTER_FROM_META
+		}
 	},
 	requirements: {
 		head: ['ref', 'name', 'description', 'framework'],

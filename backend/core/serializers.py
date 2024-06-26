@@ -131,6 +131,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
+    project = FieldsRelatedField(["folder"])
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -467,6 +468,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
+    project = FieldsRelatedField(["folder"])
     framework = FieldsRelatedField(
         ["id", "min_score", "max_score", "implementation_groups_definition"]
     )
