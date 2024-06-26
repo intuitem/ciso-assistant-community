@@ -101,6 +101,7 @@ class RiskAcceptanceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     approver = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
+    approver = FieldsRelatedField(["first_name","last_name"]);
 
     state = serializers.CharField(source="get_state_display")
 
