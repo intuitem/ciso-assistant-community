@@ -613,5 +613,11 @@
 	"ssoSettings": "SSO settings",
 	"ssoSettingsDescription": "Configure your Single Sign-On settings here.",
 	"sso": "SSO",
-	"isSso": "Is SSO"
+	"isSso": "Is SSO",
+	"requirementMappingSet": "Requirement mapping set",
+	"requirementMappingSets": "Requirement mapping sets",
+	"requirementMapping": "Requirement mapping",
+	"requirementMappings": "Requirement mappings",
+	"referenceFramework": "Reference framework",
+	"focalFramework": "Focal framework"
 }

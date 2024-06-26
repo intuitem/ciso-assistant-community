@@ -38,7 +38,8 @@ export const URL_MODEL = [
 	'requirements',
 	'requirement-assessments',
 	'libraries',
-	'sso-settings'
+	'sso-settings',
+	'requirement-mapping-sets'
 ] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
