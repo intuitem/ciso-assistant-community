@@ -8,7 +8,7 @@ def create_result(apps, schema_editor):
     for assessment in RequirementAssessment.objects.all():
         if assessment.status in RequirementAssessment.Results.values:
             setattr(assessment, "result", assessment.status)
-            assessment.status = "in_progress"
+            assessment.status = RequirementAssessment.Status.TODO
         assessment.save()
 
 
