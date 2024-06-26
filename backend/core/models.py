@@ -2092,6 +2092,28 @@ class ComplianceAssessment(Assessment):
         }
         return findings
 
+    def compute_requirement_assessments_results(
+        self, mapping_set: RequirementMappingSet, reference_assessment: Self
+    ) -> Self:
+        requirement_assessments: list[RequirementAssessment] = []
+        for mapping in mapping_set.mappings.all():
+            _reference_requirement_assessment = RequirementAssessment.objects.get(
+                compliance_assessment=reference_assessment,
+                requirement=mapping.reference_requirement,
+            )
+            focal_requirement_assessment = RequirementAssessment.objects.get(
+                compliance_assessment=self,
+                requirement=mapping.focal_requirement,
+            )
+            result = focal_requirement_assessment.infer_result(
+                mapping=mapping,
+                reference_requirement_assessment=_reference_requirement_assessment,
+            )
+            if result:
+                focal_requirement_assessment.status = result
+                requirement_assessments.append(focal_requirement_assessment)
+        return requirement_assessments
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin):
     class Status(models.TextChoices):
@@ -2151,18 +2173,18 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         return self.requirement.description
 
     def infer_result(
-        self, mapping: RequirementMapping, focal_requirement_assessment: Self
+        self, mapping: RequirementMapping, reference_requirement_assessment: Self
     ) -> str | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-            return focal_requirement_assessment.status
+            return reference_requirement_assessment.status
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
-            if focal_requirement_assessment.status in (
+            if reference_requirement_assessment.status in (
                 RequirementAssessment.Status.COMPLIANT,
                 RequirementAssessment.Status.PARTIALLY_COMPLIANT,
             ):
                 return RequirementAssessment.Status.PARTIALLY_COMPLIANT
             if (
-                focal_requirement_assessment.status
+                reference_requirement_assessment.status
                 == RequirementAssessment.Status.NON_COMPLIANT
             ):
                 return RequirementAssessment.Status.NON_COMPLIANT
