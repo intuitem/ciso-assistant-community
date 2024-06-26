@@ -1813,7 +1813,7 @@ class ComplianceAssessment(Assessment):
             return queries[0].union(*queries[1:]) if queries else base_query.none()
 
         color_map = {
-            "not_assessed": "#d1d5db",
+            RequirementAssessment.Results.NOT_ASSESSED: "#d1d5db",
             RequirementAssessment.Results.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Results.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Results.COMPLIANT: "#86efac",
@@ -1821,8 +1821,8 @@ class ComplianceAssessment(Assessment):
         }
 
         compliance_assessments_status = {"values": [], "labels": []}
-        for result in RequirementAssessment.Results.values + ["not_assessed"]:
-            is_not_assessed = result == "not_assessed"
+        for result in RequirementAssessment.Results.values:
+            is_not_assessed = result == RequirementAssessment.Results.NOT_ASSESSED
             assessable_requirements_filter = {
                 "compliance_assessment": self,
                 "requirement__assessable": True,
@@ -1992,6 +1992,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         DONE = "done", _("Done")
 
     class Results(models.TextChoices):
+        NOT_ASSESSED = "not_assessed", _("Not assessed")
         PARTIALLY_COMPLIANT = "partially_compliant", _("Partially compliant")
         NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
@@ -2009,7 +2010,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Result"),
         blank=True,
         null=True,
-        default="",
+        default=Results.NOT_ASSESSED,
     )
     score = models.IntegerField(
         blank=True,
