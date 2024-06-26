@@ -50,7 +50,6 @@ class Migration(migrations.Migration):
             model_name="requirementassessment",
             name="result",
             field=models.CharField(
-                blank=True,
                 choices=[
                     ("not_assessed", "Not assessed"),
                     ("partially_compliant", "Partially compliant"),
@@ -60,7 +59,6 @@ class Migration(migrations.Migration):
                 ],
                 default="not_assessed",
                 max_length=64,
-                null=True,
                 verbose_name="Result",
             ),
         ),
