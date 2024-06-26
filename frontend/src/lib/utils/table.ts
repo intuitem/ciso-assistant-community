@@ -62,6 +62,30 @@ const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
 	getColumn: (row) => row.meta.project.str
 };
 
+const STATUS_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.status,
+	extraProps: {
+		defaultOptionName: 'Select status...'
+	}
+};
+
+const TREATMENT_FILTER: ListViewFilterConfig = { // I could make a function just make the code less repeatitive and long for nothing
+	component: SelectFilter,
+	getColumn: (row) => row.meta.treatment,
+	extraProps: {
+		defaultOptionName: 'Select treatment...'
+	}
+};
+
+const STATE_FILTER: ListViewFilterConfig = { // I could make a function just make the code less repeatitive and long for nothing
+	component: SelectFilter,
+	getColumn: (row) => row.meta.state,
+	extraProps: {
+		defaultOptionName: 'Select state...'
+	}
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.str,
@@ -120,7 +144,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
 			domain: DOMAIN_FILTER_FROM_PROJECT,
-			project: PROJECT_FILTER
+			project: PROJECT_FILTER,
+			status: STATUS_FILTER
 		}
 	},
 	threats: {
@@ -143,21 +168,24 @@ export const listViewFields: ListViewFieldsConfig = {
 		],
 		filters: {
 			domain: DOMAIN_FILTER_FROM_META_PROJECT,
-			project: PROJECT_FILTER_FROM_META
+			project: PROJECT_FILTER_FROM_META,
+			treatment: TREATMENT_FILTER
 		}
 	},
 	'risk-acceptances': {
 		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios'],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_META
+			domain: DOMAIN_FILTER_FROM_META,
+			state: STATE_FILTER
 		}
 	},
 	'applied-controls': {
 		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
 		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control'],
 		filters: {
-			domain: DOMAIN_FILTER
+			domain: DOMAIN_FILTER,
+			status: STATUS_FILTER
 		}
 	},
 	policies: {
