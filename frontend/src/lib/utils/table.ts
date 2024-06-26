@@ -1,15 +1,16 @@
-import SelectFilter from "$lib/components/Filters/SelectFilter.svelte";
+import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import type { ComponentType } from 'svelte';
-import { LOCALE_DISPLAY_MAP } from "./constants";
+import { LOCALE_DISPLAY_MAP } from './constants';
+import type { Row } from '@vincjo/datatables';
 
-type JSONObject = {[key: string]: JSONObject} | JSONObject[] |  string | number | boolean | null;
+type JSONObject = { [key: string]: JSONObject } | JSONObject[] | string | number | boolean | null;
 
 interface ListViewFilterConfig {
 	component: ComponentType;
-	parser?: (row: JSONObject) => any; // Imperfect typescript type for the row argument.
 	filter?: (columnValue: any, value: any) => boolean;
-	filterProps?: (rows: any[],field: string) => {[key: string]: any};
-	extraProps?: {[key: string]: any};
+	getColumn?: (row: Row) => Row[keyof Row];
+	filterProps?: (rows: any[], field: string) => { [key: string]: any };
+	extraProps?: { [key: string]: any };
 }
 
 interface ListViewFieldsConfig {
@@ -19,32 +20,32 @@ interface ListViewFieldsConfig {
 		meta?: string[];
 		breadcrumb_link_disabled?: boolean;
 		filters?: {
-			[key: string]: ListViewFilterConfig
+			[key: string]: ListViewFilterConfig;
 		};
-	}
+	};
 }
 
 const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	parser: row => row.project.str, // Imperfect typescript type for the row argument.
+	getColumn: (row) => row.project.str,
 	extraProps: {
-		defaultOptionName: "Select project..."
+		defaultOptionName: 'Select project...'
 	}
 };
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	parser: row => row.framework.str, // Imperfect typescript type for the row argument.
+	getColumn: (row) => row.framework.str,
 	extraProps: {
-		defaultOptionName: "Select framework..."
+		defaultOptionName: 'Select framework...'
 	}
 };
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	parser: row => row.locale,
+	getColumn: (row) => row.locale,
 	extraProps: {
-		defaultOptionName: "Select language...",
+		defaultOptionName: 'Select language...',
 		OptionLabels: LOCALE_DISPLAY_MAP
 	}
 };
