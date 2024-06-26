@@ -57,6 +57,11 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
+	...PROJECT_FILTER,
+	getColumn: (row) => row.meta.project.str
+};
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.str,
@@ -137,7 +142,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			'residual_level'
 		],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_META_PROJECT
+			domain: DOMAIN_FILTER_FROM_META_PROJECT,
+			project: PROJECT_FILTER_FROM_META
 		}
 	},
 	'risk-acceptances': {
