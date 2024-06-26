@@ -1,9 +1,9 @@
 <script lang="ts">
 	export let options: any[];
 	export let value: string | undefined;
-	export let defaultOptionName: string = "--";
-	export let OptionLabels: {[key: string]: string} = Object.fromEntries(
-		options.map(option => [option,option.toString()])
+	export let defaultOptionName: string = '--';
+	export let OptionLabels: { [key: string]: string } = Object.fromEntries(
+		options.map((option) => [option, option.toString()])
 	);
 </script>
 
@@ -14,11 +14,7 @@
 	name={field}
 -->
 
-<select
-	placeholder=""
-	bind:value={value}
-	{...$$restProps}
->
+<select placeholder="" bind:value {...$$restProps}>
 	<option value={null} selected>{defaultOptionName}</option>
 	{#each options as option}
 		{#if option}

@@ -122,45 +122,45 @@
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters = listViewFields[tableURLModel].filters ?? {};
 	const filteredFields = Object.keys(filters);
-	const filterValues: {[key: string]: any} = {};
+	const filterValues: { [key: string]: any } = {};
 	const filterProps: {
-		[key: string]: {[key: string]: any}
+		[key: string]: { [key: string]: any };
 	} = {};
 
-	function defaultFilterProps(rows,field: string) {
-		const options = [
-			...new Set(
-				rows.map(row => filters[field].parser(row.meta))
-			)
-		].sort();
+	function defaultFilterProps(rows, field: string) {
+		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
+		const options = [...new Set(rows.map(getColumn))].sort();
 		return { options };
 	}
 
 	function defaultFilterFunction(columnValue: any, value: any): boolean {
-    return value ? columnValue === value : true;
-  }
+		return value ? columnValue === value : true;
+	}
 
 	$: {
 		for (const field of filteredFields) {
-			handler.filter(filterValues[field], field, filters[field].filter ?? defaultFilterFunction);
+			handler.filter(
+				filterValues[field],
+				filters[field].getColumn ?? field,
+				filters[field].filter ?? defaultFilterFunction
+			);
 		}
-	};
+	}
 
 	let allowOptionsUpdate = true;
-	allRows.subscribe(rows => {
-		if (!allowOptionsUpdate)
-			return;
+	allRows.subscribe((rows) => {
+		if (!allowOptionsUpdate) return;
 
 		for (const key of filteredFields) {
-			filterProps[key] = defaultFilterProps(rows,key);
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
 		}
-		if (rows.length > 0)
-			allowOptionsUpdate = false;
+		if (rows.length > 0) allowOptionsUpdate = false;
 	});
 
 	const rows = handler.getRows();
 
 	onMount(() => {
+		console.log(source);
 		if (orderBy) {
 			orderBy.direction === 'asc'
 				? handler.sortAsc(orderBy.identifier)
