@@ -16,9 +16,8 @@
 	export let max_score: number;
 	export let result: string | undefined = undefined;
 
-	const isToDo = status === 'to_do' && !result;
-
-	const lead = Object.hasOwn(m, resultI18n) && !isToDo ? m[resultI18n]() : m.toDo() ?? '';
+	const leadResult = Object.hasOwn(m, resultI18n) ? m[resultI18n]() : m.notAssessed() ?? '';
+	const lead = Object.hasOwn(m, statusI18n) ? m[statusI18n]() : m.notAssessed() ?? '';
 
 	$: classesText = resultColor == '#000000' ? 'text-white' : '';
 </script>
@@ -27,9 +26,15 @@
 	<div class="flex flex-row space-x-2 items-center">
 		<span
 			class="badge {classesText} h-fit"
-			style="background-color: {isToDo ? statusColor : resultColor};"
+			style="background-color: {statusColor ?? '#d1d5db'};"
 		>
 			{lead}
+		</span>
+		<span
+			class="badge {classesText} h-fit"
+			style="background-color: {resultColor ?? '#d1d5db'};"
+		>
+			{leadResult}
 		</span>
 		{#if score !== null && statusI18n !== 'notApplicable' && isScored}
 			<span>
