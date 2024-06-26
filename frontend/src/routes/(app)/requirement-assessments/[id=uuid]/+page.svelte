@@ -305,7 +305,6 @@
 					field="result"
 					label={m.result()}
 				/>
-
 				<Score
 					{form}
 					min_score={data.compliance_assessment_score.min_score}

@@ -1602,6 +1602,7 @@ def generate_html(
             "direct_evidences": [],
             "applied_controls": [],
             "result": "",
+            "status": "",
             "color_class": "",
         }
 
@@ -1616,7 +1617,9 @@ def generate_html(
             if assessment:
                 node_data["assessments"] = assessment
                 node_data["result"] = assessment.get_result_display()
-                node_data["color_class"] = color_css_class(assessment.result)
+                node_data["status"] = assessment.get_status_display()
+                node_data["result_color_class"] = color_css_class(assessment.result)
+                node_data["status_color_class"] = color_css_class(assessment.status)
                 direct_evidences = assessment.evidences.all()
                 if direct_evidences:
                     selected_evidences += direct_evidences

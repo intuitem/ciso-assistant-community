@@ -101,7 +101,7 @@
 </script>
 
 <div class="flex flex-row justify-between space-x-8">
-	<div class="flex flex-1 max-w-[80ch] flex-col">
+	<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
 		<span style="font-weight: 300;">
 			{#if assessable && canEditRequirementAssessment}
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">

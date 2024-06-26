@@ -48,8 +48,9 @@ def color_css_class(status):
     return {
         "not_assessed": "gray-300",
         "compliant": "green-500",
-        "to_do": "gray-300",
+        "to_do": "gray-400",
         "in_progress": "blue-500",
+        "done": "green-500",
         "non_compliant": "red-500",
         "partially_compliant": "yellow-400",
         "not_applicable": "black",
