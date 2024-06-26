@@ -160,7 +160,6 @@
 	const rows = handler.getRows();
 
 	onMount(() => {
-		console.log(source);
 		if (orderBy) {
 			orderBy.direction === 'asc'
 				? handler.sortAsc(orderBy.identifier)
