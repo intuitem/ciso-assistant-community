@@ -25,7 +25,7 @@ export const load = (async ({ fetch, params }) => {
 export const actions: Actions = {
 	updateRequirementAssessment: async (event) => {
 		const formData = await event.request.formData();
-		const values: { id: string; status: string } = { id: '', status: '' };
+		const values: { id: string; result: string } = { id: '', result: '' };
 		for (const entry of formData.entries()) {
 			values[entry[0]] = entry[1];
 		}
