@@ -1822,24 +1822,14 @@ class ComplianceAssessment(Assessment):
 
         compliance_assessments_status = {"values": [], "labels": []}
         for result in RequirementAssessment.Results.values:
-            is_not_assessed = result == RequirementAssessment.Results.NOT_ASSESSED
             assessable_requirements_filter = {
                 "compliance_assessment": self,
                 "requirement__assessable": True,
             }
 
-            if is_not_assessed:
-                base_query = (
-                    RequirementAssessment.objects.filter(
-                        **assessable_requirements_filter
-                    )
-                    .exclude(result__in=RequirementAssessment.Results.values)
-                    .distinct()
-                )
-            else:
-                base_query = RequirementAssessment.objects.filter(
-                    result=result, **assessable_requirements_filter
-                ).distinct()
+            base_query = RequirementAssessment.objects.filter(
+                result=result, **assessable_requirements_filter
+            ).distinct()
 
             if self.selected_implementation_groups:
                 union_query = union_queries(
@@ -2008,8 +1998,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         max_length=64,
         choices=Results.choices,
         verbose_name=_("Result"),
-        blank=True,
-        null=True,
         default=Results.NOT_ASSESSED,
     )
     score = models.IntegerField(
