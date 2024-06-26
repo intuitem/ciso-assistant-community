@@ -1,4 +1,5 @@
 import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
+import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
@@ -47,6 +48,22 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	extraProps: {
 		defaultOptionName: 'Select language...',
 		OptionLabels: LOCALE_DISPLAY_MAP
+	}
+};
+
+const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
+	component: CheckboxFilter,
+	getColumn: row => {
+		return !row.meta.overview.some(
+			line => line.startsWith("risk_matrix")
+		); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
+	},
+	filterProps: (rows: any[],field: string) => new Object(),
+	filter: (builtin: boolean, value: boolean): boolean => {
+		return value ? !builtin : true;
+	},
+	extraProps: {
+		title: "Only display matrix libraries"
 	}
 };
 
@@ -160,7 +177,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER
+			locale: LANGUAGE_FILTER,
+			has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
 	'loaded-libraries': {
