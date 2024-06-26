@@ -95,6 +95,7 @@
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { listViewFields } from '$lib/utils/table';
 
 	// Reactive
 	$: classesBase = `${$$props.class || 'bg-white'}`;
@@ -117,6 +118,46 @@
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
+	const allRows = handler.getAllRows();
+	const tableURLModel = source.meta?.urlmodel ?? URLModel;
+	const filters = listViewFields[tableURLModel].filters ?? {};
+	const filteredFields = Object.keys(filters);
+	const filterValues: {[key: string]: any} = {};
+	const filterProps: {
+		[key: string]: {[key: string]: any}
+	} = {};
+
+	function defaultFilterProps(rows,field: string) {
+		const options = [
+			...new Set(
+				rows.map(row => filters[field].parser(row.meta))
+			)
+		].sort();
+		return { options };
+	}
+
+	function defaultFilterFunction(columnValue: any, value: any): boolean {
+    return value ? columnValue === value : true;
+  }
+
+	$: {
+		for (const field of filteredFields) {
+			handler.filter(filterValues[field], field, filters[field].filter ?? defaultFilterFunction);
+		}
+	};
+
+	let allowOptionsUpdate = true;
+	allRows.subscribe(rows => {
+		if (!allowOptionsUpdate)
+			return;
+
+		for (const key of filteredFields) {
+			filterProps[key] = defaultFilterProps(rows,key);
+		}
+		if (rows.length > 0)
+			allowOptionsUpdate = false;
+	});
+
 	const rows = handler.getRows();
 
 	onMount(() => {
@@ -143,6 +184,15 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
+		{#each filteredFields as field}
+			<svelte:component
+				this={filters[field].component}
+				bind:value={filterValues[field]}
+				{...filterProps[field]}
+				{...filters[field].extraProps}
+			/>
+		{/each}
+
 		{#if search}
 			<Search {handler} />
 		{/if}

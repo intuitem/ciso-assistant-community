@@ -1,4 +1,55 @@
-export const listViewFields = {
+import SelectFilter from "$lib/components/Filters/SelectFilter.svelte";
+import type { ComponentType } from 'svelte';
+import { LOCALE_DISPLAY_MAP } from "./constants";
+
+type JSONObject = {[key: string]: JSONObject} | JSONObject[] |  string | number | boolean | null;
+
+interface ListViewFilterConfig {
+	component: ComponentType;
+	parser?: (row: JSONObject) => any; // Imperfect typescript type for the row argument.
+	filter?: (columnValue: any, value: any) => boolean;
+	filterProps?: (rows: any[],field: string) => {[key: string]: any};
+	extraProps?: {[key: string]: any};
+}
+
+interface ListViewFieldsConfig {
+	[key: string]: {
+		head: string[];
+		body: string[];
+		meta?: string[];
+		breadcrumb_link_disabled?: boolean;
+		filters?: {
+			[key: string]: ListViewFilterConfig
+		};
+	}
+}
+
+const PROJECT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	parser: row => row.project.str, // Imperfect typescript type for the row argument.
+	extraProps: {
+		defaultOptionName: "Select project..."
+	}
+};
+
+const FRAMEWORK_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	parser: row => row.framework.str, // Imperfect typescript type for the row argument.
+	extraProps: {
+		defaultOptionName: "Select framework..."
+	}
+};
+
+const LANGUAGE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	parser: row => row.locale,
+	extraProps: {
+		defaultOptionName: "Select language...",
+		OptionLabels: LOCALE_DISPLAY_MAP
+	}
+};
+
+export const listViewFields: ListViewFieldsConfig = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
 		body: ['name', 'description', 'parent_folder']
@@ -14,7 +65,10 @@ export const listViewFields = {
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project']
+		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		filters: {
+			project: PROJECT_FILTER
+		}
 	},
 	threats: {
 		head: ['ref', 'name', 'description', 'provider', 'domain'],
@@ -77,7 +131,11 @@ export const listViewFields = {
 	},
 	'compliance-assessments': {
 		head: ['name', 'framework', 'description', 'project'],
-		body: ['name', 'framework', 'description', 'project']
+		body: ['name', 'framework', 'description', 'project'],
+		filters: {
+			project: PROJECT_FILTER,
+			framework: FRAMEWORK_FILTER
+		}
 	},
 	'requirement-assessments': {
 		head: ['name', 'description', 'complianceAssessment'],
@@ -99,7 +157,10 @@ export const listViewFields = {
 	},
 	'stored-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
+		filters: {
+			locale: LANGUAGE_FILTER
+		}
 	},
 	'loaded-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
