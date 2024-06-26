@@ -1,7 +1,7 @@
 export const complianceColorMap = {
 	in_progress: '#3b82f6',
 	non_compliant: '#f87171',
-	to_do: '#d1d5db',
+	to_do: '#9ca3af',
 	done: '#86efac',
 	not_assessed: '#d1d5db',
 	partially_compliant: '#fde047',

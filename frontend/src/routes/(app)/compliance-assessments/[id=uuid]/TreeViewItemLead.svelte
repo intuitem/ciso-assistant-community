@@ -4,9 +4,7 @@
 
 	import * as m from '$paraglide/messages';
 
-	export let status: string | undefined;
 	export let statusI18n: string;
-	export let statusDisplay: string;
 	export let resultI18n: string;
 	export let statusColor: string;
 	export let resultColor: string;
@@ -14,7 +12,6 @@
 	export let score: number;
 	export let isScored: boolean;
 	export let max_score: number;
-	export let result: string | undefined = undefined;
 
 	const leadResult = Object.hasOwn(m, resultI18n) ? m[resultI18n]() : m.notAssessed() ?? '';
 	const lead = Object.hasOwn(m, statusI18n) ? m[statusI18n]() : m.notAssessed() ?? '';
@@ -24,9 +21,6 @@
 
 {#if assessable}
 	<div class="flex flex-row space-x-2 items-center">
-		<span class="badge h-fit" style="background-color: {statusColor ?? '#d1d5db'};">
-			{lead}
-		</span>
 		<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
 			{leadResult}
 		</span>
@@ -41,5 +35,8 @@
 				>
 			</span>
 		{/if}
+		<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
+			{lead}
+		</span>
 	</div>
 {/if}
