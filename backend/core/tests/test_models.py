@@ -1214,14 +1214,13 @@ class TestRequirementMapping:
 
         mapping = RequirementMapping.objects.create(
             focal_requirement=focal_requirement,
-            relationship=RequirementMapping.Relationships.SUBSET,
+            reference_requirement=reference_requirement,
+            coverage=RequirementMapping.Coverage.PARTIAL,
         )
 
-        mapping.reference_requirements.add(reference_requirement)
-
         assert mapping.focal_requirement == focal_requirement
-        assert mapping.relationship == RequirementMapping.Relationships.SUBSET
-        assert reference_requirement in mapping.reference_requirements.all()
+        assert mapping.coverage == RequirementMapping.Coverage.PARTIAL
+        assert mapping.reference_requirement == reference_requirement
 
 
 @pytest.mark.django_db
