@@ -1205,6 +1205,17 @@ class TestRequirementMapping:
 
     @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
     def test_requirement_mapping_creation(self):
+        focal_framework = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:iso27001-2022"
+        )
+        reference_framework = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:nist-csf-1.1"
+        )
+        mapping_set = RequirementMappingSet.objects.create(
+            reference_framework=reference_framework,
+            focal_framework=focal_framework,
+        )
+
         focal_requirement = RequirementNode.objects.filter(
             urn="urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1"
         ).last()
@@ -1216,6 +1227,7 @@ class TestRequirementMapping:
             focal_requirement=focal_requirement,
             reference_requirement=reference_requirement,
             coverage=RequirementMapping.Coverage.PARTIAL,
+            mapping_set=mapping_set,
         )
 
         assert mapping.focal_requirement == focal_requirement
