@@ -2094,7 +2094,7 @@ class ComplianceAssessment(Assessment):
 
     def compute_requirement_assessments_results(
         self, mapping_set: RequirementMappingSet, reference_assessment: Self
-    ) -> Self:
+    ) -> list["RequirementAssessment"]:
         requirement_assessments: list[RequirementAssessment] = []
         for mapping in mapping_set.mappings.all():
             _reference_requirement_assessment = RequirementAssessment.objects.get(
