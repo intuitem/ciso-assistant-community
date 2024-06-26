@@ -1684,21 +1684,8 @@ class RiskScenario(NameDescriptionMixin):
 
 
 class ComplianceAssessment(Assessment):
-    class Result(models.TextChoices):
-        COMPLIANT = "compliant", _("Compliant")
-        NON_COMPLIANT_MINOR = "non_compliant_minor", _("Non compliant (minor)")
-        NON_COMPLIANT_MAJOR = "non_compliant_major", _("Non compliant (major)")
-        NOT_APPLICABLE = "not_applicable", _("Not applicable")
-
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
-    )
-    result = models.CharField(
-        blank=True,
-        null=True,
-        max_length=100,
-        choices=Result.choices,
-        verbose_name=_("Result"),
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
@@ -1827,8 +1814,8 @@ class ComplianceAssessment(Assessment):
 
         color_map = {
             "not_assessed": "#d1d5db",
-            RequirementAssessment.Results.NON_COMPLIANT_MAJOR: "#f87171",
-            RequirementAssessment.Results.NON_COMPLIANT_MINOR: "#fde047",
+            RequirementAssessment.Results.NON_COMPLIANT: "#f87171",
+            RequirementAssessment.Results.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Results.COMPLIANT: "#86efac",
             RequirementAssessment.Results.NOT_APPLICABLE: "#000000",
         }
@@ -2005,8 +1992,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         DONE = "done", _("Done")
 
     class Results(models.TextChoices):
-        NON_COMPLIANT_MINOR = "non_compliant_minor", _("Non-compliant minor")
-        NON_COMPLIANT_MAJOR = "non_compliant_major", _("Non-compliant major")
+        PARTIALLY_COMPLIANT = "partially_compliant", _("Partially compliant")
+        NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
