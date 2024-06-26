@@ -546,3 +546,12 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
 
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
     pass
+
+
+class ComputeMappingSerializer(serializers.Serializer):
+    mapping_set = serializers.PrimaryKeyRelatedField(
+        queryset=RequirementMappingSet.objects.all()
+    )
+    reference_assessment = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all()
+    )
