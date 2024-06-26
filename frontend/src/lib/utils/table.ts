@@ -28,7 +28,7 @@ interface ListViewFieldsConfig {
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.folder.str,
+	getColumn: row => row.folder.str,
 	extraProps: {
 		defaultOptionName: 'Select domain...'
 	}
@@ -36,22 +36,22 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.project.folder.str,
+	getColumn: row => row.project.folder.str,
 };
 
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.meta.folder.str,
+	getColumn: row => row.meta.folder.str,
 };
 
 const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.meta.project.folder.str,
+	getColumn: row => row.meta.project.folder.str,
 };
 
 const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.project.str,
+	getColumn: row => row.project.str,
 	extraProps: {
 		defaultOptionName: 'Select project...' // Make translations
 	}
@@ -59,12 +59,12 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 
 const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
 	...PROJECT_FILTER,
-	getColumn: (row) => row.meta.project.str
+	getColumn: row => row.meta.project.str
 };
 
 const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.status,
+	getColumn: row => row.meta.status,
 	extraProps: {
 		defaultOptionName: 'Select status...'
 	}
@@ -72,7 +72,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 
 const TREATMENT_FILTER: ListViewFilterConfig = { // I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: (row) => row.meta.treatment,
+	getColumn: row => row.meta.treatment,
 	extraProps: {
 		defaultOptionName: 'Select treatment...'
 	}
@@ -80,15 +80,28 @@ const TREATMENT_FILTER: ListViewFilterConfig = { // I could make a function just
 
 const STATE_FILTER: ListViewFilterConfig = { // I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: (row) => row.meta.state,
+	getColumn: row => row.meta.state,
 	extraProps: {
 		defaultOptionName: 'Select state...'
 	}
 };
 
+const APPROVER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: row => {
+		if (row.first_name && row.last_name) {
+			return `${row.first_name} ${row.last_name}`;
+		}
+		return row.meta.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
+	},
+	extraProps: {
+		defaultOptionName: 'Select approver...'
+	}
+}
+
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.framework.str,
+	getColumn: row => row.framework.str,
 	extraProps: {
 		defaultOptionName: 'Select framework...' // Make translations
 	}
@@ -96,7 +109,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.locale,
+	getColumn: row => row.locale,
 	extraProps: {
 		defaultOptionName: 'Select language...', // Make translations
 		OptionLabels: LOCALE_DISPLAY_MAP
@@ -177,7 +190,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description', 'risk_scenarios'],
 		filters: {
 			domain: DOMAIN_FILTER_FROM_META,
-			state: STATE_FILTER
+			state: STATE_FILTER,
+			approver: APPROVER_FILTER
 		}
 	},
 	'applied-controls': {
