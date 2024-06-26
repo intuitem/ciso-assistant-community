@@ -2009,6 +2009,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Result"),
         blank=True,
         null=True,
+        default="",
     )
     score = models.IntegerField(
         blank=True,
