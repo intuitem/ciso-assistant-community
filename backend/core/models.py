@@ -2158,34 +2158,15 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         self.save()
 
 
-class RequirementMapping(models.Model):
-    class Coverage(models.TextChoices):
-        FULL = "full", _("Full")
-        PARTIAL = "partial", _("Partial")
-        NOT_RELATED = "not_related", _("Not related")
-
-    focal_requirement = models.ForeignKey(
-        RequirementNode,
-        on_delete=models.CASCADE,
-        verbose_name=_("Focal requirement"),
-        related_name="focal_requirement",
-    )
-    coverage = models.CharField(
-        max_length=20,
-        choices=Coverage.choices,
-        default=Coverage.NOT_RELATED,
-        verbose_name=_("Coverage"),
-    )
-    reference_requirement = models.ForeignKey(
-        RequirementNode,
-        on_delete=models.CASCADE,
-        verbose_name=_("Reference requirement"),
-        related_name="reference_requirement",
-    )
-    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
-
-
 class RequirementMappingSet(ReferentialObjectMixin):
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="requirement_mapping_sets",
+    )
+
     reference_framework = models.ForeignKey(
         Framework,
         on_delete=models.CASCADE,
@@ -2197,11 +2178,6 @@ class RequirementMappingSet(ReferentialObjectMixin):
         on_delete=models.CASCADE,
         verbose_name=_("Focal framework"),
         related_name="focal_framework",
-    )
-    mappings = models.ManyToManyField(
-        RequirementMapping,
-        verbose_name=_("Mappings"),
-        related_name="mappings",
     )
     version = models.IntegerField(
         null=False,
@@ -2238,3 +2214,36 @@ class RequirementMappingSet(ReferentialObjectMixin):
                 _("Reference and related frameworks must be different")
             )
         return super().save(*args, **kwargs)
+
+
+class RequirementMapping(models.Model):
+    class Coverage(models.TextChoices):
+        FULL = "full", _("Full")
+        PARTIAL = "partial", _("Partial")
+        NOT_RELATED = "not_related", _("Not related")
+
+    mapping_set = models.ForeignKey(
+        RequirementMappingSet,
+        on_delete=models.CASCADE,
+        verbose_name=_("Mapping set"),
+        related_name="mappings",
+    )
+    focal_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Focal requirement"),
+        related_name="focal_requirement",
+    )
+    coverage = models.CharField(
+        max_length=20,
+        choices=Coverage.choices,
+        default=Coverage.NOT_RELATED,
+        verbose_name=_("Coverage"),
+    )
+    reference_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference requirement"),
+        related_name="reference_requirement",
+    )
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
