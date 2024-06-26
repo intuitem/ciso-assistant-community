@@ -24,17 +24,14 @@ export const load = (async ({ fetch, params }) => {
 
 export const actions: Actions = {
 	updateRequirementAssessment: async (event) => {
-		const formData = await event.request.formData();
-		const values: { id: string; result: string } = { id: '', result: '' };
-		for (const entry of formData.entries()) {
-			values[entry[0]] = entry[1];
-		}
+		const data = await event.request.json();
+		const value: { id: string; result: string } = data;
 		const URLModel = 'requirement-assessments';
-		const endpoint = `${BASE_API_URL}/${URLModel}/${values.id}/`;
+		const endpoint = `${BASE_API_URL}/${URLModel}/${value.id}/`;
 
 		const requestInitOptions: RequestInit = {
 			method: 'PATCH',
-			body: JSON.stringify(values)
+			body: JSON.stringify(value)
 		};
 
 		await event.fetch(endpoint, requestInitOptions);
