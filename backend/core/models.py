@@ -2159,39 +2159,28 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
 
 
 class RequirementMapping(models.Model):
-    class Relationships(models.TextChoices):
-        SUPERSET = "superset", _("Superset")
-        SUBSET = "subset", _("Subset")
-        EQUAL = "equal", _("Equal")
-        INTERSECT = "intersect", _("Intersect")
+    class Coverage(models.TextChoices):
+        FULL = "full", _("Full")
+        PARTIAL = "partial", _("Partial")
         NOT_RELATED = "not_related", _("Not related")
 
-    class Rationales(models.TextChoices):
-        SYNTACTIC = "syntactic", _("Syntactic")
-        SEMANTIC = "semantic", _("Semantic")
-        FUNCTIONAL = "functional", _("Functional")
-
-    reference_requirements = models.ManyToManyField(
-        RequirementNode,
-        verbose_name=_("reference requirements"),
-        related_name="reference_requirements",
-    )
-    relationship = models.CharField(
-        max_length=20,
-        choices=Relationships.choices,
-        default="not_related",
-        verbose_name=_("Relationship"),
-    )
     focal_requirement = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
         verbose_name=_("Focal requirement"),
+        related_name="focal_requirement",
     )
-    rationale = models.CharField(
+    coverage = models.CharField(
         max_length=20,
-        choices=Rationales.choices,
-        verbose_name=_("Rationale"),
-        default="syntactic",
+        choices=Coverage.choices,
+        default=Coverage.NOT_RELATED,
+        verbose_name=_("Coverage"),
+    )
+    reference_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference requirement"),
+        related_name="reference_requirement",
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
