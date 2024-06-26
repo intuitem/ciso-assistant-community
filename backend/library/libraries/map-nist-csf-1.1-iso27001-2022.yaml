@@ -18,11 +18,11 @@ objects:
     focal_framework: urn:intuitem:risk:framework:iso27001-2022
     reference_framework: urn:intuitem:risk:framework:nist-csf-1.1
     requirement_mappings:
-      - focal_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
-        reference_requirement: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      - reference_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
+        focal_requirement: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
         coverage: partial
         annotation: Ipsum ut nisi Lorem fugiat ad est voluptate ullamco ea eu.
-      - focal_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
-        reference_requirement: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      - reference_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
+        focal_requirement: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
         coverage: full
         annotation: Ipsum ut nisi Lorem fugiat ad est voluptate ullamco ea eu.
