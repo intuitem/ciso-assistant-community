@@ -2,13 +2,25 @@
 
 from django.db import migrations, models
 
+class Results(models.TextChoices):
+        PARTIALLY_COMPLIANT = "partially_compliant", "Partially compliant"
+        NON_COMPLIANT = "non_compliant", "Non-compliant"
+        COMPLIANT = "compliant", "Compliant"
+        NOT_APPLICABLE = "not_applicable", "Not applicable"
+        
+        
+class Status(models.TextChoices):
+        TODO = "to_do", "To do"
+        IN_PROGRESS = "in_progress", "In progress"
+        DONE = "done", "Done"
+
 
 def create_result(apps, schema_editor):
     RequirementAssessment = apps.get_model("core", "RequirementAssessment")
     for assessment in RequirementAssessment.objects.all():
-        if assessment.status in RequirementAssessment.Results.values:
+        if assessment.status in Results.values:
             setattr(assessment, "result", assessment.status)
-            assessment.status = RequirementAssessment.Status.TODO
+            assessment.status = Status.TODO
         assessment.save()
 
 
