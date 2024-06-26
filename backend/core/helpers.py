@@ -112,9 +112,9 @@ def compile_project_for_composer(user: User, projects_list: list):
     # Requirements assessment bar chart
     color_map = {
         "in_progress": "#3b82f6",
-        "non_compliant_major": "#f87171",
+        "non_compliant": "#f87171",
         "to_do": "#d1d5db",
-        "non_compliant_minor": "#fde047",
+        "partially_compliant": "#fde047",
         "not_applicable": "#000000",
         "compliant": "#86efac",
     }

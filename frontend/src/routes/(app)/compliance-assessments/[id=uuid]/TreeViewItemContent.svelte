@@ -63,8 +63,8 @@
 
 	const REQUIREMENT_ASSESSMENT_RESULT = [
 		'compliant',
-		'non_compliant_major',
-		'non_compliant_minor',
+		'non_compliant',
+		'partially_compliant',
 		'not_applicable'
 	] as const;
 
