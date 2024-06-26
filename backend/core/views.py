@@ -1529,6 +1529,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return Response(dict(RequirementAssessment.Status.choices))
 
 
+class RequirementMappingSetViewSet(BaseModelViewSet):
+    model = RequirementMappingSet
+
+
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
 def get_csrf_token(request):
