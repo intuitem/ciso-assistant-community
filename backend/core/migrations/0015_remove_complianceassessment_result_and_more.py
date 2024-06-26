@@ -4,6 +4,7 @@ from django.db import migrations, models
 
 
 class Results(models.TextChoices):
+    NOT_ASSESSED = "not_assessed", "Not assessed"
     PARTIALLY_COMPLIANT = "partially_compliant", "Partially compliant"
     NON_COMPLIANT = "non_compliant", "Non-compliant"
     COMPLIANT = "compliant", "Compliant"
@@ -51,12 +52,13 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 choices=[
+                    ("not_assessed", "Not assessed"),
                     ("partially_compliant", "Partially compliant"),
                     ("non_compliant", "Non-compliant"),
                     ("compliant", "Compliant"),
                     ("not_applicable", "Not applicable"),
                 ],
-                default="",
+                default="not_assessed",
                 max_length=64,
                 null=True,
                 verbose_name="Result",

@@ -46,6 +46,7 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
 
 def color_css_class(status):
     return {
+        "not_assessed": "gray-300",
         "compliant": "green-500",
         "to_do": "gray-300",
         "in_progress": "blue-500",
