@@ -317,7 +317,7 @@ def get_sorted_requirement_nodes(
                     "status_i18n": camel_case(child_req_as.status)
                     if child_req_as
                     else None,
-                    "result": child_req_as.result,
+                    "result": child_req_as.result if child_req_as else None,
                     "result_i18n": camel_case(child_req_as.result)
                     if child_req_as and child_req_as.result is not None
                     else None,
