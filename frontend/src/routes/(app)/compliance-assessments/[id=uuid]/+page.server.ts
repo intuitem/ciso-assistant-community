@@ -27,9 +27,8 @@ export const load = (async ({ fetch, params }) => {
 	const global_score = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/global_score/`).then(
 		(res) => res.json()
 	);
-	
-	const initialData = {
-	};
+
+	const initialData = {};
 	const auditCreateForm = await superValidate(initialData, zod(ComplianceAssessmentSchema), {
 		errors: false
 	});

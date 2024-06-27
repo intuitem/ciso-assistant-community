@@ -2,7 +2,14 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import type { ModalComponent, ModalSettings, ModalStore, PopupSettings, ToastStore, TreeViewNode } from '@skeletonlabs/skeleton';
+	import type {
+		ModalComponent,
+		ModalSettings,
+		ModalStore,
+		PopupSettings,
+		ToastStore,
+		TreeViewNode
+	} from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
@@ -281,11 +288,9 @@
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
-			<button class="btn variant-filled-surface"
-				on:click={(_) => modalCreateForm()}
+			<button class="btn variant-filled-surface" on:click={(_) => modalCreateForm()}
 				><i class="fa-solid fa-share-nodes mr-2" /> {m.mapping()}
-			</button
-			>
+			</button>
 		</div>
 	</div>
 
