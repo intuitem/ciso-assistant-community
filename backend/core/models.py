@@ -848,6 +848,97 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         verbose_name_plural = _("RequirementNodes")
 
 
+class RequirementMappingSet(ReferentialObjectMixin):
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="requirement_mapping_sets",
+    )
+
+    reference_framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference framework"),
+        related_name="reference_framework",
+    )
+    focal_framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        verbose_name=_("Focal framework"),
+        related_name="focal_framework",
+    )
+    version = models.IntegerField(
+        null=False,
+        verbose_name=_("Version"),
+        default=1,
+        help_text=_("Version of the mapping set"),
+    )
+
+    # NOTE: This is a proposition to handle versioning of the mapping set frameworks.
+    # This should be discussed before being implemented.
+    #
+    # reference_framework_version = models.CharField(
+    #     max_length=100,
+    #     blank=True,
+    #     null=True,
+    #     help_text=_(
+    #         "Version of the reference framework, may include boundaries (e.g. >=1,<4)"
+    #     ),
+    #     verbose_name=_("Reference framework version"),
+    # )
+    # focal_framework_version = models.CharField(
+    #     max_length=100,
+    #     blank=True,
+    #     null=True,
+    #     help_text=_(
+    #         "Version of the related framework, may include boundaries (e.g. >=1,<4)"
+    #     ),
+    #     verbose_name=_("Related framework version"),
+    # )
+
+    def save(self, *args, **kwargs) -> None:
+        if self.reference_framework == self.focal_framework:
+            raise ValidationError(
+                _("Reference and related frameworks must be different")
+            )
+        return super().save(*args, **kwargs)
+
+
+class RequirementMapping(models.Model):
+    class Coverage(models.TextChoices):
+        FULL = "full", _("Full")
+        PARTIAL = "partial", _("Partial")
+        NOT_RELATED = "not_related", _("Not related")
+
+    mapping_set = models.ForeignKey(
+        RequirementMappingSet,
+        on_delete=models.CASCADE,
+        verbose_name=_("Mapping set"),
+        related_name="mappings",
+    )
+    focal_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Focal requirement"),
+        related_name="focal_requirement",
+    )
+    coverage = models.CharField(
+        max_length=20,
+        choices=Coverage.choices,
+        default=Coverage.NOT_RELATED,
+        verbose_name=_("Coverage"),
+    )
+    reference_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference requirement"),
+        related_name="reference_requirement",
+    )
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+
+
 ########################### Domain objects #########################
 
 
@@ -2001,6 +2092,28 @@ class ComplianceAssessment(Assessment):
         }
         return findings
 
+    def compute_requirement_assessments_results(
+        self, mapping_set: RequirementMappingSet, reference_assessment: Self
+    ) -> list["RequirementAssessment"]:
+        requirement_assessments: list[RequirementAssessment] = []
+        for mapping in mapping_set.mappings.all():
+            _reference_requirement_assessment = RequirementAssessment.objects.get(
+                compliance_assessment=reference_assessment,
+                requirement=mapping.reference_requirement,
+            )
+            focal_requirement_assessment = RequirementAssessment.objects.get(
+                compliance_assessment=self,
+                requirement=mapping.focal_requirement,
+            )
+            result = focal_requirement_assessment.infer_result(
+                mapping=mapping,
+                reference_requirement_assessment=_reference_requirement_assessment,
+            )
+            if result:
+                focal_requirement_assessment.status = result
+                requirement_assessments.append(focal_requirement_assessment)
+        return requirement_assessments
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin):
     class Status(models.TextChoices):
@@ -2058,6 +2171,24 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
     def get_requirement_description(self) -> str:
         return self.requirement.description
+
+    def infer_result(
+        self, mapping: RequirementMapping, reference_requirement_assessment: Self
+    ) -> str | None:
+        if mapping.coverage == RequirementMapping.Coverage.FULL:
+            return reference_requirement_assessment.status
+        if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
+            if reference_requirement_assessment.status in (
+                RequirementAssessment.Status.COMPLIANT,
+                RequirementAssessment.Status.PARTIALLY_COMPLIANT,
+            ):
+                return RequirementAssessment.Status.PARTIALLY_COMPLIANT
+            if (
+                reference_requirement_assessment.status
+                == RequirementAssessment.Status.NON_COMPLIANT
+            ):
+                return RequirementAssessment.Status.NON_COMPLIANT
+        return None
 
     class Meta:
         verbose_name = _("Requirement assessment")
@@ -2156,96 +2287,3 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
-
-
-class RequirementMapping(models.Model):
-    class Relationships(models.TextChoices):
-        SUPERSET = "superset", _("Superset")
-        SUBSET = "subset", _("Subset")
-        EQUAL = "equal", _("Equal")
-        INTERSECT = "intersect", _("Intersect")
-        NOT_RELATED = "not_related", _("Not related")
-
-    class Rationales(models.TextChoices):
-        SYNTACTIC = "syntactic", _("Syntactic")
-        SEMANTIC = "semantic", _("Semantic")
-        FUNCTIONAL = "functional", _("Functional")
-
-    reference_requirements = models.ManyToManyField(
-        RequirementNode,
-        verbose_name=_("reference requirements"),
-        related_name="reference_requirements",
-    )
-    relationship = models.CharField(
-        max_length=20,
-        choices=Relationships.choices,
-        default="not_related",
-        verbose_name=_("Relationship"),
-    )
-    focal_requirement = models.ForeignKey(
-        RequirementNode,
-        on_delete=models.CASCADE,
-        verbose_name=_("Focal requirement"),
-    )
-    rationale = models.CharField(
-        max_length=20,
-        choices=Rationales.choices,
-        verbose_name=_("Rationale"),
-        default="syntactic",
-    )
-    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
-
-
-class RequirementMappingSet(ReferentialObjectMixin):
-    reference_framework = models.ForeignKey(
-        Framework,
-        on_delete=models.CASCADE,
-        verbose_name=_("Reference framework"),
-        related_name="reference_framework",
-    )
-    focal_framework = models.ForeignKey(
-        Framework,
-        on_delete=models.CASCADE,
-        verbose_name=_("Focal framework"),
-        related_name="focal_framework",
-    )
-    mappings = models.ManyToManyField(
-        RequirementMapping,
-        verbose_name=_("Mappings"),
-        related_name="mappings",
-    )
-    version = models.IntegerField(
-        null=False,
-        verbose_name=_("Version"),
-        default=1,
-        help_text=_("Version of the mapping set"),
-    )
-
-    # NOTE: This is a proposition to handle versioning of the mapping set frameworks.
-    # This should be discussed before being implemented.
-    #
-    # reference_framework_version = models.CharField(
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    #     help_text=_(
-    #         "Version of the reference framework, may include boundaries (e.g. >=1,<4)"
-    #     ),
-    #     verbose_name=_("Reference framework version"),
-    # )
-    # focal_framework_version = models.CharField(
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    #     help_text=_(
-    #         "Version of the related framework, may include boundaries (e.g. >=1,<4)"
-    #     ),
-    #     verbose_name=_("Related framework version"),
-    # )
-
-    def save(self, *args, **kwargs) -> None:
-        if self.reference_framework == self.focal_framework:
-            raise ValidationError(
-                _("Reference and related frameworks must be different")
-            )
-        return super().save(*args, **kwargs)

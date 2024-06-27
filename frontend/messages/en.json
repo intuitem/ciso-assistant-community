@@ -620,5 +620,11 @@
 	"mapping": "Mapping",
 	"mappingInference": "Mapping inference",
 	"mappingInferenceTip": "Mapping suggestion is available for this requirement",
-	"additionalInformation": "Additional information"
+	"additionalInformation": "Additional information",
+	"requirementMappingSet": "Requirement mapping set",
+	"requirementMappingSets": "Requirement mapping sets",
+	"requirementMapping": "Requirement mapping",
+	"requirementMappings": "Requirement mappings",
+	"referenceFramework": "Reference framework",
+	"focalFramework": "Focal framework"
 }

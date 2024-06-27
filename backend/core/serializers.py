@@ -531,3 +531,27 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
         fields = "__all__"
+
+
+class RequirementMappingSetReadSerializer(BaseModelSerializer):
+    focal_framework = FieldsRelatedField()
+    reference_framework = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "urn"])
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = RequirementMappingSet
+        fields = "__all__"
+
+
+class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
+    pass
+
+
+class ComputeMappingSerializer(serializers.Serializer):
+    mapping_set = serializers.PrimaryKeyRelatedField(
+        queryset=RequirementMappingSet.objects.all()
+    )
+    reference_assessment = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all()
+    )
