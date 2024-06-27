@@ -35,8 +35,9 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
 	import * as m from '$paraglide/messages';
+	import { hideSuggestions } from '$lib/utils/stores';
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -150,6 +151,29 @@
 		));
 	}
 
+	const mappingInference = { 
+		refCA: data.requirementAssessment,
+		result: 'compliant',
+		annotation: "",
+	};
+
+	let requirementAssessmentsList: string[] = $hideSuggestions;
+
+	let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id) ? true : false;
+
+	function toggleSuggestions() {
+		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)){
+			requirementAssessmentsList.push(data.requirementAssessment.id)
+		}
+		else {
+			requirementAssessmentsList = requirementAssessmentsList.filter((item) => item !== data.requirementAssessment.id)
+		}
+		hideSuggestion = !hideSuggestion;
+		hideSuggestions.set(requirementAssessmentsList);
+	}
+
+	$: classesText = COMPLIANCE_COLOR_MAP[mappingInference.result] === '#000000' ? 'text-white' : '';
+
 	let tabSet = 0;
 </script>
 
@@ -160,64 +184,111 @@
 			👉 {data.requirement.description}
 		</p>
 	{/if}
-	{#if has_threats || has_reference_controls || annotation}
-		<div class="card p-4 variant-glass-primary text-sm flex flex-col cursor-auto">
-			{#if has_threats || has_reference_controls}
-				<div class="flex flex-row cursor-auto">
-					<div class="flex-1">
-						{#if reference_controls.length > 0}
-							<p class="font-medium">
-								<i class="fa-solid fa-gears" />
-								{m.suggestedReferenceControls()}
-							</p>
-							<ul class="list-disc ml-4">
-								{#each reference_controls as func}
-									<li>
-										{#if func.id}
-											<a class="anchor" href="/reference-controls/{func.id}">
-												{func.str}
-											</a>
-										{:else}
-											<p>{func.str}</p>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						{/if}
+		{#if has_threats || has_reference_controls || annotation || mappingInference}
+			<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
+				<h2 class="font-semibold text-lg flex flex-row justify-between">
+					<div>
+						<i class="fa-solid fa-circle-info mr-2">
+						</i>{m.additionalInformation()}
 					</div>
-					<div class="flex-1">
-						{#if threats.length > 0}
-							<p class="font-medium">
-								<i class="fa-solid fa-gears" />
-								{m.threatsCovered()}
-							</p>
-							<ul class="list-disc ml-4">
-								{#each threats as threat}
-									<li>
-										{#if threat.id}
-											<a class="anchor" href="/threats/{threat.id}">
-												{threat.str}
-											</a>
-										{:else}
-											<p>{threat.str}</p>
-										{/if}
-									</li>
-								{/each}
-							</ul>
+					<button
+					on:click={toggleSuggestions}
+					>
+						{#if !hideSuggestion}
+							<i class="fa-solid fa-eye"></i>
+						{:else}
+							<i class="fa-solid fa-eye-slash"></i>
 						{/if}
+					</button>
+				</h2>
+				{#if !hideSuggestion}
+				{#if (has_threats || has_reference_controls)}
+					<div class="my-2 flex flex-col">
+						<div class="flex-1">
+							{#if reference_controls.length > 0}
+								<p class="font-medium">
+									<i class="fa-solid fa-gears" />
+									{m.suggestedReferenceControls()}
+								</p>
+								<ul class="list-disc ml-4">
+									{#each reference_controls as func}
+										<li>
+											{#if func.id}
+												<a class="anchor" href="/reference-controls/{func.id}">
+													{func.str}
+												</a>
+											{:else}
+												<p>{func.str}</p>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+						<div class="flex-1">
+							{#if threats.length > 0}
+								<p class="font-medium">
+									<i class="fa-solid fa-gears" />
+									{m.threatsCovered()}
+								</p>
+								<ul class="list-disc ml-4">
+									{#each threats as threat}
+										<li>
+											{#if threat.id}
+												<a class="anchor" href="/threats/{threat.id}">
+													{threat.str}
+												</a>
+											{:else}
+												<p>{threat.str}</p>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
 					</div>
-				</div>
-			{/if}
-			{#if annotation}
-				<div class="my-2">
-					<p class="font-medium">
-						<i class="fa-solid fa-pencil" />
-						{m.annotation()}
-					</p>
-					<p class="whitespace-pre-line py-1">
-						{annotation}
-					</p>
-				</div>
+				{/if}
+				{#if annotation}
+					<div class="my-2">
+						<p class="font-medium">
+							<i class="fa-solid fa-pencil" />
+							{m.annotation()}
+						</p>
+						<p class="whitespace-pre-line py-1">
+							{annotation}
+						</p>
+					</div>
+				{/if}
+				{#if mappingInference}
+					<div class="my-2">
+						<p class="font-medium">
+							<i class="fa-solid fa-link"></i>
+							{m.mappingInference()}
+						</p>
+						<ul class="list-disc ml-4">
+							<li>
+								<p>
+									<a class="anchor" href="/requirement-assessments/{mappingInference.refCA.id}">
+										{mappingInference.refCA.name}
+									</a>
+								</p>
+								<p class="whitespace-pre-line py-1">
+									<span class="italic">{m.suggestionColon()}</span>
+									<span class="badge {classesText} h-fit" style="background-color: {COMPLIANCE_COLOR_MAP[mappingInference.result]};">
+										{mappingInference.result}
+									</span>
+									
+								</p>
+								{#if mappingInference.annotation}
+									<p class="whitespace-pre-line py-1">
+										<span class="italic">{m.annotationColon()}</span> {mappingInference.annotation}
+									</p>
+								{/if}
+							</li>
+						</ul>
+						
+					</div>
+				{/if}
 			{/if}
 		</div>
 	{/if}
