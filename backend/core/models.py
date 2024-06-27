@@ -2165,6 +2165,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         default=True,
         verbose_name=_("Selected"),
     )
+    mapping_inference = models.JSONField(
+        default=dict,
+        verbose_name=_("Mapping inference"),
+    )
 
     def __str__(self) -> str:
         return self.requirement.display_short
