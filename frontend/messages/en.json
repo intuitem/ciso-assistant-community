@@ -613,5 +613,12 @@
 	"ssoSettings": "SSO settings",
 	"ssoSettingsDescription": "Configure your Single Sign-On settings here.",
 	"sso": "SSO",
-	"isSso": "Is SSO"
+	"isSso": "Is SSO",
+	"suggestion": "Suggestion",
+	"suggestionColon": "Suggestion:",
+	"annotationColon": "Annotation:",
+	"mapping": "Mapping",
+	"mappingInference": "Mapping inference",
+	"mappingInferenceTip": "Mapping suggestion is available for this requirement",
+	"additionalInformation": "Additional information"
 }

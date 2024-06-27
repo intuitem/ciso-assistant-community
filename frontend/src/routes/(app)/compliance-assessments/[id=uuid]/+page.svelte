@@ -16,7 +16,6 @@
 
 	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.compliance_assessment);
@@ -56,9 +55,12 @@
 		return statusCounts;
 	};
 
+	const mappingInference = { results: ['compliant'] };
+
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.statusCounts = countStatus(node);
+			node.mappingInference = mappingInference;
 			return {
 				id: id,
 				content: TreeViewItemContent,
@@ -94,13 +96,9 @@
 
 	let expandedNodes: TreeViewNode[] = [];
 
-	import { ProgressRadial, localStorageStore } from '@skeletonlabs/skeleton';
-	import type { Writable } from 'svelte/store';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { expandedNodesState } from '$lib/utils/stores';
 	import { displayScoreColor } from '$lib/utils/helpers';
-
-	const expandedNodesState: Writable<any> = localStorageStore('expandedNodes', expandedNodes, {
-		storage: 'session'
-	});
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
@@ -195,7 +193,7 @@
 					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
 				>
 				<div
-					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 z-10"
 					data-popup="popupDownload"
 				>
 					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
@@ -221,8 +219,12 @@
 			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
-			<a href={`${$page.url.pathname}/flash-mode`} class="btn variant-filled-surface h-fit"
-				><i class="fa-solid fa-forward-fast mr-2" /> {m.flashMode()}</a
+			<a href={`${$page.url.pathname}/flash-mode`} class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
+				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</a
+			>
+			<button 
+				class="btn variant-filled-surface"
+				><i class="fa-solid fa-share-nodes mr-2"></i> {m.mapping()}</button
 			>
 		</div>
 	</div>
@@ -234,6 +236,10 @@
 				{assessableNodesCount(treeViewNodes)}
 			</span>
 		</h4>
+		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
+			<i class="fa-solid fa-share-nodes"></i>
+			<p>{m.mappingInferenceTip()}</p>
+		</div>
 		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 	</div>
 </div>
