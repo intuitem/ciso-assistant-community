@@ -40,6 +40,9 @@
 		if (node.result && node.assessable) {
 			resultCounts[node.result] = (resultCounts[node.result] || 0) + 1;
 		}
+		if (node.status && node.assessable) {
+			resultCounts[node.status] = (resultCounts[node.status] || 0) + 1;
+		}
 		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
 			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;

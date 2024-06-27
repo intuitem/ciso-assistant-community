@@ -21,6 +21,9 @@
 
 {#if assessable}
 	<div class="flex flex-row space-x-2 items-center">
+		<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
+			{lead}
+		</span>
 		<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
 			{leadResult}
 		</span>
@@ -35,8 +38,6 @@
 				>
 			</span>
 		{/if}
-		<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
-			{lead}
-		</span>
+		
 	</div>
 {/if}
