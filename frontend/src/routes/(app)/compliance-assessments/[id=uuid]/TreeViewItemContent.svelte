@@ -126,17 +126,20 @@
 						{/if} -->
 						{#if resultCounts?.to_do}
 							<span class="badge bg-gray-200 text-gray-800">
-								{resultCounts.to_do} {m.toDo()}
+								{resultCounts.to_do}
+								{m.toDo()}
 							</span>
 						{/if}
 						{#if resultCounts?.in_progress}
 							<span class="badge bg-blue-200 text-blue-800">
-								{resultCounts.in_progress} {m.inProgress()}
+								{resultCounts.in_progress}
+								{m.inProgress()}
 							</span>
 						{/if}
 						{#if resultCounts?.done}
 							<span class="badge bg-green-200 text-green-800">
-								{resultCounts.done} {m.done()}
+								{resultCounts.done}
+								{m.done()}
 							</span>
 						{/if}
 					{/if}
