@@ -219,12 +219,13 @@
 			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
-			<a href={`${$page.url.pathname}/flash-mode`} class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
-				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</a
+			<a
+				href={`${$page.url.pathname}/flash-mode`}
+				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
+				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
-			<button 
-				class="btn variant-filled-surface"
-				><i class="fa-solid fa-share-nodes mr-2"></i> {m.mapping()}</button
+			<button class="btn variant-filled-surface"
+				><i class="fa-solid fa-share-nodes mr-2" /> {m.mapping()}</button
 			>
 		</div>
 	</div>
@@ -237,7 +238,7 @@
 			</span>
 		</h4>
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
-			<i class="fa-solid fa-share-nodes"></i>
+			<i class="fa-solid fa-share-nodes" />
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
