@@ -2096,22 +2096,36 @@ class ComplianceAssessment(Assessment):
         self, mapping_set: RequirementMappingSet, reference_assessment: Self
     ) -> list["RequirementAssessment"]:
         requirement_assessments: list[RequirementAssessment] = []
-        for mapping in mapping_set.mappings.all():
-            _reference_requirement_assessment = RequirementAssessment.objects.get(
-                compliance_assessment=reference_assessment,
-                requirement=mapping.reference_requirement,
+        result_order = (
+            RequirementAssessment.Status.NON_COMPLIANT,
+            RequirementAssessment.Status.PARTIALLY_COMPLIANT,
+            RequirementAssessment.Status.COMPLIANT,
+        )
+        for requirement_assessment in self.requirement_assessments.all():
+            mappings = mapping_set.mappings.filter(
+                focal_requirement=requirement_assessment.requirement
             )
-            focal_requirement_assessment = RequirementAssessment.objects.get(
-                compliance_assessment=self,
-                requirement=mapping.focal_requirement,
-            )
-            result = focal_requirement_assessment.infer_result(
-                mapping=mapping,
-                reference_requirement_assessment=_reference_requirement_assessment,
-            )
-            if result:
-                focal_requirement_assessment.status = result
-                requirement_assessments.append(focal_requirement_assessment)
+            results = []
+            if mappings.filter(coverage=RequirementMapping.Coverage.FULL).exists():
+                mappings = mappings.filter(coverage=RequirementMapping.Coverage.FULL)
+            for mapping in mappings:
+                reference_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=reference_assessment,
+                    requirement=mapping.reference_requirement,
+                )
+                results.append(
+                    requirement_assessment.infer_result(
+                        mapping=mapping,
+                        reference_requirement_assessment=reference_requirement_assessment,
+                    )
+                )
+            if len(results) == 1:
+                requirement_assessment.status = results
+                requirement_assessments.append(requirement_assessment)
+            elif len(results) > 1:
+                lowest = min(results, key=lambda x: result_order.index(x))
+                requirement_assessment.status = lowest
+                requirement_assessments.append(requirement_assessment)
         return requirement_assessments
 
 
