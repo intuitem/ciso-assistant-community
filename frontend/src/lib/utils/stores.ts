@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import { persisted } from 'svelte-persisted-store'
+import { persisted } from 'svelte-persisted-store';
 import type { TreeViewNode } from '@skeletonlabs/skeleton';
 
 export const showNotification = writable(
@@ -26,4 +26,3 @@ const expandedNodes: TreeViewNode[] = [];
 export const expandedNodesState = persisted('expandedNodes', expandedNodes, {
 	storage: 'session'
 });
-

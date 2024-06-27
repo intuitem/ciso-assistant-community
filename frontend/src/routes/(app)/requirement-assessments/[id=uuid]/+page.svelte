@@ -151,22 +151,25 @@
 		));
 	}
 
-	const mappingInference = { 
+	const mappingInference = {
 		refCA: data.requirementAssessment,
 		result: 'compliant',
-		annotation: "",
+		annotation: ''
 	};
 
 	let requirementAssessmentsList: string[] = $hideSuggestions;
 
-	let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id) ? true : false;
+	let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id)
+		? true
+		: false;
 
 	function toggleSuggestions() {
-		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)){
-			requirementAssessmentsList.push(data.requirementAssessment.id)
-		}
-		else {
-			requirementAssessmentsList = requirementAssessmentsList.filter((item) => item !== data.requirementAssessment.id)
+		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
+			requirementAssessmentsList.push(data.requirementAssessment.id);
+		} else {
+			requirementAssessmentsList = requirementAssessmentsList.filter(
+				(item) => item !== data.requirementAssessment.id
+			);
 		}
 		hideSuggestion = !hideSuggestion;
 		hideSuggestions.set(requirementAssessmentsList);
@@ -184,25 +187,22 @@
 			👉 {data.requirement.description}
 		</p>
 	{/if}
-		{#if has_threats || has_reference_controls || annotation || mappingInference}
-			<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
-				<h2 class="font-semibold text-lg flex flex-row justify-between">
-					<div>
-						<i class="fa-solid fa-circle-info mr-2">
-						</i>{m.additionalInformation()}
-					</div>
-					<button
-					on:click={toggleSuggestions}
-					>
-						{#if !hideSuggestion}
-							<i class="fa-solid fa-eye"></i>
-						{:else}
-							<i class="fa-solid fa-eye-slash"></i>
-						{/if}
-					</button>
-				</h2>
-				{#if !hideSuggestion}
-				{#if (has_threats || has_reference_controls)}
+	{#if has_threats || has_reference_controls || annotation || mappingInference}
+		<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
+			<h2 class="font-semibold text-lg flex flex-row justify-between">
+				<div>
+					<i class="fa-solid fa-circle-info mr-2" />{m.additionalInformation()}
+				</div>
+				<button on:click={toggleSuggestions}>
+					{#if !hideSuggestion}
+						<i class="fa-solid fa-eye" />
+					{:else}
+						<i class="fa-solid fa-eye-slash" />
+					{/if}
+				</button>
+			</h2>
+			{#if !hideSuggestion}
+				{#if has_threats || has_reference_controls}
 					<div class="my-2 flex flex-col">
 						<div class="flex-1">
 							{#if reference_controls.length > 0}
@@ -262,7 +262,7 @@
 				{#if mappingInference}
 					<div class="my-2">
 						<p class="font-medium">
-							<i class="fa-solid fa-link"></i>
+							<i class="fa-solid fa-link" />
 							{m.mappingInference()}
 						</p>
 						<ul class="list-disc ml-4">
@@ -274,19 +274,21 @@
 								</p>
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.suggestionColon()}</span>
-									<span class="badge {classesText} h-fit" style="background-color: {COMPLIANCE_COLOR_MAP[mappingInference.result]};">
+									<span
+										class="badge {classesText} h-fit"
+										style="background-color: {COMPLIANCE_COLOR_MAP[mappingInference.result]};"
+									>
 										{mappingInference.result}
 									</span>
-									
 								</p>
 								{#if mappingInference.annotation}
 									<p class="whitespace-pre-line py-1">
-										<span class="italic">{m.annotationColon()}</span> {mappingInference.annotation}
+										<span class="italic">{m.annotationColon()}</span>
+										{mappingInference.annotation}
 									</p>
 								{/if}
 							</li>
 						</ul>
-						
 					</div>
 				{/if}
 			{/if}

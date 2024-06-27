@@ -125,9 +125,9 @@
 
 	function hasMappingInference(node: TreeViewNode) {
 		if (node.contentProps?.mappingInference) {
-			return true
+			return true;
 		}
-		return false
+		return false;
 	}
 </script>
 
