@@ -2,11 +2,13 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import type { PopupSettings, TreeViewNode } from '@skeletonlabs/skeleton';
-	import { popup } from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore, PopupSettings, ToastStore, TreeViewNode } from '@skeletonlabs/skeleton';
+	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
+
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
 	import { complianceColorMap } from './utils';
 
@@ -99,6 +101,7 @@
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { displayScoreColor } from '$lib/utils/helpers';
+	import { superForm } from 'sveltekit-superforms';
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
@@ -108,6 +111,60 @@
 		target: 'popupDownload',
 		placement: 'bottom'
 	};
+
+	const modalStore: ModalStore = getModalStore();
+	const toastStore: ToastStore = getToastStore();
+
+	function handleFormUpdated({
+		form,
+		pageStatus,
+		closeModal
+	}: {
+		form: any;
+		pageStatus: number;
+		closeModal: boolean;
+	}) {
+		if (closeModal && form.valid) {
+			$modalStore[0] ? modalStore.close() : null;
+		}
+		if (form.message) {
+			const toast: { message: string; background: string } = {
+				message: form.message,
+				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
+			};
+			toastStore.trigger(toast);
+		}
+	}
+
+	let { form: createForm, message: createMessage } = {
+		form: {},
+		message: {}
+	};
+
+	$: {
+		({ form: createForm, message: createMessage } = superForm(data.auditCreateForm, {
+			onUpdated: ({ form }) =>
+				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
+		}));
+	}
+
+	function modalCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.auditCreateForm,
+				model: data.auditModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.addComplianceAssessment()
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -225,7 +282,9 @@
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
 			<button class="btn variant-filled-surface"
-				><i class="fa-solid fa-share-nodes mr-2" /> {m.mapping()}</button
+				on:click={(_) => modalCreateForm()}
+				><i class="fa-solid fa-share-nodes mr-2" /> {m.mapping()}
+			</button
 			>
 		</div>
 	</div>
