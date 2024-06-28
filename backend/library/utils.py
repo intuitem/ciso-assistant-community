@@ -85,7 +85,7 @@ class RequirementNodeImporter:
 
 
 class RequirementMappingImporter:
-    REQUIRED_FIELDS = {"focal_requirement", "coverage", "reference_requirement"}
+    REQUIRED_FIELDS = {"focal_requirement", "relationship", "reference_requirement"}
 
     def __init__(self, data: dict):
         self.data = data
@@ -111,8 +111,10 @@ class RequirementMappingImporter:
             mapping_set=mapping_set,
             focal_requirement=focal_requirement,
             reference_requirement=reference_requirement,
-            coverage=self.data["coverage"],
+            relationship=self.data["relationship"],
             annotation=self.data.get("annotation"),
+            strength_of_relationship=self.data.get("strength_of_relationship"),
+            rationale=self.data.get("rationale"),
         )
 
 
