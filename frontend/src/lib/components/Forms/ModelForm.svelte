@@ -324,6 +324,11 @@
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
 			{form}
+			field="baseline"
+			options={getOptions({ objects: model.foreignKeys['baseline'] })}
+		/>
+		<AutocompleteSelect
+			{form}
 			options={getOptions({
 				objects: model.foreignKeys['project'],
 				extra_fields: [['folder', 'str']]
