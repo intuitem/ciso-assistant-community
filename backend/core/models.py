@@ -1,5 +1,6 @@
 from pathlib import Path
 from django.apps import apps
+from django.core.validators import MaxValueValidator
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
@@ -912,6 +913,18 @@ class RequirementMapping(models.Model):
         PARTIAL = "partial", _("Partial")
         NOT_RELATED = "not_related", _("Not related")
 
+    class Relationship(models.TextChoices):
+        SUBSET = "subset", _("Subset")
+        INTERSECT = "intersect", _("Intersect")
+        EQUAL = "equal", _("Equal")
+        SUPERSET = "superset", _("Superset")
+        NOT_RELATED = "not_related", _("Not related")
+
+    class Rationale(models.TextChoices):
+        SYNTACTIC = "syntactic", _("Syntactic")
+        SEMANTIC = "semantic", _("Semantic")
+        FUNCTIONAL = "functional", _("Functional")
+
     mapping_set = models.ForeignKey(
         RequirementMappingSet,
         on_delete=models.CASCADE,
@@ -924,11 +937,18 @@ class RequirementMapping(models.Model):
         verbose_name=_("Focal requirement"),
         related_name="focal_requirement",
     )
-    coverage = models.CharField(
+    relationship = models.CharField(
         max_length=20,
-        choices=Coverage.choices,
-        default=Coverage.NOT_RELATED,
-        verbose_name=_("Coverage"),
+        choices=Relationship.choices,
+        default=Relationship.NOT_RELATED,
+        verbose_name=_("Relationship"),
+    )
+    rationale = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=Rationale.choices,
+        verbose_name=_("Rationale"),
     )
     reference_requirement = models.ForeignKey(
         RequirementNode,
@@ -936,7 +956,23 @@ class RequirementMapping(models.Model):
         verbose_name=_("Reference requirement"),
         related_name="reference_requirement",
     )
+    strength_of_relationship = models.PositiveSmallIntegerField(
+        null=True,
+        verbose_name=_("Strength of relationship"),
+        validators=[MaxValueValidator(10)],
+    )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+
+    @property
+    def coverage(self) -> str:
+        if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
+            return RequirementMapping.Coverage.NOT_RELATED
+        if self.relationship in [
+            RequirementMapping.Relationship.EQUAL,
+            RequirementMapping.Relationship.SUBSET,
+        ]:
+            return RequirementMapping.Coverage.FULL
+        return RequirementMapping.Coverage.PARTIAL
 
 
 ########################### Domain objects #########################
@@ -2135,7 +2171,7 @@ class ComplianceAssessment(Assessment):
                         "str": str(ref),
                         "id": str(ref.id),
                     },
-                    "mappings": [mapping.id for mapping in mappings],
+                    # "mappings": [mapping.id for mapping in mappings],
                 }
                 requirement_assessments.append(requirement_assessment)
         return requirement_assessments
