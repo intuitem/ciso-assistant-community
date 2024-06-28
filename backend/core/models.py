@@ -1817,11 +1817,11 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Results.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Results.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Results.COMPLIANT: "#86efac",
-            RequirementAssessment.Results.NOT_APPLICABLE: "#000000",
-            RequirementAssessment.Status.TODO: "#d1d5db",
-            RequirementAssessment.Status.IN_PROGRESS: "#fde047",
-            RequirementAssessment.Status.IN_REVIEW: "#fbbf24",
-            RequirementAssessment.Status.DONE: "#86efac",
+            RequirementAssessment.Results.NOT_APPLICABLE: "#9ca3af",
+            RequirementAssessment.Status.TODO: "#9ca3af",
+            RequirementAssessment.Status.IN_PROGRESS: "#9bf6ff",
+            RequirementAssessment.Status.IN_REVIEW: "#ffd6a5",
+            RequirementAssessment.Status.DONE: "#caffbf",
         }
 
         compliance_assessments_result = {"values": [], "labels": []}
