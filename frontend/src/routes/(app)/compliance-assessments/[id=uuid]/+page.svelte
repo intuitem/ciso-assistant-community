@@ -178,7 +178,7 @@
 			{/each}
 		</div>
 		{#if data.global_score.score >= 0}
-		Maturity
+			Maturity
 			<div class="flex items-center">
 				<ProgressRadial
 					stroke={100}
@@ -195,16 +195,20 @@
 				s_label="Result"
 				name="compliance_result"
 				values={compliance_assessment_donut_values.result.values}
-				colors={compliance_assessment_donut_values.result.values.map((object) => object.itemStyle.color)}
+				colors={compliance_assessment_donut_values.result.values.map(
+					(object) => object.itemStyle.color
+				)}
 			/>
 		</div>
 		<div class="w-1/3">
-			 Progress
+			Progress
 			<DonutChart
 				s_label="Status"
 				name="compliance_status"
 				values={compliance_assessment_donut_values.status.values}
-				colors={compliance_assessment_donut_values.status.values.map((object) => object.itemStyle.color)}
+				colors={compliance_assessment_donut_values.status.values.map(
+					(object) => object.itemStyle.color
+				)}
 			/>
 		</div>
 		<div class="flex flex-col space-y-2 ml-4">
