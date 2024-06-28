@@ -121,7 +121,7 @@
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
-		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/6">
+		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
@@ -177,23 +177,29 @@
 				</div>
 			{/each}
 		</div>
-		{#if data.global_score.score >= 0}
-			Maturity
-			<div class="flex items-center">
-				<ProgressRadial
-					stroke={100}
-					meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
-					font={125}
-					value={(data.global_score.score * 100) / data.global_score.max_score}
-					width={'w-52'}>{data.global_score.score}</ProgressRadial
-				>
-			</div>
-		{/if}
+		<div class="flex w-1/3 relative">
+			{#if data.global_score.score >= 0}
+				<div class="absolute font-bold text-sm">Maturity</div>
+				<div class="flex justify-center items-center w-full">
+					<ProgressRadial
+						stroke={100}
+						meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
+						font={125}
+						value={(data.global_score.score * 100) / data.global_score.max_score}
+						width={'w-52'}
+					>
+						{data.global_score.score}
+					</ProgressRadial>
+				</div>
+			{/if}
+		</div>
+
 		<div class="w-1/3">
-			Compliance
 			<DonutChart
 				s_label="Result"
 				name="compliance_result"
+				title="Compliance"
+				orientation="horizontal"
 				values={compliance_assessment_donut_values.result.values}
 				colors={compliance_assessment_donut_values.result.values.map(
 					(object) => object.itemStyle.color
@@ -201,10 +207,11 @@
 			/>
 		</div>
 		<div class="w-1/3">
-			Progress
 			<DonutChart
 				s_label="Status"
 				name="compliance_status"
+				title="Progress"
+				orientation="horizontal"
 				values={compliance_assessment_donut_values.status.values}
 				colors={compliance_assessment_donut_values.status.values.map(
 					(object) => object.itemStyle.color
