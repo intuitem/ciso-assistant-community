@@ -405,6 +405,7 @@
 		/>
 	{:else if URLModel === 'requirement-assessments'}
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
+		<Select {form} options={model.selectOptions['result']} field="result" label={m.result()} />
 		<TextArea {form} field="observation" label={m.observation()} />
 		<HiddenInput {form} field="folder" />
 		<HiddenInput {form} field="requirement" />
