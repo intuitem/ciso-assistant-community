@@ -178,6 +178,7 @@
 			{/each}
 		</div>
 		{#if data.global_score.score >= 0}
+		Maturity
 			<div class="flex items-center">
 				<ProgressRadial
 					stroke={100}
@@ -188,7 +189,8 @@
 				>
 			</div>
 		{/if}
-		<div class="w-1/2">
+		<div class="w-1/3">
+			Compliance
 			<DonutChart
 				s_label="Result"
 				name="compliance_result"
@@ -196,7 +198,8 @@
 				colors={compliance_assessment_donut_values.result.values.map((object) => object.itemStyle.color)}
 			/>
 		</div>
-		<div class="w-1/2">
+		<div class="w-1/3">
+			 Progress
 			<DonutChart
 				s_label="Status"
 				name="compliance_status"
