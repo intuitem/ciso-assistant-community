@@ -293,8 +293,18 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
-				<Select {form} options={data.model.selectOptions['status']} field="status" label="Status" />
-
+				<Select
+					{form}
+					options={data.model.selectOptions['status']}
+					field="status"
+					label={m.status()}
+				/>
+				<Select
+					{form}
+					options={data.model.selectOptions['result']}
+					field="result"
+					label={m.result()}
+				/>
 				<Score
 					{form}
 					min_score={data.compliance_assessment_score.min_score}

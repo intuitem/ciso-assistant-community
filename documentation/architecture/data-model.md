@@ -757,7 +757,7 @@ When a applied control derives from a reference control, the same category is pr
 
 ## Compliance and risk assessments
 
-Both types of assessments have common points:
+Both types of assessments have common fields:
 - a name
 - a description
 - a version (defined by the analyst)
@@ -780,11 +780,8 @@ The state of a review can be: created/submitted/validated/changes requested/depr
 When a compliance assessment is created, each requirement of the corresponding framework is linked to a requirement assessment object. To cover a requirement, the assessor shall link it to Applied controls.
 
 Here are the specific fields for requirement assessments:
-- status: --/to do/in progress/done.
-- result: --/compliant/non-compliant minor/non-compliant major/not applicable
+- result: --/compliant/partially compliant/non-compliant/not applicable
 - score: --/<integer value from min_score to max_score>.
-- ETA (Estimated Time of Arrival) date
-- due date. This is for example useful to organize an audit plan.
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
