@@ -480,6 +480,16 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    baseline = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=ComplianceAssessment.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
+
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"

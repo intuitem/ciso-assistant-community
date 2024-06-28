@@ -1313,15 +1313,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
-        serializer.save()
-        instance = ComplianceAssessment.objects.get(id=serializer.data["id"])
+        baseline = serializer.validated_data.pop("baseline", None)
+        instance = serializer.save()
         requirements = RequirementNode.objects.filter(framework=instance.framework)
         for requirement in requirements:
-            RequirementAssessment.objects.create(
+            requirement_assessment = RequirementAssessment.objects.create(
                 compliance_assessment=instance,
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
             )
+            if baseline and baseline.framework == instance.framework:
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=baseline, requirement=requirement
+                )
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.save()
+        if baseline and baseline.framework != instance.framework:
+            mapping_set = RequirementMappingSet.objects.get(
+                focal_framework=serializer.validated_data["framework"],
+                reference_framework=baseline.framework,
+            )
+            for (
+                requirement_assessment
+            ) in instance.compute_requirement_assessments_results(
+                mapping_set, baseline
+            ):
+                requirement_assessment.save()
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
