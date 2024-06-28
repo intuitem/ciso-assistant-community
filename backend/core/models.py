@@ -2105,7 +2105,8 @@ class ComplianceAssessment(Assessment):
             mappings = mapping_set.mappings.filter(
                 focal_requirement=requirement_assessment.requirement
             )
-            results = []
+            inferences = []
+            refs = []
             if mappings.filter(coverage=RequirementMapping.Coverage.FULL).exists():
                 mappings = mappings.filter(coverage=RequirementMapping.Coverage.FULL)
             for mapping in mappings:
@@ -2113,18 +2114,29 @@ class ComplianceAssessment(Assessment):
                     compliance_assessment=reference_assessment,
                     requirement=mapping.reference_requirement,
                 )
-                results.append(
+                inferences.append(
                     requirement_assessment.infer_result(
                         mapping=mapping,
                         reference_requirement_assessment=reference_requirement_assessment,
                     )
                 )
-            if len(results) == 1:
-                requirement_assessment.status = results
-                requirement_assessments.append(requirement_assessment)
-            elif len(results) > 1:
-                lowest = min(results, key=lambda x: result_order.index(x))
-                requirement_assessment.status = lowest
+                refs.append(reference_requirement_assessment)
+            if inferences:
+                if len(inferences) == 1:
+                    requirement_assessment.status = inferences[0]
+                    ref = refs[0]
+                else:
+                    lowest_result = min(inferences, key=lambda x: result_order.index(x))
+                    requirement_assessment.status = lowest_result
+                    ref = refs[inferences.index(lowest_result)]
+                requirement_assessment.mapping_inference = {
+                    "result": requirement_assessment.status,
+                    "reference_requirement_assessment": {
+                        "str": str(ref),
+                        "id": str(ref.id),
+                    },
+                    "mappings": [mapping.id for mapping in mappings],
+                }
                 requirement_assessments.append(requirement_assessment)
         return requirement_assessments
 
