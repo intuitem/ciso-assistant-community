@@ -1594,6 +1594,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
+    filterset_fields = ["focal_framework", "reference_framework"]
+
 
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
