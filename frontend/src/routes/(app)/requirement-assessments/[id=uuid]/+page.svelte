@@ -34,7 +34,7 @@
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
+	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
 	import * as m from '$paraglide/messages';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -151,9 +151,10 @@
 		));
 	}
 
-	const mappingInference = {
-		refCA: data.requirementAssessment,
-		result: 'compliant',
+	$: mappingInference = {
+		referenceRequirementAssessment:
+			data.requirementAssessment.mapping_inference.reference_requirement_assessment,
+		result: data.requirementAssessment.mapping_inference.result,
 		annotation: ''
 	};
 
@@ -187,7 +188,7 @@
 			👉 {data.requirement.description}
 		</p>
 	{/if}
-	{#if has_threats || has_reference_controls || annotation || mappingInference}
+	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
 		<div class="card p-4 variant-glass-primary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-lg flex flex-row justify-between">
 				<div>
@@ -259,7 +260,7 @@
 						</p>
 					</div>
 				{/if}
-				{#if mappingInference}
+				{#if mappingInference.result}
 					<div class="my-2">
 						<p class="font-medium">
 							<i class="fa-solid fa-link" />
@@ -268,8 +269,12 @@
 						<ul class="list-disc ml-4">
 							<li>
 								<p>
-									<a class="anchor" href="/requirement-assessments/{mappingInference.refCA.id}">
-										{mappingInference.refCA.name}
+									<a
+										class="anchor"
+										href="/requirement-assessments/{mappingInference.referenceRequirementAssessment
+											.id}"
+									>
+										{mappingInference.referenceRequirementAssessment.str}
 									</a>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -278,7 +283,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {COMPLIANCE_COLOR_MAP[mappingInference.result]};"
 									>
-										{mappingInference.result}
+										{m[toCamelCase(mappingInference.result)]()}
 									</span>
 								</p>
 								{#if mappingInference.annotation}
