@@ -183,11 +183,13 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			// Iterate through each compliance assessment of the project
 			project.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
 				// Process the donut data of each assessment
-				compliance_assessment.donut.values.forEach((donutItem: RequirementAssessmentDonutItem) => {
+				//console.log(compliance_assessment.donut);
+				compliance_assessment.donut.result.values.forEach((donutItem: RequirementAssessmentDonutItem) => {
 					// Find the corresponding item in the aggregated data
 					const aggregatedItem: RequirementAssessmentDonutItem | undefined =
 						aggregatedDonutData.values.find((item) => item.name === donutItem.name);
 
+						console.log(aggregatedItem);
 					if (aggregatedItem) {
 						// If the item already exists, increment its value
 						aggregatedItem.value += donutItem.value;
