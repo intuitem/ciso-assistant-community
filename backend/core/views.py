@@ -1326,7 +1326,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 baseline_requirement_assessment = RequirementAssessment.objects.get(
                     compliance_assessment=baseline, requirement=requirement
                 )
-                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.result = baseline_requirement_assessment.result
                 requirement_assessment.save()
         if baseline and baseline.framework != instance.framework:
             mapping_set = RequirementMappingSet.objects.get(
@@ -1568,7 +1568,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get result choices")
     def result(self, request):
-        return Response(dict(RequirementAssessment.Results.choices))
+        return Response(dict(RequirementAssessment.Result.choices))
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
