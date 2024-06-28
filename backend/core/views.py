@@ -1327,6 +1327,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     compliance_assessment=baseline, requirement=requirement
                 )
                 requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.evidences.set(
+                    baseline_requirement_assessment.evidences.all()
+                )
+                requirement_assessment.applied_controls.set(
+                    baseline_requirement_assessment.applied_controls.all()
+                )
                 requirement_assessment.save()
         if baseline and baseline.framework != instance.framework:
             mapping_set = RequirementMappingSet.objects.get(
@@ -1338,6 +1344,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ) in instance.compute_requirement_assessments_results(
                 mapping_set, baseline
             ):
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    id=requirement_assessment.mapping_inference[
+                        "reference_requirement_assessment"
+                    ]["id"]
+                )
+                requirement_assessment.evidences.add(
+                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
+                )
+                requirement_assessment.applied_controls.add(
+                    *[
+                        ac.id
+                        for ac in baseline_requirement_assessment.applied_controls.all()
+                    ]
+                )
                 requirement_assessment.save()
 
     @action(detail=False, name="Compliance assessments per status")
