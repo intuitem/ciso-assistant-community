@@ -1,28 +1,19 @@
 <script lang="ts">
 	export let options: any[];
 	export let value: string | undefined;
-	export let defaultOptionName: string = '--';
-	export let optionLabels: { [key: string]: string } = Object.fromEntries(
-		options
-			.filter(option => Boolean(option))
-			.map((option) => [option, option.toString()])
-	);
+	export let defaultOptionName: string = "--";
+	export let optionLabels: { [key: string]: string } = {};
 </script>
 
-<!--
-	data-testid="form-input-{field.replaceAll('_', '-')}"
-	class="{'select ' + _class} {classesTextField($errors)}"
-	aria-invalid={$errors ? 'true' : undefined}
-	name={field}
--->
-
-{#if Object.keys(optionLabels).length > 0}
-	<select placeholder="" bind:value {...$$restProps}>
+{#if options.length > 0}
+	<!-- I should use class="m-0" instead of style="margin: 0;" but i didn't figure out to make tailwind add this class yet -->
+	<select placeholder="" bind:value {...$$restProps} style="margin: 0;">
 		<option value={null} selected>{defaultOptionName}</option>
 		{#each options as option}
 			{#if option}
+				{@const label = optionLabels[option] ?? option}
 				<option value={option}>
-					{optionLabels[option]}
+					{label}
 				</option>
 			{/if}
 		{/each}

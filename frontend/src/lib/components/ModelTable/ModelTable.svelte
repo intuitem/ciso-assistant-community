@@ -126,6 +126,7 @@
 	const filterProps: {
 		[key: string]: { [key: string]: any };
 	} = {};
+	let displayFilters = false;
 
 	function defaultFilterProps(rows, field: string) {
 		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
@@ -183,15 +184,11 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#each filteredFields as field}
-			<svelte:component
-				this={filters[field].component}
-				bind:value={filterValues[field]}
-				{...filterProps[field]}
-				{...filters[field].extraProps}
-			/>
-		{/each}
-
+		{#if filteredFields.length > 0}
+			<button on:click={() => {displayFilters = !displayFilters;}} class="btn variant-filled-primary self-end">
+				<i class="fa-solid fa-filter mr-2"></i> Filters
+			</button>
+		{/if}
 		{#if search}
 			<Search {handler} />
 		{/if}
@@ -202,6 +199,20 @@
 			<slot name="addButton" />
 		{/if}
 	</header>
+	{#if displayFilters}
+		<header class="flex justify-items-start content-start flex-wrap space-x-8  p-2">
+			{#if filteredFields.length > 0}
+					{#each filteredFields as field}
+						<svelte:component
+							this={filters[field].component}
+							bind:value={filterValues[field]}
+							{...filterProps[field]}
+							{...filters[field].extraProps}
+						/>
+					{/each}
+			{/if}
+		</header>
+	{/if}
 	<!-- Table -->
 	<!-- prettier-ignore -->
 	<table

@@ -169,11 +169,11 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	getColumn: row => row.locale,
 	extraProps: {
 		defaultOptionName: 'Select language...', // Make translations
-		OptionLabels: LOCALE_DISPLAY_MAP
+		optionLabels: LOCALE_DISPLAY_MAP
 	}
 };
 
-const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
+/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
 	component: CheckboxFilter,
 	getColumn: row => {
 		return !row.meta.overview.some(
@@ -187,7 +187,7 @@ const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
 	extraProps: {
 		title: "Only display matrix libraries" // Make translations
 	}
-};
+}; */
 
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
@@ -344,7 +344,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
 		filters: {
 			locale: LANGUAGE_FILTER,
-			has_risk_matrix: HAS_RISK_MATRIX_FILTER
+			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
 	'loaded-libraries': {
