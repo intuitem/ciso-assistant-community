@@ -20,9 +20,12 @@ objects:
     requirement_mappings:
       - reference_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
         focal_requirement: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
-        coverage: partial
+        relationship: intersect
+        strength_of_relationship: 5
+        rationale: syntactic
         annotation: Ipsum ut nisi Lorem fugiat ad est voluptate ullamco ea eu.
       - reference_requirement: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
         focal_requirement: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
-        coverage: full
+        relationship: equal
+        rationale: functional
         annotation: Ipsum ut nisi Lorem fugiat ad est voluptate ullamco ea eu.
