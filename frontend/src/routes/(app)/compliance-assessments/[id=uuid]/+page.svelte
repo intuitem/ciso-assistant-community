@@ -192,8 +192,16 @@
 			<DonutChart
 				s_label={m.complianceAssessments()}
 				name="compliance_assessment"
-				values={compliance_assessment_donut_values.values}
-				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
+				values={compliance_assessment_donut_values.result.values}
+				colors={compliance_assessment_donut_values.result.values.map((object) => object.itemStyle.color)}
+			/>
+		</div>
+		<div class="w-1/2">
+			<DonutChart
+				s_label="toto"
+				name="compliance_assessment_2"
+				values={compliance_assessment_donut_values.status.values}
+				colors={compliance_assessment_donut_values.status.values.map((object) => object.itemStyle.color)}
 			/>
 		</div>
 		<div class="flex flex-col space-y-2 ml-4">

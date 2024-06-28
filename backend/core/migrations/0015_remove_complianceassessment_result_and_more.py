@@ -23,6 +23,10 @@ def create_result(apps, schema_editor):
         if assessment.status in Results.values:
             setattr(assessment, "result", assessment.status)
             assessment.status = Status.TODO
+        if assessment.result == Results.COMPLIANT:
+            assessment.status = Status.DONE
+        if assessment.result == Results.PARTIALLY_COMPLIANT:
+            assessment.status = Status.IN_PROGRESS
         assessment.save()
 
 
