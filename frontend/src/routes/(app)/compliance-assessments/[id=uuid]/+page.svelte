@@ -41,45 +41,52 @@
 		`change_${requirementAssessmentModel.name}`
 	);
 
-	const countStatus = (
+	const countResults = (
 		node: Node,
-		statusCounts: Record<string, number> = {}
+		resultCounts: Record<string, number> = {}
 	): Record<string, number> => {
-		if (node.status && node.assessable) {
-			statusCounts[node.status] = (statusCounts[node.status] || 0) + 1;
+		if (node.result && node.assessable) {
+			resultCounts[node.result] = (resultCounts[node.result] || 0) + 1;
 		}
-		if (node.is_scored && node.assessable && node.status !== 'not_applicable') {
-			statusCounts['scored'] = (statusCounts['scored'] || 0) + 1;
-			statusCounts['total_score'] = (statusCounts['total_score'] || 0) + node.score;
+		if (node.status && node.assessable) {
+			resultCounts[node.status] = (resultCounts[node.status] || 0) + 1;
+		}
+		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
+			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
 			for (const childId in node.children) {
 				if (Object.prototype.hasOwnProperty.call(node.children, childId)) {
 					const childNode = node.children[childId];
-					countStatus(childNode, statusCounts);
+					countResults(childNode, resultCounts);
 				}
 			}
 		}
-		return statusCounts;
+		return resultCounts;
 	};
 
 	const mappingInference = { results: ['compliant'] };
 
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
-			node.statusCounts = countStatus(node);
 			node.mappingInference = mappingInference;
+			node.resultCounts = countResults(node);
 			return {
 				id: id,
 				content: TreeViewItemContent,
 				contentProps: { ...node, canEditRequirementAssessment },
-				lead: node.status ? TreeViewItemLead : '',
+				lead: TreeViewItemLead,
 				leadProps: {
+					result: node.result,
+					status: node.status,
 					statusI18n: node.status_i18n,
+					resultI18n: node.result_i18n,
 					assessable: node.assessable,
 					statusDisplay: node.status_display,
 					statusColor: complianceColorMap[node.status],
+					resultColor: complianceColorMap[node.result],
 					score: node.score,
 					isScored: node.is_scored,
 					max_score: node.max_score

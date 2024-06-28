@@ -154,14 +154,15 @@ export const AssetSchema = baseNamedObject({
 
 export const RequirementAssessmentSchema = z.object({
 	status: z.string(),
+	result: z.string(),
 	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),
-	evidences: z.string().uuid().optional().array(),
+	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
-	applied_controls: z.string().uuid().optional().array(),
+	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable()
 });
 

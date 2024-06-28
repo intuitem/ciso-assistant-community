@@ -7,7 +7,7 @@ from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
-from .base_models import *
+from .base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
 from .validators import validate_file_size, validate_file_name
 from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
@@ -1268,7 +1268,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1306,18 +1306,6 @@ class Assessment(NameDescriptionMixin):
         blank=True,
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
-    )
-    eta = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_("Estimated time of arrival"),
-        verbose_name=_("ETA"),
-    )
-    due_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_("Due date"),
-        verbose_name=_("Due date"),
     )
 
     fields_to_check = ["name", "version"]
@@ -1829,21 +1817,8 @@ class RiskScenario(NameDescriptionMixin):
 
 
 class ComplianceAssessment(Assessment):
-    class Result(models.TextChoices):
-        COMPLIANT = "compliant", _("Compliant")
-        NON_COMPLIANT_MINOR = "non_compliant_minor", _("Non compliant (minor)")
-        NON_COMPLIANT_MAJOR = "non_compliant_major", _("Non compliant (major)")
-        NOT_APPLICABLE = "not_applicable", _("Not applicable")
-
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
-    )
-    result = models.CharField(
-        blank=True,
-        null=True,
-        max_length=100,
-        choices=Result.choices,
-        verbose_name=_("Result"),
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
@@ -1870,7 +1845,7 @@ class ComplianceAssessment(Assessment):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(score=None)
-            .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
+            .exclude(status=RequirementAssessment.Results.NOT_APPLICABLE)
             .exclude(is_scored=False)
         )
         ig = (
@@ -1971,18 +1946,22 @@ class ComplianceAssessment(Assessment):
             return queries[0].union(*queries[1:]) if queries else base_query.none()
 
         color_map = {
-            "in_progress": "#3b82f6",
-            "non_compliant": "#f87171",
-            "to_do": "#d1d5db",
-            "partially_compliant": "#fde047",
-            "not_applicable": "#000000",
-            "compliant": "#86efac",
+            RequirementAssessment.Results.NOT_ASSESSED: "#d1d5db",
+            RequirementAssessment.Results.NON_COMPLIANT: "#f87171",
+            RequirementAssessment.Results.PARTIALLY_COMPLIANT: "#fde047",
+            RequirementAssessment.Results.COMPLIANT: "#86efac",
+            RequirementAssessment.Results.NOT_APPLICABLE: "#000000",
         }
 
         compliance_assessments_status = {"values": [], "labels": []}
-        for status in RequirementAssessment.Status:
+        for result in RequirementAssessment.Results.values:
+            assessable_requirements_filter = {
+                "compliance_assessment": self,
+                "requirement__assessable": True,
+            }
+
             base_query = RequirementAssessment.objects.filter(
-                status=status, compliance_assessment=self, requirement__assessable=True
+                result=result, **assessable_requirements_filter
             ).distinct()
 
             if self.selected_implementation_groups:
@@ -1996,14 +1975,14 @@ class ComplianceAssessment(Assessment):
 
             count = union_query.count()
             value_entry = {
-                "name": status,
-                "localName": camel_case(status.value),
+                "name": result,
+                "localName": camel_case(result),
                 "value": count,
-                "itemStyle": {"color": color_map[status]},
+                "itemStyle": {"color": color_map[result]},
             }
 
             compliance_assessments_status["values"].append(value_entry)
-            compliance_assessments_status["labels"].append(status.label)
+            compliance_assessments_status["labels"].append(result)
 
         return compliance_assessments_status
 
@@ -2177,12 +2156,16 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments
 
 
-class RequirementAssessment(AbstractBaseModel, FolderMixin):
+class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
-        NON_COMPLIANT = "non_compliant", _("Non compliant")
+        DONE = "done", _("Done")
+
+    class Results(models.TextChoices):
+        NOT_ASSESSED = "not_assessed", _("Not assessed")
         PARTIALLY_COMPLIANT = "partially_compliant", _("Partially compliant")
+        NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
@@ -2191,6 +2174,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         choices=Status.choices,
         default=Status.TODO,
         verbose_name=_("Status"),
+    )
+    result = models.CharField(
+        max_length=64,
+        choices=Results.choices,
+        verbose_name=_("Result"),
+        default=Results.NOT_ASSESSED,
     )
     score = models.IntegerField(
         blank=True,

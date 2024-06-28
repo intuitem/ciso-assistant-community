@@ -5,12 +5,7 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import type {
-		ModalSettings,
-		ModalComponent,
-		ModalStore,
-		ToastStore
-	} from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore, TabGroup, Tab, getToastStore } from '@skeletonlabs/skeleton';
 	import { isURL } from '$lib/utils/helpers';
 	import { getModelInfo } from '$lib/utils/crud.js';
@@ -29,15 +24,13 @@
 	}
 
 	let attachment: Attachment | undefined = undefined;
-
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
 
 	function modalConfirm(id: string, name: string, action: string): void {
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.evidence.form,
+				_form: data.deleteForm,
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel,
