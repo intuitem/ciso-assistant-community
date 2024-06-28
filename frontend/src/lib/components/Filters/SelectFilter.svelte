@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let options: any[];
 	export let value: string | undefined;
-	export let defaultOptionName: string = "--";
+	export let defaultOptionName: string = '--';
 	export let optionLabels: { [key: string]: string } = {};
 </script>
 

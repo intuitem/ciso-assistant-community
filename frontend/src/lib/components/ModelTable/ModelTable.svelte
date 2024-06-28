@@ -185,8 +185,13 @@
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0}
-			<button on:click={() => {displayFilters = !displayFilters;}} class="btn variant-filled-primary self-end">
-				<i class="fa-solid fa-filter mr-2"></i> Filters
+			<button
+				on:click={() => {
+					displayFilters = !displayFilters;
+				}}
+				class="btn variant-filled-primary self-end"
+			>
+				<i class="fa-solid fa-filter mr-2" /> Filters
 			</button>
 		{/if}
 		{#if search}
@@ -200,16 +205,16 @@
 		{/if}
 	</header>
 	{#if displayFilters}
-		<header class="flex justify-items-start content-start flex-wrap space-x-8  p-2">
+		<header class="flex justify-items-start content-start flex-wrap space-x-8 p-2">
 			{#if filteredFields.length > 0}
-					{#each filteredFields as field}
-						<svelte:component
-							this={filters[field].component}
-							bind:value={filterValues[field]}
-							{...filterProps[field]}
-							{...filters[field].extraProps}
-						/>
-					{/each}
+				{#each filteredFields as field}
+					<svelte:component
+						this={filters[field].component}
+						bind:value={filterValues[field]}
+						{...filterProps[field]}
+						{...filters[field].extraProps}
+					/>
+				{/each}
 			{/if}
 		</header>
 	{/if}
