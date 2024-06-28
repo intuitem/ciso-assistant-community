@@ -925,6 +925,16 @@ class RequirementMapping(models.Model):
         SEMANTIC = "semantic", _("Semantic")
         FUNCTIONAL = "functional", _("Functional")
 
+    FULL_COVERAGE_RELATIONSHIPS = [
+        Relationship.EQUAL,
+        Relationship.SUBSET,
+    ]
+
+    PARTIAL_COVERAGE_RELATIONSHIPS = [
+        Relationship.INTERSECT,
+        Relationship.SUPERSET,
+    ]
+
     mapping_set = models.ForeignKey(
         RequirementMappingSet,
         on_delete=models.CASCADE,
@@ -967,10 +977,7 @@ class RequirementMapping(models.Model):
     def coverage(self) -> str:
         if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
             return RequirementMapping.Coverage.NOT_RELATED
-        if self.relationship in [
-            RequirementMapping.Relationship.EQUAL,
-            RequirementMapping.Relationship.SUBSET,
-        ]:
+        if self.relationship in self.FULL_COVERAGE_RELATIONSHIPS:
             return RequirementMapping.Coverage.FULL
         return RequirementMapping.Coverage.PARTIAL
 
@@ -1845,7 +1852,7 @@ class ComplianceAssessment(Assessment):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(score=None)
-            .exclude(status=RequirementAssessment.Results.NOT_APPLICABLE)
+            .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
         )
         ig = (
@@ -1946,15 +1953,15 @@ class ComplianceAssessment(Assessment):
             return queries[0].union(*queries[1:]) if queries else base_query.none()
 
         color_map = {
-            RequirementAssessment.Results.NOT_ASSESSED: "#d1d5db",
-            RequirementAssessment.Results.NON_COMPLIANT: "#f87171",
-            RequirementAssessment.Results.PARTIALLY_COMPLIANT: "#fde047",
-            RequirementAssessment.Results.COMPLIANT: "#86efac",
-            RequirementAssessment.Results.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
+            RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
+            RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
+            RequirementAssessment.Result.COMPLIANT: "#86efac",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
         }
 
         compliance_assessments_status = {"values": [], "labels": []}
-        for result in RequirementAssessment.Results.values:
+        for result in RequirementAssessment.Result.values:
             assessable_requirements_filter = {
                 "compliance_assessment": self,
                 "requirement__assessable": True,
@@ -2112,9 +2119,9 @@ class ComplianceAssessment(Assessment):
     ) -> list["RequirementAssessment"]:
         requirement_assessments: list[RequirementAssessment] = []
         result_order = (
-            RequirementAssessment.Status.NON_COMPLIANT,
-            RequirementAssessment.Status.PARTIALLY_COMPLIANT,
-            RequirementAssessment.Status.COMPLIANT,
+            RequirementAssessment.Result.NON_COMPLIANT,
+            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+            RequirementAssessment.Result.COMPLIANT,
         )
         for requirement_assessment in self.requirement_assessments.all():
             mappings = mapping_set.mappings.filter(
@@ -2122,8 +2129,12 @@ class ComplianceAssessment(Assessment):
             )
             inferences = []
             refs = []
-            if mappings.filter(coverage=RequirementMapping.Coverage.FULL).exists():
-                mappings = mappings.filter(coverage=RequirementMapping.Coverage.FULL)
+            if mappings.filter(
+                relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
+            ).exists():
+                mappings = mappings.filter(
+                    relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
+                )
             for mapping in mappings:
                 reference_requirement_assessment = RequirementAssessment.objects.get(
                     compliance_assessment=reference_assessment,
@@ -2138,14 +2149,14 @@ class ComplianceAssessment(Assessment):
                 refs.append(reference_requirement_assessment)
             if inferences:
                 if len(inferences) == 1:
-                    requirement_assessment.status = inferences[0]
+                    requirement_assessment.result = inferences[0]
                     ref = refs[0]
                 else:
                     lowest_result = min(inferences, key=lambda x: result_order.index(x))
-                    requirement_assessment.status = lowest_result
+                    requirement_assessment.result = lowest_result
                     ref = refs[inferences.index(lowest_result)]
                 requirement_assessment.mapping_inference = {
-                    "result": requirement_assessment.status,
+                    "result": requirement_assessment.result,
                     "reference_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
@@ -2162,7 +2173,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         IN_PROGRESS = "in_progress", _("In progress")
         DONE = "done", _("Done")
 
-    class Results(models.TextChoices):
+    class Result(models.TextChoices):
         NOT_ASSESSED = "not_assessed", _("Not assessed")
         PARTIALLY_COMPLIANT = "partially_compliant", _("Partially compliant")
         NON_COMPLIANT = "non_compliant", _("Non-compliant")
@@ -2177,9 +2188,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     )
     result = models.CharField(
         max_length=64,
-        choices=Results.choices,
+        choices=Result.choices,
         verbose_name=_("Result"),
-        default=Results.NOT_ASSESSED,
+        default=Result.NOT_ASSESSED,
     )
     score = models.IntegerField(
         blank=True,
@@ -2231,18 +2242,18 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self, mapping: RequirementMapping, reference_requirement_assessment: Self
     ) -> str | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-            return reference_requirement_assessment.status
+            return reference_requirement_assessment.result
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
-            if reference_requirement_assessment.status in (
-                RequirementAssessment.Status.COMPLIANT,
-                RequirementAssessment.Status.PARTIALLY_COMPLIANT,
+            if reference_requirement_assessment.result in (
+                RequirementAssessment.Result.COMPLIANT,
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             ):
-                return RequirementAssessment.Status.PARTIALLY_COMPLIANT
+                return RequirementAssessment.Result.PARTIALLY_COMPLIANT
             if (
-                reference_requirement_assessment.status
-                == RequirementAssessment.Status.NON_COMPLIANT
+                reference_requirement_assessment.result
+                == RequirementAssessment.Result.NON_COMPLIANT
             ):
-                return RequirementAssessment.Status.NON_COMPLIANT
+                return RequirementAssessment.Result.NON_COMPLIANT
         return None
 
     class Meta:
