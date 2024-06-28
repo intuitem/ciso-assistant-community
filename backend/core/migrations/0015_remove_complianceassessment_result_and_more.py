@@ -14,6 +14,7 @@ class Results(models.TextChoices):
 class Status(models.TextChoices):
     TODO = "to_do", "To do"
     IN_PROGRESS = "in_progress", "In progress"
+    IN_REVIEW = "in_review", "In review"
     DONE = "done", "Done"
 
 
@@ -27,6 +28,10 @@ def create_result(apps, schema_editor):
             assessment.status = Status.DONE
         if assessment.result == Results.PARTIALLY_COMPLIANT:
             assessment.status = Status.IN_PROGRESS
+        if assessment.result == Results.NON_COMPLIANT:
+            assessment.status = Status.IN_REVIEW
+        if assessment.result == Results.NOT_APPLICABLE:
+            assessment.status = Status.DONE
         assessment.save()
 
 
@@ -83,6 +88,7 @@ class Migration(migrations.Migration):
                 choices=[
                     ("to_do", "To do"),
                     ("in_progress", "In progress"),
+                    ("in_review", "In review"),
                     ("done", "Done"),
                 ],
                 default="to_do",
