@@ -1820,6 +1820,7 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Results.NOT_APPLICABLE: "#000000",
             RequirementAssessment.Status.TODO: "#d1d5db",
             RequirementAssessment.Status.IN_PROGRESS: "#fde047",
+            RequirementAssessment.Status.IN_REVIEW: "#fbbf24",
             RequirementAssessment.Status.DONE: "#86efac",
         }
 
