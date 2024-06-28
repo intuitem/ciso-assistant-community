@@ -1528,6 +1528,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
 
+    @action(detail=False, name="Get result choices")
+    def result(self, request):
+        return Response(dict(RequirementAssessment.Results.choices))
+
 
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
@@ -1597,6 +1601,7 @@ def generate_html(
             "bar_graph": None,
             "direct_evidences": [],
             "applied_controls": [],
+            "result": "",
             "status": "",
             "color_class": "",
         }
@@ -1611,8 +1616,10 @@ def generate_html(
 
             if assessment:
                 node_data["assessments"] = assessment
+                node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
-                node_data["color_class"] = color_css_class(assessment.status)
+                node_data["result_color_class"] = color_css_class(assessment.result)
+                node_data["status_color_class"] = color_css_class(assessment.status)
                 direct_evidences = assessment.evidences.all()
                 if direct_evidences:
                     selected_evidences += direct_evidences

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { localItems } from '$lib/utils/locales';
+	import * as m from '$paraglide/messages';
 
 	export let name: string;
 	export let s_label = '';
@@ -15,7 +15,7 @@
 
 	for (const index in values) {
 		if (values[index].localName) {
-			values[index].name = localItems()[values[index].localName];
+			values[index].name = m[values[index].localName]();
 		}
 	}
 

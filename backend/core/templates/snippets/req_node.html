@@ -9,10 +9,13 @@
             {% bar_graph assessments ancestors node.requirement_node %}
         {% endif %}
     {% else %}
-        <div class='flex flex-col shadow-md border rounded-lg px-4 py-2 m-2 ml-0 items-center border-t-2 border-t-{{ node.color_class }} border-{{ node.color_class }}'>
+        <div class='flex flex-col shadow-md border rounded-lg px-4 py-2 m-2 ml-0 items-center border-t-2 border-t-{{ node.result_color_class }} border-{{ node.result_color_class }}'>
             <div class='flex flex-row justify-between w-full'>
                 <div class='font-semibold'>{{ node.assessments.requirement }}</div>
-                <div class='text-white text-center rounded-lg whitespace-nowrap px-2 py-1 bg-{{ node.color_class }}'>{{ node.status }}</div>
+                <div class='flex flex-row space-x-2'>
+                    <div class='text-center rounded-lg whitespace-nowrap px-2 py-1 text-{{ node.status_color_class }}'>{{ node.status }}</div>
+                    <div class='text-white text-center rounded-lg whitespace-nowrap px-2 py-1 bg-{{ node.result_color_class }}'>{{ node.result }}</div>
+                </div>
             </div>
             {% if node.assessments.requirement.description %}
                 <div class='text-left w-full'>{{ node.assessments.requirement.description }}</div>
@@ -44,7 +47,7 @@
                 <div class="flex flex-row">
                     <div class="flex flex-col items-left w-1/2">
                         {% for control in node.applied_controls %}
-                            <li>{{ control.measure.name }}: {{ control.measure.get_status_display }}</li>
+                            <li>{{ control.measure.name }}: {{ control.measure.get_result_display }}</li>
                         {% endfor %}
                     </div>
                     <div class="flex flex-col items-left w-1/2">
