@@ -28,7 +28,7 @@ export const load = (async ({ fetch, params }) => {
 		(res) => res.json()
 	);
 
-	const initialData = {};
+	const initialData = { baseline: compliance_assessment.id };
 	const auditCreateForm = await superValidate(initialData, zod(ComplianceAssessmentSchema), {
 		errors: false
 	});
@@ -50,6 +50,12 @@ export const load = (async ({ fetch, params }) => {
 		}
 	}
 
+	const mappingSetsEndpoint = `${BASE_API_URL}/requirement-mapping-sets/?reference_framework=${compliance_assessment.framework.id}`;
+	const mappingSets: Record<string, any>[] = await fetch(mappingSetsEndpoint)
+		.then((res) => res.json())
+		.then((data) => data.results);
+	const mappingSetIds = mappingSets.map((mappingSet) => mappingSet.id);
+	console.log(mappingSetIds);
 	auditModel.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
