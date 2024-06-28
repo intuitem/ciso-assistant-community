@@ -167,6 +167,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.auditCreateForm,
+				context: 'fromBaseline',
 				model: data.auditModel,
 				debug: false
 			}
@@ -175,7 +176,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addComplianceAssessment()
+			title: m.createAuditFromBaseline()
 		};
 		modalStore.trigger(modal);
 	}

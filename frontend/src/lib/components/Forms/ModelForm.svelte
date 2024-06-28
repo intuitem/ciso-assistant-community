@@ -25,7 +25,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
-	export let origin = 'default';
+	export let context = 'default';
 	export let closeModal = false;
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
@@ -89,7 +89,7 @@
 						.then((r) => {
 							form.form.update((currentData) => {
 								if (
-									origin === 'edit' &&
+									context === 'edit' &&
 									currentData['reference_control'] === initialData['reference_control'] &&
 									!updated_fields.has('reference_control')
 								) {
@@ -324,7 +324,9 @@
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
 			{form}
+			hide={context !== 'fromBaseline' || initialData.baseline}
 			field="baseline"
+			label={m.baseline()}
 			options={getOptions({ objects: model.foreignKeys['baseline'] })}
 		/>
 		<AutocompleteSelect
