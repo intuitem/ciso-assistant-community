@@ -28,7 +28,7 @@ interface ListViewFieldsConfig {
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.folder.str,
+	getColumn: (row) => row.folder.str,
 	extraProps: {
 		defaultOptionName: 'Select domain...'
 	}
@@ -36,22 +36,22 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: row => row.project.folder.str,
+	getColumn: (row) => row.project.folder.str
 };
 
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: row => row.meta.folder.str,
+	getColumn: (row) => row.meta.folder.str
 };
 
 const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: row => row.meta.project.folder.str,
+	getColumn: (row) => row.meta.project.folder.str
 };
 
 const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.project.str,
+	getColumn: (row) => row.project.str,
 	extraProps: {
 		defaultOptionName: 'Select project...' // Make translations
 	}
@@ -59,28 +59,30 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 
 const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
 	...PROJECT_FILTER,
-	getColumn: row => row.meta.project.str
+	getColumn: (row) => row.meta.project.str
 };
 
 const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.meta.status,
+	getColumn: (row) => row.meta.status,
 	extraProps: {
 		defaultOptionName: 'Select status...'
 	}
 };
 
-const TREATMENT_FILTER: ListViewFilterConfig = { // I could make a function just make the code less repeatitive and long for nothing
+const TREATMENT_FILTER: ListViewFilterConfig = {
+	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: row => row.meta.treatment,
+	getColumn: (row) => row.meta.treatment,
 	extraProps: {
 		defaultOptionName: 'Select treatment...'
 	}
 };
 
-const STATE_FILTER: ListViewFilterConfig = { // I could make a function just make the code less repeatitive and long for nothing
+const STATE_FILTER: ListViewFilterConfig = {
+	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: row => row.meta.state,
+	getColumn: (row) => row.meta.state,
 	extraProps: {
 		defaultOptionName: 'Select state...'
 	}
@@ -88,7 +90,7 @@ const STATE_FILTER: ListViewFilterConfig = { // I could make a function just mak
 
 const APPROVER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => {
+	getColumn: (row) => {
 		if (row.first_name && row.last_name) {
 			return `${row.first_name} ${row.last_name}`;
 		}
@@ -97,11 +99,11 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 	extraProps: {
 		defaultOptionName: 'Select approver...'
 	}
-}
+};
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.meta.risk_assessment.str,
+	getColumn: (row) => row.meta.risk_assessment.str,
 	extraProps: {
 		defaultOptionName: 'Select risk assessment...'
 	}
@@ -109,10 +111,9 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.meta.threats,
+	getColumn: (row) => row.meta.threats,
 	filter: (rowThreatName, threatName) => {
-		if (!threatName)
-			return true;
+		if (!threatName) return true;
 		return rowThreatName === threatName;
 	},
 	filterProps: (rows, _) => {
@@ -132,13 +133,12 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => {
+	getColumn: (row) => {
 		console.log(row);
 		return row.meta.assets;
 	},
 	filter: (rowAssetName, assetName) => {
-		if (!assetName)
-			return true;
+		if (!assetName) return true;
 		return rowAssetName === assetName;
 	},
 	filterProps: (rows, _) => {
@@ -158,7 +158,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.framework.str,
+	getColumn: (row) => row.framework.str,
 	extraProps: {
 		defaultOptionName: 'Select framework...' // Make translations
 	}
@@ -166,7 +166,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: row => row.locale,
+	getColumn: (row) => row.locale,
 	extraProps: {
 		defaultOptionName: 'Select language...', // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
@@ -343,7 +343,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER,
+			locale: LANGUAGE_FILTER
 			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
