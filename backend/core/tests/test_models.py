@@ -1226,12 +1226,12 @@ class TestRequirementMapping:
         mapping = RequirementMapping.objects.create(
             focal_requirement=focal_requirement,
             reference_requirement=reference_requirement,
-            coverage=RequirementMapping.Coverage.PARTIAL,
+            relationship=RequirementMapping.Relationship.INTERSECT,
             mapping_set=mapping_set,
         )
 
         assert mapping.focal_requirement == focal_requirement
-        assert mapping.coverage == RequirementMapping.Coverage.PARTIAL
+        assert mapping.relationship == RequirementMapping.Relationship.INTERSECT
         assert mapping.reference_requirement == reference_requirement
 
 
