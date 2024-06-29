@@ -116,3 +116,15 @@ class NameDescriptionMixin(AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class ETADueDateMixin(models.Model):
+    """
+    Mixin for models that have an ETA and a due date.
+    """
+
+    eta = models.DateField(null=True, blank=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+
+    class Meta:
+        abstract = True

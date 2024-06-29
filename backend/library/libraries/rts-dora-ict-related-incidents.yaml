@@ -1,0 +1,802 @@
+urn: urn:intuitem:risk:library:rts-dora-ict-related-incidents
+locale: en
+ref_id: RTS-DORA-ICT-related-incidents
+name: RTS on criteria for the classification of ICT-related incidents
+description: One of the objectives of Regulation (EU) 2022/2554 on digital operational
+  resilience for the financial sector (DORA) is to harmonise and streamline the ICT-related
+  incident reporting regime for financial entities (FEs) in the EU. To that end, DORA
+  introduces consistent requirements for FEs on management, classification and reporting
+  of ICT-related incidents.
+copyright: EUROPEAN COMMISSION
+version: 1
+provider: EUROPEAN COMMISSION
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:rts-dora-ict-related-incidents
+    ref_id: RTS-DORA-ICT-related-incidents
+    name: RTS on criteria for the classification of ICT-related incidents
+    description: One of the objectives of Regulation (EU) 2022/2554 on digital operational
+      resilience for the financial sector (DORA) is to harmonise and streamline the
+      ICT-related incident reporting regime for financial entities (FEs) in the EU.
+      To that end, DORA introduces consistent requirements for FEs on management,
+      classification and reporting of ICT-related incidents.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      assessable: false
+      depth: 1
+      ref_id: Chapter I
+      description: Classification criteria
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 1
+      description: Clients, financial counterparts and transactions
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-1
+      ref_id: '1.1'
+      description: The number of clients affected by the incident as referred to in
+        Article 18(1), point (a), of Regulation (EU) 2022/2554, shall reflect the
+        number of all affected clients, whether natural or legal persons, that are
+        or were unable to make use of the service provided by the financial entity
+        during the incident or that were adversely impacted by the incident. That
+        number shall also include third parties explicitly covered by the contractual
+        agreement between the financial entity and the client as beneficiaries of
+        the affected service.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-1
+      ref_id: '1.2'
+      description: The number of financial counterparts affected by the incident as
+        referred to in Article 18(1), point (a), of Regulation (EU) 2022/2554 shall
+        reflect the number of all affected financial counterparts that have concluded
+        a contractual arrangement with the financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-1
+      ref_id: '1.3'
+      description: 'In relation to the relevance of clients and financial counterparts
+        affected by the incident as referred to in Article 18(1), point (a), of Regulation
+        (EU) 2022/2554, the
+
+        financial entity shall take into account the extent to which the impact on
+        a client or a financial counterpart will affect the implementation of the
+        business objectives of the financial entity, as well as the potential impact
+        of the incident on market efficiency.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-1
+      ref_id: '1.4'
+      description: In relation to the amount or number of transactions affected by
+        the incident as referred to in Article 18(1), point (a), of Regulation (EU)
+        2022/2554, the financial entity shall take into account all affected transactions
+        involving a monetary amount where at least one part of the transaction is
+        carried out in the Union.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-1
+      ref_id: '1.5'
+      description: Where the actual number of clients or financial counterparts affected
+        or the actual number or amount of transactions affected cannot be determined,
+        the financial entity shall estimate those numbers or amounts based on available
+        data from comparable reference periods.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 2
+      description: Reputational impact
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-2
+      ref_id: '2.1'
+      description: 'For the purposes of determining the reputational impact of the
+        incident as referred to in Article 18(1), point (a), of Regulation (EU) 2022/2554,
+        financial entities shall consider that a reputational impact has occurred
+        where at least one of the following criteria is met:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1
+      ref_id: 2.1.a
+      description: the incident has been reflected in the media;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1
+      ref_id: 2.1.b
+      description: the incident has resulted in repetitive complaints from different
+        clients or financial counterparts on client-facing services or critical business
+        relationships;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1
+      ref_id: 2.1.c
+      description: the financial entity will not be able to or is likely not to be
+        able to meet regulatory requirements as a result of the incident;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.1
+      ref_id: 2.1.d
+      description: the financial entity will or is likely to lose clients or financial
+        counterparts with a material impact on its business as a result of the incident.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-2
+      ref_id: '2.2'
+      description: When assessing the reputational impact of the incident, financial
+        entities shall take into account the level of visibility that the incident
+        has gained or is likely to gain in relation to each criterion listed in paragraph
+        1.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 3
+      description: Duration and service downtime
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-3
+      ref_id: '3.1'
+      description: Financial entities shall measure the duration of an incident as
+        referred to in Article 18(1), point (b), of Regulation (EU) 2022/2554, from
+        the moment the incident occurs until the moment when it is resolved.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-3
+      description: Where financial entities are unable to determine the moment when
+        the incident occurred, they shall measure the duration of the incident from
+        the moment it was detected. Where financial entities become aware that the
+        incident occurred prior to its detection, they shall measure the duration
+        from the moment the incident is recorded in network or system logs or other
+        data sources.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-3
+      description: Where financial entities do not yet know when the incident will
+        be resolved or are unable to verify records in logs or other data sources,
+        they shall apply estimates.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-3
+      ref_id: '3.2'
+      description: 'Financial entities shall measure the service downtime of an incident
+        as referred to in Article 18(1), point (b), of Regulation (EU) 2022/2554,
+        from the moment the service is fully or partially unavailable to clients,
+        financial counterparts or other internal or external users to the moment when
+        regular activities or operations have been restored to the level of service
+        that was provided prior to the incident. Where the service downtime causes
+        a delay in the provision of service after regular activities or
+
+        operations have been restored, the downtime shall be measured from the start
+        of the
+
+        incident to the moment when that delayed service is fully provided.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-3
+      description: Where financial entities are unable to determine the moment when
+        the service downtime started, they shall measure the service downtime from
+        the moment it was detected.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 4
+      description: Geographical spread
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-4
+      description: 'For the purpose of determining the geographical spread with regard
+        to the areas affected by the incident as referred to in Article 18(1), point
+        (c), of Regulation (EU) 2022/2554, financial entities shall assess whether
+        the incident has or had an impact in other Member States, and in particular
+        the significance of the impact in relation to any of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node23
+      ref_id: 4.a
+      description: clients and financial counterparts in other Member States;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node23
+      ref_id: 4.b
+      description: branches or other financial entities within the group carrying
+        out activities in other Member States;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node23
+      ref_id: 4.c
+      description: financial market infrastructures or third-party providers, which
+        may affect financial entities in other Member States to which they provide
+        services, to the extent such information is available.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 5
+      description: Data losses
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node28
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-5
+      description: 'For the purpose of determining the data losses that the incident
+        entails as referred to in Article 18(1), point (d), of Regulation (EU) 2022/2554,
+        financial entities shall take into account the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node28
+      ref_id: 5.a
+      description: in relation to the availability of data, whether the incident has
+        rendered the data on demand by the financial entity, its clients or its counterparts
+        temporarily or permanently inaccessible or unusable;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node28
+      ref_id: 5.b
+      description: in relation to the authenticity of data, whether the incident has
+        compromised the trustworthiness of the source of data;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node28
+      ref_id: 5.c
+      description: in relation to the integrity of data, whether the incident has
+        resulted in non-authorised modification of data that has rendered it inaccurate
+        or incomplete;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:5.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node28
+      ref_id: 5.d
+      description: in relation to the confidentiality of data, whether the incident
+        has resulted in data having been accessed by or disclosed to an unauthorised
+        party or system.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 6
+      description: Criticality of services affected
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node34
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-6
+      description: 'For the purpose of determining the criticality of the services
+        affected as referred to in Article 18(1), point (e), of Regulation (EU) 2022/2554,
+        financial entities shall assess whether the incident:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:6.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node34
+      ref_id: 6.a
+      description: affects or has affected ICT services or network and information
+        systems that support critical or important functions of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:6.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node34
+      ref_id: 6.b
+      description: ' affects or has affected financial services provided by the financial
+        entity that require authorisation, registration or that are supervised by
+        competent authorities;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:6.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node34
+      ref_id: 6.c
+      description: constitutes or has constituted a successful, malicious and unauthorised
+        access to the network and information systems of the financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-i
+      ref_id: Article 7
+      description: Economic impact
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-7
+      ref_id: '7.1'
+      description: 'For the purpose of determining the economic impact of the incident
+        as referred to in Article 18(1), point (f), of Regulation (EU) 2022/2554,
+        financial entities shall, without accounting for financial recoveries, take
+        into account the following types of direct and indirect costs and losses which
+        they have incurred as a result of the incident:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.a
+      description: expropriated funds or financial assets for which they are liable,
+        including assets lost to theft;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.b
+      description: costs for replacement or relocation of software, hardware or infrastructure;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.c
+      description: staff costs, including costs associated with replacement or relocation
+        of staff, recruitment of extra staff, remuneration of overtime and recovery
+        of lost or impaired skills;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.d
+      description: fees due to non-compliance with contractual obligations;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.e
+      description: costs for redress and compensation to customers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.f
+      description: losses due to forgone revenues;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.g
+      description: costs associated with internal and external communication;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.1
+      ref_id: 7.1.h
+      description: advisory costs, including costs associated with legal counselling,
+        forensic services and remediation services.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-7
+      ref_id: '7.2'
+      description: 'Costs and losses referred to in paragraph 1 shall not include
+        costs that are necessary for the day-to-day operation of the business, in
+        particular the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2
+      ref_id: 7.2.a
+      description: costs for general maintenance of infrastructure, equipment, hardware
+        and software, and costs for keeping skills of staff up to date;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2
+      ref_id: 7.2.b
+      description: internal or external costs to enhance the business after the incident,
+        including upgrades, improvements and risk assessment initiatives;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.2
+      ref_id: 7.2.c
+      description: insurance premiums.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-7
+      ref_id: '7.3'
+      description: Financial entities shall calculate the amounts of costs and losses
+        based on data available at the time of reporting. Where the actual amounts
+        of costs and losses cannot be determined, financial entities shall estimate
+        those amounts.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-7
+      ref_id: '7.4'
+      description: When assessing the economic impact of the incident, financial entities
+        shall sum up the costs and losses referred to in paragraph 1.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-ii
+      assessable: false
+      depth: 1
+      ref_id: Chapter II
+      description: Major incidents and materiality thresholds
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-ii
+      ref_id: Article 8
+      description: Major incidents
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-8
+      ref_id: '8.1'
+      description: 'An incident shall be considered a major incident for the purposes
+        of Article 19(1) of Regulation (EU) 2022/2554 where it has affected critical
+        services as referred to in Article 6 and where either of the following conditions
+        is fulfilled:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.1
+      ref_id: 8.1.a
+      description: the materiality threshold referred to in Article 9(5), point (b),
+        is met;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.1
+      ref_id: 8.1.b
+      description: two or more of the other materiality thresholds referred to in
+        Articles 9(1) to (6) are met.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-8
+      ref_id: '8.2'
+      description: 'Recurring incidents that individually are not considered a major
+        incident in accordance with paragraph 1 shall be considered as one major incident
+        where they meet all of the following conditions:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2
+      ref_id: 8.2.a
+      description: they have occurred at least twice within 6 months;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2
+      ref_id: 8.2.b
+      description: they have the same apparent root cause as referred to in Article
+        20(b) of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:8.2
+      ref_id: 8.2.c
+      description: they collectively fulfil the criteria for being considered a major
+        incident set out in paragraph 1.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node63
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-8
+      description: Financial entities shall assess the existence of recurring incidents
+        on a monthly basis.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node64
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-8
+      description: This paragraph does not apply to microenterprises and to financial
+        entities listed in Article 16(1) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-ii
+      ref_id: Article 9
+      description: Materiality thresholds for determining major incidents
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      ref_id: '9.1'
+      description: "The materiality threshold for the criterion \u2018clients, financial\
+        \ counterparts and transactions\u2019 is met where any of the following conditions\
+        \ are fulfilled:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      ref_id: 9.1.a
+      description: the number of affected clients is higher than 10 % of all clients
+        using the affected service;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      ref_id: 9.1.b
+      description: the number of affected clients using the affected service is higher
+        than 100 000;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      ref_id: 9.1.c
+      description: the number of affected financial counterparts is higher than 30
+        % of all financial counterparts carrying out activities related to the provision
+        of the affected service;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      ref_id: 9.1.d
+      description: the number of affected transactions is higher than 10 % of the
+        daily average number of transactions carried out by the financial entity related
+        to the affected service;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      ref_id: 9.1.e
+      description: the amount of affected transactions is higher than 10 % of the
+        daily average value of transactions carried out by the financial entity related
+        to the affected service;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.1
+      ref_id: 9.1.f
+      description: clients or financial counterparts which have been identified as
+        relevant in accordance with Article 1(3) have been affected.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node73
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      description: Where the actual number of clients or financial counterparts affected
+        or the actual number or amount of transactions affected cannot be determined,
+        the financial entity shall estimate those numbers or amounts based on available
+        data from comparable reference periods.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      ref_id: '9.2'
+      description: "The materiality threshold for the criterion \u2018reputational\
+        \ impact\u2019 is met where any of the conditions set out in Article 2, points\
+        \ (a) to (d), are fulfilled."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      ref_id: '9.3'
+      description: "The materiality threshold for the criterion \u2018duration and\
+        \ service downtime\u2019 is met where any of the following conditions are\
+        \ fulfilled:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.3
+      ref_id: 9.3.a
+      description: the duration of the incident is longer than 24 hours;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.3
+      ref_id: 9.3.b
+      description: the service downtime is longer than 2 hours for ICT services that
+        support critical or important functions.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      ref_id: '9.4'
+      description: "The materiality threshold for the criterion \u2018geographical\
+        \ spread\u2019 is met where the incident has an impact in two or more Member\
+        \ States in accordance with Article 4."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      ref_id: '9.5'
+      description: "The materiality threshold for the criterion \u2018data losses\u2019\
+        \ is met where any of the following conditions are fulfilled:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.5
+      ref_id: 9.5.a
+      description: any impact as referred to in Article 5 on the availability, authenticity,
+        integrity or confidentiality of data has or will have an adverse impact on
+        the implementation of the business objectives of the financial entity or on
+        its ability to meet regulatory requirements;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.5
+      ref_id: 9.5.b
+      description: any successful, malicious and unauthorised access not covered by
+        point (a) occurs to network and information systems, where such access may
+        result in data losses.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:9.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-9
+      ref_id: '9.6'
+      description: "The materiality threshold for the criterion \u2018economic impact\u2019\
+        \ is met where the costs and losses incurred by the financial entity due to\
+        \ the incident have exceeded or are likely to exceed 100 000 euro."
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-iii
+      assessable: false
+      depth: 1
+      ref_id: Chapter III
+      description: Significant Cyber threats
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-iii
+      ref_id: Article 10
+      description: High materiality thresholds for determining significant cyber threats
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node85
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-10
+      description: 'For the purposes of Article 18(2) of Regulation (EU) 2022/2554,
+        a cyber threat shall be considered significant where all of the following
+        conditions are fulfilled:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node85
+      ref_id: 10.a
+      description: the cyber threat, if materialised, could affect or could have affected
+        critical or important functions of the financial entity, or could affect other
+        financial entities, third party providers, clients or financial counterparts,
+        based on information available to the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node85
+      ref_id: 10.b
+      description: 'the cyber threat has a high probability of materialisation at
+        the financial entity or at other financial entities, taking into account at
+        least the following elements:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b
+      ref_id: 10.b.i
+      description: applicable risks related to the cyber threat referred to in point
+        (a), including potential vulnerabilities of the systems of the financial entity
+        that can be exploited;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b
+      ref_id: 10.b.ii
+      description: the capabilities and intent of threat actors to the extent known
+        by the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.b
+      ref_id: 10.b.iii
+      description: the persistence of the threat and any accrued knowledge about incidents
+        that have impacted the financial entity or its third-party provider, clients
+        or financial counterparts;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node85
+      ref_id: 10.c
+      description: 'the cyber threat could, if materialised, meet any of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c
+      ref_id: 10.c.i
+      description: the criterion regarding criticality of services set out in Article
+        18(1), point (e), of Regulation (EU) 2022/2554, as specified in Article 6
+        of this Regulation;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c
+      ref_id: 10.c.ii
+      description: the materiality threshold set out in Article 9(1);
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:10.c
+      ref_id: 10.c.iii
+      description: the materiality threshold set out in Article 9(4).
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node95
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-10
+      description: Where, depending on the type of cyber threat and available information,
+        the financial entity concludes that the materiality thresholds set out in
+        Article 9(2), (3), (5) and (6) could be met, those thresholds may also be
+        considered.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-iv
+      assessable: false
+      depth: 1
+      ref_id: Chapter IV
+      description: Relevance of major incidents to competent authorities in other
+        Member States and details of reports to be shared with other competent authorities
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-iv
+      ref_id: Article 11
+      description: Relevance of major incidents to competent authorities in other
+        Member States
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node98
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-11
+      description: 'The assessment of whether the major incident is relevant for competent
+        authorities in other Member States as referred to in Article 19(7) of Regulation
+        (EU) 2022/2554 shall be based on whether the incident has a root cause originating
+        from another Member State or whether the incident has or has had a significant
+        impact in another Member State in relation to any of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:11.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node98
+      ref_id: 11.a
+      description: clients or financial counterparts;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:11.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node98
+      ref_id: 11.b
+      description: a branch of the financial entity or another financial entity within
+        the group;
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:11.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node98
+      ref_id: 11.c
+      description: a financial market infrastructure or a third-party provider which
+        may affect financial entities to which they provide services.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-iv
+      ref_id: Article 12
+      description: Details of major incidents to be shared with other competent authorities
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node103
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-12
+      description: The details of major incidents to be submitted by competent authorities
+        to other competent authorities in accordance with Article 19(6) of Regulation
+        (EU) 2022/2554 and the notifications to be submitted by EBA, ESMA or EIOPA
+        and the ECB to the relevant competent authorities in other Member States in
+        accordance with Article 19(7) of that Regulation shall contain the same level
+        of information, without any anonymisation, as the notifications and reports
+        of major incidents received from financial entities in accordance with Article
+        19(4) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-v
+      assessable: false
+      depth: 1
+      ref_id: Chapter V
+      description: final provisions
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:chapter-v
+      ref_id: Article 13
+      description: Entry into force
+    - urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:node106
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-ict-related-incidents:article-13
+      description: This Regulation shall enter into force on the twentieth day following
+        that of its publication in the Official Journal of the European Union

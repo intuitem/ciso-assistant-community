@@ -8,6 +8,7 @@
 	"german": "Allemand",
 	"dutch": "Néerlandais",
 	"italian": "Italien",
+	"polish": "Polonais",
 	"addThreat": "Ajouter une menace",
 	"addReferenceControl": "Ajouter une mesure de référence",
 	"addAppliedControl": "Ajouter une mesure appliquée",
@@ -560,5 +561,16 @@
 	"appliedControlNoReferenceControl": "La mesure appliquée n'a aucune mesure de référence sélectionnée",
 	"evidenceNoFile": "Aucun fichier n'a été téléchargé pour les preuves",
 	"requirementAppliedControlHelpText": "Les preuves liées aux mesures sélectionnées seront automatiquement associées à l'exigence.",
-	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence."
+	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence.",
+	"settings": "Paramètres",
+	"advancedSettings": "Réglages avancés",
+	"enableSSO": "Activer le SSO",
+	"failedSSO": "L'authentification SSO a échoué, veuillez contacter votre administrateur",
+	"loginSSO": "Connectez-vous en SSO",
+	"or": "ou",
+	"errorImportingLibrary": "Erreur lors de l'importation de la bibliothèque",
+	"libraryImportError": "Une erreur s'est produite lors de l'importation de la bibliothèque",
+	"ssoSettingsupdated": "Paramètres SSO mis à jour",
+	"ssoSettings": "Paramètres SSO",
+	"ssoSettingsDescription": "Configurez vos paramètres d'authentification unique ici."
 }

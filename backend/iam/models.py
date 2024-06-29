@@ -286,6 +286,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
+    is_sso = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,

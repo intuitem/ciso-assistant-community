@@ -4,15 +4,13 @@
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
-	import { getRequirementTitle } from '$lib/utils/helpers';
 
 	export let data: PageData;
 
 	breadcrumbObject.set(data.compliance_assessment);
 
-	let possible_options = [
-		{ id: 'to_do', label: m.toDo() },
-		{ id: 'in_progress', label: m.inProgress() },
+	const possible_options = [
+		{ id: '', label: m.notAssessed() },
 		{ id: 'non_compliant', label: m.nonCompliant() },
 		{ id: 'partially_compliant', label: m.partiallyCompliant() },
 		{ id: 'compliant', label: m.compliant() },
@@ -22,7 +20,7 @@
 	// Reactive variable to keep track of the current item index
 	let currentIndex = 0;
 
-	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].status];
+	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].result];
 
 	$: requirement = data.requirements.find(
 		(req) => req.id === data.requirement_assessments[currentIndex].requirement
@@ -53,14 +51,20 @@
 		}
 	}
 
-	// Function to update the status of the current item
-	function updateStatus(event) {
-		data.requirement_assessments[currentIndex].status = event.target.value;
+	$: result = data.requirement_assessments[currentIndex].result;
+
+	// Function to update the result of the current item
+	function updateResult(event) {
+		console.log(event.target.value);
+		data.requirement_assessments[currentIndex].result = event.target.value;
 		const form = document.getElementById('flashModeForm');
-		const formData = new FormData(form);
+		const formData = {
+			id: data.requirement_assessments[currentIndex].id,
+			result: event.target.value
+		};
 		fetch(form.action, {
 			method: 'POST',
-			body: formData
+			body: JSON.stringify(formData)
 		});
 	}
 </script>
@@ -91,35 +95,24 @@
 					{/if}
 				</div>
 				<div class="items-center">
-					<div class="">
-						<h3 class="mb-4 font-semibold text-gray-900 dark:text-white">{m.status()}</h3>
+					<div>
 						<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 							<ul
-								class="items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+								class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
 							>
-								<input hidden name="id" value={data.requirement_assessments[currentIndex].id} />
-								{#each possible_options as option}
-									<li
-										class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600"
-									>
-										<div class="flex items-center ps-3">
-											<input
-												id={option.id}
-												type="radio"
-												value={option.id}
-												name="status"
-												checked={option.id === data.requirement_assessments[currentIndex].status}
-												on:change={updateStatus}
-												class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-											/>
-											<label
-												for={option.id}
-												class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-												>{option.label}
-											</label>
-										</div>
-									</li>
-								{/each}
+								<RadioGroup class="w-full flex-wrap items-center">
+									{#each possible_options as option}
+										<RadioItem
+											class="h-full"
+											id={option.id}
+											value={option.id}
+											bind:group={result}
+											name="result"
+											style="border-color: {color}"
+											on:change={updateResult}>{option.label}</RadioItem
+										>
+									{/each}
+								</RadioGroup>
 							</ul>
 						</form>
 					</div>

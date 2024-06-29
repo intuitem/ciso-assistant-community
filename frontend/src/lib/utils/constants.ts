@@ -6,6 +6,12 @@ export const BASE_API_URL = `${
 		: 'http://localhost:8000/api'
 }`;
 
+export const BACKEND_API_EXPOSED_URL = `${
+	env.hasOwnProperty('PUBLIC_BACKEND_API_EXPOSED_URL')
+		? env.PUBLIC_BACKEND_API_EXPOSED_URL
+		: BASE_API_URL
+}`;
+
 export const RISK_COLOR_PALETTE: string[] = ['#BBF7D0', '#BEF264', '#FEF08A', '#FBBF24', '#F87171'];
 export const COMPLIANCE_COLOR_MAP = {
 	in_progress: '#3b82f6',

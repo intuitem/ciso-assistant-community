@@ -78,6 +78,9 @@ and run the starter script
 > [!WARNING]
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
+> [!CAUTION]
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
+
 ## End-user Documentation
 
 Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant.
@@ -108,7 +111,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
-25. TISAX (VDA ISA) 🚘
+25. TISAX (VDA ISA) v5.1 and v6.0 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
 28. CIS Controls v8\* 🌐
@@ -128,6 +131,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
 43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
 44. EU AI Act 🇪🇺🤖
+45. FBI CJIS 🇺🇸👮
+46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
 
 ### Community contributions
 
@@ -135,6 +140,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
 4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
 
 <br/>
 
@@ -147,14 +153,16 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- FBI CJIS
-- Secure Controls Framework (SCF)
 - CCPA
+- NCSC Cyber Assessment Framework (CAF)
+- NCSC Cyber Essentials
+- Secure Controls Framework (SCF)
 - Part-IS
 - SOX
 - NIST 800-82
-- NCSC Cyber Assessment Framework (CAF)
-- UK Cyber Essentials
+- Korea ISA: ISMS-P
+- ENS Esquema Nacional de seguridad (español)
+
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
 ## Add your own library
@@ -441,7 +449,7 @@ The docker-compose.yml highlights a relevant configuration with a Caddy proxy in
 Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
-> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue.
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "npm run dev", which should not be a worry for production.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
@@ -456,6 +464,7 @@ Set DJANGO_DEBUG=False for security reason.
 - DE: German
 - NL: Dutch
 - IT: Italian
+- PL: Polish
 
 
 ## Built With 💜
