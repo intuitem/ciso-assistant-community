@@ -1817,10 +1817,14 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Results.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Results.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Results.COMPLIANT: "#86efac",
-            RequirementAssessment.Results.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Results.NOT_APPLICABLE: "#9ca3af",
+            RequirementAssessment.Status.TODO: "#9ca3af",
+            RequirementAssessment.Status.IN_PROGRESS: "#ffd6a5",
+            RequirementAssessment.Status.IN_REVIEW: "#9bf6ff",
+            RequirementAssessment.Status.DONE: "#caffbf",
         }
 
-        compliance_assessments_status = {"values": [], "labels": []}
+        compliance_assessments_result = {"values": [], "labels": []}
         for result in RequirementAssessment.Results.values:
             assessable_requirements_filter = {
                 "compliance_assessment": self,
@@ -1848,10 +1852,44 @@ class ComplianceAssessment(Assessment):
                 "itemStyle": {"color": color_map[result]},
             }
 
-            compliance_assessments_status["values"].append(value_entry)
-            compliance_assessments_status["labels"].append(result)
+            compliance_assessments_result["values"].append(value_entry)
+            compliance_assessments_result["labels"].append(result)
 
-        return compliance_assessments_status
+        compliance_assessments_status = {"values": [], "labels": []}
+        for status in RequirementAssessment.Status.values:
+            assessable_requirements_filter = {
+                "compliance_assessment": self,
+                "requirement__assessable": True,
+            }
+
+            base_query = RequirementAssessment.objects.filter(
+                status=status, **assessable_requirements_filter
+            ).distinct()
+
+            if self.selected_implementation_groups:
+                union_query = union_queries(
+                    base_query,
+                    self.selected_implementation_groups,
+                    "requirement__implementation_groups",
+                )
+            else:
+                union_query = base_query
+
+            count = union_query.count()
+            value_entry = {
+                "name": status,
+                "localName": camel_case(status),
+                "value": count,
+                "itemStyle": {"color": color_map[status]},
+            }
+
+            compliance_assessments_status["values"].append(value_entry)
+            compliance_assessments_status["labels"].append(status)
+
+        return {
+            "result": compliance_assessments_result,
+            "status": compliance_assessments_status,
+        }
 
     def quality_check(self) -> dict:
         AppliedControl = apps.get_model("core", "AppliedControl")
@@ -1979,6 +2017,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
+        IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
 
     class Results(models.TextChoices):
