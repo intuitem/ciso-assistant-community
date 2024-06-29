@@ -38,7 +38,7 @@ def process_paragraph(level, paragraph):
 
     if(paragraph.has_attr("cid")):
         paragraph_cid = f"CID: {paragraph["cid"]}"
-        paragraph_name = f"Control; System Classification(s): {paragraph_classification}; Compliance: {paragraph_compliance} [{paragraph_cid}]"
+        paragraph_name = f"Control -  {paragraph_classification} - {paragraph_compliance} [{paragraph_cid}]"
 
     output_table.append(
         (paragraph_assessable, level, paragraph_id, paragraph_name, paragraph_description, paragraph_classification)
