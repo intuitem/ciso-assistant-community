@@ -1819,8 +1819,8 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Results.COMPLIANT: "#86efac",
             RequirementAssessment.Results.NOT_APPLICABLE: "#9ca3af",
             RequirementAssessment.Status.TODO: "#9ca3af",
-            RequirementAssessment.Status.IN_PROGRESS: "#9bf6ff",
-            RequirementAssessment.Status.IN_REVIEW: "#ffd6a5",
+            RequirementAssessment.Status.IN_PROGRESS: "#ffd6a5",
+            RequirementAssessment.Status.IN_REVIEW: "#9bf6ff",
             RequirementAssessment.Status.DONE: "#caffbf",
         }
 
