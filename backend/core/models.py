@@ -2180,13 +2180,13 @@ class ComplianceAssessment(Assessment):
                     compliance_assessment=reference_assessment,
                     requirement=mapping.reference_requirement,
                 )
-                inferences.append(
-                    requirement_assessment.infer_result(
-                        mapping=mapping,
-                        reference_requirement_assessment=reference_requirement_assessment,
-                    )
+                inferred_result = requirement_assessment.infer_result(
+                    mapping=mapping,
+                    reference_requirement_assessment=reference_requirement_assessment,
                 )
-                refs.append(reference_requirement_assessment)
+                if inferred_result in result_order:
+                    inferences.append(inferred_result)
+                    refs.append(reference_requirement_assessment)
             if inferences:
                 if len(inferences) == 1:
                     requirement_assessment.result = inferences[0]
