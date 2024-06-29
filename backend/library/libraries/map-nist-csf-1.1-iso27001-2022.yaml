@@ -12,7 +12,7 @@ dependencies:
   - urn:intuitem:risk:library:iso27001-2022
 objects:
   requirement_mapping_set:
-    urn: urn:intuitem:risk:requireemnt_mapping_set:nist-csf-1.1-to-iso27001-2022
+    urn: urn:intuitem:risk:requirement_mapping_set:nist-csf-1.1-to-iso27001-2022
     ref_id: NIST-CSF-1.1 to ISO/IEC 27001:2022
     name: NIST-CSF-1.1 to ISO/IEC 27001:2022
     focal_framework: urn:intuitem:risk:framework:iso27001-2022
