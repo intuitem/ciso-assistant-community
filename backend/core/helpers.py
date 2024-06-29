@@ -44,6 +44,19 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
 }
 
 
+def color_css_class(status):
+    return {
+        "not_assessed": "gray-300",
+        "compliant": "green-500",
+        "to_do": "gray-400",
+        "in_progress": "blue-500",
+        "done": "green-500",
+        "non_compliant": "red-500",
+        "partially_compliant": "yellow-400",
+        "not_applicable": "black",
+    }.get(status)
+
+
 def applied_control_priority(user: User):
     def get_quadrant(applied_control):
         if applied_control.effort in ["S", "M"]:
@@ -258,11 +271,15 @@ def get_sorted_requirement_nodes(
                 "implementation_groups": node.implementation_groups or None,
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
+                "result": req_as.result if req_as else None,
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "max_score": max_score if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
+                "result_i18n": camel_case(req_as.result)
+                if req_as and req_as.result is not None
+                else None,
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
@@ -299,6 +316,10 @@ def get_sorted_requirement_nodes(
                     else None,
                     "status_i18n": camel_case(child_req_as.status)
                     if child_req_as
+                    else None,
+                    "result": child_req_as.result if child_req_as else None,
+                    "result_i18n": camel_case(child_req_as.result)
+                    if child_req_as and child_req_as.result is not None
                     else None,
                     "style": "leaf",
                 }

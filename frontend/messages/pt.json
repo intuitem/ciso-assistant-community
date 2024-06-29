@@ -8,6 +8,7 @@
 	"german": "Alemão",
 	"dutch": "Holandês",
 	"italian": "Italiano",
+	"polish": "Poles",
 	"addThreat": "Adicionar ameaça",
 	"addReferenceControl": "Adicionar controle de referência",
 	"addAppliedControl": "Adicionar controle aplicado",
@@ -560,5 +561,16 @@
 	"appliedControlNoReferenceControl": "O controle aplicado não tem nenhum controle de referência selecionado",
 	"evidenceNoFile": "A evidência não tem nenhum arquivo carregado",
 	"requirementAppliedControlHelpText": "As evidências vinculadas às medidas selecionadas serão automaticamente associadas ao requisito.",
-	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito."
+	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito.",
+	"settings": "Configurações",
+	"advancedSettings": "Configurações avançadas",
+	"enableSSO": "Habilitar SSO",
+	"failedSSO": "Falha na autenticação SSO. Entre em contato com seu administrador",
+	"loginSSO": "Faça login no SSO",
+	"or": "ou",
+	"errorImportingLibrary": "Erro durante a importação da biblioteca",
+	"libraryImportError": "Ocorreu um erro durante a importação da biblioteca",
+	"ssoSettingsupdated": "Configurações de SSO atualizadas",
+	"ssoSettings": "Configurações de SSO",
+	"ssoSettingsDescription": "Defina suas configurações de logon único aqui."
 }

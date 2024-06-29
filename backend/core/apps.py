@@ -4,6 +4,9 @@ from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
 import os
 from django.core.management import call_command
 
+from structlog import get_logger
+
+logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
     "view_project",
@@ -245,6 +248,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_loadedlibrary",
     "backup",
     "restore",
+    "view_globalsettings",
+    "change_globalsettings",
 ]
 
 
@@ -255,7 +260,9 @@ def startup(sender: AppConfig, **kwargs):
     Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
     """
     from django.contrib.auth.models import Permission
+    from allauth.socialaccount.providers.saml.provider import SAMLProvider
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+    from global_settings.models import GlobalSettings
 
     print("startup handler: initialize database")
 
@@ -354,6 +361,53 @@ def startup(sender: AppConfig, **kwargs):
             )
         except Exception as e:
             print(e)  # NOTE: Add this exception in the logger
+
+    default_attribute_mapping = SAMLProvider.default_attribute_mapping
+
+    settings = {
+        "attribute_mapping": {
+            "uid": default_attribute_mapping["uid"],
+            "email_verified": default_attribute_mapping["email_verified"],
+            "email": default_attribute_mapping["email"],
+        },
+        "idp": {
+            "entity_id": "",
+            "metadata_url": "",
+            "sso_url": "",
+            "slo_url": "",
+            "x509cert": "",
+        },
+        "sp": {
+            "entity_id": "ciso-assistant",
+        },
+        "advanced": {
+            "allow_repeat_attribute_name": True,
+            "allow_single_label_domains": False,
+            "authn_request_signed": False,
+            "digest_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            "logout_request_signed": False,
+            "logout_response_signed": False,
+            "metadata_signed": False,
+            "name_id_encrypted": False,
+            "reject_deprecated_algorithm": True,
+            "reject_idp_initiated_sso": True,
+            "signature_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            "want_assertion_encrypted": False,
+            "want_assertion_signed": False,
+            "want_attribute_statement": True,
+            "want_message_signed": False,
+            "want_name_id": False,
+            "want_name_id_encrypted": False,
+        },
+    }
+
+    if not GlobalSettings.objects.filter(name=GlobalSettings.Names.SSO).exists():
+        logger.info("SSO settings not found, creating default settings")
+        sso_settings = GlobalSettings.objects.create(
+            name=GlobalSettings.Names.SSO,
+            value={"client_id": "0", "settings": settings},
+        )
+        logger.info("SSO settings created", settings=sso_settings.value)
 
     call_command("storelibraries")
 

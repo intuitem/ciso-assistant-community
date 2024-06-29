@@ -15,11 +15,23 @@ erDiagram
     ROLE_ASSIGNMENT }o--|| ROLE      : contains
 
     USER {
-        string email
+        string  email
+        boolean is_sso
     }
 
     USER_GROUP {
         string name
+    }
+
+    SSO_SETTINGS {
+        boolean enabled
+        string  name
+        string  provider
+        string  provider_id
+        string  client_id
+        string  oidc_secret
+        string  oidc_key
+        json    saml_settings
     }
 
 ```
@@ -745,7 +757,7 @@ When a applied control derives from a reference control, the same category is pr
 
 ## Compliance and risk assessments
 
-Both types of assessments have common points:
+Both types of assessments have common fields:
 - a name
 - a description
 - a version (defined by the analyst)
@@ -768,11 +780,8 @@ The state of a review can be: created/submitted/validated/changes requested/depr
 When a compliance assessment is created, each requirement of the corresponding framework is linked to a requirement assessment object. To cover a requirement, the assessor shall link it to Applied controls.
 
 Here are the specific fields for requirement assessments:
-- status: --/to do/in progress/done.
-- result: --/compliant/non-compliant minor/non-compliant major/not applicable
+- result: --/compliant/partially compliant/non-compliant/not applicable
 - score: --/<integer value from min_score to max_score>.
-- ETA (Estimated Time of Arrival) date
-- due date. This is for example useful to organize an audit plan.
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
@@ -1025,3 +1034,9 @@ Built-in objects are predefined in CISO Assistant. They can be viewed following 
 Types that can be built-in are: folders, roles, role assignments and groups.
 
 Names of built-in objects can be internationalized.
+
+## SSO
+
+A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
+
+SSO Settings are defined in a dedicated object SSO_SETTINGS.

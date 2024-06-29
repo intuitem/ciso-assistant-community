@@ -8,7 +8,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
-export const load: PageServerLoad = async ({ request, locals }) => {
+export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
 		redirect(302, '/analytics');
@@ -16,7 +16,9 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 	const form = await superValidate(request, zod(loginSchema));
 
-	return { form };
+	const SSOInfo = await fetch(`${BASE_API_URL}/settings/sso/info/`).then((res) => res.json());
+
+	return { form, SSOInfo };
 };
 
 export const actions: Actions = {

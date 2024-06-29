@@ -133,7 +133,7 @@
 	let registeredInteractionWithBackdrop = false;
 	let modalElement: HTMLDivElement;
 	let windowHeight: number;
-	let backdropOverflow = 'overflow-y-hidden';
+	let backdropOverflow = 'overflow-y-auto';
 
 	const modalStore = getModalStore();
 
@@ -160,12 +160,6 @@
 
 		// modal is closed
 		if (!modalHeight) return;
-
-		if (modalHeight > windowHeight) {
-			backdropOverflow = 'overflow-y-auto';
-		} else {
-			backdropOverflow = 'overflow-y-hidden';
-		}
 	}
 	// first child of the modal is the content.
 	$: onModalHeightChange(modalElement);

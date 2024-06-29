@@ -104,5 +104,9 @@ export const listViewFields = {
 	'loaded-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+	},
+	'sso-settings': {
+		head: ['name', 'provider', 'providerId'],
+		body: ['name', 'provider', 'provider_id']
 	}
 };
