@@ -36,30 +36,49 @@ objects:
         and procedures in place to govern its approach to the security of network
         and information systems.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1
       ref_id: A1.a
       name: Board Direction
       description: You have effective organisational security management led at board
         level and articulated clearly in corresponding policies.
-      annotation: 'Your organisation''s approach and policy relating to the security
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a
+      ref_id: A1.a.1
+      description: Your organisation's approach and policy relating to the security
         of network and information systems supporting the operation of your essential
         function(s) are owned and managed at board-level. These are communicated,
         in a meaningful way, to risk management decision-makers across the organisation.
-
-        Regular board-level discussions on the security of network and information
-        systems supporting the operation of your essential function(s) take place,
-        based on timely and accurate information and informed by expert guidance.
-
-        There is a board-level individual who has overall accountability for the security
-        of network and information systems and drives regular discussion at board-level.
-
-        Direction set at board-level is translated into effective organisational practices
-        that direct and control the security of the network and information systems
-        supporting your essential function(s).'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a
+      ref_id: A1.a.2
+      description: Regular board-level discussions on the security of network and
+        information systems supporting the operation of your essential function(s)
+        take place, based on timely and accurate information and informed by expert
+        guidance.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a
+      ref_id: A1.a.3
+      description: There is a board-level individual who has overall accountability
+        for the security of network and information systems and drives regular discussion
+        at board-level.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.a
+      ref_id: A1.a.4
+      description: Direction set at board-level is translated into effective organisational
+        practices that direct and control the security of the network and information
+        systems supporting your essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1
       ref_id: A1.b
@@ -67,18 +86,31 @@ objects:
       description: Your organisation has established roles and responsibilities for
         the security of network and information systems at all levels, with clear
         and well-understood channels for communicating and escalating risks.
-      annotation: 'Key roles and responsibilities for the security of network and
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b
+      ref_id: A1.b.1
+      description: Key roles and responsibilities for the security of network and
         information systems supporting your essential function(s) have been identified.
         These are reviewed regularly to ensure they remain fit for purpose.
-
-        Appropriately capable and knowledgeable staff fill those roles and are given
-        the time, authority, and resources to carry out their duties.
-
-        There is clarity on who in your organisation has overall accountability for
-        the security of the network and information systems supporting your essential
-        function(s).'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b
+      ref_id: A1.b.2
+      description: Appropriately capable and knowledgeable staff fill those roles
+        and are given the time, authority, and resources to carry out their duties.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.b
+      ref_id: A1.b.3
+      description: There is clarity on who in your organisation has overall accountability
+        for the security of the network and information systems supporting your essential
+        function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1
       ref_id: A1.c
@@ -88,19 +120,36 @@ objects:
         and effectively. Risks to network and information systems related to the operation
         of your essential function(s) are considered in the context of other organisational
         risks.
-      annotation: 'Senior management have visibility of key risk decisions made throughout
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c
+      ref_id: A1.c.1
+      description: Senior management have visibility of key risk decisions made throughout
         the organisation.
-
-        Risk management decision-makers understand their responsibilities for making
-        effective and timely decisions in the context of the risk appetite regarding
-        the essential function(s), as set by senior management.
-
-        Risk management decision-making is delegated and escalated where necessary,
-        across the organisation, to people who have the skills, knowledge, tools and
-        authority they need.
-
-        Risk management decisions are regularly reviewed to ensure their continued
-        relevance and validity.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c
+      ref_id: A1.c.2
+      description: Risk management decision-makers understand their responsibilities
+        for making effective and timely decisions in the context of the risk appetite
+        regarding the essential function(s), as set by senior management.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c
+      ref_id: A1.c.3
+      description: Risk management decision-making is delegated and escalated where
+        necessary, across the organisation, to people who have the skills, knowledge,
+        tools and authority they need.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a1.c
+      ref_id: A1.c.4
+      description: Risk management decisions are regularly reviewed to ensure their
+        continued relevance and validity.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2
       assessable: false
       depth: 2
@@ -112,7 +161,7 @@ objects:
         the operation of essential functions. This includes an overall organisational
         approach to risk management.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2
       ref_id: A2.a
@@ -120,55 +169,120 @@ objects:
       description: Your organisation has effective internal processes for managing
         risks to the security of network and information systems related to the operation
         of your essential function(s) and communicating associated activities.
-      annotation: 'Your organisational process ensures that security risks to network
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.1
+      description: Your organisational process ensures that security risks to network
         and information systems relevant to essential function(s) are identified,
         analysed, prioritised, and managed.
-
-        Your approach to risk is focused on the possibility of adverse impact to your
-        essential function(s), leading to a detailed understanding of how such impact
-        might arise as a consequence of possible attacker actions and the security
-        properties of your network and information systems.
-
-        Your risk assessments are based on a clearly understood set of threat assumptions,
-        informed by an up-to-date understanding of security threats to your essential
-        function(s) and your sector.
-
-        Your risk assessments are informed by an understanding of the vulnerabilities
-        in the network and information systems supporting your essential function(s).
-
-        The output from your risk management process is a clear set of security requirements
-        that will address the risks in line with your organisational approach to security.
-
-        Significant conclusions reached in the course of your risk management process
-        are communicated to key security decision-makers and accountable individuals.
-
-        Your risk assessments are dynamic and updated in the light of relevant changes
-        which may include technical changes to network and information systems, change
-        of use and new threat information.
-
-        The effectiveness of your risk management process is reviewed regularly, and
-        improvements made as required.
-
-        You perform detailed threat analysis and understand how this applies to your
-        organisation in the context of the threat to your sector and the wider CNI.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.2
+      description: Your approach to risk is focused on the possibility of adverse
+        impact to your essential function(s), leading to a detailed understanding
+        of how such impact might arise as a consequence of possible attacker actions
+        and the security properties of your network and information systems.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.3
+      description: Your risk assessments are based on a clearly understood set of
+        threat assumptions, informed by an up-to-date understanding of security threats
+        to your essential function(s) and your sector.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.4
+      description: Your risk assessments are informed by an understanding of the vulnerabilities
+        in the network and information systems supporting your essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.5
+      description: The output from your risk management process is a clear set of
+        security requirements that will address the risks in line with your organisational
+        approach to security.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.6
+      description: Significant conclusions reached in the course of your risk management
+        process are communicated to key security decision-makers and accountable individuals.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.7
+      description: Your risk assessments are dynamic and updated in the light of relevant
+        changes which may include technical changes to network and information systems,
+        change of use and new threat information.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.8
+      description: The effectiveness of your risk management process is reviewed regularly,
+        and improvements made as required.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.a
+      ref_id: A2.a.9
+      description: You perform detailed threat analysis and understand how this applies
+        to your organisation in the context of the threat to your sector and the wider
+        CNI.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2
       ref_id: A2.b
       name: Assurance
       description: You have gained confidence in the effectiveness of the security
         of your technology, people, and processes relevant to your essential function(s).
-      annotation: "You validate that the security measures in place to protect the\
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+      ref_id: A2.b.1
+      description: "You validate that the security measures in place to protect the\
         \ network and information systems\Lare effective and remain effective for\
-        \ the lifetime over which they are needed.\nYou understand the assurance methods\
-        \ available to you and choose appropriate methods to gain confidence in the\
-        \ security of essential function(s).\nYour confidence in the security as it\
-        \ relates to your technology, people, and processes can be\Ljustified to,\
-        \ and verified by, a third party.\nSecurity deficiencies uncovered by assurance\
-        \ activities are assessed, prioritised and remedied when necessary in a timely\
-        \ and effective way.\nThe methods used for assurance are reviewed to ensure\
-        \ they are working as intended and remain the most appropriate method to use."
+        \ the lifetime over which they are needed."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+      ref_id: A2.b.2
+      description: You understand the assurance methods available to you and choose
+        appropriate methods to gain confidence in the security of essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+      ref_id: A2.b.3
+      description: "Your confidence in the security as it relates to your technology,\
+        \ people, and processes can be\Ljustified to, and verified by, a third party."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+      ref_id: A2.b.4
+      description: Security deficiencies uncovered by assurance activities are assessed,
+        prioritised and remedied when necessary in a timely and effective way.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a2.b
+      ref_id: A2.b.5
+      description: The methods used for assurance are reviewed to ensure they are
+        working as intended and remain the most appropriate method to use.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3
       assessable: false
       depth: 2
@@ -180,27 +294,48 @@ objects:
         determined and understood. This includes data, people and systems, as well
         as any supporting infrastructure (such as power or cooling).
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3
       ref_id: A3.a
       name: Asset Management
-      annotation: 'All assets relevant to the secure operation of essential function(s)
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a
+      ref_id: A3.a.1
+      description: All assets relevant to the secure operation of essential function(s)
         are identified and inventoried (at a suitable level of detail). The inventory
         is kept up-to-date.
-
-        Dependencies on supporting infrastructure (e.g. power, cooling etc) are recognised
-        and recorded.
-
-        You have prioritised your assets according to their importance to the operation
-        of the essential function(s).
-
-        You have assigned responsibility for managing all assets, including physical
-        assets, relevant to the operation of the essential function(s).
-
-        Assets relevant to the essential function(s) are managed with cyber security
-        in mind throughout their lifecycle, from creation through to eventual decommissioning
-        or disposal.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a
+      ref_id: A3.a.2
+      description: Dependencies on supporting infrastructure (e.g. power, cooling
+        etc) are recognised and recorded.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a
+      ref_id: A3.a.3
+      description: You have prioritised your assets according to their importance
+        to the operation of the essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a
+      ref_id: A3.a.4
+      description: You have assigned responsibility for managing all assets, including
+        physical assets, relevant to the operation of the essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a3.a
+      ref_id: A3.a.5
+      description: Assets relevant to the essential function(s) are managed with cyber
+        security in mind throughout their lifecycle, from creation through to eventual
+        decommissioning or disposal.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4
       assessable: false
       depth: 2
@@ -212,27 +347,67 @@ objects:
         arise as a result of dependencies on external suppliers. This includes ensuring
         that appropriate measures are employed where third party services are used.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4
       ref_id: A4.a
       name: Supply Chain
-      annotation: "You have a deep understanding of your supply chain, including sub-\
-        \ contractors and the wider risks it faces. You consider factors such as supplier\u2019\
-        s partnerships, competitors, nationality and other organisations with which\
-        \ they sub- contract. This informs your risk assessment and procurement processes.\n\
-        Your approach to supply chain risk management considers the risks to your\
-        \ essential function(s) arising from supply chain subversion by capable and\
-        \ well-resourced attackers.\nYou have confidence that information shared with\
-        \ suppliers that is essential to the operation of your function(s) is appropriately\
-        \ protected from sophisticated attacks.\nYou understand which contracts are\
-        \ relevant and you include appropriate security obligations in relevant contracts.\
-        \ You have a proactive approach to contract management which may include a\
-        \ contract management plan for relevant contracts.\nCustomer / supplier ownership\
-        \ of responsibilities is laid out in contracts.\nAll network connections and\
-        \ data sharing with third parties are managed effectively and proportionately.\n\
-        When appropriate, your incident management process and that of your suppliers\
-        \ provide mutual support in the resolution of incidents."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.1
+      description: "You have a deep understanding of your supply chain, including\
+        \ sub- contractors and the wider risks it faces. You consider factors such\
+        \ as supplier\u2019s partnerships, competitors, nationality and other organisations\
+        \ with which they sub- contract. This informs your risk assessment and procurement\
+        \ processes."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.2
+      description: Your approach to supply chain risk management considers the risks
+        to your essential function(s) arising from supply chain subversion by capable
+        and well-resourced attackers.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.3
+      description: You have confidence that information shared with suppliers that
+        is essential to the operation of your function(s) is appropriately protected
+        from sophisticated attacks.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.4
+      description: You understand which contracts are relevant and you include appropriate
+        security obligations in relevant contracts. You have a proactive approach
+        to contract management which may include a contract management plan for relevant
+        contracts.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.5
+      description: Customer / supplier ownership of responsibilities is laid out in
+        contracts.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.6
+      description: All network connections and data sharing with third parties are
+        managed effectively and proportionately.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:a4.a
+      ref_id: A4.a.7
+      description: When appropriate, your incident management process and that of
+        your suppliers provide mutual support in the resolution of incidents.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b
       assessable: false
       depth: 1
@@ -250,7 +425,7 @@ objects:
         appropriate policies, processes and procedures that direct its overall approach
         to securing systems and data that support operation of essential functions.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1
       ref_id: B1.a
@@ -258,42 +433,91 @@ objects:
       description: You have developed and continue to improve a set of cyber security
         and resilience policies, processes and procedures that manage and mitigate
         the risk of adverse impact on your essential function(s).
-      annotation: "You fully document your overarching security governance and risk\
-        \ management approach, technical security practice and specific regulatory\
-        \ compliance. Cyber security is integrated and embedded throughout policies,\
-        \ processes and procedures and key performance indicators are reported to\
-        \ your executive management.\nYour organisation\u2019s policies, processes\
-        \ and procedures are developed to be practical, usable and appropriate for\
-        \ your essential function(s) and your technologies.\nPolicies, processes and\
-        \ procedures that rely on user behaviour are practical, appropriate and achievable.\n\
-        You review and update policies, processes and procedures at suitably regular\
-        \ intervals to ensure they remain relevant. This is in addition to reviews\
-        \ following a major cyber security incident.\nAny changes to the essential\
-        \ function(s) or the threat it faces triggers a review of policies, processes\
-        \ and procedures.\nYour systems are designed so that they remain secure even\
-        \ when user security policies, processes and procedures are not always followed."
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
+      ref_id: B1.a.1
+      description: You fully document your overarching security governance and risk
+        management approach, technical security practice and specific regulatory compliance.
+        Cyber security is integrated and embedded throughout policies, processes and
+        procedures and key performance indicators are reported to your executive management.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
+      ref_id: B1.a.2
+      description: "Your organisation\u2019s policies, processes and procedures are\
+        \ developed to be practical, usable and appropriate for your essential function(s)\
+        \ and your technologies."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
+      ref_id: B1.a.3
+      description: Policies, processes and procedures that rely on user behaviour
+        are practical, appropriate and achievable.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
+      ref_id: B1.a.4
+      description: You review and update policies, processes and procedures at suitably
+        regular intervals to ensure they remain relevant. This is in addition to reviews
+        following a major cyber security incident.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
+      ref_id: B1.a.5
+      description: Any changes to the essential function(s) or the threat it faces
+        triggers a review of policies, processes and procedures.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.a
+      ref_id: B1.a.6
+      description: Your systems are designed so that they remain secure even when
+        user security policies, processes and procedures are not always followed.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1
       ref_id: B1.b
       name: Policy, Process and Procedure Implementation
       description: You have successfully implemented your security policies, processes
         and procedures and can demonstrate the security benefits achieved.
-      annotation: 'All your policies, processes and procedures are followed, their
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b
+      ref_id: B1.b.1
+      description: All your policies, processes and procedures are followed, their
         correct application and security effectiveness is evaluated.
-
-        Your policies, processes and procedures are integrated with other organisational
-        policies, processes and procedures, including HR assessments of individuals''
-        trustworthiness.
-
-        Your policies, processes and procedures are effectively and appropriately
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b
+      ref_id: B1.b.2
+      description: Your policies, processes and procedures are integrated with other
+        organisational policies, processes and procedures, including HR assessments
+        of individuals' trustworthiness.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b
+      ref_id: B1.b.3
+      description: Your policies, processes and procedures are effectively and appropriately
         communicated across all levels of the organisation resulting in good staff
         awareness of their responsibilities.
-
-        Appropriate action is taken to address all breaches of policies, processes
-        and procedures with potential to adversely impact the essential function(s)
-        including aggregated breaches.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b1.b
+      ref_id: B1.b.4
+      description: Appropriate action is taken to address all breaches of policies,
+        processes and procedures with potential to adversely impact the essential
+        function(s) including aggregated breaches.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2
       assessable: false
       depth: 2
@@ -305,72 +529,141 @@ objects:
         (or automated functions) that can access data or systems are appropriately
         verified, authenticated and authorised.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2
       ref_id: B2.a
       name: Identity Verification, Authentication and Authorisation
       description: You robustly verify, authenticate and authorise access to the network
         and information systems supporting your essential function(s).
-      annotation: "Your process of initial identity verification is robust enough\
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
+      ref_id: B2.a.1
+      description: "Your process of initial identity verification is robust enough\
         \ to provide a high level of confidence of a user\u2019s identity profile\
         \ before allowing an authorised user access to network and information systems\
-        \ that support your essential function(s).\nOnly authorised and individually\
-        \ authenticated users can physically access and logically connect to your\
-        \ network or information systems on which your essential function(s) depends.\n\
-        The number of authorised users and systems that have access to all your network\
-        \ and information systems supporting the essential function(s) is limited\
-        \ to the minimum necessary.\nYou use additional authentication mechanisms,\
-        \ such as multi-factor\L(MFA), for all user access, including remote access,\
-        \ to all network and information systems that operate or support your essential\
-        \ function(s).\nThe list of users and systems with access to network and information\
-        \ systems supporting and delivering the essential function(s) is reviewed\
-        \ on a regular basis, at least every six months.\nYour approach to authenticating\
-        \ users, devices and systems follows up to date best practice."
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b
+        \ that support your essential function(s)."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
+      ref_id: B2.a.2
+      description: Only authorised and individually authenticated users can physically
+        access and logically connect to your network or information systems on which
+        your essential function(s) depends.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
+      ref_id: B2.a.3
+      description: The number of authorised users and systems that have access to
+        all your network and information systems supporting the essential function(s)
+        is limited to the minimum necessary.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
+      ref_id: B2.a.4
+      description: "You use additional authentication mechanisms, such as multi-factor\L\
+        (MFA), for all user access, including remote access, to all network and information\
+        \ systems that operate or support your essential function(s)."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
+      ref_id: B2.a.5
+      description: The list of users and systems with access to network and information
+        systems supporting and delivering the essential function(s) is reviewed on
+        a regular basis, at least every six months.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.a
+      ref_id: B2.a.6
+      description: Your approach to authenticating users, devices and systems follows
+        up to date best practice.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2
       ref_id: B2.b
       name: Device Management
       description: You fully know and have trust in the devices that are used to access
         your networks, information systems and data that support your essential function(s).
-      annotation: 'All privileged operations performed on your network and information
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b
+      ref_id: B2.b.1
+      description: All privileged operations performed on your network and information
         systems supporting your essential function(s) are conducted from highly trusted
         devices, such as Privileged Access Workstations, dedicated solely to those
         operations.
-
-        You either obtain independent and professional assurance of the security of
-        third-party devices or networks before they connect to your network and information
-        systems, or you only allow third-party devices or networks that are dedicated
-        to supporting your network and information systems to connect.
-
-        You perform certificate-based device identity management and only allow known
-        devices to access systems necessary for the operation of your essential function(s).
-
-        You perform regular scans to detect unknown devices and investigate any findings.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b
+      ref_id: B2.b.2
+      description: You either obtain independent and professional assurance of the
+        security of third-party devices or networks before they connect to your network
+        and information systems, or you only allow third-party devices or networks
+        that are dedicated to supporting your network and information systems to connect.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b
+      ref_id: B2.b.3
+      description: You perform certificate-based device identity management and only
+        allow known devices to access systems necessary for the operation of your
+        essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.b
+      ref_id: B2.b.4
+      description: You perform regular scans to detect unknown devices and investigate
+        any findings.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2
       ref_id: B2.c
       name: Privileged User Management
       description: You closely manage privileged user access to network and information
         systems supporting your essential function(s).
-      annotation: 'Privileged user access to network and information systems supporting
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c
+      ref_id: B2.c.1
+      description: Privileged user access to network and information systems supporting
         your essential function(s) is carried out from dedicated separate accounts
         that are closely monitored and managed.
-
-        The issuing of temporary, time- bound rights for privileged user access and
-        / or external third- party support access is in place.
-
-        Privileged user access rights are regularly reviewed and always updated as
-        part of your joiners, movers and leavers process.
-
-        All privileged user activity is routinely reviewed, validated and recorded
-        for offline analysis and investigation.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c
+      ref_id: B2.c.2
+      description: The issuing of temporary, time- bound rights for privileged user
+        access and / or external third- party support access is in place.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c
+      ref_id: B2.c.3
+      description: Privileged user access rights are regularly reviewed and always
+        updated as part of your joiners, movers and leavers process.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.c
+      ref_id: B2.c.4
+      description: All privileged user activity is routinely reviewed, validated and
+        recorded for offline analysis and investigation.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2
       ref_id: B2.d
@@ -378,21 +671,44 @@ objects:
       description: You closely manage and maintain identity and access control for
         users, devices and systems accessing the network and information systems supporting
         your essential function(s).
-      annotation: 'You follow a robust procedure to verify each user and issue the
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+      ref_id: B2.d.1
+      description: You follow a robust procedure to verify each user and issue the
         minimum required access rights, and the application of the procedure is regularly
         audited.
-
-        User access rights are reviewed both when people change roles via your joiners,
-        leavers and movers process and at regular intervals - at least annually.
-
-        All user, device and systems access to the systems supporting the essential
-        function(s) is logged and monitored.
-
-        You regularly review access logs and correlate this data with other access
-        records and expected activity.
-
-        Attempts by unauthorised users, devices or systems to connect to the systems
-        supporting the essential function(s) are alerted, promptly assessed and investigated.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+      ref_id: B2.d.2
+      description: User access rights are reviewed both when people change roles via
+        your joiners, leavers and movers process and at regular intervals - at least
+        annually.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+      ref_id: B2.d.3
+      description: All user, device and systems access to the systems supporting the
+        essential function(s) is logged and monitored.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+      ref_id: B2.d.4
+      description: You regularly review access logs and correlate this data with other
+        access records and expected activity.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b2.d
+      ref_id: B2.d.5
+      description: Attempts by unauthorised users, devices or systems to connect to
+        the systems supporting the essential function(s) are alerted, promptly assessed
+        and investigated.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3
       assessable: false
       depth: 2
@@ -406,7 +722,7 @@ objects:
         operation of essential functions. It also covers information that would assist
         an attacker, such as design details of network and information systems.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3
       ref_id: B3.a
@@ -416,34 +732,73 @@ objects:
         unavailability or unauthorised access, modification or deletion would adversely
         impact the essential function(s). This also applies to third parties storing
         or accessing data important to the operation of your essential function(s).
-      annotation: 'You have identified and catalogued all the data important to the
-        operation of the essential function(s), or that would assist an attacker.
-
-        You have identified and catalogued who has access to the data important to
-        the operation of the essential function(s).
-
-        You maintain a current understanding of the location, quantity and quality
-        of data important to the operation of the essential function(s).
-
-        You take steps to remove or minimise unnecessary copies or unneeded historic
-        data.
-
-        You have identified all mobile devices and media that may hold data important
-        to the operation of the essential function(s).
-
-        You maintain a current understanding of the data links used to transmit data
-        that is important to your essential function(s).
-
-        You understand the context, limitations and dependencies of your important
-        data.
-
-        You understand and document the impact on your essential function(s) of all
-        relevant scenarios, including unauthorised data access, modification or deletion,
-        or when authorised users are unable to appropriately access this data.
-
-        You validate these documented impact statements regularly, at least annually.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.1
+      description: You have identified and catalogued all the data important to the
+        operation of the essential function(s), or that would assist an attacker.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.2
+      description: You have identified and catalogued who has access to the data important
+        to the operation of the essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.3
+      description: You maintain a current understanding of the location, quantity
+        and quality of data important to the operation of the essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.4
+      description: You take steps to remove or minimise unnecessary copies or unneeded
+        historic data.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.5
+      description: You have identified all mobile devices and media that may hold
+        data important to the operation of the essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.6
+      description: You maintain a current understanding of the data links used to
+        transmit data that is important to your essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.7
+      description: You understand the context, limitations and dependencies of your
+        important data.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.8
+      description: You understand and document the impact on your essential function(s)
+        of all relevant scenarios, including unauthorised data access, modification
+        or deletion, or when authorised users are unable to appropriately access this
+        data.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.a
+      ref_id: B3.a.9
+      description: You validate these documented impact statements regularly, at least
+        annually.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3
       ref_id: B3.b
@@ -451,64 +806,112 @@ objects:
       description: You have protected the transit of data important to the operation
         of your essential function(s). This includes the transfer of data to third
         parties.
-      annotation: 'You have identified and protected (effectively and proportionately)
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b
+      ref_id: B3.b.1
+      description: You have identified and protected (effectively and proportionately)
         all the data links that carry data important to the operation of your essential
         function(s).
-
-        You apply appropriate physical and / or technical means to protect data that
-        travels over non-trusted or openly accessible carriers, with justified confidence
-        in the robustness of the protection applied.
-
-        Suitable alternative transmission paths are available where there is a significant
-        risk of impact on the operation of the essential function(s) due to resource
-        limitation (e.g. transmission equipment or function failure, or important
-        data being blocked or jammed).'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b
+      ref_id: B3.b.2
+      description: You apply appropriate physical and / or technical means to protect
+        data that travels over non-trusted or openly accessible carriers, with justified
+        confidence in the robustness of the protection applied.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.b
+      ref_id: B3.b.3
+      description: Suitable alternative transmission paths are available where there
+        is a significant risk of impact on the operation of the essential function(s)
+        due to resource limitation (e.g. transmission equipment or function failure,
+        or important data being blocked or jammed).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3
       ref_id: B3.c
       name: Stored Data
       description: You have protected stored soft and hard copy data important to
         the operation of your essential function(s).
-      annotation: 'All copies of data important to the operation of your essential
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+      ref_id: B3.c.1
+      description: All copies of data important to the operation of your essential
         function(s) are necessary. Where this important data is transferred to less
         secure systems, the data is provided with limited detail and / or as a read-only
         copy.
-
-        You have applied suitable physical and / or technical means to protect this
-        important stored data from unauthorised access, modification or deletion.
-
-        If cryptographic protections are used you apply suitable technical and procedural
-        means, and you have justified confidence in the robustness of the protection
-        applied.
-
-        You have suitable, secured backups of data to allow the operation of the essential
-        function(s) to continue should the original data not be available. This may
-        include off- line or segregated backups, or appropriate alternative forms
-        such as paper copies.
-
-        Necessary historic or archive data is suitably secured in storage.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+      ref_id: B3.c.2
+      description: You have applied suitable physical and / or technical means to
+        protect this important stored data from unauthorised access, modification
+        or deletion.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+      ref_id: B3.c.3
+      description: If cryptographic protections are used you apply suitable technical
+        and procedural means, and you have justified confidence in the robustness
+        of the protection applied.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+      ref_id: B3.c.4
+      description: You have suitable, secured backups of data to allow the operation
+        of the essential function(s) to continue should the original data not be available.
+        This may include off- line or segregated backups, or appropriate alternative
+        forms such as paper copies.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.c
+      ref_id: B3.c.5
+      description: Necessary historic or archive data is suitably secured in storage.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3
       ref_id: B3.d
       name: Mobile Data
       description: You have protected data important to the operation of your essential
         function(s) on mobile devices.
-      annotation: 'Mobile devices that hold data that is important to the operation
-        of the essential function(s) are catalogued, are under your organisation''s
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d
+      ref_id: B3.d.1
+      description: Mobile devices that hold data that is important to the operation
+        of the essential function(s) are catalogued, are under your organisation's
         control and configured according to best practice for the platform, with appropriate
         technical and procedural policies in place.
-
-        Your organisation can remotely wipe all mobile devices holding data important
-        to the operation of the essential function(s).
-
-        You have minimised this data on these mobile devices. Some data may be automatically
-        deleted off mobile devices after a certain period.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d
+      ref_id: B3.d.2
+      description: Your organisation can remotely wipe all mobile devices holding
+        data important to the operation of the essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.d
+      ref_id: B3.d.3
+      description: You have minimised this data on these mobile devices. Some data
+        may be automatically deleted off mobile devices after a certain period.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3
       ref_id: B3.e
@@ -516,13 +919,22 @@ objects:
       description: Before reuse and / or disposal you appropriately sanitise devices,
         equipment and removable media holding data important to the operation of your
         essential function(s).
-      annotation: 'You catalogue and track all devices that contain data important
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e
+      ref_id: B3.e.1
+      description: You catalogue and track all devices that contain data important
         to the operation of the essential function(s) (whether a specific storage
         device or one with integral storage).
-
-        Data important to the operation of the essential function(s) is removed from
-        all devices, equipment and removable media before reuse and / or disposal
-        using an assured product or service.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b3.e
+      ref_id: B3.e.2
+      description: Data important to the operation of the essential function(s) is
+        removed from all devices, equipment and removable media before reuse and /
+        or disposal using an assured product or service.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4
       assessable: false
       depth: 2
@@ -535,7 +947,7 @@ objects:
         reliable protective security measures to effectively limit opportunities for
         attackers to compromise networks and systems.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4
       ref_id: B4.a
@@ -544,57 +956,112 @@ objects:
         support the operation of your essential function(s). You minimise their attack
         surface and ensure that the operation of your essential function(s) should
         not be impacted by the exploitation of any single vulnerability.
-      annotation: 'You employ appropriate expertise to design network and information
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a
+      ref_id: B4.a.1
+      description: You employ appropriate expertise to design network and information
         systems.
-
-        Your network and information systems are segregated into appropriate security
-        zones (e.g. systems supporting the essential function(s) are segregated in
-        a highly trusted, more secure zone).
-
-        The network and information systems supporting your essential function(s)
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a
+      ref_id: B4.a.2
+      description: Your network and information systems are segregated into appropriate
+        security zones (e.g. systems supporting the essential function(s) are segregated
+        in a highly trusted, more secure zone).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a
+      ref_id: B4.a.3
+      description: The network and information systems supporting your essential function(s)
         are designed to have simple data flows between components to support effective
         security monitoring.
-
-        The network and information systems supporting your essential function(s)
-        are designed to be easy to recover.
-
-        Content-based attacks are mitigated for all inputs to network and information
-        systems that affect the essential function(s) (e.g. via transformation and
-        inspection).'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.4
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a
+      ref_id: B4.a.4
+      description: The network and information systems supporting your essential function(s)
+        are designed to be easy to recover.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.a
+      ref_id: B4.a.5
+      description: Content-based attacks are mitigated for all inputs to network and
+        information systems that affect the essential function(s) (e.g. via transformation
+        and inspection).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4
       ref_id: B4.b
       name: Secure Configuration
       description: You securely configure the network and information systems that
         support the operation of your essential function(s).
-      annotation: 'You have identified, documented and actively manage (e.g. maintain
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.1
+      description: You have identified, documented and actively manage (e.g. maintain
         security configurations, patching, updating according to good practice) the
         assets that need to be carefully configured to maintain the security of the
         essential function(s).
-
-        All platforms conform to your secure, defined baseline build, or the latest
-        known good configuration version for that environment.
-
-        You closely and effectively manage changes in your environment, ensuring that
-        network and system configurations are secure and documented.
-
-        You regularly review and validate that your network and information systems
-        have the expected, secure settings and configuration.
-
-        Only permitted software can be installed.
-
-        Standard users are not able to change settings that would impact security
-        or the business operation.
-
-        If automated decision-making technologies are in use, their operation is well
-        understood, and decisions can be replicated.
-
-        Generic, shared, default name and built-in accounts have been removed or disabled.
-        Where this is not possible, credentials to these accounts have been changed.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.2
+      description: All platforms conform to your secure, defined baseline build, or
+        the latest known good configuration version for that environment.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.3
+      description: You closely and effectively manage changes in your environment,
+        ensuring that network and system configurations are secure and documented.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.4
+      description: You regularly review and validate that your network and information
+        systems have the expected, secure settings and configuration.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.5
+      description: Only permitted software can be installed.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.6
+      description: Standard users are not able to change settings that would impact
+        security or the business operation.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.7
+      description: If automated decision-making technologies are in use, their operation
+        is well understood, and decisions can be replicated.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.b
+      ref_id: B4.b.8
+      description: Generic, shared, default name and built-in accounts have been removed
+        or disabled. Where this is not possible, credentials to these accounts have
+        been changed.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4
       ref_id: B4.c
@@ -602,38 +1069,68 @@ objects:
       description: You manage your organisation's network and information systems
         that support the operation of your essential function(s) to enable and maintain
         security.
-      annotation: 'Your systems and devices supporting the operation of the essential
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c
+      ref_id: B4.c.1
+      description: Your systems and devices supporting the operation of the essential
         function(s) are only administered or maintained by authorised privileged users
         from highly trusted devices, such as Privileged Access Workstations, dedicated
         solely to those operations.
-
-        You regularly review and update technical knowledge about network and information
-        systems, such as documentation and network diagrams, and ensure they are securely
-        stored.
-
-        You prevent, detect and remove malware, and unauthorised software. You use
-        technical, procedural and physical measures as necessary.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c
+      ref_id: B4.c.2
+      description: You regularly review and update technical knowledge about network
+        and information systems, such as documentation and network diagrams, and ensure
+        they are securely stored.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.c
+      ref_id: B4.c.3
+      description: You prevent, detect and remove malware, and unauthorised software.
+        You use technical, procedural and physical measures as necessary.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4
       ref_id: B4.d
       name: Vulnerability Management
       description: You manage known vulnerabilities in your network and information
         systems to prevent adverse impact on your essential function(s).
-      annotation: 'You maintain a current understanding of the exposure of your essential
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d
+      ref_id: B4.d.1
+      description: You maintain a current understanding of the exposure of your essential
         function(s) to publicly-known vulnerabilities.
-
-        Announced vulnerabilities for all software packages, network and information
-        systems used to support your essential function(s) are tracked, prioritised
-        and mitigated (e.g. by patching) promptly.
-
-        You regularly test to fully understand the vulnerabilities of the network
-        and information systems that support the operation of your essential function(s)
-        and verify this understanding with third-party testing.
-
-        You maximise the use of supported software, firmware and hardware in your
-        network and information systems supporting your essential function(s).'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d
+      ref_id: B4.d.2
+      description: Announced vulnerabilities for all software packages, network and
+        information systems used to support your essential function(s) are tracked,
+        prioritised and mitigated (e.g. by patching) promptly.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d
+      ref_id: B4.d.3
+      description: You regularly test to fully understand the vulnerabilities of the
+        network and information systems that support the operation of your essential
+        function(s) and verify this understanding with third-party testing.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b4.d
+      ref_id: B4.d.4
+      description: You maximise the use of supported software, firmware and hardware
+        in your network and information systems supporting your essential function(s).
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5
       assessable: false
       depth: 2
@@ -644,23 +1141,34 @@ objects:
         failure into the design, implementation, operation and management of systems
         that support the operation of essential functions.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5
       ref_id: B5.a
       name: Resilience Preparation
       description: You are prepared to restore the operation of your essential function(s)
         following adverse impact.
-      annotation: "You have business continuity and disaster recovery plans that have\
-        \ been tested for practicality, effectiveness and completeness. Appropriate\
-        \ use is made\Lof different test methods (e.g. manual fail-over, table-top\
-        \ exercises, or red-teaming).\nYou use your security awareness and threat\
-        \ intelligence sources to identify new or heightened levels of risk, which\
-        \ result in immediate and potentially temporary security measures to enhance\
-        \ the security of your network and information systems (e.g. in response to\
-        \ a widespread outbreak of very damaging malware)."
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a
+      ref_id: B5.a.1
+      description: "You have business continuity and disaster recovery plans that\
+        \ have been tested for practicality, effectiveness and completeness. Appropriate\
+        \ use is made\Lof different test methods (e.g. manual fail-over, table-top\
+        \ exercises, or red-teaming)."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.a
+      ref_id: B5.a.2
+      description: You use your security awareness and threat intelligence sources
+        to identify new or heightened levels of risk, which result in immediate and
+        potentially temporary security measures to enhance the security of your network
+        and information systems (e.g. in response to a widespread outbreak of very
+        damaging malware).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5
       ref_id: B5.b
@@ -668,32 +1176,63 @@ objects:
       description: You design the network and information systems supporting your
         essential function(s) to be resilient to cyber security incidents. Systems
         are appropriately segregated and resource limitations are mitigated.
-      annotation: "Network and information systems supporting the operation of your\
-        \ essential function(s) are segregated from other business and external systems\
-        \ by appropriate technical and physical means (e.g. separate network and system\
-        \ infrastructure with independent user administration). Internet services\
-        \ are not accessible from network and information systems supporting the essential\
-        \ function(s).\nYou have identified and mitigated all resource limitations\
-        \ (e.g. bandwidth limitations and single network paths).\nYou have identified\
-        \ and mitigated any geographical constraints or weaknesses. (e.g. systems\
-        \ that your essential function(s) depends upon\Lare replicated in another\
-        \ location, important network connectivity has alternative physical paths\
-        \ and service providers).\nYou review and update assessments of dependencies,\
-        \ resource and geographical limitations and mitigations when necessary."
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b
+      ref_id: B5.b.1
+      description: Network and information systems supporting the operation of your
+        essential function(s) are segregated from other business and external systems
+        by appropriate technical and physical means (e.g. separate network and system
+        infrastructure with independent user administration). Internet services are
+        not accessible from network and information systems supporting the essential
+        function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b
+      ref_id: B5.b.2
+      description: You have identified and mitigated all resource limitations (e.g.
+        bandwidth limitations and single network paths).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b
+      ref_id: B5.b.3
+      description: "You have identified and mitigated any geographical constraints\
+        \ or weaknesses. (e.g. systems that your essential function(s) depends upon\L\
+        are replicated in another location, important network connectivity has alternative\
+        \ physical paths and service providers)."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.b
+      ref_id: B5.b.4
+      description: You review and update assessments of dependencies, resource and
+        geographical limitations and mitigations when necessary.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5
       ref_id: B5.c
       name: Backups
       description: You hold accessible and secured current backups of data and information
         needed to recover operation of your essential function(s).
-      annotation: 'Your comprehensive, automatic and tested technical and procedural
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c
+      ref_id: B5.c.1
+      description: Your comprehensive, automatic and tested technical and procedural
         backups are secured at centrally accessible or secondary sites to recover
         from an extreme event.
-
-        Backups of all important data and information needed to recover the essential
-        function(s) are made, tested, documented and routinely reviewed.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b5.c
+      ref_id: B5.c.2
+      description: Backups of all important data and information needed to recover
+        the essential function(s) are made, tested, documented and routinely reviewed.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6
       assessable: false
       depth: 2
@@ -704,35 +1243,60 @@ objects:
         out their organisational roles effectively in relation to the security of
         network and information systems supporting the operation of essential functions.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6
       ref_id: B6.a
       name: Cyber Security Culture
       description: You develop and maintain a positive cyber security culture.
-      annotation: 'Your executive management clearly and effectively communicates
-        the organisation''s cyber security priorities and objectives to all staff.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
+      ref_id: B6.a.1
+      description: Your executive management clearly and effectively communicates
+        the organisation's cyber security priorities and objectives to all staff.
         Your organisation displays positive cyber security attitudes, behaviours and
         expectations.
-
-        People in your organisation raising potential cyber security incidents and
-        issues are treated positively.
-
-        Individuals at all levels in your organisation routinely report concerns or
-        issues about cyber security and are recognised for their contribution to keeping
-        the organisation secure.
-
-        Your management is seen to be committed to and actively involved in cyber
-        security.
-
-        Your organisation communicates openly about cyber security, with any concern
-        being taken seriously.
-
-        People across your organisation participate in cyber security activities and
-        improvements, building joint ownership and bringing knowledge of their area
-        of expertise.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
+      ref_id: B6.a.2
+      description: People in your organisation raising potential cyber security incidents
+        and issues are treated positively.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
+      ref_id: B6.a.3
+      description: Individuals at all levels in your organisation routinely report
+        concerns or issues about cyber security and are recognised for their contribution
+        to keeping the organisation secure.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
+      ref_id: B6.a.4
+      description: Your management is seen to be committed to and actively involved
+        in cyber security.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
+      ref_id: B6.a.5
+      description: Your organisation communicates openly about cyber security, with
+        any concern being taken seriously.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.a
+      ref_id: B6.a.6
+      description: People across your organisation participate in cyber security activities
+        and improvements, building joint ownership and bringing knowledge of their
+        area of expertise.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6
       ref_id: B6.b
@@ -740,17 +1304,35 @@ objects:
       description: The people who support the operation of your essential function(s)
         are appropriately trained in cyber security. A range of approaches to cyber
         security training, awareness and communications are employed.
-      annotation: 'All people in your organisation, from the most senior to the most
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b
+      ref_id: B6.b.1
+      description: All people in your organisation, from the most senior to the most
         junior, follow appropriate cyber security training paths.
-
-        Each individuals cyber security training is tracked and refreshed at suitable
-        intervals.
-
-        You routinely evaluate your cyber security training and awareness activities
-        to ensure they reach the widest audience and are effective.
-
-        You make cyber security information and good practice guidance easily accessible,
-        widely available and you know it is referenced and used within your organisation.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b
+      ref_id: B6.b.2
+      description: Each individuals cyber security training is tracked and refreshed
+        at suitable intervals.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b
+      ref_id: B6.b.3
+      description: You routinely evaluate your cyber security training and awareness
+        activities to ensure they reach the widest audience and are effective.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:b6.b
+      ref_id: B6.b.4
+      description: You make cyber security information and good practice guidance
+        easily accessible, widely available and you know it is referenced and used
+        within your organisation.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c
       assessable: false
       depth: 1
@@ -770,7 +1352,7 @@ objects:
         to detect potential security problems and to track the ongoing effectiveness
         of protective security measures.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1
       ref_id: C1.a
@@ -778,28 +1360,53 @@ objects:
       description: The data sources that you include in your monitoring allow for
         timely identification of security events which might affect the operation
         of your essential function(s).
-      annotation: 'Monitoring is based on an understanding of your networks, common
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
+      ref_id: C1.a.1
+      description: Monitoring is based on an understanding of your networks, common
         cyber attack methods and what you need awareness of in order to detect potential
         security incidents that could affect the operation of your essential function(s)
         (e.g. presence of malware, malicious emails, user policy violations).
-
-        Your monitoring data provides enough detail to reliably detect security incidents
-        that could affect the operation of your essential function(s).
-
-        You easily detect the presence or absence of IoCs on your essential function(s),
-        such as known malicious command and control signatures.
-
-        Extensive monitoring of user activity in relation to the operation of your
-        essential function(s) enables you to detect policy violations and an agreed
-        list of suspicious or undesirable behaviour.
-
-        You have extensive monitoring coverage that includes host-based monitoring
-        and network gateways.
-
-        All new systems are considered as potential monitoring data sources to maintain
-        a comprehensive monitoring capability.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
+      ref_id: C1.a.2
+      description: Your monitoring data provides enough detail to reliably detect
+        security incidents that could affect the operation of your essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
+      ref_id: C1.a.3
+      description: You easily detect the presence or absence of IoCs on your essential
+        function(s), such as known malicious command and control signatures.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
+      ref_id: C1.a.4
+      description: Extensive monitoring of user activity in relation to the operation
+        of your essential function(s) enables you to detect policy violations and
+        an agreed list of suspicious or undesirable behaviour.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
+      ref_id: C1.a.5
+      description: You have extensive monitoring coverage that includes host-based
+        monitoring and network gateways.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.a
+      ref_id: C1.a.6
+      description: All new systems are considered as potential monitoring data sources
+        to maintain a comprehensive monitoring capability.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1
       ref_id: C1.b
@@ -808,70 +1415,148 @@ objects:
         accounts with business a need. No system or user should ever need to modify
         or delete master copies of log data within an agreed retention period, after
         which it should be deleted.
-      annotation: 'The integrity of log data is protected, or any modification is
-        detected and attributed.
-
-        The logging architecture has mechanisms, policies, processes and procedures
-        to ensure that it can protect itself from threats comparable to those it is
-        trying to identify. This includes protecting the essential function(s) itself,
-        and the data within it.
-
-        Log data analysis and normalisation is only performed on copies of the data
-        keeping the master copy unaltered.
-
-        Log data is synchronised, using an accurate common time source, so that separate
-        datasets can be correlated in different ways.
-
-        Access to log data is limited to those with business need and no others.
-
-        All actions involving all log data (e.g. copying, deleting, modifying or viewing)
-        can be traced back to a unique user.
-
-        Legitimate reasons for accessing log data are given in use policies.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.1
+      description: The integrity of log data is protected, or any modification is
+        detected and attributed.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.2
+      description: The logging architecture has mechanisms, policies, processes and
+        procedures to ensure that it can protect itself from threats comparable to
+        those it is trying to identify. This includes protecting the essential function(s)
+        itself, and the data within it.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.3
+      description: Log data analysis and normalisation is only performed on copies
+        of the data keeping the master copy unaltered.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.4
+      description: Log data is synchronised, using an accurate common time source,
+        so that separate datasets can be correlated in different ways.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.5
+      description: Access to log data is limited to those with business need and no
+        others.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.6
+      description: All actions involving all log data (e.g. copying, deleting, modifying
+        or viewing) can be traced back to a unique user.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.b
+      ref_id: C1.b.7
+      description: Legitimate reasons for accessing log data are given in use policies.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1
       ref_id: C1.c
       name: Generating Alerts
       description: Evidence of potential security incidents contained in your monitoring
         data is reliably identified and triggers alerts.
-      annotation: 'Log data is enriched with other network knowledge and data when
-        investigating certain suspicious activity or alerts.
-
-        A wide range of signatures and indicators of compromise is used for investigations
-        of suspicious activity and alerts.
-
-        Alerts can be easily resolved to network assets using knowledge of networks
-        and systems. The resolution of these alerts is performed in almost real time.
-
-        Security alerts relating to all essential function(s) are prioritised and
-        this information is used to support incident management.
-
-        Logs are reviewed almost continuously, in real time.
-
-        Alerts are tested to ensure that they are generated reliably and that it is
-        possible to distinguish genuine security incidents from false alarms.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      ref_id: C1.c.1
+      description: Log data is enriched with other network knowledge and data when
+        investigating certain suspicious activity or alerts.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      ref_id: C1.c.2
+      description: A wide range of signatures and indicators of compromise is used
+        for investigations of suspicious activity and alerts.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      ref_id: C1.c.3
+      description: Alerts can be easily resolved to network assets using knowledge
+        of networks and systems. The resolution of these alerts is performed in almost
+        real time.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      ref_id: C1.c.4
+      description: Security alerts relating to all essential function(s) are prioritised
+        and this information is used to support incident management.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      ref_id: C1.c.5
+      description: Logs are reviewed almost continuously, in real time.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.c
+      ref_id: C1.c.6
+      description: Alerts are tested to ensure that they are generated reliably and
+        that it is possible to distinguish genuine security incidents from false alarms.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1
       ref_id: C1.d
       name: Identifying Security Incidents
       description: You contextualise alerts with knowledge of the threat and your
         systems, to identify those security incidents that require some form of response.
-      annotation: "You have selected threat intelligence sources or services using\
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d
+      ref_id: C1.d.1
+      description: "You have selected threat intelligence sources or services using\
         \ risk-based and threat- informed decisions based\Lon your business needs\
         \ and sector (e.g. vendor reporting and patching, strong anti-virus providers,\
-        \ sector and community-based infoshare, special interest groups).\nYou apply\
-        \ all new signatures and IoCs within a reasonable (risk-based) time of receiving\
-        \ them.\nYou receive signature updates for all your protective technologies\
-        \ (e.g. AV, IDS).\nYou track the effectiveness of your intelligence feeds\
-        \ and actively share feedback on the usefulness of IoCs and any other indicators\
-        \ with the threat community (e.g. sector partners, threat intelligence providers,\
-        \ government agencies)."
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+        \ sector and community-based infoshare, special interest groups)."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d
+      ref_id: C1.d.2
+      description: You apply all new signatures and IoCs within a reasonable (risk-based)
+        time of receiving them.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d
+      ref_id: C1.d.3
+      description: You receive signature updates for all your protective technologies
+        (e.g. AV, IDS).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.d
+      ref_id: C1.d.4
+      description: You track the effectiveness of your intelligence feeds and actively
+        share feedback on the usefulness of IoCs and any other indicators with the
+        threat community (e.g. sector partners, threat intelligence providers, government
+        agencies).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1
       ref_id: C1.e
@@ -881,29 +1566,58 @@ objects:
         threats and the complexities of the network or system data they need to use.
         Monitoring staff have knowledge of the essential function(s) they need to
         protect.
-      annotation: 'You have monitoring staff, who are responsible for the analysis,
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.1
+      description: You have monitoring staff, who are responsible for the analysis,
         investigation and reporting of monitoring alerts covering both security and
         performance.
-
-        Monitoring staff have defined roles and skills that cover all parts of the
-        monitoring and investigation process.
-
-        Monitoring staff follow policies, processes and procedures that address all
-        governance reporting requirements, internal and external.
-
-        Monitoring staff are empowered to look beyond the fixed process to investigate
-        and understand non-standard threats, by developing their own investigative
-        techniques and making new use of data.
-
-        Your monitoring tools make use of all log data collected to pinpoint activity
-        within an incident.
-
-        Monitoring staff and tools drive and shape new log data collection and can
-        make wide use of it.
-
-        Monitoring staff are aware of the operation of essential function(s) and related
-        assets and can identify and prioritise alerts or investigations that relate
-        to them.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.2
+      description: Monitoring staff have defined roles and skills that cover all parts
+        of the monitoring and investigation process.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.3
+      description: Monitoring staff follow policies, processes and procedures that
+        address all governance reporting requirements, internal and external.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.4
+      description: Monitoring staff are empowered to look beyond the fixed process
+        to investigate and understand non-standard threats, by developing their own
+        investigative techniques and making new use of data.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.5
+      description: Your monitoring tools make use of all log data collected to pinpoint
+        activity within an incident.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.6
+      description: Monitoring staff and tools drive and shape new log data collection
+        and can make wide use of it.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c1.e
+      ref_id: C1.e.7
+      description: Monitoring staff are aware of the operation of essential function(s)
+        and related assets and can identify and prioritise alerts or investigations
+        that relate to them.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2
       assessable: false
       depth: 2
@@ -915,29 +1629,46 @@ objects:
         of essential functions even when the activity evades standard signature based
         security prevent/detect solutions (or when standard solutions are not deployable).
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2
       ref_id: C2.a
       name: System Abnormalities for Attack Detection
       description: You define examples of abnormalities in system behaviour that provide
         practical ways of detecting malicious activity that is otherwise hard to identify.
-      annotation: 'Normal system behaviour is fully understood to such an extent that
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a
+      ref_id: C2.a.1
+      description: Normal system behaviour is fully understood to such an extent that
         searching for system abnormalities is a potentially effective way of detecting
         malicious activity (e.g. You fully understand which systems should and should
         not communicate and when).
-
-        System abnormality descriptions from past attacks and threat intelligence,
-        on yours and other networks, are used to signify malicious activity.
-
-        The system abnormalities you search for consider the nature of attacks likely
-        to impact on the network and information systems supporting the operation
-        of your essential function(s).
-
-        The system abnormality descriptions you use are updated to reflect changes
-        in your network and information systems and current threat intelligence.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a
+      ref_id: C2.a.2
+      description: System abnormality descriptions from past attacks and threat intelligence,
+        on yours and other networks, are used to signify malicious activity.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a
+      ref_id: C2.a.3
+      description: The system abnormalities you search for consider the nature of
+        attacks likely to impact on the network and information systems supporting
+        the operation of your essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.a
+      ref_id: C2.a.4
+      description: The system abnormality descriptions you use are updated to reflect
+        changes in your network and information systems and current threat intelligence.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2
       ref_id: C2.b
@@ -945,13 +1676,22 @@ objects:
       description: You use an informed understanding of more sophisticated attack
         methods and of normal system behaviour to monitor proactively for malicious
         activity.
-      annotation: 'You routinely search for system abnormalities indicative of malicious
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b
+      ref_id: C2.b.1
+      description: You routinely search for system abnormalities indicative of malicious
         activity on the network and information systems supporting the operation of
         your essential function(s), generating alerts based on the results of such
         searches.
-
-        You have justified confidence in the effectiveness of your searches for system
-        abnormalities indicative of malicious activity.'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:c2.b
+      ref_id: C2.b.2
+      description: You have justified confidence in the effectiveness of your searches
+        for system abnormalities indicative of malicious activity.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d
       assessable: false
       depth: 1
@@ -971,7 +1711,7 @@ objects:
         of system or service failure. Mitigation activities designed to contain or
         limit the impact of compromise are also in place.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1
       ref_id: D1.a
@@ -979,23 +1719,40 @@ objects:
       description: You have an up-to-date incident response plan that is grounded
         in a thorough risk assessment that takes account of your essential function(s)
         and covers a range of incident scenarios.
-      annotation: 'Your incident response plan is based on a clear understanding of
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a
+      ref_id: D1.a.1
+      description: Your incident response plan is based on a clear understanding of
         the security risks to the network and information systems supporting your
         essential function(s).
-
-        Your incident response plan is comprehensive (i.e. covers the complete lifecycle
-        of an incident, roles and responsibilities, and reporting) and covers likely
-        impacts of both known attack patterns and of possible attacks, previously
-        unseen.
-
-        Your incident response plan is documented and integrated with wider organisational
-        business plans and supply chain response plans, as well as dependencies on
-        supporting infrastructure (e.g. power, cooling etc).
-
-        Your incident response plan is communicated and understood by the business
-        areas involved with the operation of your essential function(s).'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.2
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a
+      ref_id: D1.a.2
+      description: Your incident response plan is comprehensive (i.e. covers the complete
+        lifecycle of an incident, roles and responsibilities, and reporting) and covers
+        likely impacts of both known attack patterns and of possible attacks, previously
+        unseen.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a
+      ref_id: D1.a.3
+      description: Your incident response plan is documented and integrated with wider
+        organisational business plans and supply chain response plans, as well as
+        dependencies on supporting infrastructure (e.g. power, cooling etc).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.a
+      ref_id: D1.a.4
+      description: Your incident response plan is communicated and understood by the
+        business areas involved with the operation of your essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1
       ref_id: D1.b
@@ -1004,22 +1761,57 @@ objects:
         effective limitation of impact on the operation of your essential function(s).
         During an incident, you have access to timely information on which to base
         your response decisions.
-      annotation: "You understand the resources that will likely be needed to carry\
-        \ out any required response activities, and arrangements are in place to make\
-        \ these resources available.\nYou understand the types of information that\
-        \ will likely be needed to inform response decisions and arrangements are\
-        \ in place to make this information available.\nYour response team members\
-        \ have the skills and knowledge required to decide on the response actions\
-        \ necessary to limit harm, and the authority to carry them out.\nKey roles\
-        \ are duplicated, and operational delivery knowledge is shared with all individuals\
-        \ involved in the operations and recovery of the essential function(s).\n\
-        Back-up mechanisms are available that can be readily activated to allow continued\
-        \ operation of your essential function(s), although possibly at a reduced\
-        \ level, if primary network and information systems fail or are unavailable.\n\
-        Arrangements exist to augment your organisation\u2019s incident response capabilities\
-        \ with external support if necessary (e.g. specialist cyber incident responders)."
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      ref_id: D1.b.1
+      description: You understand the resources that will likely be needed to carry
+        out any required response activities, and arrangements are in place to make
+        these resources available.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      ref_id: D1.b.2
+      description: You understand the types of information that will likely be needed
+        to inform response decisions and arrangements are in place to make this information
+        available.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      ref_id: D1.b.3
+      description: Your response team members have the skills and knowledge required
+        to decide on the response actions necessary to limit harm, and the authority
+        to carry them out.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      ref_id: D1.b.4
+      description: Key roles are duplicated, and operational delivery knowledge is
+        shared with all individuals involved in the operations and recovery of the
+        essential function(s).
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      ref_id: D1.b.5
+      description: Back-up mechanisms are available that can be readily activated
+        to allow continued operation of your essential function(s), although possibly
+        at a reduced level, if primary network and information systems fail or are
+        unavailable.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.b
+      ref_id: D1.b.6
+      description: "Arrangements exist to augment your organisation\u2019s incident\
+        \ response capabilities with external support if necessary (e.g. specialist\
+        \ cyber incident responders)."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1
       ref_id: D1.c
@@ -1027,17 +1819,34 @@ objects:
       description: Your organisation carries out exercises to test response plans,
         using past incidents that affected your (and other) organisation, and scenarios
         that draw on threat intelligence and your risk assessment.
-      annotation: 'Exercise scenarios are based on incidents experienced by your and
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c
+      ref_id: D1.c.1
+      description: Exercise scenarios are based on incidents experienced by your and
         other organisations or are composed using experience or threat intelligence.
-
-        Exercise scenarios are documented, regularly reviewed, and validated.
-
-        Exercises are routinely run, with the findings documented and used to refine
-        incident response plans and protective security, in line with the lessons
-        learned.
-
-        Exercises test all parts of your response cycle relating to your essential
-        function(s) (e.g. restoration of normal function(s) levels).'
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c
+      ref_id: D1.c.2
+      description: Exercise scenarios are documented, regularly reviewed, and validated.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c
+      ref_id: D1.c.3
+      description: Exercises are routinely run, with the findings documented and used
+        to refine incident response plans and protective security, in line with the
+        lessons learned.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d1.c
+      ref_id: D1.c.4
+      description: Exercises test all parts of your response cycle relating to your
+        essential function(s) (e.g. restoration of normal function(s) levels).
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2
       assessable: false
       depth: 2
@@ -1048,36 +1857,76 @@ objects:
         causes and to ensure appropriate remediating action is taken to protect against
         future incidents.
     - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2
       ref_id: D2.a
       name: Incident Root Cause Analysis
       description: When an incident occurs, steps must be taken to understand its
         root causes and ensure appropriate remediating action is taken.
-      annotation: 'Root cause analysis is conducted routinely as a key part of your
-        lessons learned activities following an incident.
-
-        Your root cause analysis is comprehensive, covering organisational process
-        issues, as well as vulnerabilities in your networks, systems or software.
-
-        All relevant incident data is made available to the analysis team to perform
-        root cause analysis.'
-    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.1
       assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a
+      ref_id: D2.a.1
+      description: Root cause analysis is conducted routinely as a key part of your
+        lessons learned activities following an incident.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a
+      ref_id: D2.a.2
+      description: Your root cause analysis is comprehensive, covering organisational
+        process issues, as well as vulnerabilities in your networks, systems or software.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.a
+      ref_id: D2.a.3
+      description: All relevant incident data is made available to the analysis team
+        to perform root cause analysis.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2
       ref_id: D2.b
       name: Using Incidents to Drive Improvements
       description: Your organisation uses lessons learned from incidents to improve
         your security measures.
-      annotation: "You have a documented incident review process/policy which ensures\
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+      ref_id: D2.b.1
+      description: "You have a documented incident review process/policy which ensures\
         \ that lessons learned from each incident are identified, captured,\Land acted\
-        \ upon.\nLessons learned cover issues with reporting, roles, governance, skills\
-        \ and organisational processes as well as technical aspects of network and\
-        \ information systems.\nYou use lessons learned to improve security measures,\
-        \ including updating and retesting response plans when necessary.\nSecurity\
-        \ improvements identified as a result of lessons learned are prioritised,\
-        \ with the highest priority improvements completed quickly.\nAnalysis is fed\
-        \ to senior management and incorporated into risk management and continuous\
-        \ improvement."
+        \ upon."
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+      ref_id: D2.b.2
+      description: Lessons learned cover issues with reporting, roles, governance,
+        skills and organisational processes as well as technical aspects of network
+        and information systems.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+      ref_id: D2.b.3
+      description: You use lessons learned to improve security measures, including
+        updating and retesting response plans when necessary.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+      ref_id: D2.b.4
+      description: Security improvements identified as a result of lessons learned
+        are prioritised, with the highest priority improvements completed quickly.
+    - urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:ncsc-caf-3.2:d2.b
+      ref_id: D2.b.5
+      description: Analysis is fed to senior management and incorporated into risk
+        management and continuous improvement.
