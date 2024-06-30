@@ -631,14 +631,14 @@ def aggregate_risks_per_field(
                     .filter(residual_level=i)
                     # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this usefull ?
+                )  # What the second filter does ? Is this useful ?
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
                     # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this usefull ?
+                )  # What the second filter does ? Is this useful ?
 
             if "count" not in values[m["risk"][i][field]]:
                 values[m["risk"][i][field]]["count"] = count

@@ -9,6 +9,7 @@
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
+	export let orientation = 'vertical';
 
 	export let values: any[]; // Set the types for these variables later on
 	export let colors: string[] = [];
@@ -49,7 +50,7 @@
 				top: 20,
 				// left: 'center',
 				right: 10,
-				orient: 'vertical'
+				orient: orientation
 			},
 			series: [
 				{

@@ -368,7 +368,7 @@
 										<DonutChart
 											s_label={m.complianceAssessments()}
 											name={compliance_assessment.name + '_donut'}
-											values={compliance_assessment.donut.values}
+											values={compliance_assessment.donut.result.values}
 										/>
 									</div>
 									<div class="absolute top-2 right-4 mt-2 space-x-1">
