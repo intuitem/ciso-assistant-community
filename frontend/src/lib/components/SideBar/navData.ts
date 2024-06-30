@@ -121,7 +121,7 @@ export const navData = {
 				},
 				{
 					name: 'requirementMappingSets',
-					fa_icon: 'fa-solid fa-folder',
+					fa_icon: 'fa-solid fa-diagram-project',
 					href: '/requirement-mapping-sets'
 				}
 			]
@@ -131,7 +131,7 @@ export const navData = {
 			items: [
 				{
 					name: 'domains',
-					fa_icon: 'fa-solid fa-diagram-project',
+					fa_icon: 'fa-solid fa-sitemap',
 					href: '/folders'
 				},
 				{
