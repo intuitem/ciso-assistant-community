@@ -782,6 +782,8 @@ When a compliance assessment is created, each requirement of the corresponding f
 Here are the specific fields for requirement assessments:
 - result: --/compliant/partially compliant/non-compliant/not applicable
 - score: --/<integer value from min_score to max_score>.
+- a status: (todo/in progress/in review/done) that facilitates reporting.
+
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
