@@ -40,7 +40,13 @@ export const load = (async ({ fetch, params }) => {
 	if (auditModel.foreignKeyFields) {
 		for (const keyField of auditModel.foreignKeyFields) {
 			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			let url: string;
+			if (keyField.urlModel === 'frameworks') {
+				url = `${BASE_API_URL}/${keyField.urlModel}/${compliance_assessment.framework.id}/mappings/`;
+			}
+			else{
+				url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			}
 			const response = await fetch(url);
 			if (response.ok) {
 				foreignKeys[keyField.field] = await response.json().then((data) => data.results);

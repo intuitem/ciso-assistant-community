@@ -40,7 +40,7 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment
+from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
@@ -1102,6 +1102,19 @@ class FrameworkViewSet(BaseModelViewSet):
                 .count()
             )
         return Response({"results": used_frameworks})
+    
+    @action(detail=True, methods=["get"], name="Get focal frameworks from mappings")
+    def mappings(self, request, pk):
+        framework = self.get_object()
+        available_focal_frameworks_objects = [framework]
+        mappings = RequirementMappingSet.objects.filter(reference_framework=framework)
+        for mapping in mappings:
+            available_focal_frameworks_objects.append(mapping.focal_framework)
+        available_focal_frameworks = FrameworkReadSerializer(
+            available_focal_frameworks_objects, many=True
+        ).data
+        return Response({"results": available_focal_frameworks})
+        
 
 
 class RequirementNodeViewSet(BaseModelViewSet):
