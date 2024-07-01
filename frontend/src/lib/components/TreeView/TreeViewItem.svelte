@@ -402,7 +402,7 @@
 		{#if $$slots.lead && !hideLead}
 			<div class="tree-item-lead flex flex-row items-center space-x-2" data-testid="tree-item-lead">
 				{#if mappingInference}
-					<i class="fa-solid fa-share-nodes" />
+					<i class="fa-solid fa-diagram-project" />
 				{/if}
 				<slot name="lead" />
 			</div>
