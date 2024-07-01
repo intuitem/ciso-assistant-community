@@ -1959,11 +1959,11 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
             RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
             RequirementAssessment.Result.COMPLIANT: "#86efac",
-            RequirementAssessment.Result.NOT_APPLICABLE: "#9ca3af",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
             RequirementAssessment.Status.TODO: "#9ca3af",
-            RequirementAssessment.Status.IN_PROGRESS: "#ffd6a5",
-            RequirementAssessment.Status.IN_REVIEW: "#9bf6ff",
-            RequirementAssessment.Status.DONE: "#caffbf",
+            RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
+            RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
+            RequirementAssessment.Status.DONE: "#86efac",
         }
 
         compliance_assessments_result = {"values": [], "labels": []}
@@ -2194,7 +2194,9 @@ class ComplianceAssessment(Assessment):
                         requirement_assessment.status = inferences[0][1]
                     ref = refs[0]
                 else:
-                    lowest_result = min(inferences, key=lambda x: result_order.index(x[0]))
+                    lowest_result = min(
+                        inferences, key=lambda x: result_order.index(x[0])
+                    )
                     requirement_assessment.result = lowest_result[0]
                     if lowest_result[1]:
                         requirement_assessment.status = lowest_result[1]
@@ -2288,22 +2290,21 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self, mapping: RequirementMapping, reference_requirement_assessment: Self
     ) -> str | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-            return (reference_requirement_assessment.result,
-                    reference_requirement_assessment.status
-                    )
+            return (
+                reference_requirement_assessment.result,
+                reference_requirement_assessment.status,
+            )
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
             if reference_requirement_assessment.result in (
                 RequirementAssessment.Result.COMPLIANT,
                 RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             ):
-                return (RequirementAssessment.Result.PARTIALLY_COMPLIANT,
-                        None)
+                return (RequirementAssessment.Result.PARTIALLY_COMPLIANT, None)
             if (
                 reference_requirement_assessment.result
                 == RequirementAssessment.Result.NON_COMPLIANT
             ):
-                return (RequirementAssessment.Result.NON_COMPLIANT,
-                        None)
+                return (RequirementAssessment.Result.NON_COMPLIANT, None)
         return (None, None)
 
     class Meta:

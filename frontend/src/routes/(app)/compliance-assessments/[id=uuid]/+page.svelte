@@ -17,7 +17,7 @@
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceColorMap } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap } from './utils';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
@@ -79,8 +79,8 @@
 					statusI18n: node.status_i18n,
 					resultI18n: node.result_i18n,
 					assessable: node.assessable,
-					statusColor: complianceColorMap[node.status],
-					resultColor: complianceColorMap[node.result],
+					statusColor: complianceStatusColorMap[node.status],
+					resultColor: complianceResultColorMap[node.result],
 					score: node.score,
 					isScored: node.is_scored,
 					max_score: node.max_score
