@@ -312,7 +312,9 @@ def get_sorted_requirement_nodes(
                     "is_scored": child_req_as.is_scored if child_req_as else None,
                     "score": child_req_as.score if child_req_as else None,
                     "max_score": max_score if child_req_as else None,
-                    "mapping_inference": child_req_as.mapping_inference if child_req_as else None,
+                    "mapping_inference": child_req_as.mapping_inference
+                    if child_req_as
+                    else None,
                     "status_display": child_req_as.get_status_display()
                     if child_req_as
                     else None,
