@@ -1102,7 +1102,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 .count()
             )
         return Response({"results": used_frameworks})
-    
+
     @action(detail=True, methods=["get"], name="Get focal frameworks from mappings")
     def mappings(self, request, pk):
         framework = self.get_object()
@@ -1114,7 +1114,6 @@ class FrameworkViewSet(BaseModelViewSet):
             available_focal_frameworks_objects, many=True
         ).data
         return Response({"results": available_focal_frameworks})
-        
 
 
 class RequirementNodeViewSet(BaseModelViewSet):
@@ -1342,7 +1341,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirement_assessment.result = baseline_requirement_assessment.result
                 requirement_assessment.status = baseline_requirement_assessment.status
                 requirement_assessment.score = baseline_requirement_assessment.score
-                requirement_assessment.is_scored = baseline_requirement_assessment.is_scored
+                requirement_assessment.is_scored = (
+                    baseline_requirement_assessment.is_scored
+                )
                 requirement_assessment.evidences.set(
                     baseline_requirement_assessment.evidences.all()
                 )

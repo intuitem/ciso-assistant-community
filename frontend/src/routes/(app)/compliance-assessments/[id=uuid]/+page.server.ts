@@ -43,8 +43,7 @@ export const load = (async ({ fetch, params }) => {
 			let url: string;
 			if (keyField.urlModel === 'frameworks') {
 				url = `${BASE_API_URL}/${keyField.urlModel}/${compliance_assessment.framework.id}/mappings/`;
-			}
-			else{
+			} else {
 				url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
 			}
 			const response = await fetch(url);
