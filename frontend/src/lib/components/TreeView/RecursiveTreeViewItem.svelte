@@ -124,7 +124,7 @@
 	let children: TreeViewItem[][] = [];
 
 	function hasMappingInference(node: TreeViewNode) {
-		const length = Object.keys(node.contentProps?.mapping_inference).length;
+		const length = Object.keys(node.contentProps?.mapping_inference ?? {}).length;
 		if (length > 0) {
 			return true;
 		}
