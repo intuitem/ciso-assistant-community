@@ -67,11 +67,8 @@
 		return resultCounts;
 	};
 
-	const mappingInference = { results: ['compliant'] };
-
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
-			node.mappingInference = mappingInference;
 			node.resultCounts = countResults(node);
 			return {
 				id: id,
@@ -79,12 +76,9 @@
 				contentProps: { ...node, canEditRequirementAssessment },
 				lead: TreeViewItemLead,
 				leadProps: {
-					result: node.result,
-					status: node.status,
 					statusI18n: node.status_i18n,
 					resultI18n: node.result_i18n,
 					assessable: node.assessable,
-					statusDisplay: node.status_display,
 					statusColor: complianceColorMap[node.status],
 					resultColor: complianceColorMap[node.result],
 					score: node.score,
