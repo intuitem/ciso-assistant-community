@@ -2180,26 +2180,31 @@ class ComplianceAssessment(Assessment):
                     compliance_assessment=reference_assessment,
                     requirement=mapping.reference_requirement,
                 )
-                inferred_result = requirement_assessment.infer_result(
+                inferred_result, inferred_status = requirement_assessment.infer_result(
                     mapping=mapping,
                     reference_requirement_assessment=reference_requirement_assessment,
                 )
                 if inferred_result in result_order:
-                    inferences.append(inferred_result)
+                    inferences.append((inferred_result, inferred_status))
                     refs.append(reference_requirement_assessment)
             if inferences:
                 if len(inferences) == 1:
-                    requirement_assessment.result = inferences[0]
+                    requirement_assessment.result = inferences[0][0]
+                    if inferences[0][1]:
+                        requirement_assessment.status = inferences[0][1]
                     ref = refs[0]
                 else:
-                    lowest_result = min(inferences, key=lambda x: result_order.index(x))
-                    requirement_assessment.result = lowest_result
-                    ref = refs[inferences.index(lowest_result)]
+                    lowest_result = min(inferences, key=lambda x: result_order.index(x[0]))
+                    requirement_assessment.result = lowest_result[0]
+                    if lowest_result[1]:
+                        requirement_assessment.status = lowest_result[1]
+                    ref = refs[inferences.index(lowest_result[0])]
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
                     "reference_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
+                        "coverage": mapping.coverage(),
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
@@ -2283,19 +2288,23 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self, mapping: RequirementMapping, reference_requirement_assessment: Self
     ) -> str | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-            return reference_requirement_assessment.result
+            return (reference_requirement_assessment.result,
+                    reference_requirement_assessment.status
+                    )
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
             if reference_requirement_assessment.result in (
                 RequirementAssessment.Result.COMPLIANT,
                 RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             ):
-                return RequirementAssessment.Result.PARTIALLY_COMPLIANT
+                return (RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+                        None)
             if (
                 reference_requirement_assessment.result
                 == RequirementAssessment.Result.NON_COMPLIANT
             ):
-                return RequirementAssessment.Result.NON_COMPLIANT
-        return None
+                return (RequirementAssessment.Result.NON_COMPLIANT,
+                        None)
+        return (None, None)
 
     class Meta:
         verbose_name = _("Requirement assessment")

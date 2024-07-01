@@ -278,6 +278,14 @@
 									</a>
 								</p>
 								<p class="whitespace-pre-line py-1">
+									<span class="italic">{m.coverageColon()}</span>
+									<span
+										class="badge {classesText} h-fit"
+									>
+										{m[mappingInference.referenceRequirementAssessment.coverage]()}
+									</span>
+								</p>
+								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.suggestionColon()}</span>
 									<span
 										class="badge {classesText} h-fit"
