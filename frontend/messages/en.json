@@ -632,5 +632,8 @@
 	"referenceFramework": "Reference framework",
 	"focalFramework": "Focal framework",
 	"baseline": "Baseline",
-	"createAuditFromBaseline": "Create audit from baseline"
+	"createAuditFromBaseline": "Create audit from baseline",
+	"coverageColon": "Coverage:",
+	"full": "Full",
+	"partial": "Partial"
 }
