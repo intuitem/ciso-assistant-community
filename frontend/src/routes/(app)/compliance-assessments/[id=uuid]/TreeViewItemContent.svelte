@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { complianceResultColorMap, complianceStatusColorMap } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap, darkenColor } from './utils';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
@@ -124,7 +124,7 @@
 							{#if resultCounts[status[0]]}
 								<span
 									class="badge mr-1"
-									style="background-color: {status[1] + '33'}; color: {status[1]}"
+									style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
 								>
 									{resultCounts[status[0]]}
 									{m[toCamelCase(status[0])]()}
