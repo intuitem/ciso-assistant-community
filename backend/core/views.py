@@ -1340,6 +1340,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     compliance_assessment=baseline, requirement=requirement
                 )
                 requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.score = baseline_requirement_assessment.score
+                requirement_assessment.is_scored = baseline_requirement_assessment.is_scored
                 requirement_assessment.evidences.set(
                     baseline_requirement_assessment.evidences.all()
                 )
