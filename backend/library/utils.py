@@ -152,6 +152,7 @@ class RequirementMappingSetImporter:
             urn=self.data["reference_framework"], default_locale=True
         )
         mapping_set = RequirementMappingSet.objects.create(
+            name=self.data["name"],
             urn=self.data["urn"],
             focal_framework=_focal_framework,
             reference_framework=_reference_framework,
