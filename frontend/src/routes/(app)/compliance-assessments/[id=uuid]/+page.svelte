@@ -313,7 +313,7 @@
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
 			<button class="btn variant-filled-surface" on:click={(_) => modalCreateForm()}
-				><i class="fa-solid fa-share-nodes mr-2" /> {m.mapping()}
+				><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
 			</button>
 		</div>
 	</div>
@@ -326,7 +326,7 @@
 			</span>
 		</h4>
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
-			<i class="fa-solid fa-share-nodes" />
+			<i class="fa-solid fa-diagram-project" />
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
