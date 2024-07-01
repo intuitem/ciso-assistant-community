@@ -2206,7 +2206,7 @@ class ComplianceAssessment(Assessment):
                     "reference_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
-                        "coverage": mapping.coverage(),
+                        "coverage": mapping.coverage,
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
