@@ -234,8 +234,10 @@
                             )?.urlModel
                           }/${val.id}`}
                           <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else}
-                          {val}
+                        {:else if m[toCamelCase(val.split(':')[0])]()}
+                        	<span class="text">{m[toCamelCase(val.split(':')[0]+"Colon")]()} {val.split(':')[1]}</span>
+						{:else}
+						  {val ?? '-'}
                         {/if}
                       </li>
                     {/each}
