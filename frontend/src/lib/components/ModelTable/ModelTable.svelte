@@ -183,19 +183,42 @@
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+			
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-start'
+	};
 </script>
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && numberOfRows > 0}
 			<button
-				on:click={() => {
-					displayFilters = !displayFilters;
-				}}
+				use:popup={popupFilter}
 				class="btn variant-filled-primary self-end"
 			>
 				<i class="fa-solid fa-filter mr-2" /> Filters
 			</button>
+			<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1" data-popup="popupFilter">
+				<div class="flex flex-col space-y-2 p-2">
+					{#if filteredFields.length > 0}
+						{#each filteredFields as field}
+							{field}
+							<svelte:component
+								this={filters[field].component}
+								bind:value={filterValues[field]}
+								{...filterProps[field]}
+								{...filters[field].extraProps}
+							/>
+						{/each}
+					{/if}
+				</div>
+			</div>
 		{/if}
 		{#if search}
 			<Search {handler} />
@@ -207,20 +230,6 @@
 			<slot name="addButton" />
 		{/if}
 	</header>
-	{#if displayFilters}
-		<header class="flex justify-items-start content-start flex-wrap space-x-8 p-2">
-			{#if filteredFields.length > 0}
-				{#each filteredFields as field}
-					<svelte:component
-						this={filters[field].component}
-						bind:value={filterValues[field]}
-						{...filterProps[field]}
-						{...filters[field].extraProps}
-					/>
-				{/each}
-			{/if}
-		</header>
-	{/if}
 	<!-- Table -->
 	<!-- prettier-ignore -->
 	<table
