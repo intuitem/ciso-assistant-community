@@ -119,6 +119,7 @@
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
+	$: hasRows = data.length > 0;
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters = fromListView ? listViewFields[tableURLModel].filters ?? {} : {};
@@ -149,12 +150,9 @@
 		}
 	}
 
-	let numberOfRows = 0;
 	let allowOptionsUpdate = true;
 	allRows.subscribe((rows) => {
-		numberOfRows = rows.length;
 		if (!allowOptionsUpdate) return;
-
 		for (const key of filteredFields) {
 			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
 		}
@@ -197,7 +195,7 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if filteredFields.length > 0}
+		{#if filteredFields.length > 0 && hasRows}
 			<button
 				use:popup={popupFilter}
 				class="btn variant-filled-primary self-end"
