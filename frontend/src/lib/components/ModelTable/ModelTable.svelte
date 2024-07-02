@@ -184,7 +184,6 @@
 
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
-			
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
@@ -196,13 +195,13 @@
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && hasRows}
-			<button
-				use:popup={popupFilter}
-				class="btn variant-filled-primary self-end"
-			>
+			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
 				<i class="fa-solid fa-filter mr-2" /> Filters
 			</button>
-			<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200" data-popup="popupFilter">
+			<div
+				class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200"
+				data-popup="popupFilter"
+			>
 				<div class="flex flex-row items-center justify-center space-x-4 p-2">
 					{#each filteredFields as field}
 						<div>
