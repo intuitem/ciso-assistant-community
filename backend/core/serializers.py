@@ -99,9 +99,8 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    approver = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
-    approver = FieldsRelatedField(["first_name", "last_name"])
+    approver = FieldsRelatedField(["id", "first_name", "last_name"])
     state = serializers.CharField(source="get_state_display")
 
     class Meta:
@@ -131,7 +130,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
-    project = FieldsRelatedField(["folder"])
+    project = FieldsRelatedField(["id", "folder"])
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -468,7 +467,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
-    project = FieldsRelatedField(["folder"])
+    project = FieldsRelatedField(["id", "folder"])
     framework = FieldsRelatedField(
         ["id", "min_score", "max_score", "implementation_groups_definition"]
     )
