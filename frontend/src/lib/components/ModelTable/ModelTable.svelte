@@ -149,8 +149,10 @@
 		}
 	}
 
+	let numberOfRows = 0;
 	let allowOptionsUpdate = true;
 	allRows.subscribe((rows) => {
+		numberOfRows = rows.length;
 		if (!allowOptionsUpdate) return;
 
 		for (const key of filteredFields) {
@@ -204,7 +206,7 @@
 			</button>
 			<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200" data-popup="popupFilter">
 				<div class="flex flex-row items-center justify-center space-x-4 p-2">
-					{#if filteredFields.length > 0}
+					{#if numberOfRows > 0}
 						{#each filteredFields as field}
 							<div>
 								<svelte:component
@@ -215,6 +217,8 @@
 								/>
 							</div>
 						{/each}
+					{:else}
+						<p class="text-center text-gray-500">Nothing to filter for now</p>
 					{/if}
 				</div>
 			</div>
