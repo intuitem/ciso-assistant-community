@@ -29,17 +29,71 @@ objects:
       \ que les sections composant le guide PSSI seront mises \xE0 jour ind\xE9pendamment.\
       \  Un formulaire de recueil de commentaires figure en annexe de chaque guide\
       \ afin de renvoyer des propositions et remarques \xE0 la DCSSI. "
-    implementation_groups_definition: []
+    implementation_groups_definition:
+    - ref_id: organisationnel
+      name: Principes organisationnels
+      description: "Politique de s\xE9curit\xE9\n - Organisation de la s\xE9curit\xE9\
+        \n - Gestion des risques SSI\n - S\xE9curit\xE9 et cycle de vie\n - Assurance\
+        \ et certification"
+    - ref_id: "politique-de-s\xE9curit\xE9"
+      name: "Principes organisationnels/Politique de s\xE9curit\xE9"
+    - ref_id: "organisation-de-la-s\xE9curit\xE9"
+      name: "Principes organisationnels/Organisation de la s\xE9curit\xE9"
+    - ref_id: gestion-des-risques-ssi
+      name: Principes organisationnels/Gestion des risques SSI
+    - ref_id: "s\xE9curit\xE9-et-cycle-de-vie"
+      name: "Principes organisationnels/S\xE9curit\xE9 et cycle de vie"
+    - ref_id: assurance-et-certification
+      name: Principes organisationnels/Assurance et certification
+    - ref_id: "de-mise-en-\u0153uv"
+      name: "Principes de mise en \u0153uvre"
+      description: "Aspects humains\n - Planification de la continuit\xE9 des activit\xE9\
+        s\n - Gestion des incidents\n - Sensibilisation et formation\n - Exploitation\n\
+        \ - Aspects physiques et environnementaux"
+    - ref_id: aspects-humains
+      name: "Principes de mise en \u0153uvre/Aspects humains"
+    - ref_id: "planification-de-la-continuit\xE9-des-activit\xE9s"
+      name: "Principes de mise en \u0153uvre/Planification de la continuit\xE9 des\
+        \ activit\xE9s"
+    - ref_id: gestion-des-incidents
+      name: "Principes de mise en \u0153uvre/Gestion des incidents"
+    - ref_id: sensibilisation-et-formation
+      name: "Principes de mise en \u0153uvre/Sensibilisation et formation"
+    - ref_id: exploitation
+      name: "Principes de mise en \u0153uvre/Exploitation"
+    - ref_id: aspects-physiques-et-environnementaux
+      name: "Principes de mise en \u0153uvre/Aspects physiques et environnementaux"
+    - ref_id: techniqu
+      name: Principes techniques
+      description: "Identification / authentification\n - Contr\xF4le d\u2019acc\xE8\
+        s logique\n - Journalisation\n - Infrastructures de gestion des cl\xE9s cryptographiques\n\
+        \ - Signaux compromettants"
+    - ref_id: identification-/-authentification
+      name: Principes techniques/Identification / authentification
+    - ref_id: "contr\xF4le-d\u2019acc\xE8s-logique"
+      name: "Principes techniques/Contr\xF4le d\u2019acc\xE8s logique"
+    - ref_id: journalisation
+      name: Principes techniques/Journalisation
+    - ref_id: "infrastructures-de-gestion-des-cl\xE9s-cryptographiques"
+      name: "Principes techniques/Infrastructures de gestion des cl\xE9s cryptographiques"
+    - ref_id: signaux-compromettants
+      name: Principes techniques/Signaux compromettants
     requirement_nodes:
     - ref_id: PSI
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       name: "Politique de s\xE9curit\xE9"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       depth: 1
       assessable: false
       description: ''
     - ref_id: PSI-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-01
       name: "\xC9volutions de la PSSI"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -57,6 +111,9 @@ objects:
     - ref_id: PSI-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-02
       name: Diffusion de la PSSI
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -77,6 +134,9 @@ objects:
     - ref_id: PSI-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-03
       name: "Contr\xF4le d\u2019application de la PSSI"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -89,6 +149,9 @@ objects:
     - ref_id: PSI-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-04
       name: "Protection des informations confi\xE9es \xE0 l'organisme"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -110,6 +173,9 @@ objects:
     - ref_id: PSI-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-05
       name: "Adoption d'une \xE9chelle de besoins"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -127,6 +193,9 @@ objects:
     - ref_id: PSI-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-06
       name: "Crit\xE8res de d\xE9termination des besoins de s\xE9curit\xE9"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -235,6 +304,9 @@ objects:
     - ref_id: PSI-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-07
       name: "\xAB D\xE9classification \xBB des informations"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -244,6 +316,9 @@ objects:
     - ref_id: PSI-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-08
       name: "\xAB Surclassification \xBB des informations"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -258,6 +333,9 @@ objects:
     - ref_id: PSI-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-09
       name: "Identification et port\xE9e de la classification d\u2019une information"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -277,6 +355,9 @@ objects:
     - ref_id: PSI-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-10
       name: "D\xE9finition et contr\xF4le des habilitations"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -293,6 +374,9 @@ objects:
     - ref_id: PSI-11
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-11
       name: "Crit\xE8res de diffusion interne des informations"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -312,6 +396,9 @@ objects:
     - ref_id: PSI-12
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-12
       name: "Crit\xE8res de diffusion externe des informations"
+      implementation_groups:
+      - "politique-de-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
       assessable: true
@@ -329,6 +416,9 @@ objects:
     - ref_id: ORG
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       name: "Organisation de la s\xE9curit\xE9"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       depth: 1
       assessable: false
       description: ''
@@ -336,6 +426,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-01
       name: "Responsabilit\xE9s g\xE9n\xE9rales pour la s\xE9curit\xE9 du syst\xE8\
         me d'information de l'organisme"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -356,6 +449,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-02
       name: "Les responsabilit\xE9s pour l'\xE9laboration et la mise en \u0153uvre\
         \ d'une PSSI"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -378,6 +474,9 @@ objects:
     - ref_id: ORG-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-03
       name: "Couverture des responsabilit\xE9s"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -399,6 +498,9 @@ objects:
     - ref_id: ORG-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-04
       name: "Responsabilit\xE9s du niveau d\xE9cisionnel"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -454,6 +556,9 @@ objects:
     - ref_id: ORG-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-05
       name: "Responsabilit\xE9s du niveau de pilotage"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -483,6 +588,9 @@ objects:
     - ref_id: ORG-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-06
       name: "Responsabilit\xE9s du niveau op\xE9rationnel"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -510,6 +618,9 @@ objects:
     - ref_id: ORG-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-07
       name: "Autres responsables de l\u2019organisme jouant un r\xF4le dans la SSI"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -557,6 +668,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-08
       name: "Entit\xE9s sp\xE9cifiques d\xE9di\xE9es \xE0 la gestion et au pilotage\
         \ de la s\xE9curit\xE9"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -574,6 +688,9 @@ objects:
     - ref_id: ORG-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-09
       name: "Application de la notion de responsable-d\xE9tenteur"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -596,6 +713,9 @@ objects:
     - ref_id: ORG-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-10
       name: "Application de la notion de responsable-d\xE9positaire"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -611,6 +731,9 @@ objects:
     - ref_id: ORG-11
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-11
       name: Gestion des relations avec des tiers intervenant dans le cadre de la SSI
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -636,6 +759,9 @@ objects:
     - ref_id: ORG-12
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-12
       name: "Cadre contractuel pour les \xE9changes de donn\xE9es s\xE9curis\xE9s"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -662,6 +788,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-13
       name: "Modalit\xE9s d'utilisation des r\xE9seaux de t\xE9l\xE9communication\
         \ externes \xE0 l'organisme"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -688,6 +817,9 @@ objects:
     - ref_id: ORG-14
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-14
       name: "Clauses sp\xE9cifiques de protection des informations"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -704,6 +836,9 @@ objects:
     - ref_id: ORG-15
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-15
       name: "S\xE9lection, coordination et emploi des moyens cryptographiques"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -730,6 +865,9 @@ objects:
     - ref_id: ORG-16
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-16
       name: "Mise en place d'une organisation de veille et de pr\xE9vention"
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -752,6 +890,9 @@ objects:
     - ref_id: ORG-17
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-17
       name: Organisation de cellules de crise
+      implementation_groups:
+      - "organisation-de-la-s\xE9curit\xE9"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
       assessable: true
@@ -769,12 +910,18 @@ objects:
     - ref_id: GER
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       name: Gestion des risques SSI
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       depth: 1
       assessable: false
       description: ''
     - ref_id: GER-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-01
       name: "D\xE9finition du cadre de gestion des risques SSI"
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
       assessable: true
@@ -793,6 +940,9 @@ objects:
     - ref_id: GER-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-02
       name: "Identification des objectifs de s\xE9curit\xE9"
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
       assessable: true
@@ -834,6 +984,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-03
       name: "Circonstances qui justifient une r\xE9\xE9valuation de la s\xE9curit\xE9\
         \ du SI"
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
       assessable: true
@@ -868,6 +1021,9 @@ objects:
     - ref_id: GER-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-04
       name: "\xC9tude prospective sur l'\xE9volution de la SSI"
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
       assessable: true
@@ -888,6 +1044,9 @@ objects:
     - ref_id: GER-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-05
       name: "Ma\xEEtrise et contr\xF4le de certains flux sp\xE9cifiques"
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
       assessable: true
@@ -922,6 +1081,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-06
       name: "Identification des services et moyens justifiant l\u2019utilisation de\
         \ la cryptographie"
+      implementation_groups:
+      - gestion-des-risques-ssi
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
       assessable: true
@@ -938,12 +1100,18 @@ objects:
     - ref_id: CDV
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       name: "S\xE9curit\xE9 et cycle de vie"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       depth: 1
       assessable: false
       description: ''
     - ref_id: CDV-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-01
       name: "Int\xE9gration de la SSI dans les projets"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -959,6 +1127,9 @@ objects:
     - ref_id: CDV-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-02
       name: Conditions de mise en exploitation de tout nouveau constituant du SI
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -977,6 +1148,9 @@ objects:
     - ref_id: CDV-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-03
       name: "Contr\xF4le des logiciels avant leur mise en exploitation"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1012,6 +1186,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-04
       name: "Circonstances retenues pour la mise en \u0153uvre des contr\xF4les de\
         \ s\xE9curit\xE9"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1034,6 +1211,9 @@ objects:
     - ref_id: CDV-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-05
       name: "Modalit\xE9s des contr\xF4les de s\xE9curit\xE9 par le niveau de pilotage"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1057,6 +1237,9 @@ objects:
     - ref_id: CDV-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-06
       name: "Continuit\xE9 du contr\xF4le de s\xE9curit\xE9 par le niveau op\xE9rationnel"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1080,6 +1263,9 @@ objects:
     - ref_id: CDV-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-07
       name: "Contr\xF4le permanent des moyens de protection"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1101,6 +1287,9 @@ objects:
     - ref_id: CDV-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-08
       name: "Application de contr\xF4le de code et de proc\xE9dure de recette"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1115,6 +1304,9 @@ objects:
     - ref_id: CDV-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-09
       name: "Autres types de contr\xF4les n\xE9cessaires"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1141,6 +1333,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-10
       name: "Les processus de contr\xF4le ne doivent pas perturber le fonctionnement\
         \ des SI"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1154,6 +1349,9 @@ objects:
     - ref_id: CDV-11
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-11
       name: "R\xE9alisation d\u2019audit de s\xE9curit\xE9"
+      implementation_groups:
+      - "s\xE9curit\xE9-et-cycle-de-vie"
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
       assessable: true
@@ -1183,12 +1381,18 @@ objects:
     - ref_id: ACR
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       name: Assurance et certification
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       depth: 1
       assessable: false
       description: ''
     - ref_id: ACR-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-01
       name: "Exigences minimales sur les applicatifs utilis\xE9s dans le SI"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1217,6 +1421,9 @@ objects:
     - ref_id: ACR-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-02
       name: "\xC9laboration d'une cible de s\xE9curit\xE9"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1248,6 +1455,9 @@ objects:
     - ref_id: ACR-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-03
       name: "Respect des exigences s\xE9curitaires avant mise en service op\xE9rationnelle"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1263,6 +1473,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-04
       name: "V\xE9rification p\xE9riodique du respect des exigences s\xE9curitaires\
         \ sur les applicatifs"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1275,6 +1488,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-05
       name: "\xC9valuation du niveau de confiance accord\xE9 au SI : \xE9valuation\
         \ et certification"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1307,6 +1523,9 @@ objects:
     - ref_id: ACR-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-06
       name: "Crit\xE8res d'acquisition et conditions d'usage de progiciels"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1325,6 +1544,9 @@ objects:
     - ref_id: ACR-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-07
       name: "Adoption de m\xE9thodes et d'outils de d\xE9veloppement"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1342,6 +1564,9 @@ objects:
     - ref_id: ACR-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-08
       name: "Adoption d'un standard de programmation et de codage des donn\xE9es"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1365,6 +1590,9 @@ objects:
     - ref_id: ACR-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-09
       name: "Homologation du syst\xE8me d'information"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1386,6 +1614,9 @@ objects:
     - ref_id: ACR-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-10
       name: "Agr\xE9ment du syst\xE8me d'information"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1406,6 +1637,9 @@ objects:
     - ref_id: ACR-11
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-11
       name: "Gestion de la documentation de s\xE9curit\xE9"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1423,6 +1657,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-12
       name: "Adoption d'un standard d'\xE9laboration de la documentation de s\xE9\
         curit\xE9"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1441,6 +1678,9 @@ objects:
     - ref_id: ACR-13
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-13
       name: "Production de documents par l\u2019organisme"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1459,6 +1699,9 @@ objects:
     - ref_id: ACR-14
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-14
       name: "Maintenance de la documentation de s\xE9curit\xE9"
+      implementation_groups:
+      - assurance-et-certification
+      - organisationnel
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
       assessable: true
@@ -1470,12 +1713,18 @@ objects:
     - ref_id: ASH
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       name: Aspects humains
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       depth: 1
       assessable: false
       description: ''
     - ref_id: ASH-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-01
       name: "Notion de reconnaissance de responsabilit\xE9"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -1508,6 +1757,9 @@ objects:
     - ref_id: ASH-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-02
       name: "Clauses de s\xE9curit\xE9 dans les contrats de travail"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -1536,6 +1788,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-03
       name: "Adoption de crit\xE8res de s\xE9lection du personnel travaillant sur\
         \ les SI sensibles"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -1553,6 +1808,9 @@ objects:
     - ref_id: ASH-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-04
       name: "Principes g\xE9n\xE9raux d\u2019habilitation"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -1572,6 +1830,9 @@ objects:
     - ref_id: ASH-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-05
       name: "Cat\xE9gories d\u2019habilitations"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -3036,6 +3297,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-06
       name: "R\xE8gles d\u2019attribution et d\u2019engagement (responsabilit\xE9\
         s)"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -3043,6 +3307,9 @@ objects:
     - ref_id: ASH-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-07
       name: Volants de personnel
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -3055,6 +3322,9 @@ objects:
     - ref_id: ASH-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-08
       name: "Proc\xE9dure d'habilitation pour les postes de travail sensibles"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -3084,6 +3354,9 @@ objects:
     - ref_id: ASH-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-09
       name: Cloisonnement des postes de travail sensibles
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -3105,6 +3378,9 @@ objects:
     - ref_id: ASH-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-10
       name: "D\xE9l\xE9gation"
+      implementation_groups:
+      - aspects-humains
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
       assessable: true
@@ -3117,6 +3393,9 @@ objects:
     - ref_id: PSS
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       name: "Planification de la continuit\xE9 des activit\xE9s"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       depth: 1
       assessable: false
       description: " Le plan de continuit\xE9 d'activit\xE9s (BCP \u2013 Business\
@@ -3148,6 +3427,9 @@ objects:
     - ref_id: PSS-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-01
       name: "D\xE9finition du p\xE9rim\xE8tre d\u2019un plan de continuit\xE9"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
       assessable: true
@@ -3162,6 +3444,9 @@ objects:
     - ref_id: PSS-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-02
       name: "Prise en compte des services externalis\xE9s"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
       assessable: true
@@ -3172,6 +3457,9 @@ objects:
     - ref_id: PSS-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-03
       name: "\xC9laboration d'un plan de reprise"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
       assessable: true
@@ -3197,6 +3485,9 @@ objects:
     - ref_id: PSS-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-04
       name: "Positionnement des applications dans le plan de continuit\xE9"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
       assessable: true
@@ -3208,6 +3499,9 @@ objects:
     - ref_id: PSS-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-05
       name: "Mise en place des proc\xE9dures de sauvegarde"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
       assessable: true
@@ -3227,6 +3521,9 @@ objects:
     - ref_id: PSS-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-06
       name: "Tests r\xE9guliers des plans"
+      implementation_groups:
+      - "planification-de-la-continuit\xE9-des-activit\xE9s"
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
       assessable: true
@@ -3238,12 +3535,18 @@ objects:
     - ref_id: INC
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       name: Gestion des incidents
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       depth: 1
       assessable: false
       description: ''
     - ref_id: INC-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-01
       name: "D\xE9finition des situations anormales envisageables"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3259,6 +3562,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-02
       name: "Mise en place d'un r\xE9seau de d\xE9tection et d'alerte des incidents\
         \ de s\xE9curit\xE9"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3286,6 +3592,9 @@ objects:
     - ref_id: INC-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-03
       name: "Ma\xEEtrise des incidents de s\xE9curit\xE9"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3311,6 +3620,9 @@ objects:
     - ref_id: INC-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-04
       name: "Contr\xF4le des incidents de s\xE9curit\xE9"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3343,6 +3655,9 @@ objects:
     - ref_id: INC-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-05
       name: "Moyens de d\xE9tection d\u2019intrusion ou d\u2019utilisation frauduleuse"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3357,6 +3672,9 @@ objects:
     - ref_id: INC-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-06
       name: "Mise en \u0153uvre d\u2019un service d\u2019alerte efficace"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3375,6 +3693,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-07
       name: "Pr\xE9vision des r\xE9actions r\xE9flexes face \xE0 des situations d\u2019\
         urgence"
+      implementation_groups:
+      - gestion-des-incidents
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
       assessable: true
@@ -3392,12 +3713,18 @@ objects:
     - ref_id: FOR
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       name: Sensibilisation et formation
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       depth: 1
       assessable: false
       description: ''
     - ref_id: FOR-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-01
       name: "Documentation des responsabilit\xE9s"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3411,6 +3738,9 @@ objects:
     - ref_id: FOR-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-02
       name: "Sensibilisation g\xE9n\xE9rale \xE0 la s\xE9curit\xE9"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3438,6 +3768,9 @@ objects:
     - ref_id: FOR-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-03
       name: Communication sur la SSI
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3463,6 +3796,9 @@ objects:
     - ref_id: FOR-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-04
       name: Application pour la protection juridique des informations de l'organisme
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3476,6 +3812,9 @@ objects:
     - ref_id: FOR-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-05
       name: "Adaptation de la sensibilisation aux diff\xE9rentes classes d'utilisateurs"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3499,6 +3838,9 @@ objects:
     - ref_id: FOR-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-06
       name: "Sensibilisation r\xE9guli\xE8re des personnels \xE0 la SSI"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3513,6 +3855,9 @@ objects:
     - ref_id: FOR-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-07
       name: Sensibilisation au traitement des incidents
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3526,6 +3871,9 @@ objects:
     - ref_id: FOR-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-08
       name: "Pr\xE9paration et entra\xEEnement \xE0 la gestion des situations de crise"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3542,6 +3890,9 @@ objects:
     - ref_id: FOR-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-09
       name: "Sensibilisation du personnel \xE0 l'usage des TIC"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3555,6 +3906,9 @@ objects:
     - ref_id: FOR-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-10
       name: "Formation du personnel \xE0 l'usage des TIC"
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3566,6 +3920,9 @@ objects:
     - ref_id: FOR-11
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-11
       name: Sensibilisation des utilisateurs aux moyens de supervision
+      implementation_groups:
+      - sensibilisation-et-formation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
       assessable: true
@@ -3584,12 +3941,18 @@ objects:
     - ref_id: EXP
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       name: Exploitation
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       depth: 1
       assessable: false
       description: ''
     - ref_id: EXP-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-01
       name: "Documentation des proc\xE9dures et r\xE8gles d\u2019exploitation"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3605,6 +3968,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-02
       name: "Int\xE9gration de la SSI dans les proc\xE9dures et r\xE8gles d\u2019\
         exploitation"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3614,6 +3980,9 @@ objects:
     - ref_id: EXP-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-03
       name: "S\xE9paration du d\xE9veloppement et des op\xE9rations ou de la production"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3640,6 +4009,9 @@ objects:
     - ref_id: EXP-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-04
       name: "Conditions d'usage de l'infog\xE9rance"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3658,6 +4030,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-05
       name: "Conditions de s\xE9curit\xE9 pour la maintenance des constituants du\
         \ SI"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3681,6 +4056,9 @@ objects:
     - ref_id: EXP-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-06
       name: "Conditions de s\xE9curit\xE9 pour la reprise apr\xE8s maintenance"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3697,6 +4075,9 @@ objects:
     - ref_id: EXP-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-07
       name: "Suivi des op\xE9rations de maintenance des constituants du SI"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3719,6 +4100,9 @@ objects:
     - ref_id: EXP-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-08
       name: Gestion des prestations de services externes
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3741,6 +4125,9 @@ objects:
     - ref_id: EXP-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-09
       name: "Int\xE9gration de la SSI dans les contrats d\u2019infog\xE9rance"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3759,6 +4146,9 @@ objects:
     - ref_id: EXP-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-10
       name: "S\xE9curit\xE9 dans les services externalis\xE9s"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3795,6 +4185,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-11
       name: "Contr\xF4le antiviral des logiciels et donn\xE9es avant leur mise en\
         \ exploitation"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3821,6 +4214,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-12
       name: "Contr\xF4les de s\xE9curit\xE9 en phase d'exploitation du syst\xE8me\
         \ d'information"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3842,6 +4238,9 @@ objects:
     - ref_id: EXP-13
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-13
       name: "R\xE9duction des vuln\xE9rabilit\xE9s"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3858,6 +4257,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-14
       name: "Proc\xE9dures d'exploitation s\xE9curis\xE9e des informations et des\
         \ donn\xE9es"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3895,6 +4297,9 @@ objects:
     - ref_id: EXP-15
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-15
       name: "Mise en place d\u2019une organisation pour la lutte contre le code malveillant"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3917,6 +4322,9 @@ objects:
     - ref_id: EXP-16
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-16
       name: "Consignes de s\xE9curit\xE9 concernant la t\xE9l\xE9-action"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3935,6 +4343,9 @@ objects:
     - ref_id: EXP-17
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-17
       name: Protection et utilisation de la messagerie
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3954,6 +4365,9 @@ objects:
     - ref_id: EXP-18
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-18
       name: "R\xE8gles sp\xE9cifiques de filtrage aux acc\xE8s"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3967,6 +4381,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-19
       name: "Normes de conservation et de destruction des informations \xE0 prot\xE9\
         ger"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -3990,6 +4407,9 @@ objects:
     - ref_id: EXP-20
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-20
       name: "Contr\xF4le des supports amovibles avant leur mise en exploitation"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -4009,6 +4429,9 @@ objects:
     - ref_id: EXP-21
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-21
       name: "Les supports, sources d\u2019infection et de risque de divulgation"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -4033,6 +4456,9 @@ objects:
     - ref_id: EXP-22
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-22
       name: "Mise au rebut des supports ou sortie de mat\xE9riel informatique"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -4053,6 +4479,9 @@ objects:
     - ref_id: EXP-23
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-23
       name: Photocopie de documents
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -4064,6 +4493,9 @@ objects:
     - ref_id: EXP-24
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-24
       name: "Stockage des informations par l\u2019organisme"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -4075,6 +4507,9 @@ objects:
     - ref_id: EXP-25
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-25
       name: Connexion des postes nomades et PDA
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
       assessable: true
@@ -4090,12 +4525,18 @@ objects:
     - ref_id: ENV
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       name: Aspects physiques et environnement
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       depth: 1
       assessable: false
       description: ''
     - ref_id: ENV-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-01
       name: "Continuit\xE9 dans la gestion des biens physiques"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4125,6 +4566,9 @@ objects:
     - ref_id: ENV-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-02
       name: "Prise en compte des contraintes op\xE9rationnelles de l'organisme"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4138,6 +4582,9 @@ objects:
     - ref_id: ENV-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-03
       name: "Compl\xE9tude des mesures de s\xE9curit\xE9 physique"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4177,6 +4624,9 @@ objects:
     - ref_id: ENV-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-04
       name: "Isolement des syst\xE8mes sensibles ou vitaux"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4188,6 +4638,9 @@ objects:
     - ref_id: ENV-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-05
       name: "Ad\xE9quation des mesures de s\xE9curit\xE9 physique aux types de biens"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4203,6 +4656,9 @@ objects:
     - ref_id: ENV-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-06
       name: Protection contre les accidents et pannes
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4237,6 +4693,9 @@ objects:
     - ref_id: ENV-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-07
       name: "Protection physique du c\xE2blage et des r\xE9seaux t\xE9l\xE9coms"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4252,6 +4711,9 @@ objects:
     - ref_id: ENV-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-08
       name: "D\xE9coupage de l'infrastructure en zones de s\xE9curit\xE9"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4271,6 +4733,9 @@ objects:
     - ref_id: ENV-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-09
       name: "Application des modalit\xE9s d'accueil et de circulation des visiteurs"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4287,6 +4752,9 @@ objects:
     - ref_id: ENV-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-10
       name: "Gestion sp\xE9cifique des biens physiques n\xE9cessitant une protection"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4314,6 +4782,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-11
       name: "Proc\xE9dures d'exploitation s\xE9curis\xE9e des moyens d\xE9centralis\xE9\
         s"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4346,6 +4817,9 @@ objects:
     - ref_id: ENV-12
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-12
       name: "Protection de la documentation de s\xE9curit\xE9"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4362,6 +4836,9 @@ objects:
     - ref_id: ENV-13
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-13
       name: "Protection de l\u2019\xE9quipement contre le vol"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4381,6 +4858,9 @@ objects:
     - ref_id: ENV-14
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-14
       name: Protection des supports de sauvegarde
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4393,6 +4873,9 @@ objects:
     - ref_id: ENV-15
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-15
       name: "Protection de la documentation syst\xE8me"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4407,6 +4890,9 @@ objects:
     - ref_id: ENV-16
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-16
       name: "Utilisation \xE0 l\u2019ext\xE9rieur du site"
+      implementation_groups:
+      - exploitation
+      - "de-mise-en-\u0153uv"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
       assessable: true
@@ -4422,12 +4908,18 @@ objects:
     - ref_id: AUT
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
       name: Identification / authentification
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       depth: 1
       assessable: false
       description: ''
     - ref_id: AUT-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-01
       name: "Utilisation d\u2019un m\xEAme secret pour acc\xE9der \xE0 plusieurs services"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
       depth: 2
       assessable: true
@@ -4443,6 +4935,9 @@ objects:
     - ref_id: AUT-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-02
       name: Combinaison des moyens d'authentification
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
       depth: 2
       assessable: true
@@ -4472,6 +4967,9 @@ objects:
     - ref_id: AUT-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-03
       name: "Unicit\xE9 de l'identit\xE9 des utilisateurs"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
       depth: 2
       assessable: true
@@ -4485,6 +4983,9 @@ objects:
     - ref_id: AUT-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-04
       name: "D\xE9livrance et recouvrement des moyens d\u2019authentification"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
       depth: 2
       assessable: true
@@ -4517,12 +5018,18 @@ objects:
     - ref_id: CAL
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       name: "Contr\xF4le d'acc\xE8s logique aux biens"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       depth: 1
       assessable: false
       description: ''
     - ref_id: CAL-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-01
       name: "Dispositifs et proc\xE9dures de protection contre les intrusions"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4541,6 +5048,9 @@ objects:
     - ref_id: CAL-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-02
       name: "Cloisonnement des r\xE9seaux et ma\xEEtrise des flux"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4598,6 +5108,9 @@ objects:
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-03
       name: "Modalit\xE9s d\u2019utilisation s\xE9curis\xE9e des r\xE9seaux de t\xE9\
         l\xE9communication de l\u2019organisme"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4626,6 +5139,9 @@ objects:
     - ref_id: CAL-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-04
       name: "Organisation des acc\xE8s au syst\xE8me d\u2019information"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4682,6 +5198,9 @@ objects:
     - ref_id: CAL-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-05
       name: Fichiers contenant des mots de passe
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4691,6 +5210,9 @@ objects:
     - ref_id: CAL-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-06
       name: "Suppression des acc\xE8s non ma\xEEtris\xE9s au syst\xE8me d\u2019information"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4705,6 +5227,9 @@ objects:
     - ref_id: CAL-07
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-07
       name: "Attribution de privil\xE8ges d\u2019acc\xE8s aux services"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4990,6 +5515,9 @@ objects:
     - ref_id: CAL-08
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-08
       name: "Protection des acc\xE8s particuliers (acc\xE8s de maintenance) au SI"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -4997,6 +5525,9 @@ objects:
     - ref_id: CAL-09
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-09
       name: "V\xE9rification des listes d'acc\xE8s au syst\xE8me d\u2019information"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -5016,6 +5547,9 @@ objects:
     - ref_id: CAL-10
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-10
       name: "Contr\xF4le des privil\xE8ges des utilisateurs du syst\xE8me d'information"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -5035,6 +5569,9 @@ objects:
     - ref_id: CAL-11
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-11
       name: "Application de la notion de profil d'utilisateur du syst\xE8me d'information"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -5058,6 +5595,9 @@ objects:
     - ref_id: CAL-12
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-12
       name: "Administration des privil\xE8ges d'utilisation du syst\xE8me d'information"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -5079,6 +5619,9 @@ objects:
     - ref_id: CAL-13
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-13
       name: Verrouillage des sessions de travail
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -5092,6 +5635,9 @@ objects:
     - ref_id: CAL-14
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-14
       name: "Protection de l\u2019environnement de travail"
+      implementation_groups:
+      - identification-/-authentification
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
       assessable: true
@@ -5102,12 +5648,18 @@ objects:
     - ref_id: JRN
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       name: Journalisation
+      implementation_groups:
+      - journalisation
+      - techniqu
       depth: 1
       assessable: false
       description: ''
     - ref_id: JRN-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-01
       name: Moyens de journalisation des intrusions ou des utilisations frauduleuses
+      implementation_groups:
+      - journalisation
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
       assessable: true
@@ -5131,6 +5683,9 @@ objects:
     - ref_id: JRN-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-02
       name: "Enregistrement des op\xE9rations"
+      implementation_groups:
+      - journalisation
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
       assessable: true
@@ -5145,6 +5700,9 @@ objects:
     - ref_id: JRN-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-03
       name: Constitution de preuves
+      implementation_groups:
+      - journalisation
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
       assessable: true
@@ -5159,6 +5717,9 @@ objects:
     - ref_id: JRN-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-04
       name: Gestion des traces
+      implementation_groups:
+      - journalisation
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
       assessable: true
@@ -5176,6 +5737,9 @@ objects:
     - ref_id: JRN-05
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-05
       name: "Alerte de s\xE9curit\xE9"
+      implementation_groups:
+      - journalisation
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
       assessable: true
@@ -5192,6 +5756,9 @@ objects:
     - ref_id: JRN-06
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-06
       name: "Analyse des enregistrements des donn\xE9es de contr\xF4le de s\xE9curit\xE9"
+      implementation_groups:
+      - journalisation
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
       assessable: true
@@ -5219,12 +5786,18 @@ objects:
     - ref_id: IGC
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
       name: "Infrastructures de gestion des cl\xE9s cryptographiques"
+      implementation_groups:
+      - "infrastructures-de-gestion-des-cl\xE9s-cryptographiques"
+      - techniqu
       depth: 1
       assessable: false
       description: ''
     - ref_id: IGC-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-01
       name: "Politique de gestion des cl\xE9s"
+      implementation_groups:
+      - "infrastructures-de-gestion-des-cl\xE9s-cryptographiques"
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
       depth: 2
       assessable: true
@@ -5244,6 +5817,9 @@ objects:
     - ref_id: IGC-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-02
       name: "Protection des cl\xE9s secr\xE8tes ou cl\xE9s priv\xE9es"
+      implementation_groups:
+      - "infrastructures-de-gestion-des-cl\xE9s-cryptographiques"
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
       depth: 2
       assessable: true
@@ -5263,6 +5839,9 @@ objects:
     - ref_id: IGC-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-03
       name: "Certification des cl\xE9s publiques"
+      implementation_groups:
+      - "infrastructures-de-gestion-des-cl\xE9s-cryptographiques"
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
       depth: 2
       assessable: true
@@ -5275,6 +5854,9 @@ objects:
     - ref_id: SCP
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
       name: Signaux compromettants
+      implementation_groups:
+      - signaux-compromettants
+      - techniqu
       depth: 1
       assessable: false
       description: " Tout mat\xE9riel ou syst\xE8me qui traite des informations sous\
@@ -5296,6 +5878,9 @@ objects:
     - ref_id: SCP-01
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-01
       name: Zonage
+      implementation_groups:
+      - signaux-compromettants
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
       depth: 2
       assessable: true
@@ -5308,6 +5893,9 @@ objects:
     - ref_id: SCP-02
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-02
       name: "Mat\xE9riel TEMPEST"
+      implementation_groups:
+      - signaux-compromettants
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
       depth: 2
       assessable: true
@@ -5325,6 +5913,9 @@ objects:
     - ref_id: SCP-03
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-03
       name: Cages de Faraday
+      implementation_groups:
+      - signaux-compromettants
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
       depth: 2
       assessable: true
@@ -5334,6 +5925,9 @@ objects:
     - ref_id: SCP-04
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-04
       name: Signaux compromettants intentionnels
+      implementation_groups:
+      - signaux-compromettants
+      - techniqu
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
       depth: 2
       assessable: true

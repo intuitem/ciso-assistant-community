@@ -97,12 +97,59 @@ def parse_description(index, section):
         return ""
 
 
+principes_list = {}
+parent_principes = {}
+principe_parents = {}
+current_implementation_groups = []
+
 for index, section in enumerate(sections):
     requirement = {}
     if section == "Introduction":
         library["objects"]["framework"]["description"] = parse_description(
             index, section
         )
+    if section == "Objet du document":
+        # Populate implementation_groups_definition
+        crop_before = re.split(
+            "Ces principes couvrent 16 domaines de la sécurité des systèmes d’information.",
+            text,
+        )
+        principes = re.split(
+            "Chacun des principes pourra être décliné en règles d'application pour rédiger une PSSI.",
+            crop_before[1],
+        )[0]
+        for principes_section in principes.strip().split("!"):
+            principes_tab = re.split("[0-9]+\\.", principes_section)
+            if len(principes_tab) > 0:
+                principe = principes_tab.pop(0).strip()
+                if principe != "":
+                    parent_principes[principe] = (
+                        principe.strip("Principes").strip().lower().replace(" ", "-")
+                    )
+                    sub_principes = list(map(lambda x: x.strip(), principes_tab))
+                    # print(principe)
+                    # print(tabs)
+                    implementation_group = {
+                        "ref_id": parent_principes[principe],
+                        "name": principe.strip(),
+                        "description": "\n - ".join(sub_principes),
+                    }
+                    library["objects"]["framework"][
+                        "implementation_groups_definition"
+                    ].append(implementation_group)
+                    for sub_principe in sub_principes:
+                        implementation_group = {
+                            "ref_id": sub_principe.lower().replace(" ", "-"),
+                            "name": f"{principe.strip()}/{sub_principe}",
+                        }
+                        principes_list[sub_principe] = sub_principe.lower().replace(
+                            " ", "-"
+                        )
+                        principe_parents[sub_principe] = parent_principes[principe]
+                        library["objects"]["framework"][
+                            "implementation_groups_definition"
+                        ].append(implementation_group)
+
     pattern_section = re.compile(
         "(?P<section>[A-Z]{3})(?P<subsection>-[0-9]{2})? : (?P<title>.*)"
     )
@@ -113,12 +160,22 @@ for index, section in enumerate(sections):
             f'{base_urn}:req_node:{library_name}:{requirement['ref_id'].lower()}'
         )
         requirement["name"] = section_desc.group("title")
+        # if section_desc.group("title") in parent_principes:
+
+        if section_desc.group("title") in principe_parents.keys():
+            current_implementation_groups = [
+                principes_list[section_desc.group("title")],
+                principe_parents[section_desc.group("title")],
+            ]
+        requirement["implementation_groups"] = current_implementation_groups.copy()
+
         if section_desc.group("subsection") is not None:
             requirement["parent_urn"] = (
                 f'{base_urn}:req_node:{library_name}:{requirement['ref_id'].split('-')[0].strip().lower()}'
             )
             requirement["depth"] = 2
             requirement["assessable"] = True
+
         else:
             requirement["depth"] = 1
             requirement["assessable"] = False
