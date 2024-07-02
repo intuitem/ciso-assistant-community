@@ -88,6 +88,7 @@
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
 	export let detailQueryParameter: string | undefined;
+	export let fromListView: boolean = false;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
@@ -120,7 +121,9 @@
 	});
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters = listViewFields[tableURLModel].filters ?? {};
+	const filters = fromListView ?
+		listViewFields[tableURLModel].filters ?? {}
+			: {};
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = {};
 	const filterProps: {
