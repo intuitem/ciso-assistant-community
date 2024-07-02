@@ -204,17 +204,18 @@
 			>
 				<i class="fa-solid fa-filter mr-2" /> Filters
 			</button>
-			<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1" data-popup="popupFilter">
-				<div class="flex flex-col space-y-2 p-2">
+			<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200" data-popup="popupFilter">
+				<div class="flex flex-row items-center justify-center space-x-4 p-2">
 					{#if filteredFields.length > 0}
 						{#each filteredFields as field}
-							{field}
-							<svelte:component
-								this={filters[field].component}
-								bind:value={filterValues[field]}
-								{...filterProps[field]}
-								{...filters[field].extraProps}
-							/>
+							<div>
+								<svelte:component
+									this={filters[field].component}
+									bind:value={filterValues[field]}
+									{...filterProps[field]}
+									{...filters[field].extraProps}
+								/>
+							</div>
 						{/each}
 					{/if}
 				</div>

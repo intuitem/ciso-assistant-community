@@ -7,7 +7,7 @@
 
 {#if options.length > 0}
 	<!-- I should use class="m-0" instead of style="margin: 0;" but i didn't figure out to make tailwind add this class yet -->
-	<select placeholder="" bind:value {...$$restProps} style="margin: 0;">
+	<select class="input bg-surface-50 max-w-2xl" placeholder="" bind:value {...$$restProps} style="margin: 0;">
 		<option value={null} selected>{defaultOptionName}</option>
 		{#each options as option}
 			{#if option}
