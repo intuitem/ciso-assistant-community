@@ -101,12 +101,27 @@ class RequirementMappingImporter:
         self,
         mapping_set: RequirementMappingSet,
     ):
-        focal_requirement = RequirementNode.objects.get(
-            urn=self.data["focal_requirement"], default_locale=True
-        )
-        reference_requirement = RequirementNode.objects.get(
-            urn=self.data["reference_requirement"], default_locale=True
-        )
+        try:
+            focal_requirement = RequirementNode.objects.get(
+                urn=self.data["focal_requirement"], default_locale=True
+            )
+        except RequirementNode.DoesNotExist:
+            raise Http404(
+                "ERROR: Focal requirement with URN {} does not exist".format(
+                    self.data["focal_requirement"]
+                )
+            )
+
+        try:
+            reference_requirement = RequirementNode.objects.get(
+                urn=self.data["reference_requirement"], default_locale=True
+            )
+        except RequirementNode.DoesNotExist:
+            raise Http404(
+                "ERROR: Reference requirement with URN {} does not exist".format(
+                    self.data["reference_requirement"]
+                )
+            )
         return RequirementMapping.objects.create(
             mapping_set=mapping_set,
             focal_requirement=focal_requirement,
