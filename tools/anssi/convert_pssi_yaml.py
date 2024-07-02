@@ -89,11 +89,9 @@ def parse_description(index, section):
     crop_before = re.split(section, text)
     if len(crop_before) > 1:
         cropped = re.split(sections[index + 1], crop_before[1])[0]
-        # print(len(cropped))
         cropped = re.sub(" *- ", "\n - ", cropped)
 
         cropped = re.sub("\. ([A-Z])", ".\n\\1", cropped)
-        # print(f"===\n{cropped}\n")
         if (len(cropped)) > 1:
             return cropped
         return ""
@@ -110,7 +108,6 @@ for index, section in enumerate(sections):
     )
     section_desc = re.match(pattern_section, section)
     if section_desc:
-        # print(f"{section_desc.group("section")}{section_desc.group("subsection")} {section_desc.group("title")}")
         requirement["ref_id"] = section.split(":")[0].strip()
         requirement["urn"] = (
             f'{base_urn}:req_node:{library_name}:{requirement['ref_id'].lower()}'
@@ -130,7 +127,5 @@ for index, section in enumerate(sections):
         library["objects"]["framework"]["requirement_nodes"].append(requirement)
 
 f = open(destfile, "w")
-f.write(yaml.dump(library))
-# for line in structured[key]:
-#     print(f"\t{line}")
-# print(sections)
+yaml.dump(library, f, sort_keys=False, default_flow_style=False)
+f.close()

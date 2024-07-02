@@ -1,13 +1,21 @@
-copyright: Licence ouverte / Open Licence v2.0 (Etalab)
+urn: urn:deepthoughtsolutions:risk:library:anssi_pssi_2004
+locale: fr
+ref_id: ANSSI-PSSI-2004
+name: ANSSI - Principes de la PSSI 2004
 description: "PSSI \u2014 Guide d\u2019\xE9laboration de politiques de s\xE9curit\xE9\
   \ des syst\xE8mes d\u2019information\n\nExtraction des principes de securit\xE9\
   \ du PSSI\n\n- https://cyber.gouv.fr/publications/pssi-guide-delaboration-de-politiques-de-securite-des-systemes-dinformation\n\
   \nPackag\xE9 par Deepthought Solutions (http://deepthought-solutions.com/) pour\
   \ ciso-assistant\nAuteur: Nicolas Karageuzian\n"
-locale: fr
-name: ANSSI - Principes de la PSSI 2004
+copyright: Licence ouverte / Open Licence v2.0 (Etalab)
+version: 1
+provider: ANSSI
+packager: deepthoughtsolutions
 objects:
   framework:
+    urn: urn:deepthoughtsolutions:risk:framework:anssi_pssi_2004
+    ref_id: ANSSI-PSSI-2004
+    name: ANSSI - Principes de la PSSI 2004
     description: " Le guide PSSI est d\xE9compos\xE9 en quatre sections :\n - l'introduction\
       \ permet de situer la place de la PSSI dans le r\xE9f\xE9rentiel normatif de\
       \ la SSI au sein de l'organisme et de pr\xE9ciser les bases de l\xE9gitimit\xE9\
@@ -22,17 +30,19 @@ objects:
       \  Un formulaire de recueil de commentaires figure en annexe de chaque guide\
       \ afin de renvoyer des propositions et remarques \xE0 la DCSSI. "
     implementation_groups_definition: []
-    name: ANSSI - Principes de la PSSI 2004
-    ref_id: ANSSI-PSSI-2004
     requirement_nodes:
-    - assessable: false
-      depth: 1
-      description: ''
-      name: "Politique de s\xE9curit\xE9"
-      ref_id: PSI
+    - ref_id: PSI
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-    - assessable: true
+      name: "Politique de s\xE9curit\xE9"
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: PSI-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-01
+      name: "\xC9volutions de la PSSI"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
       depth: 2
+      assessable: true
       description: " Un organisme peut changer au cours du temps (organisation, missions,\
         \ p\xE9rim\xE8tre, axes strat\xE9giques, valeurs).\nSon syst\xE8me d\u2019\
         information est donc l\u2019objet de modifications fr\xE9quentes, tout comme\
@@ -44,12 +54,12 @@ objects:
         \ de s\xE9curit\xE9 ;\n - syst\xE9matiquement \xE0 intervalle d\xE9fini ;\n\
         \ - sur demande d'une autorit\xE9 (responsable de la s\xE9curit\xE9, direction\u2026\
         ) dans le cadre d'une proc\xE9dure \xE0 d\xE9finir dans la PSSI. "
-      name: "\xC9volutions de la PSSI"
+    - ref_id: PSI-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-02
+      name: Diffusion de la PSSI
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La PSSI ainsi que toutes ses d\xE9clinaisons op\xE9rationnelles\
         \ doivent \xEAtre parfaitement document\xE9es et les versions de r\xE9f\xE9\
         rences \xE0 jour doivent \xEAtre facilement accessibles \xE0 tous les personnels\
@@ -64,24 +74,24 @@ objects:
         \ d\xE9taill\xE9s pour les informations pertinentes en fonction des lecteurs.\n\
         Le but de ces synth\xE8ses est de permettre \xE0 chacun de conna\xEEtre les\
         \ enjeux et les r\xE8gles de s\xE9curit\xE9 en fonction de ses besoins. "
-      name: Diffusion de la PSSI
+    - ref_id: PSI-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-03
+      name: "Contr\xF4le d\u2019application de la PSSI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il est judicieux de pr\xE9voir des proc\xE9dures et moyens de\
         \ contr\xF4le interne de l'application de la PSSI et de les compl\xE9ter par\
         \ des proc\xE9dures et moyens d\u2019audits externes. \xC9diter des r\xE8\
         gles sans se donner les moyens de contr\xF4ler leur application ne constitue\
         \ pas une situation acceptable, en particulier sur le plan de la s\xE9curit\xE9\
         . "
-      name: "Contr\xF4le d\u2019application de la PSSI"
+    - ref_id: PSI-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-04
+      name: "Protection des informations confi\xE9es \xE0 l'organisme"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Ce principe permet de s'assurer de l'exhaustivit\xE9 des r\xE9\
         f\xE9rences r\xE9glementaires.\nLes informations d\xE9tenues provisoirement\
         \ par l'organisme et qui comportent, du fait de leur propri\xE9taire, une\
@@ -97,12 +107,12 @@ objects:
         Dans le cas o\xF9 ces r\xE8gles ne d\xE9coulent pas de r\xE9glementations\
         \ communes, ils convient de contractualiser l\u2019engagement des parties\
         \ vis-\xE0-vis des informations \xE9chang\xE9es.   "
-      name: "Protection des informations confi\xE9es \xE0 l'organisme"
+    - ref_id: PSI-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-05
+      name: "Adoption d'une \xE9chelle de besoins"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Une \xE9chelle de besoins selon diff\xE9rents crit\xE8res de\
         \ s\xE9curit\xE9 (disponibilit\xE9, int\xE9grit\xE9, confidentialit\xE9\u2026\
         ) permettra de faciliter la classification objective des \xE9l\xE9ments essentiels\
@@ -114,12 +124,12 @@ objects:
         \ l'organisme et li\xE9es \xE0 ses orientations strat\xE9giques.\nPar ailleurs,\
         \ dans le plan-type propos\xE9 dans le guide PSSI, il est recommand\xE9 d'inclure\
         \ cette \xE9chelle dans la PSSI. "
-      name: "Adoption d'une \xE9chelle de besoins"
+    - ref_id: PSI-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-06
+      name: "Crit\xE8res de d\xE9termination des besoins de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La d\xE9marche m\xE9thodologique du guide PSSI propose une approche\
         \ pour d\xE9terminer les besoins de s\xE9curit\xE9 (en termes de disponibilit\xE9\
         , d'int\xE9grit\xE9, de confidentialit\xE9\u2026) des \xE9l\xE9ments essentiels\
@@ -222,21 +232,21 @@ objects:
         \ s'appuyer sur des crit\xE8res propres \xE0 l'organisme comme, par exemple,\
         \ un secteur particulier (\xE9tudes, innovations\u2026), la provenance et\
         \ le niveau de co\xFBt.  "
-      name: "Crit\xE8res de d\xE9termination des besoins de s\xE9curit\xE9"
+    - ref_id: PSI-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-07
+      name: "\xAB D\xE9classification \xBB des informations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La classification d\u2019une information est parfois attribu\xE9\
         e pour une p\xE9riode de temps.\nDes r\xE8gles devront d\xE9finir les p\xE9\
         riodes minimales selon la nature des informations.   "
-      name: "\xAB D\xE9classification \xBB des informations"
+    - ref_id: PSI-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-08
+      name: "\xAB Surclassification \xBB des informations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le degr\xE9 de protection doit \xEAtre proportionnel \xE0 la\
         \ classification des informations et des syst\xE8mes.\nSi l'emploi d\u2019\
         une classification \xE9lev\xE9e semble garantir une meilleure protection,\
@@ -245,12 +255,12 @@ objects:
         Pour \xE9viter cela il convient :\n - d\u2019\xE9viter de surclasser l\u2019\
         information ;\n - de revoir p\xE9riodiquement la classification attribu\xE9\
         e. "
-      name: "\xAB Surclassification \xBB des informations"
+    - ref_id: PSI-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-09
+      name: "Identification et port\xE9e de la classification d\u2019une information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019identification de la classification doit \xEAtre claire,\
         \ connue de tous et imm\xE9diatement reconnaissable.\nPour les documents,\
         \ elle doit \xEAtre int\xE9gr\xE9e aux chartes graphiques ; pour les disquettes\
@@ -264,12 +274,12 @@ objects:
         \ provenant d\u2019autres organismes. \xC0 l\u2019inverse la classification\
         \ d\xE9finie pour l\u2019organisme peut n\u2019avoir de sens que dans le p\xE9\
         rim\xE8tre de la PSSI. "
-      name: "Identification et port\xE9e de la classification d\u2019une information"
+    - ref_id: PSI-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-10
+      name: "D\xE9finition et contr\xF4le des habilitations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'organisme propri\xE9taire des informations doit \xEAtre en\
         \ mesure d'attribuer des habilitations li\xE9es \xE0 l'utilisation des informations\
         \ et il a pour mission de d\xE9finir les r\xE8gles de gestion des habilitations\
@@ -280,12 +290,12 @@ objects:
         \ mais doit respecter les r\xE8gles de gestion d\xE9finies par le propri\xE9\
         taire (clients, sous-traitants...) en fonction de la classification affect\xE9\
         e. "
-      name: "D\xE9finition et contr\xF4le des habilitations"
+    - ref_id: PSI-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-11
+      name: "Crit\xE8res de diffusion interne des informations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Afin d'\xE9viter les indiscr\xE9tions et les fuites, les informations\
         \ et g\xE9n\xE9ralement les supports associ\xE9s, ne doivent pouvoir \xEA\
         tre utilis\xE9s que dans un environnement r\xE9pondant aux exigences de s\xE9\
@@ -299,12 +309,12 @@ objects:
         tre (pour la confidentialit\xE9) peut \xEAtre \xE9tendu aux besoins d'en modifier\
         \ (pour l'int\xE9grit\xE9), d'en utiliser (pour la disponibilit\xE9)\u2026\
         \ "
-      name: "Crit\xE8res de diffusion interne des informations"
+    - ref_id: PSI-12
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-12
+      name: "Crit\xE8res de diffusion externe des informations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-11
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La mise \xE0 disposition non contr\xF4l\xE9e d'informations n\xE9\
         cessitant une protection peut porter pr\xE9judice \xE0 l'organisme (par exemple,\
         \ perte de cr\xE9dibilit\xE9 ou d'image de marque, r\xE9cup\xE9ration de savoir-faire\u2026\
@@ -316,18 +326,19 @@ objects:
         \ dans le cadre de ce principe, il peut \xEAtre envisag\xE9 que la diffusion\
         \ externe des informations soit effectu\xE9e par du personnel habilit\xE9\
         \ et selon une proc\xE9dure d'autorisation pr\xE9alable. "
-      name: "Crit\xE8res de diffusion externe des informations"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi
-      ref_id: PSI-12
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:psi-12
-    - assessable: false
-      depth: 1
-      description: ''
-      name: "Organisation de la s\xE9curit\xE9"
-      ref_id: ORG
+    - ref_id: ORG
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-    - assessable: true
+      name: "Organisation de la s\xE9curit\xE9"
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: ORG-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-01
+      name: "Responsabilit\xE9s g\xE9n\xE9rales pour la s\xE9curit\xE9 du syst\xE8\
+        me d'information de l'organisme"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
       depth: 2
+      assessable: true
       description: " La nomination d'un responsable de la s\xE9curit\xE9 des syst\xE8\
         mes d\u2019information (RSSI ou \xE9quivalent) est n\xE9cessaire pour assurer\
         \ la responsabilit\xE9 globale de l\u2019\xE9laboration, de la mise en \u0153\
@@ -341,13 +352,13 @@ objects:
         \ cette fonction est un signal fort et n\xE9cessaire de l'importance donn\xE9\
         e par l'organisme \xE0 sa PSSI.\nDans le cadre des administrations, la voie\
         \ fonctionnelle SSI couvre ces responsabilit\xE9s. "
-      name: "Responsabilit\xE9s g\xE9n\xE9rales pour la s\xE9curit\xE9 du syst\xE8\
-        me d'information de l'organisme"
+    - ref_id: ORG-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-02
+      name: "Les responsabilit\xE9s pour l'\xE9laboration et la mise en \u0153uvre\
+        \ d'une PSSI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La PSSI concerne toutes les fonctions vitales d'un organisme\
         \ ; en effet, celui-ci ne pourrait g\xE9n\xE9ralement pas supporter une d\xE9\
         faillance prolong\xE9e de son ou de ses syst\xE8mes d'information.  De ce\
@@ -364,13 +375,12 @@ objects:
         \ indique \xE9galement que la s\xE9curit\xE9 du SI ne se limite pas aux aspects\
         \ et aux \xE9volutions techniques mais qu\u2019elle englobe toute \xE9volution\
         \ ou modification de l\u2019organisation, des missions\u2026. "
-      name: "Les responsabilit\xE9s pour l'\xE9laboration et la mise en \u0153uvre\
-        \ d'une PSSI"
+    - ref_id: ORG-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-03
+      name: "Couverture des responsabilit\xE9s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le principe g\xE9n\xE9ral de sensibilisation de l'OCDE \xE9nonce\
         \ : \"Les attributions et responsabilit\xE9s des propri\xE9taires, des fournisseurs,\
         \ des utilisateurs de syst\xE8me d'information et des autres parties concern\xE9\
@@ -386,12 +396,12 @@ objects:
         \ s\xE9curit\xE9 li\xE9e aux r\xE9seaux ou syst\xE8mes transversaux tel que\
         \ le r\xE9seau bureautique d\u2019entreprise ou le dispositif d\u2019acc\xE8\
         s aux r\xE9seaux externes. "
-      name: "Couverture des responsabilit\xE9s"
+    - ref_id: ORG-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-04
+      name: "Responsabilit\xE9s du niveau d\xE9cisionnel"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il appartient au niveau d\xE9cisionnel de prendre toute disposition\
         \ pour concevoir et mettre en place une s\xE9curit\xE9 adapt\xE9e aux besoins\
         \ et objectifs de l'organisme et de s'assurer du respect de l\u2019application\
@@ -441,12 +451,12 @@ objects:
         \ en fonction des besoins (tels de gros projets d\u2019\xE9volution majeure\
         \ du SI) s\u2019adjoindre temporairement des sp\xE9cialistes ou experts des\
         \ domaines concern\xE9s. "
-      name: "Responsabilit\xE9s du niveau d\xE9cisionnel"
+    - ref_id: ORG-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-05
+      name: "Responsabilit\xE9s du niveau de pilotage"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " D\xE8s lors que la taille d\u2019un organisme le justifie, il\
         \ sera identifi\xE9 des sous-ensembles (sites, parties du SI, divisions\u2026\
         ) avec une mise en place de responsables \xAB locaux \xBB, une d\xE9l\xE9\
@@ -470,12 +480,12 @@ objects:
         \ - au traitement de crises, li\xE9es \xE0 la s\xE9curit\xE9 du syst\xE8me\
         \ d\u2019information ;\n - \xE0 la veille technologique, au suivi des besoins\
         \ SSI de l\u2019organisme, et \xE0 l\u2019\xE9volution de la PSSI. "
-      name: "Responsabilit\xE9s du niveau de pilotage"
+    - ref_id: ORG-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-06
+      name: "Responsabilit\xE9s du niveau op\xE9rationnel"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " \xC0 tous les niveaux, les autorit\xE9s hi\xE9rarchiques sont\
         \ personnellement responsables de l'application des mesures, d\xE9finies par\
         \ les autorit\xE9s qualifi\xE9es, destin\xE9es \xE0 assurer la s\xE9curit\xE9\
@@ -497,12 +507,12 @@ objects:
         s des personnels de l\u2019organisme doivent \xE9galement couvrir le cas o\xF9\
         \ ils interviennent dans un autre SI que celui de l\u2019organisme auquel\
         \ ils appartiennent (clients, partenaires\u2026).   "
-      name: "Responsabilit\xE9s du niveau op\xE9rationnel"
+    - ref_id: ORG-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-07
+      name: "Autres responsables de l\u2019organisme jouant un r\xF4le dans la SSI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il existe d\u2019autres fonctions non d\xE9di\xE9es \xE0 la s\xE9\
         curit\xE9 mais jouant n\xE9anmoins des r\xF4les particuliers indispensables\
         \ au fonctionnement de la SSI.\nCes fonctions sont notamment :\n - les agents\
@@ -543,12 +553,13 @@ objects:
         \ des actions sp\xE9cifiques de s\xE9curit\xE9 d\xE9finies par exemple dans\
         \ le cadre de plans d\u2019am\xE9lioration de la s\xE9curit\xE9, de migration\
         \ d\u2019applications\u2026 "
-      name: "Autres responsables de l\u2019organisme jouant un r\xF4le dans la SSI"
+    - ref_id: ORG-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-08
+      name: "Entit\xE9s sp\xE9cifiques d\xE9di\xE9es \xE0 la gestion et au pilotage\
+        \ de la s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " D'autres entit\xE9s sp\xE9cifiques peuvent \xEAtre cr\xE9\xE9\
         es.\nParmi ces entit\xE9s, on peut notamment citer :\n - un comit\xE9 de s\xE9\
         curit\xE9, responsable de la maintenance de la PSSI et du suivi de l\u2019\
@@ -560,13 +571,12 @@ objects:
         \ suivi des alertes s\xE9curit\xE9 et de leur traitement selon leur pertinence\
         \ ;\n - une cellule d\u2019audit, charg\xE9e de la r\xE9alisation effective\
         \ des audits du syst\xE8me d\u2019information.   "
-      name: "Entit\xE9s sp\xE9cifiques d\xE9di\xE9es \xE0 la gestion et au pilotage\
-        \ de la s\xE9curit\xE9"
+    - ref_id: ORG-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-09
+      name: "Application de la notion de responsable-d\xE9tenteur"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La notion de responsable-d\xE9tenteur concerne le responsable\
         \ hi\xE9rarchique d'une unit\xE9 organique (\xE9tablissement, service, centre\
         \ de responsabilit\xE9s ou de profit) ou l'autorit\xE9 qualifi\xE9e telle\
@@ -583,12 +593,12 @@ objects:
         \ \xE0 jour des informations (en accord avec les r\xE8gles de classification\
         \ en vigueur dans l'organisme) ou de modifications des logiciels et des mat\xE9\
         riels dont il dispose. "
-      name: "Application de la notion de responsable-d\xE9tenteur"
+    - ref_id: ORG-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-10
+      name: "Application de la notion de responsable-d\xE9positaire"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le responsable-d\xE9positaire re\xE7oit d\xE9l\xE9gation du responsable-d\xE9\
         tenteur pour l'application des lois, r\xE8glements et des r\xE8gles de protection\
         \ concernant les informations, logiciels et mat\xE9riels durant les phases\
@@ -598,12 +608,12 @@ objects:
         \ du patrimoine de l'organisme et il est alors tenu, tout particuli\xE8rement,\
         \ de se porter garant de l'application de la loi concernant la protection\
         \ juridique des logiciels qui lui sont confi\xE9s (copies illicites). "
-      name: "Application de la notion de responsable-d\xE9positaire"
+    - ref_id: ORG-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-11
+      name: Gestion des relations avec des tiers intervenant dans le cadre de la SSI
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La PSSI doit formaliser les types de relation, les consignes\
         \ et identifier les contacts utiles avec les organismes tiers jouant un r\xF4\
         le (ou susceptible de jouer un r\xF4le) dans le cadre du suivi et du maintien\
@@ -623,12 +633,12 @@ objects:
         mes r\xE8gles de s\xE9curit\xE9 s\u2019imposant aux personnels internes sont\
         \ applicables (documentation et aspects contractuels) et appliqu\xE9es par\
         \ les acteurs concern\xE9s. "
-      name: Gestion des relations avec des tiers intervenant dans le cadre de la SSI
+    - ref_id: ORG-12
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-12
+      name: "Cadre contractuel pour les \xE9changes de donn\xE9es s\xE9curis\xE9s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-11
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les propositions d'acc\xE8s \xE0 des services ou \xE0 des applications\
         \ t\xE9l\xE9matiques internes ou externes \xE0 l'organisme posent le probl\xE8\
         me de la coop\xE9ration entre les diff\xE9rents syst\xE8mes d'information.\n\
@@ -648,12 +658,13 @@ objects:
         \ de structuration des donn\xE9es ;\n - les responsabilit\xE9s en cas de pertes\
         \ des informations ;\n - les mesures sp\xE9cifiques pour la protection des\
         \ cl\xE9s de chiffrement. "
-      name: "Cadre contractuel pour les \xE9changes de donn\xE9es s\xE9curis\xE9s"
+    - ref_id: ORG-13
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-13
+      name: "Modalit\xE9s d'utilisation des r\xE9seaux de t\xE9l\xE9communication\
+        \ externes \xE0 l'organisme"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-12
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-12
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'utilisation des r\xE9seaux de t\xE9l\xE9communication externes\
         \ \xE0 l'organisme met en relation des utilisateurs qui n'ont pas, \xE0 priori,\
         \ les m\xEAmes exigences de s\xE9curit\xE9, et qui par ailleurs ne sont pas\
@@ -674,13 +685,12 @@ objects:
         \ sur ses responsabilit\xE9s vis \xE0 vis des informations que lui confie\
         \ l\u2019entreprise.\nLes rubriques tir\xE9es de l'architecture OSI s'appliquent\
         \ au cas des r\xE9seaux externes \xE0 l'organisme. "
-      name: "Modalit\xE9s d'utilisation des r\xE9seaux de t\xE9l\xE9communication\
-        \ externes \xE0 l'organisme"
+    - ref_id: ORG-14
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-14
+      name: "Clauses sp\xE9cifiques de protection des informations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-13
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-13
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Lorsque des \xE9changes sont pr\xE9vus avec des tiers, des clauses\
         \ sp\xE9cifiques peuvent \xEAtre incluses dans les contrats, r\xE9gissant\
         \ le cadre de ces \xE9changes.\nElles portent sur les moyens, comme :\n -\
@@ -691,12 +701,12 @@ objects:
         \ - r\xE9pudiation\u2026 Si l\u2019organisme s\u2019est engag\xE9 \xE0 respecter\
         \ de telles clauses \xE9nonc\xE9es par un tiers, elle devra en informer les\
         \ personnels concern\xE9s, voire les inclure dans sa PSSI. "
-      name: "Clauses sp\xE9cifiques de protection des informations"
+    - ref_id: ORG-15
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-15
+      name: "S\xE9lection, coordination et emploi des moyens cryptographiques"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-14
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-14
-    - assessable: true
       depth: 2
+      assessable: true
       description: " En raison des enjeux, le choix des moyens (par exemple logiciels\
         \ ou mat\xE9riels cryptographiques utilisables) et plus encore des services\
         \ externes (par exemple : autorit\xE9 de certification, prestataire de service\
@@ -717,12 +727,12 @@ objects:
         \ g\xE9n\xE9rale.\nIl convient de veiller \xE0 ce que des clauses de protection,\
         \ de s\xE9curit\xE9 et de garantie convenables soient explicitement pr\xE9\
         sentes dans chacun des contrats avec ces prestataires. "
-      name: "S\xE9lection, coordination et emploi des moyens cryptographiques"
+    - ref_id: ORG-16
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-16
+      name: "Mise en place d'une organisation de veille et de pr\xE9vention"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-15
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-15
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il est indispensable de d\xE9finir une organisation qui surveille\
         \ et maintienne la liste des risques majeurs qui p\xE8sent sur le syst\xE8\
         me d\u2019information (nouvelles menaces, nouveaux besoins de s\xE9curit\xE9\
@@ -739,12 +749,12 @@ objects:
         un syst\xE8me de veille doit s\u2019accompagner d\u2019un suivi des recommandations\
         \ : la veille n\u2019est pas une fin en soit, il est imp\xE9ratif de contr\xF4\
         ler la mise en \u0153uvre des recommandations issues de la veille. "
-      name: "Mise en place d'une organisation de veille et de pr\xE9vention"
+    - ref_id: ORG-17
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-17
+      name: Organisation de cellules de crise
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-16
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-16
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le principe est de d\xE9finir au pr\xE9alable une organisation\
         \ (responsabilit\xE9s, fonctionnement et moyens) capable de r\xE9pondre \xE0\
         \ des incidents majeurs survenant dans le syst\xE8me d\u2019information.\n\
@@ -756,18 +766,18 @@ objects:
         dures capables de :\n - diffuser l\u2019alerte ;\n - collecter l\u2019information\
         \ ;\n - constituer une cellule de crise ;\n - d\xE9cider des mesures conservatoires\
         \ ;\n - \xE9laborer un plan d\u2019action regroupant des mesures correctives. "
-      name: Organisation de cellules de crise
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org
-      ref_id: ORG-17
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:org-17
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Gestion des risques SSI
-      ref_id: GER
+    - ref_id: GER
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-    - assessable: true
+      name: Gestion des risques SSI
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: GER-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-01
+      name: "D\xE9finition du cadre de gestion des risques SSI"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
       depth: 2
+      assessable: true
       description: " La gestion des risques SSI constitue un processus continu dont\
         \ il convient de d\xE9finir pr\xE9cis\xE9ment le cadre (ressources, moyens,\
         \ responsabilit\xE9s\u2026) pour chacun de ses aspects :\n - appr\xE9ciation\
@@ -780,12 +790,12 @@ objects:
         \ accepter le risque r\xE9siduel ;\n - communication relative au risque :\
         \ cette t\xE2che consiste \xE0 \xE9changer ou partager des informations concernant\
         \ le risque. "
-      name: "D\xE9finition du cadre de gestion des risques SSI"
+    - ref_id: GER-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-02
+      name: "Identification des objectifs de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-      ref_id: GER-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'identification des objectifs de s\xE9curit\xE9 permet de d\xE9\
         finir les besoins r\xE9els de l'organisme en mati\xE8re de SSI.\nCe cahier\
         \ des charges SSI peut \xEAtre formalis\xE9 en respectant les \xE9tapes suivantes,\
@@ -820,12 +830,13 @@ objects:
         \ des assurances pour pallier un manque de comp\xE9tences ou de ressources\
         \ budg\xE9taires.\nC'est sur la base de ces analyses que la d\xE9cision de\
         \ prendre en compte ou non les risques pourra \xEAtre prise. "
-      name: "Identification des objectifs de s\xE9curit\xE9"
+    - ref_id: GER-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-03
+      name: "Circonstances qui justifient une r\xE9\xE9valuation de la s\xE9curit\xE9\
+        \ du SI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-      ref_id: GER-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le principe de r\xE9\xE9valuation des lignes directrices de l'OCDE\
         \ r\xE9gissant la s\xE9curit\xE9 des syst\xE8mes et r\xE9seaux d'information\
         \ stipule : \"Les parties prenantes doivent examiner et r\xE9\xE9valuer la\
@@ -854,13 +865,12 @@ objects:
         flexion sur le plan de la s\xE9curit\xE9.\nCette r\xE9flexion peut conduire\
         \ \xE0 une r\xE9\xE9valuation du syst\xE8me ou seulement \xE0 une modification\
         \ de certaines r\xE8gles. "
-      name: "Circonstances qui justifient une r\xE9\xE9valuation de la s\xE9curit\xE9\
-        \ du SI"
+    - ref_id: GER-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-04
+      name: "\xC9tude prospective sur l'\xE9volution de la SSI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-      ref_id: GER-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Une \xE9tude prospective sur l'\xE9volution de la SSI permet\
         \ d'anticiper sur les besoins \xE0 moyen terme de l'organisme et d'int\xE9\
         grer le plus t\xF4t possible les nouveaux objectifs, logiciels, mat\xE9riels\
@@ -875,12 +885,12 @@ objects:
         \ proposer les am\xE9nagements d'ordre technique ou organisationnel pouvant\
         \ impliquer une modification des principes et des r\xE8gles de la PSSI de\
         \ l'organisme. "
-      name: "\xC9tude prospective sur l'\xE9volution de la SSI"
+    - ref_id: GER-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-05
+      name: "Ma\xEEtrise et contr\xF4le de certains flux sp\xE9cifiques"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-      ref_id: GER-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Lorsque les communications permettent des \xE9changes entre l\u2019\
         int\xE9rieur et l\u2019ext\xE9rieur du SI de l\u2019organisme, ainsi qu'\xE0\
         \ l'int\xE9rieur m\xEAme du SI, voire pour des communications entre p\xE9\
@@ -908,12 +918,13 @@ objects:
         \ que chacun de ces flux doit \xEAtre identifi\xE9 et analys\xE9 sur le plan\
         \ de la s\xE9curit\xE9 et pourra/devra donner lieu \xE0 la mise en place de\
         \ solutions sp\xE9cifiques pour en assurer la s\xE9curit\xE9. "
-      name: "Ma\xEEtrise et contr\xF4le de certains flux sp\xE9cifiques"
+    - ref_id: GER-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-06
+      name: "Identification des services et moyens justifiant l\u2019utilisation de\
+        \ la cryptographie"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-      ref_id: GER-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Compte tenu des implications tant techniques que l\xE9gales,\
         \ il est important d\u2019identifier les applications et services n\xE9cessitant\
         \ l\u2019utilisation de moyens cryptographiques.\nLes solutions cryptographiques\
@@ -924,19 +935,18 @@ objects:
         \ de moyens cryptographiques agr\xE9\xE9s est obligatoire.\nIci encore l'appr\xE9\
         ciation des risques fournit les contraintes r\xE9glementaires en la mati\xE8\
         re ainsi que les besoins des utilisateurs. "
-      name: "Identification des services et moyens justifiant l\u2019utilisation de\
-        \ la cryptographie"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger
-      ref_id: GER-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ger-06
-    - assessable: false
-      depth: 1
-      description: ''
-      name: "S\xE9curit\xE9 et cycle de vie"
-      ref_id: CDV
+    - ref_id: CDV
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-    - assessable: true
+      name: "S\xE9curit\xE9 et cycle de vie"
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: CDV-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-01
+      name: "Int\xE9gration de la SSI dans les projets"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
       depth: 2
+      assessable: true
       description: " La PSSI doit pr\xE9voir une organisation qui assure une prise\
         \ en compte des aspects s\xE9curit\xE9 dans l'ensemble du cycle de vie des\
         \ projets (\xE9tude d'opportunit\xE9, \xE9tude de faisabilit\xE9, conception\
@@ -946,12 +956,12 @@ objects:
         \ de la SSI globale dans l\u2019organisme.\nEn particulier, l\u2019organisme\
         \ doit identifier les domaines et projets dans lesquels des experts reconnus\
         \ doivent intervenir. "
-      name: "Int\xE9gration de la SSI dans les projets"
+    - ref_id: CDV-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-02
+      name: Conditions de mise en exploitation de tout nouveau constituant du SI
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Cette r\xE8gle vise \xE0 r\xE9duire les risques inh\xE9rents\
         \ au manque de coop\xE9ration sur le plan de la s\xE9curit\xE9 avec les autres\
         \ constituants de l'environnement ou l'inadaptation des consignes techniques\
@@ -964,12 +974,12 @@ objects:
         \ modifications techniques et proc\xE9durales \xE0 effectuer ainsi que la\
         \ possibilit\xE9, en cas d'\xE9chec, de restaurer l'environnement technique\
         \ dans l'\xE9tat qui existait avant sa mise en exploitation. "
-      name: Conditions de mise en exploitation de tout nouveau constituant du SI
+    - ref_id: CDV-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-03
+      name: "Contr\xF4le des logiciels avant leur mise en exploitation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les contr\xF4les des logiciels avant leur mise en exploitation\
         \ visent \xE0 lutter tout particuli\xE8rement contre la menace de contamination\
         \ par virus 1 ou autres codes malicieux et le risque de non-conformit\xE9\
@@ -998,12 +1008,13 @@ objects:
         \ sont soumis \xE0 un contr\xF4le.\nLa mise en place de mat\xE9riels d\xE9\
         di\xE9s \xE0 un d\xE9pistage syst\xE9matique constitue une contre-mesure \xE0\
         \ cette menace. "
-      name: "Contr\xF4le des logiciels avant leur mise en exploitation"
+    - ref_id: CDV-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-04
+      name: "Circonstances retenues pour la mise en \u0153uvre des contr\xF4les de\
+        \ s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le responsable de la s\xE9curit\xE9 contr\xF4le la coh\xE9rence\
         \ et la validit\xE9 des programmes d'\xE9quipement de son organisme par rapport\
         \ aux grandes orientations de la s\xE9curit\xE9 et aux orientations strat\xE9\
@@ -1020,13 +1031,12 @@ objects:
         \ le niveau d\xE9cisionnel ; en dehors d'un contexte judiciaire ou disciplinaire,\
         \ ces contr\xF4les devraient \xEAtre accompagn\xE9s d'une action de communication\
         \ et de pr\xE9paration du personnel. "
-      name: "Circonstances retenues pour la mise en \u0153uvre des contr\xF4les de\
-        \ s\xE9curit\xE9"
+    - ref_id: CDV-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-05
+      name: "Modalit\xE9s des contr\xF4les de s\xE9curit\xE9 par le niveau de pilotage"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La r\xE9\xE9valuation p\xE9riodique des vuln\xE9rabilit\xE9s\
         \ des entit\xE9s (mat\xE9riels, logiciels, r\xE9seaux, locaux, organisations,\
         \ personnels) face aux \xE9l\xE9ments mena\xE7ants (accidentels ou d\xE9lib\xE9\
@@ -1044,12 +1054,12 @@ objects:
         \ op\xE9rationnel et aux ressources techniques, une planification par le niveau\
         \ du pilotage s'impose pour qu'ils ne constituent pas une g\xEAne au bon d\xE9\
         roulement de la mission de l'organisme. "
-      name: "Modalit\xE9s des contr\xF4les de s\xE9curit\xE9 par le niveau de pilotage"
+    - ref_id: CDV-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-06
+      name: "Continuit\xE9 du contr\xF4le de s\xE9curit\xE9 par le niveau op\xE9rationnel"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les agents de s\xE9curit\xE9 effectuent les contr\xF4les qui\
         \ leur sont impartis par application de seuils de tol\xE9rance fix\xE9s par\
         \ l'autorit\xE9 qualifi\xE9e.\nL'observation d'\xE9carts r\xE9p\xE9t\xE9s,\
@@ -1067,12 +1077,12 @@ objects:
         \ des \xE9l\xE9ments d'authentification pour les applications classifi\xE9\
         es.\nCes contr\xF4les sont compl\xE9mentaires \xE0 ceux confi\xE9s aux ing\xE9\
         nieurs qui exploitent les journaux d'audits. "
-      name: "Continuit\xE9 du contr\xF4le de s\xE9curit\xE9 par le niveau op\xE9rationnel"
+    - ref_id: CDV-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-07
+      name: "Contr\xF4le permanent des moyens de protection"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le contr\xF4le de l'int\xE9grit\xE9 et de la disponibilit\xE9\
         \ des moyens de protection est un aspect fondamental de la s\xE9curit\xE9\
         .\nCette r\xE8gle concerne les dispositifs de s\xE9curit\xE9 auxquels il est\
@@ -1088,12 +1098,12 @@ objects:
         \ de l'efficacit\xE9 de la s\xE9curit\xE9, sont garanties par la mise   en\
         \ \u0153uvre de mesures de gestion sp\xE9cifiques dont un programme de maintenance\
         \ le plus proactif possible. "
-      name: "Contr\xF4le permanent des moyens de protection"
+    - ref_id: CDV-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-08
+      name: "Application de contr\xF4le de code et de proc\xE9dure de recette"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Des proc\xE9dures de contr\xF4le des d\xE9veloppements peuvent\
         \ \xEAtre men\xE9es pour lutter contre l\u2019introduction de fonctions malveillantes\
         \ (par exemple : contr\xF4le mutuel des codes, scellement de code sous la\
@@ -1102,12 +1112,12 @@ objects:
         \ mise en exploitation \xE0 l\u2019ex\xE9cution de proc\xE9dures de recettes\
         \ unitaires, d\u2019int\xE9gration et de qualification.\nUne attention particuli\xE8\
         re sera alors port\xE9e au contr\xF4le des valeurs et aux limites. "
-      name: "Application de contr\xF4le de code et de proc\xE9dure de recette"
+    - ref_id: CDV-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-09
+      name: "Autres types de contr\xF4les n\xE9cessaires"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Voici des exemples de contr\xF4les \xE0 mettre en \u0153uvre\
         \ :\n - contr\xF4le de l\u2019application dans les projets des normes \xE9\
         nonc\xE9es dans la PSSI ;\n - contr\xF4le de la couverture de la PSSI par\
@@ -1127,12 +1137,13 @@ objects:
         \ d\u2019un nouveau syst\xE8me d\u2019information ou d\u2019une \xE9volution\
         \ majeure ;\n - contr\xF4le du respect des lois, r\xE8glements et des diff\xE9\
         rents codes de pratiques ;\n - \u2026 "
-      name: "Autres types de contr\xF4les n\xE9cessaires"
+    - ref_id: CDV-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-10
+      name: "Les processus de contr\xF4le ne doivent pas perturber le fonctionnement\
+        \ des SI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les proc\xE9dures de contr\xF4le doivent \xEAtre clairement d\xE9\
         finies.\nLes acc\xE8s et privil\xE8ges n\xE9cessaires aux tests et aux contr\xF4\
         les du syst\xE8me d\u2019information doivent \xEAtre ma\xEEtris\xE9s dans\
@@ -1140,13 +1151,12 @@ objects:
         tre port\xE9e pour v\xE9rifier que l\u2019ex\xE9cution de ces proc\xE9dures\
         \ n\u2019a pas d\u2019impact significatif sur le fonctionnement du syst\xE8\
         me d\u2019information. "
-      name: "Les processus de contr\xF4le ne doivent pas perturber le fonctionnement\
-        \ des SI"
+    - ref_id: CDV-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-11
+      name: "R\xE9alisation d\u2019audit de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019efficacit\xE9 de tout moyen de s\xE9curit\xE9 ne peut\
         \ s\u2019inscrire dans le temps que si elle est r\xE9guli\xE8rement v\xE9\
         rifi\xE9e \xE0 l\u2019aide d\u2019\xE9l\xE9ments tangibles.\nDes audits de\
@@ -1170,18 +1180,18 @@ objects:
         tre d\xE9finis et encadr\xE9s (choix d\u2019un prestataire, engagement de\
         \ confidentialit\xE9, proc\xE9dures de sauvegarde et plan de remise en route\u2026\
         ).   "
-      name: "R\xE9alisation d\u2019audit de s\xE9curit\xE9"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv
-      ref_id: CDV-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cdv-11
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Assurance et certification
-      ref_id: ACR
+    - ref_id: ACR
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-    - assessable: true
+      name: Assurance et certification
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: ACR-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-01
+      name: "Exigences minimales sur les applicatifs utilis\xE9s dans le SI"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
       depth: 2
+      assessable: true
       description: " Ces exigences doivent \xEAtre clairement \xE9nonc\xE9es et concernent\
         \ principalement :\n - la protection des donn\xE9es de configuration ou de\
         \ param\xE9trage : elles sont trop souvent oubli\xE9es alors qu\u2019elles\
@@ -1204,12 +1214,12 @@ objects:
         \ d\u2019alerte lors de comportements anormaux ou simplement impr\xE9vus ;\n\
         \ - la pr\xE9sence et la pertinence de m\xE9canismes de trace et de journalisation\
         \ disponibles et configurables selon les besoins. "
-      name: "Exigences minimales sur les applicatifs utilis\xE9s dans le SI"
+    - ref_id: ACR-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-02
+      name: "\xC9laboration d'une cible de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La cible de s\xE9curit\xE9 constitue la sp\xE9cification du syst\xE8\
         me en mati\xE8re de s\xE9curit\xE9 ; c'est une \xE9tape tr\xE8s importante\
         \ qui fixe \xE0 la fois l'objectif \xE0 atteindre et les moyens pour y parvenir.\n\
@@ -1235,12 +1245,12 @@ objects:
         \ pour que l'on puisse \xEAtre s\xFBr que les objectifs sont satisfaits, il\
         \ faut d'une part que ces fonctions et m\xE9canismes existent et, d'autre\
         \ part, que l'on puisse leur accorder une confiance suffisante. "
-      name: "\xC9laboration d'une cible de s\xE9curit\xE9"
+    - ref_id: ACR-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-03
+      name: "Respect des exigences s\xE9curitaires avant mise en service op\xE9rationnelle"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La v\xE9rification du respect des exigences doit \xEAtre :\n\
         \ - pour une part, mise en oeuvre lors de la s\xE9lection (logiciels achet\xE9\
         s) ou de la sp\xE9cification (logiciels d\xE9velopp\xE9s) afin que les caract\xE9\
@@ -1249,24 +1259,25 @@ objects:
         \ - pour une autre part, effectu\xE9e dans les conditions pr\xE9-op\xE9rationnelles\
         \ afin que soit garanti le niveau de s\xE9curit\xE9 dans les conditions effectives\
         \ d\u2019exploitation (environnement, param\xE9trage\u2026).   "
-      name: "Respect des exigences s\xE9curitaires avant mise en service op\xE9rationnelle"
+    - ref_id: ACR-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-04
+      name: "V\xE9rification p\xE9riodique du respect des exigences s\xE9curitaires\
+        \ sur les applicatifs"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Pour se prot\xE9ger contre une d\xE9rive dans le temps, il est\
         \ important de mettre en place des proc\xE9dures conduisant \xE0 un contr\xF4\
         le p\xE9riodique r\xE9gulier du respect des exigences s\xE9curitaires sur\
         \ les caract\xE9ristiques et le fonctionnement des applicatifs.\nUne partie\
         \ de ce contr\xF4le peut \xEAtre interne. "
-      name: "V\xE9rification p\xE9riodique du respect des exigences s\xE9curitaires\
-        \ sur les applicatifs"
+    - ref_id: ACR-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-05
+      name: "\xC9valuation du niveau de confiance accord\xE9 au SI : \xE9valuation\
+        \ et certification"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La conception du syst\xE8me est guid\xE9e par une d\xE9marche\
         \ coh\xE9rente qui conduit \xE0 ce que les objectifs de s\xE9curit\xE9 soient\
         \ atteints ; les fonctions de s\xE9curit\xE9 sont choisies pour satisfaire\
@@ -1293,13 +1304,12 @@ objects:
         \ confirm\xE9s par une d\xE9claration formelle appel\xE9e certificat .\nToutefois,\
         \ la certification n'a aucun caract\xE8re obligatoire : il appartient au commanditaire\
         \ de l'\xE9valuation de juger du besoin de certification. "
-      name: "\xC9valuation du niveau de confiance accord\xE9 au SI : \xE9valuation\
-        \ et certification"
+    - ref_id: ACR-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-06
+      name: "Crit\xE8res d'acquisition et conditions d'usage de progiciels"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Si les crit\xE8res d'achat de progiciels sont essentiellement\
         \ \xE9conomiques et op\xE9rationnels (disponibilit\xE9 imm\xE9diate du produit,\
         \ co\xFBt accessible, maintenance et assistance technique), il n'en demeure\
@@ -1312,12 +1322,12 @@ objects:
         cision d'acquisition ;\n - les tests de conformit\xE9 et d'int\xE9grit\xE9\
         \ avant la mise en service des progiciels ;\n - les restrictions d'utilisation\
         \ en fonction de la sensibilit\xE9 des postes de travail. "
-      name: "Crit\xE8res d'acquisition et conditions d'usage de progiciels"
+    - ref_id: ACR-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-07
+      name: "Adoption de m\xE9thodes et d'outils de d\xE9veloppement"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'adoption, d\xE8s la conception du syst\xE8me d'information,\
         \ de m\xE9thodes et d'outils de d\xE9veloppement marque la volont\xE9 de l'organisme\
         \ de ma\xEEtriser la s\xE9curit\xE9.\nL'application de cette r\xE8gle permet\
@@ -1329,12 +1339,12 @@ objects:
         \ pour le d\xE9veloppement du syst\xE8me d'information mais elle appelle \xE0\
         \ veiller sur la n\xE9cessaire coh\xE9rence qui doit exister entre les diff\xE9\
         rentes m\xE9thodes utilis\xE9es par l'organisme. "
-      name: "Adoption de m\xE9thodes et d'outils de d\xE9veloppement"
+    - ref_id: ACR-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-08
+      name: "Adoption d'un standard de programmation et de codage des donn\xE9es"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'adoption d'un standard de programmation int\xE9resse tous les\
         \ d\xE9veloppements d'applications informatiques, y compris les parties logicielles\
         \ que peuvent contenir les mat\xE9riels ou dispositifs divers du syst\xE8\
@@ -1352,12 +1362,12 @@ objects:
         \ en compte les particularit\xE9s fonctionnelles des utilisateurs de l'organisme.\n\
         L'administrateur de donn\xE9es est responsable de la bonne d\xE9finition des\
         \ donn\xE9es et de la structure des fichiers et bases de donn\xE9es. "
-      name: "Adoption d'un standard de programmation et de codage des donn\xE9es"
+    - ref_id: ACR-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-09
+      name: "Homologation du syst\xE8me d'information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'homologation de s\xE9curit\xE9 est la d\xE9claration par l\u2019\
         autorit\xE9 d\u2019homologation (gouvernementale ou sp\xE9cifique \xE0 l'organisme\
         \ selon le cas), au vu du dossier d\u2019homologation, que le SI consid\xE9\
@@ -1373,12 +1383,12 @@ objects:
         un niveau de risque r\xE9siduel qualifi\xE9 et quantifi\xE9 en termes de confidentialit\xE9\
         , d\u2019int\xE9grit\xE9, de disponibilit\xE9, d\u2019authenticit\xE9 et de\
         \ non r\xE9pudiation. "
-      name: "Homologation du syst\xE8me d'information"
+    - ref_id: ACR-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-10
+      name: "Agr\xE9ment du syst\xE8me d'information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'\xE9valuation et la certification qui en confirme les r\xE9\
         sultats permettent seulement d'assurer que la cible de s\xE9curit\xE9 est\
         \ bien atteinte.\nElle ne constitue qu'un des \xE9l\xE9ments pour juger si\
@@ -1393,12 +1403,12 @@ objects:
         \ produit ou le syst\xE8me \xE9valu\xE9 peut prot\xE9ger des informations\
         \ jusqu'\xE0 un niveau sp\xE9cifi\xE9, dans des conditions d'emploi d\xE9\
         finies. "
-      name: "Agr\xE9ment du syst\xE8me d'information"
+    - ref_id: ACR-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-11
+      name: "Gestion de la documentation de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La gestion de la documentation de s\xE9curit\xE9 comprend la\
         \ comptabilit\xE9, la mise \xE0 jour, la reproduction et la destruction :\n\
         \ - la gestion de la documentation de s\xE9curit\xE9 repose sur une comptabilit\xE9\
@@ -1409,12 +1419,13 @@ objects:
         es sur ordre du responsable de la s\xE9curit\xE9 qui v\xE9rifie que l'op\xE9\
         ration porte sur la totalit\xE9 des documents d\xE9sign\xE9s et n'affecte\
         \ qu'eux seuls. "
-      name: "Gestion de la documentation de s\xE9curit\xE9"
+    - ref_id: ACR-12
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-12
+      name: "Adoption d'un standard d'\xE9laboration de la documentation de s\xE9\
+        curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-11
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La diversit\xE9 des \xE9quipements, des logiciels et des proc\xE9\
         dures impose la d\xE9finition d'un standard d'\xE9laboration de la documentation\
         \ de s\xE9curit\xE9.\nCe standard concerne, en premier lieu, le mod\xE8le\
@@ -1427,13 +1438,12 @@ objects:
         \ servis \xE0 l'\xE9laboration de la documentation sont manipul\xE9s et prot\xE9\
         g\xE9s au m\xEAme titre et dans les m\xEAmes conditions que les documents\
         \ de s\xE9curit\xE9 qui en r\xE9sultent.   "
-      name: "Adoption d'un standard d'\xE9laboration de la documentation de s\xE9\
-        curit\xE9"
+    - ref_id: ACR-13
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-13
+      name: "Production de documents par l\u2019organisme"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-12
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-12
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Tout document produit par l\u2019organisme doit \xEAtre conforme\
         \ \xE0 la charte graphique et \xE0 sa politique d\u2019assurance qualit\xE9\
         .\nIl doit notamment porter une r\xE9f\xE9rence unique, permettant d\u2019\
@@ -1446,29 +1456,29 @@ objects:
         \ le support fera l\u2019objet d\u2019application de r\xE8gles de protection\
         \ adapt\xE9es.\nDes r\xE8gles sp\xE9cifiques de s\xE9curit\xE9 seront applicables\
         \ en fonction de la classification. "
-      name: "Production de documents par l\u2019organisme"
+    - ref_id: ACR-14
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-14
+      name: "Maintenance de la documentation de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-13
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-13
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Une organisation et des r\xE8gles doivent \xEAtre \xE9nonc\xE9\
         es pour que l\u2019ensemble de la documentation s\xE9curit\xE9 soit mise \xE0\
         \ jour lors de l\u2019ach\xE8vement de toute modification ( cf. gestion documentaire\
         \ ) et que l\u2019ancienne documentation est archiv\xE9e ou mise au rebut.\
         \   2 "
-      name: "Maintenance de la documentation de s\xE9curit\xE9"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr
-      ref_id: ACR-14
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:acr-14
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Aspects humains
-      ref_id: ASH
+    - ref_id: ASH
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-    - assessable: true
+      name: Aspects humains
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: ASH-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-01
+      name: "Notion de reconnaissance de responsabilit\xE9"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
       depth: 2
+      assessable: true
       description: " Pour les postes de travail comprenant des informations relevant\
         \ du secret de d\xE9fense, l'attestation de reconnaissance de responsabilit\xE9\
         \ est l'engagement que prend une personne de respecter les lois, r\xE8glements\
@@ -1495,12 +1505,12 @@ objects:
         Les incidences sur le plan disciplinaire du non-respect des r\xE8gles internes\
         \ de s\xE9curit\xE9 doivent dans ce cas \xEAtre expliqu\xE9es d\xE8s la prise\
         \ de fonction du personnel nouvellement affect\xE9. "
-      name: "Notion de reconnaissance de responsabilit\xE9"
+    - ref_id: ASH-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-02
+      name: "Clauses de s\xE9curit\xE9 dans les contrats de travail"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les contrats de travail du personnel doivent :\n - soit inclure\
         \ des clauses explicites de s\xE9curit\xE9 du syst\xE8me d\u2019information\
         \ tels que : o interdictions, o devoir de signalement d'une anomalie ou d'une\
@@ -1522,12 +1532,13 @@ objects:
         \ l\u2019organisme (cf. chapitre pr\xE9c\xE9dent traitant des responsabilit\xE9\
         s). (Cf.\nPrincipes d\u2019habilitation et Cf.\nObligations l\xE9gales et\
         \ r\xE9glementaires) "
-      name: "Clauses de s\xE9curit\xE9 dans les contrats de travail"
+    - ref_id: ASH-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-03
+      name: "Adoption de crit\xE8res de s\xE9lection du personnel travaillant sur\
+        \ les SI sensibles"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Cette r\xE8gle concerne toutes les cat\xE9gories de personnel\
         \ qui sont amen\xE9es \xE0 travailler sur les syst\xE8mes d'information sensibles.\n\
         Elle pr\xE9cise, pour les emplois touchant au fonctionnement et \xE0 l'utilisation\
@@ -1539,13 +1550,12 @@ objects:
         \ possibilit\xE9 de v\xE9rification des r\xE9f\xE9rences de travail d'un candidat\
         \ \xE0 un emploi ainsi que celles des personnes affect\xE9es temporairement\
         \ \xE0 une activit\xE9 n\xE9cessitant l'utilisation du syst\xE8me d'information. "
-      name: "Adoption de crit\xE8res de s\xE9lection du personnel travaillant sur\
-        \ les SI sensibles"
+    - ref_id: ASH-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-04
+      name: "Principes g\xE9n\xE9raux d\u2019habilitation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le SI ne doit \xEAtre accessible, physiquement et logiquement,\
         \ qu\u2019\xE0 des personnes nominativement autoris\xE9es.\nAinsi, des restrictions\
         \ d\u2019acc\xE8s aux syst\xE8mes et informations sont d\xE9finies conform\xE9\
@@ -1559,12 +1569,12 @@ objects:
         accomplissement de sa t\xE2che.\nIl est recommand\xE9 que le principe du moindre\
         \ acc\xE8s (habilitation nulle par d\xE9faut) soit appliqu\xE9 lors de l\u2019\
         ouverture / mise en service de tout nouveau syst\xE8me. "
-      name: "Principes g\xE9n\xE9raux d\u2019habilitation"
+    - ref_id: ASH-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-05
+      name: "Cat\xE9gories d\u2019habilitations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les cat\xE9gories d\u2019habilitation doivent \xEAtre prises\
         \ en compte dans les processus de recrutement du personnel ou de s\xE9lection\
         \ de fournisseurs qui font appel \xE0 une proc\xE9dure d\u2019habilitation.\n\
@@ -3022,32 +3032,32 @@ objects:
         \ soumettre le moyen de r\xE9soudre le probl\xE8me \xE9nonc\xE9.  N\xB0 Type\
         \ R\xE9f\xE9rence \xC9nonc\xE9 de la remarque Solution propos\xE9e 1 2 3 4\
         \ 5    Merci de votre contribution  "
-      name: "Cat\xE9gories d\u2019habilitations"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-05
-    - assessable: true
-      depth: 2
-      description: null
+    - ref_id: ASH-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-06
       name: "R\xE8gles d\u2019attribution et d\u2019engagement (responsabilit\xE9\
         s)"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-06
-    - assessable: true
       depth: 2
+      assessable: true
+      description: null
+    - ref_id: ASH-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-07
+      name: Volants de personnel
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
+      depth: 2
+      assessable: true
       description: " Des mesures organisationnelles peuvent \xEAtre prises pour qu\u2019\
         il n\u2019y ait pas de vacance sur un poste vital, m\xEAme temporaire (cong\xE9\
         s\u2026).\nL\u2019organisme devrait pr\xE9voir pour tous les postes de travail\
         \ vitaux un volant de personnel suffisant et exp\xE9riment\xE9.\nToute personne\
         \ occupant au poste vital devrait disposer d\u2019un rempla\xE7ant ayant des\
         \ comp\xE9tences \xE9quivalentes et le m\xEAme niveau de connaissance du dossier. "
-      name: Volants de personnel
+    - ref_id: ASH-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-08
+      name: "Proc\xE9dure d'habilitation pour les postes de travail sensibles"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La sensibilit\xE9 d'un poste de travail fait r\xE9f\xE9rence\
         \ au besoin de confidentialit\xE9, de disponibilit\xE9 et d'int\xE9grit\xE9\
         \ attach\xE9 aux informations, aux logiciels et aux mat\xE9riels qu'il rassemble\
@@ -3071,12 +3081,12 @@ objects:
         \ se r\xE9f\xE9rer \xE0 [REC 600].  2 Un poste de travail est un ensemble\
         \ d\xE9fini de t\xE2ches, de devoirs et de responsabilit\xE9s qui constituent\
         \ le travail habituel d\u2019une personne.   "
-      name: "Proc\xE9dure d'habilitation pour les postes de travail sensibles"
+    - ref_id: ASH-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-09
+      name: Cloisonnement des postes de travail sensibles
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le cloisonnement des postes de travail sensibles vise \xE0 lutter\
         \ contre la fuite des informations repr\xE9sentant un enjeu pour les int\xE9\
         r\xEAts de l'\xC9tat ou de l'organisme.\nPour la pr\xE9servation des int\xE9\
@@ -3092,24 +3102,23 @@ objects:
         vent pas du secret de d\xE9fense, la connaissance des besoins en information\
         \ pour l'accomplissement de la mission ou du m\xE9tier permet la mise en place\
         \ d'un cloisonnement efficace des postes de travail. "
-      name: Cloisonnement des postes de travail sensibles
+    - ref_id: ASH-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-10
+      name: "D\xE9l\xE9gation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les propri\xE9taires ou d\xE9tenteurs d\u2019information peuvent\
         \ d\xE9l\xE9guer la mise en \u0153uvre de moyens de protection \xE0 des personnels\
         \ de l\u2019organisme.\nCependant, ils conservent la responsabilit\xE9 de\
         \ la s\xE9curit\xE9.\nC\u2019est pourquoi, ils doivent disposer de moyens\
         \ pour contr\xF4ler le respect des r\xE8gles de s\xE9curit\xE9.\nLes habilitations\
         \ sont attribu\xE9es \xE0 une personne physique et sont incessibles. "
-      name: "D\xE9l\xE9gation"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash
-      ref_id: ASH-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:ash-10
-    - assessable: false
+    - ref_id: PSS
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
+      name: "Planification de la continuit\xE9 des activit\xE9s"
       depth: 1
+      assessable: false
       description: " Le plan de continuit\xE9 d'activit\xE9s (BCP \u2013 Business\
         \ Continuity Plan ) est un document qui d\xE9finit les proc\xE9dures permettant\
         \ de maintenir les activit\xE9s critiques de l'organisme pendant et apr\xE8\
@@ -3136,11 +3145,12 @@ objects:
         \ de ces plans, notamment en d\xE9finissant la criticit\xE9 des activit\xE9\
         s et des syst\xE8mes d'information, ainsi que les risques r\xE9siduels et\
         \ les mesures de s\xE9curit\xE9 \xE0 int\xE9grer. "
-      name: "Planification de la continuit\xE9 des activit\xE9s"
-      ref_id: PSS
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-    - assessable: true
+    - ref_id: PSS-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-01
+      name: "D\xE9finition du p\xE9rim\xE8tre d\u2019un plan de continuit\xE9"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
       depth: 2
+      assessable: true
       description: " Il convient de d\xE9finir pr\xE9cis\xE9ment l'ensemble du cadre\
         \ du plan de continuit\xE9 (ressources, responsabilit\xE9s, p\xE9riodicit\xE9\
         \ des tests\u2026) pour chacun des aspects suivants :\n - les installations,\
@@ -3149,22 +3159,22 @@ objects:
         \ analyse des risques SSI apportera les \xE9l\xE9ments permettant de d\xE9\
         cider des plans n\xE9cessaires pour l'organisme.\nCes plans ont en effet un\
         \ co\xFBt important qu'il convient de justifier. "
-      name: "D\xE9finition du p\xE9rim\xE8tre d\u2019un plan de continuit\xE9"
+    - ref_id: PSS-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-02
+      name: "Prise en compte des services externalis\xE9s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-      ref_id: PSS-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La gestion de plan de continuit\xE9 impliquant des partenaires\
         \ externes doit \xEAtre approfondie, notamment lors de la contractualisation.\n\
         Elle doit comporter des \xE9l\xE9ments relatifs \xE0 des exercices r\xE9guliers\
         \ visant \xE0 v\xE9rifier le bon fonctionnement des plans.   "
-      name: "Prise en compte des services externalis\xE9s"
+    - ref_id: PSS-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-03
+      name: "\xC9laboration d'un plan de reprise"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-      ref_id: PSS-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Un plan de reprise informatique (ou plan de reprise d'activit\xE9\
         ) est n\xE9cessaire pour prot\xE9ger les t\xE2ches op\xE9rationnelles critiques\
         \ du syst\xE8me d'information face aux d\xE9faillances majeures, aux erreurs\
@@ -3184,23 +3194,23 @@ objects:
         \ temporelles o\xF9 le pr\xE9judice est consid\xE9r\xE9 \xE0 un niveau donn\xE9\
         \ en correspondance avec le niveau de proc\xE9dure d'urgence du plan de reprise\
         \ d'activit\xE9. "
-      name: "\xC9laboration d'un plan de reprise"
+    - ref_id: PSS-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-04
+      name: "Positionnement des applications dans le plan de continuit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-      ref_id: PSS-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " En fonction de l\u2019analyse de risques de l\u2019organisme,\
         \ chaque application doit faire l\u2019objet d\u2019une notation en terme\
         \ de priorit\xE9 de reprise.\nCette notation correspond \xE0 une mesure de\
         \ l\u2019impact qu\u2019aurait l\u2019indisponibilit\xE9 de l\u2019application\
         \ sur l\u2019activit\xE9 de l\u2019organisme. "
-      name: "Positionnement des applications dans le plan de continuit\xE9"
+    - ref_id: PSS-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-05
+      name: "Mise en place des proc\xE9dures de sauvegarde"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-      ref_id: PSS-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Un plan de sauvegarde tenant compte des exigences de d\xE9lai\
         \ de reconstruction des informations par type d\u2019activit\xE9 et/ou de\
         \ processus doit \xEAtre mis en place.\nOn distinguera les sauvegardes syst\xE8\
@@ -3214,29 +3224,29 @@ objects:
         \ que les standards appliqu\xE9s sur le site principal.\nDes moyens de contr\xF4\
         le de la coh\xE9rence et de l\u2019int\xE9grit\xE9 des informations sauvegard\xE9\
         es doivent \xEAtre mis en place et g\xE9r\xE9s. "
-      name: "Mise en place des proc\xE9dures de sauvegarde"
+    - ref_id: PSS-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-06
+      name: "Tests r\xE9guliers des plans"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-      ref_id: PSS-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Pour m\xE9riter un niveau de confiance \xE9lev\xE9, le plan de\
         \ continuit\xE9 et les plans li\xE9s doivent \xEAtre test\xE9s r\xE9guli\xE8\
         rement. \xC0 la fin de chacun de ces exercices, il sera mis en place un groupe\
         \ \xAB retour d\u2019exp\xE9rience \xBB qui mettra \xE0 jour les plans apr\xE8\
         s analyse des disfonctionnements ou lenteurs "
-      name: "Tests r\xE9guliers des plans"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss
-      ref_id: PSS-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:pss-06
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Gestion des incidents
-      ref_id: INC
+    - ref_id: INC
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-    - assessable: true
+      name: Gestion des incidents
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: INC-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-01
+      name: "D\xE9finition des situations anormales envisageables"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
       depth: 2
+      assessable: true
       description: " Les types de situation anormale potentielle couvrent entre autres\
         \ :\n - les pannes ou anomalies de fonctionnement des \xE9quipements mat\xE9\
         riels ;\n - les pannes ou anomalies de fonctionnement des logiciels et applicatifs\
@@ -3245,12 +3255,13 @@ objects:
         \ ou anormaux ;\n - \u2026 L\u2019analyse de risques fournira des \xE9l\xE9\
         ments \xE0 prendre en compte dans le choix des alertes \xE0 faire remonter.\n\
         Ces choix sont en particulier li\xE9s aux objectifs de s\xE9curit\xE9 retenus. "
-      name: "D\xE9finition des situations anormales envisageables"
+    - ref_id: INC-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-02
+      name: "Mise en place d'un r\xE9seau de d\xE9tection et d'alerte des incidents\
+        \ de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La finalit\xE9 d'un r\xE9seau d'alerte est de provoquer une intervention\
         \ aussi rapide que possible, d\xE8s qu'un incident est d\xE9tect\xE9, limitant\
         \ ainsi les cons\xE9quences d'un arr\xEAt du syst\xE8me d'information ou l'activation\
@@ -3272,13 +3283,12 @@ objects:
         \ pour en limiter les cons\xE9quences ; un compte rendu non fond\xE9 et d\xE9\
         menti par les faits est toujours pr\xE9f\xE9rable \xE0 un retard dans l'intervention\
         \ . "
-      name: "Mise en place d'un r\xE9seau de d\xE9tection et d'alerte des incidents\
-        \ de s\xE9curit\xE9"
+    - ref_id: INC-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-03
+      name: "Ma\xEEtrise des incidents de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La ma\xEEtrise des incidents de s\xE9curit\xE9 consiste \xE0\
         \ s'assurer de la continuit\xE9 de la s\xE9curit\xE9 durant toute la dur\xE9\
         e de l'intervention faisant suite \xE0 une alerte : le recours \xE0 des sp\xE9\
@@ -3298,12 +3308,12 @@ objects:
         \ du syst\xE8me d'information : un plan de destruction d'urgence simple et\
         \ pratique de mise en \u0153uvre peut \xEAtre, dans certains cas, le seul\
         \ moyen d'\xE9viter une compromission grave. "
-      name: "Ma\xEEtrise des incidents de s\xE9curit\xE9"
+    - ref_id: INC-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-04
+      name: "Contr\xF4le des incidents de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'absence de suivi des incidents de s\xE9curit\xE9 expose l'organisme\
         \ \xE0 m\xE9conna\xEEtre les vuln\xE9rabilit\xE9s de son syst\xE8me d'information\
         \ et le condamne \xE0 ne pas \xEAtre en mesure de r\xE9agir efficacement face\
@@ -3330,12 +3340,12 @@ objects:
         \ de l'incident impliquent une planification de la collecte des comptes rendus\
         \ d'audit, de la mise en place de mesures de protection et de la communication\
         \ avec les utilisateurs affect\xE9s par l'incident. "
-      name: "Contr\xF4le des incidents de s\xE9curit\xE9"
+    - ref_id: INC-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-05
+      name: "Moyens de d\xE9tection d\u2019intrusion ou d\u2019utilisation frauduleuse"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il est recommand\xE9 que des dispositifs et/ou proc\xE9dures\
         \ puissent d\xE9tecter des tentatives d\u2019intrusion ou d'utilisation frauduleuse\
         \ et permettre ainsi, en r\xE9action, de prendre les mesures n\xE9cessaires\
@@ -3344,12 +3354,12 @@ objects:
         \ ad-hoc, qui peuvent aller d\u2019un m\xE9canisme de supervision bien configur\xE9\
         \ \xE0 des outils sp\xE9cifiques comme les syst\xE8mes de d\xE9tection d\u2019\
         intrusion.   "
-      name: "Moyens de d\xE9tection d\u2019intrusion ou d\u2019utilisation frauduleuse"
+    - ref_id: INC-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-06
+      name: "Mise en \u0153uvre d\u2019un service d\u2019alerte efficace"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le principe est de d\xE9terminer le plus rapidement l\u2019occurrence\
         \ d\u2019un \xE9v\xE9nement constituant (ou susceptible de constituer) les\
         \ pr\xE9mices d\u2019une attaque, d\u2019un incident majeur ou \xE0 l\u2019\
@@ -3361,12 +3371,13 @@ objects:
         \ niveaux d\u2019alerte.\nCes diff\xE9rents niveaux doivent \xEAtre d\xE9\
         tectables par les utilisateurs c\u2019est \xE0 dire que chacun doit conna\xEE\
         tre dans quel niveau le SI se trouve \xE0 un instant donn\xE9. "
-      name: "Mise en \u0153uvre d\u2019un service d\u2019alerte efficace"
+    - ref_id: INC-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-07
+      name: "Pr\xE9vision des r\xE9actions r\xE9flexes face \xE0 des situations d\u2019\
+        urgence"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le principe est de s\xE9lectionner des sc\xE9narios types de\
         \ sinistre et de formaliser les meilleures r\xE9actions en terme de mesures\
         \ conservatoires pour limiter, voire \xE9viter, la propagation des impacts\
@@ -3378,19 +3389,18 @@ objects:
         Ce type de proc\xE9dure s\u2019appuie sur le principe de d\xE9fense en profondeur\
         \ qui permet d\u2019\xE9tablir des barri\xE8res de protection ind\xE9pendantes\
         \ et en fonction de l\u2019alerte. "
-      name: "Pr\xE9vision des r\xE9actions r\xE9flexes face \xE0 des situations d\u2019\
-        urgence"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc
-      ref_id: INC-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:inc-07
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Sensibilisation et formation
-      ref_id: FOR
+    - ref_id: FOR
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-    - assessable: true
+      name: Sensibilisation et formation
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: FOR-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-01
+      name: "Documentation des responsabilit\xE9s"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
       depth: 2
+      assessable: true
       description: " Il est fondamental que l\u2019ensemble des responsabilit\xE9\
         s de SSI soit r\xE9dig\xE9 sans ambigu\xEFt\xE9 et port\xE9 \xE0 la connaissance\
         \ des personnes qui en ont la charge.\nLa description de ces responsabilit\xE9\
@@ -3398,12 +3408,12 @@ objects:
         espace.\nIl est \xE9galement indispensable que tous les acteurs concern\xE9\
         s s\u2019engagent formellement \xE0 prendre connaissance et \xE0 accepter\
         \ ces responsabilit\xE9s. "
-      name: "Documentation des responsabilit\xE9s"
+    - ref_id: FOR-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-02
+      name: "Sensibilisation g\xE9n\xE9rale \xE0 la s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La sensibilisation vise \xE0 faire prendre conscience \xE0 chaque\
         \ utilisateur qu'il d\xE9tient une part importante de responsabilit\xE9 dans\
         \ la lutte contre la malveillance.\nLa d\xE9finition des objectifs de cette\
@@ -3425,12 +3435,12 @@ objects:
         \ la s\xE9curit\xE9 de l\u2019organisme ;\n - les comportements \xE0 adopter\
         \ ;\n - les r\xE8gles sp\xE9cifiques (postes nomades, t\xE9l\xE9-actions\u2026\
         ). "
-      name: "Sensibilisation g\xE9n\xE9rale \xE0 la s\xE9curit\xE9"
+    - ref_id: FOR-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-03
+      name: Communication sur la SSI
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019information concernant l\u2019organisation et les exigences\
         \ g\xE9n\xE9rales de la SSI doit \xEAtre diffus\xE9e le plus largement dans\
         \ l\u2019organisme.\nUn moyen de diffusion doit donc \xEAtre d\xE9fini et\
@@ -3450,12 +3460,12 @@ objects:
         \ des r\xE8gles de s\xE9curit\xE9 et de ses devoirs.\nDe mani\xE8re analogue,\
         \ un dossier de sortie est constitu\xE9 pour informer les personnels quittant\
         \ l\u2019organisme des proc\xE9dures et r\xE8gles \xE0 respecter. "
-      name: Communication sur la SSI
+    - ref_id: FOR-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-04
+      name: Application pour la protection juridique des informations de l'organisme
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Cette r\xE8gle vise \xE0 sensibiliser le personnel sur le devoir\
         \ de protection juridique des informations qu'il utilise ou qui lui sont confi\xE9\
         es afin de diminuer le risque de d\xE9tournement ou d'appropriation par des\
@@ -3463,12 +3473,12 @@ objects:
         \ au principe de responsabilit\xE9 du personnel et, plus particuli\xE8rement,\
         \ \xE0 la r\xE8gle relative \xE0 la notion de responsable-d\xE9tenteur (cf.\
         \ chapitre responsabilit\xE9s ORG). "
-      name: Application pour la protection juridique des informations de l'organisme
+    - ref_id: FOR-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-05
+      name: "Adaptation de la sensibilisation aux diff\xE9rentes classes d'utilisateurs"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " En mati\xE8re de s\xE9curit\xE9, les niveaux de pr\xE9occupations\
         \ diff\xE8rent consid\xE9rablement suivant qu'il s'agit du personnel de direction\
         \ ou d'ex\xE9cution.\nLa sensibilisation est, en cons\xE9quence, adapt\xE9\
@@ -3486,12 +3496,12 @@ objects:
         \ n'atteint pas les objectifs assign\xE9s et laisse voir la s\xE9curit\xE9\
         \ comme une contrainte suppl\xE9mentaire sans valeur ajout\xE9e par rapport\
         \ \xE0 l'aspect productivit\xE9 du poste de travail. "
-      name: "Adaptation de la sensibilisation aux diff\xE9rentes classes d'utilisateurs"
+    - ref_id: FOR-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-06
+      name: "Sensibilisation r\xE9guli\xE8re des personnels \xE0 la SSI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019information permanente des personnes vise \xE0 obtenir\
         \ un niveau de vigilance constant.\nCette information concerne en particulier\
         \ les \xE9volutions de la PSSI et des menaces.\nElle permet d\u2019actualiser\
@@ -3500,12 +3510,12 @@ objects:
         \ correctement appliqu\xE9es.\nToute \xE9volution concernant l\u2019organisation\
         \ et les exigences g\xE9n\xE9rales de la SSI doit \xEAtre \xE9galement diffus\xE9\
         e. "
-      name: "Sensibilisation r\xE9guli\xE8re des personnels \xE0 la SSI"
+    - ref_id: FOR-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-07
+      name: Sensibilisation au traitement des incidents
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Au-del\xE0 du simple fonctionnement, les personnels concern\xE9\
         s doivent \xEAtre sensibilis\xE9s et form\xE9s au niveau qu\u2019il convient\
         \ aux aspects s\xE9curit\xE9 des op\xE9rations dont ils sont en charge.\n\
@@ -3513,12 +3523,12 @@ objects:
         exploitation concerne le respect des exigences :\n - de consignation dans\
         \ une main-courante des incidents,\n - de notification/alerte de qui de droit\
         \ (cf. suite). "
-      name: Sensibilisation au traitement des incidents
+    - ref_id: FOR-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-08
+      name: "Pr\xE9paration et entra\xEEnement \xE0 la gestion des situations de crise"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Outre pr\xE9voir les possibilit\xE9s et le traitement (proc\xE9\
         dures) des situations anormales et des incidents (FOR-07), il est essentiel\
         \ de pr\xE9parer et d\u2019entra\xEEner les personnels concern\xE9s, ce qui\
@@ -3529,12 +3539,12 @@ objects:
         \ sp\xE9cifique pour chaque profil d\u2019agents pour assurer des r\xE9actions\
         \ r\xE9flexes adapt\xE9es en cas d\u2019incident ou d\u2019alerte s\xE9curit\xE9\
         .   "
-      name: "Pr\xE9paration et entra\xEEnement \xE0 la gestion des situations de crise"
+    - ref_id: FOR-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-09
+      name: "Sensibilisation du personnel \xE0 l'usage des TIC"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Une action de sensibilisation du personnel doit \xEAtre r\xE9\
         alis\xE9e pour pr\xE9venir des risques de divulgation externe (volontaire\
         \ ou non), li\xE9e \xE0 l\u2019utilisation des m\xE9dias des technologies\
@@ -3542,23 +3552,23 @@ objects:
         phone, fax, voix\u2026 En particulier, concernant le contr\xF4le de leur destinataire,\
         \ les \xE9coutes clandestines, les personnes se trouvant \xE0 proximit\xE9\
         . "
-      name: "Sensibilisation du personnel \xE0 l'usage des TIC"
+    - ref_id: FOR-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-10
+      name: "Formation du personnel \xE0 l'usage des TIC"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Cette formation s\u2019attachera \xE0 pr\xE9senter la responsabilit\xE9\
         \ de chacun dans le domaine de l'informatique et des communications (technologies\
         \ de l'information et de communication \u2013 TIC) et \xE0 former chaque utilisateur\
         \ \xE0 l\u2019utilisation des moyens informatiques et de communication, ainsi\
         \ qu'aux moyens de protection mis \xE0 sa disposition. "
-      name: "Formation du personnel \xE0 l'usage des TIC"
+    - ref_id: FOR-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-11
+      name: Sensibilisation des utilisateurs aux moyens de supervision
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019emploi de moyens techniques pour d\xE9tecter des malveillances\
         \ informatiques ou pour maintenir les syst\xE8mes, oblige l\u2019organisme\
         \ \xE0 :\n - contr\xF4ler les flux d\u2019information,\n - acc\xE9der aux\
@@ -3571,18 +3581,18 @@ objects:
         \ du syst\xE8me d\u2019information.\nAinsi, il est recommand\xE9 de r\xE9\
         diger une charte r\xE9glementant et expliquant l\u2019objectif, des moyens\
         \ de surveillance et de r\xE9colte des preuves informatiques. "
-      name: Sensibilisation des utilisateurs aux moyens de supervision
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for
-      ref_id: FOR-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:for-11
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Exploitation
-      ref_id: EXP
+    - ref_id: EXP
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-    - assessable: true
+      name: Exploitation
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: EXP-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-01
+      name: "Documentation des proc\xE9dures et r\xE8gles d\u2019exploitation"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
       depth: 2
+      assessable: true
       description: " Toutes les activit\xE9s d\u2019exploitation, \xE9ventuellement\
         \ regroup\xE9es en familles, doivent \xEAtre identifi\xE9es.\nChacune de ces\
         \ activit\xE9s doit faire l\u2019objet d\u2019une documentation pr\xE9cise\
@@ -3591,22 +3601,22 @@ objects:
         tant destin\xE9 \xE0 une cat\xE9gorie d\u2019acteurs concern\xE9s en fonction\
         \ de son r\xF4le, de ses responsabilit\xE9s et de son besoin d'en conna\xEE\
         tre.\nElle devra \xEAtre tenue \xE0 jour. "
-      name: "Documentation des proc\xE9dures et r\xE8gles d\u2019exploitation"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-01
-    - assessable: true
-      depth: 2
-      description: " Les documents d\u2019exploitation doivent tous comprendre un\
-        \ volet s\xE9curit\xE9 qui aura \xE9t\xE9 valid\xE9 par la structure s\xE9\
-        curit\xE9 mise en place dans l\u2019organisme. "
+    - ref_id: EXP-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-02
       name: "Int\xE9gration de la SSI dans les proc\xE9dures et r\xE8gles d\u2019\
         exploitation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-02
-    - assessable: true
       depth: 2
+      assessable: true
+      description: " Les documents d\u2019exploitation doivent tous comprendre un\
+        \ volet s\xE9curit\xE9 qui aura \xE9t\xE9 valid\xE9 par la structure s\xE9\
+        curit\xE9 mise en place dans l\u2019organisme. "
+    - ref_id: EXP-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-03
+      name: "S\xE9paration du d\xE9veloppement et des op\xE9rations ou de la production"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
+      depth: 2
+      assessable: true
       description: " La s\xE9paration des t\xE2ches et environnements de d\xE9veloppement,\
         \ de recette et des autres activit\xE9s li\xE9es au fonctionnement du syst\xE8\
         me d'information (exploitation, gestion du syst\xE8me et du r\xE9seau, saisie\
@@ -3627,12 +3637,12 @@ objects:
         \ de commentaires dans les lignes de code modifi\xE9es).\nCette s\xE9paration\
         \ des fonctions concourt \xE0 une meilleure d\xE9limitation des responsabilit\xE9\
         s en cas d'incident.   "
-      name: "S\xE9paration du d\xE9veloppement et des op\xE9rations ou de la production"
+    - ref_id: EXP-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-04
+      name: "Conditions d'usage de l'infog\xE9rance"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " On distingue divers types d'infog\xE9rance : l'externalisation,\
         \ les t\xE9l\xE9services (dont la t\xE9l\xE9maintenance), l'infog\xE9rance\
         \ sur site\u2026 Les conditions d'usage de l'infog\xE9rance doivent \xEAtre\
@@ -3644,12 +3654,13 @@ objects:
         \ et l'organisme de maintenance et la n\xE9cessit\xE9 de donner des droits\
         \ d'acc\xE8s de haut niveau augmentent les risques d'attaques du syst\xE8\
         me d'information. (Cf. op\xE9rations de tel\xE9-action) "
-      name: "Conditions d'usage de l'infog\xE9rance"
+    - ref_id: EXP-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-05
+      name: "Conditions de s\xE9curit\xE9 pour la maintenance des constituants du\
+        \ SI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le non-respect des consignes pour la pr\xE9paration d'un constituant\
         \ avant sa mise en maintenance peut exposer l'organisme \xE0 des compromissions\
         \ ou \xE0 des atteintes au bon fonctionnement de son syst\xE8me d'information.\n\
@@ -3667,13 +3678,12 @@ objects:
         \ d'un constituant soit effectu\xE9e sur place par du personnel poss\xE9dant\
         \ l'habilitation ad\xE9quate.\nIl est \xE9galement essentiel de prendre en\
         \ compte la maintenance des composants de s\xE9curit\xE9. "
-      name: "Conditions de s\xE9curit\xE9 pour la maintenance des constituants du\
-        \ SI"
+    - ref_id: EXP-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-06
+      name: "Conditions de s\xE9curit\xE9 pour la reprise apr\xE8s maintenance"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les conditions de s\xE9curit\xE9 pour la remise en fonctionnement\
         \ des constituants apr\xE8s leur maintenance visent \xE0 d\xE9masquer tout\
         \ pi\xE9geage \xE9ventuel ou dysfonctionnement.\nEn cons\xE9quence, des conditions\
@@ -3684,12 +3694,12 @@ objects:
         \ est r\xE9int\xE9gr\xE9 dans sa zone de s\xE9curit\xE9,\n - pour le cas particulier\
         \ de mat\xE9riels r\xE9pondant \xE0 la norme TEMPEST, toute modification entra\xEE\
         ne une nouvelle v\xE9rification de l'aptitude anti-rayonnante. "
-      name: "Conditions de s\xE9curit\xE9 pour la reprise apr\xE8s maintenance"
+    - ref_id: EXP-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-07
+      name: "Suivi des op\xE9rations de maintenance des constituants du SI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Cette r\xE8gle qui s'applique \xE0 tous les constituants du syst\xE8\
         me d'information (mat\xE9riels et logiciels) prend un caract\xE8re majeur\
         \ pour le cas de constituants ayant des fonctions de s\xE9curit\xE9.\nL'absence\
@@ -3706,12 +3716,12 @@ objects:
         \ il a la charge et tout particuli\xE8rement lorsque ses attributions consistent\
         \ \xE0 faire installer sur les machines de l'organisme les progiciels ou les\
         \ cartes \xE9lectroniques demand\xE9es par les utilisateurs. "
-      name: "Suivi des op\xE9rations de maintenance des constituants du SI"
+    - ref_id: EXP-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-08
+      name: Gestion des prestations de services externes
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Pour le d\xE9veloppement du syst\xE8me d'information, le recours\
         \ \xE0 des prestataires de services externes (d\xFBment habilit\xE9s dans\
         \ le cadre de march\xE9s de d\xE9fense) impose l'application stricte des r\xE8\
@@ -3728,12 +3738,12 @@ objects:
         river vers une sous\n - traitance de la gestion de l'exploitation (traduction\
         \ du terme anglo-saxon \" facility management \"). (Cf. externalisation de\
         \ services) "
-      name: Gestion des prestations de services externes
+    - ref_id: EXP-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-09
+      name: "Int\xE9gration de la SSI dans les contrats d\u2019infog\xE9rance"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les contrats d'infog\xE9rance et leurs annexes devront comprendre\
         \ un volet SSI qui sp\xE9cifie clairement les engagements du prestataire et\
         \ de chacun de ses personnels concern\xE9s.\nIls devront notamment sp\xE9\
@@ -3746,12 +3756,12 @@ objects:
         \ et des proc\xE9dures \u2013en conformit\xE9 avec une \xE9volution de la\
         \ PSSI ou de ses d\xE9clinaisons op\xE9rationnelles\u2013 et l\u2019obligation\
         \ pour le prestataire de se conformer \xE0 ces \xE9volutions. "
-      name: "Int\xE9gration de la SSI dans les contrats d\u2019infog\xE9rance"
+    - ref_id: EXP-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-10
+      name: "S\xE9curit\xE9 dans les services externalis\xE9s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La d\xE9cision et la contractualisation de services externalis\xE9\
         s doivent \xEAtre pr\xE9c\xE9d\xE9s d\u2019une analyse de risques et d\u2019\
         enjeux pour l\u2019organisme.\nLes probl\xE9matiques suivantes doivent aussi\
@@ -3781,12 +3791,13 @@ objects:
         \ de d\xE9terminer des objectifs et mesures de s\xE9curit\xE9 couvrant les\
         \ risques identifi\xE9s, notamment sur le plan des clauses contractuelles,\
         \ de la tra\xE7abilit\xE9 et du suivi des op\xE9rations r\xE9alis\xE9es. "
-      name: "S\xE9curit\xE9 dans les services externalis\xE9s"
+    - ref_id: EXP-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-11
+      name: "Contr\xF4le antiviral des logiciels et donn\xE9es avant leur mise en\
+        \ exploitation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les contr\xF4les des logiciels et des fichiers de donn\xE9es\
         \ avant leur mise en exploitation visent \xE0 lutter tout particuli\xE8rement\
         \ contre la menace de contamination par virus.\nDes pr\xE9cautions peuvent\
@@ -3806,13 +3817,13 @@ objects:
         ).\nD\u2019autre part des consignes claires doivent \xEAtre communiqu\xE9\
         es aux utilisateurs afin qu\u2019ils n\u2019installent aucun logiciel sur\
         \ leur poste de travail. "
-      name: "Contr\xF4le antiviral des logiciels et donn\xE9es avant leur mise en\
-        \ exploitation"
+    - ref_id: EXP-12
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-12
+      name: "Contr\xF4les de s\xE9curit\xE9 en phase d'exploitation du syst\xE8me\
+        \ d'information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-11
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le contr\xF4le de s\xE9curit\xE9 en phase d'exploitation permet\
         \ de r\xE9duire les risques d'atteinte \xE0 la disponibilit\xE9 et \xE0 l'int\xE9\
         grit\xE9 des informations et des donn\xE9es.\nCes contr\xF4les se traduisent,\
@@ -3828,13 +3839,12 @@ objects:
         \ - l'utilisation des macro-instructions autoris\xE9es,\n - le respect des\
         \ instructions pour les r\xE9cup\xE9rations d'erreurs ou pour les \xE9v\xE9\
         nements exceptionnels . "
-      name: "Contr\xF4les de s\xE9curit\xE9 en phase d'exploitation du syst\xE8me\
-        \ d'information"
+    - ref_id: EXP-13
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-13
+      name: "R\xE9duction des vuln\xE9rabilit\xE9s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-12
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-12
-    - assessable: true
       depth: 2
+      assessable: true
       description: " De plus en plus de services sont offerts au travers des r\xE9\
         seaux bureautiques, qui v\xE9hiculent toutes sortes d\u2019informations poss\xE9\
         dant des besoins de s\xE9curit\xE9 tr\xE8s h\xE9t\xE9rog\xE8nes.\nUne politique\
@@ -3844,12 +3854,13 @@ objects:
         \ sur les syst\xE8mes et applications standard du syst\xE8me d'information.\n\
         La veille concernera les m\xE9thodes d'attaque, les vuln\xE9rabilit\xE9s et\
         \ les solutions de s\xE9curit\xE9. "
-      name: "R\xE9duction des vuln\xE9rabilit\xE9s"
+    - ref_id: EXP-14
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-14
+      name: "Proc\xE9dures d'exploitation s\xE9curis\xE9e des informations et des\
+        \ donn\xE9es"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-13
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-13
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les donn\xE9es et les supports associ\xE9s devraient h\xE9riter\
         \ du m\xEAme niveau de protection que les informations qui leur ont donn\xE9\
         \ naissance.\nEn fonction de leur classification, les informations et les\
@@ -3881,13 +3892,12 @@ objects:
         fense, il peut \xEAtre pr\xE9vu, en conformit\xE9 avec la r\xE9glementation\
         \ en vigueur, un chiffrement des donn\xE9es permettant ainsi le stockage interm\xE9\
         diaire des supports associ\xE9s lors de traitements discontinus.   "
-      name: "Proc\xE9dures d'exploitation s\xE9curis\xE9e des informations et des\
-        \ donn\xE9es"
+    - ref_id: EXP-15
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-15
+      name: "Mise en place d\u2019une organisation pour la lutte contre le code malveillant"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-14
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-14
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La mise en place d\u2019une organisation et d\u2019une PSSI contre\
         \ la menace virale permet de diminuer les risques de perte d\u2019int\xE9\
         grit\xE9, de disponibilit\xE9 et de confidentialit\xE9 de l\u2019information.\n\
@@ -3904,12 +3914,12 @@ objects:
         \ technique de protection contre les virus pour l\u2019ensemble des composants\
         \ du syst\xE8me informatique (Postes de travail, serveurs de messagerie, serveurs\
         \ Internet, serveurs de sauvegardes, de donn\xE9es\u2026) "
-      name: "Mise en place d\u2019une organisation pour la lutte contre le code malveillant"
+    - ref_id: EXP-16
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-16
+      name: "Consignes de s\xE9curit\xE9 concernant la t\xE9l\xE9-action"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-15
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-15
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La t\xE9l\xE9-action regroupe toutes les op\xE9rations d\u2019\
         exploitation du r\xE9seau et des postes de travail r\xE9alis\xE9es \xE0 distance\
         \ : sauvegarde, prise en main \xE0 distance, installations d\u2019application\
@@ -3922,12 +3932,12 @@ objects:
         \ fichiers ou sa session de travail ne peut avoir lieu sans son aval pr\xE9\
         alable \u2013 ceci doit concourir \xE0 garantir une relation de confiance\
         \ mutuelle entre les exploitants du r\xE9seau et les utilisateurs. "
-      name: "Consignes de s\xE9curit\xE9 concernant la t\xE9l\xE9-action"
+    - ref_id: EXP-17
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-17
+      name: Protection et utilisation de la messagerie
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-16
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-16
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Des r\xE8gles claires et simples doivent \xEAtre \xE9mises pour\
         \ assurer la confiance dans l\u2019utilisation de la messagerie \xE9lectronique.\n\
         Ainsi, il conviendra d\u2019\xE9tablir une liste de mesures techniques et\
@@ -3941,24 +3951,25 @@ objects:
         curit\xE9 (authentification, chiffrement signature) ;\n - l\u2019utilisation\
         \ de la messagerie depuis l\u2019ext\xE9rieur de l\u2019organisme (cf. acc\xE8\
         s distant) ;\n - la surcharge du syst\xE8me de messagerie. "
-      name: Protection et utilisation de la messagerie
+    - ref_id: EXP-18
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-18
+      name: "R\xE8gles sp\xE9cifiques de filtrage aux acc\xE8s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-17
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-17
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Des r\xE8gles techniques de filtrage pourront \xEAtre mises en\
         \ place sur les routeurs, les pare-feu et les serveurs de messagerie afin\
         \ de n'autoriser que l\u2019acc\xE8s \xE0 certains serveurs identifi\xE9s.\n\
         En effet, tout ce qui n'est pas explicitement autoris\xE9 devrait \xEAtre\
         \ interdit pour le filtrage des acc\xE8s.\nCe principe est valable en interne\
         \ \xE9galement. "
-      name: "R\xE8gles sp\xE9cifiques de filtrage aux acc\xE8s"
+    - ref_id: EXP-19
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-19
+      name: "Normes de conservation et de destruction des informations \xE0 prot\xE9\
+        ger"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-18
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-18
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Certaines cat\xE9gories d'informations n\xE9cessitent des conditions\
         \ de conservation et de destruction adapt\xE9es.\nEn ce qui concerne les informations\
         \ relevant du secret de d\xE9fense, la r\xE9glementation pr\xE9cise les mesures\
@@ -3976,13 +3987,12 @@ objects:
         \ de dur\xE9e de conservation et de protection des supports, selon la nature\
         \ des informations concern\xE9es (informations comptables ou fiscales, relatives\
         \ au personnel\u2026). "
-      name: "Normes de conservation et de destruction des informations \xE0 prot\xE9\
-        ger"
+    - ref_id: EXP-20
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-20
+      name: "Contr\xF4le des supports amovibles avant leur mise en exploitation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-19
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-19
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Cette r\xE8gle, portant sur le contr\xF4le des supports amovibles,\
         \ vise principalement la confidentialit\xE9 des informations et int\xE9resse\
         \ les organismes traitant d'informations sensibles relevant du secret de d\xE9\
@@ -3996,12 +4006,12 @@ objects:
         \ donn\xE9es pour lesquelles ils ont \xE9t\xE9 utilis\xE9s depuis l'origine\
         \ (sauf en cas de d\xE9classification).\nCe principe peut \xEAtre appliqu\xE9\
         \ aux informations non classifi\xE9es particuli\xE8rement sensibles. "
-      name: "Contr\xF4le des supports amovibles avant leur mise en exploitation"
+    - ref_id: EXP-21
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-21
+      name: "Les supports, sources d\u2019infection et de risque de divulgation"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-20
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-20
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les organismes sont sensibilis\xE9s \xE0 la s\xE9curit\xE9 des\
         \ syst\xE8mes.\nN\xE9anmoins, la protection des supports amovibles (disquette,\
         \ bande sauvegarde, listing, rapport\u2026) est souvent d\xE9laiss\xE9e, bien\
@@ -4020,12 +4030,12 @@ objects:
         entr\xE9e/sortie de supports informatiques en zone classifi\xE9e (gestion\
         \ d\u2019un registre des supports, de leur contenu\u2026) \u2013 (cf. continuit\xE9\
         \ dans la protection des informations). "
-      name: "Les supports, sources d\u2019infection et de risque de divulgation"
+    - ref_id: EXP-22
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-22
+      name: "Mise au rebut des supports ou sortie de mat\xE9riel informatique"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-21
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-21
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les mat\xE9riels informatiques contiennent des supports de donn\xE9\
         es de l\u2019organisme.\nL\u2019entr\xE9e et surtout la sortie de ces supports\
         \ de l\u2019organisme doivent \xEAtre ma\xEEtris\xE9es.\nCes donn\xE9es, au\
@@ -4040,34 +4050,34 @@ objects:
         s cette t\xE2che (avec engagement de destruction).\nDans les deux cas, une\
         \ attention particuli\xE8re devra \xEAtre port\xE9e \xE0 la protection du\
         \ stockage des supports avant leur destruction. "
-      name: "Mise au rebut des supports ou sortie de mat\xE9riel informatique"
+    - ref_id: EXP-23
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-23
+      name: Photocopie de documents
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-22
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-22
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Des directives de s\xE9curit\xE9 doivent \xEAtre \xE9nonc\xE9\
         es pour r\xE9glementer le photocopillage en fonction de la classification\
         \ du document.\nCes directives devront prendre en compte les obligations relatives\
         \ au \xAB photocopillage \xBB qui font l\u2019objet d\u2019une l\xE9gislation\
         \ sp\xE9cifique. "
-      name: Photocopie de documents
+    - ref_id: EXP-24
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-24
+      name: "Stockage des informations par l\u2019organisme"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-23
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-23
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Des r\xE8gles de s\xE9curit\xE9 pour le stockage des informations\
         \ doivent \xEAtre d\xE9finies et appliqu\xE9es par tout le personnel en fonction\
         \ de la classification.\nCes r\xE8gles visent principalement \xE0 assurer\
         \ la protection des informations contre toute divulgation ou vol par des personnes\
         \ non autoris\xE9es ou encore alt\xE9ration.   "
-      name: "Stockage des informations par l\u2019organisme"
+    - ref_id: EXP-25
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-25
+      name: Connexion des postes nomades et PDA
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-24
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-24
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Des r\xE8gles de s\xE9curit\xE9 doivent \xEAtre r\xE9dig\xE9\
         es pour r\xE9glementer les types d\u2019information pouvant \xEAtre stock\xE9\
         es dans ces unit\xE9s.\nDes moyens de protection et/ou de contr\xF4les doivent\
@@ -4077,18 +4087,18 @@ objects:
         galement \xEAtre port\xE9e pour \xE9viter que ces \xE9quipements ne puissent\
         \ servir de passerelle entre le syst\xE8me d\u2019information et un r\xE9\
         seau public. "
-      name: Connexion des postes nomades et PDA
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp
-      ref_id: EXP-25
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:exp-25
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Aspects physiques et environnement
-      ref_id: ENV
+    - ref_id: ENV
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-    - assessable: true
+      name: Aspects physiques et environnement
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: ENV-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-01
+      name: "Continuit\xE9 dans la gestion des biens physiques"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
       depth: 2
+      assessable: true
       description: " La gestion des biens physiques est assur\xE9e tout au long de\
         \ leur cycle de vie : phases d'affectation, d'installation, de fonctionnement,\
         \ d'entretien, de mise au rebut et de destruction.\nCes biens peuvent \xE9\
@@ -4112,12 +4122,12 @@ objects:
         \ classification choisie.\nPar exemple, un calculateur marqu\xE9 \"Confidentiel\"\
         \ devra se situer dans un environnement physique adapt\xE9 \xE0 ce niveau\
         \ de protection, comme celui d'une \"zone r\xE9serv\xE9e\". "
-      name: "Continuit\xE9 dans la gestion des biens physiques"
+    - ref_id: ENV-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-02
+      name: "Prise en compte des contraintes op\xE9rationnelles de l'organisme"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La mise en place de moyens et proc\xE9dures de s\xE9curit\xE9\
         \ physique qui ne prend pas en compte les contraintes de l'organisme peut\
         \ constituer une entrave au bon fonctionnement des t\xE2ches op\xE9rationnelles\
@@ -4125,12 +4135,12 @@ objects:
         .\nIl est donc n\xE9cessaire de prendre en compte les contraintes op\xE9rationnelles\
         \ de l'organisme dans la mise en place des moyens et proc\xE9dures de s\xE9\
         curit\xE9 physique. "
-      name: "Prise en compte des contraintes op\xE9rationnelles de l'organisme"
+    - ref_id: ENV-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-03
+      name: "Compl\xE9tude des mesures de s\xE9curit\xE9 physique"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les diff\xE9rents types de mesures suivants devraient \xEAtre\
         \ pris en compte.\nLes mesures de protection  des biens physiques ont pour\
         \ objectif de r\xE9duire l'ampleur des atteintes, principalement dans les\
@@ -4164,23 +4174,23 @@ objects:
         \ redout\xE9s par l'organisme, les mesures choisies devraient \xEAtre graduelles,\
         \ afin d'offrir un niveau de r\xE9sistance suffisant pour contrecarrer ou\
         \ att\xE9nuer l'attaque. "
-      name: "Compl\xE9tude des mesures de s\xE9curit\xE9 physique"
+    - ref_id: ENV-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-04
+      name: "Isolement des syst\xE8mes sensibles ou vitaux"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Isoler les syst\xE8mes sensibles ou vitaux permet de minimiser\
         \ l'exposition des biens par rapport aux menaces.\nLes risques sont ainsi\
         \ r\xE9duits.\nDe plus, ceci offre la possibilit\xE9 de proportionner au mieux\
         \ les mesures de s\xE9curit\xE9 en r\xE9duisant les co\xFBts d'une protection\
         \ globale. "
-      name: "Isolement des syst\xE8mes sensibles ou vitaux"
+    - ref_id: ENV-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-05
+      name: "Ad\xE9quation des mesures de s\xE9curit\xE9 physique aux types de biens"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les mesures de s\xE9curit\xE9 physique doivent \xEAtre appliqu\xE9\
         es \xE0 l\u2019ensemble des locaux.\nElles visent tout d\u2019abord \xE0 prot\xE9\
         ger le personnel puis \xE0 r\xE9duire les risques de destruction ou de divulgation\
@@ -4190,12 +4200,12 @@ objects:
         c\xE9dente peuvent \xEAtre d\xE9clin\xE9es selon les trois cat\xE9gories de\
         \ biens physiques \xE0 savoir, l'infrastructure, les mat\xE9riels et les \xE9\
         quipements de soutien. "
-      name: "Ad\xE9quation des mesures de s\xE9curit\xE9 physique aux types de biens"
+    - ref_id: ENV-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-06
+      name: Protection contre les accidents et pannes
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Dans les locaux h\xE9bergeant des \xE9quipements vitaux pour\
         \ le syst\xE8me d\u2019information (sans oublier les composants de l\u2019\
         infrastructure r\xE9seau) en tenant compte des menaces de l\u2019environnement\
@@ -4224,12 +4234,12 @@ objects:
         \ d\u2019appliquer ces contr\xF4les aux \xE9quipements pour lesquels ils ne\
         \ sont pas obligatoires (par exemple, la d\xE9tection de pr\xE9sence d\u2019\
         eau). "
-      name: Protection contre les accidents et pannes
+    - ref_id: ENV-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-07
+      name: "Protection physique du c\xE2blage et des r\xE9seaux t\xE9l\xE9coms"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le c\xE2blage t\xE9l\xE9com et informatique doit, dans la mesure\
         \ du possible, \xEAtre prot\xE9g\xE9 contre tout acc\xE8s malveillant pouvant\
         \ conduire \xE0 des \xE9coutes (lignes enterr\xE9es, c\xE2bles cach\xE9s\u2026\
@@ -4239,12 +4249,12 @@ objects:
         \ consiste non seulement \xE0 emp\xEAcher l\u2019\xE9coute passive (et parfois\
         \ active) mais aussi \xE0 \xE9viter que, par accident, ces moyens ne soient\
         \ endommag\xE9s. "
-      name: "Protection physique du c\xE2blage et des r\xE9seaux t\xE9l\xE9coms"
+    - ref_id: ENV-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-08
+      name: "D\xE9coupage de l'infrastructure en zones de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-07
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les sites, les b\xE2timents et les locaux contenant des biens\
         \ mat\xE9riels ou immat\xE9riels (les informations et leurs supports associ\xE9\
         s, les mat\xE9riels constitutifs du syst\xE8me d'information) ou abritant\
@@ -4258,12 +4268,12 @@ objects:
         le de la circulation du personnel par attribution de droits d'acc\xE8s sp\xE9\
         cifiques aux zones.\nCes droits peuvent \xEAtre li\xE9s aux postes de travail\
         \ et aux niveaux de responsabilit\xE9. "
-      name: "D\xE9coupage de l'infrastructure en zones de s\xE9curit\xE9"
+    - ref_id: ENV-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-09
+      name: "Application des modalit\xE9s d'accueil et de circulation des visiteurs"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-08
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les modalit\xE9s d'accueil et de circulation des visiteurs sont\
         \ g\xE9n\xE9ralement fix\xE9es par le service de s\xE9curit\xE9 g\xE9n\xE9\
         rale.\nMais, loin d'interf\xE9rer avec celui-ci, il est un devoir pour chaque\
@@ -4274,12 +4284,12 @@ objects:
         \ lui est confi\xE9.\nCette r\xE8gle est \xE0 rapprocher de celle pr\xE9conisant\
         \ le d\xE9coupage de l'infrastructure en zones de s\xE9curit\xE9, laquelle\
         \ apporte une grande facilit\xE9 pour le contr\xF4le des visiteurs. "
-      name: "Application des modalit\xE9s d'accueil et de circulation des visiteurs"
+    - ref_id: ENV-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-10
+      name: "Gestion sp\xE9cifique des biens physiques n\xE9cessitant une protection"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La gestion des biens physiques n\xE9cessitant une protection\
         \ comprend l'adoption d'une classification ou d'une typologie, les mesures\
         \ de gestion de ces biens et les mesures de protection tout au long de leur\
@@ -4300,12 +4310,13 @@ objects:
         \ attach\xE9s \xE0 ces biens pour en garantir une surveillance continue.\n\
         La typologie adopt\xE9e est sp\xE9cifique \xE0 la mission ou au m\xE9tier,\
         \ \xE0 la culture et aux contraintes propres \xE0 l'organisme. "
-      name: "Gestion sp\xE9cifique des biens physiques n\xE9cessitant une protection"
+    - ref_id: ENV-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-11
+      name: "Proc\xE9dures d'exploitation s\xE9curis\xE9e des moyens d\xE9centralis\xE9\
+        s"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les moyens d\xE9centralis\xE9s, d\xE9di\xE9s ou d\xE9port\xE9\
         s hors de leur zone de s\xE9curit\xE9 (micro-ordinateurs, mat\xE9riels portables,\
         \ imprimantes d\xE9port\xE9es, photocopieuses, t\xE9l\xE9copie\u2026) se caract\xE9\
@@ -4332,13 +4343,12 @@ objects:
         \ mat\xE9riels sont emport\xE9s \xE0 l'ext\xE9rieur de l'organisme, il faut\
         \ appliquer la m\xEAme proc\xE9dure que pour la sortie des documents classifi\xE9\
         s. "
-      name: "Proc\xE9dures d'exploitation s\xE9curis\xE9e des moyens d\xE9centralis\xE9\
-        s"
+    - ref_id: ENV-12
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-12
+      name: "Protection de la documentation de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-11
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La documentation de s\xE9curit\xE9 doit \xEAtre prot\xE9g\xE9\
         e contre les acc\xE8s non autoris\xE9s.\nSa protection est du m\xEAme niveau\
         \ que les constituants auxquels elle se rapporte.\nLes mesures suivantes peuvent\
@@ -4349,12 +4359,12 @@ objects:
         \ documents sont rang\xE9s dans des lieux s\xFBrs ;\n - la diffusion, \xE9\
         manant du responsable de la s\xE9curit\xE9, peut \xEAtre restreinte au minimum\
         \ de personnes. "
-      name: "Protection de la documentation de s\xE9curit\xE9"
+    - ref_id: ENV-13
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-13
+      name: "Protection de l\u2019\xE9quipement contre le vol"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-12
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-12
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019agent a qui sera attribu\xE9 l\u2019\xE9quipement, m\xEA\
         me de mani\xE8re temporaire, sera responsable d\xE8s son attribution de sa\
         \ protection en utilisant des moyens coh\xE9rents et adapt\xE9s.\nDans la\
@@ -4368,24 +4378,24 @@ objects:
         alis\xE9s.\nUne proc\xE9dure sp\xE9cifique doit \xEAtre formalis\xE9e pour\
         \ d\xE9finir les actions \xE0 mener par le d\xE9tenteur et par l\u2019organisme\
         \ en cas de vol de l\u2019\xE9quipement. "
-      name: "Protection de l\u2019\xE9quipement contre le vol"
+    - ref_id: ENV-14
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-14
+      name: Protection des supports de sauvegarde
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-13
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-13
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les supports de sauvegarde doivent \xEAtre prot\xE9g\xE9s contre\
         \ les risques de destruction, de divulgation et de vol.\nUne attention particuli\xE8\
         re doit \xEAtre port\xE9e \xE0 ces types de supports car, par nature, en contenant\
         \ une partie des informations h\xE9berg\xE9es par un syst\xE8me, ils constituent\
         \ une cible de choix pour r\xE9aliser un vol d\u2019information et d\xE9truire\
         \ la capacit\xE9 de l'organisme \xE0 r\xE9cup\xE9rer d'un sinistre. "
-      name: Protection des supports de sauvegarde
+    - ref_id: ENV-15
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-15
+      name: "Protection de la documentation syst\xE8me"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-14
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-14
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La documentation des syst\xE8mes (architecture r\xE9seaux, plan\
         \ de nommage\u2026) contiennent des informations qui associ\xE9es \xE0 d\u2019\
         autres (informations de vuln\xE9rabilit\xE9s\u2026) constituent des \xE9l\xE9\
@@ -4394,12 +4404,12 @@ objects:
         \ de mener des tentatives d\u2019intrusion.\nIl est donc essentiel de veiller\
         \ \xE0 classifier ces documentations et \xE0 en contr\xF4ler leur diffusion\
         \ \xE0 l\u2019ext\xE9rieur, y compris aupr\xE8s de fournisseurs. "
-      name: "Protection de la documentation syst\xE8me"
+    - ref_id: ENV-16
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-16
+      name: "Utilisation \xE0 l\u2019ext\xE9rieur du site"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-15
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-15
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La sortie et l\u2019utilisation \xE0 l\u2019ext\xE9rieur de l\u2019\
         organisme de tout \xE9quipement informatique doivent avoir \xE9t\xE9 autoris\xE9\
         es.\nDes r\xE8gles doivent \xEAtre formul\xE9es pour restreindre leurs utilisations\
@@ -4409,18 +4419,18 @@ objects:
         taire devra respecter la PSSI.\nL'\xE9quipement informatique doit \xEAtre\
         \ prot\xE9g\xE9 afin d\u2019\xE9viter tout acc\xE8s non autoris\xE9 aux informations\
         \ qu'il stocke et traite.   3 "
-      name: "Utilisation \xE0 l\u2019ext\xE9rieur du site"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env
-      ref_id: ENV-16
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:env-16
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Identification / authentification
-      ref_id: AUT
+    - ref_id: AUT
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
-    - assessable: true
+      name: Identification / authentification
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: AUT-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-01
+      name: "Utilisation d\u2019un m\xEAme secret pour acc\xE9der \xE0 plusieurs services"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
       depth: 2
+      assessable: true
       description: " Selon les applications et les syst\xE8mes, les moyens utilis\xE9\
         s pour prot\xE9ger les secrets d\u2019authentification sont de niveaux d\u2019\
         assurances diff\xE9rents.\nIl est fondamental que les utilisateurs s\u2019\
@@ -4430,12 +4440,12 @@ objects:
         \ le syst\xE8me d'exploitation et diff\xE9rentes applications).\nAinsi, il\
         \ convient de n'utiliser un m\xEAme secret que pour des services de niveaux\
         \ d'assurance \xE9quivalents. "
-      name: "Utilisation d\u2019un m\xEAme secret pour acc\xE9der \xE0 plusieurs services"
+    - ref_id: AUT-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-02
+      name: Combinaison des moyens d'authentification
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
-      ref_id: AUT-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'acc\xE8s au syst\xE8me d'information implique que les utilisateurs\
         \ justifient leur identit\xE9 en d\xE9but de session (et, dans certains cas,\
         \ en cours de session) en pr\xE9sentant un \xE9l\xE9ment d'authentification.\n\
@@ -4459,12 +4469,12 @@ objects:
         \ doit porter l'effort de protection.\nAinsi, les m\xE9canismes utilis\xE9\
         s reposent sur des \xE9l\xE9ments d'authentification dont il convient express\xE9\
         ment de pr\xE9voir une gestion rigoureuse. "
-      name: Combinaison des moyens d'authentification
+    - ref_id: AUT-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-03
+      name: "Unicit\xE9 de l'identit\xE9 des utilisateurs"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
-      ref_id: AUT-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'identit\xE9 des utilisateurs doit \xEAtre g\xE9r\xE9e sous\
         \ le contr\xF4le conjoint de la direction du syst\xE8me et du responsable\
         \ de la s\xE9curit\xE9 d'un site ou d'une unit\xE9 op\xE9rationnelle (niveau\
@@ -4472,12 +4482,12 @@ objects:
         quivoque) du propri\xE9taire d\u2019un acc\xE8s est fondamentale pour assurer\
         \ la tra\xE7abilit\xE9 des op\xE9rations et le diagnostic d\u2019une anomalie\
         \ de s\xE9curit\xE9 (cf. contr\xF4le et audit). "
-      name: "Unicit\xE9 de l'identit\xE9 des utilisateurs"
+    - ref_id: AUT-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-04
+      name: "D\xE9livrance et recouvrement des moyens d\u2019authentification"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
-      ref_id: AUT-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les technologies utilis\xE9es pour ma\xEEtriser les acc\xE8s\
         \ \xE0 un syst\xE8me d\u2019information peuvent \xEAtre aussi sophistiqu\xE9\
         es que possible, la d\xE9livrance, l\u2019utilisation et la gestion de ces\
@@ -4504,18 +4514,18 @@ objects:
         \ mesures sp\xE9ciales telles que l'emploi d'enveloppes scell\xE9es avec prise\
         \ en compte peuvent \xEAtre mises au point pour pr\xE9venir toute utilisation\
         \ abusive ou incorrecte. "
-      name: "D\xE9livrance et recouvrement des moyens d\u2019authentification"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut
-      ref_id: AUT-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:aut-04
-    - assessable: false
-      depth: 1
-      description: ''
-      name: "Contr\xF4le d'acc\xE8s logique aux biens"
-      ref_id: CAL
+    - ref_id: CAL
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-    - assessable: true
+      name: "Contr\xF4le d'acc\xE8s logique aux biens"
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: CAL-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-01
+      name: "Dispositifs et proc\xE9dures de protection contre les intrusions"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
       depth: 2
+      assessable: true
       description: " L\u2019architecture des infrastructures de communication doit\
         \ comprendre les dispositifs et proc\xE9dures assurant le niveau ad\xE9quat\
         \ de protection contre les intrusions L\u2019acc\xE8s au SI et \xE0 ses principales\
@@ -4528,12 +4538,12 @@ objects:
         \ des cibles potentielles et des moyens d\u2019acc\xE8s possibles pour des\
         \ attaquants, il conviendra de mettre en place les dispositifs d\xE9fensifs\
         \ adapt\xE9s pour couvrir les objectifs de s\xE9curit\xE9 identifi\xE9s. "
-      name: "Dispositifs et proc\xE9dures de protection contre les intrusions"
+    - ref_id: CAL-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-02
+      name: "Cloisonnement des r\xE9seaux et ma\xEEtrise des flux"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Le cloisonnement des r\xE9seaux a pour objectif :\n - de faciliter\
         \ le contr\xF4le d\u2019acc\xE8s ;\n - de mieux se prot\xE9ger contre les\
         \ intrusions ;\n - d\u2019emp\xEAcher la fuite d\u2019information : o vers\
@@ -4584,12 +4594,13 @@ objects:
         \ de ces moyens est soumis au respect de la loi et de la r\xE9glementation\
         \ et doit s'accompagner de mesures organisationnelles permettant leur gestion\
         \ sp\xE9cifique. "
-      name: "Cloisonnement des r\xE9seaux et ma\xEEtrise des flux"
+    - ref_id: CAL-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-03
+      name: "Modalit\xE9s d\u2019utilisation s\xE9curis\xE9e des r\xE9seaux de t\xE9\
+        l\xE9communication de l\u2019organisme"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'utilisation s\xE9curis\xE9e des r\xE9seaux de t\xE9l\xE9communication\
         \ de l'organisme ne doit pas remettre en cause les mesures de s\xE9curit\xE9\
         \ qui sont prises au plan de l'infrastructure (par exemple, la cr\xE9ation\
@@ -4612,13 +4623,12 @@ objects:
         me d'information des ordinateurs isol\xE9s ou ext\xE9rieurs \xE0 l'organisme\
         \ ;\n - la s\xE9paration des r\xE9seaux d\xE9di\xE9s \xE0 des domaines particuliers\
         \ ;\n - le routage des communications sur les canaux autoris\xE9s. "
-      name: "Modalit\xE9s d\u2019utilisation s\xE9curis\xE9e des r\xE9seaux de t\xE9\
-        l\xE9communication de l\u2019organisme"
+    - ref_id: CAL-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-04
+      name: "Organisation des acc\xE8s au syst\xE8me d\u2019information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019organisme doit \xE9noncer des r\xE8gles et identifier\
         \ des normes techniques pour assurer le contr\xF4le et la gestion des acc\xE8\
         s au syst\xE8me d\u2019information.\nAinsi, elles doivent d\xE9finir les niveaux\
@@ -4669,21 +4679,21 @@ objects:
         \ acc\xE9der au syst\xE8me d\u2019information de l\u2019organisme (les postes\
         \ de travail sont les points d\u2019acc\xE8s principaux au syst\xE8me d\u2019\
         information). "
-      name: "Organisation des acc\xE8s au syst\xE8me d\u2019information"
+    - ref_id: CAL-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-05
+      name: Fichiers contenant des mots de passe
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Dans la mesure du possible, tout fichier contenant des mots de\
         \ passe (ou secrets) doit \xEAtre banni ou chiffr\xE9 (par exemple, script\
         \ de connexion). "
-      name: Fichiers contenant des mots de passe
+    - ref_id: CAL-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-06
+      name: "Suppression des acc\xE8s non ma\xEEtris\xE9s au syst\xE8me d\u2019information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il est important de pouvoir ma\xEEtriser l\u2019ensemble des\
         \ acc\xE8s au syst\xE8me d\u2019information.\nC\u2019est pourquoi une attention\
         \ particuli\xE8re doit notamment \xEAtre port\xE9e aux acc\xE8s suivants :\n\
@@ -4692,12 +4702,12 @@ objects:
         \ connect\xE9 \xE0 la fois \xE0 un modem et au r\xE9seau d\u2019entreprise)\
         \ ;\n - connexion non autoris\xE9e d\u2019un poste de travail sur un acc\xE8\
         s physique du r\xE9seau. "
-      name: "Suppression des acc\xE8s non ma\xEEtris\xE9s au syst\xE8me d\u2019information"
+    - ref_id: CAL-07
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-07
+      name: "Attribution de privil\xE8ges d\u2019acc\xE8s aux services"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-06
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L\u2019attribution d\u2019un acc\xE8s et des privil\xE8ges associ\xE9\
         s doit \xEAtre valid\xE9e par le ou les propri\xE9taires des syst\xE8mes acc\xE9\
         d\xE9s afin qu\u2019il(s) v\xE9rifie(nt) qu\u2019il est conforme aux habilitations\
@@ -4977,19 +4987,19 @@ objects:
         \ soumettre le moyen de r\xE9soudre le probl\xE8me \xE9nonc\xE9.  N\xB0 Type\
         \ R\xE9f\xE9rence \xC9nonc\xE9 de la remarque Solution propos\xE9e 1 2 3 4\
         \ 5    Merci de votre contribution  "
-      name: "Attribution de privil\xE8ges d\u2019acc\xE8s aux services"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-07
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-07
-    - assessable: true
-      depth: 2
-      description: null
+    - ref_id: CAL-08
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-08
       name: "Protection des acc\xE8s particuliers (acc\xE8s de maintenance) au SI"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-08
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-08
-    - assessable: true
       depth: 2
+      assessable: true
+      description: null
+    - ref_id: CAL-09
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-09
+      name: "V\xE9rification des listes d'acc\xE8s au syst\xE8me d\u2019information"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
+      depth: 2
+      assessable: true
       description: " Pour maintenir la ma\xEEtrise des acc\xE8s au syst\xE8me d\u2019\
         information, il est fondamental de proc\xE9der p\xE9riodiquement (voir de\
         \ mani\xE8re impromptue) \xE0 un contr\xF4le de la liste des acc\xE8s et des\
@@ -5003,12 +5013,12 @@ objects:
         \ apparaissant comme trop \xE9lev\xE9s\u2026).\nCes proc\xE9dures devront\
         \ tenir compte des impacts sur le syst\xE8me d\u2019information d\u2019une\
         \ r\xE9duction des privil\xE8ges. "
-      name: "V\xE9rification des listes d'acc\xE8s au syst\xE8me d\u2019information"
+    - ref_id: CAL-10
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-10
+      name: "Contr\xF4le des privil\xE8ges des utilisateurs du syst\xE8me d'information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-09
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-09
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Il appara\xEEt important de sp\xE9cifier une r\xE8gle de v\xE9\
         rification du droit de possession des privil\xE8ges.\nEt ceci ind\xE9pendamment\
         \ des contr\xF4les portant sur l'exploitation s\xE9curis\xE9e, qui s'attachent\
@@ -5022,12 +5032,12 @@ objects:
         \ \xE0 prendre si une action est tent\xE9e sans que le droit appropri\xE9\
         \ soit poss\xE9d\xE9 ;\n - les passe-droits au contr\xF4le des privil\xE8\
         ges et leurs conditions de validit\xE9. "
-      name: "Contr\xF4le des privil\xE8ges des utilisateurs du syst\xE8me d'information"
+    - ref_id: CAL-11
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-11
+      name: "Application de la notion de profil d'utilisateur du syst\xE8me d'information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-10
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-10
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'application de la notion de profil d'utilisateur du syst\xE8\
         me d'information sous-entend, au pr\xE9alable, la structuration des donn\xE9\
         es (ou objets) par fonctions ou activit\xE9s de l'organisme qui sont des pr\xE9\
@@ -5045,12 +5055,12 @@ objects:
         \ modification, destruction) dans le cadre de leurs responsabilit\xE9s ou\
         \ activit\xE9s.\nIl faut \xE9galement d\xE9finir et formaliser les r\xE8gles\
         \ de d\xE9l\xE9gations. "
-      name: "Application de la notion de profil d'utilisateur du syst\xE8me d'information"
+    - ref_id: CAL-12
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-12
+      name: "Administration des privil\xE8ges d'utilisation du syst\xE8me d'information"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-11
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-11
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Un utilisateur poss\xE8de des privil\xE8ges d'utilisation pour\
         \ les ressources du syst\xE8me d'information correspondant au profil qui lui\
         \ est attribu\xE9.\nIl est indispensable d'administrer ces privil\xE8ges pour\
@@ -5066,12 +5076,12 @@ objects:
         \ de l'int\xE9grit\xE9 des tables contenant les privil\xE8ges doit faire l'objet\
         \ d'un contr\xF4le particulier du responsable du syst\xE8me et de l'agent\
         \ de s\xE9curit\xE9. "
-      name: "Administration des privil\xE8ges d'utilisation du syst\xE8me d'information"
+    - ref_id: CAL-13
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-13
+      name: Verrouillage des sessions de travail
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-12
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-12
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les postes de travail sont les points d\u2019entr\xE9e principaux\
         \ du syst\xE8me d\u2019information.\nLes utilisateurs doivent \xEAtre sensibilis\xE9\
         s \xE0 rendre leur environnement de travail inaccessible en leur absence (verrouillage\
@@ -5079,28 +5089,28 @@ objects:
         \ et \xE9viter des n\xE9gligences, des mesures de protection automatique d\u2019\
         une session de travail apr\xE8s un d\xE9lai d\u2019inactivit\xE9 sont fortement\
         \ recommand\xE9es (d\xE9connexion automatique, verrouillage\u2026). "
-      name: Verrouillage des sessions de travail
+    - ref_id: CAL-14
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-14
+      name: "Protection de l\u2019environnement de travail"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-13
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-13
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La liste des actions de chaque profil utilisateur (administration,\
         \ intervenants de maintenance, utilisateur principal du poste de travail,\
         \ utilisateur temporaire) doit \xEAtre \xE9tablie et prot\xE9g\xE9e par des\
         \ droits d\u2019acc\xE8s. "
-      name: "Protection de l\u2019environnement de travail"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal
-      ref_id: CAL-14
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:cal-14
-    - assessable: false
-      depth: 1
-      description: ''
-      name: Journalisation
-      ref_id: JRN
+    - ref_id: JRN
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-    - assessable: true
+      name: Journalisation
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: JRN-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-01
+      name: Moyens de journalisation des intrusions ou des utilisations frauduleuses
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
       depth: 2
+      assessable: true
       description: " Le SI devra comprendre des moyens (dispositifs et/ou proc\xE9\
         dure) de journalisation des intrusions ou des utilisations frauduleuses.\n\
         Comme il ne sera pas toujours possible de \xAB bloquer \xBB \xE0 temps des\
@@ -5118,12 +5128,12 @@ objects:
         me apr\xE8s coup\n - les intrusions et rassembler les \xE9l\xE9ments de preuve\
         \ n\xE9cessaires.\nCes \xE9l\xE9ments seront \xE9galement indispensables pour\
         \ remettre le syst\xE8me dans son \xE9tat initial. "
-      name: Moyens de journalisation des intrusions ou des utilisations frauduleuses
+    - ref_id: JRN-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-02
+      name: "Enregistrement des op\xE9rations"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-      ref_id: JRN-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " En respect du \xAB Principe de proportionnalit\xE9 \xBB et de\
         \ la volum\xE9trie, engendr\xE9e par l\u2019enregistrement des traces de s\xE9\
         curit\xE9, il est fondamental de d\xE9finir les r\xE8gles de g\xE9n\xE9ration\
@@ -5132,12 +5142,12 @@ objects:
         gles.\nLa d\xE9finition et la mise en \u0153uvre de ces syst\xE8mes de journalisation\
         \ devront tenir compte des contraintes l\xE9gislatives et r\xE9glementaires\
         \ concernant notamment le traitement des informations nominatives. "
-      name: "Enregistrement des op\xE9rations"
+    - ref_id: JRN-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-03
+      name: Constitution de preuves
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-      ref_id: JRN-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La constitution d'\xE9l\xE9ments de preuves informatiques doit\
         \ respecter la l\xE9gislation et les codes de pratiques en vigueur pour \xEA\
         tre pr\xE9sentable le cas \xE9chant devant un tribunal.\nIl s\u2018agit en\
@@ -5146,12 +5156,12 @@ objects:
         \ de l\u2019exhaustivit\xE9 de la preuve ;\n - du respect de la vie priv\xE9\
         e ;\n - de la qualit\xE9 de fabrication des \xE9l\xE9ments de preuve et de\
         \ leur stockage jusqu\u2019\xE0 leur pr\xE9sentation. "
-      name: Constitution de preuves
+    - ref_id: JRN-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-04
+      name: Gestion des traces
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-      ref_id: JRN-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " La gestion des traces de s\xE9curit\xE9 comporte plusieurs t\xE2\
         ches qu\u2019il faut d\xE9finir et organiser :\n - t\xE9l\xE9collecte s\xE9\
         curis\xE9e des traces de s\xE9curit\xE9 ;\n - archivage des traces ;\n - effacement\
@@ -5163,12 +5173,12 @@ objects:
         \ d\u2019exploitation des traces : sachant qu\u2019il est n\xE9cessaire de\
         \ diff\xE9rencier celui qui analyse les traces et l\u2019administrateur du\
         \ r\xE9seau ;\n - destruction des traces au-del\xE0 du d\xE9lai l\xE9gal. "
-      name: Gestion des traces
+    - ref_id: JRN-05
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-05
+      name: "Alerte de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-      ref_id: JRN-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-04
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les r\xE8gles qui suivent la d\xE9tection d\u2019un incident\
         \ de s\xE9curit\xE9 d\xE9pendent de la gravit\xE9 de l\u2019incident.\nDe\
         \ la classification peut d\xE9pendre, la m\xE9thode de transmission de l\u2019\
@@ -5179,12 +5189,12 @@ objects:
         \ du type d\u2019op\xE9ration, de la cible\u2026).\nLes r\xE8gles de journalisation\
         \ et d\u2019analyse d\u2019un incident de s\xE9curit\xE9 d\xE9pendent de la\
         \ classification de l\u2019incident. "
-      name: "Alerte de s\xE9curit\xE9"
+    - ref_id: JRN-06
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-06
+      name: "Analyse des enregistrements des donn\xE9es de contr\xF4le de s\xE9curit\xE9"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-      ref_id: JRN-05
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-05
-    - assessable: true
       depth: 2
+      assessable: true
       description: " L'exploitation s\xE9curis\xE9e du syst\xE8me d'information implique\
         \ l'enregistrement des donn\xE9es de contr\xF4le de s\xE9curit\xE9 dans un\
         \ journal d'audit afin de v\xE9rifier que la s\xE9curit\xE9 est bien respect\xE9\
@@ -5206,18 +5216,18 @@ objects:
         \ pour la s\xE9curit\xE9 que repr\xE9sente leur d\xE9sactivation, en particulier\
         \ du risque juridique que prend l'organisme si il sert de plate-forme de rebond\
         \ dans une attaque. "
-      name: "Analyse des enregistrements des donn\xE9es de contr\xF4le de s\xE9curit\xE9"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn
-      ref_id: JRN-06
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:jrn-06
-    - assessable: false
-      depth: 1
-      description: ''
-      name: "Infrastructures de gestion des cl\xE9s cryptographiques"
-      ref_id: IGC
+    - ref_id: IGC
       urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
-    - assessable: true
+      name: "Infrastructures de gestion des cl\xE9s cryptographiques"
+      depth: 1
+      assessable: false
+      description: ''
+    - ref_id: IGC-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-01
+      name: "Politique de gestion des cl\xE9s"
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
       depth: 2
+      assessable: true
       description: " L'utilisation de cl\xE9s cryptographiques dans le cadre d'une\
         \ infrastructure de gestion des cl\xE9s (IGC) requiert d'\xE9tablir, de mettre\
         \ en \u0153uvre, de contr\xF4ler et de maintenir une politique de gestion\
@@ -5231,12 +5241,12 @@ objects:
         \ pr\xE9alable d'une analyse de risques SSI et l'\xE9tude d'autres PC portant\
         \ sur le m\xEAme type de besoin (authentification de serveur, authentification\
         \ de personne, signature, chiffrement\u2026). "
-      name: "Politique de gestion des cl\xE9s"
+    - ref_id: IGC-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-02
+      name: "Protection des cl\xE9s secr\xE8tes ou cl\xE9s priv\xE9es"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
-      ref_id: IGC-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Que ce soit pour du chiffrement en confidentialit\xE9 ou pour\
         \ de l\u2019authentification ou de la signature, les utilisateurs vont devoir\
         \ utiliser des cl\xE9s secr\xE8tes ou cl\xE9s priv\xE9es.\nL\u2019assurance\
@@ -5250,24 +5260,23 @@ objects:
         \ garantissant que la cl\xE9 priv\xE9e est stock\xE9e et utilis\xE9e dans\
         \ un dispositif mat\xE9riel (tel une crypto carte \xE0 puce), alors qu\u2019\
         une solution logicielle pourrait \xEAtre acceptable pour d\u2019autres utilisations. "
-      name: "Protection des cl\xE9s secr\xE8tes ou cl\xE9s priv\xE9es"
+    - ref_id: IGC-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-03
+      name: "Certification des cl\xE9s publiques"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
-      ref_id: IGC-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Dans un syst\xE8me de cryptographie asym\xE9trique, il existe\
         \ un risque d\u2019usurpation de la cl\xE9 publique.\nLa s\xE9curit\xE9 du\
         \ syst\xE8me repose sur la fiabilit\xE9 de l'infrastructure de gestion des\
         \ cl\xE9s et notamment sur le processus de certification qui relie un \xE9\
         l\xE9ment (personne, serveur) \xE0 une cl\xE9 publique.\nIl est essentiel\
         \ de ma\xEEtriser cet aspect en r\xE9digeant une politique de certification. "
-      name: "Certification des cl\xE9s publiques"
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc
-      ref_id: IGC-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:igc-03
-    - assessable: false
+    - ref_id: SCP
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
+      name: Signaux compromettants
       depth: 1
+      assessable: false
       description: " Tout mat\xE9riel ou syst\xE8me qui traite des informations sous\
         \ forme \xE9lectrique est le si\xE8ge de perturbations \xE9lectromagn\xE9\
         tiques.\nCes perturbations, provoqu\xE9es par le changement d'\xE9tat des\
@@ -5284,23 +5293,24 @@ objects:
         informations classifi\xE9es de d\xE9fense (instruction g\xE9n\xE9rale interminist\xE9\
         rielle 900 du 20 juillet 1993)\n - recommand\xE9e pour le traitement d\u2019\
         informations sensibles (recommandation 901 du 2 mars 1994)   "
-      name: Signaux compromettants
-      ref_id: SCP
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
-    - assessable: true
+    - ref_id: SCP-01
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-01
+      name: Zonage
+      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
       depth: 2
+      assessable: true
       description: " Un des moyens de se prot\xE9ger contre les signaux compromettants\
         \ est le zonage.\nIl comporte deux volets :\n - le zonage des locaux conform\xE9\
         ment \xE0 la directive 495 du 19 septembre 1997,\n - le zonage des \xE9quipements\
         \ conform\xE9ment au guide 430 du 1 juin 1999.\nAu vu des r\xE9sultats du\
         \ zonage les \xE9quipements devront \xEAtre install\xE9s conform\xE9ment \xE0\
         \ la directive 485 du 1 septembre 2000. "
-      name: Zonage
+    - ref_id: SCP-02
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-02
+      name: "Mat\xE9riel TEMPEST"
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
-      ref_id: SCP-01
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-01
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Un des moyens de se prot\xE9ger contre les signaux parasites\
         \ compromettants est l'utilisation de mat\xE9riel TEMPEST ( Transient ElectroMagnetic\
         \ Pulse Emanations Standard ).\nCes mat\xE9riels qui ont fait l'objet de mesures\
@@ -5312,21 +5322,21 @@ objects:
         \ \xEAtre install\xE9s conform\xE9ment \xE0 la directive 485 du 1 septembre\
         \ 2000.\nCette solution est \xE0 envisager quand le zonage ne permet pas r\xE9\
         pondre au besoin. "
-      name: "Mat\xE9riel TEMPEST"
+    - ref_id: SCP-03
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-03
+      name: Cages de Faraday
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
-      ref_id: SCP-02
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-02
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Un des moyens, plus on\xE9reux, de se prot\xE9ger contre les\
         \ signaux parasites compromettants est l'utilisation de cage de Faraday ou\
         \ la faradisation des locaux. "
-      name: Cages de Faraday
+    - ref_id: SCP-04
+      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-04
+      name: Signaux compromettants intentionnels
       parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
-      ref_id: SCP-03
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-03
-    - assessable: true
       depth: 2
+      assessable: true
       description: " Les syst\xE8mes de transmission sans-fil, lorsqu'ils sont utilis\xE9\
         s pour transmettre de l'information deviennent potentiellement des \xE9metteurs\
         \ de signaux compromettants, lesquels sont d\xE9nomm\xE9s \"signaux compromettants\
@@ -5338,13 +5348,3 @@ objects:
         quipements et des locaux.\nD'autre part, il convient de prendre conscience\
         \ du risque associ\xE9 \xE0 l'utilisation de tels moyens dans la transmission\
         \ d'information.  "
-      name: Signaux compromettants intentionnels
-      parent_urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp
-      ref_id: SCP-04
-      urn: urn:deepthoughtsolutions:risk:req_node:anssi_pssi_2004:scp-04
-    urn: urn:deepthoughtsolutions:risk:framework:anssi_pssi_2004
-packager: deepthoughtsolutions
-provider: ANSSI
-ref_id: ANSSI-PSSI-2004
-urn: urn:deepthoughtsolutions:risk:library:anssi_pssi_2004
-version: 1
