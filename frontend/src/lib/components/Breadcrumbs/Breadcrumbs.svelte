@@ -1,28 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { localItems } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
 	import { breadcrumbObject, pageTitle } from '$lib/utils/stores';
 	import { listViewFields } from '$lib/utils/table';
 	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
-
-	function capitalizeSecondWord(sentence: string) {
-		var words = sentence.split(' ');
-
-		if (words.length >= 2) {
-			words[1] = words[1].charAt(0).toUpperCase() + words[1].substring(1);
-			return words.join('');
-		} else {
-			return sentence;
-		}
-	}
 
 	$: {
 		// Remove zero-length tokens.
 		const tokens = $page.url.pathname.split('/').filter((t) => t !== '');
-		let title = '';
 
 		// Create { label, href } pairs for each token.
 		let tokenPath = '';
@@ -40,7 +27,7 @@
 				t = 'domains';
 			} else {
 				t = t.replace(/-/g, ' ');
-				t = capitalizeSecondWord(t);
+				t = toCamelCase(t);
 			}
 			return {
 				label: $page.data.label || t,

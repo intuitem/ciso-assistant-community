@@ -13,6 +13,7 @@
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let formAction = 'create';
+	export let context = 'default';
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
 
@@ -42,6 +43,15 @@
 				<i class="fa-solid fa-xmark" />
 			</div>
 		</div>
-		<ModelForm {form} {suggestions} {parent} {model} {closeModal} action="?/{formAction}" {debug} />
+		<ModelForm
+			{form}
+			{suggestions}
+			{parent}
+			{model}
+			{closeModal}
+			{context}
+			action="?/{formAction}"
+			{debug}
+		/>
 	</div>
 {/if}

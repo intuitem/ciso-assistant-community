@@ -1,5 +1,12 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { ComplianceAssessmentSchema, modelSchema } from '$lib/utils/schemas';
+import { message, setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
+import { zod } from 'sveltekit-superforms/adapters';
+import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { fail, type Actions } from '@sveltejs/kit';
+import * as m from '$paraglide/messages';
+import { localItems, toCamelCase } from '$lib/utils/locales';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -21,12 +28,113 @@ export const load = (async ({ fetch, params }) => {
 		(res) => res.json()
 	);
 
+	const initialData = { baseline: compliance_assessment.id };
+	const auditCreateForm = await superValidate(initialData, zod(ComplianceAssessmentSchema), {
+		errors: false
+	});
+
+	const auditModel = getModelInfo('compliance-assessments');
+
+	const foreignKeys: Record<string, any> = {};
+
+	if (auditModel.foreignKeyFields) {
+		for (const keyField of auditModel.foreignKeyFields) {
+			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			let url: string;
+			if (keyField.urlModel === 'frameworks') {
+				url = `${BASE_API_URL}/${keyField.urlModel}/${compliance_assessment.framework.id}/mappings/`;
+			} else {
+				url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			}
+			const response = await fetch(url);
+			if (response.ok) {
+				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
+			} else {
+				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	const mappingSetsEndpoint = `${BASE_API_URL}/requirement-mapping-sets/?reference_framework=${compliance_assessment.framework.id}`;
+	const mappingSets: Record<string, any>[] = await fetch(mappingSetsEndpoint)
+		.then((res) => res.json())
+		.then((data) => data.results);
+	const mappingSetIds = mappingSets.map((mappingSet) => mappingSet.id);
+	console.log(mappingSetIds);
+	auditModel.foreignKeys = foreignKeys;
+
+	const selectOptions: Record<string, any> = {};
+
+	if (auditModel.selectFields) {
+		for (const selectField of auditModel.selectFields) {
+			const url = `${BASE_API_URL}/compliance-assessments/${selectField.field}/`;
+			const response = await fetch(url);
+			if (response.ok) {
+				selectOptions[selectField.field] = await response.json().then((data) =>
+					Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: key
+					}))
+				);
+			} else {
+				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	auditModel.selectOptions = selectOptions;
+
 	return {
 		URLModel,
 		compliance_assessment,
+		auditCreateForm,
+		auditModel,
 		object,
 		tree,
 		compliance_assessment_donut_values,
 		global_score
 	};
 }) satisfies PageServerLoad;
+
+export const actions: Actions = {
+	create: async ({ request, fetch }) => {
+		const formData = await request.formData();
+
+		const schema = modelSchema(formData.get('urlmodel') as string);
+		const urlModel = formData.get('urlmodel');
+
+		const createForm = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/${urlModel}/`;
+
+		if (!createForm.valid) {
+			console.log(createForm.errors);
+			return fail(400, { form: createForm });
+		}
+
+		if (formData) {
+			const requestInitOptions: RequestInit = {
+				method: 'POST',
+				body: JSON.stringify(createForm.data)
+			};
+			const res = await fetch(endpoint, requestInitOptions);
+			if (!res.ok) {
+				const response = await res.json();
+				console.log(response);
+				if (response.non_field_errors) {
+					setError(createForm, 'non_field_errors', response.non_field_errors);
+				}
+				return fail(400, { form: createForm });
+			}
+			const model: string = urlParamModelVerboseName(urlModel);
+			// TODO: reference newly created object
+			return message(
+				createForm,
+				m.successfullyCreatedObject({
+					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
+				})
+			);
+		}
+		return { createForm };
+	}
+};

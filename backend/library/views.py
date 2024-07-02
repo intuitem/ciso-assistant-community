@@ -107,8 +107,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
         try:
             key = "urn" if pk.startswith("urn:") else "id"
-            for _ in range(10):
-                print(f"Looking for {key} {pk}")
             libraries = StoredLibrary.objects.filter(  # The get method raise an exception if multiple objects are found
                 **{key: pk}
             )  # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
@@ -126,9 +124,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception as e:
+        except Exception:
             return Response(
-                {"error": f"Failed to load library ({e})"},  # This must translated
+                {"error": "Failed to load library"},  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 

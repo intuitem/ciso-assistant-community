@@ -70,7 +70,7 @@ def bar_graph(assessments, ancestors, node=None):
     ]
     total = len(candidates)
     if total > 0:
-        for st in RequirementAssessment.Results:
+        for st in RequirementAssessment.Result:
             count = len([c for c in candidates if c.result == st])
             compliance_assessments_result.append((st, round(count * 100 / total)))
 

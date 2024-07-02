@@ -78,6 +78,7 @@
 		"@inlang/paraglide-js-adapter-vite": "^1.2.14",
 		"dotenv": "^16.4.1",
 		"echarts": "^5.4.3",
-		"svelte-multiselect": "^10.2.0"
+		"svelte-multiselect": "^10.2.0",
+		"svelte-persisted-store": "^0.11.0"
 	}
 }
