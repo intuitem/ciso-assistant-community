@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import { FIELD_COLORED_TAG_MAP, FIELD_COMPONENT_MAP } from '$lib/utils/crud';
+	import {
+		FIELD_COLORED_TAG_MAP,
+		FIELD_COMPONENT_MAP,
+		CUSTOM_ACTIONS_COMPONENT
+	} from '$lib/utils/crud';
 	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
@@ -278,7 +282,7 @@
 						>
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
-              {@const actionsComponent = field_component_map['actions']}
+              {@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
               {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
               <TableRowActions
                 deleteForm={deleteForm}

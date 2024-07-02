@@ -415,21 +415,23 @@ export const URL_MODEL_MAP: ModelMap = {
 	}
 };
 
+export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
+
 export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
 	libraries: {
 		locale: LanguageDisplay,
-		actions: LibraryActions
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	// "stored-libraries": {
 	// 	locale: LanguageDisplay,
-	// 	actions: LibraryActions
+	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	// },
 	// "loaded-libraries": {
 	// 	locale: LanguageDisplay
-	// 	// actions: LibraryActions
+	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	// },
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
