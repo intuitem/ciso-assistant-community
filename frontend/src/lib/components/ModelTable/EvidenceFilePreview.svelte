@@ -12,14 +12,27 @@
 
 	let attachment: Attachment | undefined;
 
+	const fetchAttachment = async () => {
+		const res = await fetch(`/evidences/${meta.id}/attachment`);
+		const blob = await res.blob();
+		return { type: blob.type, url: URL.createObjectURL(blob) };
+	};
+
+	let mounted = false;
 	onMount(async () => {
-		const fetchAttachment = async () => {
-			const res = await fetch(`/evidences/${meta.id}/attachment`);
-			const blob = await res.blob();
-			return { type: blob.type, url: URL.createObjectURL(blob) };
-		};
 		attachment = meta.attachment ? await fetchAttachment() : undefined;
+		mounted = true;
 	});
+
+	$: {
+		if (mounted && meta.attachment) {
+			fetchAttachment().then((_attachment) => {
+				attachment = _attachment;
+			});
+		} else {
+			attachment = undefined;
+		}
+	}
 </script>
 
 {#if cell}
