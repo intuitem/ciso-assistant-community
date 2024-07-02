@@ -47,7 +47,11 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const res = await fetch(relEndpoint);
 				const revData = await res.json().then((res) => res.results);
 
-				const tableFields = listViewFields[e.urlModel];
+				const tableFieldsRef = listViewFields[e.urlModel];
+				const tableFields = {
+					head: [...tableFieldsRef.head],
+					body: [...tableFieldsRef.body]
+				};
 				const index = tableFields.body.indexOf(e.field);
 				if (index > -1) {
 					tableFields.head.splice(index, 1);

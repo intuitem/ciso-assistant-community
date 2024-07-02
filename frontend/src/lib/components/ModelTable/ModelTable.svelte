@@ -92,6 +92,7 @@
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
 	export let detailQueryParameter: string | undefined;
+	export let fromListView: boolean = false;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
@@ -99,6 +100,7 @@
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { listViewFields } from '$lib/utils/table';
 
 	// Reactive
 	$: classesBase = `${$$props.class || 'bg-white'}`;
@@ -121,6 +123,46 @@
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
+	$: hasRows = data.length > 0;
+	const allRows = handler.getAllRows();
+	const tableURLModel = source.meta?.urlmodel ?? URLModel;
+	const filters = fromListView ? listViewFields[tableURLModel].filters ?? {} : {};
+	const filteredFields = Object.keys(filters);
+	const filterValues: { [key: string]: any } = {};
+	const filterProps: {
+		[key: string]: { [key: string]: any };
+	} = {};
+	let displayFilters = false;
+
+	function defaultFilterProps(rows, field: string) {
+		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
+		const options = [...new Set(rows.map(getColumn))].sort();
+		return { options };
+	}
+
+	function defaultFilterFunction(columnValue: any, value: any): boolean {
+		return value ? columnValue === value : true;
+	}
+
+	$: {
+		for (const field of filteredFields) {
+			handler.filter(
+				filterValues[field],
+				filters[field].getColumn ?? field,
+				filters[field].filter ?? defaultFilterFunction
+			);
+		}
+	}
+
+	let allowOptionsUpdate = true;
+	allRows.subscribe((rows) => {
+		if (!allowOptionsUpdate) return;
+		for (const key of filteredFields) {
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
+		}
+		if (rows.length > 0) allowOptionsUpdate = false;
+	});
+
 	const rows = handler.getRows();
 
 	onMount(() => {
@@ -143,10 +185,41 @@
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-start'
+	};
 </script>
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
+		{#if filteredFields.length > 0 && hasRows}
+			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
+				<i class="fa-solid fa-filter mr-2" /> Filters
+			</button>
+			<div
+				class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200"
+				data-popup="popupFilter"
+			>
+				<div class="flex flex-row items-center justify-center space-x-4 p-2">
+					{#each filteredFields as field}
+						<div>
+							<svelte:component
+								this={filters[field].component}
+								bind:value={filterValues[field]}
+								{...filterProps[field]}
+								{...filters[field].extraProps}
+							/>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 		{#if search}
 			<Search {handler} />
 		{/if}

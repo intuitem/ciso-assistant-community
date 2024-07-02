@@ -123,6 +123,10 @@ class TestRiskAssessmentAuthenticated:
                 "project": {
                     "id": str(project.id),
                     "str": project.folder.name + "/" + project.name,
+                    "folder": {
+                        "id": str(project.folder.id),
+                        "str": project.folder.name,
+                    },
                 },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
@@ -152,6 +156,10 @@ class TestRiskAssessmentAuthenticated:
                 "project": {
                     "id": str(project.id),
                     "str": project.folder.name + "/" + project.name,
+                    "folder": {
+                        "id": str(project.folder.id),
+                        "str": project.folder.name,
+                    },
                 },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
@@ -193,6 +201,10 @@ class TestRiskAssessmentAuthenticated:
                 "project": {
                     "id": str(project.id),
                     "str": project.folder.name + "/" + project.name,
+                    "folder": {
+                        "id": str(project.folder.id),
+                        "str": project.folder.name,
+                    },
                 },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
