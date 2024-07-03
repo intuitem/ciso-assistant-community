@@ -158,7 +158,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.framework.str,
+	getColumn: (row) => row.framework.ref_id,
 	extraProps: {
 		defaultOptionName: 'Select framework' // ...' // Make translations
 	}
