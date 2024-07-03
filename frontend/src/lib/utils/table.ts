@@ -103,7 +103,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.risk_assessment.str,
+	getColumn: (row) => row.meta.risk_assessment.name,
 	extraProps: {
 		defaultOptionName: 'Select risk assessment' // ...'
 	}
