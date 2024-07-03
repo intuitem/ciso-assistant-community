@@ -30,7 +30,7 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder.str,
 	extraProps: {
-		defaultOptionName: 'Select domain...'
+		defaultOptionName: 'Select domain' // ...'
 	}
 };
 
@@ -53,7 +53,7 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.project.str,
 	extraProps: {
-		defaultOptionName: 'Select project...' // Make translations
+		defaultOptionName: 'Select project' // ...' // Make translations
 	}
 };
 
@@ -66,7 +66,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.status,
 	extraProps: {
-		defaultOptionName: 'Select status...'
+		defaultOptionName: 'Select status' // ...'
 	}
 };
 
@@ -75,7 +75,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.treatment,
 	extraProps: {
-		defaultOptionName: 'Select treatment...'
+		defaultOptionName: 'Select treatment' // ...'
 	}
 };
 
@@ -84,7 +84,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.state,
 	extraProps: {
-		defaultOptionName: 'Select state...'
+		defaultOptionName: 'Select state' // ...'
 	}
 };
 
@@ -97,7 +97,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		return row.meta.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
-		defaultOptionName: 'Select approver...'
+		defaultOptionName: 'Select approver' // ...'
 	}
 };
 
@@ -105,7 +105,7 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.risk_assessment.str,
 	extraProps: {
-		defaultOptionName: 'Select risk assessment...'
+		defaultOptionName: 'Select risk assessment' // ...'
 	}
 };
 
@@ -127,7 +127,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 		return { options };
 	},
 	extraProps: {
-		defaultOptionName: 'Select threat...'
+		defaultOptionName: 'Select threat' // ...'
 	}
 };
 
@@ -152,7 +152,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 		return { options };
 	},
 	extraProps: {
-		defaultOptionName: 'Select asset...'
+		defaultOptionName: 'Select asset' // ...'
 	}
 };
 
@@ -160,7 +160,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.str,
 	extraProps: {
-		defaultOptionName: 'Select framework...' // Make translations
+		defaultOptionName: 'Select framework' // ...' // Make translations
 	}
 };
 
@@ -168,7 +168,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.locale,
 	extraProps: {
-		defaultOptionName: 'Select language...', // Make translations
+		defaultOptionName: 'Select language', // ...' // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
 	}
 };

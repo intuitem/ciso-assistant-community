@@ -25,9 +25,13 @@
 			[optionIndex, option.toLowerCase().indexOf(searchText)]
 				: [null,-1]
 	).filter(([_, matchIndex]) => matchIndex >= 0);
-</script>
 
-<!-- The default behavior on focus must be to display the entire list of options (but with a scroll so it doesn't become too much long) -->
+	/* if (options.some(x => x === "Domain 1")) { // Code to test the scroll
+		for (let i=4;i<50;i++) {
+			options.push(`Dom4in ${i}`);
+		}
+	} */
+</script>
 
 <svelte:document on:click={() => {
 	searchText = "";
@@ -43,7 +47,7 @@
 			<input
 				class="input bg-surface-50 max-w-2xl" 
 				type="text"
-				placeholder={defaultOptionName}
+				placeholder="{defaultOptionName} ({options.length} listed)"
 				bind:value={searchText}
 				bind:this={textInputNode}
 				on:focus={() => {inputFocused = true;}}
@@ -54,7 +58,7 @@
 				}}
 			/>
 			{#if inputFocused}
-				<div class="absolute z-10 w-max min-w-full left-0">
+				<div class="absolute z-10 w-max min-w-full left-0 overflow-y-auto max-h-64 border border-black">
 					{#if matchingOptionsIndices.length == 0}
 						<span class="block w-full py-1 px-0 pointer-events-none text-center border-2 border-black bg-white">No result found</span> <!-- We have to translate this string !-->
 					{/if}
@@ -67,7 +71,7 @@
 						]}
 						<button
 							on:click|stopPropagation={() => {value = option;}}
-							class="block border [&:nth-first-child(1)]:border-t-2 [&:nth-last-child(1)]:border-b-2 border-l-2 border-r-2 border-black text-center bg-white py-1 px-2 w-full hover:underline"
+							class="block border [&:nth-first-child(1)]:border-t-2 [&:nth-last-child(1)]:border-b-2 border-l-2 border-r-2 border-black text-center bg-white py-1 px-2 w-full hover:underline rounded"
 						>
 							{splittedOption[0]}<b>{splittedOption[1]}</b>{splittedOption[2]}
 						</button>
