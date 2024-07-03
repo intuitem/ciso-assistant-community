@@ -205,7 +205,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
-    risk_assessment = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField(["id","name"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
     project = FieldsRelatedField(
         source="risk_assessment.project", fields=["id", "name", "folder"]
@@ -469,7 +469,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition"]
+        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"

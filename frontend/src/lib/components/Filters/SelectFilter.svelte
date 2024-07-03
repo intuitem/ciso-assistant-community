@@ -1,4 +1,6 @@
 <script lang="ts">
+	import * as m from '$paraglide/messages';
+
 	export let options: any[];
 	export let value: string | undefined;
 	export let defaultOptionName: string = "--";
@@ -47,7 +49,7 @@
 			<input
 				class="input bg-surface-50 max-w-2xl focus:rounded-b-none focus:border-b-0" 
 				type="text"
-				placeholder="{defaultOptionName} ({options.length} listed)"
+				placeholder="{defaultOptionName} ({options.length})"
 				bind:value={searchText}
 				bind:this={textInputNode}
 				on:focus={() => {inputFocused = true;}}
