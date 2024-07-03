@@ -60,7 +60,7 @@
 				}}
 			/>
 			{#if inputFocused}
-				<div class="absolute z-10 w-max min-w-full left-0 overflow-y-auto max-h-64 border border-black">
+				<div style="text-overflow: ellipsis;" class="absolute z-10 min-w-full max-w-lg left-0 overflow-y-auto max-h-64 border border-black overflow-x-hidden overflow-ellipsis">
 					{#if matchingOptionsIndices.length == 0}
 						<span class="block w-full py-1 px-0 pointer-events-none text-center border-2 border-black bg-white">{m.noResultFound()}</span>
 					{/if}
@@ -73,7 +73,7 @@
 						]}
 						<button
 							on:click|stopPropagation={() => {value = option;}}
-							class="block border [&:nth-first-child(1)]:border-t-2 [&:nth-last-child(1)]:border-b-2 border-l-2 border-r-2 border-black text-center bg-white py-1 px-2 w-full hover:underline rounded"
+							style="text-overflow: ellipsis;" class="block border [&:nth-first-child(1)]:border-t-2 [&:nth-last-child(1)]:border-b-2 border-l-2 border-r-2 border-black text-center bg-white py-1 px-2 w-full hover:underline rounded"
 						>
 							{splittedOption[0]}<b>{splittedOption[1]}</b>{splittedOption[2]}
 						</button>
