@@ -2200,7 +2200,7 @@ class ComplianceAssessment(Assessment):
                     requirement_assessment.result = lowest_result[0]
                     if lowest_result[1]:
                         requirement_assessment.status = lowest_result[1]
-                    ref = refs[inferences.index(lowest_result[0])]
+                    ref = refs[inferences.index(lowest_result)]
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
                     "reference_requirement_assessment": {
