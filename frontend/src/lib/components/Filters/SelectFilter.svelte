@@ -49,7 +49,7 @@
 			<input
 				class="input bg-surface-50 max-w-2xl" 
 				type="text"
-				placeholder="{defaultOptionName} ({options.length} listed)"
+				placeholder="{defaultOptionName} ({options.length})"
 				bind:value={searchText}
 				bind:this={textInputNode}
 				on:focus={() => {inputFocused = true;}}
