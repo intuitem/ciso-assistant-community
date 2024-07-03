@@ -197,7 +197,8 @@
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && hasRows}
 			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
-				<i class="fa-solid fa-filter mr-2" /> {m.filters()}
+				<i class="fa-solid fa-filter mr-2" />
+				{m.filters()}
 			</button>
 			<div
 				class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200"
@@ -208,7 +209,7 @@
 						<svelte:component
 							this={filters[field].component}
 							bind:value={filterValues[field]}
-							field={field}
+							{field}
 							{...filterProps[field]}
 							{...filters[field].extraProps}
 						/>

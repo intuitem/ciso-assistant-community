@@ -205,7 +205,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
-    risk_assessment = FieldsRelatedField(["id","name"])
+    risk_assessment = FieldsRelatedField(["id", "name"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
     project = FieldsRelatedField(
         source="risk_assessment.project", fields=["id", "name", "folder"]
