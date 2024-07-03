@@ -45,7 +45,7 @@
 	<div class="relative" style="margin: 0;" on:click|stopPropagation>
 		{#if !filterApplied}
 			<input
-				class="input bg-surface-50 max-w-2xl" 
+				class="input bg-surface-50 max-w-2xl focus:rounded-b-none focus:border-b-0" 
 				type="text"
 				placeholder="{defaultOptionName} ({options.length} listed)"
 				bind:value={searchText}
@@ -58,9 +58,9 @@
 				}}
 			/>
 			{#if inputFocused}
-				<div class="absolute z-10 w-max min-w-full left-0 overflow-y-auto max-h-64 border border-black">
+				<div class="absolute z-10 w-max min-w-full left-0 overflow-y-auto max-h-64 border rounded-b-lg shadow-lg border-primary-500">
 					{#if matchingOptionsIndices.length == 0}
-						<span class="block w-full py-1 px-0 pointer-events-none text-center border-2 border-black bg-white">No result found</span> <!-- We have to translate this string !-->
+						<span class="block text-center bg-white py-1 px-2 w-full text-gray-500">No result found</span> <!-- We have to translate this string !-->
 					{/if}
 					{#each matchingOptionsIndices as [optionIndex, matchIndex]}
 						{@const option = options[optionIndex]}
@@ -71,7 +71,7 @@
 						]}
 						<button
 							on:click|stopPropagation={() => {value = option;}}
-							class="block border [&:nth-first-child(1)]:border-t-2 [&:nth-last-child(1)]:border-b-2 border-l-2 border-r-2 border-black text-center bg-white py-1 px-2 w-full hover:underline rounded"
+							class="block text-center bg-white py-1 px-2 w-full hover:text-primary-500 hover:font-semibold animation duration-100"
 						>
 							{splittedOption[0]}<b>{splittedOption[1]}</b>{splittedOption[2]}
 						</button>
@@ -79,7 +79,7 @@
 				</div>
 			{/if}
 		{:else}
-			<input type="text" value={value} on:click={() => {
+			<input type="text" class="input bg-surface-50 max-w-2xl focus:rounded-b-none border border-primary-500" value={value} on:click={() => {
 				value = "";
 			}}/>
 		{/if}
