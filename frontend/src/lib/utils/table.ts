@@ -3,7 +3,7 @@ import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
-import * as m from '$paraglide/messages'
+import * as m from '$paraglide/messages';
 
 type JSONObject = { [key: string]: JSONObject } | JSONObject[] | string | number | boolean | null;
 
