@@ -62,6 +62,7 @@ for tab in dataframe:
                         title,
                         pretify_content(specification),
                         "lite,full" if lite == "Yes" else "full",
+                        "",
                     )
                 )
             else:
@@ -69,7 +70,24 @@ for tab in dataframe:
                     eos = True
                 else:
                     (d, id) = domain.split(" - ")
-                    output_table.append(("", 1, id, d, "", None))
+                    output_table.append(("", 1, id, d, "", None, None))
+    elif title == "CAIQ":
+        line = 0
+        eos = False
+        for row in tab:
+            line += 1
+            if line < 4:
+                continue
+            (question_id, question) = (r.value for r in row[4:6])
+            if question_id:
+                q = re.match(r"(.*)\.\d+$", question_id)
+                id = q.group(1)
+                for i in range(len(output_table)):
+                    if output_table[i][2] == id:
+                        a = output_table[i][6]
+                        b = pretify_content(question)
+                        c = b if a == "" else a + "\n" + b
+                        output_table[i] = output_table[i][0:6] + (c,)
     else:
         print(f"Ignored tab: {title}")
 
@@ -79,7 +97,7 @@ wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
 ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:ccm-controls-v4"])
-ws.append(["library_version", "1"])
+ws.append(["library_version", "2"])
 ws.append(["library_locale", "en"])
 ws.append(["library_ref_id", "CCM-Controls-v4"])
 ws.append(["library_name", "CCM Controls v4"])
@@ -96,7 +114,15 @@ ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("controls")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
+    [
+        "assessable",
+        "depth",
+        "ref_id",
+        "name",
+        "description",
+        "implementation_groups",
+        "annotation",
+    ]
 )
 for row in output_table:
     ws1.append(row)
