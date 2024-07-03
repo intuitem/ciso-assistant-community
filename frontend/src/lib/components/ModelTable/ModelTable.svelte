@@ -209,6 +209,7 @@
 							<svelte:component
 								this={filters[field].component}
 								bind:value={filterValues[field]}
+								field={field}
 								{...filterProps[field]}
 								{...filters[field].extraProps}
 							/>

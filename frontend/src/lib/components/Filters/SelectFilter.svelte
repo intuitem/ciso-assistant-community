@@ -2,10 +2,13 @@
 	import * as m from '$paraglide/messages';
 
 	export let options: any[];
+	export let field: string;
 	export let value: string | undefined;
 	export let defaultOptionName: string = "--";
 	export let optionLabels: { [key: string]: string } = {};
 	const hasOptionLabels = Object.keys(optionLabels).length > 0;
+
+	$: optionsCount = options.length - (field === "status" ? 1 : 0)
 
 	let textInputNode: HTMLElement | null = null;
 	let textInputMountedCount: number = 0;
@@ -49,7 +52,7 @@
 			<input
 				class="input bg-surface-50 max-w-2xl focus:rounded-b-none focus:border-b-0" 
 				type="text"
-				placeholder="{defaultOptionName} ({options.length})"
+				placeholder="{defaultOptionName} ({optionsCount})"
 				bind:value={searchText}
 				bind:this={textInputNode}
 				on:focus={() => {inputFocused = true;}}
