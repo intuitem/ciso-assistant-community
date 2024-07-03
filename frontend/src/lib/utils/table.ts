@@ -103,7 +103,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.risk_assessment.str,
+	getColumn: (row) => row.meta.risk_assessment.name,
 	extraProps: {
 		defaultOptionName: 'Select risk assessment' // ...'
 	}
@@ -158,7 +158,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.framework.str,
+	getColumn: (row) => row.framework.ref_id,
 	extraProps: {
 		defaultOptionName: 'Select framework' // ...' // Make translations
 	}
