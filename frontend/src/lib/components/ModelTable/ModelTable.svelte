@@ -203,17 +203,15 @@
 				class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200"
 				data-popup="popupFilter"
 			>
-				<div class="flex flex-row items-center justify-center space-x-4 p-2">
+				<div class="grid grid-cols-3 gap-3 items-center justify-center space-x-4 p-2">
 					{#each filteredFields as field}
-						<div>
-							<svelte:component
-								this={filters[field].component}
-								bind:value={filterValues[field]}
-								field={field}
-								{...filterProps[field]}
-								{...filters[field].extraProps}
-							/>
-						</div>
+						<svelte:component
+							this={filters[field].component}
+							bind:value={filterValues[field]}
+							field={field}
+							{...filterProps[field]}
+							{...filters[field].extraProps}
+						/>
 					{/each}
 				</div>
 			</div>
