@@ -1,4 +1,6 @@
 <script lang="ts">
+	import * as m from '$paraglide/messages';
+
 	export let options: any[];
 	export let value: string | undefined;
 	export let defaultOptionName: string = "--";
@@ -60,7 +62,7 @@
 			{#if inputFocused}
 				<div class="absolute z-10 w-max min-w-full left-0 overflow-y-auto max-h-64 border border-black">
 					{#if matchingOptionsIndices.length == 0}
-						<span class="block w-full py-1 px-0 pointer-events-none text-center border-2 border-black bg-white">No result found</span> <!-- We have to translate this string !-->
+						<span class="block w-full py-1 px-0 pointer-events-none text-center border-2 border-black bg-white">{m.noResultFound()}</span>
 					{/if}
 					{#each matchingOptionsIndices as [optionIndex, matchIndex]}
 						{@const option = options[optionIndex]}
