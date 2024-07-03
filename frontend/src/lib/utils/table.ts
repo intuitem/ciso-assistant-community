@@ -3,6 +3,7 @@ import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
+import * as m from '$paraglide/messages'
 
 type JSONObject = { [key: string]: JSONObject } | JSONObject[] | string | number | boolean | null;
 
@@ -30,7 +31,7 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder.str,
 	extraProps: {
-		defaultOptionName: 'Select domain' // ...'
+		defaultOptionName: 'domain' // ...'
 	}
 };
 
@@ -53,7 +54,7 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.project.str,
 	extraProps: {
-		defaultOptionName: 'Select project' // ...' // Make translations
+		defaultOptionName: 'project' // ...' // Make translations
 	}
 };
 
@@ -66,7 +67,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.status,
 	extraProps: {
-		defaultOptionName: 'Select status' // ...'
+		defaultOptionName: 'status' // ...'
 	}
 };
 
@@ -75,7 +76,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.treatment,
 	extraProps: {
-		defaultOptionName: 'Select treatment' // ...'
+		defaultOptionName: 'treatment' // ...'
 	}
 };
 
@@ -84,7 +85,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.state,
 	extraProps: {
-		defaultOptionName: 'Select state' // ...'
+		defaultOptionName: 'state' // ...'
 	}
 };
 
@@ -97,7 +98,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		return row.meta.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
-		defaultOptionName: 'Select approver' // ...'
+		defaultOptionName: 'approver' // ...'
 	}
 };
 
@@ -105,7 +106,7 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.risk_assessment.name,
 	extraProps: {
-		defaultOptionName: 'Select risk assessment' // ...'
+		defaultOptionName: 'riskAssessment' // ...'
 	}
 };
 
@@ -127,7 +128,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 		return { options };
 	},
 	extraProps: {
-		defaultOptionName: 'Select threat' // ...'
+		defaultOptionName: 'threat' // ...'
 	}
 };
 
@@ -152,7 +153,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 		return { options };
 	},
 	extraProps: {
-		defaultOptionName: 'Select asset' // ...'
+		defaultOptionName: 'asset' // ...'
 	}
 };
 
@@ -160,7 +161,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.ref_id,
 	extraProps: {
-		defaultOptionName: 'Select framework' // ...' // Make translations
+		defaultOptionName: 'framework' // ...' // Make translations
 	}
 };
 
@@ -168,7 +169,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.locale,
 	extraProps: {
-		defaultOptionName: 'Select language', // ...' // Make translations
+		defaultOptionName: 'language', // ...' // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
 	}
 };
