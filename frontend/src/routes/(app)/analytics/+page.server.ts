@@ -55,9 +55,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	function timeState(date: string) {
 		const eta = new Date(date);
-		if (eta.toLocaleDateString() > TODAY.toLocaleDateString()) {
+		if (eta.getTime() > TODAY.getTime()) {
 			return { name: 'incoming', hexcolor: '#93c5fd' };
-		} else if (eta.toLocaleDateString() < TODAY.toLocaleDateString()) {
+		} else if (eta.getTime() < TODAY.getTime()) {
 			return { name: 'outdated', hexcolor: '#f87171' };
 		} else {
 			return { name: 'today', hexcolor: '#fbbf24' };
