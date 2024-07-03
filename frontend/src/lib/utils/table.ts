@@ -315,7 +315,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		filters: {
 			domain: DOMAIN_FILTER_FROM_PROJECT,
 			project: PROJECT_FILTER,
-			framework: FRAMEWORK_FILTER
+			framework: FRAMEWORK_FILTER,
+			status: STATUS_FILTER
 		}
 	},
 	'requirement-assessments': {
