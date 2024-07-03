@@ -133,6 +133,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 44. EU AI Act 🇪🇺🤖
 45. FBI CJIS 🇺🇸👮
 46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+47. Secure Controls Framework (SCF) 🇺🇸🌐
+48. NCSC Cyber Assessment Framework (CAF) 🇬🇧
 
 ### Community contributions
 
@@ -155,11 +157,8 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - CCPA
-- NCSC Cyber Assessment Framework (CAF)
 - NCSC Cyber Essentials
-- Secure Controls Framework (SCF)
 - Part-IS
-- SOX
 - NIST 800-82
 - Korea ISA: ISMS-P
 - ENS Esquema Nacional de seguridad (español)
