@@ -67,7 +67,9 @@
 				}}
 			/>
 			{#if inputFocused}
-				<div class="absolute z-10 w-ma min-w-full left-0 overflow-y-auto max-h-64 border rounded-b-lg shadow-lg border-primary-500 bg-white w-full">
+				<div
+					class="absolute z-10 w-ma min-w-full left-0 overflow-y-auto max-h-64 border rounded-b-lg shadow-lg border-primary-500 bg-white w-full"
+				>
 					{#if matchingOptionsIndices.length == 0}
 						<span class="block text-center bg-white py-1 px-2 w-full text-gray-500"
 							>{m.noResultFound()}</span
@@ -81,7 +83,9 @@
 							option.substring(matchIndex + searchText.length)
 						]}
 						<button
-							on:click|stopPropagation={() => {value = option;}}
+							on:click|stopPropagation={() => {
+								value = option;
+							}}
 							class="block text-center bg-white py-1 px-2 w-full hover:text-primary-500 hover:font-semibold animation duration-100 overflow-ellipsis overflow-hidden"
 						>
 							{splittedOption[0]}<b>{splittedOption[1]}</b>{splittedOption[2]}
