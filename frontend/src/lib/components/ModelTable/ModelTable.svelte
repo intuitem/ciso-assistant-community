@@ -188,7 +188,8 @@
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
-		placement: 'bottom-start'
+		placement: 'bottom-start',
+		closeQuery: 'a[href]'
 	};
 </script>
 
