@@ -47,7 +47,7 @@
 {#if data.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel} fromListView={true}>
+			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
 					{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(URLModel)}
 						<button

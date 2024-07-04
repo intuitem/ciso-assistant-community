@@ -88,7 +88,6 @@
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
 	export let detailQueryParameter: string | undefined;
-	export let fromListView: boolean = false;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
@@ -115,6 +114,10 @@
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
+	const columnFields = new Set(
+		source.body.length === 0 ? []
+			: Object.keys(source.body[0])
+	);
 
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
@@ -122,8 +125,8 @@
 	$: hasRows = data.length > 0;
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters = fromListView ? listViewFields[tableURLModel].filters ?? {} : {};
-	const filteredFields = Object.keys(filters);
+	const filters = listViewFields[tableURLModel].filters ?? {};
+	const filteredFields = Object.keys(filters).filter(key => columnFields.has(key));
 	const filterValues: { [key: string]: any } = {};
 	const filterProps: {
 		[key: string]: { [key: string]: any };
