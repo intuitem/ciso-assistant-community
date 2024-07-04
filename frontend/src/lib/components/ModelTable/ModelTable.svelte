@@ -126,7 +126,7 @@
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters = listViewFields[tableURLModel].filters ?? {};
-	const filteredFields = Object.keys(filters).filter(key => columnFields.has(key));
+	const filteredFields = Object.keys(filters).filter(key => columnFields.has(key) || filters[key].alwaysDisplay);
 	const filterValues: { [key: string]: any } = {};
 	const filterProps: {
 		[key: string]: { [key: string]: any };
