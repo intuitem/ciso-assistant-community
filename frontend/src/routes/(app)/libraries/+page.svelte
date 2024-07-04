@@ -36,7 +36,6 @@
 					identifierField="urn"
 					pagination={false}
 					deleteForm={data.deleteForm}
-					fromListView={true}
 				/>
 			{/if}
 			{#if tabSet === 1}
@@ -48,7 +47,6 @@
 					pagination={false}
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
-					fromListView={true}
 				/>
 			{/if}
 		</svelte:fragment>
