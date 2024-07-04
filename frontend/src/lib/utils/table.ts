@@ -13,6 +13,7 @@ interface ListViewFilterConfig {
 	getColumn?: (row: Row) => Row[keyof Row];
 	filterProps?: (rows: any[], field: string) => { [key: string]: any };
 	extraProps?: { [key: string]: any };
+	alwaysDisplay?: boolean;
 }
 
 interface ListViewFieldsConfig {
@@ -32,14 +33,15 @@ const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 	getColumn: (row) => row.meta.lc_status,
 	extraProps: {
 		defaultOptionName: "status"
-	}
+	},
+	alwaysDisplay: true
 };
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder.str,
 	extraProps: {
-		defaultOptionName: 'domain' // ...'
+		defaultOptionName: 'domain'
 	}
 };
 
@@ -62,7 +64,7 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.project.str,
 	extraProps: {
-		defaultOptionName: 'project' // ...' // Make translations
+		defaultOptionName: 'project' // Make translations
 	}
 };
 
@@ -75,8 +77,9 @@ const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.status,
 	extraProps: {
-		defaultOptionName: 'status' // ...'
-	}
+		defaultOptionName: 'status'
+	},
+	alwaysDisplay: true
 };
 
 const TREATMENT_FILTER: ListViewFilterConfig = {
@@ -84,7 +87,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.treatment,
 	extraProps: {
-		defaultOptionName: 'treatment' // ...'
+		defaultOptionName: 'treatment'
 	}
 };
 
@@ -93,7 +96,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.state,
 	extraProps: {
-		defaultOptionName: 'state' // ...'
+		defaultOptionName: 'state'
 	}
 };
 
@@ -106,7 +109,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		return row.meta.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
-		defaultOptionName: 'approver' // ...'
+		defaultOptionName: 'approver'
 	}
 };
 
@@ -114,9 +117,28 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.risk_assessment.name,
 	extraProps: {
-		defaultOptionName: 'riskAssessment' // ...'
+		defaultOptionName: 'riskAssessment'
 	}
 };
+
+const PROVIDER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		console.log(row);
+		return row.provider;
+	},
+	extraProps: {
+		defaultOptionName: 'provider'
+	}
+};
+
+const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
+	...PROVIDER_FILTER,
+	getColumn: (row) => {
+		return row.meta.provider;
+	},
+	alwaysDisplay: true
+}
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
@@ -136,7 +158,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 		return { options };
 	},
 	extraProps: {
-		defaultOptionName: 'threat' // ...'
+		defaultOptionName: 'threat'
 	}
 };
 
@@ -158,15 +180,16 @@ const ASSET_FILTER: ListViewFilterConfig = {
 		return { options };
 	},
 	extraProps: {
-		defaultOptionName: 'asset' // ...'
-	}
+		defaultOptionName: 'asset'
+	},
+	alwaysDisplay: true
 };
 
 const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.ref_id,
 	extraProps: {
-		defaultOptionName: 'framework' // ...' // Make translations
+		defaultOptionName: 'framework' // Make translations
 	}
 };
 
@@ -174,10 +197,28 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.locale,
 	extraProps: {
-		defaultOptionName: 'language', // ...' // Make translations
+		defaultOptionName: 'language', // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
 	}
 };
+
+const ASSET_TYPE_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.type,
+	extraProps: {
+		defaultOptionName: 'type', // Make translations
+	},
+	alwaysDisplay: true
+}
+
+const CATEGORY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.category,
+	extraProps: {
+		defaultOptionName: 'category', // Make translations
+	},
+	alwaysDisplay: true
+}
 
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
 	component: CheckboxFilter,
@@ -204,7 +245,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'domain'],
 		body: ['name', 'description', 'folder'],
 		filters: {
-			domain: DOMAIN_FILTER,
+			folder: DOMAIN_FILTER,
 			lc_status: PROJECT_STATUS_FILTER
 		}
 	},
@@ -213,16 +254,16 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			domain: DOMAIN_FILTER
+			folder: DOMAIN_FILTER
 		}
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_PROJECT,
+			folder: {...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true},
 			project: PROJECT_FILTER,
-			status: STATUS_FILTER
+			status: {...STATUS_FILTER, alwaysDisplay: true}
 		}
 	},
 	threats: {
@@ -230,7 +271,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			domain: DOMAIN_FILTER
+			folder: DOMAIN_FILTER
 		}
 	},
 	'risk-scenarios': {
@@ -244,9 +285,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			'residual_level'
 		],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_META_PROJECT,
-			project: PROJECT_FILTER_FROM_META,
-			treatment: TREATMENT_FILTER,
+			folder: {...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true},
+			project: {...PROJECT_FILTER_FROM_META, alwaysDisplay: true},
+			treatment: {...TREATMENT_FILTER, alwaysDisplay: true},
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER
@@ -256,7 +297,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios'],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_META,
+			folder: DOMAIN_FILTER_FROM_META,
 			state: STATE_FILTER,
 			approver: APPROVER_FILTER
 		}
@@ -265,15 +306,16 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
 		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control'],
 		filters: {
-			domain: DOMAIN_FILTER,
-			status: STATUS_FILTER
+			folder: DOMAIN_FILTER,
+			status: STATUS_FILTER,
+			category: CATEGORY_FILTER
 		}
 	},
 	policies: {
 		head: ['name', 'description', 'eta', 'domain', 'referenceControl'],
 		body: ['name', 'description', 'eta', 'folder', 'reference_control'],
 		filters: {
-			domain: DOMAIN_FILTER
+			folder: DOMAIN_FILTER
 		}
 	},
 	'reference-controls': {
@@ -281,14 +323,16 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			domain: DOMAIN_FILTER
+			folder: {...DOMAIN_FILTER, alwaysDisplay: true},
+			category: CATEGORY_FILTER
 		}
 	},
 	assets: {
 		head: ['name', 'description', 'businessValue', 'domain'],
 		body: ['name', 'description', 'business_value', 'folder'],
 		filters: {
-			domain: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			type: ASSET_TYPE_FILTER
 		}
 	},
 	users: {
@@ -313,14 +357,15 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description', 'provider', 'compliance_assessments', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			domain: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: PROVIDER_FILTER
 		}
 	},
 	'compliance-assessments': {
 		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project'],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_PROJECT,
+			folder: {...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true}, // alwaysInline shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
@@ -335,7 +380,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'file', 'description'],
 		body: ['name', 'attachment', 'description'],
 		filters: {
-			domain: DOMAIN_FILTER_FROM_META
+			folder: {...DOMAIN_FILTER_FROM_META, alwaysDisplay: true} // This filter should also be displayed even without alwaysDisplay
 		}
 	},
 	requirements: {
@@ -351,13 +396,18 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER
+			locale: LANGUAGE_FILTER,
+			provider: PROVIDER_FILTER_FOR_LIBRARIES
 			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
 	'loaded-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
+		filters: {
+			locale: LANGUAGE_FILTER,
+			provider: PROVIDER_FILTER_FOR_LIBRARIES
+		}
 	},
 	'sso-settings': {
 		head: ['name', 'provider', 'providerId'],
