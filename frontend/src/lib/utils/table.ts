@@ -27,6 +27,14 @@ interface ListViewFieldsConfig {
 	};
 }
 
+const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.lc_status,
+	extraProps: {
+		defaultOptionName: "status"
+	}
+};
+
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder.str,
@@ -199,7 +207,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'domain'],
 		body: ['name', 'description', 'folder'],
 		filters: {
-			domain: DOMAIN_FILTER
+			domain: DOMAIN_FILTER,
+			lc_status: PROJECT_STATUS_FILTER
 		}
 	},
 	'risk-matrices': {
