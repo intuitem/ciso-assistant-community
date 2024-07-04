@@ -114,10 +114,7 @@
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
-	const columnFields = new Set(
-		source.body.length === 0 ? []
-			: Object.keys(source.body[0])
-	);
+	const columnFields = new Set(source.body.length === 0 ? [] : Object.keys(source.body[0]));
 
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
@@ -126,7 +123,9 @@
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters = listViewFields[tableURLModel].filters ?? {};
-	const filteredFields = Object.keys(filters).filter(key => columnFields.has(key) || filters[key].alwaysDisplay);
+	const filteredFields = Object.keys(filters).filter(
+		(key) => columnFields.has(key) || filters[key].alwaysDisplay
+	);
 	const filterValues: { [key: string]: any } = {};
 	const filterProps: {
 		[key: string]: { [key: string]: any };
@@ -187,7 +186,7 @@
 	$: if (_sessionStorage && filterValues) {
 		const cachedFilterData = JSON.parse(_sessionStorage.getItem('model_table_filter_data') ?? '{}');
 		cachedFilterData[tableURLModel] = filterValues;
-		_sessionStorage.setItem('model_table_filter_data', JSON.stringify(cachedFilterData))
+		_sessionStorage.setItem('model_table_filter_data', JSON.stringify(cachedFilterData));
 	}
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
