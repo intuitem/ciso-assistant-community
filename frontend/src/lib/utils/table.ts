@@ -32,7 +32,7 @@ const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.lc_status,
 	extraProps: {
-		defaultOptionName: "status"
+		defaultOptionName: 'status'
 	},
 	alwaysDisplay: true
 };
@@ -138,7 +138,7 @@ const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
 		return row.meta.provider;
 	},
 	alwaysDisplay: true
-}
+};
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
@@ -206,19 +206,19 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.type,
 	extraProps: {
-		defaultOptionName: 'type', // Make translations
+		defaultOptionName: 'type' // Make translations
 	},
 	alwaysDisplay: true
-}
+};
 
 const CATEGORY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.category,
 	extraProps: {
-		defaultOptionName: 'category', // Make translations
+		defaultOptionName: 'category' // Make translations
 	},
 	alwaysDisplay: true
-}
+};
 
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
 	component: CheckboxFilter,
@@ -261,9 +261,9 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
-			folder: {...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true},
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
-			status: {...STATUS_FILTER, alwaysDisplay: true}
+			status: { ...STATUS_FILTER, alwaysDisplay: true }
 		}
 	},
 	threats: {
@@ -285,9 +285,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			'residual_level'
 		],
 		filters: {
-			folder: {...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true},
-			project: {...PROJECT_FILTER_FROM_META, alwaysDisplay: true},
-			treatment: {...TREATMENT_FILTER, alwaysDisplay: true},
+			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
+			project: { ...PROJECT_FILTER_FROM_META, alwaysDisplay: true },
+			treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER
@@ -323,7 +323,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: {...DOMAIN_FILTER, alwaysDisplay: true},
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
 			category: CATEGORY_FILTER
 		}
 	},
@@ -365,7 +365,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project'],
 		filters: {
-			folder: {...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true}, // alwaysInline shoudln't be mandatory here something is wrong
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysInline shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
@@ -380,7 +380,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'file', 'description'],
 		body: ['name', 'attachment', 'description'],
 		filters: {
-			folder: {...DOMAIN_FILTER_FROM_META, alwaysDisplay: true} // This filter should also be displayed even without alwaysDisplay
+			folder: { ...DOMAIN_FILTER_FROM_META, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
 		}
 	},
 	requirements: {
