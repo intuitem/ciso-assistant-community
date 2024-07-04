@@ -306,7 +306,7 @@ for tab in dataframe:
                     else None
                 )
                 name = row[header["name"]].value if "name" in header else None
-                if name and len(name) > 100:
+                if name and len(name) >= 200:
                     print("Name too long:", ref_id, name)
                     exit(1)
                 description = (
