@@ -142,10 +142,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => {
-		console.log(row);
-		return row.meta.assets;
-	},
+	getColumn: (row) => row.meta.assets,
 	filter: (rowAssetName, assetName) => {
 		if (!assetName) return true;
 		return rowAssetName === assetName;
