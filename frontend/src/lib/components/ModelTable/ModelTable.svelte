@@ -163,6 +163,7 @@
 	});
 
 	const rows = handler.getRows();
+	let _sessionStorage = null;
 
 	onMount(() => {
 		if (orderBy) {
@@ -170,7 +171,24 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+		_sessionStorage = sessionStorage;
 	});
+
+	let initStorage = true;
+	$: if (_sessionStorage && initStorage) {
+		initStorage = false;
+		const cachedFilterData = JSON.parse(_sessionStorage.getItem('model_table_filter_data') ?? '{}');
+		const restoredCachedFilterData = cachedFilterData[tableURLModel] ?? {};
+		for (const [key, value] of Object.entries(restoredCachedFilterData)) {
+			filterValues[key] = value;
+		}
+	}
+
+	$: if (_sessionStorage && filterValues) {
+		const cachedFilterData = JSON.parse(_sessionStorage.getItem('model_table_filter_data') ?? '{}');
+		cachedFilterData[tableURLModel] = filterValues;
+		_sessionStorage.setItem('model_table_filter_data', JSON.stringify(cachedFilterData))
+	}
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 
