@@ -127,7 +127,7 @@ dataframe = openpyxl.load_workbook(args.input_file_name)
 
 requirement_nodes = []
 reference_controls = []
-threats = []
+threat_definitions = []
 scores_definition = []
 implementation_groups_definition = []
 risk_matrix = {}
@@ -383,10 +383,11 @@ for tab in dataframe:
                         parts = re.split(r":", element)
                         prefix = parts.pop(0)
                         part_name = ":".join(parts)
+                        part_name = part_name.lower().replace(" ", "-")
                         urn_prefix = library_vars_dict_reverse[
                             "reference_control_base_urn"
                         ][prefix]
-                        threat_urns.append(f"{urn_prefix}{part_name}")
+                        threat_urns.append(f"{urn_prefix}:{part_name}")
                 if req_reference_controls:
                     for element in re.split(r"[\s,]+", req_reference_controls):
                         parts = re.split(r":", element)
@@ -481,7 +482,7 @@ for tab in dataframe:
                     current_threat["description"] = description
                 if annotation:
                     current_threat["annotation"] = annotation
-                threats.append(current_threat)
+                threat_definitions.append(current_threat)
     elif library_vars_dict["tab"][title] == "scores":
         print("processing scores")
         is_header = True
@@ -608,7 +609,7 @@ if has_reference_controls:
     library["objects"]["reference_controls"] = reference_controls
 
 if has_threats:
-    library["objects"]["threats"] = threats
+    library["objects"]["threats"] = threat_definitions
 
 if has_framework:
     library["objects"]["framework"] = {
