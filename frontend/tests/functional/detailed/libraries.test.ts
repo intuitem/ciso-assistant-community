@@ -12,21 +12,40 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 		libraries.map(async (library) => await library.innerText())
 	);
 
-	let previousRemainingLibrary = '';
-	let nextRemainingLibrary = libraryNames[0];
-	for (let i = 1; i < libraryNames.length; i++) {
-		console.log('Importing library: ' + nextRemainingLibrary);
-		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
+	const testLibraries = async (libraryNames: string[]) => {
+		let previousRemainingLibrary = '';
+		let nextRemainingLibrary = libraryNames[0];
+		for (let i = 1; i < libraryNames.length; i++) {
+			console.log(`Importing library: ${nextRemainingLibrary}`);
+			await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
 
-		await librariesPage.tab('Libraries store').click();
-		expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+			await librariesPage.tab('Libraries store').click();
+			expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 
-		previousRemainingLibrary = nextRemainingLibrary;
-		nextRemainingLibrary = libraryNames[i];
-		expect(
-			previousRemainingLibrary,
-			'An error occured while importing library: ' + previousRemainingLibrary
-		).not.toEqual(nextRemainingLibrary);
+			previousRemainingLibrary = nextRemainingLibrary;
+			nextRemainingLibrary = libraryNames[i];
+			expect(
+				previousRemainingLibrary,
+				'An error occured while importing library: ' + previousRemainingLibrary
+			).not.toEqual(nextRemainingLibrary);
+		}
+	};
+
+	const MAX_LENGTH = 25;
+	const partitions: number = Math.ceil(libraryNames.length / MAX_LENGTH);
+	const libraryNamesSublists: string[][] = [];
+	let start: number = 0;
+	let end: number = 0;
+	for (let i = 0; i < partitions; i++) {
+		libraryNamesSublists.push([]);
+		start = Math.floor((libraryNames.length / partitions) * i);
+		end = Math.floor((libraryNames.length / partitions) * (i + 1));
+		for (let j = start; j < end; j++) {
+			libraryNamesSublists[i].push(libraryNames[j]);
+		}
+	}
+	for (let i = 0; i < partitions; i++) {
+		await testLibraries(libraryNamesSublists[i]);
 	}
 });
 

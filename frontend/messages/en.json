@@ -617,5 +617,7 @@
 	"ssoSettings": "SSO settings",
 	"ssoSettingsDescription": "Configure your Single Sign-On settings here.",
 	"sso": "SSO",
-	"isSso": "Is SSO"
+	"isSso": "Is SSO",
+	"noResultFound": "No result found",
+	"filters": "Filters"
 }
