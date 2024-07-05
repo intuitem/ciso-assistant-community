@@ -483,7 +483,7 @@ objects:
       ref_id: '7002'
       name: Restrictions on the Collection and Use of Personal Information.
     - urn: urn:intuitem:risk:req_node:ccpa_regulations:7002-a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccpa_regulations:7002
       ref_id: 7002-a
@@ -1360,7 +1360,7 @@ objects:
       ref_id: '7012'
       name: Notice at Collection of Personal Information.
     - urn: urn:intuitem:risk:req_node:ccpa_regulations:7012-a
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccpa_regulations:7012
       ref_id: 7012-a
