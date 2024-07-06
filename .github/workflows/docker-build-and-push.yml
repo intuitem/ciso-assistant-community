@@ -43,9 +43,19 @@ jobs:
         cp .meta ./backend/
         cp .meta ./backend/ciso_assistant/
 
+    - name: Build and Push Frontend Docker Image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: true
+        tags: |
+          ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
+          ghcr.io/${{ github.repository }}/frontend:latest
+        platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
     - name: Build and Push Backend Docker Image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ./backend
         file: ./backend/Dockerfile
@@ -55,13 +65,3 @@ jobs:
           ghcr.io/${{ github.repository }}/backend:latest
         platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
-    - name: Build and Push Frontend Docker Image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        file: ./frontend/Dockerfile
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
-          ghcr.io/${{ github.repository }}/frontend:latest
-        platforms: linux/amd64,linux/arm64,linux/arm64/v8
