@@ -33,42 +33,49 @@
 		`change_${requirementAssessmentModel.name}`
 	);
 
-	const countStatus = (
+	const countResults = (
 		node: Node,
-		statusCounts: Record<string, number> = {}
+		resultCounts: Record<string, number> = {}
 	): Record<string, number> => {
-		if (node.status && node.assessable) {
-			statusCounts[node.status] = (statusCounts[node.status] || 0) + 1;
+		if (node.result && node.assessable) {
+			resultCounts[node.result] = (resultCounts[node.result] || 0) + 1;
 		}
-		if (node.is_scored && node.assessable && node.status !== 'not_applicable') {
-			statusCounts['scored'] = (statusCounts['scored'] || 0) + 1;
-			statusCounts['total_score'] = (statusCounts['total_score'] || 0) + node.score;
+		if (node.status && node.assessable) {
+			resultCounts[node.status] = (resultCounts[node.status] || 0) + 1;
+		}
+		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
+			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
 			for (const childId in node.children) {
 				if (Object.prototype.hasOwnProperty.call(node.children, childId)) {
 					const childNode = node.children[childId];
-					countStatus(childNode, statusCounts);
+					countResults(childNode, resultCounts);
 				}
 			}
 		}
-		return statusCounts;
+		return resultCounts;
 	};
 
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
-			node.statusCounts = countStatus(node);
+			node.resultCounts = countResults(node);
 			return {
 				id: id,
 				content: TreeViewItemContent,
 				contentProps: { ...node, canEditRequirementAssessment },
-				lead: node.status ? TreeViewItemLead : '',
+				lead: TreeViewItemLead,
 				leadProps: {
+					result: node.result,
+					status: node.status,
 					statusI18n: node.status_i18n,
+					resultI18n: node.result_i18n,
 					assessable: node.assessable,
 					statusDisplay: node.status_display,
 					statusColor: complianceColorMap[node.status],
+					resultColor: complianceColorMap[node.result],
 					score: node.score,
 					isScored: node.is_scored,
 					max_score: node.max_score
@@ -114,7 +121,7 @@
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
-		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/6">
+		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
@@ -170,23 +177,45 @@
 				</div>
 			{/each}
 		</div>
-		{#if data.global_score.score >= 0}
-			<div class="flex items-center">
-				<ProgressRadial
-					stroke={100}
-					meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
-					font={125}
-					value={(data.global_score.score * 100) / data.global_score.max_score}
-					width={'w-52'}>{data.global_score.score}</ProgressRadial
-				>
-			</div>
-		{/if}
-		<div class="w-1/2">
+		<div class="flex w-1/3 relative">
+			{#if data.global_score.score >= 0}
+				<div class="absolute font-bold text-sm">Maturity</div>
+				<div class="flex justify-center items-center w-full">
+					<ProgressRadial
+						stroke={100}
+						meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
+						font={125}
+						value={(data.global_score.score * 100) / data.global_score.max_score}
+						width={'w-52'}
+					>
+						{data.global_score.score}
+					</ProgressRadial>
+				</div>
+			{/if}
+		</div>
+
+		<div class="w-1/3">
 			<DonutChart
-				s_label={m.complianceAssessments()}
-				name="compliance_assessment"
-				values={compliance_assessment_donut_values.values}
-				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
+				s_label="Result"
+				name="compliance_result"
+				title="Compliance"
+				orientation="horizontal"
+				values={compliance_assessment_donut_values.result.values}
+				colors={compliance_assessment_donut_values.result.values.map(
+					(object) => object.itemStyle.color
+				)}
+			/>
+		</div>
+		<div class="w-1/3">
+			<DonutChart
+				s_label="Status"
+				name="compliance_status"
+				title="Progress"
+				orientation="horizontal"
+				values={compliance_assessment_donut_values.status.values}
+				colors={compliance_assessment_donut_values.status.values.map(
+					(object) => object.itemStyle.color
+				)}
 			/>
 		</div>
 		<div class="flex flex-col space-y-2 ml-4">

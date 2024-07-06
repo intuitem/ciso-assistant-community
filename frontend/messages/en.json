@@ -115,6 +115,7 @@
 	"noEntriesFound": "No entries found",
 	"rowCount": "Showing {start} to {end} of {total}",
 	"status": "Status",
+	"result": "Result",
 	"effort": "Effort",
 	"impact": "Impact",
 	"expiryDate": "Expiry date",
@@ -409,7 +410,7 @@
 	"riskAcceptanceJusitficationHelpText": "Justification for the risk acceptance. Only the approver can edit this field.",
 	"approverHelpText": "Risk owner and approver identity",
 	"riskAcceptanceRiskScenariosHelpText": "The risk scenarios that are accepted",
-	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.)",
+	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.). When selected, you can paste screenshots directly from your clipboard.",
 	"attachmentWarningText": "WARNING: Uploading a new file will overwrite the existing one",
 	"isActiveHelpText": "Designates whether this user should be treated as active",
 	"helloThere": "Hello there 👋",
@@ -454,9 +455,12 @@
 	"deprecated": "Deprecated",
 	"done": "Done",
 	"nonCompliant": "Non compliant",
+	"nonCompliantMinor": "Non compliant minor",
+	"nonCompliantMajor": "Non compliant major",
 	"partiallyCompliant": "Partially compliant",
 	"compliant": "Compliant",
 	"notApplicable": "Not applicable",
+	"notAssessed": "Not assessed",
 	"administrator": "Administrator",
 	"domainManager": "Domain manager",
 	"analyst": "Analyst",
@@ -613,5 +617,7 @@
 	"ssoSettings": "SSO settings",
 	"ssoSettingsDescription": "Configure your Single Sign-On settings here.",
 	"sso": "SSO",
-	"isSso": "Is SSO"
+	"isSso": "Is SSO",
+	"noResultFound": "No result found",
+	"filters": "Filters"
 }

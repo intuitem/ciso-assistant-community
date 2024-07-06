@@ -50,6 +50,11 @@ The decoupling allows you to save a considerable amount of time:
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+Here is the scope of what CISO Assistant can help you achieve:
+
+![overview](https://github.com/intuitem/ciso-assistant-community/assets/11318384/b3697b12-92c9-4115-be74-9dfbb6d45242)
+
+
 CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
@@ -77,6 +82,9 @@ and run the starter script
 
 > [!WARNING]
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+
+> [!CAUTION]
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
 
 ## End-user Documentation
 
@@ -129,8 +137,11 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
 44. EU AI Act 🇪🇺🤖
 45. FBI CJIS 🇺🇸👮
-46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
-47. RODO (Polish Version)
+46. Operational Technology Cybersecurity Controls (OTCC) 
+47. Secure Controls Framework (SCF) 🇺🇸🌐
+48. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+49. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
+50. RODO (Polish Version of GDPR)
 
 ### Community contributions
 
@@ -151,12 +162,8 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- CCPA
-- NCSC Cyber Assessment Framework (CAF)
 - NCSC Cyber Essentials
-- Secure Controls Framework (SCF)
 - Part-IS
-- SOX
 - NIST 800-82
 - Korea ISA: ISMS-P
 - ENS Esquema Nacional de seguridad (español)
