@@ -410,7 +410,7 @@
 	"riskAcceptanceJusitficationHelpText": "Justification for the risk acceptance. Only the approver can edit this field.",
 	"approverHelpText": "Risk owner and approver identity",
 	"riskAcceptanceRiskScenariosHelpText": "The risk scenarios that are accepted",
-	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.)",
+	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.). When selected, you can paste screenshots directly from your clipboard.",
 	"attachmentWarningText": "WARNING: Uploading a new file will overwrite the existing one",
 	"isActiveHelpText": "Designates whether this user should be treated as active",
 	"helloThere": "Hello there 👋",
