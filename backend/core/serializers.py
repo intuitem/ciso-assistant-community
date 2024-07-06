@@ -228,6 +228,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
 
+    owner = FieldsRelatedField(many=True)
+
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
     class Meta:

@@ -205,9 +205,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'auditor', urlModel: 'users' }
+			{ field: 'auditor', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'users' }
 		],
-		filters: [{ field: 'threats' }, { field: 'risk_assessment' }]
+		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
 	'applied-controls': {
 		name: 'appliedcontrol',
