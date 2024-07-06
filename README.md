@@ -135,12 +135,13 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 41. ENISA: 5G Security Controls Matrix 🇪🇺
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
 43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
-44. EU AI Act 🇪🇺🤖
-45. FBI CJIS 🇺🇸👮
-46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
-47. Secure Controls Framework (SCF) 🇺🇸🌐
-48. NCSC Cyber Assessment Framework (CAF) 🇬🇧
-49. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
+44. ISO 27001:2013 🌐 (For legacy and migration)
+45. EU AI Act 🇪🇺🤖
+46. FBI CJIS 🇺🇸👮
+47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+48. Secure Controls Framework (SCF) 🇺🇸🌐
+49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+50. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
 
 ### Community contributions
 
