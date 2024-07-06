@@ -85,11 +85,11 @@
 				</div>
 				<div>
 					<span class=" text-sm text-gray-400 font-semibold">Owner(s):</span>
-
-					<!--list of owners-->
-					{#each data.scenario.owner as owner}
-						<span class="text-xs">{owner.str}</span>
-					{/each}
+					<ul>
+						{#each data.scenario.owner as owner}
+							<li class="text-xs">{owner.str}</li>
+						{/each}
+					</ul>
 				</div>
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.treatmentStatus()}</p>
