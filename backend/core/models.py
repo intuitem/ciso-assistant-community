@@ -33,7 +33,7 @@ User = get_user_model()
 ########################### Referential objects #########################
 
 
-class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
+class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
     Mixin for referential objects.
     """
