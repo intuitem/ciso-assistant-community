@@ -200,6 +200,7 @@ erDiagram
         string  provider
 
         string  category
+        string  function
     }
 
     APPLIED_CONTROL {
@@ -207,6 +208,7 @@ erDiagram
         string   description
 
         string   category
+        string   function
         string   status
         date     eta
         date     expiration
@@ -741,6 +743,8 @@ Threats are referential objects used to clarify the aim of a requirement node or
 Reference controls are templates for Applied controls. They facilitate the creation of a applied  control, and help to have consistent Applied controls. They are not mandatory to create a applied  control, but recommended.
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
+
+Reference controls have a function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
 
 ## Applied controls
 
