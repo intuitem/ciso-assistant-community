@@ -269,6 +269,8 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
+
+        principal[] owner
     }
 
     RISK_ACCEPTANCE {
@@ -947,10 +949,10 @@ When a several locales are loaded for a same library (same URN), the first one i
 
 The translation JSON field contains a dictionary with urn as key and a dictionary of (field_name, value) as value.
 
-Example: 
+Example:
 ```
 {
-    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]], 
+    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]],
     "urn:intuitem:risk:req_node:iso27001-2022:4.3", ...
 }
 ```

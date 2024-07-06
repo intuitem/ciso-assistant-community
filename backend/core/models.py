@@ -1540,6 +1540,12 @@ class RiskScenario(NameDescriptionMixin):
         blank=True,
     )
 
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="risk_scenarios",
+    )
     # current
     current_proba = models.SmallIntegerField(
         default=-1, verbose_name=_("Current probability")
