@@ -140,6 +140,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
 47. Secure Controls Framework (SCF) 🇺🇸🌐
 48. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+49. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
 
 ### Community contributions
 
@@ -160,7 +161,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- CCPA
 - NCSC Cyber Essentials
 - Part-IS
 - NIST 800-82
