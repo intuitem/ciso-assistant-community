@@ -1,0 +1,182 @@
+urn: urn:intuitem:risk:library:RODO-checklist
+locale: pl
+ref_id: RODO-checklist
+name: RODO checklist for data controllers
+description: Checklist for RODO - could be used as well  (https://Rodo.pl)
+copyright: "Andrzej Piotrowski"
+version: 1
+provider: RODO.pl
+packager: intuitem
+urn: urn:intuitem:risk:library:rodo-checklist
+locale: pl
+ref_id: rodo-checklist
+name: Lista kontrolna RODO dla administratorów danych
+description: Lista kontrolna RODO dla administratorów danych z rodo.EU (https://rodo.eu)
+copyright: |
+  Prywatność
+  Nasza Polityka prywatności wyjaśnia sposób, w jaki przetwarzamy i chronimy twoje dane osobowe w związku z korzystaniem i przeglądaniem Witryny. Zgadzając się na niniejsze warunki i zasady oraz mogąc korzystać z Usługi, zgadzasz się również na naszą Politykę prywatności.
+  Zmiany w warunkach korzystania z usług
+  W granicach obowiązującego prawa Firma zastrzega sobie prawo do przeglądu i zmiany niniejszej Umowy w dowolnym momencie. Jesteś odpowiedzialny za regularne przeglądanie tych warunków. Dalsze korzystanie i przeglądanie Witryny po takich zmianach oznacza zgodę na takie zmiany. 
+version: 1
+provider: RODO.pl
+packager: intuitem
+objects:
+ framework:
+    urn: urn:intuitem:risk:framework:rodo-checklist
+    ref_id: rodo-checklist
+    name: Lista kontrolna RODO dla administratorów danych
+    description: Lista kontrolna RODO dla administratorów danych z rodo.EU (https://rodo.eu)
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node2
+      assessable: false
+      depth: 1
+      name: Podstawy prawne i przejrzystość
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node2
+      name: Przeprowadź audyt informacji, aby określić, jakie informacje przetwarzasz i kto ma do nich dostęp.
+      description: |
+        Organizacje, które zatrudniają co najmniej 250 pracowników lub przetwarzają dane o wysokim ryzyku, są zobowiązane do prowadzenia aktualnej i szczegółowej listy swoich czynności przetwarzania (art. 30 RODO) oraz muszą być przygotowane do przedstawienia tej listy organom nadzorczym na żądanie. Najlepszym sposobem na wykazanie zgodności z RODO jest stosowanie oceny skutków dla ochrony danych (art. 35 RODO). Organizacje zatrudniające mniej niż 250 pracowników również powinny przeprowadzić taką ocenę, co ułatwi spełnienie pozostałych wymagań RODO. W swojej liście powinieneś uwzględnić: cele przetwarzania, rodzaj przetwarzanych danych, kto ma do nich dostęp w organizacji, wszelkie strony trzecie mające dostęp (i ich lokalizację), co robisz, aby chronić dane (np. szyfrowanie) oraz kiedy planujesz je usunąć (o ile to możliwe).
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node2
+      name: Uzyskaj uzasadnienie prawne dla swoich działań przetwarzania danych.
+      description: |
+        Przetwarzanie danych jest nielegalne zgodnie z RODO, jeśli nie możesz go uzasadnić jednym z sześciu warunków wymienionych w art. 6. Są też inne przepisy dotyczące dzieci i specjalnych kategorii danych osobowych w art. 7-11. Przejrzyj te przepisy, wybierz prawidłową podstawę prawną przetwarzania i udokumentuj swoje uzasadnienie. Pamiętaj, że jeśli wybierzesz "zgodę" jako podstawę prawną, ciążą na Tobie dodatkowe obowiązki, w tym zapewnienie osobom, których dane dotyczą, ciągłej możliwości wycofania zgody. Jeśli twoją podstawą prawną są "uzasadnione interesy", musisz być w stanie wykazać, że przeprowadziłeś ocenę wpływu na prywatność.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node2
+      name: Podaj jasne informacje o przetwarzaniu danych i uzasadnieniu prawnym w polityce prywatności.
+      description: |
+        Musisz poinformować osoby, że zbierasz ich dane i dlaczego (Art. 12 RODO). Powinieneś wyjaśnić, jak dane są przetwarzane, kto ma do nich dostęp i jak je zabezpieczasz. Informacje te powinny być zawarte w twojej polityce prywatności i dostarczone osobom, których dane dotyczą w momencie ich zbierania. Muszą być one przedstawione "w sposób zwięzły, przejrzysty, zrozumiały i łatwo dostępny, przy użyciu jasnego i prostego języka, szczególnie jeśli informacje są skierowane specjalnie do dziecka."
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node6
+      assessable: false
+      depth: 1
+      name: Bezpieczeństwo danych
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node6
+      name: Uwzględniaj ochronę danych przez cały czas, od momentu rozpoczęcia tworzenia produktu po każdorazowe przetwarzanie danych.
+      description: |
+        Musisz przestrzegać zasad 'ochrony danych od samego projektowania i domyślnej ochrony danych' (privacy by design and by default), włączając w to wdrażanie 'odpowiednich środków technicznych i organizacyjnych' w celu ochrony danych. Innymi słowy, ochrona danych to coś, co teraz musisz uwzględniać za każdym razem, gdy robisz cokolwiek z danymi osobowymi innych osób. Musisz również upewnić się, że każde przetwarzanie danych osobowych jest zgodne z zasadami ochrony danych opisanymi w art. 5 RODO. Środki techniczne obejmują szyfrowanie, a środki organizacyjne to takie działania, jak ograniczanie ilości zbieranych danych osobowych lub usuwanie danych, których już nie potrzebujesz. Punkt polega na tym, aby to była kwestia, o której ty i twoi pracownicy zawsze pamiętali.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node6
+      name: Szyfruj, pseudonimizuj lub anonimizuj dane osobowe tam, gdzie to możliwe.
+      description: |
+        Większość narzędzi produkcyjnych używanych przez firmy jest obecnie dostępna z wbudowanym szyfrowaniem end-to-end, w tym poczta e-mail, komunikatory, notatki i przechowywanie w chmurze. RODO wymaga od organizacji stosowania szyfrowania lub pseudonimizacji, ilekroć jest to wykonalne.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node6
+      name: Utwórz wewnętrzną politykę bezpieczeństwa dla członków swojego zespołu i zwiększaj świadomość ochrony danych.
+      description: |
+        Nawet jeśli twoje bezpieczeństwo techniczne jest silne, bezpieczeństwo operacyjne może nadal stanowić słaby punkt. Stwórz politykę bezpieczeństwa, która zapewni, że twoi członkowie zespołu są świadomi bezpieczeństwa danych. Powinna zawierać wskazówki dotyczące bezpieczeństwa poczty elektronicznej, haseł, uwierzytelniania dwuskładnikowego, szyfrowania urządzeń i VPN-ów. Pracownicy, którzy mają dostęp do danych osobowych i pracownicy nietechniczni, powinni otrzymać dodatkowe szkolenie z wymagań RODO.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node6
+      name: Wiedz, kiedy przeprowadzić ocenę wpływu na ochronę danych i mieć procedurę umożliwiającą jej przeprowadzenie.
+      description: |
+        Ocena wpływu na ochronę danych (także znana jako ocena wpływu na prywatność) to sposób, aby zrozumieć, jak twój produkt lub usługa mogą zagrozić danym twoich klientów, a także jak zminimalizować te ryzyka. Urząd Ochrony Danych Osobowych w Polsce ma na swojej stronie internetowej listę kontrolną oceny wpływu na ochronę danych. RODO wymaga od organizacji przeprowadzania tego rodzaju analizy, ilekroć planują używać danych ludzi w sposób, który jest 'prawdopodobnie ryzykowny dla ich praw i wolności'. Urząd zaleca przeprowadzanie jej za każdym razem, gdy zamierzasz przetwarzać dane osobowe.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node6
+      name: Posiadac procedurę powiadamiania władz i osób, których dane dotyczą, w przypadku naruszenia bezpieczeństwa danych.
+      description: |
+        Jeśli dojdzie do naruszenia bezpieczeństwa danych i dane osobowe zostaną ujawnione, jesteś zobowiązany do powiadomienia odpowiedniego organu nadzorczego w swojej jurysdykcji w ciągu 72 godzin. Lista wielu organów nadzorczych państw członkowskich UE jest dostępna tutaj. RODO nie określa, kogo powinieneś powiadomić, jeśli nie jesteś organizacją z siedzibą w UE. Dla osób w krajach anglojęzycznych spoza UE najłatwiej może być powiadomić Urząd Komisarza ds. Ochrony Danych w Irlandii. Również jesteś zobowiązany do szybkiego przekazania informacji o naruszeniu bezpieczeństwa osobom, których dane dotyczą, chyba że naruszenie jest mało prawdopodobne, aby je narazić na ryzyko (na przykład, jeśli skradzione dane są zaszyfrowane).
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node12
+      assessable: false
+      depth: 1
+      name: Odpowiedzialność i zarządzanie
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node12
+      name: Wyznacz osobę odpowiedzialną za zapewnienie zgodności z RODO w całej organizacji.
+      description: |
+        Innym aspektem 'ochrony danych od samego projektowania i domyślnej ochrony danych' (art. 25 RODO) jest zapewnienie, że w organizacji jest osoba odpowiedzialna za zgodność z RODO. Ta osoba powinna być upoważniona do oceny polityk ochrony danych i wdrażania tych polityk.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node12
+      name: Podpisz umowę o przetwarzanie danych między Twoją organizacją a wszelkimi stronami trzecimi, które przetwarzają dane osobowe w Twoim imieniu.
+      description: |
+        Obejmuje to wszelkie usługi stron trzecich, które przetwarzają dane osobowe Twoich osób, w tym oprogramowanie analityczne, usługi e-mail, serwery w chmurze itp. Większość usług ma standardową umowę o przetwarzanie danych dostępną na swoich stronach internetowych do przeglądu. Określają one prawa i obowiązki każdej ze stron zgodnie z RODO. Powinieneś korzystać tylko z wiarygodnych stron trzecich, które mogą zagwarantować wystarczającą ochronę danych.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node12
+      name: Jeśli Twoja organizacja znajduje się poza UE, wyznacz przedstawiciela w jednym z państw członkowskich UE.
+      description: |
+        Jeśli przetwarzasz dane dotyczące osób w konkretnym państwie członkowskim, musisz wyznaczyć przedstawiciela w tym kraju, który będzie komunikować się w Twoim imieniu z organami ochrony danych. RODO i jego oficjalne dokumenty wspierające nie dostarczają wskazówek dotyczących sytuacji, w których przetwarzanie dotyczy osób z UE w wielu państwach członkowskich. Dopóki ten wymóg nie zostanie zinterpretowany, warto wyznaczyć przedstawiciela w państwie członkowskim, które używa Twojego języka. Niektóre organizacje, jak organy publiczne, nie muszą wyznaczać przedstawiciela w UE.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node12
+      name: Wyznacz Inspektora Ochrony Danych (jeśli to konieczne).
+      description: |
+        Są trzy sytuacje, w których organizacje muszą mieć Inspektora Ochrony Danych (IOD), ale warto mieć go nawet jeśli nie jest to wymagane. IOD powinien być ekspertem w zakresie ochrony danych, którego zadaniem jest monitorowanie zgodności z RODO, ocena ryzyk związanych z ochroną danych, doradztwo w zakresie ocen skutków dla ochrony danych i współpraca z regulatorami.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node12
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      assessable: false
+      depth: 1
+      name: Prawa prywatności
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Twoim klientom łatwo jest zażądać i otrzymać wszystkie informacje, które masz na ich temat.
+      description: |
+        Osoby mają prawo wglądu do swoich danych osobowych (Artykuł 15) i sposobu ich wykorzystania. Mają też prawo wiedzieć, jak długo planujesz przechowywać ich informacje i dlaczego. Musisz wysłać im pierwszą kopię tych informacji za darmo, ale możesz pobrać rozsądną opłatę za kolejne kopie. Upewnij się, że możesz zweryfikować tożsamość osoby składającej wniosek. Powinieneś być w stanie zrealizować takie wnioski w ciągu miesiąca.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Twoim klientom łatwo jest poprawić lub zaktualizować nieścisłe lub niekompletne informacje.
+      description: |
+        Rób wszystko, co w Twojej mocy, aby dane były aktualne, wprowadzając proces kontroli jakości danych, i umożliwiaj swoim klientom wgląd (Artykuł 15) i aktualizację swoich danych osobowych w celu zachowania ich dokładności i kompletności. Upewnij się, że możesz zweryfikować tożsamość osoby składającej wniosek. Powinieneś być w stanie zrealizować wnioski zgodnie z Artykułem 16 w ciągu miesiąca.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Twoim klientom łatwo jest zażądać usunięcia swoich danych osobowych.
+      description: |
+        Osoby mają prawo żądać usunięcia wszystkich swoich danych osobowych, a Ty musisz spełnić ich żądanie w ciągu miesiąca. Istnieje pięć powodów, dla których możesz odmówić wniosku, takich jak korzystanie z wolności wypowiedzi czy wypełnianie obowiązku prawnego. Musisz także spróbować zweryfikować tożsamość osoby składającej wniosek.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Twoim klientom łatwo jest zażądać zaprzestania przetwarzania ich danych.
+      description: |
+        Twoje osoby, których dane dotyczą, mogą zażądać ograniczenia lub zaprzestania przetwarzania ich danych (Artykuł 18), jeśli zachodzą pewne podstawy, głównie w przypadku sporu co do zgodności z prawem przetwarzania lub dokładności danych. Musisz spełnić ich żądanie w ciągu miesiąca. Gdy przetwarzanie jest ograniczone, możesz nadal przechowywać ich dane. Musisz powiadomić osobę, zanim ponownie rozpoczniesz przetwarzanie jej danych.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Twoim klientom łatwo jest otrzymać kopię swoich danych osobowych w formacie, który można łatwo przekazać innej firmie.
+      description: |
+        Oznacza to, że powinieneś być w stanie przesłać ich dane osobowe (Artykuł 20) w powszechnie czytacie (np. arkusz kalkulacyjny) do nich lub do wyznaczonej przez nich strony trzeciej. Może to wydawać się niesprawiedliwe z biznesowego punktu widzenia, ponieważ możesz być zmuszony przekazać dane swoich klientów konkurencji. Jednak z punktu widzenia prywatności, idea jest taka, że ludzie są właścicielami swoich danych, a nie Ty.
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Twoim klientom łatwo jest sprzeciwić się przetwarzaniu ich danych.
+      description: |
+        Jeśli przetwarzasz ich dane w celach marketingu bezpośredniego, musisz natychmiast zaprzestać ich przetwarzania (Artykuł 21) w tym celu. W przeciwnym razie możesz być w stanie zakwestionować ich sprzeciw, jeśli możesz wykazać "przekonujące uzasadnione podstawy".
+    - urn: urn:intuitem:risk:req_node:rodo-checklist:node25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rodo-checklist:node18
+      name: Jeśli podejmujesz decyzje o ludziach na podstawie zautomatyzowanych procesów, masz procedurę ochrony ich praw.
+      description: |
+        Niektóre organizacje używają zautomatyzowanych procesów (Artykuł 22) do podejmowania decyzji o ludziach, które mają skutki prawne lub "podobnie znaczące". Jeśli uważasz, że to dotyczy Ciebie, musisz ustanowić procedurę zapewniającą ochronę ich praw, wolności i uzasadnionych interesów. Musisz umożliwić osobom łatwe zgłaszanie interwencji człowieka, udział w decyzjach i kwestionowanie już podjętych decyzji.

@@ -130,6 +130,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 44. EU AI Act 🇪🇺🤖
 45. FBI CJIS 🇺🇸👮
 46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+47. RODO (Polish Version)
 
 ### Community contributions
 
