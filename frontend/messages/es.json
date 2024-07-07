@@ -549,6 +549,7 @@
 	"asZIP": "como ZIP",
 	"incoming": "Entrante",
 	"outdated": "Desactualizado",
+	"flashMode": "Modo destello",
 	"goBackToAudit": "Volver a la auditoría",
 	"exportBackupDescription": "Esto serializará y creará una copia de seguridad de la base de datos, incluidos los usuarios y RBAC. Las pruebas y otros archivos no se incluyen en la copia de seguridad.",
 	"importBackupDescription": "Esto deserializará y restaurará la base de datos desde una copia de seguridad. Esto sobrescribirá todos los datos existentes, incluidos los usuarios y RBAC, y no se puede deshacer.",
@@ -579,6 +580,7 @@
 	"advancedSettings": "Ajustes avanzados",
 	"enableSSO": "Habilitar SSO",
 	"failedSSO": "La autenticación SSO falló; comuníquese con su administrador",
+	"UserDoesNotExist": "Usuario no declarado, por favor contacte a su administrador",
 	"loginSSO": "Inicie sesión en SSO",
 	"or": "o",
 	"errorImportingLibrary": "Error al importar la biblioteca",
@@ -586,6 +588,8 @@
 	"ssoSettingsupdated": "Configuración de SSO actualizada",
 	"ssoSettings": "Configuración de inicio de sesión único",
 	"ssoSettingsDescription": "Configure sus ajustes de inicio de sesión único aquí.",
+	"sso": "SSO",
+	"isSso": "es SSO",
 	"suggestion": "Sugerencia",
 	"suggestionColon": "Sugerencia:",
 	"annotationColon": "Anotación:",
@@ -600,5 +604,7 @@
 	"createAuditFromBaseline": "Crear auditoría desde una base",
 	"coverageColon": "Cobertura:",
 	"full": "Lleno",
-	"partial": "Parcial"
+	"partial": "Parcial",
+	"noResultFound": "No se han encontrado resultados",
+	"filters": "Filtros"
 }

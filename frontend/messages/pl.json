@@ -641,5 +641,7 @@
 	"createAuditFromBaseline": "Utwórz audyt od poziomu bazowego",
 	"coverageColon": "Zasięg:",
 	"full": "Pełny",
-	"partial": "Częściowy"
+	"partial": "Częściowy",
+	"noResultFound": "nie znaleziono żadnych wyników",
+	"filters": "Filtry"
 }
