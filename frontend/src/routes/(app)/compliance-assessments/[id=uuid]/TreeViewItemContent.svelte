@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { complianceColorMap } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap, darkenColor } from './utils';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { toCamelCase } from '$lib/utils/locales';
 	import * as m from '$paraglide/messages';
 
 	export let ref_id: string;
@@ -119,29 +120,17 @@
 				<p class="max-w-[80ch] whitespace-pre-line">
 					{#if title}
 						<span style="font-weight: 600;">{title}</span>
-						<!-- {#if assessableNodes.length > 0}
-							<span class="badge variant-soft-primary">
-								{assessableNodes.length}
-							</span>
-						{/if} -->
-						{#if resultCounts?.to_do}
-							<span class="badge bg-gray-200 text-gray-800">
-								{resultCounts.to_do}
-								{m.toDo()}
-							</span>
-						{/if}
-						{#if resultCounts?.in_progress}
-							<span class="badge bg-blue-200 text-blue-800">
-								{resultCounts.in_progress}
-								{m.inProgress()}
-							</span>
-						{/if}
-						{#if resultCounts?.done}
-							<span class="badge bg-green-200 text-green-800">
-								{resultCounts.done}
-								{m.done()}
-							</span>
-						{/if}
+						{#each Object.entries(complianceStatusColorMap) as status}
+							{#if resultCounts[status[0]]}
+								<span
+									class="badge mr-1"
+									style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
+								>
+									{resultCounts[status[0]]}
+									{m[toCamelCase(status[0])]()}
+								</span>
+							{/if}
+						{/each}
 					{/if}
 					{#if description}
 						<p>{description}</p>
@@ -232,9 +221,11 @@
 				{#each orderedResultPercentages as rp}
 					<div
 						class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-							complianceColorMap[rp.result]
+							complianceResultColorMap[rp.result]
 						)}"
-						style="width: {rp.percentage.value}%; background-color: {complianceColorMap[rp.result]}"
+						style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
+							rp.result
+						]}"
 					>
 						{rp.percentage.display}%
 					</div>
