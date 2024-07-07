@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0016_requirementassessment_mapping_inference_and_more'),
-        ('core', '0016_riskscenario_owner'),
+        ("core", "0016_requirementassessment_mapping_inference_and_more"),
+        ("core", "0016_riskscenario_owner"),
     ]
 
-    operations = [
-    ]
+    operations = []

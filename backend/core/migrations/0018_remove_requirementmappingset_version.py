@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0017_merge_20240707_1307'),
+        ("core", "0017_merge_20240707_1307"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='requirementmappingset',
-            name='version',
+            model_name="requirementmappingset",
+            name="version",
         ),
     ]
