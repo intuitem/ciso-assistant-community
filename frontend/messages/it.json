@@ -549,6 +549,7 @@
 	"asZIP": "come ZIP",
 	"incoming": "In arrivo",
 	"outdated": "Obsoleto",
+	"flashMode": "Modalità flash",
 	"goBackToAudit": "Torniamo all'audit",
 	"exportBackupDescription": "Questo serializzerà e creerà un backup del database, inclusi utenti e RBAC. Le prove e altri file non sono inclusi nel backup.",
 	"importBackupDescription": "Questo deserializzerà e ripristinerà il database da un backup. Questo sovrascriverà tutti i dati esistenti, inclusi utenti e RBAC, e non può essere annullato.",
@@ -579,6 +580,7 @@
 	"advancedSettings": "Impostazioni avanzate",
 	"enableSSO": "Abilita SSO",
 	"failedSSO": "Autenticazione SSO non riuscita, contatta il tuo amministratore",
+	"UserDoesNotExist": "Utente non dichiarato, contatta il tuo amministratore",
 	"loginSSO": "Accedi a SSO",
 	"or": "O",
 	"errorImportingLibrary": "Errore durante l'importazione della biblioteca",
@@ -586,6 +588,8 @@
 	"ssoSettingsupdated": "Impostazioni SSO aggiornate",
 	"ssoSettings": "Impostazioni SSO",
 	"ssoSettingsDescription": "Configura qui le tue impostazioni Single Sign-On.",
+	"sso": "SSO",
+	"isSso": "È SSO",
 	"suggestion": "Suggerimento",
 	"suggestionColon": "Suggerimento:",
 	"annotationColon": "Annotazione:",
@@ -600,5 +604,7 @@
 	"createAuditFromBaseline": "Crea audit da una base",
 	"coverageColon": "Copertura:",
 	"full": "Pieno",
-	"partial": "Parziale"
+	"partial": "Parziale",
+	"noResultFound": "nessun risultato trovato",
+	"filters": "Filtri"
 }
