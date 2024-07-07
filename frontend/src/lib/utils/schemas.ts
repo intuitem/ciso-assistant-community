@@ -202,7 +202,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	baseline: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({
