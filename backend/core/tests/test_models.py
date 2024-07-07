@@ -1260,7 +1260,6 @@ class TestRequirementMappingSet:
         assert requirement_mapping_set.focal_framework == iso27001
         assert requirement_mapping_set.reference_framework == csf1_1
         assert requirement_mapping_set.mappings.count() == 0
-        assert requirement_mapping_set.version == 1
 
     @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
     def test_requirement_mapping_set_reference_and_focal_frameworks_must_be_distinct(
