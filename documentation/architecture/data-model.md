@@ -201,6 +201,7 @@ erDiagram
         string  provider
 
         string  category
+        string  function
     }
 
     APPLIED_CONTROL {
@@ -208,6 +209,7 @@ erDiagram
         string   description
 
         string   category
+        string   function
         string   status
         date     eta
         date     expiration
@@ -270,6 +272,8 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
+
+        principal[] owner
     }
 
     RISK_ACCEPTANCE {
@@ -736,6 +740,8 @@ Reference controls are templates for Applied controls. They facilitate the creat
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
 
+Reference controls have a function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
+
 ## Applied controls
 
 Applied controls are fundamental objects for compliance and remediation. They can derive from a reference control, which provides better consistency, or be independent.
@@ -946,10 +952,10 @@ When a several locales are loaded for a same library (same URN), the first one i
 
 The translation JSON field contains a dictionary with urn as key and a dictionary of (field_name, value) as value.
 
-Example: 
+Example:
 ```
 {
-    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]], 
+    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]],
     "urn:intuitem:risk:req_node:iso27001-2022:4.3", ...
 }
 ```

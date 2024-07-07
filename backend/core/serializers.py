@@ -99,9 +99,8 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    approver = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
-
+    approver = FieldsRelatedField(["id", "first_name", "last_name"])
     state = serializers.CharField(source="get_state_display")
 
     class Meta:
@@ -131,6 +130,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
+    project = FieldsRelatedField(["id", "folder"])
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -205,7 +205,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
-    risk_assessment = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField(["id", "name"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
     project = FieldsRelatedField(
         source="risk_assessment.project", fields=["id", "name", "folder"]
@@ -227,6 +227,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
+
+    owner = FieldsRelatedField(many=True)
 
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
@@ -467,8 +469,9 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
+    project = FieldsRelatedField(["id", "folder"])
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition"]
+        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"

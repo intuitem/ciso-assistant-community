@@ -36,15 +36,15 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 	const libraryNamesSublists: string[][] = [];
 	let start: number = 0;
 	let end: number = 0;
-	for (let i=0;i<partitions;i++) {
+	for (let i = 0; i < partitions; i++) {
 		libraryNamesSublists.push([]);
-		start = Math.floor((libraryNames.length/partitions)*i);
-		end = Math.floor((libraryNames.length/partitions)*(i+1));
-		for (let j=start;j<end;j++) {
+		start = Math.floor((libraryNames.length / partitions) * i);
+		end = Math.floor((libraryNames.length / partitions) * (i + 1));
+		for (let j = start; j < end; j++) {
 			libraryNamesSublists[i].push(libraryNames[j]);
 		}
 	}
-	for (let i=0;i<partitions;i++) {
+	for (let i = 0; i < partitions; i++) {
 		await testLibraries(libraryNamesSublists[i]);
 	}
 });

@@ -419,7 +419,7 @@
 	"riskAcceptanceJusitficationHelpText": "Justification de l'acceptation du risque. Seul l'approbateur peut modifier ce champ.",
 	"approverHelpText": "Identité du propriétaire du risque et de l’approbateur",
 	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
-	"attachmentHelpText": "Fichier de preuve (ex. capture d'écran, fichier journal, etc.)",
+	"attachmentHelpText": "Fichier de preuve (ex. capture d'écran, fichier journal, etc.). Quand le champ est sélectionné, vous pouvez y coller une copie d'écran de votre presse-papiers.",
 	"attachmentWarningText": "ATTENTION : le téléchargement d'un nouveau fichier écrasera celui existant",
 	"isActiveHelpText": "Désigne si cet utilisateur doit être traité comme actif",
 	"helloThere": "Bonjour 👋",
