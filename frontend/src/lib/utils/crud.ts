@@ -64,8 +64,8 @@ export const getOptions = ({
 								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
-						  '/' +
-						  my_label
+							'/' +
+							my_label
 						: my_label,
 				value: object[value],
 				suggested: false
