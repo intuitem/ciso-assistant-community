@@ -21,6 +21,8 @@ with open(args.reference_yaml, 'r') as file:
 with open(args.focal_yaml, 'r') as file:
     focal = yaml.safe_load(file)
 
+reference_library_urn = reference['urn']
+focal_library_urn = focal['urn']
 reference_framework_urn = reference['objects']['framework']['urn']
 focal_framework_urn = focal['objects']['framework']['urn']
 reference_framework_ref_id = reference['objects']['framework']['ref_id']
@@ -47,14 +49,18 @@ ws.append(["library_description", description])
 ws.append(["library_copyright", packager])
 ws.append(["library_provider", packager])
 ws.append(["library_packager", packager])
-ws.append(["mapping_reference_urn", f"urn:{packager.lower()}:risk:req_node:{reference_ref_id}"])
-ws.append(["mapping_focal_urn", f"urn:{packager.lower()}:risk:req_node:{focal_ref_id}"])
+ws.append(["library_dependencies", f"{reference_library_urn}, {focal_library_urn}"])
+ws.append(["mapping_urn", f"urn:{packager.lower()}:risk:req_mapping_set:{reference_ref_id}"])
 ws.append(["mapping_ref_id", ref_id])
 ws.append(["mapping_name", name])
 ws.append(["mapping_description",description])
-ws.append(["tab", "mapping", "mapping"])
+ws.append(["mapping_reference_framework_urn", reference_framework_urn])
+ws.append(["mapping_focal_framework_urn", focal_framework_urn])
+ws.append(["mapping_reference_node_base_urn",  f"urn:{packager.lower()}:risk:req_node:{reference_ref_id}"])
+ws.append(["mapping_focal_node_base_urn",  f"urn:{packager.lower()}:risk:req_node:{focal_ref_id}"])
+ws.append(["tab", "mappings", "mappings"])
 
-ws1 = wb_output.create_sheet("mapping")
+ws1 = wb_output.create_sheet("mappings")
 ws1.append(
     ["reference_node_id", "focal_node_id", "relationship", "rationale", "strength_of_relationship"]
 )
