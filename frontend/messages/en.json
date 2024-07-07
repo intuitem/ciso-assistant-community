@@ -619,5 +619,6 @@
 	"sso": "SSO",
 	"isSso": "Is SSO",
 	"noResultFound": "No result found",
-	"filters": "Filters"
+	"filters": "Filters",
+	"advanced": "Advanced"
 }

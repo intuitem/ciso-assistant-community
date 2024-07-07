@@ -82,6 +82,24 @@ const STATUS_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const RESULT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.result,
+	extraProps: {
+		defaultOptionName: 'result'
+	},
+	alwaysDisplay: true
+};
+
+const AUDIT_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.compliance_assessment.str,
+	extraProps: {
+		defaultOptionName: 'complianceAssessment'
+	},
+	alwaysDisplay: true
+};
+
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
@@ -374,7 +392,12 @@ export const listViewFields: ListViewFieldsConfig = {
 	'requirement-assessments': {
 		head: ['name', 'description', 'complianceAssessment'],
 		body: ['name', 'description', 'compliance_assessment'],
-		breadcrumb_link_disabled: true
+		breadcrumb_link_disabled: true,
+		filters: {
+			status: STATUS_FILTER,
+			result: RESULT_FILTER,
+			audit: AUDIT_FILTER
+		}
 	},
 	evidences: {
 		head: ['name', 'file', 'description'],

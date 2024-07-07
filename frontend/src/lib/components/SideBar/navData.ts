@@ -151,7 +151,6 @@ export const navData = {
 				}
 			]
 		},
-
 		{
 			name: 'extra',
 			items: [
@@ -184,6 +183,16 @@ export const navData = {
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
 					permissions: ['change_globalsettings']
+				}
+			]
+		},
+		{
+			name: 'advanced',
+			items: [
+				{
+					name: 'requirementAssessments',
+					fa_icon: 'fa-solid fa-cogs',
+					href: '/requirement-assessments'
 				}
 			]
 		}

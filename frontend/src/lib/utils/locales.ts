@@ -73,6 +73,7 @@ export function localItems(): LocalItems {
 		compliance: m.compliance(),
 		organization: m.organization(),
 		extra: m.extra(),
+		advanced: m.advanced(),
 		analytics: m.analytics(),
 		calendar: m.calendar(),
 		threats: m.threats(),
