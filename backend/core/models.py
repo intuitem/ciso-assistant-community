@@ -872,34 +872,6 @@ class RequirementMappingSet(ReferentialObjectMixin):
         verbose_name=_("Focal framework"),
         related_name="focal_framework",
     )
-    version = models.IntegerField(
-        null=False,
-        verbose_name=_("Version"),
-        default=1,
-        help_text=_("Version of the mapping set"),
-    )
-
-    # NOTE: This is a proposition to handle versioning of the mapping set frameworks.
-    # This should be discussed before being implemented.
-    #
-    # reference_framework_version = models.CharField(
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    #     help_text=_(
-    #         "Version of the reference framework, may include boundaries (e.g. >=1,<4)"
-    #     ),
-    #     verbose_name=_("Reference framework version"),
-    # )
-    # focal_framework_version = models.CharField(
-    #     max_length=100,
-    #     blank=True,
-    #     null=True,
-    #     help_text=_(
-    #         "Version of the related framework, may include boundaries (e.g. >=1,<4)"
-    #     ),
-    #     verbose_name=_("Related framework version"),
-    # )
 
     def save(self, *args, **kwargs) -> None:
         if self.reference_framework == self.focal_framework:
