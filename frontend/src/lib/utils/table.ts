@@ -412,5 +412,9 @@ export const listViewFields: ListViewFieldsConfig = {
 	'sso-settings': {
 		head: ['name', 'provider', 'providerId'],
 		body: ['name', 'provider', 'provider_id']
+	},
+	'requirement-mapping-sets': {
+		head: ['referenceFramework', 'focalFramework'],
+		body: ['reference_framework', 'focal_framework']
 	}
 };

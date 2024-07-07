@@ -367,7 +367,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' }
+			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
 		filters: [{ field: 'status' }]
@@ -413,6 +414,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'SSO settings',
 		verboseNamePlural: 'SSO settings',
 		selectFields: [{ field: 'provider' }]
+	},
+	'requirement-mapping-sets': {
+		name: 'requirementmappingset',
+		localName: 'requirementMappingSet',
+		localNamePlural: 'requirementMappingSets',
+		verboseName: 'Requirement mapping set',
+		verboseNamePlural: 'Requirement mapping sets',
+		foreignKeyFields: [
+			{ field: 'focal_framework', urlModel: 'frameworks' },
+			{ field: 'reference_framework', urlModel: 'frameworks' },
+			{ field: 'library', urlModel: 'libraries' }
+		]
 	}
 };
 

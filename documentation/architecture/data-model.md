@@ -72,13 +72,13 @@ erDiagram
 ```mermaid
 erDiagram
 
-    LOADED_LIBRARY  |o--o{ REFERENCE_CONTROL: contains
-    LOADED_LIBRARY  |o--o{ THREAT           : contains
-    LOADED_LIBRARY  ||--o{ FRAMEWORK        : contains
-    LOADED_LIBRARY  ||--o{ RISK_MATRIX      : contains
-    LOADED_LIBRARY  ||--o{ MAPPING          : contains
-    LOADED_LIBRARY2 }o--o{ LOADED_LIBRARY   : depends_on
-    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY: translates
+    LOADED_LIBRARY      |o--o{ REFERENCE_CONTROL        : contains
+    LOADED_LIBRARY      |o--o{ THREAT                   : contains
+    LOADED_LIBRARY      ||--o{ FRAMEWORK                : contains
+    LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
+    LOADED_LIBRARY      ||--o{ REQUIREMMENT_MAPPING_SET : contains
+    LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
+    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY           : translates
 
     LIBRARY_TRANSLATION {
         string locale
@@ -183,6 +183,7 @@ erDiagram
         string  name
         string  description
         string  annotation
+        string  provider
 
         urn     parent_urn
         int     order_id
@@ -303,28 +304,23 @@ erDiagram
 
 ```
 
-### Mappings
+### Requirement mappings (crosswalk)
 
 ```mermaid
 erDiagram
-    REFERENCE_REQUIREMENT ||--o{ MAPPING          : referenced_by
-    MAPPING               }o--|| FOCAL_REQUIREMENT: maps_to
+    REQUIREMENT_MAPPING_SET   }o--|| REFERENCE_FRAMEWORK : contains
+    REQUIREMENT_MAPPING_SET   }o--|| FOCAL_FRAMEWORK     : contains
 
-    MAPPING {
-        string  urn
-        string  locale
-        string  ref_id
-        string  name
-        string  description
-        string  annotation
-        string  provider
+    REQUIREMENT_MAPPING_SET {
+        string    urn
+        string    locale
+        string    ref_id
+        string    name
+        string    description
+        string    annotation
+        string    provider
 
-        string  reference_urn
-        string  focal_urn
-        string  rationale
-        string  relationship
-        boolean fulfilled_by
-        int     strength
+        json      mapping_rules
     }
 
 
@@ -808,24 +804,26 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 - 0-5 (0-5, no score definition)
 - 0-10 (0-10, no score definition)
 
-### Mappings
+### Requirement Mapping set
 
-Mappings are referential objects that describe relations between requirements from a reference framework to a focal framework. The definition of mappings is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a reference framework to a focal framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
 
-A mapping is defined by the following specific attributes:
+A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
+
+A mapping_rules is a list of elements containing:
 - a reference requirement URN
 - a focal requirement URN
 - a rationale giving the explanation for why a Reference Document Element and a Focal Document Element are related. This will be syntactic, semantic, or functional.
 - a relationship that provides the type of logical relationship that the OLIR Developer asserts the Reference Document Element has compared to the Focal Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
 - a strength of relationship, optionally providing the extent to which a Reference Document Element and a Focal Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
 
-Mappings are used to automatically generate a draft compliance assessment for a focal framework, given existing reference assessments.
+Requirement mapping rules are used to automatically generate a draft compliance assessment for a focal framework, given existing reference assessments.
 
 The following inference rules are used:
 - there is an order relation in results: compliant > non-compliant minor > non-compliant major
 - N/A or -- in reference makes the mapping not usable.
 - when several mappings exist for a focal requirement, the strongest inference result is used to determine the compliance result.
-- all mappings are described in the mapping_inference field.
+- all requirement mappings are described in the mapping_inference field.
 - a superset or equal mapping pushes the reference result to the focal result.
 - an subset mapping pushes a most a partial compliance result to the focal result
 
@@ -893,6 +891,7 @@ Libraries can contain:
 - threats
 - reference controls
 - risk matrices
+- requirement mapping sets
 
 It is recommended that libraries be modular, with only one type of object, but this is not mandatory.
 
