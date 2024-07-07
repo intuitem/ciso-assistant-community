@@ -79,14 +79,16 @@ ws2.append(["", "functional"])
 ws2.append(["strength_of_relationship", "use an integer or empty value"])
 
 ws3 = wb_output.create_sheet("reference")
-ws3.append(["assessable", "urn", "ref_id", "name", "description"])
+ws3.append(["node_id", "assessable", "urn", "ref_id", "name", "description"])
 for node in reference['objects']['framework']['requirement_nodes']:
-    ws3.append([node["assessable"], node["urn"], node.get("ref_id"), node.get("name"), node.get("description")])
+    node_id = node["urn"].split(":")[-1] if node["assessable"] else ""
+    ws3.append([node_id, node["assessable"], node["urn"], node.get("ref_id"), node.get("name"), node.get("description")])
 
 ws4 = wb_output.create_sheet("focal")
-ws4.append(["assessable", "urn", "ref_id", "name", "description"])
+ws4.append(["node_id", "assessable", "urn", "ref_id", "name", "description"])
 for node in focal['objects']['framework']['requirement_nodes']:
-    ws4.append([node["assessable"], node["urn"], node.get("ref_id"), node.get("name"), node.get("description")])
+    node_id = node["urn"].split(":")[-1] if node["assessable"] else ""
+    ws4.append([node_id, node["assessable"], node["urn"], node.get("ref_id"), node.get("name"), node.get("description")])
 
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
