@@ -143,7 +143,8 @@
 	}
 
 	function defaultFilterFunction(columnValue: any, value: any): boolean {
-		return value ? columnValue === value : true;
+		if (!value || value.length < 1) return true;
+		return value.includes(columnValue);
 	}
 
 	$: {
