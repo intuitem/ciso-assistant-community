@@ -367,7 +367,7 @@ objects:
       rationale: syntactic
       stregth_of_relationship: null
     - reference_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.5
-      focal_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a7.6
+      focal_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       relationship: equal
       rationale: syntactic
       stregth_of_relationship: null
