@@ -30,8 +30,6 @@
 	};
 
 	import MultiSelect from 'svelte-multiselect';
-
-	$: console.log($$props);
 </script>
 
 <div hidden={hide}>
