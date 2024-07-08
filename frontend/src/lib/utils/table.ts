@@ -14,6 +14,7 @@ interface ListViewFilterConfig {
 	filterProps?: (rows: any[], field: string) => { [key: string]: any };
 	extraProps?: { [key: string]: any };
 	alwaysDisplay?: boolean;
+	alwaysDefined?: boolean;
 }
 
 interface ListViewFieldsConfig {
@@ -40,6 +41,7 @@ const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.folder.str,
+	alwaysDefined: true,
 	extraProps: {
 		defaultOptionName: 'domain'
 	}
