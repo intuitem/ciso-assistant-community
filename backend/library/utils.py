@@ -85,7 +85,11 @@ class RequirementNodeImporter:
 
 
 class RequirementMappingImporter:
-    REQUIRED_FIELDS = {"focal_requirement", "relationship", "reference_requirement"}
+    REQUIRED_FIELDS = {
+        "focal_requirement_urn",
+        "relationship",
+        "reference_requirement_urn",
+    }
 
     def __init__(self, data: dict):
         self.data = data
@@ -103,7 +107,7 @@ class RequirementMappingImporter:
     ):
         try:
             focal_requirement = RequirementNode.objects.get(
-                urn=self.data["focal_requirement"], default_locale=True
+                urn=self.data["focal_requirement_urn"], default_locale=True
             )
         except RequirementNode.DoesNotExist:
             raise Http404(
@@ -114,7 +118,7 @@ class RequirementMappingImporter:
 
         try:
             reference_requirement = RequirementNode.objects.get(
-                urn=self.data["reference_requirement"], default_locale=True
+                urn=self.data["reference_requirement_urn"], default_locale=True
             )
         except RequirementNode.DoesNotExist:
             raise Http404(
@@ -161,10 +165,10 @@ class RequirementMappingSetImporter:
     ):
         self.init_requirement_mappings(self.data["requirement_mappings"])
         _focal_framework = Framework.objects.get(
-            urn=self.data["focal_framework"], default_locale=True
+            urn=self.data["focal_framework_urn"], default_locale=True
         )
         _reference_framework = Framework.objects.get(
-            urn=self.data["reference_framework"], default_locale=True
+            urn=self.data["reference_framework_urn"], default_locale=True
         )
         mapping_set = RequirementMappingSet.objects.create(
             name=self.data["name"],
