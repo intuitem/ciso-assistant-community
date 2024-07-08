@@ -875,9 +875,7 @@ class RequirementMappingSet(ReferentialObjectMixin):
 
     def save(self, *args, **kwargs) -> None:
         if self.source_framework == self.target_framework:
-            raise ValidationError(
-                _("Source and related frameworks must be different")
-            )
+            raise ValidationError(_("Source and related frameworks must be different"))
         return super().save(*args, **kwargs)
 
 
