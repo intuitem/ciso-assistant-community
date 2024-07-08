@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { localItems } from '$lib/utils/locales';
+	import * as m from '$paraglide/messages';
 
 	export let name: string;
 	export let s_label = '';
@@ -9,13 +9,14 @@
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
+	export let orientation = 'vertical';
 
 	export let values: any[]; // Set the types for these variables later on
 	export let colors: string[] = [];
 
 	for (const index in values) {
 		if (values[index].localName) {
-			values[index].name = localItems()[values[index].localName];
+			values[index].name = m[values[index].localName]();
 		}
 	}
 
@@ -49,7 +50,7 @@
 				top: 20,
 				// left: 'center',
 				right: 10,
-				orient: 'vertical'
+				orient: orientation
 			},
 			series: [
 				{
