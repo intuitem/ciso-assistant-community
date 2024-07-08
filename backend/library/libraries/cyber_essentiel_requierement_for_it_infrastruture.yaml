@@ -9,7 +9,7 @@ description: "Cyber Essentials is a set of baseline technical controls produced 
   Licence : https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
 copyright: Information
 version: 1
-provider: UK Government
+provider: NCSC
 packager: intuitem
 objects:
   framework:
@@ -75,7 +75,7 @@ objects:
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:library:cyber_essentials_requirements_for_it_infrastructure:node10
-      description: ' Establish the boundary of scope for your organisation, and then
+      description: 'Establish the boundary of scope for your organisation, and then
         determine what is in scope
 
         within this boundary.'
@@ -83,7 +83,7 @@ objects:
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:library:cyber_essentials_requirements_for_it_infrastructure:node10
-      description: ' Review each of the five technical control themes and the controls
+      description: 'Review each of the five technical control themes and the controls
         they embody as
 
         requirements.'
@@ -91,7 +91,7 @@ objects:
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:library:cyber_essentials_requirements_for_it_infrastructure:node10
-      description: ' Take the necessary steps to ensure that your organisation meets
+      description: 'Take the necessary steps to ensure that your organisation meets
         every requirement it
 
         needs for the scope you have determined.'
