@@ -365,7 +365,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysInline shoudln't be mandatory here something is wrong
+			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
