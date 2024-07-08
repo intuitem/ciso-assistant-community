@@ -7,7 +7,11 @@ export abstract class BasePage {
 	readonly modalTitle: Locator;
 	readonly breadcrumbs: Locator;
 
-	constructor(public readonly page: Page, url: string, name: string | RegExp) {
+	constructor(
+		public readonly page: Page,
+		url: string,
+		name: string | RegExp
+	) {
 		this.url = url;
 		this.name = name;
 		this.pageTitle = this.page.locator('#page-title');
