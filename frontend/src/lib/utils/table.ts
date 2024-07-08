@@ -124,7 +124,6 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		console.log(row);
 		return row.provider;
 	},
 	extraProps: {
