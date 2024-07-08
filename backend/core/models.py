@@ -1,12 +1,13 @@
 from pathlib import Path
 from django.apps import apps
+from django.core.validators import MaxValueValidator
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
 
-from .base_models import *
+from .base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
 from .validators import validate_file_size, validate_file_name
 from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
@@ -15,6 +16,8 @@ from django.core import serializers
 import os
 import json
 import yaml
+
+from django.core.exceptions import ValidationError
 
 from django.urls import reverse
 from datetime import date, datetime
@@ -30,7 +33,7 @@ User = get_user_model()
 ########################### Referential objects #########################
 
 
-class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
+class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
     Mixin for referential objects.
     """
@@ -41,10 +44,6 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
-    locale = models.CharField(
-        max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
-    )
-    default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider")
     )
@@ -85,7 +84,17 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
         return self.display_short
 
 
-class LibraryMixin(ReferentialObjectMixin):
+class I18nObjectMixin(models.Model):
+    locale = models.CharField(
+        max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
+    )
+    default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
+
+    class Meta:
+        abstract = True
+
+
+class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         abstract = True
         unique_together = [["urn", "locale", "version"]]
@@ -170,7 +179,7 @@ class StoredLibrary(LibraryMixin):
             outdated_library.delete()
 
         objects_meta = {
-            key: (1 if key == "framework" else len(value))
+            key: (1 if key == "framework" or "requirement_mapping_set" else len(value))
             for key, value in library_data["objects"].items()
         }
 
@@ -408,16 +417,17 @@ class LibraryUpdater:
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
 
-                new_requirement_node, created = (
-                    RequirementNode.objects.update_or_create(
-                        urn=requirement_node["urn"].lower(),
-                        defaults=requirement_node_dict,
-                        create_defaults={
-                            **referential_object_dict,
-                            **requirement_node_dict,
-                            "framework": new_framework,
-                        },
-                    )
+                (
+                    new_requirement_node,
+                    created,
+                ) = RequirementNode.objects.update_or_create(
+                    urn=requirement_node["urn"].lower(),
+                    defaults=requirement_node_dict,
+                    create_defaults={
+                        **referential_object_dict,
+                        **requirement_node_dict,
+                        "framework": new_framework,
+                    },
                 )
 
                 if created:
@@ -570,7 +580,7 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
+class Threat(ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -601,7 +611,7 @@ class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
         return self.name
 
 
-class ReferenceControl(ReferentialObjectMixin):
+class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -658,7 +668,7 @@ class ReferenceControl(ReferentialObjectMixin):
             )
 
 
-class RiskMatrix(ReferentialObjectMixin):
+class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -740,7 +750,7 @@ class RiskMatrix(ReferentialObjectMixin):
         return self.name
 
 
-class Framework(ReferentialObjectMixin):
+class Framework(ReferentialObjectMixin, I18nObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -803,7 +813,7 @@ class Framework(ReferentialObjectMixin):
         return node_dict
 
 
-class RequirementNode(ReferentialObjectMixin):
+class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     threats = models.ManyToManyField(
         "Threat",
         blank=True,
@@ -839,6 +849,111 @@ class RequirementNode(ReferentialObjectMixin):
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
+
+
+class RequirementMappingSet(ReferentialObjectMixin):
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="requirement_mapping_sets",
+    )
+
+    reference_framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference framework"),
+        related_name="reference_framework",
+    )
+    focal_framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        verbose_name=_("Focal framework"),
+        related_name="focal_framework",
+    )
+
+    def save(self, *args, **kwargs) -> None:
+        if self.reference_framework == self.focal_framework:
+            raise ValidationError(
+                _("Reference and related frameworks must be different")
+            )
+        return super().save(*args, **kwargs)
+
+
+class RequirementMapping(models.Model):
+    class Coverage(models.TextChoices):
+        FULL = "full", _("Full")
+        PARTIAL = "partial", _("Partial")
+        NOT_RELATED = "not_related", _("Not related")
+
+    class Relationship(models.TextChoices):
+        SUBSET = "subset", _("Subset")
+        INTERSECT = "intersect", _("Intersect")
+        EQUAL = "equal", _("Equal")
+        SUPERSET = "superset", _("Superset")
+        NOT_RELATED = "not_related", _("Not related")
+
+    class Rationale(models.TextChoices):
+        SYNTACTIC = "syntactic", _("Syntactic")
+        SEMANTIC = "semantic", _("Semantic")
+        FUNCTIONAL = "functional", _("Functional")
+
+    FULL_COVERAGE_RELATIONSHIPS = [
+        Relationship.EQUAL,
+        Relationship.SUBSET,
+    ]
+
+    PARTIAL_COVERAGE_RELATIONSHIPS = [
+        Relationship.INTERSECT,
+        Relationship.SUPERSET,
+    ]
+
+    mapping_set = models.ForeignKey(
+        RequirementMappingSet,
+        on_delete=models.CASCADE,
+        verbose_name=_("Mapping set"),
+        related_name="mappings",
+    )
+    focal_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Focal requirement"),
+        related_name="focal_requirement",
+    )
+    relationship = models.CharField(
+        max_length=20,
+        choices=Relationship.choices,
+        default=Relationship.NOT_RELATED,
+        verbose_name=_("Relationship"),
+    )
+    rationale = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=Rationale.choices,
+        verbose_name=_("Rationale"),
+    )
+    reference_requirement = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        verbose_name=_("Reference requirement"),
+        related_name="reference_requirement",
+    )
+    strength_of_relationship = models.PositiveSmallIntegerField(
+        null=True,
+        verbose_name=_("Strength of relationship"),
+        validators=[MaxValueValidator(10)],
+    )
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+
+    @property
+    def coverage(self) -> str:
+        if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
+            return RequirementMapping.Coverage.NOT_RELATED
+        if self.relationship in self.FULL_COVERAGE_RELATIONSHIPS:
+            return RequirementMapping.Coverage.FULL
+        return RequirementMapping.Coverage.PARTIAL
 
 
 ########################### Domain objects #########################
@@ -1134,7 +1249,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1172,18 +1287,6 @@ class Assessment(NameDescriptionMixin):
         blank=True,
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
-    )
-    eta = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_("Estimated time of arrival"),
-        verbose_name=_("ETA"),
-    )
-    due_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_("Due date"),
-        verbose_name=_("Due date"),
     )
 
     fields_to_check = ["name", "version"]
@@ -1551,6 +1654,12 @@ class RiskScenario(NameDescriptionMixin):
         blank=True,
     )
 
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="risk_scenarios",
+    )
     # current
     current_proba = models.SmallIntegerField(
         default=-1, verbose_name=_("Current probability")
@@ -1695,21 +1804,8 @@ class RiskScenario(NameDescriptionMixin):
 
 
 class ComplianceAssessment(Assessment):
-    class Result(models.TextChoices):
-        COMPLIANT = "compliant", _("Compliant")
-        NON_COMPLIANT_MINOR = "non_compliant_minor", _("Non compliant (minor)")
-        NON_COMPLIANT_MAJOR = "non_compliant_major", _("Non compliant (major)")
-        NOT_APPLICABLE = "not_applicable", _("Not applicable")
-
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
-    )
-    result = models.CharField(
-        blank=True,
-        null=True,
-        max_length=100,
-        choices=Result.choices,
-        verbose_name=_("Result"),
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
@@ -1736,7 +1832,7 @@ class ComplianceAssessment(Assessment):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(score=None)
-            .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
+            .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
         )
         ig = (
@@ -1837,18 +1933,57 @@ class ComplianceAssessment(Assessment):
             return queries[0].union(*queries[1:]) if queries else base_query.none()
 
         color_map = {
-            "in_progress": "#3b82f6",
-            "non_compliant": "#f87171",
-            "to_do": "#d1d5db",
-            "partially_compliant": "#fde047",
-            "not_applicable": "#000000",
-            "compliant": "#86efac",
+            RequirementAssessment.Result.NOT_ASSESSED: "#d1d5db",
+            RequirementAssessment.Result.NON_COMPLIANT: "#f87171",
+            RequirementAssessment.Result.PARTIALLY_COMPLIANT: "#fde047",
+            RequirementAssessment.Result.COMPLIANT: "#86efac",
+            RequirementAssessment.Result.NOT_APPLICABLE: "#000000",
+            RequirementAssessment.Status.TODO: "#9ca3af",
+            RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
+            RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
+            RequirementAssessment.Status.DONE: "#86efac",
         }
 
-        compliance_assessments_status = {"values": [], "labels": []}
-        for status in RequirementAssessment.Status:
+        compliance_assessments_result = {"values": [], "labels": []}
+        for result in RequirementAssessment.Result.values:
+            assessable_requirements_filter = {
+                "compliance_assessment": self,
+                "requirement__assessable": True,
+            }
+
             base_query = RequirementAssessment.objects.filter(
-                status=status, compliance_assessment=self, requirement__assessable=True
+                result=result, **assessable_requirements_filter
+            ).distinct()
+
+            if self.selected_implementation_groups:
+                union_query = union_queries(
+                    base_query,
+                    self.selected_implementation_groups,
+                    "requirement__implementation_groups",
+                )
+            else:
+                union_query = base_query
+
+            count = union_query.count()
+            value_entry = {
+                "name": result,
+                "localName": camel_case(result),
+                "value": count,
+                "itemStyle": {"color": color_map[result]},
+            }
+
+            compliance_assessments_result["values"].append(value_entry)
+            compliance_assessments_result["labels"].append(result)
+
+        compliance_assessments_status = {"values": [], "labels": []}
+        for status in RequirementAssessment.Status.values:
+            assessable_requirements_filter = {
+                "compliance_assessment": self,
+                "requirement__assessable": True,
+            }
+
+            base_query = RequirementAssessment.objects.filter(
+                status=status, **assessable_requirements_filter
             ).distinct()
 
             if self.selected_implementation_groups:
@@ -1863,15 +1998,18 @@ class ComplianceAssessment(Assessment):
             count = union_query.count()
             value_entry = {
                 "name": status,
-                "localName": camel_case(status.value),
+                "localName": camel_case(status),
                 "value": count,
                 "itemStyle": {"color": color_map[status]},
             }
 
             compliance_assessments_status["values"].append(value_entry)
-            compliance_assessments_status["labels"].append(status.label)
+            compliance_assessments_status["labels"].append(status)
 
-        return compliance_assessments_status
+        return {
+            "result": compliance_assessments_result,
+            "status": compliance_assessments_status,
+        }
 
     def quality_check(self) -> dict:
         AppliedControl = apps.get_model("core", "AppliedControl")
@@ -1994,13 +2132,77 @@ class ComplianceAssessment(Assessment):
         }
         return findings
 
+    def compute_requirement_assessments_results(
+        self, mapping_set: RequirementMappingSet, reference_assessment: Self
+    ) -> list["RequirementAssessment"]:
+        requirement_assessments: list[RequirementAssessment] = []
+        result_order = (
+            RequirementAssessment.Result.NON_COMPLIANT,
+            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+            RequirementAssessment.Result.COMPLIANT,
+        )
+        for requirement_assessment in self.requirement_assessments.all():
+            mappings = mapping_set.mappings.filter(
+                focal_requirement=requirement_assessment.requirement
+            )
+            inferences = []
+            refs = []
+            if mappings.filter(
+                relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
+            ).exists():
+                mappings = mappings.filter(
+                    relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
+                )
+            for mapping in mappings:
+                reference_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=reference_assessment,
+                    requirement=mapping.reference_requirement,
+                )
+                inferred_result, inferred_status = requirement_assessment.infer_result(
+                    mapping=mapping,
+                    reference_requirement_assessment=reference_requirement_assessment,
+                )
+                if inferred_result in result_order:
+                    inferences.append((inferred_result, inferred_status))
+                    refs.append(reference_requirement_assessment)
+            if inferences:
+                if len(inferences) == 1:
+                    requirement_assessment.result = inferences[0][0]
+                    if inferences[0][1]:
+                        requirement_assessment.status = inferences[0][1]
+                    ref = refs[0]
+                else:
+                    lowest_result = min(
+                        inferences, key=lambda x: result_order.index(x[0])
+                    )
+                    requirement_assessment.result = lowest_result[0]
+                    if lowest_result[1]:
+                        requirement_assessment.status = lowest_result[1]
+                    ref = refs[inferences.index(lowest_result)]
+                requirement_assessment.mapping_inference = {
+                    "result": requirement_assessment.result,
+                    "reference_requirement_assessment": {
+                        "str": str(ref),
+                        "id": str(ref.id),
+                        "coverage": mapping.coverage,
+                    },
+                    # "mappings": [mapping.id for mapping in mappings],
+                }
+                requirement_assessments.append(requirement_assessment)
+        return requirement_assessments
 
-class RequirementAssessment(AbstractBaseModel, FolderMixin):
+
+class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
-        NON_COMPLIANT = "non_compliant", _("Non compliant")
+        IN_REVIEW = "in_review", _("In review")
+        DONE = "done", _("Done")
+
+    class Result(models.TextChoices):
+        NOT_ASSESSED = "not_assessed", _("Not assessed")
         PARTIALLY_COMPLIANT = "partially_compliant", _("Partially compliant")
+        NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
@@ -2009,6 +2211,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         choices=Status.choices,
         default=Status.TODO,
         verbose_name=_("Status"),
+    )
+    result = models.CharField(
+        max_length=64,
+        choices=Result.choices,
+        verbose_name=_("Result"),
+        default=Result.NOT_ASSESSED,
     )
     score = models.IntegerField(
         blank=True,
@@ -2045,12 +2253,37 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         default=True,
         verbose_name=_("Selected"),
     )
+    mapping_inference = models.JSONField(
+        default=dict,
+        verbose_name=_("Mapping inference"),
+    )
 
     def __str__(self) -> str:
         return self.requirement.display_short
 
     def get_requirement_description(self) -> str:
         return self.requirement.description
+
+    def infer_result(
+        self, mapping: RequirementMapping, reference_requirement_assessment: Self
+    ) -> str | None:
+        if mapping.coverage == RequirementMapping.Coverage.FULL:
+            return (
+                reference_requirement_assessment.result,
+                reference_requirement_assessment.status,
+            )
+        if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
+            if reference_requirement_assessment.result in (
+                RequirementAssessment.Result.COMPLIANT,
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+            ):
+                return (RequirementAssessment.Result.PARTIALLY_COMPLIANT, None)
+            if (
+                reference_requirement_assessment.result
+                == RequirementAssessment.Result.NON_COMPLIANT
+            ):
+                return (RequirementAssessment.Result.NON_COMPLIANT, None)
+        return (None, None)
 
     class Meta:
         verbose_name = _("Requirement assessment")

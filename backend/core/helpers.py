@@ -46,9 +46,11 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
 
 def color_css_class(status):
     return {
+        "not_assessed": "gray-300",
         "compliant": "green-500",
-        "to_do": "gray-300",
+        "to_do": "gray-400",
         "in_progress": "blue-500",
+        "done": "green-500",
         "non_compliant": "red-500",
         "partially_compliant": "yellow-400",
         "not_applicable": "black",
@@ -269,11 +271,16 @@ def get_sorted_requirement_nodes(
                 "implementation_groups": node.implementation_groups or None,
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
+                "result": req_as.result if req_as else None,
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "max_score": max_score if req_as else None,
+                "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
+                "result_i18n": camel_case(req_as.result)
+                if req_as and req_as.result is not None
+                else None,
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
@@ -305,11 +312,18 @@ def get_sorted_requirement_nodes(
                     "is_scored": child_req_as.is_scored if child_req_as else None,
                     "score": child_req_as.score if child_req_as else None,
                     "max_score": max_score if child_req_as else None,
+                    "mapping_inference": child_req_as.mapping_inference
+                    if child_req_as
+                    else None,
                     "status_display": child_req_as.get_status_display()
                     if child_req_as
                     else None,
                     "status_i18n": camel_case(child_req_as.status)
                     if child_req_as
+                    else None,
+                    "result": child_req_as.result if child_req_as else None,
+                    "result_i18n": camel_case(child_req_as.result)
+                    if child_req_as and child_req_as.result is not None
                     else None,
                     "style": "leaf",
                 }
@@ -621,14 +635,14 @@ def aggregate_risks_per_field(
                     .filter(residual_level=i)
                     # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this usefull ?
+                )  # What the second filter does ? Is this useful ?
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
                     # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this usefull ?
+                )  # What the second filter does ? Is this useful ?
 
             if "count" not in values[m["risk"][i][field]]:
                 values[m["risk"][i][field]]["count"] = count
