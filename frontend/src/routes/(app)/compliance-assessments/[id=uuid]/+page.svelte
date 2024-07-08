@@ -313,7 +313,9 @@
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
-			<button class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit" on:click={(_) => modalCreateForm()}
+			<button
+				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
+				on:click={(_) => modalCreateForm()}
 				><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
 			</button>
 		</div>
