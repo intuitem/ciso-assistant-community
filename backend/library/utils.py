@@ -85,7 +85,11 @@ class RequirementNodeImporter:
 
 
 class RequirementMappingImporter:
-    REQUIRED_FIELDS = {"focal_requirement_urn", "relationship", "reference_requirement_urn"}
+    REQUIRED_FIELDS = {
+        "focal_requirement_urn",
+        "relationship",
+        "reference_requirement_urn",
+    }
 
     def __init__(self, data: dict):
         self.data = data
