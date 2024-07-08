@@ -233,6 +233,7 @@
 						<svelte:component
 							this={filters[field].component}
 							bind:value={filterValues[field]}
+							alwaysDefined={filters[field].alwaysDefined}
 							{field}
 							{...filterProps[field]}
 							{...filters[field].extraProps}
