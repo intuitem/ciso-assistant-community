@@ -29,10 +29,10 @@ Conventions:
         mapping_ref_id                  | <ref_id>
         mapping_name                    | <name>
         mapping_description             | <description>
-        mapping_reference_framework_urn | <urn>
-        mapping_focal_framework_urn     | <urn>
-        mapping_reference_node_base_urn | <urn>
-        mapping_focal_node_base_urn     | <urn>
+        mapping_source_framework_urn    | <urn>
+        mapping_target_framework_urn    | <urn>
+        mapping_source_node_base_urn    | <urn>
+        mapping_target_node_base_urn    | <urn>
         tab                             | <tab_name> | requirements
         tab                             | <tab_name> | threats            | <base_urn>
         tab                             | <tab_name> | reference_controls | <base_urn>
@@ -78,8 +78,8 @@ Conventions:
         This is a topological representation. The display on the screen (transposition, direction of axes) will be managed in the frontend, not in the data model.
     For mappings:
         The first line is a header, with the following possible fields (* for required):
-            - reference_node_id(*)
-            - focal_node_id(*)
+            - source_node_id(*)
+            - target_node_id(*)
             - relationship(*)
             - rationale
             - stregth_of_relationship
@@ -121,10 +121,10 @@ LIBRARY_VARS = (
     "mapping_ref_id",
     "mapping_name",
     "mapping_description",
-    "mapping_reference_framework_urn",
-    "mapping_focal_framework_urn",
-    "mapping_reference_node_base_urn",
-    "mapping_focal_node_base_urn",
+    "mapping_source_framework_urn",
+    "mapping_target_framework_urn",
+    "mapping_source_node_base_urn",
+    "mapping_target_node_base_urn",
     "tab",
 )
 library_vars = {}
@@ -601,24 +601,24 @@ for tab in dataframe:
     elif library_vars_dict["tab"][title] == "mappings":
         print("processing mappings")
         is_header = True
-        reference_prefix=library_vars["mapping_reference_node_base_urn"]
-        focal_prefix=library_vars["mapping_focal_node_base_urn"]
+        source_prefix=library_vars["mapping_source_node_base_urn"]
+        target_prefix=library_vars["mapping_target_node_base_urn"]
         for row in tab:
             if is_header:
                 header = read_header(row)
                 is_header = False
-                assert "reference_node_id" in header
-                assert "focal_node_id" in header
+                assert "source_node_id" in header
+                assert "target_node_id" in header
                 assert "relationship" in header
             elif any([c.value for c in row]):
-                reference_requirement_urn = reference_prefix + ":" + row[header["reference_node_id"]].value
-                focal_requirement_urn = focal_prefix + ":" + row[header["focal_node_id"]].value
+                source_requirement_urn = source_prefix + ":" + row[header["source_node_id"]].value
+                target_requirement_urn = target_prefix + ":" + row[header["target_node_id"]].value
                 relationship = row[header["relationship"]].value
                 rationale = row[header["rationale"]].value if "rationale" in header else None
                 stregth_of_relationship = row[header["stregth_of_relationship"]].value if "stregth_of_relationship" in header else None
                 requirement_mappings.append(
-                    {"reference_requirement_urn": reference_requirement_urn, 
-                     "focal_requirement_urn": focal_requirement_urn, 
+                    {"source_requirement_urn": source_requirement_urn, 
+                     "target_requirement_urn": target_requirement_urn, 
                      "relationship": relationship,
                      "rationale": rationale,
                      "stregth_of_relationship": stregth_of_relationship,
@@ -671,8 +671,8 @@ if has_mappings:
         "ref_id": library_vars["mapping_ref_id"],
         "name": library_vars["mapping_name"],
         "description": library_vars["mapping_description"],
-        "reference_framework_urn": library_vars["mapping_reference_framework_urn"],
-        "focal_framework_urn": library_vars["mapping_focal_framework_urn"],
+        "source_framework_urn": library_vars["mapping_source_framework_urn"],
+        "target_framework_urn": library_vars["mapping_target_framework_urn"],
     }
     library["objects"]["requirement_mapping_set"]["requirement_mappings"] = requirement_mappings
 

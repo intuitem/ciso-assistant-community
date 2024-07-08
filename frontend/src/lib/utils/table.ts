@@ -414,7 +414,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'provider', 'provider_id']
 	},
 	'requirement-mapping-sets': {
-		head: ['referenceFramework', 'focalFramework'],
-		body: ['reference_framework', 'focal_framework']
+		head: ['sourceFramework', 'targetFramework'],
+		body: ['source_framework', 'target_framework']
 	}
 };
