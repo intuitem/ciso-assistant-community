@@ -222,6 +222,7 @@
 						<ModelTable
 							URLModel="applied-controls"
 							source={appliedControlTodoTable}
+							hideFilters={true}
 							search={false}
 							rowsPerPage={false}
 							orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
@@ -245,6 +246,7 @@
 							<ModelTable
 								source={appliedControlWatchlistTable}
 								URLModel="applied-controls"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -254,6 +256,7 @@
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
 								URLModel="risk-acceptances"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
