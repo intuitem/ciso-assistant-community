@@ -603,7 +603,7 @@ objects:
       stregth_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.2
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
-      relationship: subset
+      relationship: equal
       rationale: syntactic
       stregth_of_relationship: null
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.3
