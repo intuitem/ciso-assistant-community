@@ -272,7 +272,11 @@
 						field="applied_controls"
 						label={m.appliedControls()}
 					/>
-					<ModelTable source={data.tables['applied-controls']} hideFilters={true} URLModel="applied-controls" />
+					<ModelTable
+						source={data.tables['applied-controls']}
+						hideFilters={true}
+						URLModel="applied-controls"
+					/>
 				</div>
 				<div class="flex flex-col">
 					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>
