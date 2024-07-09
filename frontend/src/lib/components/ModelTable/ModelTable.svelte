@@ -156,8 +156,12 @@
 		for (const field of filteredFields) {
 			handler.filter(
 				filterValues[field],
-				filters[field].getColumn ?? field,
-				filters[field].filter ?? defaultFilterFunction
+				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
+					? filters[field].getColumn
+					: field,
+				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'filter')
+					? filters[field].filter
+					: defaultFilterFunction
 			);
 		}
 	}
@@ -220,7 +224,7 @@
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if filteredFields.length > 0 && hasRows && !hideFilters}
-			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
+			<button use:popup={popupFilter} class="btn variant-filled-primary self-end relative">
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
 				{#if filterCount}
@@ -228,7 +232,7 @@
 				{/if}
 			</button>
 			<div
-				class="card p-2 flex flex-col bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
 				data-popup="popupFilter"
 			>
 				{#each filteredFields as field}
