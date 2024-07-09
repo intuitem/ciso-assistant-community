@@ -95,6 +95,8 @@
 	export let detailQueryParameter: string | undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
+	export let hideFilters = false;
+
 	const user = $page.data.user;
 
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
@@ -127,7 +129,10 @@
 	$: hasRows = data.length > 0;
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters = listViewFields[tableURLModel].filters ?? {};
+	const filters =
+		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+			? listViewFields[tableURLModel].filters
+			: {};
 	const filteredFields = Object.keys(filters).filter(
 		(key) => columnFields.has(key) || filters[key].alwaysDisplay
 	);
@@ -214,11 +219,8 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if displayFilters && filteredFields.length > 0 && hasRows}
-			<button
-				use:popup={popupFilter}
-				class="btn variant-filled-primary self-end relative inline-block"
-			>
+		{#if filteredFields.length > 0 && hasRows && !hideFilters}
+			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
 				{#if filterCount}
