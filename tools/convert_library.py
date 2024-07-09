@@ -409,7 +409,7 @@ for tab in dataframe:
                         part_name = ":".join(parts)
                         part_name = part_name.lower().replace(" ", "-")
                         urn_prefix = library_vars_dict_reverse[
-                            "reference_control_base_urn"
+                            "threat_base_urn"
                         ][prefix]
                         threat_urns.append(f"{urn_prefix}:{part_name}")
                 if req_reference_controls:
