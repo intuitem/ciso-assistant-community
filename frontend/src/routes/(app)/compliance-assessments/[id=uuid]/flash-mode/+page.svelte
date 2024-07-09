@@ -30,8 +30,8 @@
 	$: title = requirement.display_short
 		? requirement.display_short
 		: parent.display_short
-		? parent.display_short
-		: parent.description;
+			? parent.display_short
+			: parent.description;
 
 	// Function to handle the "Next" button click
 	function nextItem() {
