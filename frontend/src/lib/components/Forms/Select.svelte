@@ -10,12 +10,15 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
+	export let cachedValue: string | undefined = undefined;
 
 	export let color_map = {};
 
 	export let form: SuperForm<AnyZodObject>;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	$: value.set(cachedValue);
+	let selectElement: HTMLElement | null = null;
 
 	interface Option {
 		label: unknown;
@@ -52,8 +55,9 @@
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			style="background-color: {color_map[$value]}"
-			bind:value={$value}
+			style="background-color: {color_map[cachedValue]}"
+			bind:value={cachedValue}
+			bind:this={selectElement}
 			{...$constraints}
 			{...$$restProps}
 		>
