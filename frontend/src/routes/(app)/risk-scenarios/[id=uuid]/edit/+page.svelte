@@ -205,7 +205,7 @@
 					label={m.assets()}
 					helpText={m.riskScenarioAssetHelpText()}
 				/>
-				<ModelTable source={data.tables['assets']} URLModel="assets" />
+				<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 			</div>
 		</div>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
@@ -272,7 +272,7 @@
 						field="applied_controls"
 						label={m.appliedControls()}
 					/>
-					<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
+					<ModelTable source={data.tables['applied-controls']} hideFilters={true} URLModel="applied-controls" />
 				</div>
 				<div class="flex flex-col">
 					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>

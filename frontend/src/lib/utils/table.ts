@@ -263,7 +263,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
+			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
 			status: { ...STATUS_FILTER, alwaysDisplay: true }
 		}
