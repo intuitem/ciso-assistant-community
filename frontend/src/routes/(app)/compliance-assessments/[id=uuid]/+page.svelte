@@ -307,12 +307,15 @@
 			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
+			<span class="pt-4 font-light text-sm">Power-ups:</span>
 			<a
 				href={`${$page.url.pathname}/flash-mode`}
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
-			<button class="btn variant-filled-surface" on:click={(_) => modalCreateForm()}
+			<button
+				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
+				on:click={(_) => modalCreateForm()}
 				><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
 			</button>
 		</div>
