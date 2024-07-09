@@ -6,6 +6,8 @@ from ciso_assistant.settings import BASE_DIR
 from core.models import (
     Policy,
     Project,
+    RequirementMapping,
+    RequirementMappingSet,
     RiskAssessment,
     ComplianceAssessment,
     RiskScenario,
@@ -47,6 +49,20 @@ def risk_matrix_fixture():
     ).last()
     assert library is not None
     library.load()
+
+
+@pytest.fixture
+def iso27001_csf1_1_frameworks_fixture():
+    iso27001_library = StoredLibrary.objects.get(
+        urn="urn:intuitem:risk:library:iso27001-2022", locale="en"
+    )
+    assert iso27001_library is not None
+    iso27001_library.load()
+    csf_1_1_library = StoredLibrary.objects.get(
+        urn="urn:intuitem:risk:library:nist-csf-1.1", locale="en"
+    )
+    assert csf_1_1_library is not None
+    csf_1_1_library.load()
 
 
 @pytest.mark.django_db
@@ -1181,3 +1197,79 @@ class TestLibrary:
         except:
             None
         assert LoadedLibrary.objects.count() == 0
+
+
+@pytest.mark.django_db
+class TestRequirementMapping:
+    pytestmark = pytest.mark.django_db
+
+    @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
+    def test_requirement_mapping_creation(self):
+        target_framework = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:iso27001-2022"
+        )
+        source_framework = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:nist-csf-1.1"
+        )
+        mapping_set = RequirementMappingSet.objects.create(
+            source_framework=source_framework,
+            target_framework=target_framework,
+        )
+
+        target_requirement = RequirementNode.objects.filter(
+            urn="urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1"
+        ).last()
+        source_requirement = RequirementNode.objects.get(
+            urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.15"
+        )
+
+        mapping = RequirementMapping.objects.create(
+            target_requirement=target_requirement,
+            source_requirement=source_requirement,
+            relationship=RequirementMapping.Relationship.INTERSECT,
+            mapping_set=mapping_set,
+        )
+
+        assert mapping.target_requirement == target_requirement
+        assert mapping.relationship == RequirementMapping.Relationship.INTERSECT
+        assert mapping.source_requirement == source_requirement
+
+
+@pytest.mark.django_db
+class TestRequirementMappingSet:
+    pytestmark = pytest.mark.django_db
+
+    @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
+    def test_requirement_mapping_set_creation(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        iso27001 = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:iso27001-2022"
+        )
+        csf1_1 = Framework.objects.get(urn="urn:intuitem:risk:framework:nist-csf-1.1")
+        requirement_mapping_set = RequirementMappingSet.objects.create(
+            name="Requirement Mapping Set",
+            description="Requirement Mapping Set description",
+            source_framework=csf1_1,
+            target_framework=iso27001,
+        )
+        assert requirement_mapping_set.name == "Requirement Mapping Set"
+        assert (
+            requirement_mapping_set.description == "Requirement Mapping Set description"
+        )
+        assert requirement_mapping_set.folder == root_folder
+        assert requirement_mapping_set.target_framework == iso27001
+        assert requirement_mapping_set.source_framework == csf1_1
+        assert requirement_mapping_set.mappings.count() == 0
+
+    @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
+    def test_requirement_mapping_set_source_and_target_frameworks_must_be_distinct(
+        self,
+    ):
+        csf1_1 = Framework.objects.get(urn="urn:intuitem:risk:framework:nist-csf-1.1")
+        with pytest.raises(ValidationError):
+            RequirementMappingSet.objects.create(
+                name="Requirement Mapping Set",
+                description="Requirement Mapping Set description",
+                source_framework=csf1_1,
+                target_framework=csf1_1,
+            )

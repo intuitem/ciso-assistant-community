@@ -50,9 +50,9 @@ The decoupling allows you to save a considerable amount of time:
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
-Here is the scope of what CISO Assistant can help you achieve:
+Here is an overview of CISO Assistant features and capabilities:
 
-![overview](https://github.com/intuitem/ciso-assistant-community/assets/11318384/b3697b12-92c9-4115-be74-9dfbb6d45242)
+![overview](features.png)
 
 
 CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
@@ -142,6 +142,14 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 48. NCSC Cyber Assessment Framework (CAF) 🇬🇧
 49. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
 50. RODO (Polish Version of GDPR)
+44. ISO 27001:2013 🌐 (For legacy and migration)
+45. EU AI Act 🇪🇺🤖
+46. FBI CJIS 🇺🇸👮
+47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+48. Secure Controls Framework (SCF) 🇺🇸🌐
+49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+50. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
+
 
 ### Community contributions
 

@@ -228,6 +228,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
 
+    owner = FieldsRelatedField(many=True)
+
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
     class Meta:
@@ -481,6 +483,16 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    baseline = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=ComplianceAssessment.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
+
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
@@ -532,3 +544,27 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
         fields = "__all__"
+
+
+class RequirementMappingSetReadSerializer(BaseModelSerializer):
+    source_framework = FieldsRelatedField()
+    target_framework = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "urn"])
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = RequirementMappingSet
+        fields = "__all__"
+
+
+class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
+    pass
+
+
+class ComputeMappingSerializer(serializers.Serializer):
+    mapping_set = serializers.PrimaryKeyRelatedField(
+        queryset=RequirementMappingSet.objects.all()
+    )
+    source_assessment = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all()
+    )
