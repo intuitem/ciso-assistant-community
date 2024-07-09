@@ -33,7 +33,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ["3.11"]
-        playwright-browser: ["firefox"]
+        playwright-browser: ["chromium", "firefox"]
 
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +95,7 @@ jobs:
           nohup python manage.py runserver &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
-        run: npx playwright test detailed/libraries.test.ts --project=${{ matrix.playwright-browser }}
+        run: npx playwright test --project=${{ matrix.playwright-browser }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
