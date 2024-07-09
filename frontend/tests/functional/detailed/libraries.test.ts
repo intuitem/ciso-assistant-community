@@ -29,7 +29,6 @@ test('the first half of libraries can be loaded', async ({ librariesPage, page }
 	}
 });
 
-test.describe.configure({ mode: 'serial' });
 test('the last half of libraries can be loaded', async ({ librariesPage, page }) => {
 	test.slow();
 	await librariesPage.goto();
