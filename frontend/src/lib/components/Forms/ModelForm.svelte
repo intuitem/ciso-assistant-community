@@ -11,7 +11,7 @@
 
 	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
-	import type { ModelInfo, urlModel } from '$lib/utils/types';
+	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import HiddenInput from './HiddenInput.svelte';
@@ -49,13 +49,28 @@
 
 	let formDataCache: {[key: string]: any} = {};
 
+	function makeCacheLock(): CacheLock {
+		let resolve: (_: any) => any = _ => _;
+		const promise = new Promise(res => {
+			resolve = res;
+		});
+		return { resolve, promise };
+	}
+
+	$: cacheLocks = Object.keys(shape).reduce((acc, field) => {
+		acc[field] = makeCacheLock();
+		return acc;
+	}, {});
+
 	let _sessionStorage = null;
 	onMount(() => {
 		if (caching) {
 			_sessionStorage = sessionStorage;
 			const data = JSON.parse(sessionStorage.getItem("model_form_cache") ?? '{}');
-			const modelData = data[model.name] ?? {};
-			formDataCache = {...modelData};
+			formDataCache = data[model.name] ?? {};
+			for (const [key, value] of Object.entries(cacheLocks)) {
+				cacheLocks[key].resolve(formDataCache[key]);
+			};
 		}
 
 		if (shape.reference_control) {
@@ -97,6 +112,8 @@
 				label: 'auto' // convention for automatic label calculation
 			})}
 			field="reference_control"
+			cacheLock={cacheLocks["reference_control"]}
+			bind:cachedValue={formDataCache["reference_control"]}
 			label={m.referenceControl()}
 			nullable={true}
 			on:change={async (e) => {
@@ -131,6 +148,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
@@ -150,6 +169,8 @@
 				extra_fields: [['folder', 'str']]
 			})}
 			field="project"
+			cacheLock={cacheLocks["project"]}
+			bind:cachedValue={formDataCache["project"]}
 			label={m.project()}
 			hide={initialData.project}
 		/>
@@ -160,6 +181,8 @@
 			disabled={object.id}
 			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
 			field="risk_matrix"
+			cacheLock={cacheLocks["risk_matrix"]}
+			bind:cachedValue={formDataCache["risk_matrix"]}
 			label={m.riskMatrix()}
 			helpText={m.riskAssessmentMatrixHelpText()}
 		/>
@@ -168,6 +191,8 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
 			field="authors"
+			cacheLock={cacheLocks["authors"]}
+			bind:cachedValue={formDataCache["authors"]}
 			label={m.authors()}
 		/>
 		<AutocompleteSelect
@@ -175,6 +200,8 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
 			field="reviewers"
+			cacheLock={cacheLocks["reviewers"]}
+			bind:cachedValue={formDataCache["reviewers"]}
 			label={m.reviewers()}
 		/>
 		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} bind:cachedValue={formDataCache["eta"]} />
@@ -192,6 +219,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
@@ -204,6 +233,8 @@
 				extra_fields: [['project', 'str']]
 			})}
 			field="risk_assessment"
+			cacheLock={cacheLocks["risk_assessment"]}
+			bind:cachedValue={formDataCache["risk_assessment"]}
 			label={m.riskAssessment()}
 			hide={initialData.risk_assessment}
 		/>
@@ -216,6 +247,8 @@
 				label: 'auto' // convention for automatic label calculation
 			})}
 			field="threats"
+			cacheLock={cacheLocks["threats"]}
+			bind:cachedValue={formDataCache["threats"]}
 			label={m.threats()}
 		/>
 	{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
@@ -237,6 +270,8 @@
 				extra_fields: [['folder', 'str']]
 			})}
 			field="evidences"
+			cacheLock={cacheLocks["evidences"]}
+			bind:cachedValue={formDataCache["evidences"]}
 			label={m.evidences()}
 		/>
 		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} bind:cachedValue={formDataCache["eta"]} />
@@ -261,6 +296,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
@@ -287,6 +324,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
@@ -294,6 +333,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['approver'], label: 'email' })}
 			field="approver"
+			cacheLock={cacheLocks["approver"]}
+			bind:cachedValue={formDataCache["approver"]}
 			label={m.approver()}
 			helpText={m.approverHelpText()}
 		/>
@@ -304,6 +345,8 @@
 				extra_fields: [['project', 'str']]
 			})}
 			field="risk_scenarios"
+			cacheLock={cacheLocks["risk_scenarios"]}
+			bind:cachedValue={formDataCache["risk_scenarios"]}
 			label={m.riskScenarios()}
 			helpText={m.riskAcceptanceRiskScenariosHelpText()}
 			multiple
@@ -323,6 +366,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
@@ -342,6 +387,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.applied_controls || initialData.requirement_assessments}
 		/>
@@ -351,6 +398,8 @@
 			{form}
 			hide={context !== 'fromBaseline' || initialData.baseline}
 			field="baseline"
+			cacheLock={cacheLocks["baseline"]}
+			bind:cachedValue={formDataCache["baseline"]}
 			label={m.baseline()}
 			options={getOptions({ objects: model.foreignKeys['baseline'] })}
 		/>
@@ -361,6 +410,8 @@
 				extra_fields: [['folder', 'str']]
 			})}
 			field="project"
+			cacheLock={cacheLocks["project"]}
+			bind:cachedValue={formDataCache["project"]}
 			label={m.project()}
 			hide={initialData.project}
 		/>
@@ -371,6 +422,8 @@
 			disabled={object.id}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
 			field="framework"
+			cacheLock={cacheLocks["framework"]}
+			bind:cachedValue={formDataCache["framework"]}
 			label={m.framework()}
 			on:change={async (e) => {
 				if (e.detail) {
@@ -392,6 +445,8 @@
 				{form}
 				options={model.selectOptions['selected_implementation_groups']}
 				field="selected_implementation_groups"
+				cacheLock={cacheLocks["selected_implementation_groups"]}
+				bind:cachedValue={formDataCache["selected_implementation_groups"]}
 				label={m.selectedImplementationGroups()}
 			/>
 		{/if}
@@ -400,6 +455,8 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
 			field="authors"
+			cacheLock={cacheLocks["authors"]}
+			bind:cachedValue={formDataCache["authors"]}
 			label={m.authors()}
 		/>
 		<AutocompleteSelect
@@ -407,6 +464,8 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
 			field="reviewers"
+			cacheLock={cacheLocks["reviewers"]}
+			bind:cachedValue={formDataCache["reviewers"]}
 			label={m.reviewers()}
 		/>
 		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} bind:cachedValue={formDataCache["eta"]} />
@@ -424,6 +483,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
+			cacheLock={cacheLocks["folder"]}
+			bind:cachedValue={formDataCache["folder"]}
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
@@ -434,6 +495,8 @@
 			{form}
 			options={getOptions({ objects: model.foreignKeys['parent_assets'], self: object })}
 			field="parent_assets"
+			cacheLock={cacheLocks["parent_assets"]}
+			bind:cachedValue={formDataCache["parent_assets"]}
 			label={m.parentAssets()}
 		/>
 	{:else if URLModel === 'requirement-assessments'}
@@ -455,6 +518,8 @@
 				multiple
 				options={getOptions({ objects: model.foreignKeys['user_groups'] })}
 				field="user_groups"
+				cacheLock={cacheLocks["user_groups"]}
+				bind:cachedValue={formDataCache["user_groups"]}
 				label={m.userGroups()}
 			/>
 		{/if}
@@ -468,6 +533,8 @@
 				{form}
 				hide={model.selectOptions['provider'].length < 2}
 				field="provider"
+				cacheLock={cacheLocks["provider"]}
+				bind:cachedValue={formDataCache["provider"]}
 				options={model.selectOptions['provider']}
 				label={m.provider()}
 				disabled={!data.is_enabled}
