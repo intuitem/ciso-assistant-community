@@ -1,7 +1,7 @@
 import { test, expect, type Locator } from '../../utils/test-utils.js';
 
 test.describe.configure({ mode: 'serial' });
-test('the first half of libraries can be loaded', async ({ librariesPage, page }) => {
+test('the first half of libraries can be loaded', async ({ logedPage, librariesPage, page }) => {
 	test.slow();
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
@@ -29,7 +29,7 @@ test('the first half of libraries can be loaded', async ({ librariesPage, page }
 	}
 });
 
-test('the last half of libraries can be loaded', async ({ librariesPage, page }) => {
+test('the last half of libraries can be loaded', async ({ logedPage, librariesPage, page }) => {
 	test.slow();
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
