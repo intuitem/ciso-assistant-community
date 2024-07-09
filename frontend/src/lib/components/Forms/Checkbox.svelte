@@ -5,14 +5,19 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
+	// The cachedValue isn't used in the ModelForm because we don't need it yet
+	export let cachedValue: boolean | undefined = undefined;
 
 	label = label ?? field;
 
 	export let form;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-
-	$: boolValue = value as Writable<boolean>;
+	$: if (cachedValue !== undefined) {
+		value.set(cachedValue);
+	} else {
+		cachedValue = $value;
+	}
 
 	$: classesHidden = (hidden: boolean) => (hidden ? 'hidden' : '');
 	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
@@ -39,7 +44,7 @@
 				type="checkbox"
 				class="checkbox"
 				data-testid="form-input-{field.replaceAll('_', '-')}"
-				bind:checked={$boolValue}
+				bind:checked={cachedValue}
 				{...$constraints}
 				{...$$restProps}
 				disabled={$$props.disabled}
