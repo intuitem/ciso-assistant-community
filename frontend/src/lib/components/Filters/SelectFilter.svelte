@@ -12,8 +12,6 @@
 
 	export let multiple = true;
 
-	export let option;
-
 	export let hide = false;
 	export let translateOptions = true;
 
