@@ -10,10 +10,12 @@
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 	export let form;
+	export let cachedValue: string = "";
 
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	$: value.set(cachedValue);
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 </script>
@@ -42,7 +44,7 @@
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			bind:value={$value}
+			bind:value={cachedValue}
 			{...$constraints}
 			{...$$restProps}
 			rows="5"

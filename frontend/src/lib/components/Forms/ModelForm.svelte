@@ -26,6 +26,7 @@
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let context = 'default';
+	export let caching: boolean = false;
 	export let closeModal = false;
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
@@ -46,7 +47,17 @@
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
 
+	let formDataCache: {[key: string]: any} = {};
+
+	let _sessionStorage = null;
 	onMount(() => {
+		if (caching) {
+			_sessionStorage = sessionStorage;
+			const data = JSON.parse(sessionStorage.getItem("model_form_cache") ?? '{}');
+			const modelData = data[model.name] ?? {};
+			formDataCache = {...modelData};
+		}
+
 		if (shape.reference_control) {
 			const reference_control_input: HTMLElement | null = document.querySelector(
 				`div.multiselect[role="searchbox"] input`
@@ -54,6 +65,12 @@
 			reference_control_input?.focus();
 		}
 	});
+
+	$: if (caching && _sessionStorage && formDataCache) {
+		const data = JSON.parse(_sessionStorage.getItem("model_form_cache") ?? '{}');
+		data[model.name] = formDataCache;
+		_sessionStorage.setItem("model_form_cache", JSON.stringify(data));
+	}
 </script>
 
 <SuperForm
@@ -104,10 +121,10 @@
 		/>
 	{/if}
 	{#if shape.name}
-		<TextField {form} field="name" label={m.name()} data-focusindex="0" />
+		<TextField {form} field="name" label={m.name()} bind:cachedValue={formDataCache["name"]} data-focusindex="0" />
 	{/if}
 	{#if shape.description}
-		<TextArea {form} field="description" label={m.description()} data-focusindex="1" />
+		<TextArea {form} field="description" label={m.description()} bind:cachedValue={formDataCache["description"]} data-focusindex="1" />
 	{/if}
 	{#if URLModel === 'projects'}
 		<AutocompleteSelect
@@ -117,12 +134,13 @@
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
-		<TextField {form} field="internal_reference" label={m.internalReference()} />
+		<TextField {form} field="internal_reference" label={m.internalReference()} bind:cachedValue={formDataCache["internal_reference"]} />
 		<Select
 			{form}
 			options={model.selectOptions['lc_status']}
 			field="lc_status"
 			label={m.lcStatus()}
+			bind:cachedValue={formDataCache["lc_status"]}
 		/>
 	{:else if URLModel === 'risk-assessments'}
 		<AutocompleteSelect
@@ -135,8 +153,8 @@
 			label={m.project()}
 			hide={initialData.project}
 		/>
-		<TextField {form} field="version" label={m.version()} />
-		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
+		<TextField {form} field="version" label={m.version()} bind:cachedValue={formDataCache["version"]} />
+		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} bind:cachedValue={formDataCache["status"]} />
 		<AutocompleteSelect
 			{form}
 			disabled={object.id}
@@ -159,16 +177,17 @@
 			field="reviewers"
 			label={m.reviewers()}
 		/>
-		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} />
+		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} bind:cachedValue={formDataCache["eta"]} />
 		<TextField
 			type="date"
 			{form}
 			field="due_date"
 			label={m.dueDate()}
 			helpText={m.dueDateHelpText()}
+			bind:cachedValue={formDataCache["due_date"]}
 		/>
 	{:else if URLModel === 'threats'}
-		<TextField {form} field="ref_id" label={m.ref()} />
+		<TextField {form} field="ref_id" label={m.ref()} bind:cachedValue={formDataCache["ref_id"]} />
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -176,7 +195,7 @@
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
-		<TextField {form} field="provider" label={m.provider()} />
+		<TextField {form} field="provider" label={m.provider()} bind:cachedValue={formDataCache["provider"]} />
 	{:else if URLModel === 'risk-scenarios'}
 		<AutocompleteSelect
 			{form}
@@ -206,9 +225,10 @@
 				options={model.selectOptions['category']}
 				field="category"
 				label={m.category()}
+				bind:cachedValue={formDataCache["category"]}
 			/>
 		{/if}
-		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
+		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} bind:cachedValue={formDataCache["status"]} />
 		<AutocompleteSelect
 			{form}
 			multiple
@@ -219,21 +239,23 @@
 			field="evidences"
 			label={m.evidences()}
 		/>
-		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} />
+		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} bind:cachedValue={formDataCache["eta"]} />
 		<TextField
 			type="date"
 			{form}
 			field="expiry_date"
 			label={m.expiryDate()}
 			helpText={m.expiryDateHelpText()}
+			bind:cachedValue={formDataCache["expiry_date"]}
 		/>
-		<TextField {form} field="link" label={m.link()} helpText={m.linkHelpText()} />
+		<TextField {form} field="link" label={m.link()} helpText={m.linkHelpText()} bind:cachedValue={formDataCache["link"]} />
 		<Select
 			{form}
 			options={model.selectOptions['effort']}
 			field="effort"
 			label={m.effort()}
 			helpText={m.effortHelpText()}
+			bind:cachedValue={formDataCache["effort"]}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -249,6 +271,7 @@
 			field="expiry_date"
 			label={m.expiryDate()}
 			helpText={m.expiryDateHelpText()}
+			bind:cachedValue={formDataCache["expiry_date"]}
 		/>
 		{#if object.id && $page.data.user.id === object.approver}
 			<TextArea
@@ -257,6 +280,7 @@
 				field="justification"
 				label={m.justification()}
 				helpText={m.riskAcceptanceJusitficationHelpText()}
+				bind:cachedValue={formDataCache["justification"]}
 			/>
 		{/if}
 		<AutocompleteSelect
@@ -285,15 +309,16 @@
 			multiple
 		/>
 	{:else if URLModel === 'reference-controls'}
-		<TextField {form} field="ref_id" label={m.ref()} />
+		<TextField {form} field="ref_id" label={m.ref()} bind:cachedValue={formDataCache["ref_id"]} />
 		<Select
 			{form}
 			options={model.selectOptions['category']}
 			field="category"
 			label={m.category()}
+			bind:cachedValue={formDataCache["category"]}
 		/>
-		<TextArea {form} field="annotation" label={m.annotation()} />
-		<TextField {form} field="provider" label={m.provider()} />
+		<TextArea {form} field="annotation" label={m.annotation()} bind:cachedValue={formDataCache["annotation"]} />
+		<TextField {form} field="provider" label={m.provider()} bind:cachedValue={formDataCache["provider"]} />
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -320,7 +345,7 @@
 			label={m.domain()}
 			hide={initialData.applied_controls || initialData.requirement_assessments}
 		/>
-		<TextField {form} field="link" label={m.link()} helpText={m.linkHelpText()} />
+		<TextField {form} field="link" label={m.link()} helpText={m.linkHelpText()} bind:cachedValue={formDataCache["link"]} />
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
 			{form}
@@ -339,8 +364,8 @@
 			label={m.project()}
 			hide={initialData.project}
 		/>
-		<TextField {form} field="version" label={m.version()} />
-		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
+		<TextField {form} field="version" label={m.version()} bind:cachedValue={formDataCache["version"]} />
+		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} bind:cachedValue={formDataCache["status"]} />
 		<AutocompleteSelect
 			{form}
 			disabled={object.id}
@@ -384,16 +409,17 @@
 			field="reviewers"
 			label={m.reviewers()}
 		/>
-		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} />
+		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} bind:cachedValue={formDataCache["eta"]} />
 		<TextField
 			type="date"
 			{form}
 			field="due_date"
 			label={m.dueDate()}
 			helpText={m.dueDateHelpText()}
+			bind:cachedValue={formDataCache["due_date"]}
 		/>
 	{:else if URLModel === 'assets'}
-		<TextArea {form} field="business_value" label={m.businessValue()} />
+		<TextArea {form} field="business_value" label={m.businessValue()} bind:cachedValue={formDataCache["business_value"]} />
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -401,7 +427,7 @@
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
-		<Select {form} options={model.selectOptions['type']} field="type" label="Type" />
+		<Select {form} options={model.selectOptions['type']} field="type" label="Type" bind:cachedValue={formDataCache["type"]} />
 		<AutocompleteSelect
 			disabled={data.type === 'PR'}
 			multiple
@@ -411,17 +437,17 @@
 			label={m.parentAssets()}
 		/>
 	{:else if URLModel === 'requirement-assessments'}
-		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
-		<Select {form} options={model.selectOptions['result']} field="result" label={m.result()} />
-		<TextArea {form} field="observation" label={m.observation()} />
+		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} bind:cachedValue={formDataCache["status"]} />
+		<Select {form} options={model.selectOptions['result']} field="result" label={m.result()} bind:cachedValue={formDataCache["result"]} />
+		<TextArea {form} field="observation" label={m.observation()} bind:cachedValue={formDataCache["observation"]} />
 		<HiddenInput {form} field="folder" />
 		<HiddenInput {form} field="requirement" />
 		<HiddenInput {form} field="compliance_assessment" />
 	{:else if URLModel === 'users'}
-		<TextField {form} field="email" label={m.email()} data-focusindex="2" />
+		<TextField {form} field="email" label={m.email()} bind:cachedValue={formDataCache["email"]} data-focusindex="2" />
 		{#if shape.first_name && shape.last_name}
-			<TextField {form} field="first_name" label={m.firstName()} />
-			<TextField {form} field="last_name" label={m.lastName()} />
+			<TextField {form} field="first_name" label={m.firstName()} bind:cachedValue={formDataCache["first_name"]} />
+			<TextField {form} field="last_name" label={m.lastName()} bind:cachedValue={formDataCache["last_name"]} />
 		{/if}
 		{#if shape.user_groups}
 			<AutocompleteSelect
@@ -450,13 +476,14 @@
 				<AccordionItem open>
 					<svelte:fragment slot="summary">{m.IdPConfiguration()}</svelte:fragment>
 					<svelte:fragment slot="content">
-						<TextField {form} field="provider_name" label={m.name()} disabled={!data.is_enabled} />
+						<TextField {form} field="provider_name" label={m.name()} disabled={!data.is_enabled} bind:cachedValue={formDataCache["provider_name"]} />
 						<TextField
 							hidden
 							{form}
 							field="provider_id"
 							label={m.providerID()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["provider_id"]}
 						/>
 						<TextField
 							{form}
@@ -464,6 +491,7 @@
 							label={m.clientID()}
 							helpText={m.clientIDHelpText()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["client_id"]}
 						/>
 						{#if data.provider !== 'saml'}
 							<TextField
@@ -472,8 +500,9 @@
 								label={m.secret()}
 								helpText={m.secretHelpText()}
 								disabled={!data.is_enabled}
+								bind:cachedValue={formDataCache["secret"]}
 							/>
-							<TextField {form} field="key" label={m.key()} disabled={!data.is_enabled} />
+							<TextField {form} field="key" label={m.key()} disabled={!data.is_enabled} bind:cachedValue={formDataCache["key"]} />
 						{/if}
 					</svelte:fragment>
 				</AccordionItem>
@@ -490,6 +519,7 @@
 							label={m.IdPEntityID()}
 							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["idp_entity_id"]}
 						/>
 						<TextField
 							{form}
@@ -497,6 +527,7 @@
 							label={m.metadataURL()}
 							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["metadata_url"]}
 						/>
 						<TextField
 							hidden
@@ -504,6 +535,7 @@
 							field="sso_url"
 							label={m.SSOURL()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["sso_url"]}
 						/>
 						<TextField
 							hidden
@@ -511,6 +543,7 @@
 							field="slo_url"
 							label={m.SLOURL()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["slo_url"]}
 						/>
 						<TextArea
 							hidden
@@ -518,6 +551,7 @@
 							field="x509cert"
 							label={m.x509Cert()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["x509cert"]}
 						/>
 					</svelte:fragment>
 				</AccordionItem>
@@ -533,6 +567,7 @@
 							label={m.SPEntityID()}
 							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["sp_entity_id"]}
 						/>
 					</svelte:fragment>
 				</AccordionItem>
@@ -547,18 +582,21 @@
 							field="attribute_mapping_uid"
 							label={m.attributeMappingUID()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["attribute_mapping_uid"]}
 						/>
 						<TextField
 							{form}
 							field="attribute_mapping_email_verified"
 							label={m.attributeMappingEmailVerified()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["attribute_mapping_email_verified"]}
 						/>
 						<TextField
 							{form}
 							field="attribute_mapping_email"
 							label={m.attributeMappingEmail()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["attribute_mapping_email"]}
 						/>
 
 						<Checkbox
@@ -586,6 +624,7 @@
 							hidden
 							label={m.digestAlgorithm()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["digest_algorithm"]}
 						/>
 						<Checkbox
 							{form}
@@ -634,6 +673,7 @@
 							hidden
 							label={m.signatureAlgorithm()}
 							disabled={!data.is_enabled}
+							bind:cachedValue={formDataCache["signature_algorithm"]}
 						/>
 						<Checkbox
 							{form}

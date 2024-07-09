@@ -7,12 +7,14 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
+	export let cachedValue: string = "";
 
 	export let form;
 
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	$: value.set(cachedValue);
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
@@ -44,7 +46,7 @@
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			bind:value={$value}
+			bind:value={cachedValue}
 			{...$constraints}
 			{...$$restProps}
 		/>
