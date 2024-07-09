@@ -1503,27 +1503,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
 
-    @action(detail=True, methods=["post"])
-    def compute_mapping(self, request, pk):
-        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
-        serializer = ComputeMappingSerializer(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        mapping_set = RequirementMappingSet.objects.get(
-            id=serializer.data["mapping_set"]
-        )
-        source_assessment = ComplianceAssessment.objects.get(
-            id=serializer.data["source_assessment"]
-        )
-        for (
-            requirement_assessment
-        ) in compliance_assessment.compute_requirement_assessments_results(
-            mapping_set, source_assessment
-        ):
-            requirement_assessment.save()
-        return Response(status=status.HTTP_200_OK)
-
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
