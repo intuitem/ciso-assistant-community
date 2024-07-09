@@ -343,7 +343,11 @@
 									options={getOptions({ objects: data.model.foreignKeys['applied_controls'] })}
 									field="applied_controls"
 								/>
-								<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
+								<ModelTable
+									source={data.tables['applied-controls']}
+									hideFilters={true}
+									URLModel="applied-controls"
+								/>
 							</div>
 						{/if}
 						{#if tabSet === 1}
@@ -367,7 +371,11 @@
 									options={getOptions({ objects: data.model.foreignKeys['evidences'] })}
 									field="evidences"
 								/>
-								<ModelTable source={data.tables['evidences']} URLModel="evidences" />
+								<ModelTable
+									source={data.tables['evidences']}
+									hideFilters={true}
+									URLModel="evidences"
+								/>
 							</div>
 						{/if}
 					</svelte:fragment>
