@@ -126,7 +126,10 @@
 	$: hasRows = data.length > 0;
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters = listViewFields[tableURLModel].filters ?? {};
+	const filters =
+        tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+            ? listViewFields[tableURLModel].filters
+            : {};
 	const filteredFields = Object.keys(filters).filter(
 		(key) => columnFields.has(key) || filters[key].alwaysDisplay
 	);
@@ -155,6 +158,7 @@
 			);
 		}
 	}
+	
 
 	let allowOptionsUpdate = true;
 	allRows.subscribe((rows) => {
