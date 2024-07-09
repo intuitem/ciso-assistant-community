@@ -15,931 +15,931 @@ objects:
     urn: urn:intuitem:risk:requirement_mapping_set:nist-csf-1.1-to-nist-csf-2.0
     ref_id: mapping-nist-csf-1.1-nist-csf-2.0
     name: mapping-nist-csf-1.1-nist-csf-2.0
-    focal_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
-    reference_framework_urn: urn:intuitem:risk:framework:nist-csf-1.1
+    source_framework_urn: urn:intuitem:risk:framework:nist-csf-1.1
+    target_framework_urn: urn:intuitem:risk:framework:nist-csf-2.0
     requirement_mappings:
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-11
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-11
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.po-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-8
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-8
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-9
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-9
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-10
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-07
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-07
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-5
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-5
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-3
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-3
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-1
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-1
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04
       relationship: intersect
       rationale: semantic
       annotation: ''
-    - reference_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
-      focal_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04
+    - source_requirement_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
+      target_requirement_urn: urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04
       relationship: intersect
       rationale: semantic
       annotation: ''

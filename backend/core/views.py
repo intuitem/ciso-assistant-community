@@ -1103,17 +1103,17 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         return Response({"results": used_frameworks})
 
-    @action(detail=True, methods=["get"], name="Get focal frameworks from mappings")
+    @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
     def mappings(self, request, pk):
         framework = self.get_object()
-        available_focal_frameworks_objects = [framework]
-        mappings = RequirementMappingSet.objects.filter(reference_framework=framework)
+        available_target_frameworks_objects = [framework]
+        mappings = RequirementMappingSet.objects.filter(source_framework=framework)
         for mapping in mappings:
-            available_focal_frameworks_objects.append(mapping.focal_framework)
-        available_focal_frameworks = FrameworkReadSerializer(
-            available_focal_frameworks_objects, many=True
+            available_target_frameworks_objects.append(mapping.target_framework)
+        available_target_frameworks = FrameworkReadSerializer(
+            available_target_frameworks_objects, many=True
         ).data
-        return Response({"results": available_focal_frameworks})
+        return Response({"results": available_target_frameworks})
 
 
 class RequirementNodeViewSet(BaseModelViewSet):
@@ -1353,8 +1353,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirement_assessment.save()
         if baseline and baseline.framework != instance.framework:
             mapping_set = RequirementMappingSet.objects.get(
-                focal_framework=serializer.validated_data["framework"],
-                reference_framework=baseline.framework,
+                target_framework=serializer.validated_data["framework"],
+                source_framework=baseline.framework,
             )
             for (
                 requirement_assessment
@@ -1363,7 +1363,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ):
                 baseline_requirement_assessment = RequirementAssessment.objects.get(
                     id=requirement_assessment.mapping_inference[
-                        "reference_requirement_assessment"
+                        "source_requirement_assessment"
                     ]["id"]
                 )
                 requirement_assessment.evidences.add(
@@ -1503,27 +1503,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
 
-    @action(detail=True, methods=["post"])
-    def compute_mapping(self, request, pk):
-        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
-        serializer = ComputeMappingSerializer(
-            data=request.data, context={"request": request}
-        )
-        serializer.is_valid(raise_exception=True)
-        mapping_set = RequirementMappingSet.objects.get(
-            id=serializer.data["mapping_set"]
-        )
-        reference_assessment = ComplianceAssessment.objects.get(
-            id=serializer.data["reference_assessment"]
-        )
-        for (
-            requirement_assessment
-        ) in compliance_assessment.compute_requirement_assessments_results(
-            mapping_set, reference_assessment
-        ):
-            requirement_assessment.save()
-        return Response(status=status.HTTP_200_OK)
-
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
@@ -1611,7 +1590,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
-    filterset_fields = ["focal_framework", "reference_framework"]
+    filterset_fields = ["target_framework", "source_framework"]
 
 
 @api_view(["GET"])
