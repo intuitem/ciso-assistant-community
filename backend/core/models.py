@@ -455,7 +455,7 @@ class LibraryUpdater:
                     )
                     if (
                         reference_control_to_add is None
-                    ):  # I am not 100% this condition is usefull
+                    ):  # I am not 100% this condition is useful
                         reference_control_to_add = ReferenceControl.objects.filter(
                             urn=reference_control_urn.lower()
                         ).first()  # No locale support
@@ -860,24 +860,22 @@ class RequirementMappingSet(ReferentialObjectMixin):
         related_name="requirement_mapping_sets",
     )
 
-    reference_framework = models.ForeignKey(
+    source_framework = models.ForeignKey(
         Framework,
         on_delete=models.CASCADE,
-        verbose_name=_("Reference framework"),
-        related_name="reference_framework",
+        verbose_name=_("Source framework"),
+        related_name="source_framework",
     )
-    focal_framework = models.ForeignKey(
+    target_framework = models.ForeignKey(
         Framework,
         on_delete=models.CASCADE,
-        verbose_name=_("Focal framework"),
-        related_name="focal_framework",
+        verbose_name=_("Target framework"),
+        related_name="target_framework",
     )
 
     def save(self, *args, **kwargs) -> None:
-        if self.reference_framework == self.focal_framework:
-            raise ValidationError(
-                _("Reference and related frameworks must be different")
-            )
+        if self.source_framework == self.target_framework:
+            raise ValidationError(_("Source and related frameworks must be different"))
         return super().save(*args, **kwargs)
 
 
@@ -901,12 +899,12 @@ class RequirementMapping(models.Model):
 
     FULL_COVERAGE_RELATIONSHIPS = [
         Relationship.EQUAL,
-        Relationship.SUBSET,
+        Relationship.SUPERSET,
     ]
 
     PARTIAL_COVERAGE_RELATIONSHIPS = [
         Relationship.INTERSECT,
-        Relationship.SUPERSET,
+        Relationship.SUBSET,
     ]
 
     mapping_set = models.ForeignKey(
@@ -915,11 +913,11 @@ class RequirementMapping(models.Model):
         verbose_name=_("Mapping set"),
         related_name="mappings",
     )
-    focal_requirement = models.ForeignKey(
+    target_requirement = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
-        verbose_name=_("Focal requirement"),
-        related_name="focal_requirement",
+        verbose_name=_("Target requirement"),
+        related_name="target_requirement",
     )
     relationship = models.CharField(
         max_length=20,
@@ -934,11 +932,11 @@ class RequirementMapping(models.Model):
         choices=Rationale.choices,
         verbose_name=_("Rationale"),
     )
-    reference_requirement = models.ForeignKey(
+    source_requirement = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
-        verbose_name=_("Reference requirement"),
-        related_name="reference_requirement",
+        verbose_name=_("Source requirement"),
+        related_name="source_requirement",
     )
     strength_of_relationship = models.PositiveSmallIntegerField(
         null=True,
@@ -2133,7 +2131,7 @@ class ComplianceAssessment(Assessment):
         return findings
 
     def compute_requirement_assessments_results(
-        self, mapping_set: RequirementMappingSet, reference_assessment: Self
+        self, mapping_set: RequirementMappingSet, source_assessment: Self
     ) -> list["RequirementAssessment"]:
         requirement_assessments: list[RequirementAssessment] = []
         result_order = (
@@ -2143,7 +2141,7 @@ class ComplianceAssessment(Assessment):
         )
         for requirement_assessment in self.requirement_assessments.all():
             mappings = mapping_set.mappings.filter(
-                focal_requirement=requirement_assessment.requirement
+                target_requirement=requirement_assessment.requirement
             )
             inferences = []
             refs = []
@@ -2154,17 +2152,17 @@ class ComplianceAssessment(Assessment):
                     relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
                 )
             for mapping in mappings:
-                reference_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=reference_assessment,
-                    requirement=mapping.reference_requirement,
+                source_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=source_assessment,
+                    requirement=mapping.source_requirement,
                 )
                 inferred_result, inferred_status = requirement_assessment.infer_result(
                     mapping=mapping,
-                    reference_requirement_assessment=reference_requirement_assessment,
+                    source_requirement_assessment=source_requirement_assessment,
                 )
                 if inferred_result in result_order:
                     inferences.append((inferred_result, inferred_status))
-                    refs.append(reference_requirement_assessment)
+                    refs.append(source_requirement_assessment)
             if inferences:
                 if len(inferences) == 1:
                     requirement_assessment.result = inferences[0][0]
@@ -2181,7 +2179,7 @@ class ComplianceAssessment(Assessment):
                     ref = refs[inferences.index(lowest_result)]
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
-                    "reference_requirement_assessment": {
+                    "source_requirement_assessment": {
                         "str": str(ref),
                         "id": str(ref.id),
                         "coverage": mapping.coverage,
@@ -2265,21 +2263,21 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return self.requirement.description
 
     def infer_result(
-        self, mapping: RequirementMapping, reference_requirement_assessment: Self
+        self, mapping: RequirementMapping, source_requirement_assessment: Self
     ) -> str | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
             return (
-                reference_requirement_assessment.result,
-                reference_requirement_assessment.status,
+                source_requirement_assessment.result,
+                source_requirement_assessment.status,
             )
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
-            if reference_requirement_assessment.result in (
+            if source_requirement_assessment.result in (
                 RequirementAssessment.Result.COMPLIANT,
                 RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             ):
                 return (RequirementAssessment.Result.PARTIALLY_COMPLIANT, None)
             if (
-                reference_requirement_assessment.result
+                source_requirement_assessment.result
                 == RequirementAssessment.Result.NON_COMPLIANT
             ):
                 return (RequirementAssessment.Result.NON_COMPLIANT, None)

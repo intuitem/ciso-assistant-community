@@ -85,7 +85,11 @@ class RequirementNodeImporter:
 
 
 class RequirementMappingImporter:
-    REQUIRED_FIELDS = {"focal_requirement", "relationship", "reference_requirement"}
+    REQUIRED_FIELDS = {
+        "target_requirement_urn",
+        "relationship",
+        "source_requirement_urn",
+    }
 
     def __init__(self, data: dict):
         self.data = data
@@ -102,30 +106,30 @@ class RequirementMappingImporter:
         mapping_set: RequirementMappingSet,
     ):
         try:
-            focal_requirement = RequirementNode.objects.get(
-                urn=self.data["focal_requirement"], default_locale=True
+            target_requirement = RequirementNode.objects.get(
+                urn=self.data["target_requirement_urn"], default_locale=True
             )
         except RequirementNode.DoesNotExist:
             raise Http404(
-                "ERROR: Focal requirement with URN {} does not exist".format(
-                    self.data["focal_requirement"]
+                "ERROR: target requirement with URN {} does not exist".format(
+                    self.data["target_requirement"]
                 )
             )
 
         try:
-            reference_requirement = RequirementNode.objects.get(
-                urn=self.data["reference_requirement"], default_locale=True
+            source_requirement = RequirementNode.objects.get(
+                urn=self.data["source_requirement_urn"], default_locale=True
             )
         except RequirementNode.DoesNotExist:
             raise Http404(
-                "ERROR: Reference requirement with URN {} does not exist".format(
-                    self.data["reference_requirement"]
+                "ERROR: source requirement with URN {} does not exist".format(
+                    self.data["source_requirement"]
                 )
             )
         return RequirementMapping.objects.create(
             mapping_set=mapping_set,
-            focal_requirement=focal_requirement,
-            reference_requirement=reference_requirement,
+            target_requirement=target_requirement,
+            source_requirement=source_requirement,
             relationship=self.data["relationship"],
             annotation=self.data.get("annotation"),
             strength_of_relationship=self.data.get("strength_of_relationship"),
@@ -160,17 +164,17 @@ class RequirementMappingSetImporter:
         library_object: LoadedLibrary,
     ):
         self.init_requirement_mappings(self.data["requirement_mappings"])
-        _focal_framework = Framework.objects.get(
-            urn=self.data["focal_framework"], default_locale=True
+        _target_framework = Framework.objects.get(
+            urn=self.data["target_framework_urn"], default_locale=True
         )
-        _reference_framework = Framework.objects.get(
-            urn=self.data["reference_framework"], default_locale=True
+        _source_framework = Framework.objects.get(
+            urn=self.data["source_framework_urn"], default_locale=True
         )
         mapping_set = RequirementMappingSet.objects.create(
             name=self.data["name"],
             urn=self.data["urn"],
-            focal_framework=_focal_framework,
-            reference_framework=_reference_framework,
+            target_framework=_target_framework,
+            source_framework=_source_framework,
             library=library_object,
         )
         for mapping in self._requirement_mappings:
