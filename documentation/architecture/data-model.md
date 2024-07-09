@@ -304,7 +304,7 @@ erDiagram
 
 ```
 
-### Requirement mappings (crosswalk)
+### Requirement mappings
 
 ```mermaid
 erDiagram
