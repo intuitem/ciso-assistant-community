@@ -94,6 +94,8 @@
 	export let detailQueryParameter: string | undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
+	export let hideFilters = false;
+
 	const user = $page.data.user;
 
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
@@ -137,7 +139,6 @@
 	const filterProps: {
 		[key: string]: { [key: string]: any };
 	} = {};
-	let displayFilters = false;
 
 	function defaultFilterProps(rows, field: string) {
 		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
@@ -223,7 +224,7 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if filteredFields.length > 0 && hasRows}
+		{#if filteredFields.length > 0 && hasRows && !hideFilters}
 			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
