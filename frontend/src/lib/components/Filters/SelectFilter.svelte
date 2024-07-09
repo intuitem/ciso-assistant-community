@@ -7,7 +7,7 @@
 	export let helpText: string | undefined = undefined;
 
 	export let defaultOptionName = 'undefined';
-	export let label: string | undefined = defaultOptionName;
+	export let label: string = defaultOptionName;
 	export let optionLabels: { [key: string]: string } = {};
 
 	export let multiple = true;
@@ -34,7 +34,7 @@
 
 <div hidden={hide}>
 	<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
-	<div class="control" data-testid="form-input-{field.replaceAll('_', '-')}">
+	<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
 		{#if options.length > 0}
 			<MultiSelect bind:value {options} {...multiSelectOptions} {...$$restProps} let:option>
 				{#if translateOptions && Object.hasOwn(m, option)}
