@@ -170,7 +170,11 @@
 		<div class="flex flex-col w-1/2">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<p class="text-sm font-semibold text-gray-400">{m.appliedControls()}</p>
-			<ModelTable source={data.tables['applied-controls']} hideFilters={true} URLModel="applied-controls" />
+			<ModelTable
+				source={data.tables['applied-controls']}
+				hideFilters={true}
+				URLModel="applied-controls"
+			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">
 			<p class="flex flex-col">
