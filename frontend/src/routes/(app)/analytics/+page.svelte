@@ -222,6 +222,7 @@
 						<ModelTable
 							URLModel="applied-controls"
 							source={appliedControlTodoTable}
+							hideFilters={true}
 							search={false}
 							rowsPerPage={false}
 							orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
@@ -245,6 +246,7 @@
 							<ModelTable
 								source={appliedControlWatchlistTable}
 								URLModel="applied-controls"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -254,6 +256,7 @@
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
 								URLModel="risk-acceptances"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -368,20 +371,22 @@
 										<DonutChart
 											s_label={m.complianceAssessments()}
 											name={compliance_assessment.name + '_donut'}
-											values={compliance_assessment.donut.values}
+											values={compliance_assessment.donut.result.values}
 										/>
 									</div>
-									<div class="absolute top-0 right-0 mt-2 space-x-1">
-										<a
-											href="/compliance-assessments/{compliance_assessment.id}/export"
-											class="btn variant-filled-primary"
-											><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
-										</a>
-										<a
-											href="/compliance-assessments/{compliance_assessment.id}/edit"
-											class="btn variant-filled-primary"
-											><i class="fa-solid fa-edit mr-2" /> {m.edit()}
-										</a>
+									<div class="absolute top-2 right-4 mt-2 space-x-1">
+										<div class="flex flex-col space-y-1">
+											<a
+												href="/compliance-assessments/{compliance_assessment.id}/edit"
+												class="btn variant-filled-primary"
+												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
+											</a>
+											<a
+												href="/compliance-assessments/{compliance_assessment.id}/export"
+												class="btn variant-filled-primary"
+												><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+											</a>
+										</div>
 									</div>
 								</div>
 							{/each}

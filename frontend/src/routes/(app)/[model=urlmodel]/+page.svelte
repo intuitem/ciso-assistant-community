@@ -6,11 +6,11 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { checkConstraints } from '$lib/utils/crud';
 
 	export let data: PageData;
+	$: URLModel = data.URLModel;
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -26,7 +26,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.model.localName)]
+			title: m['add' + capitalizeFirstLetter(data.model.localName)]()
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -36,7 +36,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: localItems()['add' + capitalizeFirstLetter(data.model.localName)].toLowerCase(),
+				body: m['add' + capitalizeFirstLetter(data.model.localName)]().toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
@@ -46,26 +46,28 @@
 
 {#if data.table}
 	<div class="shadow-lg">
-		<ModelTable source={data.table} deleteForm={data.deleteForm} URLModel={data.URLModel}>
-			<div slot="addButton">
-				{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(data.URLModel)}
-					<button
-						class="btn variant-filled-primary self-end"
-						data-testid="add-button"
-						on:click={modalCreateForm}
-						><i class="fa-solid fa-plus mr-2" />
-						{localItems()['add' + capitalizeFirstLetter(data.model.localName)]}
-					</button>
-				{:else if data.URLModel === 'risk-matrices'}
-					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-						><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
-					>
-				{:else if data.URLModel === 'frameworks'}
-					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-						><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
-					>
-				{/if}
-			</div>
-		</ModelTable>
+		{#key URLModel}
+			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+				<div slot="addButton">
+					{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(URLModel)}
+						<button
+							class="btn variant-filled-primary self-end"
+							data-testid="add-button"
+							on:click={modalCreateForm}
+							><i class="fa-solid fa-plus mr-2" />
+							{m['add' + capitalizeFirstLetter(data.model.localName)]()}
+						</button>
+					{:else if URLModel === 'risk-matrices'}
+						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+							><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
+						>
+					{:else if URLModel === 'frameworks'}
+						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+							><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
+						>
+					{/if}
+				</div>
+			</ModelTable>
+		{/key}
 	</div>
 {/if}

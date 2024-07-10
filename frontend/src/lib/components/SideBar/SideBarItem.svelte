@@ -1,14 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
 
 	export let item: any; // TODO: type this
-
-	const modalStore = getModalStore();
 
 	$: classesActive = (href: string) =>
 		href === $page.url.pathname
@@ -26,7 +20,7 @@
 	>
 		<span class="px-4 flex items-center w-full space-x-2 text-xs">
 			<i class="{item.fa_icon} w-1/12" />
-			<span class="text-sm tracking-wide truncate">{localItems()[item.name]}</span>
+			<span class="text-sm tracking-wide truncate">{m[item.name]() ?? item.name}</span>
 		</span></a
 	>
 {/each}

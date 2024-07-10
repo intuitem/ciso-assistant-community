@@ -13,8 +13,8 @@ from iam.models import Folder
 from test_utils import EndpointTestsQueries
 
 # Generic requirement assessment data for tests
-REQUIREMENT_ASSESSMENT_STATUS = "partially_compliant"
-REQUIREMENT_ASSESSMENT_STATUS2 = "non_compliant"
+REQUIREMENT_ASSESSMENT_STATUS = "to_do"
+REQUIREMENT_ASSESSMENT_STATUS2 = "in_progress"
 REQUIREMENT_ASSESSMENT_OBSERVATION = "Test observation"
 
 

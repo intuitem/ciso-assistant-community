@@ -1,0 +1,693 @@
+urn: urn:intuitem:risk:library:mapping-iso27001-2013-to-iso27001-2022
+locale: en
+ref_id: mapping-iso27001-2013-to-iso27001-2022
+name: ISO/IEC 27001:2013 -> ISO/IEC 27001:2022
+description: Mapping from International standard ISO/IEC 27001:2013 to International
+  standard ISO/IEC 27001:2022
+copyright: intuitem
+version: 1
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:iso27001-2013
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:iso27001-2013
+    ref_id: mapping-iso27001-2013-to-iso27001-2022
+    name: ISO/IEC 27001:2013 -> ISO/IEC 27001:2022
+    description: Mapping from International standard ISO/IEC 27001:2013 to International
+      standard ISO/IEC 27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2013
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
+      relationship: superset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
+      relationship: superset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
+      relationship: superset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
+      relationship: superset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
+      relationship: superset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
+      relationship: superset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: intersect
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: intersect
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
+      relationship: intersect
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: equal
+      rationale: syntactic
+      stregth_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
+      relationship: subset
+      rationale: syntactic
+      stregth_of_relationship: null
