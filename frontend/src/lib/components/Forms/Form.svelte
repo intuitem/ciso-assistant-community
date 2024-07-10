@@ -29,8 +29,7 @@
 	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
 		if (form.valid) {
 			onUpdated(form);
-			if (closeModal)
-				$modalStore[0] ? modalStore.close() : null;
+			if (closeModal) $modalStore[0] ? modalStore.close() : null;
 		}
 	}
 

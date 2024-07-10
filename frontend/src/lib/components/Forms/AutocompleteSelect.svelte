@@ -105,7 +105,7 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="control" data-testid="form-input-{field.replaceAll('_', '-')}">
+	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		<input type="hidden" name={field} value={$value ? $value : ''} />
 		{#if options.length > 0}
 			<MultiSelect

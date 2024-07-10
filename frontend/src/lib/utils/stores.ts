@@ -45,8 +45,7 @@ export const createModalCache = {
 		}
 	},
 	setModelName(urlModelFromPage: string) {
-		if (this._urlModel !== urlModelFromPage)
-			this.clear();
+		if (this._urlModel !== urlModelFromPage) this.clear();
 		this._urlModel = urlModelFromPage;
 	},
 	data: {}
