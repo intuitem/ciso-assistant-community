@@ -20,14 +20,17 @@
 	export let resetForm = false;
 	export let onSubmit = (submit_data: any) => {};
 	export let taintedMessage: string | null = m.taintedFormMessage();
+	export let onUpdated = (_: any) => {};
 
 	export let useFocusTrap = true;
 
 	export let debug = false; // set to true to enable SuperDebug component
 
 	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
+		if (form.valid) {
+			onUpdated(form);
+			if (closeModal)
+				$modalStore[0] ? modalStore.close() : null;
 		}
 	}
 
