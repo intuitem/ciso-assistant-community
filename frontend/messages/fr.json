@@ -606,5 +606,6 @@
 	"full": "Complète",
 	"partial": "Partielle",
 	"noResultFound": "Aucun résultat trouvé",
-	"filters": "Filtres"
+	"filters": "Filtres",
+	"advanced": "Avancé"
 }

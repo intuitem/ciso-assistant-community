@@ -647,5 +647,6 @@
 	"full": "Full",
 	"partial": "Partial",
 	"noResultFound": "No result found",
-	"filters": "Filters"
+	"filters": "Filters",
+	"advanced": "Advanced"
 }
