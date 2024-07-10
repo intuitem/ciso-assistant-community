@@ -22,7 +22,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-
+	import { createModalCache } from '$lib/utils/stores';
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let context = 'default';
@@ -47,8 +47,6 @@
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
 
-	let formDataCache: { [key: string]: any } = {};
-
 	function makeCacheLock(): CacheLock {
 		let resolve: (_: any) => any = (_) => _;
 		const promise = new Promise((res) => {
@@ -57,34 +55,29 @@
 		return { resolve, promise };
 	}
 
-	$: cacheLocks = Object.keys(shape).reduce((acc, field) => {
-		acc[field] = makeCacheLock();
-		return acc;
-	}, {});
+	let cacheLocks = {};
+	$: if (shape)
+		cacheLocks = Object.keys(shape).reduce((acc, field) => {
+			acc[field] = makeCacheLock();
+			return acc;
+		}, {});
 
-	let _sessionStorage = null;
-	onMount(() => {
+	let formDataCache = {};
+	let urlModelFromPage;
+
+	$: if ($page) {
+		urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
+		createModalCache.setModelName(urlModelFromPage);
 		if (caching) {
-			_sessionStorage = sessionStorage;
-			const data = JSON.parse(sessionStorage.getItem('model_form_cache') ?? '{}');
-			formDataCache = data[model.name] ?? {};
-			for (const [key, value] of Object.entries(cacheLocks)) {
-				cacheLocks[key].resolve(formDataCache[key]);
-			}
+			createModalCache.data[model.urlModel] ??= {};
+			formDataCache = createModalCache.data[model.urlModel];
 		}
+	}
 
-		if (shape.reference_control) {
-			const reference_control_input: HTMLElement | null = document.querySelector(
-				`div.multiselect[role="searchbox"] input`
-			); // The MultiSelect component can't be focused automatically with data-focusindex="0" so we focus manually
-			reference_control_input?.focus();
+	$: if (caching) {
+		for (const key of Object.keys(cacheLocks)) {
+			cacheLocks[key].resolve(formDataCache[key]);
 		}
-	});
-
-	$: if (caching && _sessionStorage && formDataCache) {
-		const data = JSON.parse(_sessionStorage.getItem('model_form_cache') ?? '{}');
-		data[model.name] = formDataCache;
-		_sessionStorage.setItem('model_form_cache', JSON.stringify(data));
 	}
 </script>
 
