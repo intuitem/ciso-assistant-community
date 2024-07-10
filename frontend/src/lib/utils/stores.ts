@@ -29,12 +29,24 @@ export const expandedNodesState = persisted('expandedNodes', expandedNodes, {
 
 export const createModalCache = {
 	_urlModel: '',
-	setModelName(urlModelFromPage: string) {
-		if (this._urlModel !== urlModelFromPage) {
-			for (const key of Object.keys(this.data)) {
-				delete this.data[key];
-			}
+	_cacheToDelete: new Set(),
+	deleteCache(cacheName: any) {
+		this._cacheToDelete.add(cacheName);
+	},
+	garbageCollect() {
+		for (const cacheName of this._cacheToDelete) {
+			delete this.data[cacheName];
 		}
+		this._cacheToDelete.clear();
+	},
+	clear() {
+		for (const cacheName of Object.keys(this.data)) {
+			delete this.data[cacheName];
+		}
+	},
+	setModelName(urlModelFromPage: string) {
+		if (this._urlModel !== urlModelFromPage)
+			this.clear();
 		this._urlModel = urlModelFromPage;
 	},
 	data: {}

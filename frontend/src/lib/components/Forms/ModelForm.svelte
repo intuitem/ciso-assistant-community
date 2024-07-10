@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -23,6 +23,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { createModalCache } from '$lib/utils/stores';
+	import CreateModal from '../Modals/CreateModal.svelte';
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let context = 'default';
@@ -79,6 +80,10 @@
 			cacheLocks[key].resolve(formDataCache[key]);
 		}
 	}
+
+	onDestroy(() => {
+		createModalCache.garbageCollect();
+	});
 </script>
 
 <SuperForm
@@ -90,6 +95,7 @@
 	let:data
 	let:initialData
 	validators={zod(schema)}
+	onUpdated={() => createModalCache.deleteCache(model.urlModel)}
 	{...$$restProps}
 >
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
@@ -935,7 +941,10 @@
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={parent.onClose}>{m.cancel()}</button
+				on:click={(event) => {
+					parent.onClose(event);
+					createModalCache.deleteCache(model.urlModel);
+				}}>{m.cancel()}</button
 			>
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
