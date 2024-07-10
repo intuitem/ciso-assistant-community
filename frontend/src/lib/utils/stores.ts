@@ -26,3 +26,16 @@ const expandedNodes: TreeViewNode[] = [];
 export const expandedNodesState = persisted('expandedNodes', expandedNodes, {
 	storage: 'session'
 });
+
+export const createModalCache = {
+	_urlModel: '',
+	setModelName(urlModelFromPage: string) {
+		if (this._urlModel !== urlModelFromPage) {
+			for (const key of Object.keys(this.data)) {
+				delete this.data[key];
+			}
+		}
+		this._urlModel = urlModelFromPage;
+	},
+	data: {}
+};
