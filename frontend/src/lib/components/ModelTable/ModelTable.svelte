@@ -94,6 +94,8 @@
 	export let detailQueryParameter: string | undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
+	export let hideFilters = false;
+
 	const user = $page.data.user;
 
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
@@ -126,7 +128,10 @@
 	$: hasRows = data.length > 0;
 	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
-	const filters = listViewFields[tableURLModel].filters ?? {};
+	const filters =
+		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+			? listViewFields[tableURLModel].filters
+			: {};
 	const filteredFields = Object.keys(filters).filter(
 		(key) => columnFields.has(key) || filters[key].alwaysDisplay
 	);
@@ -134,7 +139,6 @@
 	const filterProps: {
 		[key: string]: { [key: string]: any };
 	} = {};
-	let displayFilters = false;
 
 	function defaultFilterProps(rows, field: string) {
 		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
@@ -219,7 +223,7 @@
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if filteredFields.length > 0 && hasRows}
+		{#if filteredFields.length > 0 && hasRows && !hideFilters}
 			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
 				<i class="fa-solid fa-filter mr-2" />
 				{m.filters()}
@@ -233,6 +237,7 @@
 						<svelte:component
 							this={filters[field].component}
 							bind:value={filterValues[field]}
+							alwaysDefined={filters[field].alwaysDefined}
 							{field}
 							{...filterProps[field]}
 							{...filters[field].extraProps}
