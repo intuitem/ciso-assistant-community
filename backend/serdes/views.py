@@ -30,7 +30,13 @@ class ExportBackupView(APIView):
         # NOTE: We will not be able to dump selected folders with this method.
         management.call_command(
             dumpdata.Command(),
-            exclude=["contenttypes", "auth.permission", "sessions.session"],
+            exclude=[
+                "contenttypes",
+                "auth.permission",
+                "sessions.session",
+                "iam.ssosettings",
+                "knox.authtoken",
+            ],
             indent=4,
             stdout=response,
             natural_foreign=True,
@@ -56,7 +62,12 @@ class LoadBackupView(APIView):
                 "-",
                 format="json",
                 verbosity=0,
-                exclude=["contenttypes", "auth.permission", "sessions.session"],
+                exclude=[
+                    "contenttypes",
+                    "auth.permission",
+                    "sessions.session",
+                    "knox.authtoken",
+                ],
             )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)

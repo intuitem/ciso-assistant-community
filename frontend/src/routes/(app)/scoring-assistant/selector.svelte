@@ -18,7 +18,8 @@
 <select class="select w-full" {id} bind:value {disabled}>
 	{#each choices as text, i}
 		<option class="text-{i}" value={i}
-			>{i}{#if text} - {localItems()[text]}{/if}</option
+			>{i}{#if text}
+				- {localItems()[text]}{/if}</option
 		>
 	{/each}
 </select>

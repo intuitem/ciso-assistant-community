@@ -81,6 +81,7 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
+		const model: ModelInfo = getModelInfo(event.params.model!);
 		const endpoint = `${BASE_API_URL}/${event.params.model}/`;
 
 		const fileFields = Object.fromEntries(
@@ -161,7 +162,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
+					object: m[toCamelCase(modelVerboseName)]().toLowerCase()
 				})
 			},
 			event
@@ -204,7 +205,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDeletedObject({
-						object: localItems()[toCamelCase(toCamelCase(model))].toLowerCase()
+						object: m[toCamelCase(toCamelCase(model))]().toLowerCase()
 					})
 				},
 				event

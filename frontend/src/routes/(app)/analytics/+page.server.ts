@@ -55,9 +55,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	function timeState(date: string) {
 		const eta = new Date(date);
-		if (eta.toLocaleDateString() > TODAY.toLocaleDateString()) {
+		if (eta.getTime() > TODAY.getTime()) {
 			return { name: 'incoming', hexcolor: '#93c5fd' };
-		} else if (eta.toLocaleDateString() < TODAY.toLocaleDateString()) {
+		} else if (eta.getTime() < TODAY.getTime()) {
 			return { name: 'outdated', hexcolor: '#f87171' };
 		} else {
 			return { name: 'today', hexcolor: '#fbbf24' };
@@ -183,19 +183,20 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			// Iterate through each compliance assessment of the project
 			project.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
 				// Process the donut data of each assessment
-				compliance_assessment.donut.values.forEach((donutItem: RequirementAssessmentDonutItem) => {
-					// Find the corresponding item in the aggregated data
-					const aggregatedItem: RequirementAssessmentDonutItem | undefined =
-						aggregatedDonutData.values.find((item) => item.name === donutItem.name);
-
-					if (aggregatedItem) {
-						// If the item already exists, increment its value
-						aggregatedItem.value += donutItem.value;
-					} else {
-						// If it's a new item, add it to the aggregated data
-						aggregatedDonutData.values.push({ ...donutItem });
+				compliance_assessment.donut.result.values.forEach(
+					(donutItem: RequirementAssessmentDonutItem) => {
+						// Find the corresponding item in the aggregated data
+						const aggregatedItem: RequirementAssessmentDonutItem | undefined =
+							aggregatedDonutData.values.find((item) => item.name === donutItem.name);
+						if (aggregatedItem) {
+							// If the item already exists, increment its value
+							aggregatedItem.value += donutItem.value;
+						} else {
+							// If it's a new item, add it to the aggregated data
+							aggregatedDonutData.values.push({ ...donutItem });
+						}
 					}
-				});
+				);
 			});
 
 			// Calculate the total sum of all values

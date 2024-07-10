@@ -7,7 +7,12 @@ export class PageDetail extends BasePage {
 	item: string;
 	readonly editButton: Locator;
 
-	constructor(public readonly page: Page, url: string, form: FormContent, item: string) {
+	constructor(
+		public readonly page: Page,
+		url: string,
+		form: FormContent,
+		item: string
+	) {
 		super(page, url, item);
 		this.form = form;
 		this.item = item;
