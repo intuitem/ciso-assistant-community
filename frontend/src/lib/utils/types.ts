@@ -129,6 +129,6 @@ export interface AppliedControlStatus {
 }
 
 export interface CacheLock {
-	promise: Promise<any>,
+	promise: Promise<any>;
 	resolve: (_: any) => any;
 }

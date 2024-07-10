@@ -10,7 +10,7 @@
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 	export let form;
-	export let cachedValue: string = "";
+	export let cachedValue: string = '';
 
 	label = label ?? field;
 

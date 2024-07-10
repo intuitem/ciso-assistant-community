@@ -7,8 +7,8 @@
 	interface Option {
 		label: string;
 		value: string;
-		suggested?: boolean
-	};
+		suggested?: boolean;
+	}
 
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -21,8 +21,8 @@
 	export let hide = false;
 	export let translateOptions = true;
 	export let cacheLock: CacheLock = {
-		promise: new Promise(res => res(null)),
-		resolve: x => x
+		promise: new Promise((res) => res(null)),
+		resolve: (x) => x
 	};
 	export let cachedValue: any[] | undefined = undefined;
 
@@ -39,12 +39,12 @@
 
 	let selected: typeof options = options.length === 1 && $constraints?.required ? [options[0]] : [];
 
-	$: cachedValue = selected.map(option => option.value);
+	$: cachedValue = selected.map((option) => option.value);
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
-			selected = cacheResult.map(value => optionHashmap[value]);
+			selected = cacheResult.map((value) => optionHashmap[value]);
 		}
 	});
 
