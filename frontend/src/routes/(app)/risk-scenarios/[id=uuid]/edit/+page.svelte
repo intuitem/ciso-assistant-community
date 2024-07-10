@@ -133,7 +133,7 @@
 		{...$$restProps}
 	>
 		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg w-3/4">
+			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
 				<h4 class="h4 font-semibold">{m.scope()}</h4>
 				<div class="flex flex-row justify-between">
 					<span>
@@ -154,27 +154,38 @@
 					</span>
 				</div>
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/4">
+			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
 				<h4 class="h4 font-semibold">{m.status()}</h4>
 				<div class="flex flex-row justify-between">
-					<span>
+					<div class="w-1/4">
 						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 						<p class="text-sm font-semibold">
 							{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
 						</p>
-					</span>
-					<Select
-						{form}
-						options={data.treatmentChoices}
-						field="treatment"
-						label={m.treatmentStatus()}
-					/>
+					</div>
+					<div class=" px-2 w-2/4">
+						<AutocompleteSelect
+							{form}
+							multiple
+							options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
+							field="owner"
+							label="Owner(s)"
+						/>
+					</div>
+					<div class=" w-1/4">
+						<Select
+							{form}
+							options={data.treatmentChoices}
+							field="treatment"
+							label={m.treatmentStatus()}
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
 
 		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2">
+			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5">
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -185,7 +196,7 @@
 				<TextField {form} field="name" label={m.name()} />
 				<TextArea {form} field="description" label={m.description()} />
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-scroll">
+			<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
 				<AutocompleteSelect
 					multiple
 					{form}
@@ -194,7 +205,7 @@
 					label={m.assets()}
 					helpText={m.riskScenarioAssetHelpText()}
 				/>
-				<ModelTable source={data.tables['assets']} URLModel="assets" />
+				<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 			</div>
 		</div>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
@@ -261,7 +272,11 @@
 						field="applied_controls"
 						label={m.appliedControls()}
 					/>
-					<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
+					<ModelTable
+						source={data.tables['applied-controls']}
+						hideFilters={true}
+						URLModel="applied-controls"
+					/>
 				</div>
 				<div class="flex flex-col">
 					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>

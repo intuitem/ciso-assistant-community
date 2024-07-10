@@ -103,7 +103,8 @@ export const RiskScenarioSchema = baseNamedObject({
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const AppliedControlSchema = baseNamedObject({
@@ -201,7 +202,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	baseline: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({

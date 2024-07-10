@@ -40,7 +40,7 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment
+from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
@@ -1103,6 +1103,18 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         return Response({"results": used_frameworks})
 
+    @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
+    def mappings(self, request, pk):
+        framework = self.get_object()
+        available_target_frameworks_objects = [framework]
+        mappings = RequirementMappingSet.objects.filter(source_framework=framework)
+        for mapping in mappings:
+            available_target_frameworks_objects.append(mapping.target_framework)
+        available_target_frameworks = FrameworkReadSerializer(
+            available_target_frameworks_objects, many=True
+        ).data
+        return Response({"results": available_target_frameworks})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -1313,15 +1325,57 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
-        serializer.save()
-        instance = ComplianceAssessment.objects.get(id=serializer.data["id"])
+        baseline = serializer.validated_data.pop("baseline", None)
+        instance = serializer.save()
         requirements = RequirementNode.objects.filter(framework=instance.framework)
         for requirement in requirements:
-            RequirementAssessment.objects.create(
+            requirement_assessment = RequirementAssessment.objects.create(
                 compliance_assessment=instance,
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
             )
+            if baseline and baseline.framework == instance.framework:
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=baseline, requirement=requirement
+                )
+                requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.score = baseline_requirement_assessment.score
+                requirement_assessment.is_scored = (
+                    baseline_requirement_assessment.is_scored
+                )
+                requirement_assessment.evidences.set(
+                    baseline_requirement_assessment.evidences.all()
+                )
+                requirement_assessment.applied_controls.set(
+                    baseline_requirement_assessment.applied_controls.all()
+                )
+                requirement_assessment.save()
+        if baseline and baseline.framework != instance.framework:
+            mapping_set = RequirementMappingSet.objects.get(
+                target_framework=serializer.validated_data["framework"],
+                source_framework=baseline.framework,
+            )
+            for (
+                requirement_assessment
+            ) in instance.compute_requirement_assessments_results(
+                mapping_set, baseline
+            ):
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    id=requirement_assessment.mapping_inference[
+                        "source_requirement_assessment"
+                    ]["id"]
+                )
+                requirement_assessment.evidences.add(
+                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
+                )
+                requirement_assessment.applied_controls.add(
+                    *[
+                        ac.id
+                        for ac in baseline_requirement_assessment.applied_controls.all()
+                    ]
+                )
+                requirement_assessment.save()
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -1530,7 +1584,13 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get result choices")
     def result(self, request):
-        return Response(dict(RequirementAssessment.Results.choices))
+        return Response(dict(RequirementAssessment.Result.choices))
+
+
+class RequirementMappingSetViewSet(BaseModelViewSet):
+    model = RequirementMappingSet
+
+    filterset_fields = ["target_framework", "source_framework"]
 
 
 @api_view(["GET"])
