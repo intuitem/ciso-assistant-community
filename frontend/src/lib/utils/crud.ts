@@ -64,8 +64,8 @@ export const getOptions = ({
 								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
-						  '/' +
-						  my_label
+							'/' +
+							my_label
 						: my_label,
 				value: object[value],
 				suggested: false
@@ -422,8 +422,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Requirement mapping set',
 		verboseNamePlural: 'Requirement mapping sets',
 		foreignKeyFields: [
-			{ field: 'focal_framework', urlModel: 'frameworks' },
-			{ field: 'reference_framework', urlModel: 'frameworks' },
+			{ field: 'source_framework', urlModel: 'frameworks' },
+			{ field: 'target_framework', urlModel: 'frameworks' },
 			{ field: 'library', urlModel: 'libraries' }
 		]
 	}

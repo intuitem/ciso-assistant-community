@@ -152,8 +152,8 @@
 	}
 
 	$: mappingInference = {
-		referenceRequirementAssessment:
-			data.requirementAssessment.mapping_inference.reference_requirement_assessment,
+		sourceRequirementAssessment:
+			data.requirementAssessment.mapping_inference.source_requirement_assessment,
 		result: data.requirementAssessment.mapping_inference.result,
 		annotation: ''
 	};
@@ -271,16 +271,16 @@
 								<p>
 									<a
 										class="anchor"
-										href="/requirement-assessments/{mappingInference.referenceRequirementAssessment
+										href="/requirement-assessments/{mappingInference.sourceRequirementAssessment
 											.id}"
 									>
-										{mappingInference.referenceRequirementAssessment.str}
+										{mappingInference.sourceRequirementAssessment.str}
 									</a>
 								</p>
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
 									<span class="badge {classesText} h-fit">
-										{m[mappingInference.referenceRequirementAssessment.coverage]()}
+										{m[mappingInference.sourceRequirementAssessment.coverage]()}
 									</span>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -343,7 +343,11 @@
 									options={getOptions({ objects: data.model.foreignKeys['applied_controls'] })}
 									field="applied_controls"
 								/>
-								<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
+								<ModelTable
+									source={data.tables['applied-controls']}
+									hideFilters={true}
+									URLModel="applied-controls"
+								/>
 							</div>
 						{/if}
 						{#if tabSet === 1}
@@ -367,7 +371,11 @@
 									options={getOptions({ objects: data.model.foreignKeys['evidences'] })}
 									field="evidences"
 								/>
-								<ModelTable source={data.tables['evidences']} URLModel="evidences" />
+								<ModelTable
+									source={data.tables['evidences']}
+									hideFilters={true}
+									URLModel="evidences"
+								/>
 							</div>
 						{/if}
 					</svelte:fragment>

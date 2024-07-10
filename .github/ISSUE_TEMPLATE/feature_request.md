@@ -2,7 +2,7 @@
 name: Feature Request
 about: Suggestions for new features and improvements
 title: ""
-labels: "new feature"
+labels: "question"
 assignees: ""
 ---
 
