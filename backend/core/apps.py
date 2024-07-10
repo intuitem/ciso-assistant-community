@@ -29,6 +29,8 @@ READER_PERMISSIONS_LIST = [
     "view_loadedlibrary",
     "view_storedlibrary",
     "view_user",
+    "view_requirementmappingset",
+    "view_requirementmapping",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -53,6 +55,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_requirementmappingset",
+    "view_requirementmapping",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -107,6 +111,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_requirementmappingset",
+    "view_requirementmapping",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -166,6 +172,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_requirementmappingset",
+    "view_requirementmapping",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -250,6 +258,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
     "view_globalsettings",
     "change_globalsettings",
+    "view_requirementmappingset",
+    "view_requirementmapping",
 ]
 
 
