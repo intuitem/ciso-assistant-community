@@ -65,7 +65,7 @@ export const forms = {
 			]
 		}
 	],
-	business_impact: [
+	vulnerability: [
 		{
 			id: 'ease_of_discovery',
 			text: 'easeOfDiscoveryText',
@@ -131,7 +131,7 @@ export const forms = {
 			]
 		}
 	],
-	vulnerability: [
+	business_impact: [
 		{
 			id: 'financial_damage',
 			text: 'financialDamageText',
