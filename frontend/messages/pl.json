@@ -643,5 +643,9 @@
 	"full": "Pełny",
 	"partial": "Częściowy",
 	"noResultFound": "nie znaleziono żadnych wyników",
-	"filters": "Filtry"
+	"filters": "Filtry",
+	"notApplicableScore": "Nie możesz zdobyć punktów, jeśli ocena wymagań nie ma zastosowania",
+	"maturity": "Dojrzałość",
+	"progress": "Postęp",
+	"back": "Powrót"
 }

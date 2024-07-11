@@ -606,5 +606,9 @@
 	"full": "Voll",
 	"partial": "Teilweise",
 	"noResultFound": "Keine Einträge gefunden",
-	"filters": "Filter"
+	"filters": "Filter",
+	"notApplicableScore": "Sie können keine Punkte erzielen, wenn die Anforderungsbewertung nicht anwendbar ist",
+	"maturity": "Reife",
+	"progress": "Fortschreiten",
+	"back": "Zurückkehren"
 }
