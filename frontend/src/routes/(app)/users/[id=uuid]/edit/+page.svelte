@@ -9,18 +9,26 @@
 
 	export let data: PageData;
 	breadcrumbObject.set(data.object);
+
+	let debugStyle = "";
+	let debugClicked = false;
+	$: if (debugClicked) {
+		debugStyle = "border: 50px solid violet;";
+	} else {
+		debugStyle = "";
+	}
 </script>
 
 <div class="card bg-white shadow p-4">
 	<ModelForm form={data.form} schema={UserEditSchema} model={data.model} />
 </div>
-<div class="card bg-white shadow p-4 mt-2">
+<div style={debugStyle} class="card bg-white shadow p-4 mt-2">
 	<p class="text-gray-500 text-sm">
 		{m.setTemporaryPassword1()}
 		<a
 			href="{$page.url.pathname}/set-password"
 			class="text-primary-700 hover:text-primary-500"
-			data-testid="set-password-btn">{m.setTemporaryPassword()}</a
+			data-testid="set-password-btn" on:click={() => {debugClicked=!debugClicked;}}>{m.setTemporaryPassword()}</a
 		>. {m.setTemporaryPassword2()}.
 	</p>
 </div>
