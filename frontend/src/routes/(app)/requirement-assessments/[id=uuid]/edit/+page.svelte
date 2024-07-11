@@ -176,7 +176,8 @@
 		hideSuggestions.set(requirementAssessmentsList);
 	}
 
-	$: classesText = complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
+	$: classesText =
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
 	let tabSet = 0;
 </script>
