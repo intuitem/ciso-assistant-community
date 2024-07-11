@@ -17,7 +17,7 @@
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceResultColorMap, complianceStatusColorMap } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
