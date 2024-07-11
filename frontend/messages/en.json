@@ -647,5 +647,8 @@
 	"full": "Full",
 	"partial": "Partial",
 	"noResultFound": "No result found",
-	"filters": "Filters"
+	"filters": "Filters",
+	"notApplicableScore": "You cannot score if the requirement assessment is not applicable",
+	"maturity": "Maturity",
+	"progress": "Progress"
 }
