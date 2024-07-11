@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
-	import type { PageData } from '../[id=uuid]/$types';
+	import type { PageData } from '../[id=uuid]/edit/$types';
 
 	export let data: PageData;
 	const threats = data.requirement.threats;
@@ -35,7 +35,7 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
-	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
+	import { complianceResultColorMap } from '$lib/utils/constants';
 	import * as m from '$paraglide/messages';
 	import { hideSuggestions } from '$lib/utils/stores';
 
@@ -176,7 +176,7 @@
 		hideSuggestions.set(requirementAssessmentsList);
 	}
 
-	$: classesText = COMPLIANCE_COLOR_MAP[mappingInference.result] === '#000000' ? 'text-white' : '';
+	$: classesText = complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
 	let tabSet = 0;
 </script>
@@ -287,7 +287,7 @@
 									<span class="italic">{m.suggestionColon()}</span>
 									<span
 										class="badge {classesText} h-fit"
-										style="background-color: {COMPLIANCE_COLOR_MAP[mappingInference.result]};"
+										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
 										{m[toCamelCase(mappingInference.result)]()}
 									</span>

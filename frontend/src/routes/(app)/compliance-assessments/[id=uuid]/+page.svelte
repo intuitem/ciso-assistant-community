@@ -236,7 +236,7 @@
 		</div>
 		<div class="flex w-1/3 relative">
 			{#if data.global_score.score >= 0}
-				<div class="absolute font-bold text-sm">Maturity</div>
+				<div class="absolute font-bold text-sm">{m.maturity()}</div>
 				<div class="flex justify-center items-center w-full">
 					<ProgressRadial
 						stroke={100}
@@ -255,7 +255,7 @@
 			<DonutChart
 				s_label="Result"
 				name="compliance_result"
-				title="Compliance"
+				title={m.compliance()}
 				orientation="horizontal"
 				values={compliance_assessment_donut_values.result.values}
 				colors={compliance_assessment_donut_values.result.values.map(
@@ -267,7 +267,7 @@
 			<DonutChart
 				s_label="Status"
 				name="compliance_status"
-				title="Progress"
+				title={m.progress()}
 				orientation="horizontal"
 				values={compliance_assessment_donut_values.status.values}
 				colors={compliance_assessment_donut_values.status.values.map(

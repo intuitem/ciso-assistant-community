@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { complianceResultColorMap, complianceStatusColorMap, darkenColor } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import { darkenColor } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
