@@ -1,15 +1,15 @@
 <script lang="ts">
-    import type { PageData } from '../[id=uuid]/$types';
-    import { getRequirementTitle } from '$lib/utils/helpers';
-    import { hideSuggestions, breadcrumbObject } from '$lib/utils/stores';
-    import * as m from '$paraglide/messages';
-    import { toCamelCase } from '$lib/utils/locales';
-    import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
-    import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-    import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
-    import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import type { PageData } from '../[id=uuid]/$types';
+	import { getRequirementTitle } from '$lib/utils/helpers';
+	import { hideSuggestions, breadcrumbObject } from '$lib/utils/stores';
+	import * as m from '$paraglide/messages';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
-    export let data: PageData;
+	export let data: PageData;
 	const threats = data.requirement.threats;
 	const reference_controls = data.requirement.reference_controls;
 	const annotation = data.requirement.annotation;
@@ -17,14 +17,14 @@
 	const has_threats = threats && threats.length > 0;
 	const has_reference_controls = reference_controls && reference_controls.length > 0;
 
-    $: mappingInference = {
+	$: mappingInference = {
 		sourceRequirementAssessment:
 			data.requirementAssessment.mapping_inference.source_requirement_assessment,
 		result: data.requirementAssessment.mapping_inference.result,
 		annotation: ''
 	};
 
-    const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
 		: getRequirementTitle(data.parent.ref_id, data.parent.name);
 	breadcrumbObject.set({
@@ -33,13 +33,13 @@
 		email: ''
 	});
 
-    let requirementAssessmentsList: string[] = $hideSuggestions;
+	let requirementAssessmentsList: string[] = $hideSuggestions;
 
-    let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id)
+	let hideSuggestion = requirementAssessmentsList.includes(data.requirementAssessment.id)
 		? true
 		: false;
 
-    function toggleSuggestions() {
+	function toggleSuggestions() {
 		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
 			requirementAssessmentsList.push(data.requirementAssessment.id);
 		} else {
@@ -51,34 +51,43 @@
 		hideSuggestions.set(requirementAssessmentsList);
 	}
 
-    $: classesText = complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
+	$: classesText =
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
-    const max_score = data.complianceAssessmentScore.max_score;
-    const value = data.requirementAssessment.score;
+	const max_score = data.complianceAssessmentScore.max_score;
+	const value = data.requirementAssessment.score;
 
-    let tabSet = 0;
+	let tabSet = 0;
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-    <div class="flex flex-row space-x-2 items-center">
-        <code class="code">{data.requirement.urn}</code>
-        <span class="badge h-fit" style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ?? '#d1d5db'};">
+	<div class="flex flex-row space-x-2 items-center">
+		<code class="code">{data.requirement.urn}</code>
+		<span
+			class="badge h-fit"
+			style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
+				'#d1d5db'};"
+		>
 			{m[data.requirementAssessment.status]()}
 		</span>
-		<span class="badge {classesText} h-fit" style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ?? '#d1d5db'};">
-            {m[data.requirementAssessment.result]()}
+		<span
+			class="badge {classesText} h-fit"
+			style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
+				'#d1d5db'};"
+		>
+			{m[data.requirementAssessment.result]()}
 		</span>
-        {#if data.requirementAssessment.is_scored}
-            <ProgressRadial
-                stroke={100}
-                meter={displayScoreColor(value, max_score)}
-                value={formatScoreValue(value, max_score)}
-                font={150}
-                class="shrink-0"
-                width={'w-10'}>{value}</ProgressRadial
-            >
-        {/if}
-    </div>
+		{#if data.requirementAssessment.is_scored}
+			<ProgressRadial
+				stroke={100}
+				meter={displayScoreColor(value, max_score)}
+				value={formatScoreValue(value, max_score)}
+				font={150}
+				class="shrink-0"
+				width={'w-10'}>{value}</ProgressRadial
+			>
+		{/if}
+	</div>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line p-2 font-light text-lg">
 			👉 {data.requirement.description}
@@ -201,48 +210,44 @@
 			{/if}
 		</div>
 	{/if}
-    <div>
-        <TabGroup>
-            <Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
-                >{m.appliedControls()}
-            </Tab>
-            <Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
-            <svelte:fragment slot="panel">
-                {#if tabSet === 0}
-                    <div class="flex items-center mb-2 px-2 text-xs space-x-2">
-                        <i class="fa-solid fa-info-circle" />
-                        <p>{m.requirementAppliedControlHelpText()}</p>
-                    </div>
-                    <div
-                        class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-                    >
-                        <ModelTable
-                            source={data.tables['applied-controls']}
-                            hideFilters={true}
-                            URLModel="applied-controls"
-                        />
-                    </div>
-                {/if}
-                {#if tabSet === 1}
-                    <div class="flex items-center mb-2 px-2 text-xs space-x-2">
-                        <i class="fa-solid fa-info-circle" />
-                        <p>{m.requirementEvidenceHelpText()}</p>
-                    </div>
-                    <div
-                        class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
-                    >
-                        <ModelTable
-                            source={data.tables['evidences']}
-                            hideFilters={true}
-                            URLModel="evidences"
-                        />
-                    </div>
-                {/if}
-            </svelte:fragment>
-        </TabGroup>
-    </div>
-    <div class="card p-4 space-y-2">
-        <h1 class="font-semibold">{m.observation()}</h1>
-        <span class="text-sm">{data.requirementAssessment.observation}</span>
-    </div>
+	<div>
+		<TabGroup>
+			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
+				>{m.appliedControls()}
+			</Tab>
+			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
+			<svelte:fragment slot="panel">
+				{#if tabSet === 0}
+					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+						<i class="fa-solid fa-info-circle" />
+						<p>{m.requirementAppliedControlHelpText()}</p>
+					</div>
+					<div
+						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+					>
+						<ModelTable
+							source={data.tables['applied-controls']}
+							hideFilters={true}
+							URLModel="applied-controls"
+						/>
+					</div>
+				{/if}
+				{#if tabSet === 1}
+					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+						<i class="fa-solid fa-info-circle" />
+						<p>{m.requirementEvidenceHelpText()}</p>
+					</div>
+					<div
+						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+					>
+						<ModelTable source={data.tables['evidences']} hideFilters={true} URLModel="evidences" />
+					</div>
+				{/if}
+			</svelte:fragment>
+		</TabGroup>
+	</div>
+	<div class="card p-4 space-y-2">
+		<h1 class="font-semibold">{m.observation()}</h1>
+		<span class="text-sm">{data.requirementAssessment.observation}</span>
+	</div>
 </div>
