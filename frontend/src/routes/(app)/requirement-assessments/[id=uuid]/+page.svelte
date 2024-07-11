@@ -7,7 +7,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue, getSecureRedirect } from '$lib/utils/helpers';
 
 	export let data: PageData;
 	const threats = data.requirement.threats;
@@ -49,6 +49,13 @@
 		}
 		hideSuggestion = !hideSuggestion;
 		hideSuggestions.set(requirementAssessmentsList);
+	}
+
+	function cancel(): void {
+		var currentUrl = window.location.href;
+		var url = new URL(currentUrl);
+		var nextValue = getSecureRedirect(url.searchParams.get('next'));
+		if (nextValue) window.location.href = nextValue;
 	}
 
 	$: classesText =
@@ -249,5 +256,10 @@
 	<div class="card p-4 space-y-2">
 		<h1 class="font-semibold">{m.observation()}</h1>
 		<span class="text-sm">{data.requirementAssessment.observation}</span>
+	</div>
+	<div class="flex flex-row justify-between space-x-4">
+		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" on:click={cancel}
+			>{m.cancel()}</button
+		>
 	</div>
 </div>
