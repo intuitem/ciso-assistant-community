@@ -3,7 +3,7 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
+	import { complianceResultColorMap } from '$lib/utils/constants';
 
 	export let data: PageData;
 
@@ -20,7 +20,7 @@
 	// Reactive variable to keep track of the current item index
 	let currentIndex = 0;
 
-	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].result];
+	$: color = complianceResultColorMap[data.requirement_assessments[currentIndex].result];
 
 	$: requirement = data.requirements.find(
 		(req) => req.id === data.requirement_assessments[currentIndex].requirement

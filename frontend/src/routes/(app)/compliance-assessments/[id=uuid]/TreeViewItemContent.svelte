@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { complianceResultColorMap, complianceStatusColorMap, darkenColor } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import { darkenColor } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
@@ -16,7 +17,6 @@
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
-	export let result: string | undefined = undefined;
 	export let resultCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
 	export let max_score: number;
@@ -104,40 +104,57 @@
 
 <div class="flex flex-row justify-between space-x-8">
 	<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
-		<span style="font-weight: 300;">
-			{#if assessable && canEditRequirementAssessment}
-				<span class="w-full h-full flex rounded-token hover:text-primary-500">
-					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
+		<div class="flex flex-row space-x-2" style="font-weight: 300;">
+			<div>
+				{#if assessable}
+					<span class="w-full h-full flex rounded-token hover:text-primary-500">
+						{#if canEditRequirementAssessment}
+							<a href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}">
+								{#if title}
+									<span style="font-weight: 600;">{title}</span>
+								{/if}
+								{#if description}
+									<p>{description}</p>
+								{/if}
+							</a>
+						{:else}
+							<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
+								{#if title}
+									<span style="font-weight: 600;">{title}</span>
+								{/if}
+								{#if description}
+									<p>{description}</p>
+								{/if}
+							</a>
+						{/if}
+					</span>
+				{:else}
+					<p class="max-w-[80ch] whitespace-pre-line">
 						{#if title}
 							<span style="font-weight: 600;">{title}</span>
 						{/if}
 						{#if description}
 							<p>{description}</p>
 						{/if}
-					</a>
-				</span>
-			{:else}
-				<p class="max-w-[80ch] whitespace-pre-line">
-					{#if title}
-						<span style="font-weight: 600;">{title}</span>
-						{#each Object.entries(complianceStatusColorMap) as status}
-							{#if resultCounts[status[0]]}
-								<span
-									class="badge mr-1"
-									style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
-								>
-									{resultCounts[status[0]]}
-									{m[toCamelCase(status[0])]()}
-								</span>
-							{/if}
-						{/each}
-					{/if}
-					{#if description}
-						<p>{description}</p>
-					{/if}
-				</p>
-			{/if}
-		</span>
+					</p>
+				{/if}
+			</div>
+			<div>
+				{#if hasAssessableChildren}
+					{#each Object.entries(complianceStatusColorMap) as status}
+						{#if resultCounts[status[0]]}
+							<span
+								class="badge mr-1"
+								style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
+							>
+								{resultCounts[status[0]]}
+								{m[toCamelCase(status[0])]()}
+							</span>
+						{/if}
+					{/each}
+				{/if}
+			</div>
+		</div>
 		{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 			<div
 				role="button"

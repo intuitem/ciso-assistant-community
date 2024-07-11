@@ -606,5 +606,9 @@
 	"full": "Pieno",
 	"partial": "Parziale",
 	"noResultFound": "nessun risultato trovato",
-	"filters": "Filtri"
+	"filters": "Filtri",
+	"notApplicableScore": "Non è possibile ottenere un punteggio se la valutazione dei requisiti non è applicabile",
+	"maturity": "Scadenza",
+	"progress": "Progressione",
+	"back": "Ritorno"
 }
