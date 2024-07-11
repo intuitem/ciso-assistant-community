@@ -650,5 +650,6 @@
 	"filters": "Filters",
 	"notApplicableScore": "You cannot score if the requirement assessment is not applicable",
 	"maturity": "Maturity",
-	"progress": "Progress"
+	"progress": "Progress",
+	"back": "Back"
 }

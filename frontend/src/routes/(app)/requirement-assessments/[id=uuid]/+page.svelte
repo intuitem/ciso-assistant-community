@@ -259,7 +259,7 @@
 	</div>
 	<div class="flex flex-row justify-between space-x-4">
 		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" on:click={cancel}
-			>{m.cancel()}</button
+			>{m.back()}</button
 		>
 	</div>
 </div>
