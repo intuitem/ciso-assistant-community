@@ -142,6 +142,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 48. Secure Controls Framework (SCF) 🇺🇸🌐
 49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
+51. California Consumer Privacy Act Regulations 🇺🇸☀️ 
+52. NCSC Cyber Essentials 🇬🇧
 
 ### Community contributions
 
@@ -162,7 +164,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- NCSC Cyber Essentials
 - Part-IS
 - NIST 800-82
 - Korea ISA: ISMS-P
@@ -177,6 +178,8 @@ A library can be a framework, a catalog of threats or reference controls, and ev
 Take a look at the `tools` directory and its dedicated readme. The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+
+There is also a tool to facilitate the creation of mappings, called `prepare_mapping.py` that will create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
 
 ## Community
 
