@@ -17,7 +17,8 @@
 	export let form: SuperForm<AnyZodObject>;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	$: value.set(cachedValue);
+	// $: value.set(cachedValue);
+	cachedValue = $value; // I must add an initial value.set(cachedValue) to make the cache work after that, but i firstly want to see if i can pass the test with this.
 	let selectElement: HTMLElement | null = null;
 
 	interface Option {
@@ -55,8 +56,8 @@
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			style="background-color: {color_map[cachedValue]}"
-			bind:value={cachedValue}
+			style="background-color: {color_map[$value]}"
+			bind:value={$value}
 			bind:this={selectElement}
 			{...$constraints}
 			{...$$restProps}
