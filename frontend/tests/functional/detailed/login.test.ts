@@ -38,9 +38,7 @@ test('login invalid message is showing properly', async ({ loginPage, page }) =>
 	await loginPage.hasUrl();
 });
 
-test('forgot password process is working properly', {
-	tag: "@forgotpassword"
-}, async ({
+test('forgot password process is working properly', async ({
 	logedPage,
 	usersPage,
 	sideBar,
@@ -55,9 +53,7 @@ test('forgot password process is working properly', {
 	});
 
 	await usersPage.editItemButton(email).click();
-	await new Promise(res => setTimeout(res,2000));
 	await page.getByTestId('set-password-btn').click();
-	await new Promise(res => setTimeout(res,2000));
 	await expect(page).toHaveURL(/.*\/users\/.+\/edit\/set-password/);
 	await usersPage.form.fill({
 		new_password: testData.user.password,
