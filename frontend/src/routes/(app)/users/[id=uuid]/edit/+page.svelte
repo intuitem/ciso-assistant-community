@@ -6,6 +6,7 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 
 	import * as m from '$paraglide/messages';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.object);
@@ -17,8 +18,11 @@
 	} else {
 		debugStyle = "";
 	}
+	let debugCodeElem = null;
+	let debugText = "...";
 </script>
 
+<code style="font-size: 32px;border: 10px solid blue;" bind:this={debugCodeElem}>{debugText}</code>
 <div class="card bg-white shadow p-4">
 	<ModelForm form={data.form} schema={UserEditSchema} model={data.model} />
 </div>
@@ -28,7 +32,14 @@
 		<a
 			href="{$page.url.pathname}/set-password"
 			class="text-primary-700 hover:text-primary-500"
-			data-testid="set-password-btn" on:click={() => {debugClicked=!debugClicked;}}>{m.setTemporaryPassword()}</a
+			data-testid="set-password-btn" on:click={(e) => {
+				debugClicked=!debugClicked;
+				goto(`${$page.url.pathname}/set-password`).then(
+					res => {debugText = `[THEN] ${res}`;}
+				).catch(
+					err => {debugText = `[CATCH] ${err}`;}
+				);
+			}}>{m.setTemporaryPassword()}</a
 		>. {m.setTemporaryPassword2()}.
 	</p>
 </div>

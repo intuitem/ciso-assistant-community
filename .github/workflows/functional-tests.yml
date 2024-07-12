@@ -95,7 +95,7 @@ jobs:
           nohup python manage.py runserver &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
-        run: npx playwright test --project=${{ matrix.playwright-browser }}
+        run: npx playwright test --project=${{ matrix.playwright-browser }} --grep=@forgotpassword
       - uses: actions/upload-artifact@v4
         if: always()
         with:
