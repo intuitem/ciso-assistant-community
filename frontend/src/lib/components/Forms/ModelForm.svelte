@@ -141,6 +141,7 @@
 			{form}
 			field="name"
 			label={m.name()}
+			cacheLock={cacheLocks['name']}
 			bind:cachedValue={formDataCache['name']}
 			data-focusindex="0"
 		/>
@@ -150,6 +151,7 @@
 			{form}
 			field="description"
 			label={m.description()}
+			cacheLock={cacheLocks['description']}
 			bind:cachedValue={formDataCache['description']}
 			data-focusindex="1"
 		/>
@@ -168,6 +170,7 @@
 			{form}
 			field="internal_reference"
 			label={m.internalReference()}
+			cacheLock={cacheLocks['internal_reference']}
 			bind:cachedValue={formDataCache['internal_reference']}
 		/>
 		<Select
@@ -195,6 +198,7 @@
 			{form}
 			field="version"
 			label={m.version()}
+			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
 		<Select
@@ -239,6 +243,7 @@
 			field="eta"
 			label={m.eta()}
 			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
 			bind:cachedValue={formDataCache['eta']}
 		/>
 		<TextField
@@ -247,10 +252,17 @@
 			field="due_date"
 			label={m.dueDate()}
 			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
 			bind:cachedValue={formDataCache['due_date']}
 		/>
 	{:else if URLModel === 'threats'}
-		<TextField {form} field="ref_id" label={m.ref()} bind:cachedValue={formDataCache['ref_id']} />
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -264,6 +276,7 @@
 			{form}
 			field="provider"
 			label={m.provider()}
+			cacheLock={cacheLocks['provider']}
 			bind:cachedValue={formDataCache['provider']}
 		/>
 	{:else if URLModel === 'risk-scenarios'}
@@ -329,6 +342,7 @@
 			field="eta"
 			label={m.eta()}
 			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
 			bind:cachedValue={formDataCache['eta']}
 		/>
 		<TextField
@@ -337,6 +351,7 @@
 			field="expiry_date"
 			label={m.expiryDate()}
 			helpText={m.expiryDateHelpText()}
+			cacheLock={cacheLocks['expiry_date']}
 			bind:cachedValue={formDataCache['expiry_date']}
 		/>
 		<TextField
@@ -344,6 +359,7 @@
 			field="link"
 			label={m.link()}
 			helpText={m.linkHelpText()}
+			cacheLock={cacheLocks['link']}
 			bind:cachedValue={formDataCache['link']}
 		/>
 		<Select
@@ -371,6 +387,7 @@
 			field="expiry_date"
 			label={m.expiryDate()}
 			helpText={m.expiryDateHelpText()}
+			cacheLock={cacheLocks['expiry_date']}
 			bind:cachedValue={formDataCache['expiry_date']}
 		/>
 		{#if object.id && $page.data.user.id === object.approver}
@@ -380,6 +397,7 @@
 				field="justification"
 				label={m.justification()}
 				helpText={m.riskAcceptanceJusitficationHelpText()}
+				cacheLock={cacheLocks['justification']}
 				bind:cachedValue={formDataCache['justification']}
 			/>
 		{/if}
@@ -415,7 +433,13 @@
 			multiple
 		/>
 	{:else if URLModel === 'reference-controls'}
-		<TextField {form} field="ref_id" label={m.ref()} bind:cachedValue={formDataCache['ref_id']} />
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['category']}
@@ -428,12 +452,14 @@
 			{form}
 			field="annotation"
 			label={m.annotation()}
+			cacheLock={cacheLocks['annotation']}
 			bind:cachedValue={formDataCache['annotation']}
 		/>
 		<TextField
 			{form}
 			field="provider"
 			label={m.provider()}
+			cacheLock={cacheLocks['provider']}
 			bind:cachedValue={formDataCache['provider']}
 		/>
 		<AutocompleteSelect
@@ -471,6 +497,7 @@
 			field="link"
 			label={m.link()}
 			helpText={m.linkHelpText()}
+			cacheLock={cacheLocks['link']}
 			bind:cachedValue={formDataCache['link']}
 		/>
 	{:else if URLModel === 'compliance-assessments'}
@@ -499,6 +526,7 @@
 			{form}
 			field="version"
 			label={m.version()}
+			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
 		<Select
@@ -566,6 +594,7 @@
 			field="eta"
 			label={m.eta()}
 			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
 			bind:cachedValue={formDataCache['eta']}
 		/>
 		<TextField
@@ -574,6 +603,7 @@
 			field="due_date"
 			label={m.dueDate()}
 			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
 			bind:cachedValue={formDataCache['due_date']}
 		/>
 	{:else if URLModel === 'assets'}
@@ -581,6 +611,7 @@
 			{form}
 			field="business_value"
 			label={m.businessValue()}
+			cacheLock={cacheLocks['business_value']}
 			bind:cachedValue={formDataCache['business_value']}
 		/>
 		<AutocompleteSelect
@@ -631,6 +662,7 @@
 			{form}
 			field="observation"
 			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
 			bind:cachedValue={formDataCache['observation']}
 		/>
 		<HiddenInput {form} field="folder" />
@@ -641,6 +673,7 @@
 			{form}
 			field="email"
 			label={m.email()}
+			cacheLock={cacheLocks['email']}
 			bind:cachedValue={formDataCache['email']}
 			data-focusindex="2"
 		/>
@@ -649,12 +682,14 @@
 				{form}
 				field="first_name"
 				label={m.firstName()}
+				cacheLock={cacheLocks['first_name']}
 				bind:cachedValue={formDataCache['first_name']}
 			/>
 			<TextField
 				{form}
 				field="last_name"
 				label={m.lastName()}
+				cacheLock={cacheLocks['last_name']}
 				bind:cachedValue={formDataCache['last_name']}
 			/>
 		{/if}
@@ -694,6 +729,7 @@
 							field="provider_name"
 							label={m.name()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['provider_name']}
 							bind:cachedValue={formDataCache['provider_name']}
 						/>
 						<TextField
@@ -702,6 +738,7 @@
 							field="provider_id"
 							label={m.providerID()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['provider_id']}
 							bind:cachedValue={formDataCache['provider_id']}
 						/>
 						<TextField
@@ -710,6 +747,7 @@
 							label={m.clientID()}
 							helpText={m.clientIDHelpText()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['client_id']}
 							bind:cachedValue={formDataCache['client_id']}
 						/>
 						{#if data.provider !== 'saml'}
@@ -719,6 +757,7 @@
 								label={m.secret()}
 								helpText={m.secretHelpText()}
 								disabled={!data.is_enabled}
+								cacheLock={cacheLocks['secret']}
 								bind:cachedValue={formDataCache['secret']}
 							/>
 							<TextField
@@ -726,6 +765,7 @@
 								field="key"
 								label={m.key()}
 								disabled={!data.is_enabled}
+								cacheLock={cacheLocks['key']}
 								bind:cachedValue={formDataCache['key']}
 							/>
 						{/if}
@@ -744,6 +784,7 @@
 							label={m.IdPEntityID()}
 							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['idp_entity_id']}
 							bind:cachedValue={formDataCache['idp_entity_id']}
 						/>
 						<TextField
@@ -752,6 +793,7 @@
 							label={m.metadataURL()}
 							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['metadata_url']}
 							bind:cachedValue={formDataCache['metadata_url']}
 						/>
 						<TextField
@@ -760,6 +802,7 @@
 							field="sso_url"
 							label={m.SSOURL()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['sso_url']}
 							bind:cachedValue={formDataCache['sso_url']}
 						/>
 						<TextField
@@ -768,6 +811,7 @@
 							field="slo_url"
 							label={m.SLOURL()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['slo_url']}
 							bind:cachedValue={formDataCache['slo_url']}
 						/>
 						<TextArea
@@ -776,6 +820,7 @@
 							field="x509cert"
 							label={m.x509Cert()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['x509cert']}
 							bind:cachedValue={formDataCache['x509cert']}
 						/>
 					</svelte:fragment>
@@ -792,6 +837,7 @@
 							label={m.SPEntityID()}
 							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['sp_entity_id']}
 							bind:cachedValue={formDataCache['sp_entity_id']}
 						/>
 					</svelte:fragment>
@@ -807,6 +853,7 @@
 							field="attribute_mapping_uid"
 							label={m.attributeMappingUID()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['attribute_mapping_uid']}
 							bind:cachedValue={formDataCache['attribute_mapping_uid']}
 						/>
 						<TextField
@@ -814,6 +861,7 @@
 							field="attribute_mapping_email_verified"
 							label={m.attributeMappingEmailVerified()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['attribute_mapping_email_verified']}
 							bind:cachedValue={formDataCache['attribute_mapping_email_verified']}
 						/>
 						<TextField
@@ -821,6 +869,7 @@
 							field="attribute_mapping_email"
 							label={m.attributeMappingEmail()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['attribute_mapping_email']}
 							bind:cachedValue={formDataCache['attribute_mapping_email']}
 						/>
 
@@ -849,6 +898,7 @@
 							hidden
 							label={m.digestAlgorithm()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['digest_algorithm']}
 							bind:cachedValue={formDataCache['digest_algorithm']}
 						/>
 						<Checkbox
@@ -898,6 +948,7 @@
 							hidden
 							label={m.signatureAlgorithm()}
 							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['signature_algorithm']}
 							bind:cachedValue={formDataCache['signature_algorithm']}
 						/>
 						<Checkbox

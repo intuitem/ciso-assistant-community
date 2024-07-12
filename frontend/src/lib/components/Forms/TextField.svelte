@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import { onMount } from 'svelte';
 
 	let _class = '';
 
@@ -8,6 +9,10 @@
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 	export let cachedValue: string | undefined; // = '';
+	export let cacheLock: CacheLock = {
+		promise: new Promise((res) => res(null)),
+		resolve: (x) => x
+	};
 
 	export let form;
 
@@ -17,6 +22,12 @@
 	// $: value.set(cachedValue);
 	// $value = cachedValue;
 	$: cachedValue = $value;
+
+	onMount(async () => {
+		const cacheResult = await cacheLock.promise;
+		if (cacheResult)
+			$value = cacheResult;
+	});
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
