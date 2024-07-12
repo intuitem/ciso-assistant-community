@@ -15,7 +15,8 @@
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	$: value.set(cachedValue);
+	// $: value.set(cachedValue);
+	$: cachedValue = $value;
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 </script>
@@ -44,7 +45,7 @@
 			name={field}
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			bind:value={cachedValue}
+			bind:value={$value}
 			{...$constraints}
 			{...$$restProps}
 			rows="5"
