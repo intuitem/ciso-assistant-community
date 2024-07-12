@@ -26,12 +26,11 @@
 	$: cachedValue = $value; // I must add an initial value.set(cachedValue) to make the cache work after that, but i firstly want to see if i can pass the test with this.
 	let selectElement: HTMLElement | null = null;
 
-	onMount(async () => {
-		if (!cacheLock) return;
+	/* onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult)
 			$value = cacheResult;
-	});
+	}); */
 
 	interface Option {
 		label: unknown;
