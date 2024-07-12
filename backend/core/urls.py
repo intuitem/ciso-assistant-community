@@ -1,5 +1,7 @@
+from iam.sso.views import SSOSettingsViewSet
 from .views import *
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
+from iam.sso.saml.views import FinishACSView
 
 
 from django.urls import include, path
@@ -41,12 +43,17 @@ router.register(
 )
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
-
+router.register(
+    r"requirement-mapping-sets",
+    RequirementMappingSetViewSet,
+    basename="requirement-mapping-sets",
+)
 
 urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
     path("serdes/", include("serdes.urls")),
+    path("settings/", include("global_settings.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("license/", license, name="license"),
@@ -55,6 +62,11 @@ urlpatterns = [
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "accounts/saml/", include("iam.sso.saml.urls")
+    ),  # NOTE: This has to be placed before the allauth urls, otherwise our ACS implementation will not be used
+    path("accounts/", include("allauth.urls")),
+    path("_allauth/", include("allauth.headless.urls")),
 ]
 
 if DEBUG:

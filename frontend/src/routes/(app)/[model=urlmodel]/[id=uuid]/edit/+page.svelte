@@ -14,5 +14,5 @@
 	selectOptions={data.selectOptions}
 	foreignKeys={data.foreignKeys}
 	model={data.model}
-	origin="edit"
+	context="edit"
 />

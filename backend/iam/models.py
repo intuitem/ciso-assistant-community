@@ -279,6 +279,15 @@ class UserManager(BaseUserManager):
         return superuser
 
 
+class CaseInsensitiveUserManager(UserManager):
+    def get_by_natural_key(self, username):
+        """
+        By default, Django does a case-sensitive check on usernames™.
+        Overriding this method fixes it.
+        """
+        return self.get(**{self.model.USERNAME_FIELD + "__iexact": username})
+
+
 class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     """a user is a principal corresponding to a human"""
 
@@ -286,6 +295,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
+    is_sso = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -311,7 +321,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "granted to each of their user groups."
         ),
     )
-    objects = UserManager()
+    objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.

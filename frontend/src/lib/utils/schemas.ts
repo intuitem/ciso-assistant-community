@@ -103,7 +103,8 @@ export const RiskScenarioSchema = baseNamedObject({
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const AppliedControlSchema = baseNamedObject({
@@ -154,14 +155,15 @@ export const AssetSchema = baseNamedObject({
 
 export const RequirementAssessmentSchema = z.object({
 	status: z.string(),
+	result: z.string(),
 	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),
-	evidences: z.string().uuid().optional().array(),
+	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
-	applied_controls: z.string().uuid().optional().array(),
+	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable()
 });
 
@@ -200,7 +202,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	baseline: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({
@@ -209,6 +212,50 @@ export const EvidenceSchema = baseNamedObject({
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	link: z.string().optional().nullable()
+});
+
+export const SSOSettingsSchema = z.object({
+	is_enabled: z.boolean().optional(),
+	provider: z.string().default('saml'),
+	provider_id: z.string().optional(),
+	provider_name: z.string(),
+	client_id: z.string(),
+	secret: z.string().optional(),
+	key: z.string().optional(),
+
+	// SAML specific fields
+	attribute_mapping_uid: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_email_verified: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_email: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	idp_entity_id: z.string().optional(),
+	metadata_url: z.string().url().optional(),
+	sso_url: z.string().optional().nullable(),
+	slo_url: z.string().optional().nullable(),
+	x509cert: z.string().optional(),
+	sp_entity_id: z.string().optional(),
+	allow_repeat_attribute_name: z.boolean().optional().nullable(),
+	allow_single_label_domains: z.boolean().optional().nullable(),
+	authn_request_signed: z.boolean().optional().nullable(),
+	digest_algorithm: z.string().optional().nullable(),
+	logout_request_signed: z.boolean().optional().nullable(),
+	logout_response_signed: z.boolean().optional().nullable(),
+	metadata_signed: z.boolean().optional().nullable(),
+	name_id_encrypted: z.boolean().optional().nullable(),
+	reject_deprecated_algorithm: z.boolean().optional().nullable(),
+	reject_idp_initiated_sso: z.boolean().optional().nullable(),
+	signature_algorithm: z.string().optional().nullable(),
+	want_assertion_encrypted: z.boolean().optional().nullable(),
+	want_assertion_signed: z.boolean().optional().nullable(),
+	want_attribute_statement: z.boolean().optional().nullable(),
+	want_message_signed: z.boolean().optional().nullable(),
+	want_name_id: z.boolean().optional().nullable(),
+	want_name_id_encrypted: z.boolean().optional().nullable()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -226,7 +273,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,
 	evidences: EvidenceSchema,
-	users: UserCreateSchema
+	users: UserCreateSchema,
+	'sso-settings': SSOSettingsSchema
 };
 
 export const modelSchema = (model: string) => {

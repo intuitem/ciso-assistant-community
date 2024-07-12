@@ -35,6 +35,11 @@
 	 * @type {TreeViewItem[]}
 	 */
 	export let children: TreeViewItem[] = [];
+	/**
+	 * Set the radio group binding value.
+	 * @type {unknown}
+	 */
+	export let mappingInference: unknown = undefined;
 	// Props (styles)
 	/** Provide classes to set the horizontal spacing. */
 	export let spacing: CssClasses = 'space-x-4';
@@ -318,11 +323,11 @@
 	}
 
 	// Classes
-	const cBase = '';
+	const cBase = 'space-y-1';
 	// [&::-webkit-details-marker]:hidden -> hide default arrow on webkit browsers
 	const cSummary = 'list-none [&::-webkit-details-marker]:hidden items-center cursor-pointer flex';
 	const cSymbol = 'fill-current w-3 text-center transition-transform duration-[200ms]';
-	const cChildren = '';
+	const cChildren = 'space-y-1';
 	const cDisabled = 'opacity-50 !cursor-not-allowed';
 
 	// Reactive State Classes
@@ -395,7 +400,10 @@
 		</div>
 		<!-- Slot: Lead -->
 		{#if $$slots.lead && !hideLead}
-			<div class="tree-item-lead" data-testid="tree-item-lead">
+			<div class="tree-item-lead flex flex-row items-center space-x-2" data-testid="tree-item-lead">
+				{#if mappingInference}
+					<i class="fa-solid fa-diagram-project" />
+				{/if}
 				<slot name="lead" />
 			</div>
 		{/if}

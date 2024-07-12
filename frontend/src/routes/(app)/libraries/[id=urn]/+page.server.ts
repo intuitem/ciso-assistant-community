@@ -7,7 +7,7 @@ import { languageTag } from '$paraglide/runtime';
 
 export const actions: Actions = {
 	load: async (event) => {
-		const endpoint = `${BASE_API_URL}/stored-libraries/${event.params.id}/import`;
+		const endpoint = `${BASE_API_URL}/stored-libraries/${event.params.id}/import/`;
 		const res = await event.fetch(endpoint); // We will have to make this a POST later (we should use POST when creating a new object)
 		if (!res.ok) {
 			const response = await res.json();

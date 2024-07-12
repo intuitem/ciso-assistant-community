@@ -1,8 +1,7 @@
-import { Console } from 'console';
 import { test, expect, type Locator } from '../../utils/test-utils.js';
 
 test.describe.configure({ mode: 'serial' });
-test('every library can be loaded', async ({ logedPage, librariesPage, page }) => {
+test('the first half of libraries can be loaded', async ({ logedPage, librariesPage, page }) => {
 	test.slow();
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
@@ -14,8 +13,36 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 
 	let previousRemainingLibrary = '';
 	let nextRemainingLibrary = libraryNames[0];
-	for (let i = 1; i < libraryNames.length; i++) {
-		console.log('Importing library: ' + nextRemainingLibrary);
+	for (let i = 1; i < Math.ceil(libraryNames.length / 2); i++) {
+		console.log('library:' + nextRemainingLibrary);
+		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
+
+		await librariesPage.tab('Libraries store').click();
+		expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+
+		previousRemainingLibrary = nextRemainingLibrary;
+		nextRemainingLibrary = libraryNames[i];
+		expect(
+			previousRemainingLibrary,
+			'An error occured while importing library: ' + previousRemainingLibrary
+		).not.toEqual(nextRemainingLibrary);
+	}
+});
+
+test('the last half of libraries can be loaded', async ({ logedPage, librariesPage, page }) => {
+	test.slow();
+	await librariesPage.goto();
+	await librariesPage.hasUrl();
+
+	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(1)').all();
+	const libraryNames: string[] = await Promise.all(
+		libraries.map(async (library) => await library.innerText())
+	);
+
+	let previousRemainingLibrary = '';
+	let nextRemainingLibrary = libraryNames[0];
+	for (let i = Math.ceil(libraryNames.length / 2); i < libraryNames.length; i++) {
+		console.log('library:' + nextRemainingLibrary);
 		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
 
 		await librariesPage.tab('Libraries store').click();
