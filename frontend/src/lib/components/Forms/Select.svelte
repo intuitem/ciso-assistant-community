@@ -18,6 +18,7 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 	// $: value.set(cachedValue);
+	$value = cachedValue;
 	cachedValue = $value; // I must add an initial value.set(cachedValue) to make the cache work after that, but i firstly want to see if i can pass the test with this.
 	let selectElement: HTMLElement | null = null;
 
