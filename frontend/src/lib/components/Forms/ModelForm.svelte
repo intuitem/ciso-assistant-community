@@ -175,6 +175,7 @@
 			options={model.selectOptions['lc_status']}
 			field="lc_status"
 			label={m.lcStatus()}
+			cacheLock={cacheLocks['lc_status']}
 			bind:cachedValue={formDataCache['lc_status']}
 		/>
 	{:else if URLModel === 'risk-assessments'}
@@ -201,6 +202,7 @@
 			options={model.selectOptions['status']}
 			field="status"
 			label={m.status()}
+			cacheLock={cacheLocks['status']}
 			bind:cachedValue={formDataCache['status']}
 		/>
 		<AutocompleteSelect
@@ -297,6 +299,7 @@
 				options={model.selectOptions['category']}
 				field="category"
 				label={m.category()}
+				cacheLock={cacheLocks['category']}
 				bind:cachedValue={formDataCache['category']}
 			/>
 		{/if}
@@ -305,6 +308,7 @@
 			options={model.selectOptions['status']}
 			field="status"
 			label={m.status()}
+			cacheLock={cacheLocks['status']}
 			bind:cachedValue={formDataCache['status']}
 		/>
 		<AutocompleteSelect
@@ -348,6 +352,7 @@
 			field="effort"
 			label={m.effort()}
 			helpText={m.effortHelpText()}
+			cacheLock={cacheLocks['effort']}
 			bind:cachedValue={formDataCache['effort']}
 		/>
 		<AutocompleteSelect
@@ -416,6 +421,7 @@
 			options={model.selectOptions['category']}
 			field="category"
 			label={m.category()}
+			cacheLock={cacheLocks['category']}
 			bind:cachedValue={formDataCache['category']}
 		/>
 		<TextArea
@@ -500,6 +506,7 @@
 			options={model.selectOptions['status']}
 			field="status"
 			label={m.status()}
+			cacheLock={cacheLocks['status']}
 			bind:cachedValue={formDataCache['status']}
 		/>
 		<AutocompleteSelect
@@ -590,6 +597,7 @@
 			options={model.selectOptions['type']}
 			field="type"
 			label="Type"
+			cacheLock={cacheLocks['type']}
 			bind:cachedValue={formDataCache['type']}
 		/>
 		<AutocompleteSelect
@@ -608,6 +616,7 @@
 			options={model.selectOptions['status']}
 			field="status"
 			label={m.status()}
+			cacheLock={cacheLocks['status']}
 			bind:cachedValue={formDataCache['status']}
 		/>
 		<Select
@@ -615,6 +624,7 @@
 			options={model.selectOptions['result']}
 			field="result"
 			label={m.result()}
+			cacheLock={cacheLocks['result']}
 			bind:cachedValue={formDataCache['result']}
 		/>
 		<TextArea
