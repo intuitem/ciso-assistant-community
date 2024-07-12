@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CssClasses } from '@skeletonlabs/skeleton';
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import { onMount } from 'svelte';
 
 	let _class = '';
 
@@ -11,6 +12,10 @@
 	export let helpText: string | undefined = undefined;
 	export let form;
 	export let cachedValue: string = '';
+	export let cacheLock: CacheLock = {
+		promise: new Promise((res) => res(null)),
+		resolve: (x) => x
+	};
 
 	label = label ?? field;
 
@@ -18,6 +23,12 @@
 	// $: value.set(cachedValue);
 	// $value = cachedValue;
 	$: cachedValue = $value;
+
+	onMount(async () => {
+		const cacheResult = await cacheLock.promise;
+		if (cacheResult)
+			$value = cacheResult;
+	});
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 </script>
