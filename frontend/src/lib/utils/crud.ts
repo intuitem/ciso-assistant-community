@@ -53,7 +53,7 @@ export const getOptions = ({
 	const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 	const options = objects
 		.map((object) => {
-			let my_label =
+			const my_label =
 				label != 'auto'
 					? object[label]
 					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
@@ -64,8 +64,8 @@ export const getOptions = ({
 								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
-						  '/' +
-						  my_label
+							'/' +
+							my_label
 						: my_label,
 				value: object[value],
 				suggested: false
@@ -126,6 +126,7 @@ export interface ModelMapEntry {
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
 	filters?: SelectField[];
+	path?: string;
 }
 
 type ModelMap = {
@@ -204,9 +205,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'auditor', urlModel: 'users' }
+			{ field: 'auditor', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'users' }
 		],
-		filters: [{ field: 'threats' }, { field: 'risk_assessment' }]
+		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
 	'applied-controls': {
 		name: 'appliedcontrol',
@@ -365,7 +367,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' }
+			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
 		filters: [{ field: 'status' }]
@@ -383,7 +386,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'requirementAssessments',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'result' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
@@ -392,19 +395,41 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'stored-libraries': {
 		name: 'storedlibrary',
-		localName: 'stored library',
-		localNamePlural: 'stored libraries',
+		localName: 'storedLibrary',
+		localNamePlural: 'storedLibraries',
 		verboseName: 'stored Library',
 		verboseNamePlural: 'stored Libraries'
 	},
 	'loaded-libraries': {
 		name: 'loadedlibrary',
-		localName: 'loaded library',
-		localNamePlural: 'loaded libraries',
+		localName: 'loadedLibrary',
+		localNamePlural: 'loadedLibraries',
 		verboseName: 'loaded Library',
 		verboseNamePlural: 'loaded Libraries'
+	},
+	'sso-settings': {
+		name: 'ssoSettings',
+		localName: 'ssoSettings',
+		localNamePlural: 'ssoSettings',
+		verboseName: 'SSO settings',
+		verboseNamePlural: 'SSO settings',
+		selectFields: [{ field: 'provider' }]
+	},
+	'requirement-mapping-sets': {
+		name: 'requirementmappingset',
+		localName: 'requirementMappingSet',
+		localNamePlural: 'requirementMappingSets',
+		verboseName: 'Requirement mapping set',
+		verboseNamePlural: 'Requirement mapping sets',
+		foreignKeyFields: [
+			{ field: 'source_framework', urlModel: 'frameworks' },
+			{ field: 'target_framework', urlModel: 'frameworks' },
+			{ field: 'library', urlModel: 'libraries' }
+		]
 	}
 };
+
+export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 export const FIELD_COMPONENT_MAP = {
 	evidences: {
@@ -412,15 +437,15 @@ export const FIELD_COMPONENT_MAP = {
 	},
 	libraries: {
 		locale: LanguageDisplay,
-		actions: LibraryActions
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	// "stored-libraries": {
 	// 	locale: LanguageDisplay,
-	// 	actions: LibraryActions
+	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	// },
 	// "loaded-libraries": {
 	// 	locale: LanguageDisplay
-	// 	// actions: LibraryActions
+	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	// },
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
@@ -506,6 +531,14 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 			key: 'lc_status',
 			values: {
 				Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
+			}
+		}
+	},
+	users: {
+		email: {
+			key: 'is_sso',
+			values: {
+				true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
 			}
 		}
 	}

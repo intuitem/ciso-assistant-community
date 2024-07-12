@@ -52,11 +52,11 @@
                         {% for applied_control in applied_controls %}
                         <tr>
                             <td class="text-md p-2 text-center">{{ applied_control.name }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.description }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.category }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.eta }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.expiry_date }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.effort }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.description|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.get_category_display|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.eta|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.expiry_date|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.get_effort_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{% get_requirements_count applied_control compliance_assessment %}</td>
                         </tr>
                         {% empty %}

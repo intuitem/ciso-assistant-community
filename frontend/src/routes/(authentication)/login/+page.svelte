@@ -8,10 +8,9 @@
 
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { redirectToProvider } from '$lib/allauth.js';
 
 	export let data: PageData;
-
-	const cursor = false;
 </script>
 
 <div class="relative h-screen w-screen bg-slate-200">
@@ -78,6 +77,19 @@
 								</p>
 							</SuperForm>
 						</div>
+						{#if data.SSOInfo.is_enabled}
+							<div class="flex items-center justify-center w-full space-x-2">
+								<hr class="w-64 items-center bg-gray-200 border-0" />
+								<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+								<hr class="w-64 items-center bg-gray-200 border-0" />
+							</div>
+							<button
+								class="btn bg-gradient-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
+								on:click={() =>
+									redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
+								>{m.loginSSO()}</button
+							>
+						{/if}
 					</div>
 				</div>
 			</div>

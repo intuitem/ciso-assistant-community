@@ -1,19 +1,29 @@
 <script lang="ts">
+	import type { ComponentProps } from 'svelte';
 	import type { Writable } from 'svelte/store';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 
+	label = label ?? field;
+
 	export let form;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$: boolValue = value as Writable<boolean>;
+
+	$: classesHidden = (hidden: boolean) => (hidden ? 'hidden' : '');
+	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
 </script>
 
 <div>
-	<div class="flex flex-row space-x-2 items-center">
+	<div
+		class="flex flex-row space-x-2 items-center {classesHidden($$props.hidden)} {classesDisabled(
+			$$props.disabled
+		)}"
+	>
 		{#if label !== undefined}
 			{#if $constraints?.required}
 				<label class="text-sm font-semibold" for={field}
@@ -32,6 +42,7 @@
 				bind:checked={$boolValue}
 				{...$constraints}
 				{...$$restProps}
+				disabled={$$props.disabled}
 			/>
 		</div>
 	</div>
