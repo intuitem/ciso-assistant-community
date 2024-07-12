@@ -15,6 +15,7 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 	// $: value.set(cachedValue);
+	$value = cachedValue;
 	$: cachedValue = $value;
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
