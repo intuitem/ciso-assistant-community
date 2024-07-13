@@ -92,7 +92,9 @@
 		>
 			<a
 				href="/my-profile"
-				on:click={(e) => {window.location.href=e.target.href;}}
+				on:click={(e) => {
+					window.location.href = e.target.href;
+				}}
 				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2" />{m.myProfile()}</a
 			>
