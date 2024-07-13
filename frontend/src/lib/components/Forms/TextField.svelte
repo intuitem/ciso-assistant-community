@@ -25,8 +25,7 @@
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
-		if (cacheResult)
-			$value = cacheResult;
+		if (cacheResult) $value = cacheResult;
 	});
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');

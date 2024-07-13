@@ -11,15 +11,15 @@
 	export let data: PageData;
 	breadcrumbObject.set(data.object);
 
-	let debugStyle = "";
+	let debugStyle = '';
 	let debugClicked = false;
 	$: if (debugClicked) {
-		debugStyle = "border: 50px solid violet;";
+		debugStyle = 'border: 50px solid violet;';
 	} else {
-		debugStyle = "";
+		debugStyle = '';
 	}
 	let debugCodeElem = null;
-	let debugText = "...";
+	let debugText = '...';
 </script>
 
 <code style="font-size: 32px;border: 10px solid blue;" bind:this={debugCodeElem}>{debugText}</code>
@@ -32,13 +32,16 @@
 		<a
 			href="{$page.url.pathname}/set-password"
 			class="text-primary-700 hover:text-primary-500"
-			data-testid="set-password-btn" on:click={(e) => {
-				debugClicked=!debugClicked;
-				goto(`${$page.url.pathname}/set-password`).then(
-					res => {debugText = `[THEN] ${res}`;}
-				).catch(
-					err => {debugText = `[CATCH] ${err}`;}
-				);
+			data-testid="set-password-btn"
+			on:click={(e) => {
+				debugClicked = !debugClicked;
+				goto(`${$page.url.pathname}/set-password`)
+					.then((res) => {
+						debugText = `[THEN] ${res}`;
+					})
+					.catch((err) => {
+						debugText = `[CATCH] ${err}`;
+					});
 			}}>{m.setTemporaryPassword()}</a
 		>. {m.setTemporaryPassword2()}.
 	</p>

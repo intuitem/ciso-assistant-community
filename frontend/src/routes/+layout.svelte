@@ -41,10 +41,10 @@
 				$flash.type == 'success'
 					? 'variant-filled-success'
 					: $flash.type === 'error'
-						? 'variant-filled-error'
-						: $flash.type == 'warning'
-							? 'variant-filled-warning'
-							: 'variant-filled-primary'
+					? 'variant-filled-error'
+					: $flash.type == 'warning'
+					? 'variant-filled-warning'
+					: 'variant-filled-primary'
 		});
 
 		// Clearing the flash message could sometimes

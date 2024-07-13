@@ -28,8 +28,7 @@
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
-		if (cacheResult)
-			$value = cacheResult;
+		if (cacheResult) $value = cacheResult;
 	});
 
 	interface Option {
