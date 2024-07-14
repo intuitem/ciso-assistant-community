@@ -203,13 +203,7 @@
 							name="riskScenariosStatus"
 							title={m.riskScenariosStatus()}
 							values={data.riskScenariosPerStatus.values}
-						/>
-						<BarChart
-							classesContainer="basis-1/3 card p-4 bg-white"
-							name="usedMatrices"
-							title={m.usedRiskMatrices()}
-							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
-							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+							orientation="horizontal"
 						/>
 					</div>
 				</section>
