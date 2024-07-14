@@ -47,11 +47,6 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
-	...DOMAIN_FILTER,
-	getColumn: (row) => row.project.folder.str
-};
-
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
 	getColumn: (row) => row.meta.folder.str

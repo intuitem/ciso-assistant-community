@@ -50,6 +50,7 @@
 			{model}
 			{closeModal}
 			{context}
+			caching={true}
 			action="?/{formAction}"
 			{debug}
 		/>
