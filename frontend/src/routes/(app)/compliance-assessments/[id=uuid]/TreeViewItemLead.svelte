@@ -13,8 +13,8 @@
 	export let isScored: boolean;
 	export let max_score: number;
 
-	const leadResult = Object.hasOwn(m, resultI18n) ? m[resultI18n]() : m.notAssessed() ?? '';
-	const lead = Object.hasOwn(m, statusI18n) ? m[statusI18n]() : m.notAssessed() ?? '';
+	const leadResult = Object.hasOwn(m, resultI18n) ? m[resultI18n]() : (m.notAssessed() ?? '');
+	const lead = Object.hasOwn(m, statusI18n) ? m[statusI18n]() : (m.notAssessed() ?? '');
 
 	$: classesText = resultColor == '#000000' ? 'text-white' : '';
 </script>
