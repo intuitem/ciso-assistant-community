@@ -53,7 +53,7 @@
 				<span style="font-weight: 600;">
 					{title}
 				</span>
-				{#if assessableNodes.length > 1}
+				{#if assessableNodes.length > 0}
 					<span class="badge variant-soft-primary">
 						{assessableNodes.length}
 					</span>
