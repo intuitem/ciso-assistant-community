@@ -184,6 +184,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
+	'risk-assessment_duplicate': {
+		name: 'riskassessment',
+		localName: 'riskAssessment',
+		localNamePlural: 'riskAssessments',
+		verboseName: 'Risk assessment',
+		verboseNamePlural: 'Risk assessments',
+		foreignKeyFields: [
+			{ field: 'project', urlModel: 'projects' },
+		]
+	},
 	threats: {
 		name: 'threat',
 		localName: 'threat',

@@ -651,5 +651,7 @@
 	"notApplicableScore": "You cannot score if the requirement assessment is not applicable",
 	"maturity": "Maturity",
 	"progress": "Progress",
-	"back": "Back"
+	"back": "Back",
+	"duplicate": "Duplicate",
+	"duplicateRiskAssessment": "Duplicate risk assessment"
 }
