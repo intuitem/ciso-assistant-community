@@ -323,6 +323,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RiskAssessment
+    serializer_class = RiskAssessmentWriteSerializer
     filterset_fields = [
         "project",
         "project__folder",
@@ -546,6 +547,49 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+    
+    @action(detail=True, name="Duplicate risk assessment", methods=["post"])
+    def duplicate(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            risk_assessment = self.get_object()
+            data = request.data
+            duplicate_risk_assessment = RiskAssessment.objects.create(
+                name=data["name"],
+                description=data["description"],
+                project=Project.objects.get(id=data["project"]),
+                version=data["version"],
+                risk_matrix=risk_assessment.risk_matrix,
+                eta=risk_assessment.eta,
+                due_date=risk_assessment.due_date,
+                status=risk_assessment.status,
+            )
+            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
+            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+            for scenario in risk_assessment.risk_scenarios.all():
+                duplicate_scenario = RiskScenario.objects.create(
+                    risk_assessment=duplicate_risk_assessment,
+                    name=scenario.name,
+                    description=scenario.description,
+                    existing_controls=scenario.existing_controls,
+                    treatment=scenario.treatment,
+                    current_proba=scenario.current_proba,
+                    current_impact=scenario.current_impact,
+                    residual_proba=scenario.residual_proba,
+                    residual_impact=scenario.residual_impact,
+                    strength_of_knowledge=scenario.strength_of_knowledge,
+                    justification=scenario.justification,
+                )
+                duplicate_scenario.threats.set(scenario.threats.all())
+                duplicate_scenario.assets.set(scenario.assets.all())
+                duplicate_scenario.owner.set(scenario.owner.all())
+                for control in scenario.applied_controls.all():
+                    duplicate_scenario.applied_controls.add(control)
+                duplicate_scenario.save()
+            duplicate_risk_assessment.save()
+            return Response({"results": "risk assessment duplicated"})
 
 
 class AppliedControlViewSet(BaseModelViewSet):
