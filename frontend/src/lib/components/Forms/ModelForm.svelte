@@ -48,6 +48,8 @@
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
 
+	// test
+
 	function makeCacheLock(): CacheLock {
 		let resolve: (_: any) => any = (_) => _;
 		const promise = new Promise((res) => {
