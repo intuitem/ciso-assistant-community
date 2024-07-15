@@ -96,6 +96,26 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalDuplicateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.riskAssessmentDuplicateForm,
+				model: data.riskAssessmentModel,
+				debug: false,
+				riskAssessmentDuplication: true,
+				formAction: 'duplicate'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.duplicateRiskAssessment()
+		};
+		modalStore.trigger(modal);
+	}
+
 	const riskMap = (scenarios: RiskScenario[], risk_matrix: RiskMatrix) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
 		return scenarios.map((s) => {
@@ -159,52 +179,7 @@
 
 <main class="flex-grow main">
 	<div>
-		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
-			<div class="absolute right-2 top-2 py-2 px-4">
-				<a
-					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
-					class="btn variant-filled-primary"
-					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</a
-				>
-				<button class="btn variant-filled-primary" use:popup={popupDownload}
-					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
-				>
-				<div
-					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-					data-popup="popupDownload"
-				>
-					<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
-					<a
-						href="/risk-assessments/{risk_assessment.id}/export/pdf"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-					>
-					<a
-						href="/risk-assessments/{risk_assessment.id}/export/csv"
-						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-						>... {m.asCSV()}</a
-					>
-					<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
-					<a
-						href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-					>
-					<a
-						href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
-						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-						>... {m.asCSV()}</a
-					>
-				</div>
-				{#if canEditObject}
-					<a
-						href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
-						class="btn variant-filled-primary"
-						data-testid="edit-button"
-					>
-						<i class="fa-solid fa-edit mr-2" />
-						{m.edit()}</a
-					>
-				{/if}
-			</div>
+		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">	
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -254,6 +229,62 @@
 				<div class="text-sm" data-testid="description-field-value">
 					{risk_assessment.description ?? '-'}
 				</div>
+			</div>
+			<div class="flex flex-col space-y-2 ml-4">
+				<div class="flex flex-row space-x-2">
+					<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
+					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
+					>
+					<div
+						class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+						data-popup="popupDownload"
+					>
+						<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
+						<a
+							href="/risk-assessments/{risk_assessment.id}/export/pdf"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+						>
+						<a
+							href="/risk-assessments/{risk_assessment.id}/export/csv"
+							class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+							>... {m.asCSV()}</a
+						>
+						<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
+						<a
+							href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
+							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+						>
+						<a
+							href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
+							class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+							>... {m.asCSV()}</a
+						>
+					</div>
+					{#if canEditObject}
+					<a
+						href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
+						class="btn variant-filled-primary"
+						data-testid="edit-button"
+					>
+						<i class="fa-solid fa-edit mr-2" />
+						{m.edit()}</a
+					>
+				{/if}
+				</div>
+				<a
+					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
+					class="btn variant-filled-primary"
+					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</a
+				>
+				<span class="pt-4 font-light text-sm">Power-ups:</span>
+				<button
+						class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
+						on:click={(_) => modalDuplicateForm()}
+						data-testid="duplicate-button"
+					>
+					<i class="fa-solid fa-copy mr-2"></i>
+						{m.duplicate()}</button
+					>
 			</div>
 		</div>
 	</div>
