@@ -110,11 +110,14 @@ export const actions: Actions = {
 			};
 			const res = await fetch(endpoint, requestInitOptions);
 			if (!res.ok) {
-				const response = await res.json();
+				const response: Record<string, any> = await res.json();
 				console.log(response);
 				if (response.non_field_errors) {
 					setError(createForm, 'non_field_errors', response.non_field_errors);
 				}
+				Object.entries(response).forEach(([key, value]) => {
+					setError(createForm, key, value);
+				});
 				return fail(400, { form: createForm });
 			}
 			const modelVerboseName: string = urlParamModelVerboseName(urlModel);
