@@ -190,9 +190,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'riskAssessments',
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
-		foreignKeyFields: [
-			{ field: 'project', urlModel: 'projects' },
-		]
+		foreignKeyFields: [{ field: 'project', urlModel: 'projects' }]
 	},
 	threats: {
 		name: 'threat',

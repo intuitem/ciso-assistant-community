@@ -128,5 +128,13 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 	riskAssessmentModel.foreignKeys = foreignKeys;
 
-	return { risk_assessment, scenarioModel, scenariosTable, scenarioDeleteForm, scenarioCreateForm, riskAssessmentDuplicateForm, riskAssessmentModel };
+	return {
+		risk_assessment,
+		scenarioModel,
+		scenariosTable,
+		scenarioDeleteForm,
+		scenarioCreateForm,
+		riskAssessmentDuplicateForm,
+		riskAssessmentModel
+	};
 };
