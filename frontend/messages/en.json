@@ -474,6 +474,7 @@
 	"domainManager": "Domain manager",
 	"analyst": "Analyst",
 	"successfullyCreatedObject": "The {object} object has been successfully created",
+	"successfullyDuplicateObject": "The {object} object has been successfully duplicated",
 	"successfullyUpdatedObject": "The {object} object has been successfully updated",
 	"successfullySavedObject": "The {object} object has been successfully saved",
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
