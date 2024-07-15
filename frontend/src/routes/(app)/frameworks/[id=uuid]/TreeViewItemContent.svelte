@@ -47,7 +47,7 @@
 </script>
 
 <div>
-	<span class="whitespace-pre-line" style="font-weight: 300};">
+	<span class="whitespace-pre-line" style="font-weight: 300;">
 		<p class="max-w-[80ch]">
 			{#if title}
 				<span style="font-weight: 600;">
