@@ -179,7 +179,7 @@
 
 <main class="flex-grow main">
 	<div>
-		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">	
+		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
@@ -233,7 +233,7 @@
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
 					<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
-					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
+						><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
 					>
 					<div
 						class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
@@ -261,15 +261,15 @@
 						>
 					</div>
 					{#if canEditObject}
-					<a
-						href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
-						class="btn variant-filled-primary"
-						data-testid="edit-button"
-					>
-						<i class="fa-solid fa-edit mr-2" />
-						{m.edit()}</a
-					>
-				{/if}
+						<a
+							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
+							class="btn variant-filled-primary"
+							data-testid="edit-button"
+						>
+							<i class="fa-solid fa-edit mr-2" />
+							{m.edit()}</a
+						>
+					{/if}
 				</div>
 				<a
 					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
@@ -278,13 +278,13 @@
 				>
 				<span class="pt-4 font-light text-sm">Power-ups:</span>
 				<button
-						class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
-						on:click={(_) => modalDuplicateForm()}
-						data-testid="duplicate-button"
-					>
+					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
+					on:click={(_) => modalDuplicateForm()}
+					data-testid="duplicate-button"
+				>
 					<i class="fa-solid fa-copy mr-2"></i>
-						{m.duplicate()}</button
-					>
+					{m.duplicate()}</button
+				>
 			</div>
 		</div>
 	</div>

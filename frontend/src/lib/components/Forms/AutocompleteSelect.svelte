@@ -59,7 +59,7 @@
 	const default_value = nullable ? null : selectedValues[0];
 
 	$: {
-		$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
+		$value = multiple ? selectedValues : selectedValues[0] ?? default_value;
 		handleSelectChange();
 	}
 
