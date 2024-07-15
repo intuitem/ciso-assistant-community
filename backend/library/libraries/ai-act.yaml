@@ -2,13 +2,13 @@ urn: urn:intuitem:risk:library:ai-act
 locale: en
 ref_id: AI Act
 name: EU Artificial Intelligence Act (AI Act)
-description: REGULATION OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL laying down
-  harmonised rules on artificial intelligence and amending Regulations (EC) No 300/2008,
-  (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858, (EU) 2018/1139 and (EU) 2019/2144
-  and Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828 (Artificial Intelligence
-  Act)
+description: Regulation (EU) 2024/1689 of the European Parliament and of the Council
+  of 13 June 2024 laying down harmonised rules on artificial intelligence and amending
+  Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858,
+  (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797 and (EU)
+  2020/1828 (Artificial Intelligence Act).
 copyright: European Union law
-version: 1
+version: 2
 provider: EU
 packager: intuitem
 objects:
@@ -16,11 +16,11 @@ objects:
     urn: urn:intuitem:risk:framework:ai-act
     ref_id: AI Act
     name: EU Artificial Intelligence Act
-    description: REGULATION OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL laying down
-      harmonised rules on artificial intelligence and amending Regulations (EC) No
-      300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858, (EU) 2018/1139
-      and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828
-      (Artificial Intelligence Act)
+    description: Regulation (EU) 2024/1689 of the European Parliament and of the Council
+      of 13 June 2024 laying down harmonised rules on artificial intelligence and
+      amending Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU)
+      2018/858, (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU)
+      2016/797 and (EU) 2020/1828 (Artificial Intelligence Act).
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ai-act:node2
       assessable: false
@@ -32,7 +32,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ai-act:node2
       ref_id: Recital 1
       description: "The purpose of this Regulation is to improve the functioning of\
-        \ the internal market by\nlaying down a uniform legal framework in particular\
+        \ the internal market by laying down a uniform legal framework in particular\
         \ for the development, the placing on the market, the putting into service\
         \ and the use of artificial intelligence systems (AI systems) in the Union,\
         \ in accordance with Union values, to promote the uptake of human centric\
@@ -190,22 +190,22 @@ objects:
         \ Member States as well as the right to negotiate, to conclude and enforce\
         \ collective agreements or to take collective action in accordance with national\
         \ law.\nThis Regulation should not affect the provisions aiming to improve\
-        \ working conditions in platform work laid down in Directive (EU) 2024/...\
-        \ of the European Parliament and of the Council. Moreover, this Regulation\
-        \ aims to strengthen the effectiveness of such existing rights and remedies\
-        \ by establishing specific requirements and obligations, including in respect\
-        \ of transparency, technical documentation and record-keeping of AI systems.\
-        \ Furthermore, the obligations placed on various operators involved in the\
-        \ AI value chain under this Regulation should apply without prejudice to national\
-        \ law, in accordance with Union law, having the effect of limiting the use\
-        \ of certain AI systems where such law falls outside the scope of this Regulation\
-        \ or pursues other legitimate public interest objectives than those pursued\
-        \ by this Regulation. For example, national labour law and law on the protection\
-        \ of minors, namely persons below the age of 18, taking into account the United\
-        \ Nations General Comment No 25 (2021) on children\u2019s rights in relation\
-        \ to the digital environment, insofar as they are not specific to AI systems\
-        \ and pursue other legitimate public interest objectives, should not be affected\
-        \ by this Regulation."
+        \ working conditions in platform work laid down in a Directive of the European\
+        \ Parliament and of the Council on improving working conditions in platform\
+        \ work. Moreover, this Regulation aims to strengthen the effectiveness of\
+        \ such existing rights and remedies by establishing specific requirements\
+        \ and obligations, including in respect of transparency, technical documentation\
+        \ and record-keeping of AI systems. Furthermore, the obligations placed on\
+        \ various operators involved in the AI value chain under this Regulation should\
+        \ apply without prejudice to national law, in accordance with Union law, having\
+        \ the effect of limiting the use of certain AI systems where such law falls\
+        \ outside the scope of this Regulation or pursues other legitimate public\
+        \ interest objectives than those pursued by this Regulation. For example,\
+        \ national labour law and law on the protection of minors, namely persons\
+        \ below the age of 18, taking into account the United Nations General Comment\
+        \ No 25 (2021) on children\u2019s rights in relation to the digital environment,\
+        \ insofar as they are not specific to AI systems and pursue other legitimate\
+        \ public interest objectives, should not be affected by this Regulation."
     - urn: urn:intuitem:risk:req_node:ai-act:recital-10
       assessable: false
       depth: 2
@@ -1512,7 +1512,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ai-act:node2
       ref_id: Recital 62
       description: Without prejudice to the rules provided for in Regulation (EU)
-        2024/... of the European Parliament and of the Council, and in order to address
+        2024/900 of the European Parliament and of the Council, and in order to address
         the risks of undue external interference to the right to vote enshrined in
         Article 39 of the Charter, and of adverse effects on democracy and the rule
         of law, AI systems intended to be used to influence the outcome of an election
@@ -1878,22 +1878,25 @@ objects:
       ref_id: Recital 77
       description: Without prejudice to the requirements related to robustness and
         accuracy set out in this Regulation, high-risk AI systems which fall within
-        the scope of the Regulation (EU) 2024/... of the European Parliament and of
-        the Council38+, in accordance with Article 8 of that Regulation may demonstrate
-        compliance with the cybersecurity requirements of this Regulation by fulfilling
-        the essential cybersecurity requirements set out in Article 10 of, and Annex
-        I to, Regulation (EU) 2024/...++.When high-risk AI systems fulfil the essential
-        requirements of Regulation (EU) 2024/...++, they should be deemed compliant
-        with the cybersecurity requirements set out in this Regulation in so far as
-        the achievement of those requirements is demonstrated in the EU declaration
-        of conformity or parts thereof issued under Regulation (EU) 2024/...++. For
-        this purpose, the assessment of the cybersecurity risks, associated to a product
-        with digital elements classified as high-risk AI system according to this
-        Regulation, carried out under Regulation (EU) 2024/...++, should consider
-        risks to the cyber resilience of an AI system as regards attempts by unauthorised
-        third parties to alter its use, behaviour or performance, including AI specific
-        vulnerabilities such as data poisoning or adversarial attacks, as well as,
-        as relevant, risks to fundamental rights as required by this Regulation.
+        the scope of a regulation of the European Parliament and of the Council on
+        horizontal cybersecurity requirements for products with digital elements,
+        in accordance with that regulation may demonstrate compliance with the cybersecurity
+        requirements of this Regulation by fulfilling the essential cybersecurity
+        requirements set out in that regulation. When high-risk AI systems fulfil
+        the essential requirements of a regulation of the European Parliament and
+        of the Council on horizontal cybersecurity requirements for products with
+        digital elements, they should be deemed compliant with the cybersecurity requirements
+        set out in this Regulation in so far as the achievement of those requirements
+        is demonstrated in the EU declaration of conformity or parts thereof issued
+        under that regulation. To that end, the assessment of the cybersecurity risks,
+        associated to a product with digital elements classified as high-risk AI system
+        according to this Regulation, carried out under a regulation of the European
+        Parliament and of the Council on horizontal cybersecurity requirements for
+        products with digital elements, should consider risks to the cyber resilience
+        of an AI system as regards attempts by unauthorised third parties to alter
+        its use, behaviour or performance, including AI specific vulnerabilities such
+        as data poisoning or adversarial attacks, as well as, as relevant, risks to
+        fundamental rights as required by this Regulation.
     - urn: urn:intuitem:risk:req_node:ai-act:recital-78
       assessable: false
       depth: 2
@@ -1901,34 +1904,38 @@ objects:
       ref_id: Recital 78
       description: The conformity assessment procedure provided by this Regulation
         should apply in relation to the essential cybersecurity requirements of a
-        product with digital elements covered by Regulation (EU) 2024/...+ and classified
-        as a high-risk AI system under this Regulation. However, this rule should
-        not result in reducing the necessary level of assurance for critical products
-        with digital elements covered by Regulation (EU) 2024/...+. Therefore, by
-        way of derogation from this rule, high-risk AI systems that fall within the
-        scope of this Regulation and are also qualified as important and critical
-        products with digital elements pursuant to Regulation (EU) 2024/...+ and to
-        which the conformity assessment procedure based on internal control set out
-        in an annex to this Regulation applies, are subject to the conformity assessment
-        provisions of Regulation (EU) 2024/...+ insofar as the essential cybersecurity
-        requirements of that Regulation are concerned. In this case, for all the other
-        aspects covered by this Regulation the respective provisions on conformity
-        assessment based on internal control set out in an annex to this Regulation
-        should apply. Building on the knowledge and expertise of ENISA on the cybersecurity
-        policy and tasks assigned to ENISA under the Regulation (EU) 2019/1020, the
-        Commission should cooperate with ENISA on issues related to cybersecurity
+        product with digital elements covered by a regulation of the European Parliament
+        and of the Council on horizontal cybersecurity requirements for products with
+        digital elements and classified as a high-risk AI system under this Regulation.
+        However, this rule should not result in reducing the necessary level of assurance
+        for critical products with digital elements covered by a regulation of the
+        European Parliament and of the Council on horizontal cybersecurity requirements
+        for products with digital elements. Therefore, by way of derogation from this
+        rule, high-risk AI systems that fall within the scope of this Regulation and
+        are also qualified as important and critical products with digital elements
+        pursuant to a regulation of the European Parliament and of the Council on
+        horizontal cybersecurity requirements for products with digital elements and
+        to which the conformity assessment procedure based on internal control set
+        out in an annex to this Regulation applies, are subject to the conformity
+        assessment provisions of a regulation of the European Parliament and of the
+        Council on horizontal cybersecurity requirements for products with digital
+        elements insofar as the essential cybersecurity requirements of that regulation
+        are concerned. In this case, for all the other aspects covered by this Regulation
+        the respective provisions on conformity assessment based on internal control
+        set out in an annex to this Regulation should apply. Building on the knowledge
+        and expertise of ENISA on the cybersecurity policy and tasks assigned to ENISA
+        under the Regulation (EU) 2019/881 of the European Parliament and of the Council,
+        the Commission should cooperate with ENISA on issues related to cybersecurity
         of AI systems.
     - urn: urn:intuitem:risk:req_node:ai-act:recital-79
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:ai-act:node2
       ref_id: Recital 79
-      description: 'It is appropriate that a specific natural or legal person, defined
-        as the provider, takes the
-
-        responsibility for the placing on the market or the putting into service of
-        a high-risk AI system, regardless of whether that natural or legal person
-        is the person who designed or developed the system.'
+      description: It is appropriate that a specific natural or legal person, defined
+        as the provider, takes the responsibility for the placing on the market or
+        the putting into service of a high-risk AI system, regardless of whether that
+        natural or legal person is the person who designed or developed the system.
     - urn: urn:intuitem:risk:req_node:ai-act:recital-80
       assessable: false
       depth: 2
@@ -3859,24 +3866,22 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:ai-act:node2
       ref_id: Recital 174
-      description: Given the rapid technological developments and the required technical
-        expertise in the effective application of this Regulation, the Commission
-        should evaluate and review this Regulation by ... [five years from the date
-        of entry into force of this Regulation] and every four years thereafter and
-        report to the European Parliament and the Council. In addition, taking into
-        account the implications for the scope of this Regulation, the Commission
+      description: Given the rapid technological developments and the technical expertise
+        required to effectively apply this Regulation, the Commission should evaluate
+        and review this Regulation by 2 August 2029 and every four years thereafter
+        and report to the European Parliament and the Council. In addition, taking
+        into account the implications for the scope of this Regulation, the Commission
         should carry out an assessment of the need to amend the list of high-risk
         AI systems and the list of prohibited practices once a year. Moreover, by
-        two years after entry into application and every four years thereafter, the
-        Commission should evaluate and report to the European Parliament and to the
-        Council on the need to amend the list of high-risk areas in the annex to this
-        Regulation, the AI systems within the scope of the transparency obligations,
-        the effectiveness of the supervision and governance system and the progress
-        on the development of standardisation deliverables on energy efficient development
-        of general-purpose AI models, including the need for further measures or actions.
-        Finally, by ... [four years from the entry into force of this Regulation]
-        and every three years thereafter, the Commission should evaluate the impact
-        and effectiveness of voluntary codes of conduct to foster the application
+        2 August 2028 and every four years thereafter, the Commission should evaluate
+        and report to the European Parliament and to the Council on the need to amend
+        the list of high-risk areas headings in the annex to this Regulation, the
+        AI systems within the scope of the transparency obligations, the effectiveness
+        of the supervision and governance system and the progress on the development
+        of standardisation deliverables on energy efficient development of general-purpose
+        AI models, including the need for further measures or actions. Finally, by
+        2 August 2028 and every three years thereafter, the Commission should evaluate
+        the impact and effectiveness of voluntary codes of conduct to foster the application
         of the requirements provided for high-risk AI systems in the case of AI systems
         other than high-risk AI systems and possibly other additional requirements
         for such AI systems.
@@ -3939,30 +3944,26 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:ai-act:node2
       ref_id: Recital 179
-      description: This Regulation should apply from ... [two years from the date
-        of entry into force of this Regulation]. However, taking into account the
-        unacceptable risk associated with the use of AI in certain ways, the prohibitions
-        should apply already from ... [six months from the date of entry into force
-        of this Regulation]. While the full effect of those prohibitions follows with
-        the establishment of the governance and enforcement of this Regulation, anticipating
-        the application of the prohibitions is important to take account of unacceptable
-        risks and to have an effect on other procedures, such as in civil law. Moreover,
-        the infrastructure related to the governance and the conformity assessment
-        system should be operational before that date, therefore the provisions on
-        notified bodies and governance structure should apply from ... [ 12 months
-        from the date of entry into force of this Regulation]. Given the rapid pace
-        of technological advancements and adoption of general-purpose AI models, obligations
-        for providers of general-purpose AI models should apply from ... [12 months
-        from the date of entry into force of this Regulation]. Codes of practice should
-        be ready by... [9 months from the date of entry into force of this Regulation]
-        in view of enabling providers to demonstrate compliance on time. The AI Office
-        should ensure that classification rules and procedures are up to date in light
-        of technological developments. In addition, Member States should lay down
-        and notify to the Commission the rules on penalties, including administrative
-        fines, and ensure that they are properly and effectively implemented by the
-        date of application of this Regulation. Therefore the provisions on penalties
-        should apply from ... [12 months from the date of entry into force of this
-        Regulation].
+      description: This Regulation should apply from 2 August 2026. However, taking
+        into account the unacceptable risk associated with the use of AI in certain
+        ways, the prohibitions as well as the general provisions of this Regulation
+        should already apply from 2 February 2025. While the full effect of those
+        prohibitions follows with the establishment of the governance and enforcement
+        of this Regulation, anticipating the application of the prohibitions is important
+        to take account of unacceptable risks and to have an effect on other procedures,
+        such as in civil law. Moreover, the infrastructure related to the governance
+        and the conformity assessment system should be operational before 2 August
+        2026, therefore the provisions on notified bodies and governance structure
+        should apply from 2 August 2025. Given the rapid pace of technological advancements
+        and adoption of general-purpose AI models, obligations for providers of general-purpose
+        AI models should apply from 2 August 2025. Codes of practice should be ready
+        by 2 May 2025 in view of enabling providers to demonstrate compliance on time.
+        The AI Office should ensure that classification rules and procedures are up
+        to date in light of technological developments. In addition, Member States
+        should lay down and notify to the Commission the rules on penalties, including
+        administrative fines, and ensure that they are properly and effectively implemented
+        by the date of application of this Regulation. Therefore the provisions on
+        penalties should apply from 2 August 2025.
     - urn: urn:intuitem:risk:req_node:ai-act:recital-180
       assessable: false
       depth: 2
@@ -5217,11 +5218,10 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ai-act:node302
       ref_id: '6.5'
       description: "The Commission shall, after consulting the European Artificial\
-        \ Intelligence Board (the \u2018Board\u2019), and no later than ... [18 months\
-        \ from the date of entry into force of this Regulation], provide guidelines\
-        \ specifying the practical implementation of this Article in line with Article\
-        \ 96 together with a comprehensive list of practical examples of use cases\
-        \ of AI systems that are high-risk and not high-risk."
+        \ Intelligence Board (the \u2018Board\u2019), and no later than 2 February\
+        \ 2026, provide guidelines specifying the practical implementation of this\
+        \ Article in line with Article 96 together with a comprehensive list of practical\
+        \ examples of use cases of AI systems that are high-risk and not high-risk."
     - urn: urn:intuitem:risk:req_node:ai-act:6.6
       assessable: false
       depth: 4
@@ -9433,10 +9433,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ai-act:node765
       ref_id: '56.9'
-      description: Codes of practice shall be ready at the latest by ... [nine months
-        from the date of entry into force of this Regulation]. The AI Office shall
-        take the necessary steps, including inviting providers pursuant to paragraph
-        7.
+      description: Codes of practice shall be ready at the latest by 2 May 2025. The
+        AI Office shall take the necessary steps, including inviting providers pursuant
+        to paragraph 7.
     - urn: urn:intuitem:risk:req_node:ai-act:node780
       assessable: false
       depth: 1
@@ -9455,9 +9454,8 @@ objects:
       ref_id: '57.1'
       description: 'Member States shall ensure that their competent authorities establish
         at least one AI regulatory sandbox at national level, which shall be operational
-        by ... [24 months from the date of entry into force of this Regulation]. That
-        sandbox may also be established jointly with the competent authorities of
-        one or more other Member States. The Commission may provide technical support,
+        by 2 August 2026. That sandbox may also be established jointly with the competent
+        authorities of other Member States. The Commission may provide technical support,
         advice and tools for the establishment and operation of AI regulatory sandboxes.
 
         The obligation under the first subparagraph may also be fulfilled by participating
@@ -10749,11 +10747,10 @@ objects:
         tasks of those authorities, as well as any subsequent changes thereto. Member
         States shall make publicly available information on how competent authorities
         and single points of contact can be contacted, through electronic communication
-        means by... [12 months from the date of entry into force of this Regulation].
-        Member States shall designate a market surveillance authority to act as the
-        single point of contact for this Regulation, and shall notify the Commission
-        of the identity of the single point of contact. The Commission shall make
-        a list of the single points of contact publicly available.
+        means by 2 August 2025. Member States shall designate a market surveillance
+        authority to act as the single point of contact for this Regulation, and shall
+        notify the Commission of the identity of the single point of contact. The
+        Commission shall make a list of the single points of contact publicly available.
     - urn: urn:intuitem:risk:req_node:ai-act:70.3
       assessable: false
       depth: 4
@@ -10789,11 +10786,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ai-act:node898
       ref_id: '70.6'
-      description: By ..., [one year from the date of entry into force of this Regulation]
-        and once every two years thereafter, Member States shall report to the Commission  on
-        the status of the financial and human resources of the national competent
-        authorities, with an assessment of their adequacy. The Commission shall transmit
-        that information to the Board for discussion and possible recommendations.
+      description: By 2 August 2025, and once every two years thereafter, Member States
+        shall report to the Commission on the status of the financial and human resources
+        of the national competent authorities, with an assessment of their adequacy.
+        The Commission shall transmit that information to the Board for discussion
+        and possible recommendations.
     - urn: urn:intuitem:risk:req_node:ai-act:70.7
       assessable: false
       depth: 4
@@ -10939,10 +10936,9 @@ objects:
         monitoring plan. The post-market monitoring plan shall be part of the technical
         documentation referred to in Annex IV. The Commission shall adopt an implementing
         act laying down detailed provisions establishing a template for the post-market
-        monitoring plan and the list of elements to be included in the plan by ...
-        [six months before the entry into application of this Regulation]. That implementing
-        act shall be adopted in accordance with the examination procedure referred
-        to in Article 98(2).
+        monitoring plan and the list of elements to be included in the plan by 2 February
+        2026. That implementing act shall be adopted in accordance with the examination
+        procedure referred to in Article 98(2).
     - urn: urn:intuitem:risk:req_node:ai-act:72.4
       assessable: true
       depth: 4
@@ -11048,13 +11044,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ai-act:node924
       ref_id: '73.8'
-      description: Upon receiving a notification related to a serious incident referred
-        to in Article 3, point (44)(c), the relevant market surveillance authority
-        shall inform the national public authorities or bodies referred to in Article
-        77(1). The Commission shall develop dedicated guidance to facilitate compliance
-        with the obligations set out in paragraph 1 of this Article. That guidance
-        shall be issued by ... [12 months after the entry into force of this Regulation],
-        and shall be assessed regularly.
+      description: The market surveillance authority shall take appropriate measures,
+        as provided for in Article 19 of Regulation (EU) 2019/1020, within seven days
+        from the date it received the notification referred to in paragraph 1 of this
+        Article, and shall follow the notification procedures as provided in that
+        Regulation.
     - urn: urn:intuitem:risk:req_node:ai-act:73.9
       assessable: false
       depth: 4
@@ -11413,11 +11407,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ai-act:node963
       ref_id: '77.2'
-      description: By ... [three months after the entry into force of this Regulation],
-        each Member State shall identify the public authorities or bodies referred
-        to in paragraph 1 and make a list of them publicly available  . Member States
-        shall notify the list to the Commission and to the other Member States, and
-        shall keep the list up to date.
+      description: By 2 November 2024, each Member State shall identify the public
+        authorities or bodies referred to in paragraph 1 and make a list of them publicly
+        available. Member States shall notify the list to the Commission and to the
+        other Member States, and shall keep the list up to date.
     - urn: urn:intuitem:risk:req_node:ai-act:77.3
       assessable: false
       depth: 4
@@ -12443,15 +12436,15 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1068
       ref_id: '97.2'
-      description: The power to adopt delegated acts referred to in Article 6(6),
-        Article 7(1) and (3), Article 11(3), Article 43(5) and (6), Article 47(5),
+      description: The power to adopt delegated acts referred to in Article 6(6) and
+        (7), Article 7(1) and (3), Article 11(3), Article 43(5) and (6), Article 47(5),
         Article 51(3), Article 52(4) and Article 53(5) and (6) shall be conferred
-        on the Commission for a period of five years from ... [date of entry into
-        force of this Regulation]. The Commission shall draw up a report in respect
-        of the delegation of power not later than nine months before the end of the
-        five-year period. The delegation of power shall be tacitly extended for periods
-        of an identical duration, unless the European Parliament or the Council opposes
-        such extension not later than three months before the end of each period.
+        on the Commission for a period of five years from 1 August 2024. The Commission
+        shall draw up a report in respect of the delegation of power not later than
+        nine months before the end of the five-year period. The delegation of power
+        shall be tacitly extended for periods of an identical duration, unless the
+        European Parliament or the Council opposes such extension not later than three
+        months before the end of each period.
     - urn: urn:intuitem:risk:req_node:ai-act:97.3
       assessable: false
       depth: 3
@@ -12874,7 +12867,7 @@ objects:
         \ subparagraph is added:\n\u2018When adopting detailed measures related to\
         \ technical specifications and procedures for approval and use of security\
         \ equipment concerning Artificial Intelligence systems within the meaning\
-        \ of Regulation (EU) 2024/... of the European Parliament and of the Council*+,\
+        \ of Regulation (EU) 2024/1689 of the European Parliament and of the Council,\
         \ the requirements set out in Title III, Chapter 2 of that Regulation shall\
         \ be taken into account."
     - urn: urn:intuitem:risk:req_node:ai-act:node1109
@@ -12891,8 +12884,8 @@ objects:
       description: "In Article 17(5) of Regulation (EU) No 167/2013, the following\
         \ subparagraph is added:\n\u2018When adopting delegated acts pursuant to the\
         \ first subparagraph concerning artificial intelligence systems which are\
-        \ safety components within the meaning of Regulation (EU) 2024/... of the\
-        \ European Parliament and of the Council*+, the requirements set out in Title\
+        \ safety components within the meaning of Regulation (EU) 2024/1689 of the\
+        \ European Parliament and of the Council, the requirements set out in Title\
         \ III, Chapter 2 of that Regulation shall be taken into account."
     - urn: urn:intuitem:risk:req_node:ai-act:node1111
       assessable: false
@@ -12908,8 +12901,8 @@ objects:
       description: "In Article 22(5) of Regulation (EU) No 168/2013, the following\
         \ subparagraph is added:\n\u2018When adopting delegated acts pursuant to the\
         \ first subparagraph concerning Artificial Intelligence systems which are\
-        \ safety components within the meaning of Regulation (EU) 2024/... of the\
-        \ European Parliament and of the Council*+, the requirements set out in Title\
+        \ safety components within the meaning of Regulation (EU) 2024/1689 of the\
+        \ European Parliament and of the Council, the requirements set out in Title\
         \ III, Chapter 2 of that Regulation shall be taken into account."
     - urn: urn:intuitem:risk:req_node:ai-act:node1113
       assessable: false
@@ -12924,8 +12917,8 @@ objects:
       ref_id: '105.1'
       description: "In Article 8 of Directive 2014/90/EU, the following paragraph\
         \ is added:\n\u20185. For Artificial Intelligence systems which are safety\
-        \ components within the meaning of Regulation (EU) 2024/... of the European\
-        \ Parliament and of the Council*+, when carrying out its activities pursuant\
+        \ components within the meaning of Regulation (EU) 2024/1689 of the European\
+        \ Parliament and of the Council, when carrying out its activities pursuant\
         \ to paragraph 1 and when adopting technical specifications and testing standards\
         \ in accordance with paragraphs 2 and 3, the Commission shall take into account\
         \ the requirements set out in Title III, Chapter 2 of that Regulation."
@@ -12944,7 +12937,7 @@ objects:
         \ is added:\n\u201812. When adopting delegated acts pursuant to paragraph\
         \ 1 and implementing acts pursuant to paragraph 11 concerning Artificial Intelligence\
         \ systems which are safety components within the meaning of Regulation (EU)\
-        \ 2024/... of the European Parliament and of the Council*+, the requirements\
+        \ 2024/1689 of the European Parliament and of the Council, the requirements\
         \ set out in Title III, Chapter 2 of that Regulation shall be taken into account."
     - urn: urn:intuitem:risk:req_node:ai-act:node1117
       assessable: false
@@ -12960,8 +12953,8 @@ objects:
       description: "In Article 5 of Regulation (EU) 2018/858 the following paragraph\
         \ is added:\n\u20184. When adopting delegated acts pursuant to paragraph 3\
         \ concerning Artificial Intelligence systems which are safety components within\
-        \ the meaning of Regulation (EU) 2024/... of the European Parliament and of\
-        \ the Council*+, the requirements set out in Title III, Chapter 2 of that\
+        \ the meaning of Regulation (EU) 2024/1689 of the European Parliament and\
+        \ of the Council, the requirements set out in Title III, Chapter 2 of that\
         \ Regulation shall be taken into account."
     - urn: urn:intuitem:risk:req_node:ai-act:node1119
       assessable: false
@@ -12978,31 +12971,31 @@ objects:
         \ 17, the following paragraph is added:\n\u20183. Without prejudice to paragraph\
         \ 2, when adopting implementing acts pursuant to paragraph 1 concerning Artificial\
         \ Intelligence systems which are safety components within the meaning of Regulation\
-        \ (EU) 2024/... of the European Parliament and of the Council*+, the requirements\
+        \ (EU) 2024/1689 of the European Parliament and of the Council, the requirements\
         \ set out in Title III, Chapter 2 of that Regulation shall be taken into account.\n\
         the Council*+, the requirements set out in Title III, Chapter 2 of that Regulation\
         \ shall be taken into account.\n(2) in Article 19, the following paragraph\
         \ is added:\n\u20184. When adopting delegated acts pursuant to paragraphs\
         \ 1 and 2 concerning Artificial Intelligence systems which are safety components\
-        \ within the meaning of Regulation (EU) 2024/...++, the requirements set out\
+        \ within the meaning of Regulation (EU) 2024/1689, the requirements set out\
         \ in Title III, Chapter 2 of that Regulation shall be taken into account.\u2019\
         ;\n(3) in Article 43, the following paragraph is added:\n\u20184. When adopting\
         \ implementing acts pursuant to paragraph 1 concerning Artificial Intelligence\
         \ systems which are safety components within the meaning of Regulation (EU)\
-        \ 2024/...+, the requirements set out in Title III, Chapter 2 of that Regulation\
+        \ 2024/1689, the requirements set out in Title III, Chapter 2 of that Regulation\
         \ shall be taken into account.\u2019;\n(4) in Article 47, the following paragraph\
         \ is added:\n\u20183. When adopting delegated acts pursuant to paragraphs\
         \ 1 and 2 concerning Artificial Intelligence systems which are safety components\
-        \ within the meaning of Regulation (EU) 2024/...+, the requirements set out\
+        \ within the meaning of Regulation (EU) 2024/1689, the requirements set out\
         \ in Title III, Chapter 2 of that Regulation shall be taken into account.\u2019\
         ;\n(5) in Article 57, the following subparagraph is added:\n\u2018When adopting\
         \ those implementing acts concerning Artificial Intelligence systems which\
-        \ are safety components within the meaning of Regulation (EU) 2024/...+, the\
+        \ are safety components within the meaning of Regulation (EU) 2024/1689, the\
         \ requirements set out in Title III, Chapter 2 of that Regulation shall be\
         \ taken into account.\u2019;\n(6) in Article 58, the following paragraph is\
         \ added:\n\u20183. When adopting delegated acts pursuant to paragraphs 1 and\
         \ 2 concerning Artificial Intelligence systems which are safety components\
-        \ within the meaning of Regulation (EU) 2024/...+, the requirements set out\
+        \ within the meaning of Regulation (EU) 2024/1689, the requirements set out\
         \ in Title III, Chapter 2 of that Regulation shall be taken into account.\u2019\
         ."
     - urn: urn:intuitem:risk:req_node:ai-act:node1121
@@ -13017,11 +13010,11 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1121
       ref_id: '109.1'
       description: "In Article 11 of Regulation (EU) 2019/2144, the following paragraph\
-        \ is added:\n\u20183. When adopting the implementing acts pursuant to paragraph\
+        \ is added:\n\u20183.   When adopting the implementing acts pursuant to paragraph\
         \ 2, concerning artificial intelligence systems which are safety components\
-        \ within the meaning of Regulation (EU) 2024/... of the European Parliament\
-        \ and of the Council*++, the requirements set out in Title III, Chapter 2\
-        \ of that Regulation shall be taken into account."
+        \ within the meaning of Regulation (EU) 2024/1689 of the European Parliament\
+        \ and of the Council (*8), the requirements set out in Chapter III, Section\
+        \ 2, of that Regulation shall be taken into account."
     - urn: urn:intuitem:risk:req_node:ai-act:node1123
       assessable: false
       depth: 2
@@ -13034,10 +13027,13 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1123
       ref_id: '110.1'
       description: "In Annex I to Directive (EU) 2020/1828 of the European Parliament\
-        \ and of the Council61, the following point is added:\n\u2018(68)\nRegulation\
-        \ (EU) 2024/... of the European Parliament and of the Council laying down\
-        \ harmonised rules on artificial intelligence (Artificial Intelligence Act)\
-        \ and amending certain Union legislative acts (OJ L, ..., ELI: ...)\u2019."
+        \ and of the Council (58), the following point is added:\n\u2018(68) Regulation\
+        \ (EU) 2024/1689 of the European Parliament and of the Council of 13 June\
+        \ 2024 laying down harmonised rules on artificial intelligence and amending\
+        \ Regulations (EC) No 300/2008, (EU) No 167/2013, (EU) No 168/2013, (EU) 2018/858,\
+        \ (EU) 2018/1139 and (EU) 2019/2144 and Directives 2014/90/EU, (EU) 2016/797\
+        \ and (EU) 2020/1828 (Artificial Intelligence Act) (OJ L, 2024/1689, 12.7.2024,\
+        \ ELI: http://data.europa.eu/eli/reg/2024/1689/oj).\u2019."
     - urn: urn:intuitem:risk:req_node:ai-act:node1125
       assessable: false
       depth: 2
@@ -13049,34 +13045,30 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1125
       ref_id: '111.1'
-      description: '1. Without prejudice to the application of Article 5 as referred
+      description: '1.   Without prejudice to the application of Article 5 as referred
         to in Article 113(3), point (a), AI systems which are components of the large-scale
         IT systems established by the legal acts listed in Annex X that have been
-        placed on the market or put into service before ... [36 months from the date
-        of entry into force of this Regulation] shall be brought into compliance with
-        this Regulation by 31 December 2030.
+        placed on the market or put into service before 2 August 2027 shall be brought
+        into compliance with this Regulation by 31 December 2030.
 
-        The requirements laid down in this Regulation shall be taken into account  in
-        the evaluation of each large-scale IT system established by the legal acts
+        The requirements laid down in this Regulation shall be taken into account
+        in the evaluation of each large-scale IT system established by the legal acts
         listed in Annex X to be undertaken as provided for in those legal acts and
         where those legal acts are replaced or amended.
 
-        2. Without prejudice to the application of Article 5 as referred to in Article
+        2.   Without prejudice to the application of Article 5 as referred to in Article
         113(3), point (a), this Regulation shall apply to operators of high-risk AI
         systems, other than the systems referred to in paragraph 1 of this Article,
-        that have been placed on the market or put into service before ... [24 months
-        from the date of entry into force of this Regulation], only if, as from that
-        date, those systems are subject to significant changes in their designs. In
-        the case of high-risk AI systems intended to be used by public authorities,
-        the providers and deployers of such systems shall take the necessary steps
-        to comply with the requirements of this Regulation by ...[ six years from
-        the date of entry into force of this Regulation].
+        that have been placed on the market or put into service before 2 August 2026,
+        only if, as from that date, those systems are subject to significant changes
+        in their designs. In any case, the providers and deployers of high-risk AI
+        systems intended to be used by public authorities shall take the necessary
+        steps to comply with the requirements and obligations of this Regulation by
+        2 August 2030.
 
-        3. Providers of general-purpose AI models that have been placed on the market
-        before ... [12 months from the date of entry into force of this Regulation]
-        shall take the necessary steps in order to comply with the obligations laid
-        down in this Regulation by ... [36 months from the date of entry into force
-        of this Regulation].'
+        3.   Providers of general-purpose AI models that have been placed on the market
+        before 2 August 2025 shall take the necessary steps in order to comply with
+        the obligations laid down in this Regulation by 2 August 2027.'
     - urn: urn:intuitem:risk:req_node:ai-act:node1127
       assessable: false
       depth: 2
@@ -13089,15 +13081,14 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1127
       ref_id: '112.1'
       description: '1. The Commission shall assess the need for amendment of the list
-        in Annex III and of the list of prohibited AI practices in Article 5, once
-        a year following the entry into force of this Regulation, and until the end
-        of the period of the delegation of power set out in Article 97. The Commission
-        shall submit the findings of that assessment to the European Parliament and
-        the Council.
+        set out in Annex III and of the list of prohibited AI practices laid down
+        in Article 5, once a year following the entry into force of this Regulation,
+        and until the end of the period of the delegation of power laid down in Article
+        97. The Commission shall submit the findings of that assessment to the European
+        Parliament and the Council.
 
-        2. By ... [four years from the date of entry into force of this Regulation]
-        and every four years thereafter, the Commission shall evaluate and report
-        to the European Parliament and to the Council on the following:
+        2. By 2 August 2028 and every four years thereafter, the Commission shall
+        evaluate and report to the European Parliament and to the Council on the following:
 
         (a) the need for amendments extending existing area headings or adding new
         area headings in Annex III;
@@ -13108,43 +13099,20 @@ objects:
         (c) amendments enhancing the effectiveness of the supervision and governance
         system.
 
-        3. By ... [four years from the date of entry into force of this Regulation]
-        and every four years thereafter, the Commission shall submit a report on the
-        evaluation and review of this Regulation to the European Parliament and to
-        the Council. The report shall include an assessment with regard to the structure
-        of enforcement and the possible need for a Union agency to resolve any identified
-        shortcomings. On the basis of the findings, that report shall, where appropriate,
-        be accompanied by a proposal for amendment of this Regulation. The reports
-        shall be made public.
+        3. By 2 August 2029 and every four years thereafter, the Commission shall
+        submit a report on the evaluation and review of this Regulation to the European
+        Parliament and to the Council. The report shall include an assessment with
+        regard to the structure of enforcement and the possible need for a Union agency
+        to resolve any identified shortcomings. On the basis of the findings, that
+        report shall, where appropriate, be accompanied by a proposal for amendment
+        of this Regulation. The reports shall be made public.
 
-        4. The reports referred to in paragraph 2 shall devote specific attention
-        to the following:
+        4. The reports referred to in paragraph 2 shall pay specific attention to
+        the following:
 
         (a) the status of the financial, technical and human resources of the national
         competent authorities in order to effectively perform the tasks assigned to
         them under this Regulation;
-
-        (c) adopted harmonised standards and common specifications developed to support
-        this Regulation;
-
-        (d) the number of undertakings that enter the market after the entry into
-        application of this Regulation, and how many of them are SMEs.
-
-        5. By ... [four years from the date of entry into force of this Regulation)]
-        the Commission shall evaluate the functioning of the AI Office, whether the
-        Office has been given sufficient powers and competences to fulfil its tasks
-        and whether it would be relevant and needed for the proper implementation
-        and enforcement of this Regulation to upgrade the AI Office and its enforcement
-        competences and to increase its resources. The Commission shall submit this
-        evaluation report to the European Parliament and to the Council.
-
-        6. By ... [four years from the date of entry into force of this Regulation)]
-        and every four years thereafter, the Commission shall submit a report on the
-        review of the progress on the development of standardisation deliverables
-        on the energy-efficient development of general-purpose models, and asses the
-        need for further measures or actions, including binding measures or actions.
-        The report shall be submitted to the European Parliament and to the Council,
-        and it shall be made public.
 
         (b) the state of penalties, in particular administrative fines as referred
         to in Article 99(1), applied by Member States for infringements of this Regulation;
@@ -13155,28 +13123,26 @@ objects:
         (d) the number of undertakings that enter the market after the entry into
         application of this Regulation, and how many of them are SMEs.
 
-        5. By ... [four years from the date of entry into force of this Regulation)]
-        the Commission shall evaluate the functioning of the AI Office, whether the
-        Office has been given sufficient powers and competences to fulfil its tasks
-        and whether it would be relevant and needed for the proper implementation
-        and enforcement of this Regulation to upgrade the AI Office and its enforcement
-        competences and to increase its resources. The Commission shall submit this
-        evaluation report to the European Parliament and to the Council.
+        5. By 2 August 2028, the Commission shall evaluate the functioning of the
+        AI Office, whether the AI Office has been given sufficient powers and competences
+        to fulfil its tasks, and whether it would be relevant and needed for the proper
+        implementation and enforcement of this Regulation to upgrade the AI Office
+        and its enforcement competences and to increase its resources. The Commission
+        shall submit a report on its evaluation to the European Parliament and to
+        the Council.
 
-        6. By ... [four years from the date of entry into force of this Regulation)]
-        and every four years thereafter, the Commission shall submit a report on the
-        review of the progress on the development of standardisation deliverables
-        on the energy-efficient development of general-purpose models, and asses the
-        need for further measures or actions, including binding measures or actions.
-        The report shall be submitted to the European Parliament and to the Council,
-        and it shall be made public.
+        6. By 2 August 2028 and every four years thereafter, the Commission shall
+        submit a report on the review of the progress on the development of standardisation
+        deliverables on the energy-efficient development of general-purpose AI models,
+        and asses the need for further measures or actions, including binding measures
+        or actions. The report shall be submitted to the European Parliament and to
+        the Council, and it shall be made public.
 
-        7. By ... [four years from the date of entry into force of this Regulation]
-        and every three years thereafter, the Commission shall evaluate the impact
-        and effectiveness of voluntary codes of conduct to foster the application
-        of the requirements set out in Chapter II, Section 2 for AI systems other
-        than high-risk AI systems and possibly other additional requirements for AI
-        systems other than high-risk AI systems, including as regards environmental
+        7. By 2 August 2028 and every three years thereafter, the Commission shall
+        evaluate the impact and effectiveness of voluntary codes of conduct to foster
+        the application of the requirements set out in Chapter III, Section 2 for
+        AI systems other than high-risk AI systems and possibly other additional requirements
+        for AI systems other than high-risk AI systems, including as regards environmental
         sustainability.
 
         8. For the purposes of paragraphs 1 to 7, the Board, the Member States and
@@ -13191,41 +13157,34 @@ objects:
         10. The Commission shall, if necessary, submit appropriate proposals to amend
         this Regulation, in particular taking into account developments in technology,
         the effect of AI systems on health and safety, and on fundamental rights,
-        and in the light of the state of progress in the information society.
+        and in light of the state of progress in the information society.
 
         11. To guide the evaluations and reviews referred to in paragraphs 1 to 7
         of this Article, the AI Office shall undertake to develop an objective and
         participative methodology for the evaluation of risk levels based on the criteria
         outlined in the relevant Articles and the inclusion of new systems in:
 
-        (a) the list in Annex III, including the extension of existing area headings
-        or the addition of new area headings in that Annex;
+        (a) the list set out in Annex III, including the extension of existing area
+        headings or the addition of new area headings in that Annex;
 
-        (b) the list of prohibited practices laid down in Article 5; and,
+        (b) the list of prohibited practices set out in Article 5; and
 
         (c) the list of AI systems requiring additional transparency measures pursuant
-        to
-
-        Article 50.
+        to Article 50.
 
         12. Any amendment to this Regulation pursuant to paragraph 10, or relevant
-        delegated or
+        delegated or implementing acts, which concerns sectoral Union harmonisation
+        legislation listed in Section B of Annex I shall take into account the regulatory
+        specificities of each sector, and the existing governance, conformity assessment
+        and enforcement mechanisms and authorities established therein.
 
-        implementing acts, which concerns sectoral Union harmonisation legislation
-        listed in Section B of Annex I shall take into account the regulatory specificities
-        of each sector, and the existing governance, conformity assessment and enforcement
-        mechanisms and authorities established therein.
-
-        13. By ... [seven years from the date of entry into force of this Regulation],
-        the Commission shall carry out an assessment of the enforcement of this Regulation
-        and shall report on it to the European Parliament, the Council and the European
-        Economic and Social Committee, taking into account the first years of application
-        of this Regulation. On the basis of the findings, that report shall, where
-        appropriate, be accompanied by a proposal for amendment of this Regulation
-        with regard to the structure of enforcement and the need for a Union agency
-        to resolve any identified shortcomings.
-
-        '
+        13. By 2 August 2031, the Commission shall carry out an assessment of the
+        enforcement of this Regulation and shall report on it to the European Parliament,
+        the Council and the European Economic and Social Committee, taking into account
+        the first years of application of this Regulation. On the basis of the findings,
+        that report shall, where appropriate, be accompanied by a proposal for amendment
+        of this Regulation with regard to the structure of enforcement and the need
+        for a Union agency to resolve any identified shortcomings.'
     - urn: urn:intuitem:risk:req_node:ai-act:node1129
       assessable: false
       depth: 2
@@ -13240,26 +13199,23 @@ objects:
       description: 'This Regulation shall enter into force on the twentieth day following
         that of its publication in the Official Journal of the European Union.
 
-        It shall apply from ... [24 months from the date of entry into force of this
-        Regulation]. However:
+        It shall apply from 2 August 2026.
 
-        (a) Chapters I and II shall apply from ... [six months from the date of entry
-        into force of this Regulation];
+        However:
 
-        (b) Chapter III  Section 4, Chapter V, Chapter VII and Chapter XII shall apply
-        from ... [12 months from the date of entry into force of this Regulation],
-        with the exception of Article 101;
+        (a) Chapters I and II shall apply from 2 February 2025;
+
+        (b) Chapter III Section 4, Chapter V, Chapter VII and Chapter XII and Article
+        78 shall apply from 2 August 2025, with the exception of Article 101;
 
         (c) Article 6(1) and the corresponding obligations in this Regulation shall
-        apply from ... [36 months from the date of entry into force of this Regulation].
-
-        '
+        apply from 2 August 2027.'
     - urn: urn:intuitem:risk:req_node:ai-act:node1131
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1129
-      description: This Regulation shall be binding in its entirety and directly applicable
-        in all Member States. Done at ...,
+      description: "This Regulation shall be binding in its entirety and directly\
+        \ applicable in all Member States. \nDone at Brussels, 13 June 2024."
     - urn: urn:intuitem:risk:req_node:ai-act:node1132
       assessable: false
       depth: 1
@@ -14212,17 +14168,17 @@ objects:
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:ai-act:node1184
-      description: '3. Eurodac
-
-        (a) Regulation (EU) 2024/... of the European Parliament and of the Council
-        on the establishment of ''Eurodac'' for the comparison of biometric data for
-        the effective application of Regulation (EU) .../... [Regulation on Asylum
-        and Migration Management], of Regulation (EU) .../... [Resettlement Regulation]
-        and Directive 2001/55/EC [Temporary Protection Directive] for identifying
-        an illegally staying third-country national or stateless person and on requests
-        for the comparison with Eurodac data by Member States'' law enforcement authorities
-        and Europol for law enforcement purposes and amending Regulations (EU) 2018/1240
-        and (EU) 2019/818+.'
+      description: "3. Eurodac\nRegulation (EU) 2024/1358 of the European Parliament\
+        \ and of the Council of 14 May 2024 on the establishment of \u2018Eurodac\u2019\
+        \ for the comparison of biometric data in order to effectively apply Regulations\
+        \ (EU) 2024/1315 and (EU) 2024/1350 of the European Parliament and of the\
+        \ Council and Council Directive 2001/55/EC and to identify illegally staying\
+        \ third-country nationals and stateless persons and on requests for the comparison\
+        \ with Eurodac data by Member States\u2019 law enforcement authorities and\
+        \ Europol for law enforcement purposes, amending Regulations (EU) 2018/1240\
+        \ and (EU) 2019/818 of the European Parliament and of the Council and repealing\
+        \ Regulation (EU) No 603/2013 of the European Parliament and of the Council\
+        \ (OJ L, 2024/1358, 22.5.2024, ELI: http://data.europa.eu/eli/reg/2024/1358/oj)."
     - urn: urn:intuitem:risk:req_node:ai-act:node1188
       assessable: false
       depth: 2

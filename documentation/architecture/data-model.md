@@ -254,7 +254,7 @@ erDiagram
         string description
 
         string business_value
-        string category
+        string type
         asset  parent_asset
     }
 
@@ -304,12 +304,12 @@ erDiagram
 
 ```
 
-### Requirement mappings (crosswalk)
+### Requirement mappings
 
 ```mermaid
 erDiagram
-    REQUIREMENT_MAPPING_SET   }o--|| REFERENCE_FRAMEWORK : contains
-    REQUIREMENT_MAPPING_SET   }o--|| FOCAL_FRAMEWORK     : contains
+    REQUIREMENT_MAPPING_SET   }o--|| SOURCE_FRAMEWORK : contains
+    REQUIREMENT_MAPPING_SET   }o--|| TARGET_FRAMEWORK : contains
 
     REQUIREMENT_MAPPING_SET {
         string    urn
@@ -536,7 +536,7 @@ namespace ReferentialObjects {
 
     class Mapping {
         +CharField    reference_urn
-        +CharField    focal_urn
+        +CharField    target_urn
         +CharField    rationale
         +CharField    relationship
         +BooleanField fulfilled_by
@@ -695,7 +695,7 @@ Projects have the following fields:
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
-Assets are of category primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
+Assets are of type primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
 
 ## Frameworks
 
@@ -806,26 +806,26 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a reference framework to a focal framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
 A mapping_rules is a list of elements containing:
-- a reference requirement URN
-- a focal requirement URN
-- a rationale giving the explanation for why a Reference Document Element and a Focal Document Element are related. This will be syntactic, semantic, or functional.
-- a relationship that provides the type of logical relationship that the OLIR Developer asserts the Reference Document Element has compared to the Focal Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
-- a strength of relationship, optionally providing the extent to which a Reference Document Element and a Focal Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
+- a source requirement URN
+- a target requirement URN
+- a rationale giving the explanation for why a Source Document Element and a Target Document Element are related. This will be syntactic, semantic, or functional.
+- a relationship that provides the type of logical relationship that the OLIR Developer asserts the Source Document Element has compared to the Target Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
+- a strength of relationship, optionally providing the extent to which a Source Document Element and a Target Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
 
-Requirement mapping rules are used to automatically generate a draft compliance assessment for a focal framework, given existing reference assessments.
+Requirement mapping rules are used to automatically generate a draft compliance assessment for a target framework, given existing source assessments.
 
 The following inference rules are used:
 - there is an order relation in results: compliant > non-compliant minor > non-compliant major
-- N/A or -- in reference makes the mapping not usable.
-- when several mappings exist for a focal requirement, the strongest inference result is used to determine the compliance result.
+- N/A or -- in source makes the mapping not usable.
+- when several mappings exist for a target requirement, the strongest inference result is used to determine the compliance result.
 - all requirement mappings are described in the mapping_inference field.
-- a superset or equal mapping pushes the reference result to the focal result.
-- an subset mapping pushes a most a partial compliance result to the focal result
+- a superset or equal mapping pushes the source result to the target result.
+- an subset mapping pushes a partial compliance result to the target result
 
 ### Risk assessments and risk matrices
 

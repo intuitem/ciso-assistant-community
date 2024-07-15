@@ -81,12 +81,12 @@ class Migration(migrations.Migration):
                     models.TextField(blank=True, null=True, verbose_name="Annotation"),
                 ),
                 (
-                    "focal_framework",
+                    "target_framework",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="focal_framework",
+                        related_name="target_framework",
                         to="core.framework",
-                        verbose_name="Focal framework",
+                        verbose_name="Target framework",
                     ),
                 ),
                 (
@@ -109,12 +109,12 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "reference_framework",
+                    "source_framework",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="reference_framework",
+                        related_name="source_framework",
                         to="core.framework",
-                        verbose_name="Reference framework",
+                        verbose_name="Source framework",
                     ),
                 ),
             ],
@@ -176,21 +176,21 @@ class Migration(migrations.Migration):
                     models.TextField(blank=True, null=True, verbose_name="Annotation"),
                 ),
                 (
-                    "focal_requirement",
+                    "target_requirement",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="focal_requirement",
+                        related_name="target_requirement",
                         to="core.requirementnode",
-                        verbose_name="Focal requirement",
+                        verbose_name="Target requirement",
                     ),
                 ),
                 (
-                    "reference_requirement",
+                    "source_requirement",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="reference_requirement",
+                        related_name="source_requirement",
                         to="core.requirementnode",
-                        verbose_name="Reference requirement",
+                        verbose_name="Source requirement",
                     ),
                 ),
                 (

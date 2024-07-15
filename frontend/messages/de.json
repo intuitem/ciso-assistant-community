@@ -598,13 +598,17 @@
 	"additionalInformation": "Weitere Informationen",
 	"requirementMapping": "Anforderungszuordnung",
 	"requirementMappings": "Anforderungszuordnungen",
-	"referenceFramework": "Referenzrahmen",
-	"focalFramework": "Fokusrahmen",
+	"sourceFramework": "Quellrahmen",
+	"targetFramework": "Zielrahmen",
 	"baseline": "Ausgangslage",
 	"createAuditFromBaseline": "Erstellen eines Audits aus einer Basis",
 	"coverageColon": "Abdeckung:",
 	"full": "Voll",
 	"partial": "Teilweise",
 	"noResultFound": "Keine Einträge gefunden",
-	"filters": "Filter"
+	"filters": "Filter",
+	"notApplicableScore": "Sie können keine Punkte erzielen, wenn die Anforderungsbewertung nicht anwendbar ist",
+	"maturity": "Reife",
+	"progress": "Fortschreiten",
+	"back": "Zurückkehren"
 }

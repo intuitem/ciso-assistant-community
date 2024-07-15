@@ -48,3 +48,18 @@ export function getSecureRedirect(url: any): string {
 	const SECURE_REDIRECT_URL_REGEX = /^\/(?!.*\/\/)[^\s]*$/;
 	return typeof url === 'string' && SECURE_REDIRECT_URL_REGEX.test(url) ? url : '';
 }
+
+export function darkenColor(hex: string, amount: number) {
+	hex = hex.slice(1);
+	let num = parseInt(hex, 16);
+
+	let r = (num >> 16) - amount * 255;
+	let g = ((num >> 8) & 0x00ff) - amount * 255;
+	let b = (num & 0x0000ff) - amount * 255;
+
+	r = Math.max(0, Math.min(255, r));
+	g = Math.max(0, Math.min(255, g));
+	b = Math.max(0, Math.min(255, b));
+
+	return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
