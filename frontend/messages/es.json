@@ -598,13 +598,17 @@
 	"additionalInformation": "Información adicional",
 	"requirementMapping": "Mapeo de requisitos",
 	"requirementMappings": "Asignaciones de requisitos",
-	"referenceFramework": "Marco de referencia",
-	"focalFramework": "Marco focal",
+	"sourceFramework": "Marco de trabajo",
+	"targetFramework": "Marco de destino",
 	"baseline": "Base",
 	"createAuditFromBaseline": "Crear auditoría desde una base",
 	"coverageColon": "Cobertura:",
 	"full": "Lleno",
 	"partial": "Parcial",
 	"noResultFound": "No se han encontrado resultados",
-	"filters": "Filtros"
+	"filters": "Filtros",
+	"notApplicableScore": "No se puede puntuar si la evaluación de requisitos no es aplicable",
+	"maturity": "Madurez",
+	"progress": "Progresión",
+	"back": "Devolver"
 }

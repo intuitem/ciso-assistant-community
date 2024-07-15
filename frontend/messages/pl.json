@@ -635,13 +635,17 @@
 	"additionalInformation": "Dodatkowe informacje",
 	"requirementMapping": "Mapowanie wymagań",
 	"requirementMappings": "Mapowania wymagań",
-	"referenceFramework": "Ramy odniesienia",
-	"focalFramework": "Ramy ogniskowe",
+	"sourceFramework": "Ramy źródłowa",
+	"targetFramework": "Ramy docelowa",
 	"baseline": "Linia bazowa",
 	"createAuditFromBaseline": "Utwórz audyt od poziomu bazowego",
 	"coverageColon": "Zasięg:",
 	"full": "Pełny",
 	"partial": "Częściowy",
 	"noResultFound": "nie znaleziono żadnych wyników",
-	"filters": "Filtry"
+	"filters": "Filtry",
+	"notApplicableScore": "Nie możesz zdobyć punktów, jeśli ocena wymagań nie ma zastosowania",
+	"maturity": "Dojrzałość",
+	"progress": "Postęp",
+	"back": "Powrót"
 }

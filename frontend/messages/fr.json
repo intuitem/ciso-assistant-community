@@ -598,13 +598,17 @@
 	"additionalInformation": "Informations Complémentaires",
 	"requirementMapping": "Cartographie des exigences",
 	"requirementMappings": "Cartographies des exigences",
-	"referenceFramework": "Référentiel de départ",
-	"focalFramework": "Référentiel focal",
+	"sourceFramework": "Référentiel source",
+	"targetFramework": "Référentiel cible",
 	"baseline": "Référence de base",
 	"createAuditFromBaseline": "Créer un audit à partir d'une base",
 	"coverageColon": "Couverture :",
 	"full": "Complète",
 	"partial": "Partielle",
 	"noResultFound": "Aucun résultat trouvé",
-	"filters": "Filtres"
+	"filters": "Filtres",
+	"notApplicableScore": "Vous ne pouvez pas scorer si l'évaluation des exigences n'est pas applicable",
+	"maturity": "Maturité",
+	"progress": "Progression",
+	"back": "Retour"
 }

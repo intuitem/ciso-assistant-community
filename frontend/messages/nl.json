@@ -598,13 +598,17 @@
 	"additionalInformation": "Extra informatie",
 	"requirementMapping": "Vereisten in kaart brengen",
 	"requirementMappings": "Vereistentoewijzingen",
-	"referenceFramework": "Referentiekader",
-	"focalFramework": "Focaal raamwerk",
+	"sourceFramework": "Bronkader",
+	"targetFramework": "Doelkader",
 	"baseline": "Basislijn",
 	"createAuditFromBaseline": "Creëer audit vanuit een basis",
 	"coverageColon": "Dekking:",
 	"full": "Vol",
 	"partial": "Gedeeltelijk",
 	"noResultFound": "geen resultaat gevonden",
-	"filters": "Filters"
+	"filters": "Filters",
+	"notApplicableScore": "U kunt niet scoren als de eisenbeoordeling niet van toepassing is",
+	"maturity": "Volwassenheid",
+	"progress": "Progressie",
+	"back": "Opbrengst"
 }

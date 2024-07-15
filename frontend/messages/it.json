@@ -598,13 +598,17 @@
 	"additionalInformation": "Informazioni aggiuntive",
 	"requirementMapping": "Mappatura dei requisiti",
 	"requirementMappings": "Mappature dei requisiti",
-	"referenceFramework": "Quadro di riferimento",
-	"focalFramework": "Quadro focale",
+	"sourceFramework": "Quadro di origine",
+	"targetFramework": "Quadro di destinazione",
 	"baseline": "Linea di base",
 	"createAuditFromBaseline": "Crea audit da una base",
 	"coverageColon": "Copertura:",
 	"full": "Pieno",
 	"partial": "Parziale",
 	"noResultFound": "nessun risultato trovato",
-	"filters": "Filtri"
+	"filters": "Filtri",
+	"notApplicableScore": "Non è possibile ottenere un punteggio se la valutazione dei requisiti non è applicabile",
+	"maturity": "Scadenza",
+	"progress": "Progressione",
+	"back": "Ritorno"
 }
