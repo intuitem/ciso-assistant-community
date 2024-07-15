@@ -1010,7 +1010,11 @@
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit">{m.save()}</button
+				type="submit"
+				on:click={(event) => {
+					parent.onClose(event);
+					createModalCache.deleteCache(model.urlModel);
+				}}>{m.save()}</button
 			>
 		{:else}
 			{#if cancelButton}
