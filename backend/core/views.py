@@ -589,8 +589,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 duplicate_scenario.threats.set(scenario.threats.all())
                 duplicate_scenario.assets.set(scenario.assets.all())
                 duplicate_scenario.owner.set(scenario.owner.all())
-                for control in scenario.applied_controls.all():
-                    duplicate_scenario.applied_controls.add(control)
+                duplicate_scenario.applied_controls.set(scenario.applied_controls.all())
                 duplicate_scenario.save()
             duplicate_risk_assessment.save()
             return Response({"results": "risk assessment duplicated"})
