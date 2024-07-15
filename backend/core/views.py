@@ -323,7 +323,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RiskAssessment
-    serializer_class = RiskAssessmentWriteSerializer
     filterset_fields = [
         "project",
         "project__folder",
@@ -547,8 +546,13 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
-    
-    @action(detail=True, name="Duplicate risk assessment", methods=["post"])
+
+    @action(
+        detail=True,
+        name="Duplicate risk assessment",
+        methods=["post"],
+        serializer_class=RiskAssessmentDuplicateSerializer,
+    )
     def duplicate(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
