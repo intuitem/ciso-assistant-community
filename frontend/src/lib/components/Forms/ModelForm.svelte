@@ -23,6 +23,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { createModalCache } from '$lib/utils/stores';
+	import CreateModal from '../Modals/CreateModal.svelte';
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let context = 'default';
@@ -31,7 +32,6 @@
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
-	export let riskAssessmentDuplication = false;
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -181,7 +181,7 @@
 			cacheLock={cacheLocks['lc_status']}
 			bind:cachedValue={formDataCache['lc_status']}
 		/>
-	{:else if URLModel === 'risk-assessments' || URLModel === 'risk-assessment-duplicate'}
+	{:else if URLModel === 'risk-assessments'}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
@@ -201,63 +201,60 @@
 			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
-		{#if !riskAssessmentDuplication}
-			<Select
-				{form}
-				options={model.selectOptions['status']}
-				field="status"
-				hide
-				label={m.status()}
-				cacheLock={cacheLocks['status']}
-				bind:cachedValue={formDataCache['status']}
-			/>
-			<AutocompleteSelect
-				{form}
-				disabled={object.id}
-				options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
-				field="risk_matrix"
-				cacheLock={cacheLocks['risk_matrix']}
-				bind:cachedValue={formDataCache['risk_matrix']}
-				label={m.riskMatrix()}
-				helpText={m.riskAssessmentMatrixHelpText()}
-			/>
-			<AutocompleteSelect
-				{form}
-				multiple
-				options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
-				field="authors"
-				cacheLock={cacheLocks['authors']}
-				bind:cachedValue={formDataCache['authors']}
-				label={m.authors()}
-			/>
-			<AutocompleteSelect
-				{form}
-				multiple
-				options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
-				field="reviewers"
-				cacheLock={cacheLocks['reviewers']}
-				bind:cachedValue={formDataCache['reviewers']}
-				label={m.reviewers()}
-			/>
-			<TextField
-				type="date"
-				{form}
-				field="eta"
-				label={m.eta()}
-				helpText={m.etaHelpText()}
-				cacheLock={cacheLocks['eta']}
-				bind:cachedValue={formDataCache['eta']}
-			/>
-			<TextField
-				type="date"
-				{form}
-				field="due_date"
-				label={m.dueDate()}
-				helpText={m.dueDateHelpText()}
-				cacheLock={cacheLocks['due_date']}
-				bind:cachedValue={formDataCache['due_date']}
-			/>
-		{/if}
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+			cacheLock={cacheLocks['status']}
+			bind:cachedValue={formDataCache['status']}
+		/>
+		<AutocompleteSelect
+			{form}
+			disabled={object.id}
+			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
+			field="risk_matrix"
+			cacheLock={cacheLocks['risk_matrix']}
+			bind:cachedValue={formDataCache['risk_matrix']}
+			label={m.riskMatrix()}
+			helpText={m.riskAssessmentMatrixHelpText()}
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+			field="authors"
+			cacheLock={cacheLocks['authors']}
+			bind:cachedValue={formDataCache['authors']}
+			label={m.authors()}
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+			field="reviewers"
+			cacheLock={cacheLocks['reviewers']}
+			bind:cachedValue={formDataCache['reviewers']}
+			label={m.reviewers()}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
+		/>
 	{:else if URLModel === 'threats'}
 		<TextField
 			{form}
