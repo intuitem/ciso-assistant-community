@@ -427,7 +427,10 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_scenarios'],
-				extra_fields: [['project', 'str'], ['risk_assessment', 'str']]
+				extra_fields: [
+					['project', 'str'],
+					['risk_assessment', 'str']
+				]
 			})}
 			field="risk_scenarios"
 			cacheLock={cacheLocks['risk_scenarios']}

@@ -110,12 +110,16 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const initialDataDuplicate = {
 		name: risk_assessment.name,
 		description: risk_assessment.description,
-		version: risk_assessment.version,
+		version: risk_assessment.version
 	};
 
-	const riskAssessmentDuplicateForm = await superValidate(initialDataDuplicate, zod(riskAssessmentSchema), {
-		errors: false
-	});
+	const riskAssessmentDuplicateForm = await superValidate(
+		initialDataDuplicate,
+		zod(riskAssessmentSchema),
+		{
+			errors: false
+		}
+	);
 
 	const riskAssessmentModel = getModelInfo('risk-assessment-duplicate');
 
