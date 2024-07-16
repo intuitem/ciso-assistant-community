@@ -1015,7 +1015,6 @@
 				data-testid="save-button"
 				type="submit"
 				on:click={(event) => {
-					parent.onClose(event);
 					createModalCache.deleteCache(model.urlModel);
 				}}>{m.save()}</button
 			>
