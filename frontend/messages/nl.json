@@ -474,6 +474,7 @@
 	"domainManager": "Domeinbeheerder",
 	"analyst": "Analist",
 	"successfullyCreatedObject": "Het {object} object is succesvol aangemaakt",
+	"successfullyDuplicateObject": "Het object {object} is succesvol gedupliceerd",
 	"successfullyUpdatedObject": "Het {object} object is succesvol bijgewerkt",
 	"successfullySavedObject": "Het {object} object is succesvol opgeslagen",
 	"successfullyDeletedObject": "Het {object} object is succesvol verwijderd",
@@ -610,5 +611,7 @@
 	"notApplicableScore": "U kunt niet scoren als de eisenbeoordeling niet van toepassing is",
 	"maturity": "Volwassenheid",
 	"progress": "Progressie",
-	"back": "Opbrengst"
+	"back": "Opbrengst",
+	"duplicate": "Duplicaat",
+	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling"
 }
