@@ -1832,6 +1832,7 @@ class ComplianceAssessment(Assessment):
             .exclude(score=None)
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
+            .exclude(requirement__assessable=False)
         )
         ig = (
             set(self.selected_implementation_groups)
