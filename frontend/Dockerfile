@@ -5,9 +5,10 @@ ENV PUBLIC_BACKEND_API_URL=foo
 
 COPY package*.json ./
 COPY . .
-RUN npm ci
-RUN npm run build
-RUN npm prune --production
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
+RUN pnpm run build
+RUN pnpm prune
 
 FROM node:21-alpine
 WORKDIR /app
