@@ -28,12 +28,12 @@ jobs:
       - name: Install latest npm
         working-directory: ${{env.working-directory}}
         run: |
-          npm install -g npm &&
-          npm --version &&
-          npm list -g --depth 0
+          npm install -g pnpm &&
+          pnpm --version &&
+          pnpm list -g --depth 0
       - name: Install dependencies
         working-directory: ${{env.working-directory}}
-        run: npm ci
+        run: pnpm i --frozen-lockfile
       - name: Run tests
         working-directory: ${{env.working-directory}}
-        run: npm run test:ci
+        run: pnpm run test:ci
