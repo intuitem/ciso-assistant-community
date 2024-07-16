@@ -52,7 +52,7 @@
 		"eslint-plugin-svelte": "^2.41.0",
 		"jsdom": "^24.1.0",
 		"postcss": "^8.4.39",
-		"prettier": "^3.3.2",
+		"prettier": "^3.3.3",
 		"prettier-plugin-svelte": "^3.2.5",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",

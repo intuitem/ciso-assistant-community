@@ -129,6 +129,12 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = RiskAssessment
+        fields = ["name", "version", "project", "description"]
+
+
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
     risk_scenarios = FieldsRelatedField(many=True)
