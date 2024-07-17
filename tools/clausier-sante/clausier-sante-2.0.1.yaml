@@ -1,0 +1,1806 @@
+urn: urn:ackwa:risk:library:clausier-sante-2.0.1
+locale: fr
+ref_id: Clausier-sante-2.0.1
+name: "Clausier S\xE9curit\xE9 Sant\xE9 v2024"
+description: "Clausier de s\xE9curit\xE9 num\xE9rique du Club RSSI Sant\xE9 (cf. https://www.rssi-sante.fr/clausier-securite-ssi).\n\
+  \nLe pr\xE9sent r\xE9f\xE9rentiel est le fruit du partenariat entre l\u2019APHM,\
+  \ le Club des RSSI Sant\xE9, les centrales UniHA et CAIH. Il a fait l\u2019objet\
+  \ d\u2019une collaboration \xE9troite avec l\u2019Association Fran\xE7aise des Ing\xE9\
+  nieurs Biom\xE9dicaux (AFIB) et le r\xE9seau des dpo hospitaliers. Il \xE9voluera\
+  \ dans ce cadre pour prendre en compte les besoins de s\xE9curit\xE9 et les \xE9\
+  volutions r\xE9glementaires.\n\nLes exigences de s\xE9curit\xE9 de ce r\xE9f\xE9\
+  rentiel sont obligatoires et non n\xE9gociables. Certaines exigences identifi\xE9\
+  es dans ce document peuvent \xEAtre adapt\xE9es ou faire l\u2019objet d\u2019une\
+  \ d\xE9rogation dans le CCTP."
+copyright: "Club RSSI Sant\xE9 - 15/05/2024-17/07/24"
+version: 1
+provider: "Club RSSI Sant\xE9"
+packager: Ackwa.fr
+objects:
+  framework:
+    urn: urn:ackwa:risk:framework:clausier-sante-2.0.1
+    ref_id: Clausier-sante-2.0.1
+    name: "Clausier S\xE9curit\xE9 Sant\xE9 v2024"
+    description: "Clausier de s\xE9curit\xE9 num\xE9rique du Club RSSI Sant\xE9 (cf.\
+      \ https://www.rssi-sante.fr/clausier-securite-ssi).\n\nLe pr\xE9sent r\xE9f\xE9\
+      rentiel est le fruit du partenariat entre l\u2019APHM, le Club des RSSI Sant\xE9\
+      , les centrales UniHA et CAIH. Il a fait l\u2019objet d\u2019une collaboration\
+      \ \xE9troite avec l\u2019Association Fran\xE7aise des Ing\xE9nieurs Biom\xE9\
+      dicaux (AFIB) et le r\xE9seau des dpo hospitaliers. Il \xE9voluera dans ce cadre\
+      \ pour prendre en compte les besoins de s\xE9curit\xE9 et les \xE9volutions\
+      \ r\xE9glementaires.\n\nLes exigences de s\xE9curit\xE9 de ce r\xE9f\xE9rentiel\
+      \ sont obligatoires et non n\xE9gociables. Certaines exigences identifi\xE9\
+      es dans ce document peuvent \xEAtre adapt\xE9es ou faire l\u2019objet d\u2019\
+      une d\xE9rogation dans le CCTP."
+    requirement_nodes:
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Introduction
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:1
+      ref_id: O-1.1
+      description: "Le titulaire d\xE9signe parmi son personnel un correspondant s\xE9\
+        curit\xE9 pour toute la dur\xE9e de la prestation. Ce correspondant est notamment\
+        \ :\n\u2022 l\u2019interlocuteur privil\xE9gi\xE9 de l\u2019\xE9tablissement\
+        \ pour toutes les questions relatives\n\xE0 la s\xE9curit\xE9 de la prestation,\
+        \ notamment dans le cadre d\u2019investigations initi\xE9es par l\u2019\xE9\
+        tablissement ou le titulaire suite \xE0 des incidents de s\xE9curit\xE9 op\xE9\
+        rationnels ;\n\u2022 charg\xE9 du maintien et de la mise en application du\
+        \ PAS (Plan d\u2019Assurance S\xE9curit\xE9) ;\n\u2022 joignable aux horaires\
+        \ pr\xE9cis\xE9s dans le contrat.\nTout remplacement de ce correspondant doit\
+        \ \xEAtre notifi\xE9 \xE0 l\u2019\xE9tablissement. De plus, une suppl\xE9\
+        ance de ce correspondant de s\xE9curit\xE9 doit \xEAtre assur\xE9e pour pallier\
+        \ son indisponibilit\xE9."
+      typical_evidence: "- Identification du correspondant s\xE9curit\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Exigences sp\xE9cifiques sur la sous-traitance"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.1
+      name: "Nature du traitement de donn\xE9es \xE0 caract\xE8re personnel"
+      description: "Le titulaire est inform\xE9 qu\u2019il aura acc\xE8s, dans le\
+        \ cadre des pr\xE9sentes, en tant que sous-traitant, \xE0 des donn\xE9es \xE0\
+        \ caract\xE8re personnel (ci-apr\xE8s \xAB les Donn\xE9es \xBB) appartenant\
+        \ \xE0 L\u2019ETABLISSEMENT DE SANTE.\n\n\xC0 ce titre, le titulaire s\u2019\
+        engage \xE0 traiter les donn\xE9es qui lui sont confi\xE9es par L\u2019ETABLISSEMENT\
+        \ DE SANTE dans le strict respect des pr\xE9sentes dispositions contractuelles\
+        \ et de la l\xE9gislation et r\xE9glementation en vigueur et notamment au\
+        \ R\xE8glement (UE)\xB02016/679 du Parlement europ\xE9en et du Conseil du\
+        \ 27 avril 2016 relatif \xE0 la protection des per- sonnes physiques \xE0\
+        \ l\u2019\xE9gard du traitement des donn\xE9es \xE0 caract\xE8re personnel\
+        \ et \xE0 la libre circulation de ces donn\xE9es (ci-apr\xE8s \xAB RGPD \xBB\
+        ).\n\nL\u2019ETABLISSEMENT DE SANTE demeure seul responsable du traitement\
+        \ des donn\xE9es. L\u2019ETABLISSEMENT DE SANTE autorise le titulaire, pour\
+        \ la dur\xE9e et les seuls besoins du pr\xE9sent contrat/march\xE9 \xE0 proc\xE9\
+        der au traitement des donn\xE9es uniquement pour les services faisant l\u2019\
+        objet du pr\xE9sent contrat/march\xE9.\n\nLe candidat doit d\xE9crire :\n\n\
+        \u2022 le type de prestation (maintenance, infog\xE9rance, h\xE9bergement,\
+        \ etc ...),\n\u2022 la nature des op\xE9rations r\xE9alis\xE9es sur les donn\xE9\
+        es,\n\u2022 la ou les finalit\xE9(s) du traitement (pourquoi le titulaire\
+        \ a acc\xE8s aux donn\xE9es pour les services fournis),\n\u2022 les donn\xE9\
+        es trait\xE9es et les cat\xE9gories de personnes concern\xE9es,\n\u2022 la\
+        \ dur\xE9e du traitement.\n\nLe titulaire s\u2019engage \xE0 ne pas traiter\
+        \ de donn\xE9es \xE0 caract\xE8re personnel pour ses besoins propres ou pour\
+        \ le compte de tiers."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.2
+      name: "Obligations g\xE9n\xE9rales du sous-traitant"
+      description: "Dans le cadre de ses prestations, le titulaire mettra en \u0153\
+        uvre toutes les mesures tech- niques et organisationnelles adapt\xE9es \xE0\
+        \ l\u2019\xE9tat des connaissances, au contexte, aux fi- nalit\xE9s du traitement\
+        \ et aux risques afin de prot\xE9ger les Donn\xE9es et prendra toutes les\
+        \ pr\xE9cautions n\xE9cessaires pour pr\xE9server la s\xE9curit\xE9, la disponibilit\xE9\
+        , la confidentialit\xE9 et l\u2019int\xE9grit\xE9 de ces Donn\xE9es, notamment\
+        \ contre la destruction accidentelle ou illicite, la perte accidentelle, l\u2019\
+        alt\xE9ration, la diffusion ou l\u2019acc\xE8s non autoris\xE9s.\nLe titulaire\
+        \ communiquera \xE0 l\u2019ETABLISSEMENT DE SANTE l\u2019ensemble des mesures\
+        \ prises pour garantir la s\xE9curit\xE9 des Donn\xE9es.\n\nPar ailleurs,\
+        \ le titulaire s\u2019engage notamment \xE0 :\n\n\u2022 traiter les donn\xE9\
+        es uniquement pour la ou les seule(s) finalit\xE9(s) \xE9nonc\xE9e(s) ci-dessus\
+        \ et conform\xE9ment aux instructions de l\u2019ETABLISSEMENT DE SANTE. Si\
+        \ le titulaire consid\xE8re qu\u2019une instruction constitue une violation\
+        \ du RGPD ou de toute autre dis- position du droit de l\u2019Union ou du droit\
+        \ des Etats membres relative \xE0 la protection des donn\xE9es, il en informe\
+        \ imm\xE9diatement L\u2019ETABLISSEMENT DE SANTE ;\n\u2022 informer L\u2019\
+        ETABLISSEMENT DE SANTE s\u2019il est tenu de proc\xE9der \xE0 un transfert\
+        \ de donn\xE9es vers un pays tiers ou \xE0 une organisation internationale,\
+        \ en vertu du droit de l\u2019Union ou du droit de l\u2019Etat membre auquel\
+        \ il est soumis ;\n\u2022 garantir la confidentialit\xE9 des donn\xE9es \xE0\
+        \ caract\xE8re personnel trait\xE9es dans le cadre du pr\xE9sent contrat/march\xE9\
+        \ ;\n\u2022 veiller \xE0 ce que les personnes autoris\xE9es \xE0 traiter les\
+        \ donn\xE9es \xE0 caract\xE8re personnel en vertu du pr\xE9sent contrat/march\xE9\
+        \ s\u2019engagent \xE0 respecter elle-m\xEAme la confidentialit\xE9 et re\xE7\
+        oivent la formation n\xE9cessaire en mati\xE8re de protection des donn\xE9\
+        es \xE0 caract\xE8re personnel ;\n\u2022 prendre en compte, s\u2019agissant\
+        \ de ses outils, produits, applications ou services, les principes de protection\
+        \ des donn\xE9es d\xE8s la conception et de protection des don- n\xE9es par\
+        \ d\xE9faut ;\n\u2022 aider L\u2019ETABLISSEMENT DE SANTE pour la r\xE9alisation\
+        \ d\u2019analyses d\u2019impact relatives \xE0 la protection des donn\xE9\
+        es et pour la r\xE9alisation de la consultation pr\xE9alable de l\u2019au\
+        \ torit\xE9 de contr\xF4le ;\n\u2022 communiquer \xE0 l\u2019ETABLISSEMENT\
+        \ DE SANTE le nom et les coordonn\xE9es de son d\xE9l\xE9gu\xE9 \xE0 la protection\
+        \ des donn\xE9es, s\u2019il en a d\xE9sign\xE9 un conform\xE9ment \xE0 l\u2019\
+        article 37 du RGPD, et de son responsable de la s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information ;\n\u2022 indiquer \xE0 l\u2019ETABLISSEMENT DE SANTE\
+        \ si le traitement fait l\u2019objet d\u2019un transfert de donn\xE9es hors\
+        \ de l\u2019Union Europ\xE9enne, le cas \xE9ch\xE9ant apporter les \xE9l\xE9\
+        ments de preuve exig\xE9s par le RGPD, notamment la signature des clauses\
+        \ contractuelles types de la commission europ\xE9enne concernant un transfert\
+        \ de donn\xE9es dans un pays ne remplissant pas les garanties ad\xE9quates.\
+        \ Le titulaire doit fournir le nom et les coordonn\xE9es directes du DPO ou\
+        \ R\xE9f\xE9rent \xE0 la Protection des Donn\xE9es \xE0 Caract\xE8re Personnel."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.3
+      name: "Sous-traitance ult\xE9rieure"
+      description: "Le titulaire peut faire appel \xE0 un sous-traitant pour mener\
+        \ des activit\xE9s de traitement sp\xE9cifiques. Dans ce cas, il informe pr\xE9\
+        alablement et par \xE9crit L\u2019ETABLISSEMENT DE SANTE de tout changement\
+        \ envisag\xE9 concernant l\u2019ajout ou le remplacement de sous-traitants.\
+        \ Cette information doit indiquer clairement les activit\xE9s de traitement\
+        \ sous-trait\xE9es, l\u2019identit\xE9 et les coordonn\xE9es du sous-traitant\
+        \ et les dates du contrat de sous-traitance. L\u2019ETABLISSEMENT DE SANTE\
+        \ dispose d\u2019un d\xE9lai maximum de vingt-et-un (21) jours \xE0 compter\
+        \ de la date de r\xE9ception de cette information pour pr\xE9senter ses objections.\
+        \ Cette sous-traitance ne peut \xEAtre effectu\xE9e que si L\u2019ETABLISSEMENT\
+        \ DE SANTE n\u2019a pas \xE9mis d\u2019objection pendant le d\xE9lai susvis\xE9\
+        .\n\nIl appartient au titulaire de s\u2019assurer que le sous-traitant respecte\
+        \ les obligations du pr\xE9sent contrat/march\xE9 et pr\xE9sente les m\xEA\
+        mes garanties suffisantes quant \xE0 la mise en \u0153uvre de mesures techniques\
+        \ et organisationnelles appropri\xE9es de mani\xE8re \xE0 ce que le traitement\
+        \ r\xE9ponde aux exigences de la r\xE9glementation sur la protection des donn\xE9\
+        es. Si le sous-traitant ult\xE9rieur ne remplit pas ses obligations en mati\xE8\
+        re de protection des donn\xE9es, le titulaire demeure pleinement responsable\
+        \ devant L\u2019ETABLISSEMENT DE SANTE de l\u2019ex\xE9cution par l\u2019\
+        un autre sous-traitant de ses obligations."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.4
+      name: Exercice de droits
+      description: "Dans la mesure du possible, le titulaire doit aider L\u2019ETABLISSEMENT\
+        \ DE SANTE \xE0 s\u2019acquitter de son obligation de donner suite aux demandes\
+        \ d\u2019exercice des droits des per- sonnes concern\xE9es : droit d\u2019\
+        acc\xE8s, de rectification, d\u2019effacement et d\u2019opposition, droit\
+        \ \xE0 la limitation du traitement, droit \xE0 la portabilit\xE9 des donn\xE9\
+        es, droit de ne pas faire l\u2019objet d\u2019une d\xE9cision individuelle\
+        \ automatis\xE9e (y compris le profilage).\n\nSi les personnes concern\xE9\
+        es venaient \xE0 exercer aupr\xE8s du titulaire des demandes d\u2019exercice\
+        \ de leurs droits, ce dernier doit adresser ces demandes d\xE8s r\xE9ception\
+        \ par courrier \xE9lectronique \xE0 DPO [at] ETABLISSEMENT DE SANTE [.fr]"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.5
+      name: "Violation de donn\xE9es"
+      description: "Le titulaire notifie \xE0 l\u2019ETABLISSEMENT DE SANTE toute\
+        \ violation de donn\xE9es \xE0 caract\xE8re personnel dans les meilleurs d\xE9\
+        lais apr\xE8s en avoir pris connaissance, par mail \xE0 l\u2019adresse DPO\
+        \ [at] ETABLISSEMENT DE SANTE [.fr]. Cette notification est accompagn\xE9\
+        e de la description de la violation, les donn\xE9es concern\xE9es, la cause\
+        \ et toute documentation utile afin de permettre \xE0 l\u2019ETABLISSEMENT\
+        \ DE SANTE, si n\xE9cessaire, de notifier cette violation \xE0 l\u2019autorit\xE9\
+        \ de contr\xF4le comp\xE9tente."
+      typical_evidence: "- Pr\xE9ciser si OK avec le d\xE9lai demand\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.6
+      name: Registre des traitements
+      description: "Conform\xE9ment au RGPD, le titulaire d\xE9clare tenir par \xE9\
+        crit un registre de toutes les cat\xE9gories d\u2019activit\xE9s de traitement\
+        \ effectu\xE9es pour le compte de l\u2019ETABLISSEMENT DE SANTE."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.7
+      name: "Droit d\u2019audit"
+      description: "L\u2019ETABLISSEMENT DE SANTE pourra faire proc\xE9der, une fois\
+        \ par an, par un cabinet d\u2019audit tenu au secret professionnel et agr\xE9\
+        \xE9 par les deux parties, \xE0 l\u2019examen de tout \xE9l\xE9ment permettant\
+        \ de s\u2019assurer de la bonne ex\xE9cution des dispositions d\xE9finies\
+        \ au pr\xE9sent contrat/march\xE9. Cet audit aura lieu aux heures d\u2019\
+        ouverture des bureaux du titulaire et sous r\xE9serve d\u2019en avoir inform\xE9\
+        \ le titulaire au moins quinze (15) jours avant sa mise en \u0153uvre, par\
+        \ lettre recommand\xE9e avec accus\xE9 de r\xE9ception. Les frais d\u2019\
+        audit seront \xE0 la charge de l\u2019ETABLISSEMENT DE SANTE sauf dans le\
+        \ cas o\xF9 l\u2019audit r\xE9v\xE8lerait un manquement dans le cadre des\
+        \ obligations du titulaire.\n\nCet audit pourra \xEAtre effectu\xE9 par un\
+        \ cabinet ext\xE9rieur, pour autant que celui-ci n\u2019exerce pas \xE9galement\
+        \ lui-m\xEAme une activit\xE9 concurrente de celle du titulaire.\n\nUn exemplaire\
+        \ du rapport d\u2019audit sera remis au titulaire.\n\nSi le rapport d\u2019\
+        audit fait appara\xEEtre un non-respect des obligations du titulaire, ce der-\
+        \ nier s\u2019engage, dans le cadre d\u2019un plan d\u2019action, \xE0 mettre\
+        \ en \u0153uvre, \xE0 ses frais, les me- sures correctives n\xE9cessaires\
+        \ dans un d\xE9lai de trente (30) jours calendaires \xE0 compter de la remise\
+        \ du rapport d\u2019audit.\n\nLes Parties conviennent qu\u2019en tout \xE9\
+        tat de cause, la proc\xE9dure d\u2019audit ou son absence de mise en \u0153\
+        uvre n\u2019exon\xE8rent d\u2019aucune mani\xE8re le titulaire du respect\
+        \ de ses obliga- tions contractuelles et ne peuvent \xEAtre interpr\xE9t\xE9\
+        es comme valant acceptation de la qualit\xE9 des Prestations effectu\xE9es."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:2
+      ref_id: O-2.8
+      name: Engagement du responsable de traitement
+      description: "L\u2019ETABLISSEMENT DE SANTE s\u2019engage \xE0 :\n\n\u2022 fournir\
+        \ au titulaire les donn\xE9es n\xE9cessaires \xE0 la fourniture des services\
+        \ pr\xE9vus au Contrat/march\xE9 ;\n\u2022 documenter par \xE9crit toute instruction\
+        \ concernant le traitement des donn\xE9es par le titulaire ;\n\u2022 veiller,\
+        \ au pr\xE9alable et pendant toute la dur\xE9e du contrat/march\xE9, au respect\
+        \ des obligations pr\xE9vues par la r\xE9glementation sur la protection des\
+        \ donn\xE9es et notamment \xE0 l\u2019information des personnes concern\xE9\
+        es ;\n\u2022 superviser le traitement, y compris r\xE9aliser les audits et\
+        \ les inspections aupr\xE8s du titulaire."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Exigences g\xE9n\xE9rales sur les logiciels"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.1
+      description: "Le titulaire s\u2019engage \xE0 fournir et maintenir la liste\
+        \ exhaustive des logiciels et \xE9ventuels \xE9quipements install\xE9s. La\
+        \ cartographie doit \xEAtre document\xE9e (niveau de version, pr\xE9requis,\
+        \ \u2026) et doit contenir les informations d\xE9taillant chaque logiciel\
+        \ ainsi que les interactions entre eux.\n\nLe titulaire s\u2019engage une\
+        \ fois le march\xE9 obtenu \xE0 r\xE9diger avec le r\xE9f\xE9rent de l\u2019\
+        \xE9tablissement de L\u2019ETABLISSEMENT DE SANT\xC9 le Document d\u2019Architecture\
+        \ Technique (DAT) et le Document d\u2019Exploitation (DEX)."
+      typical_evidence: "- liste des logiciels\n- liste des d\xE9pendances \n- documentation\
+        \ fournie"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.2
+      description: "Pour tout ce qui est fourni au titre de l\u2019offre, le titulaire\
+        \ s\u2019engage \xE0 acqu\xE9rir et \xE0 conc\xE9der \xE0 l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 l\u2019ensemble des licences d\u2019utilisation n\xE9cessaires\
+        \ \xE0 son bon fonctionnement.\nSi n\xE9cessaire, il d\xE9taillera les conditions\
+        \ sp\xE9cifiques ou exclusions.\n\nCeci concerne l\u2019ensemble des logiciels\
+        \ et couches logiques utilis\xE9es (OS, progiciels, BDD, t\xE9l\xE9maintenance\u2026\
+        )."
+      typical_evidence: "- Si concern\xE9, d\xE9tails des conditions sp\xE9cifiques\
+        \ ou exclusions."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.3
+      description: "Le titulaire s\u2019engage \xE0 n\u2019installer et n\u2019activer\
+        \ que les seuls logiciels n\xE9cessaires au bon fonctionnement du dispositif\
+        \ objet du march\xE9. Si des logiciels compl\xE9mentaires sont n\xE9cessaires\
+        \ ils devront \xEAtre valid\xE9s par l\u2019\xE9tablissement "
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.4
+      description: "Pour les logiciels libres, la conformit\xE9 du logiciel est de\
+        \ la responsabilit\xE9 du titulaire seul. Ils devront aussi respecter les\
+        \ exigences de s\xE9curit\xE9 d\xE9crites dans ce document."
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.5
+      description: "Pour les logiciels gratuits, la conformit\xE9 du logiciel est\
+        \ de la responsabilit\xE9 du titulaire seul\_: ils devront aussi respecter\
+        \ les exigences de s\xE9curit\xE9 d\xE9crites dans ce document d\xE9crites\
+        \ dans ce document."
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.6
+      description: "Pour les logiciels de type SaaS (Software as a Service\_: logiciel\
+        \ h\xE9berg\xE9), la conformit\xE9 du logiciel est de la responsabilit\xE9\
+        \ du titulaire seul : ils devront aussi respecter les exigences de s\xE9curit\xE9\
+        ."
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.7
+      description: "Les personnels du titulaire devront respecter les chartes informatiques\
+        \ si existantes lors de toute intervention \xE0 l\u2019installation ou en\
+        \ maintenance. Le titulaire s\u2019engage \xE0 en informer ses personnels."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.8
+      description: "Toute op\xE9ration r\xE9alis\xE9e par le titulaire et ses personnels\
+        \ lors de l\u2019installation devra respecter les m\xEAmes exigences que celles\
+        \ d\xE9crites dans le chapitre Maintenance et T\xE9l\xE9maintenance durant\
+        \ son ex\xE9cution."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.9
+      description: "Si la solution propos\xE9e entre dans le p\xE9rim\xE8tre de sous-traitant\
+        \ du R\xE8glement G\xE9n\xE9ral europ\xE9en sur la Protection des Donn\xE9\
+        es (RGPD), le titulaire devra respecter ce r\xE8glement \xE0 date d\u2019\
+        application et accepter des audits de v\xE9rification de conformit\xE9. "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.10
+      description: "Pour les applications web le titulaire s\u2019engage \xE0 fournir\
+        \ avec l\u2019offre un audit externe de s\xE9curit\xE9 de type top 10 de l\u2019\
+        OWASP prouvant l\u2019absence de faille de s\xE9curit\xE9 de niveau sup\xE9\
+        rieur \xE0 7 et de composant obsol\xE8te (sans maintenance de correctif de\
+        \ vuln\xE9rabilit\xE9 de l\u2019\xE9diteur)"
+      typical_evidence: '- Conclusion d''audit de type top 10 de l''OWASP'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:3
+      ref_id: O-3.11
+      description: "Sauf sp\xE9cification d\u2019exclusion dans le CCTP, le logiciel,\
+        \ service ou application doit proposer un mode et/ou fonctionnalit\xE9\_d\xE9\
+        grad\xE9(e) permettant un passage en mode manuel en cas d\u2019interruption.\
+        \ Une extraction des donn\xE9es doit \xEAtre r\xE9alisable \xE0 une p\xE9\
+        riodicit\xE9 d\xE9finie. Les donn\xE9es extraites doivent \xEAtre imprimables\
+        \ en ersion papier et correspondre au formalisme initial du service num\xE9\
+        rique propos\xE9.Cette fonctionnalit\xE9 et ce passage en mode manuel doit\
+        \ \xEAtre d\xE9crit dans les sp\xE9cifications fonctionnelles du service."
+      typical_evidence: "-Description des modes d\xE9grad\xE9es disponibles, avec\
+        \ documentation technique et fonctionnelle de mise en \u0153uvre et de maintien\
+        \ en condtion op\xE9rationnel"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Identit\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:4
+      ref_id: O-4.1
+      description: "Le titulaire s\u2019engage \xE0 fournir et maintenir un syst\xE8\
+        me destin\xE9 \xE0 r\xE9percuter dans son application le cycle de vie d\u2019\
+        un utilisateur (arriv\xE9e, d\xE9part). Ce syst\xE8me devra prendre la forme\
+        \ d\u2019une interface entre l\u2019application et le r\xE9f\xE9rentiel d\u2019\
+        identit\xE9 de l\u2019ETABLISSEMENT de SANTE. Cette interface sera fournie\
+        \ et maintenue par le titulaire.\n\nLe titulaire s\u2019engage une fois le\
+        \ march\xE9 obtenu \xE0 r\xE9diger avec le r\xE9f\xE9rent de l\u2019\xE9tablissement\
+        \ de L\u2019ETABLISSEMENT DE SANT\xC9 le Document de sp\xE9cifications fonctionnelles\
+        \ et techniques de l\u2019interface."
+      typical_evidence: "-Modes op\xE9ratoires disponibles pour la gestion des identit\xE9\
+        s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Authentification et Single Sign-On
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      ref_id: O-5.1
+      description: "Sauf disposition sp\xE9cifique du CCTP, l\u2019ETABLISSEMENT DE\
+        \ SANT\xC9 impose une compatibilit\xE9 avec une authentification unique (Single\
+        \ Sign On) au travers de son syst\xE8me SSO utilisant une identit\xE9 de domaine\
+        \ port\xE9e par les protocoles commun\xE9ment utilis\xE9s en environnement\
+        \ Windows. La politique de s\xE9curit\xE9 de l\u2019authentification de l\u2019\
+        ETABLISSEMENT DE SANT\xC9 s\u2019applique de fait aux comptes d\u2019acc\xE8\
+        s au syst\xE8me.\n\nSi une gestion de comptes utilisateurs et de mot de passe\
+        \ locale au syst\xE8me est sp\xE9cifi\xE9e dans le CCTP, le syst\xE8me doit\
+        \ permettre d\u2019imposer une politique de mots de passe robustes en accord\
+        \ avec la politique de s\xE9curit\xE9 de l\u2019ETABLISSEMENT DE SANT\xC9\
+        \ (8 \xE0 12 caract\xE8res selon le niveau de privil\xE8ge comprenant Majuscules,\
+        \ minuscules, chiffres et caract\xE8res sp\xE9ciaux / d\xE9lais de renouvellement\
+        \ / historisation) et respectant les recommandations de la CNIL"
+      typical_evidence: "- Descriptif des modalit\xE9s de gestion des comptes \n-\
+        \ Descriptif des modalit\xE9s de raccordement \xE0 une solution de SSO"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      ref_id: O-5.2
+      description: "Les mots de passe des comptes n\xE9cessaires \xE0 l\u2019administration\
+        \ de la solution doivent pouvoir \xEAtre modifi\xE9s par l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 et chiffr\xE9s avec chiffrement \xE0 l\u2019\xE9tat de l\u2019\
+        art si stock\xE9s localement.  "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      ref_id: O-5.3
+      description: "Pour les applications web expos\xE9es sur internet et qui int\xE8\
+        greraient une authentification et/ou une gestion des comptes :\nLes pages\
+        \ r\xE9serv\xE9es \xE0 l\u2019authentification et \xE0 la cr\xE9ation de comptes\
+        \ doivent int\xE9grer un dispositif de pr\xE9munition contre l\u2019usage\
+        \ de robots (type test de d\xE9fi-r\xE9ponse). \nDes m\xE9canismes emp\xEA\
+        chant de r\xE9utiliser des informations de connexion ou de session pour contourner\
+        \ l\u2019authentification doivent \xEAtre en place.\nL\u2019interface d\u2019\
+        administration doit \xEAtre accessible seulement en interne "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      ref_id: O-5.4
+      description: "Pour les applications web expos\xE9es sur internet et qui int\xE8\
+        greraient une authentification et/ou une gestion des comptes, les m\xE9canismes\
+        \ d\u2019authentification doivent \xEAtre adapt\xE9s \xE0 la criticit\xE9\
+        \ des donn\xE9es \nUne authentification forte est notamment exig\xE9e pour\
+        \ l\u2019acc\xE8s \xE0 des donn\xE9es de sant\xE9 par carte CPS ou \xE9quivalent\
+        \ et pour toutes donn\xE9es dites sensibles au sens du RGPD (sauf disposition\
+        \ contraire du CCTP qui conduirait l\u2019ETABLISSEMENT DE SANT\xC9 \xE0 prendre\
+        \ en charge une authentification forte en pr\xE9alable \xE0 l\u2019acc\xE8\
+        s \xE0 l\u2019application objet du march\xE9 : cas d\u2019un portail d\u2019\
+        authentification en amont de l\u2019application) en conformit\xE9 avec l\u2019\
+        Arr\xEAt\xE9 du 28 mars 2022 portant approbation du r\xE9f\xE9rentiel relatif\
+        \ \xE0 l'identification \xE9lectronique des acteurs des secteurs sanitaire,\
+        \ m\xE9dico-social et social, personnes physiques et morales, et \xE0 l'identification\
+        \ \xE9lectronique des usagers des services num\xE9riques en sant\xE9, applicable\
+        \ depuis juin 2022."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      ref_id: O-5.5
+      description: "Le processus d'authentification doit \xEAtre, sauf disposition\
+        \ contraire du CCTP, compatible avec un service d'annuaire ou \xE0 un m\xE9\
+        canisme SSO du type LDAP, SAML, OpenID."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:5
+      ref_id: O-5.6
+      name: Gestion des habilitations
+      description: "Sauf disposition sp\xE9cifique du CCTP, l\u2019ETABLISSEMENT DE\
+        \ SANT\xC9 impose une gestion des habilitations \xE0 partir de son r\xE9f\xE9\
+        rentiel d\u2019identit\xE9. Le titulaire s\u2019engage une fois le march\xE9\
+        \ obtenu \xE0 r\xE9diger avec le r\xE9f\xE9rent de L\u2019ETABLISSEMENT DE\
+        \ SANT\xC9 le Document de sp\xE9cifications fonctionnelles et techniques de\
+        \ l\u2019interface."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "Tra\xE7abilit\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      ref_id: O-6.1
+      description: "La capacit\xE9 (ou non) \xE0 tracer toutes les actions (y compris\
+        \ la consultation de donn\xE9es) doit \xEAtre d\xE9crite et conforme \xE0\
+        \ la r\xE9glementation li\xE9e au projet."
+      typical_evidence: "-Description des actions trac\xE9es"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      ref_id: O-6.2
+      description: "Les acc\xE8s utilisateurs (dont administrateurs) seront trac\xE9\
+        s en r\xE9ussite et en \xE9chec dans le syst\xE8me fourni."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      ref_id: O-6.3
+      description: "Dans le cadre de syst\xE8mes g\xE9rant des donn\xE9es \xE0 caract\xE8\
+        re personnel au sens du RGPD les traces de consultation et de modification\
+        \ sont obligatoires dans le syst\xE8me fourni."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      ref_id: O-6.4
+      description: "Les traces produites sont un pr\xE9requis et devront \xEAtre mise\
+        \ \xE0 disposition et accessibles gratuitement dans un format et un mode d\u2019\
+        acc\xE8s rendus possibles et d\xE9crits avec la fourniture du syst\xE8me par\
+        \ le titulaire (ATNA\_: format IHE, syslog, requ\xEAte dans une base de donn\xE9\
+        es \xE0 fournir, fichier \xE0 d\xE9crire)."
+      typical_evidence: '-Outil d''interrogation des traces
+
+        -Export possible des traces'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      ref_id: O-6.5
+      description: "Les traces doivent pouvoir \xEAtre \xE9pur\xE9e au-del\xE0 du\
+        \ temps l\xE9gal de r\xE9tention notamment en conformit\xE9 avec le RGPD"
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:6
+      ref_id: O-6.6
+      description: "Le titulaire s\u2019engage une fois le march\xE9 obtenu \xE0 formaliser\
+        \ \xE0 la demande de L\u2019ETABLISSEMENT de SANTE le d\xE9tail des traces\
+        \ g\xE9n\xE9r\xE9es, leur s\xE9curisation et leur \xE9puration dans un format\
+        \ de type Document d\u2019Architecture Technique (DAT) et Document d\u2019\
+        Exploitation (DEX)."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: "Protection des syst\xE8mes"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:7
+      ref_id: O-7.1
+      description: "Le titulaire s\u2019engage \xE0 mettre en \u0153uvre les dispositifs\
+        \ et param\xE9trages n\xE9cessaires pour pr\xE9munir ses syst\xE8mes contre\
+        \ les attaques virales et intrusives selon l\u2019une des formes suivantes\
+        \ :\n\u2022\tMaintenir les composants \xE0 niveau en termes de s\xE9curit\xE9\
+        \ et garantit une administration s\xE9curis\xE9e int\xE9grant a minima un\
+        \ antivirus mis \xE0 jour et un syst\xE8me d\u2019exploitation ainsi que tous\
+        \ les composants mis \xE0 jour des correctifs de s\xE9curit\xE9 publi\xE9\
+        s par les \xE9diteurs selon des modalit\xE9s de qualification \xE0 d\xE9crire\n\
+        \u2022\tInt\xE9grer ses dispositifs dans la d\xE9marche s\xE9curit\xE9 de\
+        \ l\u2019ETABLISSEMENT en installant l\u2019antivirus de l\u2019ETABLISSEMENT\
+        \ et l\u2019EDR en inscrivant ses syst\xE8mes dans les exigences de gestion\
+        \ des correctifs de s\xE9curit\xE9 en vigueur pour le reste du SI.\n\u2022\
+        \tLes types de fichiers n\xE9cessitant une exclusion d\u2019analyse par l\u2019\
+        antivirus conditionnant le bon fonctionnement doivent \xEAtre communiqu\xE9\
+        s avant installation pour d\xE9cider d\u2019un \xE9ventuel compl\xE9ment de\
+        \ s\xE9curit\xE9\nDe fait, en cas d\u2019intrusion ou de contamination, le\
+        \ titulaire est responsable de la vuln\xE9rabilit\xE9 de ses syst\xE8mes vis\
+        \ \xE0 vis des d\xE9finitions virales et correctifs publics."
+      typical_evidence: "-Sch\xE9ma d'architecture avec toutes les informations n\xE9\
+        cessaires (Matrice de flux avec s\xE9curisation port\xE9e, liste des services\
+        \ par machine, liste des ports, \u2026)\n'-Politique de MCO / patch management\
+        \ / AV\n-Compatibilit\xE9 avec le syst\xE8me AV/EDR de l'\xE9tablissement\
+        \  : OUI/NON\n-Liste des esclusions \xE0 mettre en place si utilisation de\
+        \ l'AV de l'\xE9tablissement"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:7
+      ref_id: O-7.2
+      description: "L\u2019ETABLISSEMENT DE SANTE assure un suivi des vuln\xE9rabilit\xE9\
+        s. Aussi le titulaire s\u2019engage \xE0 proposer une application de correctif\
+        \ (couvrant 100 % des vuln\xE9rabilit\xE9s concern\xE9es) selon la graduation\
+        \ et la temporalit\xE9 suivante : \n\nScore CVE\tD\xE9lai de mise \xE0 disposition\
+        \ de correctif\n> 4.0 et < 7.0\tProchaine mise \xE0 jour mineure de l\u2019\
+        outil\n> 7.0 et < 8.9\tSous 3 mois\n> 8.9\tSous 1 mois\nLes corrections dont\
+        \ le score CVE est sup\xE9rieur \xE0 7 sont \xE0 la charge du titulaire. \n\
+        La mise en \u0153uvre des actions correctives (ou de contournement) sera faite\
+        \ en collaboration avec l\u2019\xE9quipe op\xE9rationnel de l\u2019\xE9tablissement.\
+        \ \nL\u2019installation du ou des correctifs ne doit pas avoir d\u2019impact\
+        \ fonctionnel pour les utilisateurs."
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Cryptographie
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:8
+      ref_id: O-8.1
+      description: "Dans le cas d\u2019applications web publi\xE9es sur internet comme\
+        \ sur l\u2019intranet, l\u2019usage du TLS 1.2 ou plus est imp\xE9ratif. "
+      typical_evidence: "- Versions SSL en place/propos\xE9es"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:8
+      ref_id: O-8.2
+      description: "Les donn\xE9es utiles \xE0 l\u2019authentification doivent \xEA\
+        tre chiffr\xE9es lors de leur communication et de leur stockage."
+      typical_evidence: "- Chiffrements propos\xE9s en transit et au repos"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:8
+      ref_id: O-8.3
+      description: "De mani\xE8re g\xE9n\xE9rale, si des techniques cryptographiques\
+        \ sont utilis\xE9es, elles doivent \xEAtre conformes aux exigences de l\u2019\
+        arr\xEAt\xE9 du 4 avril 2022 relatif \xE0 des moyens d'identification \xE9\
+        lectronique immat\xE9riels mis \xE0 disposition des professionnels, personnes\
+        \ physiques des secteurs sanitaire, social et m\xE9dico-social pour l'utilisation\
+        \ des services num\xE9riques en sant\xE9, et au R\xE9f\xE9rentiel G\xE9n\xE9\
+        ral de S\xE9curit\xE9 (RGS)."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:8
+      ref_id: O-8.4
+      description: "Si les logiciels fournis int\xE8grent la gestion de donn\xE9es\
+        \ \xE0 caract\xE8re personnel au sens du RGPD au sein de syst\xE8mes de gestion\
+        \ de base de donn\xE9es standards (Microsoft SQL, Oracle, MySQL, \u2026) qui\
+        \ proposent le chiffrement des donn\xE9es, celui-ci devra \xEAtre support\xE9\
+        \ par le titulaire et activable \xE0 d\xE9cision de l\u2019ETABLISSEMENT DE\
+        \ SANTE. Les algorithmes et clefs de chiffrement seront conformes aux pr\xE9\
+        conisations de la CNIL et au RGS."
+      typical_evidence: "-Descriptif des m\xE9canismes de chiffrement disponibles"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: "Maintenance et t\xE9l\xE9maintenance"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.1
+      description: "Si le titulaire propose un syst\xE8me de supervision destin\xE9\
+        \ au maintien en condition op\xE9rationnelle et de s\xE9curit\xE9 du syst\xE8\
+        me d\u2019information, il devra en d\xE9crire pr\xE9cis\xE9ment les cat\xE9\
+        gories de donn\xE9es transf\xE9r\xE9es. La protection de ces derni\xE8res\
+        \ devra \xEAtre encadr\xE9 et conforme au RGPD."
+      typical_evidence: "-Description du processus et listing des donn\xE9es concern\xE9\
+        es / NC"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.2
+      description: "La connexion de t\xE9l\xE9maintenance doit se faire via la passerelle\
+        \ Internet s\xE9curis\xE9e mise \xE0 disposition par l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 conform\xE9ment \xE0 sa politique de s\xE9curit\xE9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.3
+      description: "Au niveau des postes de travail standard de l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9, aucun outil de prise de contr\xF4le \xE0 distance ne peut \xEA\
+        tre install\xE9 ou ex\xE9cut\xE9. Le seul outil de prise de contr\xF4le \xE0\
+        \ distance autoris\xE9 est celui DE L\u2019ETABLISSEMENT DE SANT\xC9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.4
+      description: "Il est de la responsabilit\xE9 du titulaire d\u2019assurer la\
+        \ s\xE9curit\xE9 de sa plateforme d\u2019intervention \xE0 distance (locaux,\
+        \ mat\xE9riels, donn\xE9es, logiciels, habilitations), notamment mise \xE0\
+        \ jour des correctifs de s\xE9curit\xE9 et dispositif de protection contre\
+        \ les codes malveillants "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.5
+      description: "L\u2019ETABLISSEMENT DE SANT\xC9 se r\xE9serve le droit de faire\
+        \ des contr\xF4les de s\xE9curit\xE9 du titulaire afin de s\u2019assurer que\
+        \ le niveau de s\xE9curit\xE9 requis est conforme aux exigences de s\xE9curit\xE9\
+        \ du pr\xE9sent r\xE9f\xE9rentiel."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.6
+      description: "Les donn\xE9es \xE0 caract\xE8re personnel ou technique (configuration\
+        \ des \xE9quipements) de l\u2019ETABLISSEMENT DE SANT\xC9 exploit\xE9es par\
+        \ les \xE9quipes de support chez le titulaire doivent \xEAtre prot\xE9g\xE9\
+        s et ne doivent pas \xEAtre divulgu\xE9es."
+      typical_evidence: "- M\xE9canismes de protection de la donn\xE9e / NC"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.7
+      description: "L\u2019intervention de maintenance doit \xEAtre encadr\xE9e entre\
+        \ l\u2019ETABLISSEMENT DE SANT\xC9 et le titulaire, d\xE9finissant notamment\
+        \ les engagements de chacun, l\u2019applications des chartes, les modalit\xE9\
+        s pratiques. "
+      typical_evidence: "-Convention/Contrat/\u2026."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.8
+      description: "Il est de la responsabilit\xE9 du titulaire de sensibiliser son\
+        \ personnel \xE0 l\u2019application des mesures de s\xE9curit\xE9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.9
+      description: "Il est de la responsabilit\xE9 du titulaire de conna\xEEtre en\
+        \ toutes circonstances les actions et l\u2019identit\xE9 de toute personne\
+        \ qui se connecte ou s\u2019est connect\xE9e sur le SI de l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 et d\u2019en assurer la tra\xE7abilit\xE9. Cette tra\xE7abilit\xE9\
+        \ devra \xEAtre communiqu\xE9e sur demande de l\u2019ETABLISSEMENT DE SANT\xC9\
+        ."
+      typical_evidence: "-Prod\xE9cure de tra\xE7abilit\xE9 du titulaire"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.10
+      description: "Il est de la responsabilit\xE9 du titulaire de veiller \xE0 ce\
+        \ que toutes les informations r\xE9siduelles inutiles \xE0 l\u2019issue d\u2019\
+        une intervention soient supprim\xE9es en application du principe de minimisation\
+        \ des donn\xE9es."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.11
+      description: "Le titulaire r\xE9alise un suivi permanent des incidents et vuln\xE9\
+        rabilit\xE9s li\xE9s aux dispositifs fournis et met \xE0 disposition les correctifs\
+        \ et pr\xE9ventifs n\xE9cessaires dans les d\xE9lais appropri\xE9s."
+      typical_evidence: "- Processus de gestion des vuln\xE9rabilit\xE9s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.12
+      description: "Le titulaire s\u2019engage \xE0 effectuer des tests de robustesse\
+        \ et de non-r\xE9gression \xE0 chaque \xE9volution du mat\xE9riel ou du logiciel.\
+        \ Les impacts d'une d\xE9faillance qui serait n\xE9anmoins constat\xE9e seraient\
+        \ de la responsabilit\xE9 du titulaire, la correction et la prise en charge\
+        \ des impacts \xE0 sa charge.\nLes r\xE9sultats des tests pourront \xEAtre\
+        \ communiqu\xE9es sur demande de l\u2019ETABLISSEMENT DE SANT\xC9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.13
+      description: "Le titulaire doit fournir un rapport d\xE9taill\xE9 de l\u2019\
+        intervention effectu\xE9e."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.14
+      description: "La connexion de t\xE9l\xE9maintenance doit se faire via la passerelle\
+        \ Internet s\xE9curis\xE9e mise \xE0 disposition par l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 conform\xE9ment \xE0 sa politique de s\xE9curit\xE9.\nSi l\u2019\
+        ETABLISSEMENT DE SANT\xC9 ne dispose pas d\u2019une passerelle Internet s\xE9\
+        curis\xE9e, le cas d\u2019utilisation d\u2019une passerelle \xE9quivalente\
+        \ fournie par le titulaire du titulaire pourra \xEAtre \xE9tudi\xE9 s\u2019\
+        il apporte des garanties de protection, de tra\xE7abilit\xE9, de preuve opposable\
+        \ et d\u2019acc\xE8s avec la possibilit\xE9 d\u2019audit DE L\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 \nSelon les besoins d\u2019intervention l\u2019acc\xE8s aux\
+        \ syst\xE8mes \xE0 maintenir ou exploiter sera ouvert et ferm\xE9 par l\u2019\
+        \xE9tablissement DE L\u2019ETABLISSEMENT DE SANT\xC9 \xE0 la demande (du mainteneur\
+        \ ou de la personne habilit\xE9e selon le protocole d\xE9fini dans les conditions\
+        \ de la maintenance). "
+      typical_evidence: "- Liste d'adresses IP publiques utilis\xE9es dans le cadre\
+        \ des connexions s\xE9curis\xE9es de t\xE9l\xE9maintenance, \n- Les plages\
+        \ horaires valid\xE9es de connexion en t\xE9l\xE9maintenance possible,\n-\
+        \ Les localisations g\xE9ographiques d\u2019o\xF9 les connexions seront \xE9\
+        tablies."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: O-9.15
+      description: "Le titulaire doit informer le RSSI DE L\u2019ETABLISSEMENT DE\
+        \ SANT\xC9 de tout incident de s\xE9curit\xE9 concernant ses dispositifs connect\xE9\
+        s ou son SI d'entreprise pouvant impacter son mat\xE9riel, le service ou les\
+        \ donn\xE9es de L\u2019ETABLISSEMENT DE SANT\xC9. Le titulaire s\u2019engage\
+        \ \xE0 mobiliser les ressources n\xE9cessaires pour assurer le traitement\
+        \ de l\u2019incident de s\xE9curit\xE9 sur les dispositifs d\xE9ploy\xE9s\
+        \ dans L\u2019ETABLISSEMENT DE SANT\xC9. Si l\u2019incident concerne un traitement\
+        \ relatif RGPD les dispositions relatives au traitement des incidents s\u2019\
+        appliqueront aussi."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9
+      ref_id: '9.1'
+      name: "Prestataire d'administration et de maintenance s\xE9curis\xE9e"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:9.1
+      ref_id: O-9.1.1
+      description: "Le prestataire renseigne annuellement son niveau de conformit\xE9\
+        \ aux exigences et recommandations du r\xE9f\xE9rentiel d\u2019exigences pour\
+        \ les prestataires d\u2019administration et de maintenance s\xE9curis\xE9\
+        es de l\u2019ANSSI [PAMS_RE]. "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: "Sp\xE9cifications WI-FI"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:10
+      ref_id: O-10.1
+      description: "Le chiffrement et l\u2019int\xE9grit\xE9 des informations circulant\
+        \ sur le r\xE9seau doivent \xEAtre assur\xE9s par la mise en place sur les\
+        \ \xE9quipements concern\xE9s du m\xE9canisme WPA2 ou ult\xE9rieurs garantissant\
+        \ le plus haut niveau de s\xE9curit\xE9 (version de la norme IEEE 802.11i\
+        \ certifi\xE9e par la Wifi Alliance)."
+      typical_evidence: "- M\xE9canismes de s\xE9curit\xE9 WiFi propos\xE9s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:10
+      ref_id: O-10.2
+      description: "Pour l\u2019authentification, l\u2019association de WPA2 ou sup\xE9\
+        rieur (\xAB WPA2 \u2013 Entreprise \xBB) avec un serveur d'authentification\
+        \ 802.1X (Radius) par le biais du protocole EAP est demand\xE9e.  Pour \xE9\
+        viter la gestion redondante des comptes, le serveur devra s\u2019appuyer sur\
+        \ l\u2019annuaire LDAP centralis\xE9 de l\u2019\xE9tablissement. "
+      typical_evidence: "- M\xE9canismes d'authentification WiFi propos\xE9s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:11
+      assessable: false
+      depth: 1
+      ref_id: '11'
+      name: "Protection des donn\xE9es m\xE9dicales"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:11
+      ref_id: O-11.1
+      description: "Le titulaire et son personnel comme le personnel de l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 sont soumis \xE0 un engagement de confidentialit\xE9 conform\xE9\
+        ment aux pr\xE9conisations de la CNIL et au Code de la Sant\xE9 Publique."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:11
+      ref_id: O-11.2
+      description: "En cons\xE9quence, notamment, les jeux de donn\xE9es fournies\
+        \ par l\u2019ETABLISSEMENT DE SANT\xC9 sont strictement confidentiels et sont\
+        \ li\xE9s au secret professionnel."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12
+      assessable: false
+      depth: 1
+      ref_id: '12'
+      name: "Cas particuliers selon p\xE9rim\xE8tre"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12
+      ref_id: '12.1'
+      name: Cas des moyens mobiles
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.1
+      ref_id: O-12.1.1
+      description: "Tout dispositif mobile doit \xEAtre chiffr\xE9 (en conformit\xE9\
+        \ avec le R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9 : RGS) et les\
+        \ clefs de chiffrement doivent pouvoir \xEAtre mis \xE0 disposition et g\xE9\
+        r\xE9s par l\u2019ETABLISSEMENT DE SANT\xC9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12
+      ref_id: '12.2'
+      name: "Cas des dispositifs connect\xE9s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.1
+      name: "Conformit\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.1
+      ref_id: O-12.2.1.1
+      name: Droit d'audit
+      description: "L\u2019ETABLISSEMENT DE SANTE se r\xE9serve le droit de contr\xF4\
+        ler la qualit\xE9 et la s\xE9curit\xE9 du Syst\xE8me fourni par le titulaire,\
+        \ via des audits et/ou des tests d\u2019intrusion.\n\nUn accord formel du\
+        \ titulaire doit pr\xE9ciser :\n- Les types de tests d'intrusion et d'audit\
+        \ technique autoris\xE9s\n- Les audits techniques qui n\xE9cessitent de pr\xE9\
+        venir le titulaire\n\nLes types d'audits techniques \xE0 consid\xE9rer sont\
+        \ les tests d'intrusion (de niveau r\xE9seau et/ou applicatif), les audits\
+        \ de configuration de composants logiciels et les audits de code source.\n\
+        \nA l'issu de l'audit, si un plan de r\xE9m\xE9diation est propos\xE9, le\
+        \ titulaire s'engage sur un planning de mise en oeuvre."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.1
+      ref_id: O-12.2.1.2
+      name: Sous-traitance
+      description: "En cas de recours \xE0 de la sous-traitance pour les actions d'administration\
+        \ et de maintenance du DM, le titulaire s'engage \xE0 faire respecter \xE0\
+        \ ses propres sous-traitants les m\xEAmes objectifs de s\xE9curit\xE9 que\
+        \ ceux auxquels il est soumis."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.2
+      name: "Gestion des acc\xE8s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.2
+      ref_id: O-12.2.2.1
+      name: 'Gestion des profils et des droits :'
+      description: "Le titulaire doit d\xE9crire les fonctions acc\xE9d\xE9es par\
+        \ les diff\xE9rents profils d'utilisateur du dispositif m\xE9dical. Il doit\
+        \ \xE9galement d\xE9crire les fonctions avanc\xE9es acc\xE9d\xE9es sp\xE9\
+        cifiquement par le ou les profils d'administrateur (acc\xE8s aux configurations,\
+        \ aux param\xE8tres, au mode sans \xE9chec, au mode debug...)."
+      typical_evidence: "-Description des droits d'acc\xE8s par profil"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.3
+      name: "Connectivit\xE9 et s\xE9curit\xE9 des r\xE9seaux"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.3
+      ref_id: O-12.2.3.1
+      name: "Protocoles d\u2019authentification"
+      description: "Le titulaire doit pouvoir fournir la proc\xE9dure de connexion\
+        \ du dispositif m\xE9dical sur le r\xE9seau de l'\xE9tablissement, notamment\
+        \ une description des m\xE9canismes standards d'identification et d'authentification\
+        \ support\xE9s par le dispositif. Les protocoles de chiffrement utilis\xE9\
+        s pour s\xE9curiser l'authentification et la connexion doivent \xEAtre surs\
+        \ et connus (ex: SHA256, AES, AES-CBC, RSA-OAEP)."
+      typical_evidence: "- Proc\xE9dure de connexion au dispositif m\xE9dical, de\
+        \ m\xE9canismes de connexion et des protocoles de s\xE9cruit\xE9 associ\xE9\
+        s"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.3
+      ref_id: O-12.2.3.2
+      name: "Matrice de flux r\xE9seaux "
+      description: "Le titulaire assure la mise \xE0 disposition d'une matrice des\
+        \ flux r\xE9seaux qui d\xE9crit les flux entrants et sortants du dispositif\
+        \ m\xE9dical. Elle d\xE9crit notamment :\n- l'identification et la description\
+        \ de chaque flux\n- l'exposition \xE0 Internet (t\xE9l\xE9supervision, t\xE9\
+        l\xE9maintenance, Big Data...)\n- l'\xE9metteur (application, poste, serveur,\
+        \ base de donn\xE9es...)\n- le r\xE9cepteur (application, poste, serveur,\
+        \ base de donn\xE9es...)\n- le protocole r\xE9seau utilis\xE9\n- le chiffrement\
+        \ (algorithme), si applicable\n\nSi le dispositif m\xE9dical est compos\xE9\
+        \ de plusieurs mat\xE9riels connect\xE9s en r\xE9seau, le titulaire doit pouvoir\
+        \ fournir la matrice des flux r\xE9seaux entre ces mat\xE9riels.\nLes flux\
+        \ r\xE9seaux doivent \xEAtre limit\xE9s au strict n\xE9cessaire."
+      typical_evidence: "-Sch\xE9ma d'architecture avec toutes les informations n\xE9\
+        cessaires (Matrice de flux avec s\xE9curisation port\xE9e, liste des services\
+        \ par machine, liste des ports, \u2026)"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.3
+      ref_id: O-12.2.3.3
+      name: "Sch\xE9ma d\u2019architecture"
+      description: "Le titulaire assure la mise \xE0 disposition d'une matrice des\
+        \ flux r\xE9seaux qui d\xE9crit les flux entrants et sortants du dispositif\
+        \ m\xE9dical. Elle d\xE9crit notamment :\n- l'identification et la description\
+        \ de chaque flux\n- l'exposition \xE0 Internet (t\xE9l\xE9supervision, t\xE9\
+        l\xE9maintenance, Big Data...)\n- l'\xE9metteur (application, poste, serveur,\
+        \ base de donn\xE9es...)\n- le r\xE9cepteur (application, poste, serveur,\
+        \ base de donn\xE9es...)\n- le protocole r\xE9seau utilis\xE9\n- le chiffrement\
+        \ (algorithme), si applicable\n\nSi le dispositif m\xE9dical est compos\xE9\
+        \ de plusieurs mat\xE9riels connect\xE9s en r\xE9seau, le titulaire doit pouvoir\
+        \ fournir la matrice des flux r\xE9seaux entre ces mat\xE9riels.\nLes flux\
+        \ r\xE9seaux doivent \xEAtre limit\xE9s au strict n\xE9cessaire."
+      typical_evidence: "-Sch\xE9ma d'architecture avec toutes les informations n\xE9\
+        cessaires (Matrice de flux avec s\xE9curisation port\xE9e, liste des services\
+        \ par machine, liste des ports, \u2026)"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.4
+      name: Exploitation et communication
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.4
+      ref_id: O-12.2.4.1
+      name: Mise en service
+      description: "Si le dispositif m\xE9dical n\xE9cessite des actions de la part\
+        \ de l'\xE9tablissement, le titulaire doit fournir un guide d'installation\
+        \ et de mise en service int\xE9grant les modalit\xE9s ci-dessous :\n- La liste\
+        \ des \xE9ventuels services \xE0 d\xE9sactiver ;\n- La liste des comptes inutiles\
+        \ ou obsol\xE8tes \xE0 d\xE9sactiver ou \xE0 supprimer ;\n- La liste des comptes\
+        \ \xE0 privil\xE8ges dont les mots de passe doivent \xEAtre modifi\xE9s."
+      typical_evidence: '- Guide d''installation et de mise en service '
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.4
+      ref_id: O-12.2.4.2
+      name: "D\xE9tection d'une vuln\xE9rabilit\xE9 critique"
+      description: "Les postes utilisateurs des dispositifs connect\xE9s doivent \xEA\
+        tre compatibles avec des moyens de s\xE9curit\xE9 permettant de filtrer les\
+        \ donn\xE9es \xE9chang\xE9es sur les r\xE9seaux (types de protocoles, origine/destination\
+        \ des flux, \u2026).\nDans ce sens, les logiciels sp\xE9cifiques \xE0 la gestion\
+        \ des dispositifs connect\xE9s, install\xE9s sur les postes de travail, sont\
+        \ compatibles avec les solutions de s\xE9curit\xE9 de filtrage r\xE9seaux\
+        \ de type firewall personnel."
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.4.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.4
+      ref_id: O-12.2.4.3
+      name: Mise au rebut
+      description: "En cas de maintenance du mat\xE9riel ou de mise au rebut, le titulaire\
+        \ doit supprimer de mani\xE8re s\xE9curis\xE9e les donn\xE9es \xE0 caract\xE8\
+        re personnel de sant\xE9 pr\xE9sentes sur les disques durs ou dans la m\xE9\
+        moire int\xE9gr\xE9e. Un proc\xE8s-verbal doit \xEAtre sign\xE9 entre le titulaire\
+        \ et l\u2019\xE9tablissement."
+      typical_evidence: OUI/NON/NC
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.5
+      name: "D\xE9veloppement et maintenance des logiciels"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.5
+      ref_id: O-12.2.5.1
+      name: Maintenance
+      description: "Le titulaire doit pouvoir fournir une proc\xE9dure de maintenance\
+        \ pr\xE9cisant les modalit\xE9s de mise \xE0 jour en toute s\xE9curit\xE9\
+        \ du dispositif m\xE9dical. Ces modalit\xE9s doivent inclure :\n- M\xE9thodes\
+        \ et outils (logiciels ou mat\xE9riels) utilis\xE9s par les intervenants\n\
+        - S\xE9curit\xE9 appliqu\xE9e sur ces outils (configuration, contr\xF4le d'acc\xE8\
+        s, tra\xE7abilit\xE9)\n- Fonctionnalit\xE9s du dispositif m\xE9dical qui restent\
+        \ actives durant l'op\xE9ration de maintenance\n- Mesures de s\xE9curit\xE9\
+        \ qui emp\xEAchent l'acc\xE8s aux donn\xE9es personnelles de sant\xE9 stock\xE9\
+        es dans le dispositif m\xE9dical par le mainteneur\n- Contr\xF4le de l'origine\
+        \ et de l'int\xE9grit\xE9 des fichiers de mise \xE0 jour\n- Modalit\xE9s de\
+        \ retour arri\xE8re en cas d'\xE9chec de la mise \xE0 jour\n\nCette proc\xE9\
+        dure doit \xEAtre valid\xE9e par l\u2019ETABLISSEMENT DE SANTE.\nChaque op\xE9\
+        ration de maintenance doit faire l'objet d'un compte-rendu de l'op\xE9ration\
+        \ notifi\xE9 et consultable par l'\xE9tablissement."
+      typical_evidence: "-Proc\xE9dure de maintenance"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.5
+      ref_id: O-12.2.5.2
+      description: "Il doit \xEAtre possible de faire scanner le contenu de la mise\
+        \ \xE0 jour avant son installation dans le DM, quel que soit le moyen de support\
+        \ utilis\xE9 par le mainteneur (portail fabricant, cl\xE9 USB, disque dur,\
+        \ PC d'op\xE9rateur, etc.)."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.5
+      ref_id: O-12.2.5.3
+      name: "T\xE9l\xE9maintenance"
+      description: "Dans le cadre d\u2019un acc\xE8s de t\xE9l\xE9maintenance, le\
+        \ titulaire doit utiliser les moyens de connexion \xE0 distance mis en \u0153\
+        uvre par l\u2019ETABLISSEMENT DE SANTE.\n\nToute op\xE9ration de t\xE9l\xE9\
+        maintenance doit \xEAtre annonc\xE9e \xE0 l'\xE9tablissement par le titulaire.\
+        \ L'op\xE9ration doit \xEAtre planifi\xE9e et cadr\xE9e dans le temps avec\
+        \ une date de d\xE9but et de fin. La connexion ne sera accord\xE9e et ouverte\
+        \ uniquement que durant la p\xE9riode convenue. Une proc\xE9dure d\u2019exception\
+        \ peut \xEAtre pr\xE9vue pour autoriser temporairement, afin de r\xE9pondre\
+        \ \xE0 des besoins d\u2019intervention en urgence.\nUn compte-rendu de l'intervention\
+        \ doit \xEAtre dress\xE9 par le titulaire \xE0 la fin de l'op\xE9ration de\
+        \ t\xE9l\xE9maintenance et transmis \xE0 l'\xE9tablissement.\n\nLe titulaire\
+        \ doit fournir les IP publiques \xE0 partir desquelles les op\xE9rateurs de\
+        \ maintenance r\xE9alisent leurs op\xE9rations."
+      typical_evidence: "- Liste d'adresses IP publiques utilis\xE9es dans le cadre\
+        \ des connexions s\xE9curis\xE9es de t\xE9l\xE9maintenance, \n- Les plages\
+        \ horaires valid\xE9es de connexion en t\xE9l\xE9maintenance possible,\n-\
+        \ Les localisations g\xE9ographiques d\u2019o\xF9 les connexions seront \xE9\
+        tablies."
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.5.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.5
+      ref_id: O-12.2.5.4
+      name: Gestion des logiciels tiers
+      description: "Le titulaire doit fournir la liste exhaustive des logiciels tiers\
+        \ (OS, firmwares, librairies, outil de t\xE9l\xE9surveillance, outil de t\xE9\
+        l\xE9maintenance, etc.), i.e. qui n'ont pas \xE9t\xE9 d\xE9velopp\xE9s par\
+        \ le titulaire, avec leurs versions au moment de la commande. Le titulaire\
+        \ s'engage \xE0 maintenir ces logiciels tierces pendant la dur\xE9e de vie\
+        \ du dispositif m\xE9dical, notamment dans le cadre de la mat\xE9riovigilance.\n\
+        Le temps de garantie de fourniture des logiciels doit \xEAtre inclus dans\
+        \ le march\xE9 de maintenance."
+      typical_evidence: '- Liste exhaustive des logiciels tiers'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.6
+      name: "Protection des donn\xE9es"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.6
+      ref_id: O-12.2.6.1
+      name: "Protection des donn\xE9es personnelles de sant\xE9"
+      description: "Le titulaire doit pouvoir d\xE9crire les modalit\xE9s de transfert\
+        \ et d'export des donn\xE9es personnelles de sant\xE9, en pr\xE9cisant les\
+        \ protocoles utilis\xE9s. Les protocoles de chiffrement utilis\xE9s pour s\xE9\
+        curiser l'authentification et la connexion doivent \xEAtre surs et connus\
+        \ (ex: SHA256, AES, AES-CBC, RSA-OAEP).\n\nSi des donn\xE9es sont stock\xE9\
+        es dans le dispositif m\xE9dical, les modalit\xE9s d'acc\xE8s et de stockage\
+        \ doivent \xEAtre conformes au RGPD, aux exigences identifi\xE9es dans le\
+        \ Cadre d\u2019Interop\xE9rabilit\xE9 des SIS publi\xE9s par l\u2019ANS et\
+        \ \xE0 la PSSI de l'\xE9tablissement."
+      typical_evidence: "- Modalit\xE9s de transfert et d'export des donn\xE9es personnelles\
+        \ de sant\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.7
+      name: "S\xE9curit\xE9 physique"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.7.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.7
+      ref_id: O-12.2.7.1
+      name: "S\xE9curit\xE9 physique du dispositif m\xE9dical"
+      description: "Les mesures de s\xE9curit\xE9 physique sur le dispositif m\xE9\
+        dical doivent \xEAtre document\xE9es pour limiter les risques li\xE9s \xE0\
+        \ de l'intrusion physique. L'ensemble des ports physiques (USB, RJ45, et autres)\
+        \ doivent \xEAtre list\xE9s et plac\xE9s sur un sch\xE9ma. Il doit \xEAtre\
+        \ possible notamment de : \n- D\xE9sactiver les ports de debug. \n- Limiter\
+        \ la possibilit\xE9 de d\xE9tourner le d\xE9marrage via un support amovible.\n\
+        \nL\u2019ETABLISSEMEMNT DE SANTE doit pouvoir placer sur les ports USB des\
+        \ bloqueurs physiques. Les ports USB doivent donc \xEAtre accessibles physiquement\
+        \ pour l'\xE9tablissement."
+      typical_evidence: "- Descriptif des mesures de s\xE9curit\xE9 physique sur le\
+        \ dispositif m\xE9dical "
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.8
+      name: "R\xE9silience"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.8
+      ref_id: O-12.2.8.1
+      name: "Mise en s\xE9curit\xE9"
+      description: "Le dispositif m\xE9dical doit pouvoir d\xE9crire un mode de \"\
+        mise en s\xE9curit\xE9\" en cas d'attaque cybers\xE9curit\xE9 sur le r\xE9\
+        seau informatique garantissant la non mise en danger du patient. Les \xE9\
+        l\xE9ments suivants doivent \xEAtre d\xE9crits dans la documentation du dispositif\
+        \ m\xE9dical :\n- Modalit\xE9s de mise en s\xE9curit\xE9\n- Fonctionnalit\xE9\
+        s maintenues\n- Modalit\xE9s de remise en service\n- Alertes et messages d\xE9\
+        crivant l'\xE9tat de compromission du DM"
+      typical_evidence: "-Descriptif du mode \"mise en s\xE9curit\xE9\""
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.8
+      ref_id: O-12.2.8.2
+      name: "Mode d\xE9grad\xE9"
+      description: "Le titulaire doit pouvoir d\xE9crire les modalit\xE9s d'activation\
+        \ d'un mode d\xE9grad\xE9 en cas d'attaque cybers\xE9curit\xE9 sur le DM.\
+        \ Le mode d\xE9grad\xE9 est une situation o\xF9 le DM doit pouvoir fonctionner\
+        \ malgr\xE9 les impacts d'une cyberattaque. Ces modalit\xE9s contiennent :\n\
+        - le mode op\xE9ratoire pour le faire fonctionner sans connexion r\xE9seau\n\
+        - le mode op\xE9ratoire pour le faire fonctionner en cas de compromission\
+        \ d'un poste ou d'un serveur qui constitue le DM\n\nLes modes op\xE9ratoires\
+        \ doivent tenir compte de l'\xE9cosyst\xE8me dans lequel se trouve le DM."
+      typical_evidence: "- Modalit\xE9s de fonctionnement du mode d\xE9grad\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.8
+      ref_id: O-12.2.8.3
+      name: "Traitement des incidents de s\xE9curit\xE9"
+      description: "Le titulaire s'engage \xE0 contacter les interlocuteurs s\xE9\
+        curit\xE9 de l\u2019\xE9tablissement d\xE9sign\xE9s pour signaler tout incident\
+        \ de s\xE9curit\xE9 SI susceptible d\u2019affecter les donn\xE9es ou le SI\
+        \ de l\u2019\xE9tablissement.\nLe titulaire dispose d'une proc\xE9dure de\
+        \ gestion des incidents de s\xE9curit\xE9 formalisant les \xE9tapes de traitement\
+        \ et de r\xE9solution d'un incident.\n\nDe plus :\n- si cet incident a lieu\
+        \ sur le SI de l\u2019\xE9tablissement, un contact s\xE9curit\xE9 du titulaire\
+        \ est d\xE9sign\xE9 et participe activement \xE0 la gestion de l'incident\
+        \ si l'\xE9quipement est impliqu\xE9\n- si cet incident a lieu sur le SI du\
+        \ titulaire, un contact s\xE9curit\xE9 du titulaire est d\xE9sign\xE9 et doit\
+        \ fournir r\xE9guli\xE8rement un \xE9tat de la situation aux \xE9tablissements\
+        \ concern\xE9s, \xE0 l'ANSM et au CERT-Sant\xE9. Le titulaire doit obligatoirement\
+        \ fournir une description des impacts \xE9ventuels sur le SI des \xE9tablissements.\n\
+        \nEn outre, des r\xE9unions p\xE9riodiques d\u2019analyse post-incident devront\
+        \ \xEAtre planifi\xE9es avec l\u2019\xE9tablissement (traitement des causes\
+        \ profondes)."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.8.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.8
+      ref_id: O-12.2.8.4
+      name: "Gestion de crise s\xE9curit\xE9"
+      description: "Sur son domaine de responsabilit\xE9 SI, le titulaire applique\
+        \ une proc\xE9dure formalis\xE9e et op\xE9rationnelle de gestion de crise,\
+        \ apte \xE0 assurer le traitement d\u2019\xE9v\xE9nements remettant en cause\
+        \ de fa\xE7on inacceptable pour l\u2019\xE9tablissement le respect des engagements\
+        \ de s\xE9curit\xE9 du DM. Ce plan pr\xE9cise au minimum :\n- les principes\
+        \ d\u2019escalade (crit\xE8res de d\xE9clenchement, synoptique d\u2019escalade)\
+        \ ;\n- la composition de la cellule de crise : fonctions et responsabilit\xE9\
+        s des membres (\xE9tablissement et titulaire). La liste nominative des membres\
+        \ et de leurs suppl\xE9ants est r\xE9f\xE9renc\xE9e dans un annuaire ;\n-\
+        \ les moyens d\xE9di\xE9s \xE0 la gestion de crise (salle(s) de crise, proc\xE9\
+        dures op\xE9rationnelles, moyens de communication)."
+      typical_evidence: "- Proc\xE9dure formalis\xE9e et op\xE9rationnelle de gestion\
+        \ de crise"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.9
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.9
+      name: Gestion des licences
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.9
+      ref_id: O-12.2.9.1
+      name: "Gestion de la propri\xE9t\xE9 intellectuelle"
+      description: "Le titulaire s'assure de l'acquisition de l'ensemble des licences\
+        \ ou des abonnements n\xE9cessaires et de la concession des droits d'usage\
+        \ \xE0 l'\xE9tablissement dans le cadre du service (droits d'usage de mat\xE9\
+        riels, de progiciels et/ou de couches logiques).\n\nLe titulaire s\u2019assure\
+        \ de la bonne validit\xE9 des licences des logiciels qu\u2019il met \xE0 disposition\
+        \ de l\u2019\xE9tablissement dans le cadre de la prestation, et ce durant\
+        \ toute la dur\xE9e du march\xE9. Par exemple, concernant les licences Windows,\
+        \ le titulaire s'engage \xE0 fournir des licences \xE0 jour ou \xE0 apporter\
+        \ la preuve qu'un contrat de support \xE9tendu qui court sur la p\xE9riode\
+        \ pr\xE9vue de la prestation."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.10
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2
+      ref_id: 12.2.10
+      name: "Protection des donn\xE9es"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.2.10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.2.10
+      ref_id: O-12.2.10.1
+      name: "Protection des secrets stock\xE9s"
+      description: "Les secrets stock\xE9s dans l'appareil (mots de passe, certificats\
+        \ \xE9lectroniques, cl\xE9s de chiffrement, etc.) doivent \xEAtre prot\xE9\
+        g\xE9s par des algorithmes de chiffrement surs et connus."
+      typical_evidence: "- Descriptif des mesures de s\xE9curit\xE9 des secrets stock\xE9\
+        s dans l'appareil  "
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12
+      ref_id: '12.3'
+      name: "Cas de service h\xE9berg\xE9 en dehors du SI de l\u2019\xE9tablissement\
+        \ de sant\xE9 et de prestation de type SAAS/IAAS"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node109
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      name: "Les services h\xE9berg\xE9s devront respecter les exigences de s\xE9\
+        curit\xE9 des r\xE9glementations en vigueur"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node109
+      ref_id: O-12.3.1
+      description: "Si le centre de maintenance ou d\u2019h\xE9bergement est en dehors\
+        \ du territoire national cela devra \xEAtre pr\xE9cis\xE9 pour analyser les\
+        \ contraintes r\xE9glementaires associ\xE9es au type de syst\xE8me \xE0 prot\xE9\
+        ger selon la politique de s\xE9curit\xE9 de l\u2019\xE9tat et du minist\xE8\
+        re de rattachement.\nLe candidat doit pr\xE9ciser les pays o\xF9 sont r\xE9\
+        alis\xE9s les h\xE9bergements. Dans le cas d\u2019h\xE9bergement hors communaut\xE9\
+        \ europ\xE9enne les dispositions adapt\xE9es doivent \xEAtre pr\xE9alablement\
+        \ r\xE9alis\xE9es et valid\xE9es par les autorit\xE9s comp\xE9tentes."
+      typical_evidence: "- Localisation du centre de maintenance / h\xE9bergement"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node109
+      ref_id: O-12.3.2
+      description: "Si des donn\xE9es sont \xAB h\xE9berg\xE9es \xBB en dehors du\
+        \ territoire national cela devra \xEAtre pr\xE9cis\xE9 pour analyser les contraintes\
+        \ r\xE9glementaires.\nLe candidat doit pr\xE9ciser les pays o\xF9 sont r\xE9\
+        alis\xE9s les h\xE9bergements. Dans le cas d\u2019h\xE9bergement hors communaut\xE9\
+        \ europ\xE9enne les dispositions adapt\xE9es doivent \xEAtre pr\xE9alablement\
+        \ r\xE9alis\xE9es et valid\xE9es par l\u2019\xE9tablissement de sant\xE9 et\
+        \ les autorit\xE9s comp\xE9tentes."
+      typical_evidence: '-Certification HDS '
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node109
+      ref_id: O-12.3.3
+      description: "Si le titulaire ou un de ses sous-traitants \xAB h\xE9berge \xBB\
+        \ des donn\xE9es de sant\xE9 (cf sens donn\xE9 par le Code de la Sant\xE9\
+        \ Publique) celui-ci doit \xEAtre certifi\xE9 h\xE9bergeur de donn\xE9es de\
+        \ sant\xE9 conform\xE9ment \xE0 l\u2019article L 1111-8 du Code de la Sant\xE9\
+        \ Publique. Le Titulaire devra fournir ses certifications HDS et ISO27001.\n\
+        Pour le cadre sp\xE9cifique de la recherche uniquement, des dispositions sp\xE9\
+        cifiques de conformit\xE9 au RGPD seront \xE9tablies pour des h\xE9bergements\
+        \ hors UE."
+      typical_evidence: '-Certification HDS '
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node109
+      ref_id: O-12.3.4
+      description: "Si des donn\xE9es nominatives \xE0 caract\xE8re personnel font\
+        \ l\u2019objet de traitement par le syst\xE8me, une conformit\xE9 au RGPD\
+        \ est n\xE9cessaire et le titulaire devra d\xE9montrer le niveau de protection\
+        \ adapt\xE9 \xE0 la criticit\xE9 de ces donn\xE9es. Cette d\xE9monstration\
+        \ doit \xEAtre int\xE9gr\xE9e dans les descriptions de la prise en charge\
+        \ des mesures concern\xE9es du pr\xE9sent document."
+      typical_evidence: "- Certifications et/ou r\xE9sultats d'audit prouvant le niveau\
+        \ de maturit\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node114
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      name: "Concernant l\u2019acc\xE8s par des utilisateurs de l\u2019\xE9tablissement\
+        \ de sant\xE9, au service h\xE9berg\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node114
+      ref_id: O-12.3.5
+      description: "Une authentification d\u2019acc\xE8s doit permettre aux utilisateurs\
+        \ d\u2019acc\xE9der aux services avec un niveau de s\xE9curit\xE9 adapt\xE9\
+        \ aux donn\xE9es \xE0 prot\xE9ger. Les utilisateurs pourront changer leur\
+        \ authentifiant (mot de passe ou moyen d\u2019authentification). La confidentialit\xE9\
+        \ des mots de passe doit \xEAtre garantie par l\u2019h\xE9bergeur lors de\
+        \ son stockage (chiffr\xE9) et de sa saisie. \nPour l\u2019acc\xE8s aux donn\xE9\
+        es de sant\xE9 l\u2019authentification devra \xEAtre conforme aux exigences\
+        \ d\u2019authentification forte de l\u2019Arr\xEAt\xE9 du 28 mars 2022 portant\
+        \ approbation du r\xE9f\xE9rentiel relatif \xE0 l'identification \xE9lectronique\
+        \ des acteurs des secteurs sanitaire, m\xE9dico-social et social, personnes\
+        \ physiques et morales, et \xE0 l'identification \xE9lectronique des usagers\
+        \ des services num\xE9riques en sant\xE9."
+      typical_evidence: '- Descriptif des moyens d''authentification disponibles'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node114
+      ref_id: O-12.3.6
+      description: "Les mots de passe ne doivent pas \xEAtre stock\xE9s en clair dans\
+        \ le logiciel ou la base de donn\xE9es. Le chiffrement utilis\xE9 doit \xEA\
+        tre conforme au RGS."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node114
+      ref_id: O-12.3.7
+      description: "Le titulaire doit remettre un compte et authentifiant pour audit\
+        \ \xE0 la demande de l\u2019ETABLISSEMENT DE SANT\xC9 et accepte que l\u2019\
+        ETABLISSEMENT DE SANT\xC9 r\xE9alise ou commandite des audits externes pour\
+        \ v\xE9rifier la conformit\xE9 aux exigences de s\xE9curit\xE9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node118
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      name: "Concernant la continuit\xE9 du service h\xE9berg\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node118
+      ref_id: O-12.3.8
+      description: "Le service ne doit pas \xEAtre indisponible plus que la dur\xE9\
+        e d\xE9crite dans le CCTP."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node118
+      ref_id: O-12.3.9
+      description: "Sauf sp\xE9cification d\u2019exclusion dans le CCTP, le logiciel,\
+        \ service ou application doit proposer un mode et/ou fonctionnalit\xE9 d\xE9\
+        grad\xE9(e) permettant un passage en mode manuel en cas d\u2019interruption.\
+        \ Une extraction des donn\xE9es doit \xEAtre r\xE9alisable \xE0 une p\xE9\
+        riodicit\xE9 d\xE9finie. Les donn\xE9es extraites doivent \xEAtre imprimables\
+        \ en version papier et correspondre au formalisme initial du service num\xE9\
+        rique propos\xE9.\nCette fonctionnalit\xE9 et ce passage en mode manuel doit\
+        \ \xEAtre d\xE9crit dans les sp\xE9cifications fonctionnelles du service."
+      typical_evidence: "- Descriptif des modes d\xE9grad\xE9s disponibles"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node121
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      name: "Concernant la r\xE9versibilit\xE9 du service h\xE9berg\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node121
+      ref_id: O-12.3.10
+      description: "Une copie exploitable des donn\xE9es\_(bases de donn\xE9es ou\
+        \ fichiers informatiques avec champs d\xE9limit\xE9s et d\xE9crits) est transmise\
+        \ \xE0 l\u2019ETABLISSEMENT DE SANT\xC9 3 mois avant la fin de ce contrat/march\xE9\
+        \ pour permettre la r\xE9alisation de tests de migration. "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node121
+      ref_id: O-12.3.11
+      description: "Une copie exploitable des donn\xE9es (bases de donn\xE9es ou fichiers\
+        \ informatiques avec champs d\xE9limit\xE9s et d\xE9crits) est transmise \xE0\
+        \ l\u2019ETABLISSEMENT DE SANT\xC9 en fin de contrat/march\xE9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node124
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      name: "Concernant la garantie de confidentialit\xE9 des donn\xE9es\_h\xE9berg\xE9\
+        es"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.12
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node124
+      ref_id: O-12.3.12
+      description: "Le titulaire s\u2019engage \xE0 garantir un acc\xE8s aux donn\xE9\
+        es aux seules personnes habilit\xE9es selon les besoins de l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9"
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.13
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node124
+      ref_id: O-12.3.13
+      description: "Les intervenants sont identifi\xE9s et doivent signer un engagement\
+        \ de confidentialit\xE9 individuel. Les acc\xE8s et actions r\xE9alis\xE9\
+        es devront \xEAtre trac\xE9s."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.14
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node124
+      ref_id: O-12.3.14
+      description: "Le titulaire s\u2019engage \xE0 d\xE9truire les donn\xE9es selon\
+        \ les dispositions pr\xE9vues dans le CTTP ou \xE0 d\xE9faut en fin de contrat/march\xE9\
+        \ apr\xE8s les avoir restitu\xE9es \xE0 l\u2019ETABLISSEMENT DE SANT\xC9 sous\
+        \ une forme exploitable. Un proc\xE8s-verbal de la destruction sera fourni\
+        \ au plus tard 1 mois apr\xE8s la fin de contrat/march\xE9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node128
+      assessable: false
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.3
+      name: "Concernant la perte ou le renouvellement de certification d\u2019h\xE9\
+        bergement de donn\xE9es de sant\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.3.15
+      assessable: true
+      depth: 4
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:node128
+      ref_id: O-12.3.15
+      description: "Le titulaire certifi\xE9 h\xE9bergeur de donn\xE9es de sant\xE9\
+        \ doit transmettre \xE0 l\u2019ETABLISSEMENT DE SANTE, dans les 10 jours,\
+        \ les r\xE9sultats des audits de certification, de contr\xF4le et de renouvellement. "
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12
+      ref_id: '12.4'
+      name: "Cas de service h\xE9berg\xE9 par l\u2019\xE9tablissement de sant\xE9\
+        \ et int\xE9gralement administr\xE9 par le titulaire"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.4
+      ref_id: O-12.4.1
+      description: "Le titulaire doit s\u2019engager \xE0 maintenir les composants\
+        \ \xE0 niveau en termes de s\xE9curit\xE9 et garantir une administration s\xE9\
+        curis\xE9e int\xE9grant prioritairement les dispositifs de lutte contre les\
+        \ codes malveillants de l\u2019ETABLISSEMENT de SANTE. Sinon le titulaire\
+        \ fournira ces dispositifs.\nLe syst\xE8me d\u2019exploitation ainsi que tous\
+        \ les composants seront mis \xE0 jour des correctifs de s\xE9curit\xE9 publi\xE9\
+        s par les \xE9diteurs selon des modalit\xE9s de qualification \xE0 d\xE9crire."
+      typical_evidence: "- Descriptif des modalit\xE9s de s\xE9curisation\n- Descriptif\
+        \ du patch management"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.4
+      ref_id: O-12.4.2
+      description: "L\u2019acc\xE8s depuis l\u2019ext\xE9rieur de l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 pour l\u2019exploitation et la maintenance doivent respecter\
+        \ les conditions d\xE9crites au paragraphe Maintenance et T\xE9l\xE9maintenance."
+      typical_evidence: "Cf. Section Maintenance et t\xE9l\xE9maintenance"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.4
+      ref_id: O-12.4.3
+      description: "Pour tout type de traitement le titulaire doit remettre un compte\
+        \ et authentifiant pour audit \xE0 la demande de l\u2019ETABLISSEMENT DE SANT\xC9\
+        \ et accepte que l\u2019ETABLISSEMENT DE SANT\xC9 r\xE9alise ou commandite\
+        \ des audits externes pour v\xE9rifier la conformit\xE9 aux exigences de s\xE9\
+        curit\xE9."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.4
+      ref_id: O-12.4.4
+      description: "Les \xE9changes avec l\u2019ext\xE9rieur de l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 doivent \xEAtre s\xE9curis\xE9s\_: utilisation de protocoles\
+        \ s\xE9curis\xE9s, du filtrage et du contr\xF4le par les \xE9quipements de\
+        \ s\xE9curit\xE9 de l\u2019ETABLISSEMENT DE SANT\xC9 (l\u2019ETABLISSEMENT\
+        \ DE SANT\xC9 se r\xE9serve le droit de tracer tout acc\xE8s et action sur\
+        \ les syst\xE8mes install\xE9s dans son infrastructure)."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12
+      ref_id: '12.5'
+      name: "Cas du fournisseur de service de d\xE9veloppement"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.1
+      description: "Les licences et modalit\xE9s de la propri\xE9t\xE9 intellectuelle\
+        \ relatifs au code source de l\u2019applicatif contractualis\xE9 doit \xEA\
+        tre explicit\xE9es et d\xE9finies dans le contrat de services avec le titulaire.\
+        \ Les d\xE9lais de validit\xE9 des licences doivent \xEAtre accept\xE9s par\
+        \ l\u2019ETABLISSEMENT de SANTE."
+      typical_evidence: "- Descriptif des licences et modalit\xE9s de la propri\xE9\
+        t\xE9 intelectuelle"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.2
+      description: "Les accords de s\xE9questre concernant le code source du logiciel\
+        \ doivent \xEAtre explicit\xE9s et d\xE9finis dans le contrat de service avec\
+        \ le titulaire afin de statuer sur des modalit\xE9s de conservation du code\
+        \ source lors des diff\xE9rents jalons de d\xE9veloppement."
+      typical_evidence: '- Descriptif des accords de sequestre'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.3
+      description: "Toute application \xE0 destination de l\u2019ETABLISSEMENT de\
+        \ SANTE doit \xEAtre d\xE9velopp\xE9e et test\xE9e dans un environnement s\xE9\
+        curis\xE9, diff\xE9rent de la production au sein des infrastructures de l\u2019\
+        \xE9diteur de la solution."
+      typical_evidence: "-Descriptif de la s\xE9curisation des environnements de d\xE9\
+        veloppement"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.4
+      description: "Un plan de test doit \xEAtre d\xE9termin\xE9 avec le fournisseur\
+        \ de services, comprenant :\na) Un programme d\xE9taill\xE9 des activit\xE9\
+        s et des tests ;\nb) Les donn\xE9es d'entr\xE9e et les donn\xE9es de sorties\
+        \ attendues sous un ensemble de conditions ;\nc) Les crit\xE8res pour \xE9\
+        valuer les r\xE9sultats ;\n      d) La d\xE9cision de mener des actions suppl\xE9\
+        mentaires, si besoin."
+      typical_evidence: '- Plan de test '
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.5
+      description: "Des tests de s\xE9curit\xE9 doivent \xEAtre men\xE9s par rapport\
+        \ \xE0 un ensemble d'exigences qui peuvent \xEAtre exprim\xE9es comme fonctionnelles\
+        \ ou non fonctionnelles. Il convient que les tests de s\xE9curit\xE9 incluent\
+        \ les tests :\na) des fonctions de s\xE9curit\xE9 : l'authentification des\
+        \ utilisateurs, les restrictions d'acc\xE8s et l'utilisation de la cryptographie\
+        \ ;\nb) du codage s\xE9curis\xE9 ;\nc) des configurations s\xE9curis\xE9es,\
+        \ y compris celles des syst\xE8mes d'exploitation, des pares-feux et autres\
+        \ composants de s\xE9curit\xE9."
+      typical_evidence: "- Descriptif des tests de s\xE9curit\xE9"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.6
+      description: "Le fournisseur de service, dans le cadre de la livraison de d\xE9\
+        veloppement pour l\u2019ETABLISSEMENT de SANTE, doit pr\xE9senter des preuves\
+        \ montrant que les tests suffisants ont \xE9t\xE9 r\xE9alis\xE9s pour prot\xE9\
+        ger le code source de la pr\xE9sence de contenus malveillants.\nL\u2019ETABLISSEMENT\
+        \ de SANTE pourra valider les preuves communiqu\xE9es, et demander des compl\xE9\
+        ments si celles-ci ne sont pas conformes avec ses attendus."
+      typical_evidence: '- Fourniture d''audits/preuves des tests'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.7
+      description: "Les d\xE9veloppements du titulaire doivent respecter les principes\
+        \ de s\xE9curit\xE9 \xE9nonc\xE9s par l\u2019organisme OWASP en vigueur, qui\
+        \ fournit une liste de dix domaines de vuln\xE9rabilit\xE9s majeurs et les\
+        \ guides pratiques associ\xE9s pour s\u2019en pr\xE9munir."
+      typical_evidence: '- Fourniture d''audits/preuves des tests'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.8
+      description: "Les d\xE9veloppeurs ne doivent en aucun cas utiliser du code provenant\
+        \ d\u2019une source inconnue ou qui n\u2019a pas \xE9t\xE9 v\xE9rifi\xE9e\
+        \ (forums, internet, etc.). De plus, l\u2019utilisation d\u2019un code sous\
+        \ copyright est \xE9galement prohib\xE9e, ou doit comporter une description\
+        \ contractuelle."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.9
+      description: "Le \xAB codage en dur \xBB d\u2019identifiants dans le code source\
+        \ est prohib\xE9.\nLes identifiants ne devant pas \xEAtre \xAB cod\xE9s en\
+        \ dur \xBB sont, de fa\xE7on non exhaustive, les suivants :\n\u2022\tNom d\u2019\
+        utilisateur,\n\u2022\tMot de passe,\n\u2022\tCertificat \xE9lectronique,\n\
+        \u2022\tNum\xE9ro de jeton (token),\n\u2022\tNum\xE9ro de t\xE9l\xE9phone.\n\
+        Les mesures de protection contre cette vuln\xE9rabilit\xE9 sont d\xE9crites\
+        \ dans l\u2019OWASP 2021 : A2 \xAB D\xE9faillances cryptographiques \xBB"
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.10
+      description: "Le d\xE9veloppement externalis\xE9 doit \xEAtre supervis\xE9 et\
+        \ contr\xF4l\xE9 par les \xE9quipes projet et les r\xE9f\xE9rents de l\u2019\
+        ETABLISSEMENT de SANTE.\nEn cas de d\xE9veloppement externalis\xE9, des contrats\
+        \ int\xE9grant les bonnes pratiques de s\xE9curit\xE9 du pr\xE9sent clausier\
+        \ doivent \xEAtre pass\xE9s avec l\u2019\xE9diteur et l\u2019ETABLISSEMENT\
+        \ de SANTE."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.11
+      description: "L\u2019application doit \xEAtre d\xE9velopp\xE9e et test\xE9e\
+        \ dans un environnement s\xE9curis\xE9, diff\xE9rent de la production."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.12
+      description: "En d\xE9veloppement \xAB cycle en V \xBB comme en m\xE9thode agile,\
+        \ l\u2019\xE9quipe projet doit s\u2019assurer que l\u2019environnement de\
+        \ d\xE9veloppement est bien distinct et cloisonn\xE9 (dans la mesure du possible\
+        \ physiquement) par rapport aux environnements de pr\xE9production/qualit\xE9\
+        \ et production."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.13
+      description: "Les d\xE9veloppeurs ne doivent pas publier le code source sur\
+        \ des forums ou sites internet sp\xE9cialis\xE9s (ex : afin de demander des\
+        \ conseils).\nDe plus, le code source doit \xEAtre prot\xE9g\xE9 dans un environnement\
+        \ s\xE9curis\xE9.\nSi la contribution \xE0 une communaut\xE9 open source est\
+        \ n\xE9cessaire, le d\xE9veloppeur doit demander autorisation \xE0 l\u2019\
+        ETABLISSEMENT de SANTE."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.14
+      description: "Parce qu\u2019ils peuvent contenir des informations qui peuvent\
+        \ \xEAtre utilis\xE9es par des attaquants, les d\xE9veloppeurs doivent supprimer\
+        \ tous les commentaires sensibles de leur code avant la mise en production\
+        \ de l\u2019application."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.15
+      description: "Les tests de s\xE9curit\xE9, pour les applications consid\xE9\
+        r\xE9es comme sensibles (notamment manipulant de la donn\xE9e de sant\xE9\
+        \ nominative), doivent permettre de s\u2019assurer que les exigences de s\xE9\
+        curit\xE9 ont \xE9t\xE9 correctement appliqu\xE9es.\nLorsque la conception\
+        \ de l\u2019application est termin\xE9e, des tests de s\xE9curit\xE9 doivent\
+        \ \xEAtre r\xE9alis\xE9s avant sa mise en production (revue du code, test\
+        \ d\u2019intrusion, scan de vuln\xE9rabilit\xE9, \u2026). Ces tests doivent\
+        \ \xE9galement perdurer apr\xE8s la mise en production."
+      typical_evidence: "- Descriptif des tests de s\xE9curit\xE9\n- Fourniture d'audits/preuves\
+        \ des tests"
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.16
+      description: "En compl\xE9ment des tests de s\xE9curit\xE9, des audits techniques\
+        \ et tests d\u2019intrusion devraient \xEAtre planifi\xE9s avant une mise\
+        \ en production d\u2019un applicatif.\n\xC0 la suite des tests de s\xE9curit\xE9\
+        , le plan de traitement doit \xEAtre valid\xE9 afin de limiter la possibilit\xE9\
+        \ de d\xE9couvrir de nouveaux risques ou \xE0 minima d\u2019amoindrir leurs\
+        \ impacts s\u2019ils sont in\xE9vitables."
+      typical_evidence: '- Fourniture d''audits/preuves des tests'
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.17
+      description: "L\u2019ETABLISSEMENT de SANTE, dans le cadre de la prestation\
+        \ de service contractualis\xE9 avec le fournisseur de service de d\xE9veloppement,\
+        \ peut demander une fois par an un audit technique sur le d\xE9veloppement\
+        \ engag\xE9. \nLes modalit\xE9s et les couts de cet audit sont \xE0 la charge\
+        \ de l\u2019ETABLISSEMENT.\nL\u2019ETABLISSEMENT de SANTE doit pr\xE9venir\
+        \ le fournisseur de services afin que celui-ci propose un planning de r\xE9\
+        alisation dans les 60 jours suivant la demande initiale.\n\nLe titulaire s\u2019\
+        engage \xE0 corriger les vuln\xE9rabilit\xE9s, dans un calendrier \xE9tabli\
+        \ en accord avec l\u2019ETABLISSEMENT de SANTE."
+      typical_evidence: OUI/NON
+    - urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:o-12.5.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:ackwa:risk:req_node:clausier-sante-2.0.1:12.5
+      ref_id: O-12.5.18
+      description: "En cas de violation de donn\xE9es \xE0 caract\xE8re personnel,\
+        \ l\u2019ETABLISSEMENT de SANTE, dans le cadre de la prestation de service\
+        \ contractualis\xE9 avec le fournisseur de service de d\xE9veloppement, peut\
+        \ demander un audit technique sur le d\xE9veloppement engag\xE9. \nLes modalit\xE9\
+        s et les couts de cet audit sont \xE0 la charge du TITULAIRE.\nL\u2019ETABLISSEMENT\
+        \ de SANTE doit pr\xE9venir le fournisseur de services afin que celui-ci propose\
+        \ un planning de r\xE9alisation dans les 15 jours suivant la demande initiale.\n\
+        \nLe titulaire s\u2019engage \xE0 corriger les vuln\xE9rabilit\xE9s, dans\
+        \ un calendrier \xE9tabli en accord avec l\u2019ETABLISSEMENT de SANTE."
+      typical_evidence: OUI/NON
