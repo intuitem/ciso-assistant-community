@@ -519,7 +519,7 @@ export class TestContent {
 					name: vars.riskAssessmentName,
 					description: vars.description,
 					project: vars.folderName + '/' + vars.projectName,
-					version: '1.4.2',
+					version: vars.riskAssessmentVersion,
 					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
 					// eta: "2025-01-01",
@@ -528,7 +528,7 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					version: '1.4.3'
+					version: vars.riskAssessmentVersion2
 					//TODO add risk_matrix
 					// eta: "2025-12-31",
 					// due_date: "2026-02-25"
@@ -540,7 +540,7 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName}`,
+					risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
@@ -566,7 +566,9 @@ export class TestContent {
 					expiry_date: '2025-01-01',
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
-					risk_scenarios: [`${vars.folderName}/${vars.projectName}/${vars.riskScenarioName}`]
+					risk_scenarios: [
+						`${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+					]
 				},
 				editParams: {
 					name: '',
