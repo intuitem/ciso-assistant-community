@@ -84,11 +84,17 @@ for (const key of testPages) {
 					items[key].build,
 					items[key].editParams
 				);
-				replaceValues(
-					history[testInfo.line],
-					items[key].build.name || items[key].build.email,
-					items[key].build.name + ' edited' || '_' + items[key].build.email
-				);
+				for (const editedKey of Object.keys(editedValues)) {
+					replaceValues(
+						history[testInfo.line],
+						editedKey,
+						editedKey === 'name'
+							? items[key].build.name + ' edited'
+							: items[key].build.email
+								? '_' + items[key].build.email
+								: editedValues[editedKey]
+					);
+				}
 				//wait fore the file to load to prevent crashing
 				page.url().includes('evidences')
 					? await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' })
