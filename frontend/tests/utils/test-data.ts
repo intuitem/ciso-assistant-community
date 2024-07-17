@@ -6,6 +6,8 @@ export default {
 	projectName: 'Test project',
 	riskAcceptanceName: 'Test risk acceptance',
 	riskAssessmentName: 'Test risk assessment',
+	riskAssessmentVersion: '1.4.2',
+	riskAssessmentVersion2: '1.4.3',
 	riskScenarioName: 'Test risk scenario',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
