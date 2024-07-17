@@ -98,29 +98,29 @@
 				</div>
 			</div>
 			<div class="items-center my-4">
-			<div>
-				<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-					<ul
-						class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-					>
-						<RadioGroup class="w-full flex-wrap items-center">
-							{#each possible_options as option}
-								<RadioItem
-									class="h-full"
-									id={option.id}
-									value={option.id}
-									bind:group={result}
-									name="result"
-									style="border-color: {color}"
-									on:change={updateResult}>{option.label}</RadioItem
-								>
-							{/each}
-						</RadioGroup>
-					</ul>
-				</form>
+				<div>
+					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
+						<ul
+							class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+						>
+							<RadioGroup class="w-full flex-wrap items-center">
+								{#each possible_options as option}
+									<RadioItem
+										class="h-full"
+										id={option.id}
+										value={option.id}
+										bind:group={result}
+										name="result"
+										style="border-color: {color}"
+										on:change={updateResult}>{option.label}</RadioItem
+									>
+								{/each}
+							</RadioGroup>
+						</ul>
+					</form>
+				</div>
 			</div>
-		</div>
-		<div class="flex justify-between">
+			<div class="flex justify-between">
 				<button class="bg-gray-400 text-white px-4 py-2 rounded" on:click={previousItem}>
 					{m.previous()}
 				</button>
