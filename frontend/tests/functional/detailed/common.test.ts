@@ -84,15 +84,6 @@ for (const key of testPages) {
 					items[key].build,
 					items[key].editParams
 				);
-<<<<<<< Updated upstream
-				replaceValues(
-					history[testInfo.line],
-					items[key].build.version || items[key].build.name || items[key].build.email,
-					items[key].editParams.version ||
-						items[key].build.name + ' edited' ||
-						'_' + items[key].build.email
-				);
-=======
 				for (const editedKey of Object.keys(editedValues)) {
 					replaceValues(
 						history[testInfo.line],
@@ -104,7 +95,6 @@ for (const key of testPages) {
 								: editedValues[editedKey]
 					);
 				}
->>>>>>> Stashed changes
 				//wait fore the file to load to prevent crashing
 				page.url().includes('evidences')
 					? await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' })
