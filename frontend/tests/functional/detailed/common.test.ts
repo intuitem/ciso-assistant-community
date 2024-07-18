@@ -84,15 +84,16 @@ for (const key of testPages) {
 					items[key].build,
 					items[key].editParams
 				);
-				for (const editedKey of Object.keys(editedValues)) {
+				replaceValues(
+					history[testInfo.line],
+					items[key].build.name || items[key].build.email,
+					items[key].build.name + ' edited' || '_' + items[key].build.email
+				);
+				if (key === 'riskAssessmentsPage'){
 					replaceValues(
 						history[testInfo.line],
-						items[key].build[editedKey],
-						editedKey === 'name'
-							? items[key].build.name + ' edited'
-							: items[key].build.email
-								? '_' + items[key].build.email
-								: editedValues[editedKey]
+						items[key].build.version,
+						items[key].editParams.version
 					);
 				}
 				//wait fore the file to load to prevent crashing
