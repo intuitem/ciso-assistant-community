@@ -1,9 +1,9 @@
 urn: urn:intuitem:risk:library:dnssi-2023-2
 locale: fr
 ref_id: dnssi-2023-2
-name: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information"
+name: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information (MAROC)"
 description: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information\
-  \ (DNSSI)"
+  \ (DNSSI MAROC)"
 copyright: DGSSI Maroc
 version: 1
 provider: DGSSI
@@ -12,9 +12,10 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:dnssi-2023-2
     ref_id: dnssi-2023-2
-    name: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information"
+    name: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information\
+      \ (MAROC)"
     description: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information\
-      \ (DNSSI)"
+      \ (DNSSI MAROC)"
     min_score: 0
     max_score: 5
     scores_definition:
