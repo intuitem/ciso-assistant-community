@@ -1,0 +1,1557 @@
+urn: urn:intuitem:risk:library:dnssi-2023-2
+locale: fr
+ref_id: dnssi-2023-2
+name: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information"
+description: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information\
+  \ (DNSSI)"
+copyright: DGSSI Maroc
+version: 1
+provider: DGSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:dnssi-2023-2
+    ref_id: dnssi-2023-2
+    name: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information"
+    description: "Directive Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information\
+      \ (DNSSI)"
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Aucun
+      description: null
+    - score: 1
+      name: Initial
+      description: null
+    - score: 2
+      name: Reproductible
+      description: null
+    - score: 3
+      name: "D\xE9fini"
+      description: null
+    - score: 4
+      name: "Maitris\xE9"
+      description: null
+    - score: 5
+      name: "Optimis\xE9"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node2
+      assessable: false
+      depth: 1
+      name: 1. POLITIQUE DE SECURITE DES SYSTEMES D'INFORMATION
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node2
+      name: Objectif 1
+      description: "Apporter \xE0 la s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ (SI) une orientation et un soutien de la part de la direction de l\u2019\
+        entit\xE9 ou de l\u2019IIV, conform\xE9ment aux exigences m\xE9tier et aux\
+        \ lois, r\xE8glements, directives et r\xE9f\xE9rentiels en vigueur."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-risque
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node3
+      ref_id: POL-RISQUE
+      name: Analyse de risque
+      description: "Chaque entit\xE9 ou IIV doit identifier les besoins de s\xE9curit\xE9\
+        \ en mati\xE8re de confidentialit\xE9, disponibilit\xE9 et int\xE9grit\xE9\
+        \ pour chaque processus support\xE9 par le syst\xE8me d'information et proc\xE9\
+        der \xE0 une analyse des risques de s\xE9curit\xE9 li\xE9s \xE0 ce syst\xE8\
+        me d'information.\n"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-formel
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node3
+      ref_id: POL-FORMEL
+      name: "Politique de s\xE9curit\xE9 des syst\xE8mes d'information"
+      description: "Chaque entit\xE9 ou IIV doit d\xE9finir une politique en mati\xE8\
+        re de s\xE9curit\xE9 des SI qui soit approuv\xE9e par un niveau hi\xE9rarchique\
+        \ \xE9lev\xE9 (ex. : secr\xE9tariat g\xE9n\xE9ral, direction g\xE9n\xE9rale,\
+        \ ... ) et qui d\xE9crit les r\xE8gles qui doivent \xEAtre adopt\xE9es pour\
+        \ g\xE9rer les besoins identifi\xE9s de s\xE9curit\xE9 des SI.\n\nCette politique\
+        \ doit \xEAtre d\xE9clin\xE9e au besoin en politiques sp\xE9cifiques par domaine\
+        \ ou par aspect de s\xE9curit\xE9.\n\nLa politique de s\xE9curit\xE9 des SI\
+        \ doit \xEAtre \xE9labor\xE9e en se basant sur une analyse de risques, et\
+        \ doit \xEAtre diffus\xE9e et communiqu\xE9e au personnel et aux tiers concern\xE9\
+        s et mise \xE0 jour r\xE9guli\xE8rement.\n"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-pas
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node3
+      ref_id: POL-PAS
+      name: "Plan d'actions de la s\xE9curit\xE9 des SI"
+      description: "Chaque entit\xE9 ou IIV doit d\xE9finir un plan d'actions pour\
+        \ la mise en conformit\xE9 avec sa politique de s\xE9curit\xE9 des SI. Ce\
+        \ plan d'actions tiendra compte des impacts sur les activit\xE9s, et des moyens\
+        \ financiers et humains \xE0 mettre en \u0153uvre en indiquant les mesures\
+        \ \xE0 court terme et les mesures atteignables \xE0 moyen terme."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:pol-tdb
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node3
+      ref_id: POL-TDB
+      name: "Tableau de bord de la s\xE9curit\xE9 des SI"
+      description: "Chaque entit\xE9 ou IIV doit \xE9laborer et se servir d'un tableau\
+        \ de bord de la s\xE9curit\xE9 des SI pour assurer le suivi de la bonne application\
+        \ des r\xE8gles \xE9dict\xE9es dans sa politique de s\xE9curit\xE9.\n\nLe\
+        \ tableau de bord doit se baser sur des indicateurs permettant le suivi de\
+        \ la mise en \u0153uvre des r\xE8gles de s\xE9curit\xE9 des SI propres \xE0\
+        \ l'entit\xE9 ou \xE0 l'IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node8
+      assessable: false
+      depth: 1
+      name: "2. ORGANISATION DE LA SECURITE DES SYSTEMES D\u2019INFORMATION"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node8
+      name: Objectif 2
+      description: "\xC9tablir un cadre de gestion pour engager, puis v\xE9rifier\
+        \ la mise en \u0153uvre et le fonctionnement de la s\xE9curit\xE9 du SI au\
+        \ sein de l\u2019entit\xE9 ou de l\u2019IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-gouv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node9
+      ref_id: ORG-INTER-GOUV
+      name: "Gouvernance de la s\xE9curit\xE9 des SI"
+      description: "Chaque entit\xE9 ou IIV doit mettre en place une gouvernance appropri\xE9\
+        e de la s\xE9curit\xE9 des SI avec l'implication notamment d'un niveau hi\xE9\
+        rarchique \xE9lev\xE9 (ex. : secr\xE9tariat g\xE9n\xE9ral, direction g\xE9\
+        n\xE9rale, ... ) de l'entit\xE9 ou de l'IIV, et ce afin de d\xE9finir les\
+        \ orientations strat\xE9giques en mati\xE8re de s\xE9curit\xE9 des SI et assurer\
+        \ le suivi de l'avancement de l'ensemble des projets y aff\xE9rents."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-rssi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node9
+      ref_id: ORG-INTER-RSSI
+      name: "D\xE9signation d'un responsable de la s\xE9curit\xE9 des SI (RSSI)"
+      description: "Les r\xE8gles applicables \xE0 la d\xE9signation et aux missions\
+        \ du RSSI sont fix\xE9es par la loi n\xB0 05-20 relative \xE0 la cybers\xE9\
+        curit\xE9 et son d\xE9cret d'application.\n\nTout changement de l'identit\xE9\
+        \ et des coordonn\xE9es du RSSI doit \xEAtre port\xE9 \xE0 la connaissance\
+        \ de la DGSSI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-inter-resp
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node9
+      ref_id: ORG-INTER-RESP
+      name: "Attribution des r\xF4les et responsabilit\xE9s"
+      description: "Chaque entit\xE9 ou IIV doit d\xE9finir et attribuer les r\xF4\
+        les et responsabilit\xE9s des diff\xE9rents acteurs en mati\xE8re de s\xE9\
+        curit\xE9 des SI.\n\nCette attribution doit tenir compte de la s\xE9paration\
+        \ entre les t\xE2ches et les domaines de responsabilit\xE9 incompatibles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node8
+      name: Objectif 3
+      description: "Assurer la s\xE9curit\xE9 du syst\xE8me d\u2019information de\
+        \ l\u2019entit\xE9 ou de l\u2019IIV en cas d\u2019adoption du t\xE9l\xE9travail."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:org-teletrav-sec
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node13
+      ref_id: ORG-TELETRAV-SEC
+      name: "T\xE9l\xE9travail s\xE9curis\xE9"
+      description: "Chaque entit\xE9 ou IIV doit prendre les mesures ad\xE9quates,\
+        \ en fonction du moyen d'acc\xE8s, pour prot\xE9ger les informations consult\xE9\
+        es, trait\xE9es ou stock\xE9es sur des sites de t\xE9l\xE9travail.\n\nA cet\
+        \ effet, une politique ou des proc\xE9dures claires pr\xE9cisant les syst\xE8\
+        mes accessibles et les mesures de s\xE9curit\xE9 applicables, doivent \xEA\
+        tre d\xE9finies, valid\xE9es par la hi\xE9rarchie, communiqu\xE9es et tenues\
+        \ \xE0 jour pour une mise en \u0153uvre appropri\xE9e du t\xE9l\xE9travail."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node15
+      assessable: false
+      depth: 1
+      name: 3. SECURITE DES RESSOURCES HUMAINES
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node15
+      name: Objectif 4
+      description: "S\u2019assurer que le personnel et les contractuels comprennent\
+        \ leurs responsabilit\xE9s et qu\u2019ils sont comp\xE9tents pour remplir\
+        \ les fonctions que l\u2019entit\xE9 ou l\u2019IIV envisage de leur confier."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-avt--person
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node16
+      ref_id: RH-AVT- PERSON
+      name: Personnel de confiance
+      description: "A l'embauche, des v\xE9rifications des informations des candidats\
+        \ appel\xE9s \xE0 travailler sur des t\xE2ches sensibles au sein de l'entit\xE9\
+        \ ou de l'IIV doivent \xEAtre r\xE9alis\xE9es conform\xE9ment \xE0 la r\xE9\
+        glementation, \xE0 l'\xE9thique, et proportionnellement aux exigences m\xE9\
+        tier et \xE0 la classification des actifs informationnels accessibles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-avt--cond
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node16
+      ref_id: RH-AVT- COND
+      name: Termes et conditions d'embauche
+      description: "Les accords contractuels avec les employ\xE9s et les sous-traitants\
+        \ doivent pr\xE9ciser leurs responsabilit\xE9s et celles de l'entit\xE9 ou\
+        \ de l'IIV en mati\xE8re de s\xE9curit\xE9 des SI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node15
+      name: Objectif 5
+      description: "S\u2019assurer que les employ\xE9s et les contractuels sont conscients\
+        \ de leurs responsabilit\xE9s en mati\xE8re de s\xE9curit\xE9 des SI et qu\u2019\
+        ils assument ces responsabilit\xE9s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-apres--form
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node19
+      ref_id: RH-APRES- FORM
+      name: Formation et sensibilisation du personnel
+      description: "Chaque entit\xE9 ou IIV doit organiser r\xE9guli\xE8rement, selon\
+        \ un programme pr\xE9\xE9tabli, des sessions de formation et de sensibilisation\
+        \ au profit de son personnel en mati\xE8re de s\xE9curit\xE9 des SI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node15
+      name: Objectif 6
+      description: "Prot\xE9ger les int\xE9r\xEAts de l\u2019entit\xE9 ou de l\u2019\
+        IIV dans le cadre du processus de modification, de rupture ou de terme d\u2019\
+        un contrat de travail."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:rh-fin-gest
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node21
+      ref_id: RH-FIN-GEST
+      name: "Gestion des mutations et d\xE9parts"
+      description: "Afin de pr\xE9server la confidentialit\xE9 et l'int\xE9grit\xE9\
+        \ de l'information, chaque entit\xE9 ou IIV doit formaliser et mettre en place\
+        \ une proc\xE9dure de gestion des mutations ou des d\xE9parts qui couvre notamment\
+        \ :\n\n- La notification au service informatique par le service des ressources\
+        \ humaines de tout mouvement du personnel ;\n\n- La passation des consignes\
+        \ ;\n\n- La restitution des biens informatiques ;\n\n- Le retrait ou la modification\
+        \ des acc\xE8s aux SI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node23
+      assessable: false
+      depth: 1
+      name: 4. GESTION DES ACTIFS INFORMATIONNELS
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node23
+      name: Objectif 7
+      description: "Identifier les actifs informationnels de l\u2019entit\xE9 ou de\
+        \ l\u2019IIV et d\xE9finir les responsabilit\xE9s appropri\xE9es en mati\xE8\
+        re de protection."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-resp-inv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node24
+      ref_id: ACTIF-RESP-INV
+      name: Inventaire des actifs
+      description: "Un inventaire des actifs informationnels (mat\xE9riels et logiciels)\
+        \ doit \xEAtre r\xE9alis\xE9 et mis \xE0 jour r\xE9guli\xE8rement, int\xE9\
+        grant notamment :\n\n- la liste des composants mat\xE9riels (avec n\xBA de\
+        \ s\xE9rie) et logiciels (avec n\xBA de licence);\n\n- la version du syst\xE8\
+        me d'exploitation et les correctifs appliqu\xE9s ;\n\n- l'identification de\
+        \ l'utilisateur final si applicable (poste de travail, t\xE9l\xE9phonie IP,\
+        \ imprimante, ... )."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-resp-prop
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node24
+      ref_id: ACTIF-RESP-PROP
+      name: "Propri\xE9taires des actifs"
+      description: "Chaque actif informationnel doit \xEAtre attribu\xE9 formellement\
+        \ \xE0 un propri\xE9taire qui a la responsabilit\xE9 de la gestion des actifs\
+        \ informationnels qui lui sont attribu\xE9s (inventaire, classification, protection,\
+        \ destruction, r\xE9forme ... ) tout au long de leurs cycles de vie."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-resp-charte
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node24
+      ref_id: ACTIF-RESP-CHARTE
+      name: Charte d'utilisation du SI
+      description: "Une charte d'utilisation du SI doit \xEAtre \xE9labor\xE9e en\
+        \ conformit\xE9 avec la politique de s\xE9curit\xE9 des SI en vigueur. Elle\
+        \ doit \xEAtre valid\xE9e par la hi\xE9rarchie, communiqu\xE9 et sign\xE9\
+        e ou accept\xE9e par les utilisateurs.\n\nCette charte doit contenir, entre\
+        \ autres :\n\n- Un rappel des exigences l\xE9gislatives et r\xE9glementaires\
+        \ applicables dans le contexte de l'entit\xE9 ou de l'IIV;\n\n- Les r\xE8\
+        gles g\xE9n\xE9rales d'utilisation des ressources informatiques ;\n\n- Les\
+        \ \xE9l\xE9ments de sensibilisation des utilisateurs ;\n\n- Les clauses de\
+        \ confidentialit\xE9 des informations manipul\xE9es ;\n\n- Les r\xE9flexes\
+        \ \xE0 adopter en cas d'incident ou de suspicion d'incident de cybers\xE9\
+        curit\xE9 et les r\xE8gles \xE0 respecter notamment l'obligation de d\xE9\
+        clarer tout incident de cybers\xE9curit\xE9 \xE0 la DGSSI ;\n\n- La charte\
+        \ d'utilisation du SI constitue un \xE9l\xE9ment opposable en cas de manquement\
+        \ grave."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--resp-carto
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node24
+      ref_id: ACTIF- RESP-CARTO
+      name: Cartographie SI
+      description: "Chaque entit\xE9 ou IIV doit tenir et mettre \xE0 jour une cartographie\
+        \ de son SI qui pr\xE9cise les composants mat\xE9riels et logiciels ainsi\
+        \ que les architectures des r\xE9seaux sur lesquels sont identifi\xE9s les\
+        \ centres de donn\xE9es et les diff\xE9rents sites desservis.\n\nLes documents\
+        \ de cartographie doivent \xEAtre maintenus au fil des \xE9volutions apport\xE9\
+        es aux SI et faire l'objet d'une protection adapt\xE9e."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node29
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node23
+      name: Objectif 8
+      description: "S\u2019assurer que les actifs informationnels b\xE9n\xE9ficient\
+        \ d\u2019un niveau de protection appropri\xE9 conforme \xE0 leur importance\
+        \ pour l\u2019entit\xE9 ou pour l\u2019IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif-info
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node29
+      ref_id: ACTIF- CLASSIF-INFO
+      name: Classification
+      description: "Chaque entit\xE9 ou IIV doit classifier ses actifs informationnels\
+        \ selon leur niveau de sensibilit\xE9 en termes de confidentialit\xE9, d'int\xE9\
+        grit\xE9 et de disponibilit\xE9, et ce sur la base d'une \xE9chelle d'impacts\
+        \ fix\xE9e par l'entit\xE9 ou par l'IIV et qui tient compte notamment de sa\
+        \ taille, de son importance, de ses missions, de son domaine d'activit\xE9\
+        s, de ses exigences m\xE9tiers, de ses propres enjeux de s\xE9curit\xE9 et\
+        \ des obligations l\xE9gales, r\xE8glementaires, contractuelles ou normatives\
+        \ qui lui sont applicables. Le r\xE9sultat de cette classification traduit\
+        \ la valeur des actifs informationnels en fonction de leur sensibilit\xE9\
+        \ et de leur caract\xE8re critique pour l'entit\xE9 ou pour l'IIV.\n\nEn parall\xE8\
+        le, l'entit\xE9 ou l'IIV doit proc\xE9der \xE0 la classification des m\xEA\
+        mes actifs informationnels et SI selon le r\xE9f\xE9rentiel de la classification\
+        \ des actifs informationnels et SI fix\xE9 par la loi n\xBA 05.20 et son d\xE9\
+        cret d'application. L'objectif de cette classification est d'identifier les\
+        \ SI sensibles et les donn\xE9es sensibles au sens de la loi pr\xE9cit\xE9\
+        e."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif-mes
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node29
+      ref_id: ACTIF- CLASSIF-MES
+      name: Mesures de protection des informations
+      description: "Sur la base des r\xE9sultats de ces classifications, chaque entit\xE9\
+        \ ou IIV doit mettre en place les mesures de s\xE9curit\xE9 proportionnelles\
+        \ \xE0 la sensibilit\xE9 des actifs et les formaliser dans une proc\xE9dure\
+        \ de classification des actifs informationnels.\n\nL'entit\xE9 ou l'IIV doit\
+        \ \xE9galement se conformer aux dispositions pertinentes de la loi n\xBA 05-20\
+        \ relative \xE0 la cybers\xE9curit\xE9 et son d\xE9cret d'application et appliquer\
+        \ les mesures de protection d\xE9finies dans les r\xE9f\xE9rentiels \xE9labor\xE9\
+        s par la DGSSI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif--classif--exam
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node29
+      ref_id: ACTIF- CLASSIF- EXAM
+      name: Examen de la classification
+      description: "Chaque entit\xE9 ou IIV doit revoir la classification de ses actifs\
+        \ informationnels et de ses SI au moins une fois tous les trois ans et \xE0\
+        \ chaque fois que n\xE9cessaire. Les mesures de protection doivent \xE9voluer\
+        \ en fonction de la nouvelle classification."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node33
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node23
+      name: Objectif 9
+      description: "Emp\xEAcher la divulgation, la modification, le retrait ou la\
+        \ destruction non autoris\xE9(e) de l\u2019information de l\u2019entit\xE9\
+        \ ou de l\u2019IIV stock\xE9e sur des supports et assurer la s\xE9curit\xE9\
+        \ de l\u2019utilisation des appareils mobiles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-amov
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node33
+      ref_id: ACTIF-SUP-AMOV
+      name: Gestion des supports amovibles
+      description: "Chaque entit\xE9 ou IIV doit mettre en place des mesures appropri\xE9\
+        es pour la gestion des supports amovibles notamment :\n\n- la d\xE9sactivation\
+        \ de leur ex\xE9cution automatique, sauf dans des cas exceptionnels li\xE9\
+        s \xE0 des imp\xE9ratifs de service ;\n\n- leur conservation dans des locaux\
+        \ prot\xE9g\xE9s et l'adoption de mesures adapt\xE9es tel que le chiffrement,\
+        \ le contr\xF4le anti-virus, etc. surtout lorsqu'ils contiennent des donn\xE9\
+        es sensibles ;"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-mobil
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node33
+      ref_id: ACTIF-SUP-MOBIL
+      name: "Politique en mati\xE8re d'appareils mobiles"
+      description: "Les r\xE8gles de s\xE9curit\xE9 destin\xE9es \xE0 g\xE9rer les\
+        \ risques d\xE9coulant de l'utilisation des appareils mobiles doivent faire\
+        \ partie int\xE9grante de la politique de s\xE9curit\xE9 des SI de l'entit\xE9\
+        \ ou de l'IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-nomad
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node33
+      ref_id: ACTIF-SUP-NOMAD
+      name: Postes nomades
+      description: "Les postes nomades doivent \xEAtre tous soumis aux m\xEAmes mesures\
+        \ de s\xE9curit\xE9 que les autres \xE9quipements du parc en termes de mise\
+        \ \xE0 jour r\xE9guli\xE8re de l'antivirus, application des correctifs, contr\xF4\
+        le de conformit\xE9 et interdiction des t\xE9l\xE9chargements \xE0 caract\xE8\
+        re non conforme \xE0 la charte d'utilisation du SI.\n\nEn cas d'utilisation\
+        \ de ces postes hors des locaux de travail (mission, conf\xE9rence, r\xE9\
+        union, etc.), une proc\xE9dure formalis\xE9e doit \xEAtre pr\xE9vue pour leur\
+        \ protection."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:actif-sup-reb
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node33
+      ref_id: ACTIF-SUP-REB
+      name: Mise au rebut ou recyclage des supports
+      description: "Une proc\xE9dure de mise au rebut ou de recyclage des supports\
+        \ doit \xEAtre mise en place afin d'effacer de mani\xE8re s\xE9curis\xE9e\
+        \ les donn\xE9es pr\xE9sentes sur tous type de support (les disques durs,\
+        \ les m\xE9moires int\xE9gr\xE9es, ... ).\n\nDans le cas de donn\xE9es sensibles,\
+        \ la destruction du support ou sa d\xE9magn\xE9tisation si applicable, peut\
+        \ s'av\xE9rer n\xE9cessaire de mani\xE8re \xE0 emp\xEAcher toute tentative\
+        \ de r\xE9cup\xE9ration."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node38
+      assessable: false
+      depth: 1
+      name: "5. CONTROLE D\u2019ACCES"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node39
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node38
+      name: Objectif 10
+      description: "Limiter l\u2019acc\xE8s \xE0 l\u2019information et aux moyens\
+        \ de traitement de l\u2019information."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-exig-pol
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node39
+      ref_id: ACC-EXIG-POL
+      name: "Politique de contr\xF4le d'acc\xE8s"
+      description: "Chaque entit\xE9 ou IIV est tenue d'\xE9tablir, de documenter\
+        \ et de revoir une politique de contr\xF4le d'acc\xE8s aux syst\xE8mes, r\xE9\
+        seaux et services sur la base des exigences m\xE9tier et de s\xE9curit\xE9\
+        \ de l'information en respectant le principe du moindre privil\xE8ge."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node41
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node38
+      name: Objectif 11
+      description: "Ma\xEEtriser l\u2019acc\xE8s utilisateur par le biais d\u2019\
+        autorisations et emp\xEAcher les acc\xE8s non autoris\xE9s aux syst\xE8mes\
+        \ et services d\u2019information."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-enregis/desinscri
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node41
+      ref_id: ACC-UTILIS-ENREGIS/DESINSCRI
+      name: "Enregistrement et d\xE9sinscription des utilisateurs"
+      description: "Chaque entit\xE9 ou IIV doit mettre en \u0153uvre une proc\xE9\
+        dure formelle d'enregistrement et de d\xE9sinscription des utilisateurs destin\xE9\
+        e \xE0 permettre l'attribution de droits d'acc\xE8s.\n\nCette proc\xE9dure\
+        \ impose notamment :\n\n- la cr\xE9ation d'identifiants utilisateurs uniques\
+        \ ;\n\n- la suppression ou le blocage imm\xE9diats des identifiants des utilisateurs\
+        \ qui ont quitt\xE9 l'organisation ;\n\n- la d\xE9tection p\xE9riodique des\
+        \ identifiants utilisateurs redondants, suivie de leur suppression ou de leur\
+        \ blocage ;\n\n- l'assurance que des identifiants utilisateurs redondants\
+        \ ne sont pas attribu\xE9s \xE0 d'autres utilisateurs."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-idf/auth
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node41
+      ref_id: ACC-UTILIS-IDF/AUTH
+      name: Identification et authentification
+      description: "L'acc\xE8s des utilisateurs aux ressources (r\xE9seaux, syst\xE8\
+        me d'exploitation ou applications informatiques) passe obligatoirement par\
+        \ une identification et une authentification individuelle.\n\nLes droits particuliers\
+        \ (super-utilisateur, Administrateur syst\xE8mes et r\xE9seaux, ... ) doivent\
+        \ \xEAtre parfaitement identifi\xE9s, limit\xE9s (nombre et droits) et justifi\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-habilit
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node41
+      ref_id: ACC-UTILIS-HABILIT
+      name: Gestion des habilitations
+      description: "Chaque entit\xE9 ou IIV est tenue de mettre en place une matrice\
+        \ d'habilitations qui pr\xE9cise pour chaque utilisateur ses droits d'acc\xE8\
+        s sur les diff\xE9rents syst\xE8mes et services du SI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-generiq
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node41
+      ref_id: ACC-UTILIS-GENERIQ
+      name: "Gestion des comptes g\xE9n\xE9riques"
+      description: "Chaque entit\xE9 ou IIV est tenue de cr\xE9er des comptes nominatifs\
+        \ pour les utilisateurs permettant de les relier \xE0 leurs actions et de\
+        \ les leur imputer.\n\nLorsque les aspects op\xE9rationnels li\xE9s \xE0 l'activit\xE9\
+        \ de l'entit\xE9 ou de l'IIV exigent l'utilisation de comptes g\xE9n\xE9riques,\
+        \ ces comptes doivent \xEAtre approuv\xE9s, document\xE9s et inventori\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-utilis-revue
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node41
+      ref_id: ACC-UTILIS-REVUE
+      name: "Revue des droits d'acc\xE8s"
+      description: "Une revue p\xE9riodique des droits attribu\xE9s est n\xE9cessaire,\
+        \ au moins une fois par an, en s'appuyant sur l'inventaire des applications\
+        \ et des ressources utilis\xE9es, ainsi que sur la matrice des habilitations.\n\
+        \nSuite \xE0 cet examen, les corrections n\xE9cessaires doivent \xEAtre apport\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node47
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node38
+      name: Objectif 12
+      description: "Emp\xEAcher les acc\xE8s non autoris\xE9s aux syst\xE8mes et aux\
+        \ applications."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-acc
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node47
+      ref_id: ACC-SYS/APP-ACC
+      name: "Acc\xE8s aux syst\xE8mes et applications"
+      description: "Les syst\xE8mes et applications doivent \xEAtre prot\xE9g\xE9\
+        s par des m\xE9canismes adapt\xE9s de restriction des acc\xE8s (login/mot\
+        \ de passe, authentification forte, r\xE8gles de filtrage et d'acc\xE8s, plages\
+        \ horaires de connexions) conform\xE9ment \xE0 la politique de contr\xF4le\
+        \ d'acc\xE8s de l'entit\xE9 ou de l'IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-privil
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node47
+      ref_id: ACC-SYS/APP-PRIVIL
+      name: "Gestion des acc\xE8s \xE0 privil\xE8ges"
+      description: "L'acc\xE8s aux outils et interfaces d'administration doit \xEA\
+        tre strictement limit\xE9 aux personnes habilit\xE9es, selon une proc\xE9\
+        dure formelle d'autorisation d'acc\xE8s.\n\nL'inventaire des comptes \xE0\
+        \ privil\xE8ge doit \xEAtre tenu \xE0 jour."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-mdp
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node47
+      ref_id: ACC-SYS/APP-MDP
+      name: Gestion des mots de passe
+      description: "Chaque entit\xE9 ou IIV est tenue de formaliser une politique\
+        \ de gestion des mots de passe qui d\xE9finit les r\xE8gles applicables aux\
+        \ mots de passe, en particulier :\n\n- la structure (complexit\xE9 minimale)\
+        \ ;\n\n- le changement p\xE9riodique ;\n\n- la suppression en cas de suspicion\
+        \ de compromission ;\n\n- la r\xE9initialisation ;\n\nUn processus de contr\xF4\
+        le de l'application de ces r\xE8gles doit \xEAtre d\xE9ploy\xE9."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node51
+      assessable: false
+      depth: 1
+      name: 6. CRYPTOGRAPHIE
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node52
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node51
+      name: Objectif 13
+      description: "Garantir l\u2019utilisation correcte et efficace de la cryptographie\
+        \ en vue de prot\xE9ger la confidentialit\xE9, l\u2019authenticit\xE9 et l\u2019\
+        int\xE9grit\xE9 de l\u2019information."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:crypto-mes-pol
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node52
+      ref_id: CRYPTO-MES-POL
+      name: Politique d'utilisation des mesures cryptographiques
+      description: "En cas de recours \xE0 la cryptographie, l'entit\xE9 ou l'IIV\
+        \ doit \xE9laborer et mettre en \u0153uvre une politique d'utilisation de\
+        \ mesures cryptographiques en vue de prot\xE9ger l'information.\n\nCette politique\
+        \ doit sp\xE9cifier notamment les exigences en mati\xE8re de certificats de\
+        \ signature ou de chiffrement (d\xE9lai maximum de validit\xE9, algorithme,\
+        \ longueurs de cl\xE9s, etc .. ) ou en mati\xE8re de connexions chiffr\xE9\
+        es (protocoles autoris\xE9s)."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:crypto-mes-gestcle
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node52
+      ref_id: CRYPTO-MES-GESTCLE
+      name: "Gestion des cl\xE9s cryptographiques"
+      description: "Chaque entit\xE9 ou IIV utilisant des cl\xE9s cryptographiques\
+        \ doit \xE9laborer et mettre en \u0153uvre une proc\xE9dure encadrant leur\
+        \ utilisation et leur protection tout au long de leur cycle de vie (g\xE9\
+        n\xE9ration, stockage, archivage, extraction, attribution, retrait et destruction)."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node55
+      assessable: false
+      depth: 1
+      name: 7.  SECURITE PHYSIQUE ET ENVIRONNEMENTALE
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node55
+      name: Objectif 14
+      description: "Emp\xEAcher tout acc\xE8s physique non autoris\xE9, tout dommage\
+        \ ou intrusion portant sur l\u2019information et les moyens de traitement\
+        \ de l\u2019information de l\u2019entit\xE9 ou de l\u2019IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-delimit
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      ref_id: PHYS-ZONE-DELIMIT
+      name: "D\xE9limitation des zones"
+      description: "Des zones physiques de s\xE9curit\xE9 doivent \xEAtre d\xE9limit\xE9\
+        es pour prot\xE9ger les SI et les moyens de traitement associ\xE9s. Cette\
+        \ d\xE9limitation peut se faire selon la typologie suivante :\n\n- zones publiques\
+        \ : autoris\xE9es \xE0 toute personne.\n\n- zones internes : autoris\xE9es\
+        \ uniquement au personnel de l'entit\xE9 ou de l'IIV, aux tiers autoris\xE9\
+        s ou aux visiteurs accompagn\xE9s.\n\n- zones restreintes : accessibles uniquement\
+        \ aux personnes de l'entit\xE9 ou de l'IIV habilit\xE9es \xE0 consulter, \xE0\
+        \ traiter et manipuler des informations ou des \xE9quipements classifi\xE9\
+        s, et le cas \xE9ch\xE9ant aux tiers autoris\xE9s et accompagn\xE9s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-proc
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      ref_id: PHYS-ZONE-PROC
+      name: "Proc\xE9dures de contr\xF4le d'acc\xE8s"
+      description: "Chaque entit\xE9 ou IIV doit formaliser les proc\xE9dures de contr\xF4\
+        le d'acc\xE8s physique \xE0 ses locaux en mettant en place les m\xE9canismes\
+        \ n\xE9cessaires pour leur application. Ces proc\xE9dures doivent \xEAtre\
+        \ valid\xE9es par la hi\xE9rarchie et le personnel doit \xEAtre tenu au courant\
+        \ de leurs contenus."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-dispo
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      ref_id: PHYS-ZONE-DISPO
+      name: "Dispositif de contr\xF4le d'acc\xE8s"
+      description: "Les entit\xE9s ou les IIV sont tenues de mettre en place un dispositif\
+        \ de contr\xF4le d'acc\xE8s physique individualis\xE9 dans les zones restreintes.\n\
+        \nCe dispositif doit assurer la tra\xE7abilit\xE9 des acc\xE8s du personnel\
+        \ et des tiers autoris\xE9s et accompagn\xE9s aux zones restreintes, et conserver\
+        \ les enregistrements pour une dur\xE9e d'au moins trois mois."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone--videoprot
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      ref_id: PHYS-ZONE- VIDEOPROT
+      name: "Vid\xE9o protection"
+      description: "Les zones \xE0 s\xE9curiser doivent \xEAtre couvertes par une\
+        \ vid\xE9o protection. Les enregistrements ne doivent \xEAtre manipul\xE9\
+        s que par un nombre limit\xE9 de personnes habilit\xE9es \xE0 cet effet."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-incen
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      ref_id: PHYS-ZONE-INCEN
+      name: "S\xE9curit\xE9 incendie"
+      description: "Les zones abritant des syst\xE8mes de traitement de l'information\
+        \ doivent \xEAtre \xE9quip\xE9es de syst\xE8mes adapt\xE9s pour la d\xE9tection\
+        \ et l'extinction d'incendies."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-zone-eau
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node56
+      ref_id: PHYS-ZONE-EAU
+      name: "D\xE9g\xE2ts des eaux"
+      description: "Les moyens de traitement de l'information doivent \xEAtre plac\xE9\
+        s dans des locaux \xE0 l'abri des risques des d\xE9g\xE2ts des eaux."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node55
+      name: Objectif 15
+      description: "Emp\xEAcher la perte, l\u2019endommagement, le vol ou la compromission\
+        \ des actifs informationnels et l\u2019interruption des activit\xE9s de l\u2019\
+        entit\xE9 ou de l\u2019IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat--cabl
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      ref_id: PHYS-MAT- CABL
+      name: "S\xE9curit\xE9 du c\xE2blage"
+      description: "Les c\xE2bles \xE9lectriques et de transmission de donn\xE9es\
+        \ (courant fort et courant faible), connect\xE9s aux infrastructures de traitement\
+        \ de l'information doivent \xEAtre identifi\xE9s (\xE9tiquet\xE9s), document\xE9\
+        s et s\xE9par\xE9s. Les c\xE2bles doivent \xEAtre d\xE9roul\xE9s en faisceaux\
+        \ clairs et non emm\xEAl\xE9s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-ond
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      ref_id: PHYS-MAT-OND
+      name: Onduleurs
+      description: "Les \xE9quipements de traitement de l'information doivent \xEA\
+        tre prot\xE9g\xE9s des variations et des microcoupures d'\xE9lectricit\xE9\
+        \ par des onduleurs \xE0 capacit\xE9 adapt\xE9e."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-electrog
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      ref_id: PHYS-MAT-ELECTROG
+      name: "Groupe \xE9lectrog\xE8ne"
+      description: "En cas de besoins accrus de disponibilit\xE9 des SI, l'entit\xE9\
+        \ ou l'IIV peut faire recours \xE0 un groupe \xE9lectrog\xE8ne pour pallier\
+        \ les interruptions prolong\xE9es du courant \xE9lectrique."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-clim
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      ref_id: PHYS-MAT-CLIM
+      name: Climatisation
+      description: "Les zones abritant des moyens de traitement de l'information (salles\
+        \ des machines, datacenter ... etc.) doivent \xEAtre \xE9quip\xE9es de syst\xE8\
+        mes de climatisation pour r\xE9guler au besoin la temp\xE9rature et l'humidit\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-equip
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      ref_id: PHYS-MAT-EQUIP
+      name: "Entretien des \xE9quipements de s\xE9curit\xE9 environnementale"
+      description: "Les \xE9quipements de s\xE9curit\xE9 environnementale (extincteurs,\
+        \ climatisations, d\xE9tecteurs d'incendie, onduleurs, groupes \xE9lectrog\xE8\
+        nes, etc.) doivent \xEAtre correctement entretenus pour assurer leur bon fonctionnement.\n\
+        \nUn d\xE9lai d'intervention adapt\xE9 en cas de d\xE9faillance doit \xEA\
+        tre pr\xE9cis\xE9 dans les contrats de maintenance des \xE9quipements de s\xE9\
+        curit\xE9 environnementale."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:phys-mat-horsloc
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node63
+      ref_id: PHYS-MAT-HORSLOC
+      name: "S\xE9curit\xE9 du mat\xE9riel et des actifs hors les locaux"
+      description: "Chaque entit\xE9 ou IIV doit appliquer des mesures de s\xE9curit\xE9\
+        \ \xE0 tous types d'\xE9quipements informatiques et supports destin\xE9s \xE0\
+        \ \xEAtre transport\xE9s et utilis\xE9s hors des lieux de travail habituel,\
+        \ afin de les prot\xE9ger notamment contre les risques de vol, d'endommagement\
+        \ ou d'intrusion."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      assessable: false
+      depth: 1
+      name: "8. SECURITE LIEE A L\u2019EXPLOITATION"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node71
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      name: Objectif 16
+      description: "S\u2019assurer de l\u2019exploitation correcte et s\xE9curis\xE9\
+        e des moyens de traitement de l\u2019information."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-proc-chang
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node71
+      ref_id: EXP-PROC-CHANG
+      name: Gestion des changements
+      description: "Tout changement apport\xE9 au SI doit suivre une proc\xE9dure\
+        \ formelle respectant le cycle : demande, validation, application et contr\xF4\
+        le \xE0 posteriori.\n\nEn effet, chaque entit\xE9 ou IIV doit contr\xF4ler\
+        \ tout changement qui influe sur la s\xE9curit\xE9 du SI, en tenant compte\
+        \ des \xE9l\xE9ments suivants :\n\n- L'identification et la planification\
+        \ des changements significatifs ;\n\n- L'appr\xE9ciation des incidences potentielles\
+        \ de ces changements sur la s\xE9curit\xE9 de l'information ;\n\n- L'autorisation\
+        \ formelle des changements propos\xE9s ;\n\n- La transmission des informations\
+        \ d\xE9taill\xE9es sur les changements apport\xE9s \xE0 toutes les personnes\
+        \ concern\xE9es."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--proc-cap
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node71
+      ref_id: EXP- PROC-CAP
+      name: "Gestion des capacit\xE9s"
+      description: "Des analyses r\xE9guli\xE8res du bon dimensionnement des syst\xE8\
+        mes et des r\xE9seaux (capacit\xE9 m\xE9moire, bande passante, temps de r\xE9\
+        ponse, ... ) doivent \xEAtre r\xE9alis\xE9es dans le but de mener les actions\
+        \ de redimensionnement \xE0 m\xEAme de garantir ou d'am\xE9liorer la disponibilit\xE9\
+        \ du SI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-proc-envir
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node71
+      ref_id: EXP-PROC-ENVIR
+      name: "S\xE9paration des environnements"
+      description: "Les environnements de d\xE9veloppement, de test et de production\
+        \ doivent \xEAtre s\xE9par\xE9s pour r\xE9duire notamment les risques d'acc\xE8\
+        s ou de changements non autoris\xE9s dans les trois environnements."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node75
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      name: Objectif 17
+      description: "Garantir que l\u2019information et les moyens de traitement de\
+        \ l\u2019information sont prot\xE9g\xE9s contre les logiciels malveillants."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-protec-malveil
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node75
+      ref_id: EXP-PROTEC-MALVEIL
+      name: Protection contre les logiciels malveillants
+      description: "Des solutions de protection contre les logiciels malveillants\
+        \ doivent \xEAtre install\xE9es et mises \xE0 jour sur l'ensemble des serveurs,\
+        \ postes de travail et appareils mobiles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node77
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      name: Objectif 18
+      description: "Se prot\xE9ger de la perte de donn\xE9es."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sauv-proc
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node77
+      ref_id: EXP-SAUV-PROC
+      name: "Proc\xE9dures de sauvegarde"
+      description: "Chaque entit\xE9 ou IIV doit mettre en place des proc\xE9dures\
+        \ de sauvegarde qui pr\xE9cisent pour chaque syst\xE8me d'information :\n\n\
+        - la nature des sauvegardes (compl\xE8te, incr\xE9mentale, d\xE9duplication,\
+        \ ... ) ;\n\n- la fr\xE9quence (journali\xE8re, hebdomadaire, mensuelle, ...\
+        \ ) ;\n\n- le type de support (sur disque, sur bande) ;\n\n- Les donn\xE9\
+        es sensibles devant \xEAtre sauvegard\xE9es de mani\xE8re chiffr\xE9e."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sauv-restaur
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node77
+      ref_id: EXP-SAUV-RESTAUR
+      name: Restauration
+      description: "Chaque entit\xE9 ou IIV doit tester r\xE9guli\xE8rement les supports\
+        \ de sauvegarde en s'assurant que les donn\xE9es sauvegard\xE9es peuvent \xEA\
+        tre restaur\xE9es en temps voulu conform\xE9ment \xE0 une proc\xE9dure de\
+        \ restauration document\xE9e."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sauv-sec
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node77
+      ref_id: EXP-SAUV-SEC
+      name: "S\xE9curit\xE9 des sauvegardes"
+      description: "Chaque entit\xE9 ou IIV doit prot\xE9ger physiquement les supports\
+        \ de sauvegarde en les pla\xE7ant \xE0 un endroit prot\xE9g\xE9 (Armoire ignifuge)\
+        \ ou en les externalisant sur un site suffisamment distant du site principal."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      name: Objectif 19
+      description: "Enregistrer les \xE9v\xE9nements et g\xE9n\xE9rer des preuves."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-journal
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      ref_id: EXP- JOURN/SURV-JOURNAL
+      name: "Journalisation des \xE9v\xE9nements"
+      description: "Chaque entit\xE9 ou IIV doit mener une \xE9tude pour identifier\
+        \ les journaux \xE0 collecter des diff\xE9rentes sources (serveurs, \xE9quipements\
+        \ de s\xE9curit\xE9, \xE9quipements r\xE9seaux, applications, postes de travail,\
+        \ etc.) en fonction des risques et incidents redout\xE9s par l'entit\xE9 ou\
+        \ par l'IIV. Elle doit mettre en place un journal r\xE9pertoriant les \xE9\
+        v\xE9nements de s\xE9curit\xE9 \xE0 collecter. Ces journaux doivent \xEAtre\
+        \ analys\xE9s p\xE9riodiquement et les actions \xE0 mener doivent \xEAtre\
+        \ bien d\xE9finies.\n\nCes journaux doivent \xEAtre centralis\xE9s et prot\xE9\
+        g\xE9s contre les risques de falsification ou d'acc\xE8s non autoris\xE9.\
+        \ Ils doivent \xEAtre conserv\xE9s pour une dur\xE9e minimale de six mois."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-privil
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      ref_id: EXP- JOURN/SURV-PRIVIL
+      name: "Tra\xE7abilit\xE9 des actions des comptes \xE0 privil\xE8ge"
+      description: "Les actions des administrateurs syst\xE8me et des op\xE9rateurs\
+        \ syst\xE8me doivent \xEAtre trac\xE9es. Pour cela leurs comptes doivent \xEA\
+        tre nominatifs pour assurer l'imputabilit\xE9 de leurs actions."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-journ/surv-maint
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      ref_id: EXP-JOURN/SURV-MAINT
+      name: "Tra\xE7abilit\xE9 des actions de maintenance"
+      description: "Les interventions de maintenance sur les ressources informatiques\
+        \ de l'entit\xE9 ou de l'IIV doivent \xEAtre trac\xE9es par le service informatique.\
+        \ Ces traces sont \xE0 conserver pendant une dur\xE9e d'au moins trois mois\
+        \ et ce tout en d\xE9ployant les mesures n\xE9cessaires pour assurer leur\
+        \ int\xE9grit\xE9."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv-synchron
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      ref_id: EXP- JOURN/SURV SYNCHRON
+      name: Synchronisation des horloges
+      description: "Pour assurer la pr\xE9cision des journaux d'\xE9v\xE9nements qui\
+        \ peuvent \xEAtre utilis\xE9s lors des investigations, les actifs doivent\
+        \ \xEAtre synchronis\xE9s sur la m\xEAme base de temps, \xE0 savoir : le service\
+        \ NTP de confiance (Network Time Protocol)."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv--dist
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      ref_id: EXP- JOURN/SURV -DIST
+      name: "Administration \xE0 distance"
+      description: "Les actions d'administration \xE0 distance sur les ressources\
+        \ locales doivent s'appuyer sur des protocoles d'administration s\xE9curis\xE9\
+        s. Des mesures de s\xE9curit\xE9 sp\xE9cifiques doivent \xEAtre d\xE9finies\
+        \ et respect\xE9es."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp--journ/surv---centr
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node81
+      ref_id: EXP- JOURN/SURV - CENTR
+      name: Centralisation
+      description: "L'entit\xE9 ou l'IIV doit mettre en place de mani\xE8re centralis\xE9\
+        e les moyens appropri\xE9s de supervision et de d\xE9tection pour le traitement\
+        \ continu des \xE9v\xE9nements de s\xE9curit\xE9 pr\xE9vus par la loi n\xBA\
+        05-20 relative \xE0 la cybers\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node88
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      name: Objectif 20
+      description: "Garantir l\u2019int\xE9grit\xE9 des syst\xE8mes en exploitation\
+        \ et emp\xEAcher toute exploitation des vuln\xE9rabilit\xE9s techniques."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sys-config
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node88
+      ref_id: EXP-SYS-CONFIG
+      name: "Configuration syst\xE8me"
+      description: "Chaque entit\xE9 ou IIV doit documenter les proc\xE9dures d'administration\
+        \ et de configuration s\xE9curis\xE9e des actifs du syst\xE8me d'information,\
+        \ les rendre disponibles, les expliquer \xE0 toute personne ayant besoin de\
+        \ les conna\xEEtre et les maintenir \xE0 jour.\n\nLes configurations doivent\
+        \ \xEAtre sauvegard\xE9es en lieu s\xFBr apr\xE8s chaque changement."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-sys-durc
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node88
+      ref_id: EXP-SYS-DURC
+      name: Durcissement des configurations
+      description: "Les configurations des \xE9quipements et syst\xE8mes doivent \xEA\
+        tre durcies notamment par rapport aux versions natives des fournisseurs (le\
+        \ changement des mots de passe par d\xE9faut et des certificats, la fermeture\
+        \ des services et des ports non n\xE9cessaires, etc .. ).\n\nLes proc\xE9\
+        dures et guides de durcissement pour les diff\xE9rents types d'actifs doivent\
+        \ \xEAtre document\xE9s et tenus \xE0 jours."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-vuln-install
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node88
+      ref_id: EXP-VULN-INSTALL
+      name: "Restrictions li\xE9es \xE0 l'installation de logiciels"
+      description: "Chaque entit\xE9 ou IIV doit d\xE9finir et mettre en place un\
+        \ processus de contr\xF4le des logiciels que les utilisateurs peuvent installer\
+        \ ainsi que des privil\xE8ges qui leurs sont accord\xE9s en tenant compte\
+        \ de leurs fonctions."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-vuln-gest
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node88
+      ref_id: EXP-VULN-GEST
+      name: "Gestion des vuln\xE9rabilit\xE9s techniques"
+      description: "Chaque entit\xE9 ou IIV doit \xEAtre tenue inform\xE9e en temps\
+        \ voulu des vuln\xE9rabilit\xE9s techniques des syst\xE8mes d'information\
+        \ en exploitation, d'\xE9valuer son exposition \xE0 ces vuln\xE9rabilit\xE9\
+        s et de prendre les mesures appropri\xE9es pour traiter le risque associ\xE9\
+        .\n\nUne proc\xE9dure de gestion des vuln\xE9rabilit\xE9s doit \xEAtre mise\
+        \ en place en prenant en compte principalement les \xE9l\xE9ments suivants\
+        \ :\n\n- L'inventaire des actifs informationnels en service ;\n\n- Les r\xF4\
+        les et responsabilit\xE9s associ\xE9s \xE0 la gestion des vuln\xE9rabilit\xE9\
+        s ;\n\n- Les d\xE9lais d'intervention ;\n\n- Les modalit\xE9s de corrections\
+        \ (Application de correctifs, cloisonnement, ... ).\n\n- Les vuln\xE9rabilit\xE9\
+        s jug\xE9es critiques doivent \xEAtre port\xE9es \xE0 la connaissance de la\
+        \ DGSSI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-vuln-correct
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node88
+      ref_id: EXP-VULN-CORRECT
+      name: Gestion des correctifs
+      description: "Chaque entit\xE9 ou IIV doit d\xE9finir et mettre en \u0153uvre\
+        \ une politique de suivi et d'application des correctifs de s\xE9curit\xE9\
+        .\n\nUn processus de gestion des correctifs propre \xE0 chaque syst\xE8me\
+        \ ou applicatif doit \xEAtre d\xE9fini et adapt\xE9 suivant les contraintes\
+        \ et le niveau d'exposition du syst\xE8me."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node94
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node70
+      name: Objectif 21
+      description: "R\xE9duire au minimum l\u2019incidence des activit\xE9s d\u2019\
+        audit sur les syst\xE8mes en exploitation."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:exp-audit-mes
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node94
+      ref_id: EXP-AUDIT-MES
+      name: "Mesures relatives \xE0 l'audit du syst\xE8me d'information"
+      description: "Les modalit\xE9s de d\xE9roulement des op\xE9rations d'audit d\xE9\
+        ploy\xE9es par l'entit\xE9 ou par l'IIV doivent \xEAtre bien d\xE9finies (acc\xE8\
+        s aux \xE9quipements, contr\xF4les et traitements admis, consultation des\
+        \ donn\xE9es, habilitation des auditeurs, etc.).\n\nLes exigences et activit\xE9\
+        s d'audit impliquant des v\xE9rifications sur des syst\xE8mes en exploitation\
+        \ doivent \xEAtre pr\xE9vues avec soin et valid\xE9es afin de r\xE9duire au\
+        \ minimum les perturbations qui pourraient \xEAtre subies par les processus\
+        \ m\xE9tier.\n\nCertaines r\xE8gles applicables \xE0 l'audit des syst\xE8\
+        mes d'information sensibles sont d\xE9finies par la loi n\xBA 05-20 et ses\
+        \ textes d'application."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node96
+      assessable: false
+      depth: 1
+      name: 9. SECURITE DES COMMUNICATIONS
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node96
+      name: Objectif 22
+      description: "Garantir la protection des informations sur les r\xE9seaux et\
+        \ des moyens de traitement de l\u2019information sur lesquels elle s\u2019\
+        appuie."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-cloison
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      ref_id: COM-MANAG-CLOISON
+      name: "Cloisonnement du r\xE9seau"
+      description: "Chaque entit\xE9 ou IIV est tenue de cloisonner son r\xE9seau\
+        \ en zones (zone publique, zone utilisateurs, zone serveurs, etc.) selon la\
+        \ classification et les niveaux de sensibilit\xE9 des actifs informationnels\
+        \ connect\xE9s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-filtrage
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      ref_id: COM-MANAG-FILTRAGE
+      name: Filtrage des flux
+      description: "Le trafic entrant et sortant de chaque zone r\xE9seau doit \xEA\
+        tre soumis \xE0 des r\xE8gles strictes de filtrage conform\xE9ment \xE0 la\
+        \ politique de contr\xF4le d'acc\xE8s et \xE0 la classification des donn\xE9\
+        es trait\xE9es.\n\nLa liste des r\xE8gles de filtrage doit \xEAtre document\xE9\
+        e et tenue \xE0 jour."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-sysaut
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      ref_id: COM-MANAG-SYSAUT
+      name: "Syst\xE8mes autoris\xE9s sur le r\xE9seau"
+      description: "L'entit\xE9 ou l'IIV doit mettre en place les moyens et m\xE9\
+        canismes n\xE9cessaires pour s'assurer que seuls les \xE9quipements autoris\xE9\
+        s peuvent \xEAtre connect\xE9s au r\xE9seau interne de l'entit\xE9 ou de l'IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-distant
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      ref_id: COM-MANAG-DISTANT
+      name: "Acc\xE8s distants"
+      description: "L'acc\xE8s distant ne doit \xEAtre r\xE9alisable que par des personnes\
+        \ autoris\xE9es et bien d\xE9finies et \xE0 partir de moyens maitris\xE9s.\n\
+        \nDes mesures d'authentification adapt\xE9es et l'usage de protocoles s\xE9\
+        curis\xE9s pour ce type de connexions sont n\xE9cessaires."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-tunel
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      ref_id: COM-MANAG-TUNEL
+      name: "Tunnelisation chiffr\xE9e"
+      description: "Chaque entit\xE9 ou IIV doit mettre en place des m\xE9canismes\
+        \ de chiffrement pour la protection des tunnels de connexion \xE0 distance\
+        \ lorsque l'acc\xE8s se fait \xE0 travers un r\xE9seau public."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-manag-rsf
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node97
+      ref_id: COM-MANAG-RSF
+      name: "S\xE9curit\xE9 des r\xE9seaux sans fil"
+      description: "Le d\xE9ploiement du r\xE9seau sans fil doit faire l'objet d'une\
+        \ \xE9tude de s\xE9curit\xE9 sp\xE9cifique.\n\nLe r\xE9seau sans fil doit\
+        \ \xEAtre cloisonn\xE9 du reste du r\xE9seau : une passerelle ma\xEEtris\xE9\
+        e doit \xEAtre mise en place permettant de tracer les acc\xE8s et de restreindre\
+        \ les \xE9changes aux seuls flux n\xE9cessaires.\n\nDes moyens d'authentification\
+        \ adapt\xE9s doivent \xEAtre mis en place pour limiter l'acc\xE8s aux r\xE9\
+        seaux sans fil aux seules personnes autoris\xE9es."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node104
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node96
+      name: Objectif 23
+      description: "Maintenir la s\xE9curit\xE9 de l\u2019information transf\xE9r\xE9\
+        e au sein de l\u2019entit\xE9 ou de l\u2019IIV et vers l\u2019ext\xE9rieur."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-fichier
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node104
+      ref_id: COM-TRANS-FICHIER
+      name: Usage des transferts par fichiers
+      description: "Des moyens adapt\xE9s doivent \xEAtre mis en place pour la protection\
+        \ des informations qui transitent \xE0 travers tout type de moyens de communication\
+        \ (serveurs de fichier, partage ou stockage Cloud, etc.) contre l'interception,\
+        \ la reproduction, la modification, les erreurs d'acheminement ou la destruction."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-mess
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node104
+      ref_id: COM-TRANS-MESS
+      name: "Usage de la messagerie \xE9lectronique"
+      description: "Chaque entit\xE9 ou IIV doit formaliser et mettre en \u0153uvre\
+        \ les r\xE8gles de bon usage n\xE9cessaires pour la s\xE9curit\xE9 de la messagerie\
+        \ \xE9lectronique notamment :\n\n- le chiffrement et la signature des messages\
+        \ sensibles par des moyens adapt\xE9s ;\n\n- l'acc\xE8s \xE0 distance \xE0\
+        \ la messagerie professionnelle via un canal s\xE9curis\xE9 ;\n\n- la v\xE9\
+        rification de la source des courriers \xE9lectroniques avant d'ouvrir les\
+        \ pi\xE8ces jointes;\n\n- l'interdiction de l'usage de la messagerie professionnelle\
+        \ \xE0 des fins personnelles ;\n\n- l'interdiction du renvoi automatique vers\
+        \ une messagerie non ma\xEEtris\xE9e, sauf autorisation expresse pour des\
+        \ raisons exceptionnelles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:com-trans-filtr
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node104
+      ref_id: COM-TRANS-FILTR
+      name: Filtrage des mails
+      description: "Chaque entit\xE9 ou IIV doit veiller \xE0 l'application des m\xE9\
+        canismes de filtrage du courrier \xE9lectronique \xE9mis et re\xE7u notamment\
+        \ par :\n\n- le contr\xF4le antiviral des pi\xE8ces jointes, leurs tailles\
+        \ et natures ;\n\n- la protection anti-spam ;\n\n- le contr\xF4le des ent\xEA\
+        tes SMTP."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node108
+      assessable: false
+      depth: 1
+      name: "10. ACQUISITION, DEVELOPPEMENT ET MAINTENANCE DES SYSTEMES D\u2019INFORMATION"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node109
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node108
+      name: Objectif 24
+      description: "Veiller \xE0 ce que la s\xE9curit\xE9 fasse partie int\xE9grante\
+        \ des SI tout au long de leur cycle de vie."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-exig-projet
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node109
+      ref_id: DEV-EXIG-PROJET
+      name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
+      description: "Chaque entit\xE9 ou IIV doit traiter la s\xE9curit\xE9 de l'information\
+        \ dans la gestion de tous types de projets SI. A ce titre, la s\xE9curit\xE9\
+        \ doit \xEAtre int\xE9gr\xE9e \xE0 toutes les phases du cycle de vie du projet\
+        \ de mani\xE8re \xE0 s'assurer notamment que :\n\n- une appr\xE9ciation du\
+        \ risque, li\xE9e \xE0 la s\xE9curit\xE9 de l'information, soit effectu\xE9\
+        e au commencement du projet pour identifier les exigences de s\xE9curit\xE9\
+        \ ;\n\n- les objectifs en mati\xE8re de s\xE9curit\xE9 de l'information soient\
+        \ int\xE9gr\xE9s aux objectifs du projet et pris en compte d\xE8s la conception\
+        \ ;\n\n- la v\xE9rification de la s\xE9curit\xE9 soit int\xE9gr\xE9e dans\
+        \ les tests d'acceptation."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-exig-transac
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node109
+      ref_id: DEV-EXIG-TRANSAC
+      name: "Protection des transactions li\xE9es aux services d'application"
+      description: "Chaque entit\xE9 ou IIV doit identifier les fichiers et les transactions\
+        \ devant \xEAtre prot\xE9g\xE9s par des solutions de chiffrement et/ou de\
+        \ signature \xE9lectronique au niveau de l'architecture applicative."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node108
+      name: Objectif 25
+      description: "S\u2019assurer que la s\xE9curit\xE9 de l\u2019information est\
+        \ mise en \u0153uvre dans le cadre du cycle de d\xE9veloppement des SI conform\xE9\
+        ment aux r\xE9f\xE9rentiels et guides en vigueur."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-pol
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      ref_id: DEV-PROC-POL
+      name: "Politique de d\xE9veloppement s\xE9curis\xE9"
+      description: "Chaque entit\xE9 ou IIV doit \xE9laborer et mettre en place, conform\xE9\
+        ment aux guides et r\xE9f\xE9rentiels \xE9labor\xE9s par la DGSSI, une politique\
+        \ de d\xE9veloppement s\xE9curis\xE9 des logiciels et des syst\xE8mes, qui\
+        \ d\xE9finit notamment :\n\n- les exigences de s\xE9curit\xE9 de l'environnement\
+        \ de d\xE9veloppement ;\n\n- les exigences de s\xE9curit\xE9 dans la phase\
+        \ de conception ;\n\n- les points de contr\xF4le de la s\xE9curit\xE9 aux\
+        \ diff\xE9rentes \xE9tapes cl\xE9s du projet ;\n\n- les r\xE9f\xE9rentiels\
+        \ de d\xE9veloppement s\xE9curis\xE9 \xE0 utiliser ;\n\n- les r\xE8gles de\
+        \ protection du code source et le contr\xF4le des versions."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-chang
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      ref_id: DEV-PROC-CHANG
+      name: "Contr\xF4le des changements apport\xE9s au syst\xE8me dans le cycle de\
+        \ d\xE9veloppement"
+      description: "Les changements apport\xE9s au SI dans le cycle de d\xE9veloppement\
+        \ doivent \xEAtre contr\xF4l\xE9s en utilisant des proc\xE9dures formelles.\n\
+        \nA cet effet, chaque entit\xE9 ou IIV doit mener une appr\xE9ciation du risque\
+        \ pour analyser les incidences des changements apport\xE9s au SI dans le cycle\
+        \ de d\xE9veloppement et se limiter aux changements n\xE9cessaires.\n\nLorsque\
+        \ les changements sont apport\xE9s, chaque entit\xE9 ou IIV doit revoir et\
+        \ tester les applications m\xE9tiers critiques afin de v\xE9rifier tout impact\
+        \ sur l'activit\xE9 ou sur la s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-envir
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      ref_id: DEV-PROC-ENVIR
+      name: "Environnement de d\xE9veloppement s\xE9curis\xE9"
+      description: "Chaque entit\xE9 ou IIV doit veiller \xE0 ce que les environnements\
+        \ de d\xE9veloppement soient s\xE9curis\xE9s, de mani\xE8re \xE0 tenir compte\
+        \ notamment de :\n\n- la sensibilit\xE9 des donn\xE9es trait\xE9es, stock\xE9\
+        es et en transit ;\n\n- les exigences internes et externes d\xE9coulant des\
+        \ politiques et r\xE9f\xE9rentiels en vigueur ;\n\n- le niveau de fiabilit\xE9\
+        \ du personnel travaillant dans l'environnement ;\n\n- le contr\xF4le d'acc\xE8\
+        s aux environnements ;\n\n- la s\xE9paration des diff\xE9rents environnements\
+        \ de d\xE9veloppement ;\n\n- le degr\xE9 d'externalisation associ\xE9e \xE0\
+        \ la t\xE2che de d\xE9veloppement."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-test
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      ref_id: DEV-PROC-TEST
+      name: "Test de la s\xE9curit\xE9 du syst\xE8me"
+      description: "Chaque entit\xE9 ou IIV doit assurer la r\xE9alisation des tests\
+        \ de la s\xE9curit\xE9 durant le cycle de d\xE9veloppement conform\xE9ment\
+        \ \xE0 la politique de d\xE9veloppement s\xE9curis\xE9 de l'entit\xE9 ou de\
+        \ l'IIV et aux guides et r\xE9f\xE9rentiels \xE9labor\xE9s par la DGSSI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-code
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      ref_id: DEV-PROC-CODE
+      name: Protection du code source des programmes
+      description: "Un contr\xF4le strict de l'acc\xE8s au code source des programmes\
+        \ et aux \xE9l\xE9ments associ\xE9s tels que les exigences de conception,\
+        \ les sp\xE9cifications, les programmes de v\xE9rification et de validation,\
+        \ doit \xEAtre mis en place."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:dev-proc-donnee
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node112
+      ref_id: DEV-PROC-DONNEE
+      name: "Protection des donn\xE9es de test"
+      description: "Lorsque des donn\xE9es d'exploitation sont utilis\xE9es pour les\
+        \ besoins d'un test, il est n\xE9cessaire notamment de :\n\n- respecter les\
+        \ proc\xE9dures d'acc\xE8s qui s'appliquent aux syst\xE8mes d'applications\
+        \ en exploitation ;\n\n- obtenir une autorisation pour copier des informations\
+        \ d'exploitation dans un environnement de test ;\n\n- effacer les informations\
+        \ d'exploitation d'un environnement de test imm\xE9diatement apr\xE8s la fin\
+        \ des tests ;\n\n- journaliser toute reproduction et utilisation de l'information\
+        \ d'exploitation.\n\nEn outre, lorsque les donn\xE9es d'exploitation sont\
+        \ de nature sensible, elles ne doivent pas \xEAtre utilis\xE9es sans qu'il\
+        \ ne soit proc\xE9d\xE9 \xE0 leur anonymisation."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node119
+      assessable: false
+      depth: 1
+      name: 11. RELATIONS AVEC LES FOURNISSEURS
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node120
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node119
+      name: Objectif 26
+      description: "Garantir la protection des actifs de l\u2019entit\xE9 ou de l\u2019\
+        IIV accessibles aux fournisseurs."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-risq
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node120
+      ref_id: FOURNIS-REL-RISQ
+      name: "Risques \xE9manant des fournisseurs"
+      description: "Chaque entit\xE9 ou IIV doit identifier les risques de s\xE9curit\xE9\
+        \ li\xE9s aux interventions des fournisseurs et des prestataires. FOURNIS-REL-POL\
+        \ : Politique de s\xE9curit\xE9 de l'information dans les relations avec les\
+        \ fournisseurs\n\nChaque entit\xE9 ou IIV doit mettre en place une politique\
+        \ qui d\xE9finit les mesures de s\xE9curit\xE9 sp\xE9cifiques applicables\
+        \ aux fournisseurs et aux prestataires."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-pol
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node120
+      ref_id: FOURNIS-REL-POL
+      name: "Politique de s\xE9curit\xE9 de l\u2019information dans les relations\
+        \ avec les fournisseurs"
+      description: "Chaque entit\xE9 ou IIV doit mettre en place une politique qui\
+        \ d\xE9finit les mesures de s\xE9curit\xE9 sp\xE9cifiques applicables\naux\
+        \ fournisseurs et aux prestataires."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-rel-exig
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node120
+      ref_id: FOURNIS-REL-EXIG
+      name: Exigences contractuelles
+      description: "Les contrats conclus doivent pr\xE9voir les exigences de l\u2019\
+        entit\xE9 ou de l\u2019IIV en termes de s\xE9curit\xE9 et de niveaux de\n\
+        service. Les fournisseurs et les prestataires sont tenus conform\xE9ment aux\
+        \ contrats conclus de respecter la politique\nde s\xE9curit\xE9 des SI de\
+        \ l\u2019entit\xE9 ou de l\u2019IIV.\nDes clauses d\u2019auditabilit\xE9 et\
+        \ de r\xE9versibilit\xE9 sont \xE0 pr\xE9voir lorsqu\u2019il s\u2019agit de\
+        \ contrats d\u2019externalisation, et ce\nconform\xE9ment aux dispositions\
+        \ de la loi n\xB005-20 relative \xE0 la cybers\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node124
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node119
+      name: Objectif 27
+      description: "Maintenir un niveau convenu de s\xE9curit\xE9 de l\u2019information\
+        \ et de prestation de services, conform\xE9ment aux accords conclus avec les\
+        \ fournisseurs."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:fournis-gest-surveil
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node124
+      ref_id: FOURNIS-GEST-SURVEIL
+      name: Surveillance et revue des services des fournisseurs
+      description: "Chaque entit\xE9 ou IIV doit surveiller, revoir et auditer \xE0\
+        \ intervalles r\xE9guliers les prestations assur\xE9es par les\nfournisseurs,\
+        \ afin de s\u2019assurer que les clauses portant sur la s\xE9curit\xE9 de\
+        \ l\u2019information pr\xE9vues dans les contrats sont\nrespect\xE9es et que\
+        \ les \xE9ventuels incidents sont correctement g\xE9r\xE9s."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node126
+      assessable: false
+      depth: 1
+      name: 12. GESTION DES INCIDENTS DE CYBERSECURITE
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node126
+      name: Objectif 28
+      description: "Garantir une m\xE9thode coh\xE9rente et efficace de d\xE9tection\
+        \ et de traitement des incidents de cybers\xE9curit\xE9, incluant la communication\
+        \ des \xE9v\xE9nements et des failles li\xE9s \xE0 la s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest--proc
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST- PROC
+      name: " Proc\xE9dures et responsabilit\xE9s en mati\xE8re de gestion des incidents"
+      description: "Les proc\xE9dures de gestion d'incidents doivent couvrir les diff\xE9\
+        rents types d\u2019incidents affectant la s\xE9curit\xE9 ou le\nfonctionnement\
+        \ du syst\xE8me (erreurs, dysfonctionnement, sinistres naturels, malveillances,\
+        \ d\xE9nis de service,\ninfections virales, intrusion, sabotage, saturation,\
+        \ etc.) et d\xE9finir les moyens de signalement et de suivi d\u2019incidents.\n\
+        Les responsabilit\xE9s de gestion des incidents de cybers\xE9curit\xE9 doivent\
+        \ \xEAtre d\xE9finies pour garantir que lesdites\nproc\xE9dures soient d\xE9\
+        velopp\xE9es et communiqu\xE9es au sein de l\u2019entit\xE9 ou de l\u2019\
+        IIV."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-cat
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-CAT
+      name: "Cat\xE9gorisation et classification des incidents"
+      description: "Chaque entit\xE9 ou IIV doit d\xE9finir les diff\xE9rentes cat\xE9\
+        gories d\u2019incidents susceptibles d\u2019affecter la s\xE9curit\xE9 du\
+        \ SI ainsi\nque l\u2019\xE9chelle de classification de ces incidents selon\
+        \ l\u2019impact induit."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-signal
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-SIGNAL
+      name: "Signalement des \xE9v\xE9nements"
+      description: "L\u2019ensemble des personnes impliqu\xE9es dans la maintenance,\
+        \ l\u2019exploitation, l\u2019administration ou l\u2019utilisation du\nsyst\xE8\
+        me doivent \xEAtre en mesure de noter et signaler dans les meilleurs d\xE9\
+        lais tout dysfonctionnement observ\xE9 ou\nsoup\xE7onn\xE9 dans l\u2019usage\
+        \ normal du syst\xE8me et pouvant porter atteinte aux donn\xE9es ou au syst\xE8\
+        me lui-m\xEAme.\nLa proc\xE9dure de gestion des incidents doit garantir que\
+        \ le signalement soit remont\xE9 aux autorit\xE9s comp\xE9tentes\nselon les\
+        \ exigences l\xE9gislatives et r\xE9glementaires en vigueur."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-qualif
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-QUALIF
+      name: "Qualification des \xE9v\xE9nements"
+      description: "Chaque entit\xE9 ou IIV doit pouvoir \xE9valuer chaque \xE9v\xE8\
+        nement afin de pouvoir d\xE9cider s\u2019il s\u2019agit d\u2019un incident\
+        \ li\xE9 \xE0 la\ns\xE9curit\xE9 du SI et de d\xE9terminer sa cat\xE9gorie.\
+        \ Dans ce cas, la criticit\xE9 de cet incident doit \xEAtre appr\xE9ci\xE9\
+        e selon une\n\xE9chelle de classification des incidents de cybers\xE9curit\xE9\
+        \ bas\xE9e sur la sensibilit\xE9 du service impact\xE9 et sur l\u2019impact\n\
+        induit."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-reponse
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-REPONSE
+      name: "R\xE9ponse aux incidents li\xE9s \xE0 la s\xE9curit\xE9 des SI"
+      description: "D\xE8s qu\u2019un incident de cybers\xE9curit\xE9 est confirm\xE9\
+        , chaque entit\xE9 ou IIV doit attribuer les r\xF4les et responsabilit\xE9\
+        s aux\ndiff\xE9rents membres de l\u2019\xE9quipe d\u2019intervention interne,\
+        \ externe ou mixte, et s\u2019assurer que toutes les t\xE2ches\nconcernant\
+        \ la r\xE9ponse sont correctement r\xE9alis\xE9es et journalis\xE9es conform\xE9\
+        ment \xE0 une proc\xE9dure de r\xE9ponse\nformalis\xE9e."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-alert
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-ALERT
+      name: "R\xE9action aux alertes li\xE9s \xE0 la s\xE9curit\xE9 des SI"
+      description: "Chaque entit\xE9 ou IIV doit mobiliser les ressources internes\
+        \ et/ou externes pour r\xE9agir efficacement aux alertes li\xE9es\n\xE0 la\
+        \ s\xE9curit\xE9 des SI.\nCes alertes peuvent provenir soit d\u2019un \xE9\
+        diteur ou fournisseur, soit du centre de veille, de d\xE9tection et de r\xE9\
+        ponses\naux attaques informatiques (ma-CERT) relevant de la DGSSI.\nDans ce\
+        \ dernier cas, l\u2019entit\xE9 ou l\u2019IIV accuse r\xE9ception de l\u2019\
+        alerte et transmet par la suite, si elle est impact\xE9e par\ncette alerte,\
+        \ un compte rendu d\u2019ex\xE9cution \xE0 la DGSSI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-rep
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-REP
+      name: "R\xE9pertoire d\u2019incidents"
+      description: "La typologie et la description des incidents de cybers\xE9curit\xE9\
+        \ doivent \xEAtre localement enregistr\xE9es dans une base\npermettant un\
+        \ enrichissement progressif ainsi qu'un acc\xE8s s\xE9lectif facile pour effectuer\
+        \ le traitement et le suivi des\ndivers incidents futurs."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:incid-gest-preuv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node127
+      ref_id: INCID-GEST-PREUV
+      name: Recueil des preuves
+      description: "En cas d\u2019attaque suspect\xE9e, chaque entit\xE9 ou IIV doit\
+        \ d\xE9finir et appliquer les proc\xE9dures relatives :\n- aux processus de\
+        \ recherche, de reconnaissance et de documentation des preuves potentielles\
+        \ ;\n- au recueil des \xE9l\xE9ments physiques pouvant contenir des preuves\
+        \ potentielles ;\n- au processus de cr\xE9ation de copie de donn\xE9es ;\n\
+        - \xE0 la protection et la sauvegarde de l\u2019int\xE9grit\xE9 et l\u2019\
+        \xE9tat d\u2019origine des preuves potentielles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node136
+      assessable: false
+      depth: 1
+      name: "13. GESTION DE LA CONTINUITE DE L\u2019ACTIVITE"
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node137
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node136
+      name: Objectif 29
+      description: "Neutraliser les interruptions des activit\xE9s de l\u2019entit\xE9\
+        \ ou de l\u2019IIV, prot\xE9ger les processus m\xE9tier cruciaux des effets\
+        \ caus\xE9s par les d\xE9faillances des syst\xE8mes d\u2019information ou\
+        \ par des sinistres et garantir une reprise de ces processus dans les meilleurs\
+        \ d\xE9lais."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-bia
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node137
+      ref_id: CONTINU-BIA
+      name: "Analyse d\u2019impact sur l\u2019activit\xE9"
+      description: "Chaque entit\xE9 ou IIV est tenue d\u2019\xE9tablir une analyse\
+        \ d\u2019impacts sur son activit\xE9, qui consiste \xE0 :\n- identifier les\
+        \ activit\xE9s et processus critiques ;\n- analyser les risques li\xE9s aux\
+        \ activit\xE9s et processus ;\n- analyser les impacts qui r\xE9sulteraient\
+        \ d\u2019un arr\xEAt de ces activit\xE9s et processus critiques ;\n- d\xE9\
+        terminer comment ces impacts \xE9volueraient dans le temps en cas d\u2019\
+        arr\xEAt prolong\xE9 ;\n- \xE9tablir le temps d\u2019arr\xEAt ou d\u2019indisponibilit\xE9\
+        \ maximum supportable des activit\xE9s critiques ;\n- identifier et consid\xE9\
+        rer toute activit\xE9 critique d\xE9pendant d\u2019autres entit\xE9s ou IIV,\
+        \ des fournisseurs et\nd\u2019autres tiers ;\n- estimer le d\xE9lai cible\
+        \ de r\xE9tablissement des activit\xE9s apr\xE8s un sinistre ;\n- estimer\
+        \ les ressources humaines, techniques et logistiques que chaque activit\xE9\
+        \ critique requiert pour sa\nreprise."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-act
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node137
+      ref_id: CONTINU-ACT
+      name: "Plan de Continuit\xE9 et de Reprise d\u2019Activit\xE9 (PCA/PRA)"
+      description: "Chaque entit\xE9 ou IIV doit pr\xE9parer un plan de continuit\xE9\
+        \ et de reprise d\u2019activit\xE9s int\xE9grant l'ensemble des solutions\n\
+        pour pallier les arr\xEAts des processus et applications critiques. Il doit\
+        \ porter notamment sur des solutions de secours\ninformatique (sauvegarde,\
+        \ site de secours, bascule, r\xE9silience des r\xE9seaux, redondance mat\xE9\
+        rielle et logicielle,\netc.).\nLe PCA/PRA doit d\xE9crire de mani\xE8re pr\xE9\
+        cise les r\xF4les et les responsabilit\xE9s de tous les intervenants en cas\
+        \ de\nsinistre."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-plan
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node137
+      ref_id: CONTINU-PLAN
+      name: "Mise \xE0 l\u2019essai des PCA/PRA"
+      description: "Un plan de test technique (tests de restauration des syst\xE8\
+        mes, des applications, des donn\xE9es ou des\ncommunications, etc.) doit \xEA\
+        tre mis en \u0153uvre annuellement."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:continu-exercice
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node137
+      ref_id: CONTINU-EXERCICE
+      name: Exercices et Scenarios
+      description: "Chaque entit\xE9 ou IIV est tenue d\u2019organiser de mani\xE8\
+        re r\xE9guli\xE8re des exercices de crise afin de tester le PCA/PRA."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node142
+      assessable: false
+      depth: 1
+      name: 14. CONFORMITE
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node143
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node142
+      name: Objectif 30
+      description: "\xC9viter toute violation des obligations l\xE9gales, statutaires,\
+        \ r\xE9glementaires ou contractuelles relatives \xE0 la s\xE9curit\xE9 des\
+        \ SI."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-idf
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node143
+      ref_id: CONF-OBLIG-IDF
+      name: "Identification de la l\xE9gislation en vigueur"
+      description: "L\u2019arsenal l\xE9gal, r\xE9glementaire, normatif et contractuel\
+        \ auquel l\u2019entit\xE9 ou l\u2019IIV est soumise doit \xEAtre clairement\n\
+        identifi\xE9. La politique de s\xE9curit\xE9 des SI doit faire r\xE9f\xE9\
+        rence \xE0 cet arsenal et mettre l\u2019accent sur l\u2019obligation de s\u2019\
+        y\nconformer."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-cybersec
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node143
+      ref_id: CONF-OBLIG-CYBERSEC
+      name: "Conformit\xE9 \xE0 la r\xE9glementation li\xE9e \xE0 la cybers\xE9curit\xE9"
+      description: "Chaque entit\xE9 ou IIV doit veiller \xE0 ce que la gestion de\
+        \ la s\xE9curit\xE9 ses SI soit conforme au cadre juridique applicable\nen\
+        \ mati\xE8re de cybers\xE9curit\xE9 notamment la loi n\xB0 05-20 relative\
+        \ \xE0 la cybers\xE9curit\xE9 et le d\xE9cret n\xB0 2-21-406 pris pour\nson\
+        \ application."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-intellect
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node143
+      ref_id: CONF-OBLIG-INTELLECT
+      name: "Droits de propri\xE9t\xE9 intellectuelle"
+      description: "Chaque entit\xE9 ou IIV doit veiller au respect des droits de\
+        \ propri\xE9t\xE9 intellectuelle notamment en interdisant\nl\u2019utilisation\
+        \ de tout logiciel non dot\xE9 d'une licence d\u2019utilisation valide."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-perso
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node143
+      ref_id: CONF-OBLIG-PERSO
+      name: "Protection des donn\xE9es personnelles"
+      description: "Chaque entit\xE9 ou IIV doit veiller au respect de la l\xE9gislation\
+        \ relative \xE0 la protection des donn\xE9es \xE0 caract\xE8re\npersonnel\
+        \ notamment la loi n\xB0 09-08 relative \xE0 la protection des personnes physiques\
+        \ \xE0 l'\xE9gard du traitement des\ndonn\xE9es \xE0 caract\xE8re personnel\
+        \ et les textes pris pour son application."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-oblig-crypto
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node143
+      ref_id: CONF-OBLIG-CRYPTO
+      name: "R\xE9glementation relative aux mesures cryptographiques"
+      description: "Chaque entit\xE9 ou IIV doit veiller au respect des dispositions\
+        \ l\xE9gales, r\xE9glementaires et normatives se rapportant au\nrecours \xE0\
+        \ des mesures cryptographiques."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:node149
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node142
+      name: Objectif 31
+      description: "Garantir que la s\xE9curit\xE9 des SI est mise en \u0153uvre et\
+        \ appliqu\xE9e conform\xE9ment aux politiques et proc\xE9dures organisationnelles."
+    - urn: urn:intuitem:risk:req_node:dnssi-2023-2:conf-revu-ssi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dnssi-2023-2:node149
+      ref_id: CONF-REVU-SSI
+      name: "V\xE9rification de la conformit\xE9 de la s\xE9curit\xE9 des SI"
+      description: "Chaque entit\xE9 ou IIV doit auditer r\xE9guli\xE8rement la conformit\xE9\
+        \ de la s\xE9curit\xE9 de ses syst\xE8mes d\u2019information.\nChaque op\xE9\
+        ration d\u2019audit doit donner lieu \xE0 des recommandations. Celles-ci doivent\
+        \ \xEAtre mises en \u0153uvre dans le\ncadre de plans d\u2019actions en concertation\
+        \ avec les structures concern\xE9es.\nA sa demande, les rapports d\u2019audit\
+        \ peuvent \xEAtre mis \xE0 la disposition de la DGSSI."
