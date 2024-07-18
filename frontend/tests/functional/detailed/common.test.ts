@@ -89,7 +89,7 @@ for (const key of testPages) {
 					items[key].build.name || items[key].build.email,
 					items[key].build.name + ' edited' || '_' + items[key].build.email
 				);
-				if (key === 'riskAssessmentsPage'){
+				if (key === 'riskAssessmentsPage') {
 					replaceValues(
 						history[testInfo.line],
 						items[key].build.version,
