@@ -474,6 +474,7 @@
 	"domainManager": "Manager di dominio",
 	"analyst": "Analista",
 	"successfullyCreatedObject": "L'oggetto {object} è stato creato con successo",
+	"successfullyDuplicateObject": "L'oggetto {object} è stato duplicato con successo",
 	"successfullyUpdatedObject": "L'oggetto {object} è stato aggiornato con successo",
 	"successfullySavedObject": "L'oggetto {object} è stato salvato con successo",
 	"successfullyDeletedObject": "L'oggetto {object} è stato eliminato con successo",
@@ -610,5 +611,7 @@
 	"notApplicableScore": "Non è possibile ottenere un punteggio se la valutazione dei requisiti non è applicabile",
 	"maturity": "Scadenza",
 	"progress": "Progressione",
-	"back": "Ritorno"
+	"back": "Ritorno",
+	"duplicate": "Duplicare",
+	"duplicateRiskAssessment": "Duplicare la valutazione del rischio"
 }

@@ -263,6 +263,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
+	'risk-assessment-duplicate': RiskAssessmentSchema,
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,

@@ -474,6 +474,7 @@
 	"domainManager": "Gestionnaire de domaine",
 	"analyst": "Analyste",
 	"successfullyCreatedObject": "L'objet {object} a été créé avec succès",
+	"successfullyDuplicateObject": "L'objet {object} a été dupliqué avec succès",
 	"successfullyUpdatedObject": "L'objet {object} a été mis à jour avec succès",
 	"successfullySavedObject": "L'objet {object} a été enregistré avec succès",
 	"successfullyDeletedObject": "L'objet {object} a été supprimé avec succès",
@@ -610,5 +611,7 @@
 	"notApplicableScore": "Vous ne pouvez pas scorer si l'évaluation des exigences n'est pas applicable",
 	"maturity": "Maturité",
 	"progress": "Progression",
-	"back": "Retour"
+	"back": "Retour",
+	"duplicate": "Dupliquer",
+	"duplicateRiskAssessment": "Dupliquer l’évaluation de risque"
 }
