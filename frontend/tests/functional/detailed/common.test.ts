@@ -87,7 +87,7 @@ for (const key of testPages) {
 				for (const editedKey of Object.keys(editedValues)) {
 					replaceValues(
 						history[testInfo.line],
-						editedKey,
+						items[key].build[editedKey],
 						editedKey === 'name'
 							? items[key].build.name + ' edited'
 							: items[key].build.email
