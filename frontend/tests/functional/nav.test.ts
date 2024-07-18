@@ -45,7 +45,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await logedPage.checkForUndefinedText();
 		await expect(sideBar.profileButton).toBeVisible();
 		await sideBar.profileButton.click();
-		await expect(sideBar.morePanel).toHaveAttribute('inert');
+		await expect(sideBar.morePanel).not.toBeVisible();
 		await expect(page).toHaveURL('/my-profile');
 		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
 		await logedPage.checkForUndefinedText();

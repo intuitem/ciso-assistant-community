@@ -254,7 +254,7 @@ erDiagram
         string description
 
         string business_value
-        string category
+        string type
         asset  parent_asset
     }
 
@@ -695,7 +695,7 @@ Projects have the following fields:
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
-Assets are of category primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
+Assets are of type primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
 
 ## Frameworks
 
