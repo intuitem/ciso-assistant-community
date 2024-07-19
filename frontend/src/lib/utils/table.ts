@@ -256,7 +256,7 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
