@@ -1306,7 +1306,7 @@ class RiskAssessment(Assessment):
         verbose_name_plural = _("Risk assessments")
 
     def __str__(self) -> str:
-        return f"{self.project}/{self.name} - {self.version}"
+        return f"{self.name} - {self.version}"
 
     @property
     def path_display(self) -> str:
