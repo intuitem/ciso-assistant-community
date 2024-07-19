@@ -287,6 +287,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_assessment'],
+				label: 'str',
 				extra_fields: [['project', 'str']]
 			})}
 			field="risk_assessment"
@@ -426,7 +427,10 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_scenarios'],
-				extra_fields: [['project', 'str']]
+				extra_fields: [
+					['project', 'str'],
+					['risk_assessment', 'str']
+				]
 			})}
 			field="risk_scenarios"
 			cacheLock={cacheLocks['risk_scenarios']}
@@ -1015,7 +1019,6 @@
 				data-testid="save-button"
 				type="submit"
 				on:click={(event) => {
-					parent.onClose(event);
 					createModalCache.deleteCache(model.urlModel);
 				}}>{m.save()}</button
 			>

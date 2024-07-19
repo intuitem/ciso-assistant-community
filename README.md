@@ -145,6 +145,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
 53. General Data Protection Regulation (GDPR) 🇪🇺
+54. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 
 ### Community contributions
 

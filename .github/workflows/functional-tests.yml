@@ -53,8 +53,8 @@ jobs:
       - name: Install dependencies
         working-directory: ${{ env.working-directory }}
         run: |
-          npm install
-          npm ci
+          npm install -g pnpm
+          pnpm i --frozen-lockfile
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps ${{ matrix.playwright-browser }}
