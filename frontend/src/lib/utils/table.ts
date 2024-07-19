@@ -374,8 +374,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		breadcrumb_link_disabled: true
 	},
 	evidences: {
-		head: ['name', 'file', 'description'],
-		body: ['name', 'attachment', 'description'],
+		head: ['name', 'file', 'size', 'description'],
+		body: ['name', 'attachment', 'size', 'description'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_META, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
 		}
