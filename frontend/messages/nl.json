@@ -613,5 +613,6 @@
 	"progress": "Progressie",
 	"back": "Opbrengst",
 	"duplicate": "Duplicaat",
-	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling"
+	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling",
+	"size": "Grootte"
 }

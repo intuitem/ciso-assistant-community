@@ -613,5 +613,6 @@
 	"progress": "Progressione",
 	"back": "Ritorno",
 	"duplicate": "Duplicare",
-	"duplicateRiskAssessment": "Duplicare la valutazione del rischio"
+	"duplicateRiskAssessment": "Duplicare la valutazione del rischio",
+	"size": "Dimensione"
 }
