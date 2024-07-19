@@ -613,5 +613,6 @@
 	"ssoSettings": "إعدادات تسجيل الدخول الموحد",
 	"ssoSettingsDescription": "قم بتكوين إعدادات تسجيل الدخول الموحد هنا.",
 	"sso": "SSO",
-	"isSso": "هل هو SSO"
+	"isSso": "هل هو SSO",
+	"size": "الحجم"
 }
