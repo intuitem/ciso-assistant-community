@@ -88,6 +88,7 @@
 						<td class="px-2 font-semibold">{m.name()}</td>
 						<td class="px-2 font-semibold">{m.description()}</td>
 						<td class="px-2 font-semibold">{m.category()}</td>
+						<td class="px-2 font-semibold">{m.csfFunction()}</td>
 						<td class="px-2 font-semibold">{m.referenceControl()}</td>
 						<td class="px-2 font-semibold">{m.eta()}</td>
 						<td class="px-2 font-semibold">{m.effort()}</td>
@@ -103,6 +104,7 @@
 							<td class="px-2 py-3">{measure.name ?? '--'}</td>
 							<td class="px-2 py-3 max-w-md">{measure.description ?? '--'}</td>
 							<td class="px-2 py-3">{measure.category ?? '--'}</td>
+							<td class="px-2 py-3">{measure.csf_function ?? '--'}</td>
 							<td class="px-2 py-3"
 								>{measure.reference_control ? measure.reference_control.str : '--'}</td
 							>

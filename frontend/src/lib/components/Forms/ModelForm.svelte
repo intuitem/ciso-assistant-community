@@ -129,7 +129,7 @@
 									return currentData; // Keep the current values in the edit form.
 								}
 								updated_fields.add('reference_control');
-								return { ...currentData, category: r.category };
+								return { ...currentData, category: r.category, csf_function: r.csf_function };
 							});
 						});
 				}
@@ -322,6 +322,14 @@
 		{/if}
 		<Select
 			{form}
+			options={model.selectOptions['csf_function']}
+			field="csf_function"
+			label={m.csfFunction()}
+			cacheLock={cacheLocks['csf_function']}
+			bind:cachedValue={formDataCache['csf_function']}
+		/>
+		<Select
+			{form}
 			options={model.selectOptions['status']}
 			field="status"
 			label={m.status()}
@@ -454,6 +462,14 @@
 			label={m.category()}
 			cacheLock={cacheLocks['category']}
 			bind:cachedValue={formDataCache['category']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['csf_function']}
+			field="csf_function"
+			label={m.csfFunction()}
+			cacheLock={cacheLocks['csf_function']}
+			bind:cachedValue={formDataCache['csf_function']}
 		/>
 		<TextArea
 			{form}

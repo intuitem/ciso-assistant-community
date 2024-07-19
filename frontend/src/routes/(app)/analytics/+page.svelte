@@ -42,6 +42,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csf_function',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
 			eta: 'eta',
@@ -50,6 +51,7 @@
 		body: tableSourceMapper(data.measures, [
 			'name',
 			'category',
+			'csf_function',
 			'folder',
 			'ranking_score',
 			'eta',
@@ -62,6 +64,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csf_function',
 			folder: 'domain',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
@@ -70,6 +73,7 @@
 		body: tableSourceMapper(data.measures_to_review, [
 			'name',
 			'category',
+			'csf_function',
 			'folder',
 			'eta',
 			'expiry_date',

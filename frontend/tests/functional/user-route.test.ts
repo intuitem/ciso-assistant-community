@@ -88,6 +88,7 @@ test('user usual routine actions are working correctly', async ({
 			name: vars.referenceControlName,
 			description: vars.description,
 			category: 'Physical',
+			csf_function: 'protect',
 			provider: 'Test provider',
 			folder: vars.folderName
 		});
@@ -104,6 +105,7 @@ test('user usual routine actions are working correctly', async ({
 			name: vars.appliedControlName,
 			description: vars.description,
 			category: 'Technical',
+			csf_function: 'protect',
 			status: 'Planned',
 			eta: '2025-01-01',
 			link: 'https://intuitem.com/',

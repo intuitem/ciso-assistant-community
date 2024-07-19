@@ -1,3 +1,5 @@
+// schema for the validation of forms
+
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -109,6 +111,7 @@ export const RiskScenarioSchema = baseNamedObject({
 
 export const AppliedControlSchema = baseNamedObject({
 	category: z.string().optional().nullable(),
+	csf_function: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
@@ -120,6 +123,7 @@ export const AppliedControlSchema = baseNamedObject({
 });
 
 export const PolicySchema = baseNamedObject({
+	csf_function: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
@@ -141,6 +145,7 @@ export const RiskAcceptanceSchema = baseNamedObject({
 export const ReferenceControlSchema = baseNamedObject({
 	provider: z.string().optional().nullable(),
 	category: z.string().optional().nullable(),
+	csf_function: z.string().optional().nullable(),
 	folder: z.string(),
 	ref_id: z.string().optional().nullable(),
 	annotation: z.string().optional().nullable()
