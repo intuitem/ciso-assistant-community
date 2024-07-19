@@ -1,3 +1,5 @@
+// define the content of forms
+
 import type { urlModel } from './types';
 import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
@@ -229,6 +231,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
@@ -244,11 +247,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
-		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'category' },
+			{ field: 'csf_function' },
+			{ field: 'effort' }
+		],
 		filters: [
 			{ field: 'reference_control' },
 			{ field: 'status' },
 			{ field: 'category' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'folder' }
 		]
@@ -264,9 +273,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'effort' }],
+		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },
+			{ field: 'csf_function' },
 			{ field: 'status' },
 			{ field: 'effort' },
 			{ field: 'folder' }
@@ -296,7 +306,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
-		selectFields: [{ field: 'category' }],
+		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]
 	},
 	assets: {

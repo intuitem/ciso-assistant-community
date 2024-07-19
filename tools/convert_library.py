@@ -64,6 +64,7 @@ Conventions:
             - name
             - description
             - category (policy/process/techncial/physical).
+            - csf_function (govern/identitfy/protect/detect/respond/recover).
             - annotation
     For risk matrices:
         The first line is a header, with the following mandatory fields:
@@ -454,6 +455,9 @@ for tab in dataframe:
                 category = (
                     row[header["category"]].value if "category" in header else None
                 )
+                csf_function = (
+                    row[header["csf_function"]].value if "csf_function" in header else None
+                )
                 annotation = (
                     row[header["annotation"]].value if "annotation" in header else None
                 )
@@ -465,6 +469,8 @@ for tab in dataframe:
                     current_function["name"] = name
                 if category:
                     current_function["category"] = category
+                if csf_function:
+                    current_function["csf_function"] = csf_function
                 if description:
                     current_function["description"] = description
                 if annotation:

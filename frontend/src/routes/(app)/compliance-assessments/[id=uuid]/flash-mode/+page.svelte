@@ -55,7 +55,6 @@
 
 	// Function to update the result of the current item
 	function updateResult(event) {
-		console.log(event.target.value);
 		data.requirement_assessments[currentIndex].result = event.target.value;
 		const form = document.getElementById('flashModeForm');
 		const formData = {

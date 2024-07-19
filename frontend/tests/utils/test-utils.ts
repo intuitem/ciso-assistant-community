@@ -212,6 +212,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
+			{ name: 'csf_function', type: type.SELECT },
 			{ name: 'provider', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
 		]);
@@ -223,6 +224,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
+			{ name: 'csf_function', type: type.SELECT },
 			{ name: 'status', type: type.SELECT },
 			{ name: 'eta', type: type.DATE },
 			{ name: 'expiry_date', type: type.DATE },
@@ -419,6 +421,7 @@ export class TestContent {
 					name: vars.referenceControlName,
 					description: vars.description,
 					category: 'Technical',
+					csf_function: 'protect',
 					provider: 'Test provider',
 					folder: vars.folderName
 				},
@@ -426,6 +429,7 @@ export class TestContent {
 					name: '',
 					description: '',
 					category: 'Physical',
+					csf_function: 'detect',
 					provider: ''
 				}
 			},
@@ -436,6 +440,7 @@ export class TestContent {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl.name,
 						category: vars.referenceControl.category,
+						csf_function: vars.referenceControl.csf_function,
 						request: {
 							url: 'reference-controls'
 						}
@@ -448,12 +453,14 @@ export class TestContent {
 					link: 'https://intuitem.com/',
 					effort: 'Large',
 					folder: vars.folderName,
-					category: vars.referenceControl.category
+					category: vars.referenceControl.category,
+					csf_function: vars.referenceControl.csf_function
 				},
 				editParams: {
 					reference_control: {
 						value: 'Global/' + vars.referenceControl2.name,
 						category: vars.referenceControl2.category,
+						csf_function: vars.referenceControl2.csf_function,
 						request: {
 							url: 'reference-controls'
 						}
@@ -465,7 +472,8 @@ export class TestContent {
 					expiry_date: '2026-02-25',
 					link: 'https://intuitem.com/community/',
 					effort: 'Medium',
-					category: vars.referenceControl2.category
+					category: vars.referenceControl2.category,
+					csf_function: vars.referenceControl2.csf_function
 				}
 			},
 			complianceAssessmentsPage: {

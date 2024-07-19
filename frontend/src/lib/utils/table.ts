@@ -1,3 +1,5 @@
+// description of the columns for each ListView
+
 import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
@@ -121,7 +123,6 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		console.log(row);
 		return row.provider;
 	},
 	extraProps: {
@@ -217,6 +218,15 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
+const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.csf_function,
+	extraProps: {
+		defaultOptionName: 'csf_function' // Make translations
+	},
+	alwaysDisplay: true
+};
+
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
 	component: CheckboxFilter,
 	getColumn: row => {
@@ -300,28 +310,30 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control'],
+		head: ['name', 'description', 'category', 'csf_function', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'category', 'csf_function', 'eta', 'folder', 'reference_control'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: STATUS_FILTER,
-			category: CATEGORY_FILTER
+			category: CATEGORY_FILTER,
+			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
 	policies: {
-		head: ['name', 'description', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'eta', 'folder', 'reference_control'],
+		head: ['name', 'description', 'csf_function', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'csf_function', 'eta', 'folder', 'reference_control'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
 	},
 	'reference-controls': {
-		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
+		head: ['ref', 'name', 'description', 'category', 'csf_function', 'provider', 'domain'],
+		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
-			category: CATEGORY_FILTER
+			category: CATEGORY_FILTER,
+			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
 	assets: {

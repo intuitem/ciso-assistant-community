@@ -30,16 +30,6 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
-
-
-def match_urn(urn_string):
-    match = re.match(URN_REGEX, urn_string)
-    if match:
-        return match.groups()  # Returns all captured groups from the regex match
-    else:
-        return None
-
 
 class RequirementNodeImporter:
     REQUIRED_FIELDS = {"urn"}
@@ -318,6 +308,9 @@ class ThreatImporter:
 class ReferenceControlImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in ReferenceControl.CATEGORY)
+    CSF_FUNCTIONS = set(
+        _csf_function[0] for _csf_function in ReferenceControl.CSF_FUNCTION
+    )
 
     def __init__(self, reference_control_data: dict):
         self.reference_control_data = reference_control_data
@@ -334,6 +327,14 @@ class ReferenceControlImporter:
                     category, ", ".join(ReferenceControlImporter.CATEGORIES)
                 )
 
+        if (
+            csf_function := self.reference_control_data.get("csf_function")
+        ) is not None:
+            if csf_function not in ReferenceControlImporter.CSF_FUNCTIONS:
+                return "Invalid CSF function '{}', the function must be among the following list : {}".format(
+                    csf_function, ", ".join(ReferenceControlImporter.CSF_FUNCTIONS)
+                )
+
     def import_reference_control(self, library_object: LoadedLibrary):
         ReferenceControl.objects.create(
             library=library_object,
@@ -344,6 +345,7 @@ class ReferenceControlImporter:
             provider=library_object.provider,
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
+            csf_function=self.reference_control_data.get("csf_function"),
             is_published=True,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?

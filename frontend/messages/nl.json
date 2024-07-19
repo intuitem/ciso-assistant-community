@@ -92,6 +92,7 @@
 	"firstName": "Voornaam",
 	"lastName": "Achternaam",
 	"category": "Categorie",
+	"csfFunction": "functie",
 	"eta": "ETA",
 	"referenceControl": "Referentiecontrole",
 	"appliedControl": "Toegepaste controle",
