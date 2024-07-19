@@ -1,0 +1,1585 @@
+urn: urn:intuitem:risk:library:cra-resolution-annexes
+locale: en
+ref_id: CRA-resolution-annexes
+name: Cyber Resilience Act
+description: "European Parliament legislative resolution of 12 March 2024 on the proposal\
+  \ for a regulation of the European Parliament and of the Council on horizontal cybersecurity\
+  \ requirements for products with digital elements and amending Regulation (EU) 2019/1020\
+  \ (COM(2022)0454 \u2013 C9-0308/2022 \u2013 2022/0272(COD))\nhttps://www.europarl.europa.eu/doceo/document/TA-9-2024-0130_EN.pdf"
+copyright: European Union law
+version: 2
+provider: EU
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cra-resolution-annexes
+    ref_id: CRA-resolution-annexes
+    name: Cyber Resilience Act
+    description: "European Parliament legislative resolution of 12 March 2024 on the\
+      \ proposal for a regulation of the European Parliament and of the Council on\
+      \ horizontal cybersecurity requirements for products with digital elements and\
+      \ amending Regulation (EU) 2019/1020 (COM(2022)0454 \u2013 C9-0308/2022 \u2013\
+      \ 2022/0272(COD))\nhttps://www.europarl.europa.eu/doceo/document/TA-9-2024-0130_EN.pdf"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: ANNEX I
+      description: ESSENTIAL REQUIREMENTS
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1
+      ref_id: '1.1'
+      name: Part I
+      description: Cybersecurity requirements relating to the properties of products
+        with digital elements
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1
+      ref_id: 1.1.1
+      description: Products with digital elements shall be designed, developed and
+        produced in such a way that they ensure an appropriate level of cybersecurity
+        based on the risks;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1
+      ref_id: 1.1.2
+      description: 'On the basis of the cybersecurity risk assessment referred to
+        in Article 10(2) and where applicable, products with digital elements shall:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.a
+      description: be made available on the market without known exploitable vulnerabilities;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.b
+      description: be made available on the market with a secure by default configuration,
+        unless otherwise agreed between manufacturer and business user in relation
+        to a tailor-made product with digital elements, including the possibility
+        to reset the product to its original state;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.c
+      description: ensure that vulnerabilities can be addressed through security updates,
+        including, where applicable, through automatic security updates that are installed
+        within an appropriate timeframe enabled as a default setting, with a clear
+        and easy-to-use opt-out mechanism, through the notification of available updates
+        to users, and the option to temporarily postpone them;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.d
+      description: ensure protection from unauthorised access by appropriate control
+        mechanisms, including but not limited to authentication, identity or access
+        management systems, and report on possible unauthorised access;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.e
+      description: protect the confidentiality of stored, transmitted or otherwise
+        processed data, personal or other, such as by encrypting relevant data at
+        rest or in transit by state of the art mechanisms, and by using other technical
+        means;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.f
+      description: protect the integrity of stored, transmitted or otherwise processed
+        data, personal or other, commands, programs and configuration against any
+        manipulation or modification not authorised by the user, and report on corruptions;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.g
+      description: process only data, personal or other, that are adequate, relevant
+        and limited to what is necessary in relation to the intended purpose of the
+        product with digital elements (minimisation of data);
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.h
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.h
+      description: protect the availability of essential and basic functions, also
+        after an incident, including through resilience and mitigation measures against
+        denial-of-service attacks;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.i
+      description: minimise the negative impact by the products themselves or connected
+        devices on the availability of services provided by other devices or networks;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.j
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.j
+      description: be designed, developed and produced to limit attack surfaces, including
+        external interfaces;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.k
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.k
+      description: be designed, developed and produced to reduce the impact of an
+        incident using appropriate exploitation mitigation mechanisms and techniques;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.l
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.l
+      description: provide security related information by recording and monitoring
+        relevant internal activity, including the access to or modification of data,
+        services or functions, with an opt-out mechanism for the user;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2.m
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.1.2
+      ref_id: 1.1.2.m
+      description: provide the possibility for users to securely and easily remove
+        on a permanent basis all data and settings and, where such data can be transferred
+        to other products or systems, ensure that this is done in a secure manner.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1
+      ref_id: '1.2'
+      name: Part II
+      description: "Vulnerability\_handling\_requirements"
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2
+      description: 'Manufacturers of the products with digital elements shall:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.1
+      description: identify and document vulnerabilities and components contained
+        in products with digital elements, including by drawing up a software bill
+        of materials in a commonly used and machine-readable format covering at the
+        very least the top-level dependencies of the products;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.2
+      description: in relation to the risks posed to products with digital elements,
+        address and remediate vulnerabilities without delay, including by providing
+        security updates; where technically feasible, new security updates shall be
+        provided separately from functionality updates;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.3
+      description: apply effective and regular tests and reviews of the security of
+        the product with digital elements;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.4
+      description: once a security update has been made available, share and publicly
+        disclose information about fixed vulnerabilities, including a description
+        of the vulnerabilities, information allowing users to identify the product
+        with digital elements affected, the impacts of the vulnerabilities, their
+        severity and clear and accessible information helping users to remediate the
+        vulnerabilities; in duly justified cases, where manufacturers consider the
+        security risks of publication to outweigh the security benefits, they may
+        delay making public information regarding a fixed vulnerability until after
+        users have been given the possibility to apply the relevant patch;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.5
+      description: put in place and enforce a policy on coordinated vulnerability
+        disclosure;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.6
+      description: take measures to facilitate the sharing of information about potential
+        vulnerabilities in their product with digital elements as well as in third
+        party components contained in that product, including by providing a contact
+        address for the reporting of the vulnerabilities discovered in the product
+        with digital elements;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.7
+      description: provide for mechanisms to securely distribute updates for products
+        with digital elements to ensure that vulnerabilities are fixed or mitigated
+        in a timely manner and, where applicable for security updates, in an automatic
+        manner;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:1.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node20
+      ref_id: 1.2.8
+      description: ensure that, where security updates are available to address identified
+        security issues, they are disseminated without delay and, unless otherwise
+        agreed between a manufacturer and a business user in relation to a tailor-
+        made product with digital elements, free of charge, accompanied by advisory
+        messages providing users with the relevant information, including on potential
+        action to be taken.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: ANNEX II
+      description: INFORMATION AND INSTRUCTIONS TO THE USER
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2
+      description: 'As a minimum, the product with digital elements shall be accompanied
+        by:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.1'
+      description: the name, registered trade name or registered trademark of the
+        manufacturer, and the postal address, the email address or other digital contact
+        as well as, where available, the website at which the manufacturer can be
+        contacted;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.2'
+      description: "the single point of contact where information about vulnerabilities\
+        \ of the product with digital elements can be reported and received, and where\
+        \ the manufacturer\u2019s policy on coordinated vulnerability disclosure can\
+        \ be found;"
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.3'
+      description: name and type and any additional information enabling the unique
+        identification of the product with digital elements ;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.4'
+      description: "the intended purpose of the product with digital elements, including\
+        \ the security environment provided by the manufacturer, as well as the product\u2019\
+        s essential functionalities and information about the security properties;"
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.5'
+      description: 'any known or foreseeable circumstance, related to the use of the
+        product with digital elements in accordance with its intended purpose or under
+        conditions of reasonably foreseeable misuse, which may lead to significant
+        cybersecurity risks; '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.6'
+      description: 'where applicable, the internet address at which the EU declaration
+        of conformity can be accessed; '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.7'
+      description: the type of technical security support offered by the manufacturer
+        and the end-date of the support period during which users can expect vulnerabilities
+        to be handled and to receive security updates;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.8'
+      description: 'detailed instructions or an internet address referring to such
+        detailed instructions and information on:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      ref_id: 2.8.a
+      description: the necessary measures during initial commissioning and throughout
+        the lifetime of the product with digital elements to ensure its secure use;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      ref_id: 2.8.b
+      description: how changes to the product with digital elements can affect the
+        security of data;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      ref_id: 2.8.c
+      description: how security-relevant updates can be installed;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      ref_id: 2.8.d
+      description: the secure decommissioning of the product with digital elements,
+        including information on how user data can be securely removed;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      ref_id: 2.8.e
+      description: how the default setting enabling the automatic installation of
+        security updates, as required by Annex I, Part I, point (c), can be turned
+        off;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.8
+      ref_id: 2.8.f
+      description: where the product with digital elements is intended for integration
+        into other products with digital elements, the information necessary for the
+        integrator to comply with the essential requirements set out in Annex I and
+        the documentation requirements set out in Annex VII.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node30
+      ref_id: '2.9'
+      description: If the manufacturer decides to make available the software bill
+        of materials to the user, information on where the software bill of materials
+        can be accessed.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: ANNEX III
+      description: IMPORTANT PRODUCTS WITH DIGITAL ELEMENTS
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3
+      ref_id: '3.1'
+      name: Class I
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.1
+      description: Identity management systems  and privileged access management software
+        and hardware, including authentication and access control readers, including
+        biometric readers;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.2
+      description: Standalone and embedded browsers;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.3
+      description: Password managers;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.4
+      description: Software that searches for, removes, or quarantines malicious software;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.5
+      description: Products with digital elements with the function of virtual private
+        network (VPN);
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.6
+      description: Network management systems;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.7
+      description: Security information and event management (SIEM) systems;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.8
+      description: Boot managers;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.9
+      description: Public key infrastructure and digital certificate issuance software;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.9'
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.9'
+      description: Physical and virtual network interfaces;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.10
+      description: Operating systems ;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.11
+      description: Routers, modems intended for the connection to the internet, and
+        switches ;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.12
+      description: Microprocessors with security-related functionalities;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.13
+      description: Microcontrollers with security-related functionalities;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.14
+      description: Application specific integrated circuits (ASIC) and field-programmable
+        gate arrays (FPGA) with security-related functionalities;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.15
+      description: Smart home general purpose virtual assistants;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.16
+      description: Smart home products with security functionalities, including smart
+        door locks, security cameras, baby monitoring systems and alarm systems;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.17
+      description: Internet connected toys covered by Directive 2009/48/EC of the
+        European Parliament and of the Council1 that have social interactive features
+        (e.g. speaking or filming) or that have location tracking features;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.1
+      ref_id: 3.1.18
+      description: Personal wearable products to be worn or placed on a human body
+        that have a health monitoring (such as tracking) purpose and to which Regulation
+        (EU) 2017/745 or Regulation (EU) 2017/746 do not apply, or personal wearable
+        products that are intended for the use by and for children.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3
+      ref_id: '3.2'
+      name: Class II
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
+      ref_id: 3.2.1
+      description: Hypervisors and container runtime systems that support virtualised
+        execution of operating systems and similar environments;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
+      ref_id: 3.2.2
+      description: Firewalls, intrusion detection and prevention systems ;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
+      ref_id: 3.2.3
+      description: Tamper-resistant microprocessors;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:3.2
+      ref_id: 3.2.4
+      description: Tamper-resistant microcontrollers.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: ANNEX IV
+      description: CRITICAL PRODUCTS WITH DIGITAL ELEMENTS
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
+      ref_id: '4.1'
+      description: Hardware Devices with Security Boxes;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
+      ref_id: '4.2'
+      description: Smart meter gateways within smart metering systems as defined in
+        Article 2(23) of Directive (EU) 2019/944 of the European Parliament and of
+        the Council and other devices for advanced security purposes, including for
+        secure cryptoprocessing;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:4
+      ref_id: '4.3'
+      description: Smartcards or similar devices, including secure elements.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: ANNEX V
+      description: EU DECLARATION OF CONFORMITY
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5
+      description: 'The EU declaration of conformity referred to in Article 28, shall
+        contain all of the following information:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.1'
+      description: Name and type and any additional information enabling the unique
+        identification of the product with digital elements;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.2'
+      description: Name and address of the manufacturer or its authorised representative;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.3'
+      description: A statement that the EU declaration of conformity is issued under
+        the sole responsibility of the provider;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.4'
+      description: Object of the declaration (identification of the product with digital
+        elements allowing traceability, which may include a photograph, where appropriate);
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.5'
+      description: A statement that the object of the declaration described above
+        is in conformity with the relevant Union harmonisation legislation;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.6'
+      description: References to any relevant harmonised standards used or any other
+        common specification or cybersecurity certification in relation to which conformity
+        is declared;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.7'
+      description: Where applicable, the name and number of the notified body, a description
+        of the conformity assessment procedure performed and identification of the
+        certificate issued;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node77
+      ref_id: '5.8'
+      description: 'Additional information:
+
+        Signed for and on behalf of:....................................... (place
+        and date of issue):
+
+        (name, function) (signature):'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: ANNEX VI
+      description: SIMPLIFIED EU DECLARATION OF CONFORMITY
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node87
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
+      description: 'The simplified EU declaration of conformity referred to in Article
+        13(20) shall be provided as follows:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node88
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
+      description: Hereby, [Name of manufacturer] declares that the product with digital
+        elements type [designation of type of product with digital element] is in
+        compliance with Regulation (EU) .../... of the European Parliament and of
+        the Council1.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node89
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:6
+      description: 'The full text of the EU declaration of conformity is available
+        at the following internet address:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: ANNEX  VII
+      description: CONTENTS OF THE TECHNICAL DOCUMENTATION
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7
+      description: 'The technical documentation referred to in Article 31 shall contain
+        at least the following information, as applicable to the relevant product
+        with digital elements:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.1'
+      description: 'a general description of the product with digital elements, including:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      ref_id: 7.1.a
+      description: its intended purpose;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      ref_id: 7.1.b
+      description: versions of software affecting compliance with essential requirements;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      ref_id: 7.1.c
+      description: where the product with digital elements is a hardware product,
+        photographs or illustrations showing external features, marking and internal
+        layout;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.1
+      ref_id: 7.1.d
+      description: user information and instructions as set out in Annex II;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.2'
+      description: 'a description of the design, development and production of the
+        product with digital
+
+        elements and vulnerability handling processes, including:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      ref_id: 7.2.a
+      description: necessary information on the design and development of the product
+        with digital elements, including, where applicable, drawings and schemes and
+        a description of the system architecture explaining how software components
+        build on or feed into each other and integrate into the overall processing;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      ref_id: 7.2.b
+      description: necessary information and specifications of the vulnerability handling
+        processes put in place by the manufacturer, including the software bill of
+        materials, the coordinated vulnerability disclosure policy, evidence of the
+        provision of a contact address for the reporting of the vulnerabilities and
+        a description of the technical solutions chosen for the secure distribution
+        of updates;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.2
+      ref_id: 7.2.c
+      description: necessary information and specifications of the production and
+        monitoring processes of the product with digital elements and the validation
+        of those processes;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.3'
+      description: an assessment of the cybersecurity risks against which the product
+        with digital elements is designed, developed, produced, delivered and maintained
+        as laid down in Article 13 of this Regulation, including how the essential
+        requirements set out in Annex I, Part I, are applicable;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.4'
+      description: relevant information that was taken into account to determine the
+        support period as referred to in Article 13(8) of the product with digital
+        elements;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.5'
+      description: a list of the harmonised standards applied in full or in part the
+        references of which have been published in the Official Journal of the European
+        Union, common specifications as set out in Article 27 of this Regulation or
+        European cybersecurity certification schemes adopted pursuant to Regulation
+        (EU) 2019/881 pursuant to Article 27(8) of this Regulation, and, where those
+        harmonised standards, common specifications or European cybersecurity certification
+        schemes have not been applied, descriptions of the solutions adopted to meet
+        the essential requirements set out in of Annex I, Parts I and II, including
+        a list of other relevant technical specifications applied. In the event of
+        partly applied harmonised standards, common specifications or European cybersecurity
+        certification schemes, the technical documentation shall specify the parts
+        which have been applied;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.6'
+      description: reports of the tests carried out to verify the conformity of the
+        product with digital elements and of the vulnerability handling processes
+        with the applicable essential requirements as set out in Annex I, Parts I
+        and II;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.7'
+      description: a copy of the EU declaration of conformity;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:7.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node91
+      ref_id: '7.8'
+      description: 'where applicable, the software bill of materials, further to a
+        reasoned request from a market surveillance authority provided that it is
+        necessary in order for this authority to be able to check compliance with
+        the essential requirements set out in Annex I. '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: ANNEX  VIII
+      description: CONFORMITY ASSESSMENT PROCEDURES
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
+      ref_id: '8.1'
+      name: Part I
+      description: Conformity Assessment procedure based on internal control (based
+        on Module A)
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      ref_id: 8.1.1
+      description: Internal control is the conformity assessment procedure whereby
+        the manufacturer fulfils the obligations laid down in points 2, 3 and 4, and
+        ensures and declares on its sole responsibility that the products with digital
+        elements satisfy all the essential requirements set out in Annex I, Part I,
+        and the manufacturer meets the essential requirements set out in Annex I,
+        Part II.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      ref_id: 8.1.2
+      description: 'The manufacturer shall draw up the technical documentation described
+        in Annex VII. '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      ref_id: 8.1.3
+      description: "Design, development, production and vulnerability handling of\
+        \ products with digital elements \nThe manufacturer shall take all measures\
+        \ necessary so that the design, development, production and vulnerability\
+        \ handling processes and their monitoring ensure compliance of the manufactured\
+        \ or developed products with digital elements and of the processes put in\
+        \ place by the manufacturer with the essential requirements set out in Annex\
+        \ I, Parts I and II."
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      ref_id: 8.1.4
+      name: Conformity marking and declaration of conformity
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
+      ref_id: 8.1.4.1
+      description: The manufacturer shall affix the CE marking to each individual
+        product with digital elements that satisfies the applicable requirements of
+        this Regulation.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.4
+      ref_id: 8.1.4.2
+      description: The manufacturer shall draw up a written EU declaration of conformity
+        for each product with digital elements in accordance with Article 28 and keep
+        it together with the technical documentation at the disposal of the national
+        authorities for 10 years after the product with digital elements has been
+        placed on the market or for the support period, whichever is longer. The EU
+        declaration of conformity shall identify the product with digital elements
+        for which it has been drawn up. A copy of the EU declaration of conformity
+        shall be made available to the relevant authorities upon request.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      ref_id: 8.1.5
+      description: Authorised representatives
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node116
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.1
+      description: "The manufacturer\u2019s obligations set out in point 4 may be\
+        \ fulfilled by its authorised representative, on its behalf and under its\
+        \ responsibility, provided that they are specified in the mandate."
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
+      ref_id: '8.2'
+      name: Part II
+      description: 'EU-type examination (based on Module B) '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.1
+      description: 'EU-type examination is the part of a conformity assessment procedure
+        in which a notified body examines the technical design and development of
+        a product with digital elements and the vulnerability handling processes put
+        in place by the manufacturer, and attests that a product with digital elements
+        meets the essential requirements set out in Annex I, Part I, and that the
+        manufacturer meets the essential requirements set out in Annex I, Part II. '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.2
+      description: EU-type examination shall be carried out by assessment of the adequacy
+        of the technical design and development of the product with digital elements
+        through examination of the technical documentation and supporting evidence
+        referred to in point 3, plus examination of specimens of one or more critical
+        parts of the product (combination of production type and design type).
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.3
+      description: 'The manufacturer shall lodge an application for EU-type examination
+        with a single notified body of its choice. '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      description: 'The application shall include: '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
+      ref_id: 8.2.3.1
+      description: the name and address of the manufacturer and, if the application
+        is lodged by the authorised representative, its name and address as well;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
+      ref_id: 8.2.3.2
+      description: a written declaration that the same application has not been lodged
+        with any other notified body;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
+      ref_id: 8.2.3.3
+      description: the technical documentation, which shall make it possible to assess
+        the conformity of the product with digital elements with the applicable essential
+        requirements as set out in Annex I, Part I, and the manufacturer's vulnerability
+        handling processes set out in Annex I, Part II, and shall include an adequate
+        analysis and assessment of the risks. The technical documentation shall specify
+        the applicable requirements and cover, as far as relevant for the assessment,
+        the design, manufacture and operation of the product with digital elements.
+        The technical documentation shall contain, wherever applicable, at least the
+        elements set out in Annex VII;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node121
+      ref_id: 8.2.3.4
+      description: the supporting evidence for the adequacy of the technical design
+        and development solutions and vulnerability handling processes. This supporting
+        evidence shall mention any documents that have been used, in particular where
+        the relevant harmonised standards or technical specifications have not been
+        applied in full. The supporting evidence shall include, where necessary, the
+        results of tests carried out by the appropriate laboratory of the manufacturer,
+        or by another testing laboratory on its behalf and under its responsibility.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.4
+      description: 'The notified body shall:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
+      ref_id: 8.2.4.1
+      description: examine the technical documentation and supporting evidence to
+        assess the adequacy of the technical design and development of the product
+        with digital elements with the essential requirements set out in Annex I,
+        Part I, and of the vulnerability handling processes put in place by the manufacturer
+        with the essential requirements set out in Annex I, Part II;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
+      ref_id: 8.2.4.2
+      description: verify that specimens have been developed or manufactured in conformity
+        with the technical documentation, and identify the elements which have been
+        designed and developed in accordance with the applicable provisions of the
+        relevant harmonised standards or technical specifications, as well as the
+        elements which have been designed and developed without applying the relevant
+        provisions of those standards;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
+      ref_id: 8.2.4.3
+      description: carry out appropriate examinations and tests, or have them carried
+        out, to check that, where the manufacturer has chosen to apply the solutions
+        in the relevant harmonised standards or technical specifications for the requirements
+        set out in Annex I, they have been applied correctly;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
+      ref_id: 8.2.4.4
+      description: carry out appropriate examinations and tests, or have them carried
+        out, to check that, where the solutions in the relevant harmonised standards
+        or technical specifications for the requirements set out in Annex I have not
+        been applied, the solutions adopted by the manufacturer meet the corresponding
+        essential requirements;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.4
+      ref_id: 8.2.4.5
+      description: agree with the manufacturer on a location where the examinations
+        and tests will be carried out.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.5
+      description: "The notified body shall draw up an evaluation report that records\
+        \ the activities undertaken in accordance with point 4 and their outcomes.\
+        \ Without prejudice to its obligations vis-\xE0-vis the notifying authorities,\
+        \ the notified body shall release the content of that report, in full or in\
+        \ part, only with the agreement of the manufacturer."
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.6
+      description: Where the type and the vulnerability handling processes meet the
+        essential requirements set out in Annex I, the notified body shall issue an
+        EU-type examination certificate to the manufacturer. The certificate shall
+        contain the name and address of the manufacturer, the conclusions of the examination,
+        the conditions (if any) for its validity and the necessary data for identification
+        of the approved type and vulnerability handling processes. The certificate
+        may have one or more annexes attached.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node134
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      description: The certificate and its annexes shall contain all relevant information
+        to allow the conformity of manufactured or developed products with digital
+        elements with the examined type and vulnerability handling processes to be
+        evaluated and to allow for in-service control.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node135
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      description: Where the type and the vulnerability handling processes do not
+        satisfy the applicable essential requirements set out in Annex I, the notified
+        body shall refuse to issue an EU-type examination certificate and shall inform
+        the applicant accordingly, giving detailed reasons for its refusal.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.7
+      description: The notified body shall keep itself apprised of any changes in
+        the generally acknowledged state of the art which indicate that the approved
+        type and the vulnerability handling processes may no longer comply with the
+        applicable essential requirements set out in Annex I to this Regulation, and
+        shall determine whether such changes require further investigation. If so,
+        the notified body shall inform the manufacturer accordingly.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node137
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      description: The manufacturer shall inform the notified body that holds the
+        technical documentation relating to the EU-type examination certificate of
+        all modifications to the approved type and the vulnerability handling processes
+        that may affect the conformity with the essential requirements set out in
+        Annex I, or the conditions for validity of the certificate. Such modifications
+        shall require additional approval in the form of an addition to the original
+        EU-type examination certificate.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.8
+      description: The notified body shall carry out periodic audits to ensure that
+        the vulnerability handling processes as set out in Annex I, Part II, are implemented
+        adequately.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.9
+      description: Each notified body shall inform its notifying authorities concerning
+        the EU-type examination certificates and any additions thereto which it has
+        issued or withdrawn, and shall, periodically or upon request, make available
+        to its notifying authorities the list of certificates and any additions thereto
+        refused, suspended or otherwise restricted.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node140
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      description: Each notified body shall inform the other notified bodies concerning
+        the EU-type examination certificates and any additions thereto which it has
+        refused, withdrawn, suspended or otherwise restricted, and, upon request,
+        concerning the certificates and additions thereto which it has issued.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node141
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      description: The Commission, the Member States and the other notified bodies
+        may, on request, obtain a copy of the EU-type examination certificates and
+        any additions thereto. On request, the Commission and the Member States may
+        obtain a copy of the technical documentation and the results of the examinations
+        carried out by the notified body. The notified body shall keep a copy of the
+        EU-type examination certificate, its annexes and additions, as well as the
+        technical file including the documentation submitted by the manufacturer,
+        until the expiry of the validity of the certificate.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.10
+      description: The manufacturer shall keep a copy of the EU-type examination certificate,
+        its annexes and additions together with the technical documentation at the
+        disposal of the national authorities for 10 years after the product with digital
+        elements has been placed on the market or for the support period, whichever
+        is longer.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.2
+      ref_id: 8.2.11
+      description: The manufacturer's authorised representative may lodge the application
+        referred to in point 3 and fulfil the obligations set out in points 7 and
+        10, provided that they are specified in the mandate.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
+      ref_id: '8.3'
+      name: Part III
+      description: ' Conformity to type based on internal production control (based
+        on Module C)'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
+      ref_id: 8.3.1
+      description: Conformity to type based on internal production control is the
+        part of a conformity assessment procedure whereby the manufacturer fulfils
+        the obligations laid down in points 2 and 3, and ensures and declares that
+        the products with digital elements concerned are in conformity with the type
+        described in the EU-type examination certificate and satisfy the essential
+        requirements set out in Annex I, Part I, and that the manufacturer meets the
+        essential requirements set out in Annex I, Part II.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
+      ref_id: 8.3.2
+      name: Production
+      description: The manufacturer shall take all measures necessary so that the
+        production and its monitoring ensure conformity of the manufactured products
+        with digital elements with the approved type described in the EU-type examination
+        certificate and with the essential requirements as set out in Annex I, Part
+        I, and ensures that the manufacturer meets the essential requirements set
+        out in Annex I, Part II.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
+      ref_id: 8.3.3
+      name: Conformity marking and declaration of conformity
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3
+      ref_id: 8.3.3.1
+      description: The manufacturer shall affix the CE marking to each individual
+        product with digital elements that is in conformity with the type described
+        in the EU-type examination certificate and satisfies the applicable requirements
+        of the legislative instrument.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.3
+      ref_id: 8.3.3.2
+      description: The manufacturer shall draw up a written declaration of conformity
+        for a product model and keep it at the disposal of the national authorities
+        for 10 years after the product with digital elements has been placed on the
+        market or for the support period, whichever is longer. The declaration of
+        conformity shall identify the product model for which it has been drawn up.
+        A copy of the declaration of conformity shall be made available to the relevant
+        authorities upon request.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.3
+      ref_id: 8.3.4
+      name: Authorised representative
+      description: The manufacturer's obligations set out in point 3 may be fulfilled
+        by its authorised representative, on its behalf and under its responsibility,
+        provided that they are specified in the mandate.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8
+      ref_id: '8.4'
+      name: Part IV
+      description: Conformity based on full quality assurance (based on Module H)
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.1
+      description: Conformity based on full quality assurance is the conformity assessment
+        procedure whereby the manufacturer fulfils the obligations laid down in points
+        2 and 5, and ensures and declares on its sole responsibility that the products
+        with digital elements or product categories concerned satisfy the essential
+        requirements set out in Annex I, Part I, and that the vulnerability handling
+        processes put in place by the manufacturer meet the requirements set out in
+        Annex I, Part II.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.2
+      description: 'Design, development, production and vulnerability handling of
+        products with digital elements
+
+        The manufacturer shall operate an approved quality system as specified in
+        point 3 for the design, development and final product inspection and testing
+        of the products with digital elements concerned and for handling vulnerabilities,
+        maintain its effectiveness throughout the support period, and shall be subject
+        to surveillance as specified in point 4.'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.3
+      name: Quality system
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      ref_id: 8.4.3.1
+      description: The manufacturer shall lodge an application for assessment of its
+        quality system with the notified body of its choice, for the products with
+        digital elements concerned.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: 'The application shall include:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
+      ref_id: 8.4.3.1.1
+      description: the name and address of the manufacturer and, if the application
+        is lodged by the authorised representative, its name and address as well;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
+      ref_id: 8.4.3.1.2
+      description: the technical documentation for one model of each category of products
+        with digital elements intended to be manufactured or developed. The technical
+        documentation shall, wherever applicable, contain at least the elements as
+        set out in Annex VII;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
+      ref_id: 8.4.3.1.3
+      description: the documentation concerning the quality system; and
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.1.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node156
+      ref_id: 8.4.3.1.4
+      description: a written declaration that the same application has not been lodged
+        with any other notified body.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      ref_id: 8.4.3.2
+      description: The quality system shall ensure compliance of the products with
+        digital elements with the essential requirements set out in Annex I, Part
+        I, and compliance of the vulnerability handling processes put in place by
+        the manufacturer with the requirements set out in Annex I, Part II.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node162
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: All the elements, requirements and provisions adopted by the manufacturer
+        shall be documented in a systematic and orderly manner in the form of written
+        policies, procedures and instructions. That quality system documentation shall
+        permit a consistent interpretation of the quality programmes, plans, manuals
+        and records.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: 'It shall, in particular, contain an adequate description of:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.1
+      description: the quality objectives and the organisational structure, responsibilities
+        and powers of the management with regard to design, development, product quality
+        and vulnerability handling;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.2
+      description: the technical design and development specifications, including
+        standards, that will be applied and, where the relevant harmonised standards
+        or technical specifications will not be applied in full, the means that will
+        be used to ensure that the essential requirements set out in Annex I, Part
+        I, that apply to the products with digital elements will be met;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.3
+      description: the procedural specifications, including standards, that will be
+        applied and, where the relevant harmonised standards or technical specifications
+        will not be applied in full, the means that will be used to ensure that the
+        essential requirements set out in Annex I, Part II, that apply to the manufacturer
+        will be met;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.4
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.4
+      description: the design and development control, as well as design and development
+        verification techniques, processes and systematic actions that will be used
+        when designing and developing the products with digital elements pertaining
+        to the product category covered;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.5
+      description: the corresponding production, quality control and quality assurance
+        techniques, processes and systematic actions that will be used;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.6
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.6
+      description: the examinations and tests that will be carried out before, during
+        and after production, and the frequency with which they will be carried out;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.7
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.7
+      description: the quality records, such as inspection reports and test data,
+        calibration data and qualification reports on the personnel concerned;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.2.8
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node163
+      ref_id: 8.4.3.2.8
+      description: the means of monitoring the achievement of the required design
+        and product quality and the effective operation of the quality system.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      ref_id: 8.4.3.3
+      description: The notified body shall assess the quality system to determine
+        whether it satisfies the requirements referred to in point 3.2.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node173
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: It shall presume conformity with those requirements in respect
+        of the elements of the quality system that comply with the corresponding specifications
+        of the national standard that implements the relevant harmonised standard
+        or technical specification.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node174
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: In addition to experience in quality management systems, the auditing
+        team shall have at least one member experienced as an assessor in the relevant
+        product field and product technology concerned, and shall have knowledge of
+        the applicable requirements of this Regulation. The audit shall include an
+        assessment visit to the manufacturer's premises, where such premises exist.
+        The auditing team shall review the technical documentation referred to in
+        point 3.1, second indent, to verify the manufacturer's ability to identify
+        the applicable requirements of this Regulation and to carry out the necessary
+        examinations with a view to ensuring compliance of the product with digital
+        elements with those requirements.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node175
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: The manufacturer or its authorised representative shall be notified
+        of the decision.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node176
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: The notification shall contain the conclusions of the audit and
+        the reasoned assessment decision.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      ref_id: 8.4.3.4
+      description: The manufacturer shall undertake to fulfil the obligations arising
+        out of the quality system as approved and to maintain it so that it remains
+        adequate and efficient.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      ref_id: 8.4.3.5
+      description: The manufacturer shall keep the notified body that has approved
+        the quality system informed of any intended change to the quality system.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node179
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: The notified body shall evaluate any proposed changes and decide
+        whether the modified quality system will continue to satisfy the requirements
+        referred to in point 3.2 or whether a reassessment is necessary.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node180
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.3
+      description: It shall notify the manufacturer of its decision. The notification
+        shall contain the conclusions of the examination and the reasoned assessment
+        decision.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.4
+      name: Surveillance under the responsibility of the notified body
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4
+      ref_id: 8.4.4.1
+      description: The purpose of surveillance is to make sure that the manufacturer
+        duly fulfils the obligations arising out of the approved quality system.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4
+      ref_id: 8.4.4.2
+      description: 'The manufacturer shall, for assessment purposes, allow the notified
+        body access to the design, development, production, inspection, testing and
+        storage sites, and shall provide it with all necessary information, in particular:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
+      ref_id: 8.4.4.2.1
+      description: 'the quality system documentation; '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
+      ref_id: 8.4.4.2.2
+      description: 'the quality records as provided for by the design part of the
+        quality system, such as results of analyses, calculations and tests; '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2.3
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.2
+      ref_id: 8.4.4.2.3
+      description: 'the quality records as provided for by the manufacturing part
+        of the quality system, such as inspection reports and test data, calibration
+        data and qualification reports on the personnel concerned. '
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.4
+      ref_id: 8.4.4.3
+      description: The notified body shall carry out periodic audits to make sure
+        that the manufacturer maintains and applies the quality system and shall provide
+        the manufacturer with an audit report.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.5
+      name: Conformity marking and declaration of conformity
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
+      ref_id: 8.4.5.1
+      description: The manufacturer shall affix the CE marking, and, under the responsibility
+        of the notified body referred to in point 3.1, the latter's identification
+        number to each individual product with digital elements that satisfies the
+        requirements set out in Annex I, Part I, to this Regulation.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
+      ref_id: 8.4.5.2
+      description: The manufacturer shall draw up a written declaration of conformity
+        for each product model and keep it at the disposal of the national authorities
+        for 10 years after the product with digital elements has been placed on the
+        market or for the support period, whichever is longer. The declaration of
+        conformity shall identify the product model for which it has been drawn up.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node191
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.5
+      description: A copy of the declaration of conformity shall be made available
+        to the relevant authorities upon request.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.6
+      description: 'The manufacturer shall, for a period ending at least 10 years
+        after the product with digital elements has been placed on the market or for
+        the support period, whichever is longer, keep at the disposal of the national
+        authorities:'
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      ref_id: 8.4.6.1
+      description: the technical documentation referred to in point 3.1;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      ref_id: 8.4.6.2
+      description: the documentation concerning the quality system referred to in
+        point 3.1;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      ref_id: 8.4.6.3
+      description: the change referred to in point 3.5, as approved;
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.6
+      ref_id: 8.4.6.4
+      description: the decisions and reports of the notified body referred to in points
+        3.5 and 4.3.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.7
+      description: Each notified body shall inform its notifying authorities of quality
+        system approvals issued or withdrawn, and shall, periodically or upon request,
+        make available to its notifying authorities the list of quality system approvals
+        refused, suspended or otherwise restricted.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:node198
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      description: Each notified body shall inform the other notified bodies of quality
+        system approvals which it has refused, suspended or withdrawn, and, upon request,
+        of quality system approvals which it has issued.
+    - urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cra-resolution-annexes:8.4
+      ref_id: 8.4.8
+      name: Authorised representative
+      description: The manufacturer's obligations set out in points 3.1, 3.5, 5 and
+        6 may be fulfilled by its authorised representative, on its behalf and under
+        its responsibility, provided that they are specified in the mandate.

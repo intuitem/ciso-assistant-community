@@ -50,6 +50,11 @@ The decoupling allows you to save a considerable amount of time:
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+Here is an overview of CISO Assistant features and capabilities:
+
+![overview](features.png)
+
+
 CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
@@ -77,6 +82,9 @@ and run the starter script
 
 > [!WARNING]
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+
+> [!CAUTION]
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
 
 ## End-user Documentation
 
@@ -127,9 +135,17 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 41. ENISA: 5G Security Controls Matrix 🇪🇺
 42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
 43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
-44. EU AI Act 🇪🇺🤖
-45. FBI CJIS 🇺🇸👮
-46. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+44. ISO 27001:2013 🌐 (For legacy and migration)
+45. EU AI Act 🇪🇺🤖
+46. FBI CJIS 🇺🇸👮
+47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+48. Secure Controls Framework (SCF) 🇺🇸🌐
+49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
+50. California Consumer Privacy Act (CCPA) 🇺🇸
+51. California Consumer Privacy Act Regulations 🇺🇸
+52. NCSC Cyber Essentials 🇬🇧
+53. General Data Protection Regulation (GDPR) 🇪🇺
+54. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 
 ### Community contributions
 
@@ -150,13 +166,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- NCSC Cyber Assessment Framework (CAF)
-- Secure Controls Framework (SCF)
-- CCPA
 - Part-IS
-- SOX
 - NIST 800-82
-- UK Cyber Essentials
+- Korea ISA: ISMS-P
+- ENS Esquema Nacional de seguridad (español)
+
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
 ## Add your own library
@@ -166,6 +180,8 @@ A library can be a framework, a catalog of threats or reference controls, and ev
 Take a look at the `tools` directory and its dedicated readme. The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+
+There is also a tool to facilitate the creation of mappings, called `prepare_mapping.py` that will create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
 
 ## Community
 

@@ -94,7 +94,7 @@
 			</div>
 		{:else}
 			<p class="text-sm text-gray-500">
-				You cannot score if the requirement assessment is not applicable
+				{m.notApplicableScore()}
 			</p>
 		{/if}
 	</div>

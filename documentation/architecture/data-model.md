@@ -72,13 +72,13 @@ erDiagram
 ```mermaid
 erDiagram
 
-    LOADED_LIBRARY  |o--o{ REFERENCE_CONTROL: contains
-    LOADED_LIBRARY  |o--o{ THREAT           : contains
-    LOADED_LIBRARY  ||--o{ FRAMEWORK        : contains
-    LOADED_LIBRARY  ||--o{ RISK_MATRIX      : contains
-    LOADED_LIBRARY  ||--o{ MAPPING          : contains
-    LOADED_LIBRARY2 }o--o{ LOADED_LIBRARY   : depends_on
-    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY: translates
+    LOADED_LIBRARY      |o--o{ REFERENCE_CONTROL        : contains
+    LOADED_LIBRARY      |o--o{ THREAT                   : contains
+    LOADED_LIBRARY      ||--o{ FRAMEWORK                : contains
+    LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
+    LOADED_LIBRARY      ||--o{ REQUIREMMENT_MAPPING_SET : contains
+    LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
+    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY           : translates
 
     LIBRARY_TRANSLATION {
         string locale
@@ -183,6 +183,7 @@ erDiagram
         string  name
         string  description
         string  annotation
+        string  provider
 
         urn     parent_urn
         int     order_id
@@ -200,6 +201,7 @@ erDiagram
         string  provider
 
         string  category
+        string  function
     }
 
     APPLIED_CONTROL {
@@ -207,6 +209,7 @@ erDiagram
         string   description
 
         string   category
+        string   function
         string   status
         date     eta
         date     expiration
@@ -251,7 +254,7 @@ erDiagram
         string description
 
         string business_value
-        string category
+        string type
         asset  parent_asset
     }
 
@@ -269,6 +272,8 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
+
+        principal[] owner
     }
 
     RISK_ACCEPTANCE {
@@ -299,28 +304,23 @@ erDiagram
 
 ```
 
-### Mappings
+### Requirement mappings
 
 ```mermaid
 erDiagram
-    REFERENCE_REQUIREMENT ||--o{ MAPPING          : referenced_by
-    MAPPING               }o--|| FOCAL_REQUIREMENT: maps_to
+    REQUIREMENT_MAPPING_SET   }o--|| SOURCE_FRAMEWORK : contains
+    REQUIREMENT_MAPPING_SET   }o--|| TARGET_FRAMEWORK : contains
 
-    MAPPING {
-        string  urn
-        string  locale
-        string  ref_id
-        string  name
-        string  description
-        string  annotation
-        string  provider
+    REQUIREMENT_MAPPING_SET {
+        string    urn
+        string    locale
+        string    ref_id
+        string    name
+        string    description
+        string    annotation
+        string    provider
 
-        string  reference_urn
-        string  focal_urn
-        string  rationale
-        string  relationship
-        boolean fulfilled_by
-        int     strength
+        json      mapping_rules
     }
 
 
@@ -536,7 +536,7 @@ namespace ReferentialObjects {
 
     class Mapping {
         +CharField    reference_urn
-        +CharField    focal_urn
+        +CharField    target_urn
         +CharField    rationale
         +CharField    relationship
         +BooleanField fulfilled_by
@@ -695,7 +695,7 @@ Projects have the following fields:
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
-Assets are of category primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
+Assets are of type primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
 
 ## Frameworks
 
@@ -740,6 +740,8 @@ Reference controls are templates for Applied controls. They facilitate the creat
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
 
+Reference controls have a function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
+
 ## Applied controls
 
 Applied controls are fundamental objects for compliance and remediation. They can derive from a reference control, which provides better consistency, or be independent.
@@ -757,7 +759,7 @@ When a applied control derives from a reference control, the same category is pr
 
 ## Compliance and risk assessments
 
-Both types of assessments have common points:
+Both types of assessments have common fields:
 - a name
 - a description
 - a version (defined by the analyst)
@@ -780,11 +782,10 @@ The state of a review can be: created/submitted/validated/changes requested/depr
 When a compliance assessment is created, each requirement of the corresponding framework is linked to a requirement assessment object. To cover a requirement, the assessor shall link it to Applied controls.
 
 Here are the specific fields for requirement assessments:
-- status: --/to do/in progress/done.
-- result: --/compliant/non-compliant minor/non-compliant major/not applicable
+- result: --/compliant/partially compliant/non-compliant/not applicable
 - score: --/<integer value from min_score to max_score>.
-- ETA (Estimated Time of Arrival) date
-- due date. This is for example useful to organize an audit plan.
+- a status: (todo/in progress/in review/done) that facilitates reporting.
+
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
@@ -803,26 +804,28 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 - 0-5 (0-5, no score definition)
 - 0-10 (0-10, no score definition)
 
-### Mappings
+### Requirement Mapping set
 
-Mappings are referential objects that describe relations between requirements from a reference framework to a focal framework. The definition of mappings is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
 
-A mapping is defined by the following specific attributes:
-- a reference requirement URN
-- a focal requirement URN
-- a rationale giving the explanation for why a Reference Document Element and a Focal Document Element are related. This will be syntactic, semantic, or functional.
-- a relationship that provides the type of logical relationship that the OLIR Developer asserts the Reference Document Element has compared to the Focal Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
-- a strength of relationship, optionally providing the extent to which a Reference Document Element and a Focal Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
+A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
-Mappings are used to automatically generate a draft compliance assessment for a focal framework, given existing reference assessments.
+A mapping_rules is a list of elements containing:
+- a source requirement URN
+- a target requirement URN
+- a rationale giving the explanation for why a Source Document Element and a Target Document Element are related. This will be syntactic, semantic, or functional.
+- a relationship that provides the type of logical relationship that the OLIR Developer asserts the Source Document Element has compared to the Target Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
+- a strength of relationship, optionally providing the extent to which a Source Document Element and a Target Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
+
+Requirement mapping rules are used to automatically generate a draft compliance assessment for a target framework, given existing source assessments.
 
 The following inference rules are used:
 - there is an order relation in results: compliant > non-compliant minor > non-compliant major
-- N/A or -- in reference makes the mapping not usable.
-- when several mappings exist for a focal requirement, the strongest inference result is used to determine the compliance result.
-- all mappings are described in the mapping_inference field.
-- a superset or equal mapping pushes the reference result to the focal result.
-- an subset mapping pushes a most a partial compliance result to the focal result
+- N/A or -- in source makes the mapping not usable.
+- when several mappings exist for a target requirement, the strongest inference result is used to determine the compliance result.
+- all requirement mappings are described in the mapping_inference field.
+- a superset or equal mapping pushes the source result to the target result.
+- an subset mapping pushes a partial compliance result to the target result
 
 ### Risk assessments and risk matrices
 
@@ -888,6 +891,7 @@ Libraries can contain:
 - threats
 - reference controls
 - risk matrices
+- requirement mapping sets
 
 It is recommended that libraries be modular, with only one type of object, but this is not mandatory.
 
@@ -948,10 +952,10 @@ When a several locales are loaded for a same library (same URN), the first one i
 
 The translation JSON field contains a dictionary with urn as key and a dictionary of (field_name, value) as value.
 
-Example: 
+Example:
 ```
 {
-    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]], 
+    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]],
     "urn:intuitem:risk:req_node:iso27001-2022:4.3", ...
 }
 ```
