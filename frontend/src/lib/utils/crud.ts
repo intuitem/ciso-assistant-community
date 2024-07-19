@@ -64,8 +64,8 @@ export const getOptions = ({
 								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
-						  '/' +
-						  my_label
+							'/' +
+							my_label
 						: my_label,
 				value: object[value],
 				suggested: false
@@ -184,6 +184,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
+	'risk-assessment_duplicate': {
+		name: 'riskassessment',
+		localName: 'riskAssessment',
+		localNamePlural: 'riskAssessments',
+		verboseName: 'Risk assessment',
+		verboseNamePlural: 'Risk assessments',
+		foreignKeyFields: [{ field: 'project', urlModel: 'projects' }]
+	},
 	threats: {
 		name: 'threat',
 		localName: 'threat',
@@ -205,9 +213,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'auditor', urlModel: 'users' }
+			{ field: 'auditor', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'users' }
 		],
-		filters: [{ field: 'threats' }, { field: 'risk_assessment' }]
+		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
 	'applied-controls': {
 		name: 'appliedcontrol',
@@ -366,7 +375,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' }
+			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
 		filters: [{ field: 'status' }]
@@ -384,7 +394,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'requirementAssessments',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'result' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
@@ -412,8 +422,22 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'SSO settings',
 		verboseNamePlural: 'SSO settings',
 		selectFields: [{ field: 'provider' }]
+	},
+	'requirement-mapping-sets': {
+		name: 'requirementmappingset',
+		localName: 'requirementMappingSet',
+		localNamePlural: 'requirementMappingSets',
+		verboseName: 'Requirement mapping set',
+		verboseNamePlural: 'Requirement mapping sets',
+		foreignKeyFields: [
+			{ field: 'source_framework', urlModel: 'frameworks' },
+			{ field: 'target_framework', urlModel: 'frameworks' },
+			{ field: 'library', urlModel: 'libraries' }
+		]
 	}
 };
+
+export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 export const FIELD_COMPONENT_MAP = {
 	evidences: {
@@ -421,15 +445,15 @@ export const FIELD_COMPONENT_MAP = {
 	},
 	libraries: {
 		locale: LanguageDisplay,
-		actions: LibraryActions
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	// "stored-libraries": {
 	// 	locale: LanguageDisplay,
-	// 	actions: LibraryActions
+	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	// },
 	// "loaded-libraries": {
 	// 	locale: LanguageDisplay
-	// 	// actions: LibraryActions
+	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	// },
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay

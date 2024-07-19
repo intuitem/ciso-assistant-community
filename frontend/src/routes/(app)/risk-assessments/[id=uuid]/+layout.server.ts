@@ -7,7 +7,6 @@ import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
-import { listViewFields } from '$lib/utils/table';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
@@ -106,5 +105,46 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 	scenarioModel.selectOptions = selectOptions;
 
-	return { risk_assessment, scenarioModel, scenariosTable, scenarioDeleteForm, scenarioCreateForm };
+	const riskAssessmentSchema = modelSchema('risk-assessments');
+
+	const initialDataDuplicate = {
+		name: risk_assessment.name,
+		description: risk_assessment.description,
+		version: risk_assessment.version
+	};
+
+	const riskAssessmentDuplicateForm = await superValidate(
+		initialDataDuplicate,
+		zod(riskAssessmentSchema),
+		{
+			errors: false
+		}
+	);
+
+	const riskAssessmentModel = getModelInfo('risk-assessment-duplicate');
+
+	if (riskAssessmentModel.foreignKeyFields) {
+		for (const keyField of riskAssessmentModel.foreignKeyFields) {
+			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			const response = await fetch(url);
+			if (response.ok) {
+				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
+			} else {
+				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	riskAssessmentModel.foreignKeys = foreignKeys;
+
+	return {
+		risk_assessment,
+		scenarioModel,
+		scenariosTable,
+		scenarioDeleteForm,
+		scenarioCreateForm,
+		riskAssessmentDuplicateForm,
+		riskAssessmentModel
+	};
 };

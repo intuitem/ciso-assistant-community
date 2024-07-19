@@ -21,6 +21,7 @@ export const URL_MODEL = [
 	'projects',
 	'risk-matrices',
 	'risk-assessments',
+	'risk-assessment-duplicate',
 	'threats',
 	'risk-scenarios',
 	'applied-controls',
@@ -38,7 +39,8 @@ export const URL_MODEL = [
 	'requirements',
 	'requirement-assessments',
 	'libraries',
-	'sso-settings'
+	'sso-settings',
+	'requirement-mapping-sets'
 ] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
@@ -125,4 +127,9 @@ export interface AppliedControlStatus {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on
+}
+
+export interface CacheLock {
+	promise: Promise<any>;
+	resolve: (_: any) => any;
 }

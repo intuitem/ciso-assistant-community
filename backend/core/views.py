@@ -40,7 +40,7 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment
+from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
@@ -546,6 +546,53 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+
+    @action(
+        detail=True,
+        name="Duplicate risk assessment",
+        methods=["post"],
+        serializer_class=RiskAssessmentDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            risk_assessment = self.get_object()
+            data = request.data
+            duplicate_risk_assessment = RiskAssessment.objects.create(
+                name=data["name"],
+                description=data["description"],
+                project=Project.objects.get(id=data["project"]),
+                version=data["version"],
+                risk_matrix=risk_assessment.risk_matrix,
+                eta=risk_assessment.eta,
+                due_date=risk_assessment.due_date,
+                status=risk_assessment.status,
+            )
+            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
+            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+            for scenario in risk_assessment.risk_scenarios.all():
+                duplicate_scenario = RiskScenario.objects.create(
+                    risk_assessment=duplicate_risk_assessment,
+                    name=scenario.name,
+                    description=scenario.description,
+                    existing_controls=scenario.existing_controls,
+                    treatment=scenario.treatment,
+                    current_proba=scenario.current_proba,
+                    current_impact=scenario.current_impact,
+                    residual_proba=scenario.residual_proba,
+                    residual_impact=scenario.residual_impact,
+                    strength_of_knowledge=scenario.strength_of_knowledge,
+                    justification=scenario.justification,
+                )
+                duplicate_scenario.threats.set(scenario.threats.all())
+                duplicate_scenario.assets.set(scenario.assets.all())
+                duplicate_scenario.owner.set(scenario.owner.all())
+                duplicate_scenario.applied_controls.set(scenario.applied_controls.all())
+                duplicate_scenario.save()
+            duplicate_risk_assessment.save()
+            return Response({"results": "risk assessment duplicated"})
 
 
 class AppliedControlViewSet(BaseModelViewSet):
@@ -1103,6 +1150,18 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         return Response({"results": used_frameworks})
 
+    @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
+    def mappings(self, request, pk):
+        framework = self.get_object()
+        available_target_frameworks_objects = [framework]
+        mappings = RequirementMappingSet.objects.filter(source_framework=framework)
+        for mapping in mappings:
+            available_target_frameworks_objects.append(mapping.target_framework)
+        available_target_frameworks = FrameworkReadSerializer(
+            available_target_frameworks_objects, many=True
+        ).data
+        return Response({"results": available_target_frameworks})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -1313,15 +1372,57 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
-        serializer.save()
-        instance = ComplianceAssessment.objects.get(id=serializer.data["id"])
+        baseline = serializer.validated_data.pop("baseline", None)
+        instance = serializer.save()
         requirements = RequirementNode.objects.filter(framework=instance.framework)
         for requirement in requirements:
-            RequirementAssessment.objects.create(
+            requirement_assessment = RequirementAssessment.objects.create(
                 compliance_assessment=instance,
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
             )
+            if baseline and baseline.framework == instance.framework:
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=baseline, requirement=requirement
+                )
+                requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.score = baseline_requirement_assessment.score
+                requirement_assessment.is_scored = (
+                    baseline_requirement_assessment.is_scored
+                )
+                requirement_assessment.evidences.set(
+                    baseline_requirement_assessment.evidences.all()
+                )
+                requirement_assessment.applied_controls.set(
+                    baseline_requirement_assessment.applied_controls.all()
+                )
+                requirement_assessment.save()
+        if baseline and baseline.framework != instance.framework:
+            mapping_set = RequirementMappingSet.objects.get(
+                target_framework=serializer.validated_data["framework"],
+                source_framework=baseline.framework,
+            )
+            for (
+                requirement_assessment
+            ) in instance.compute_requirement_assessments_results(
+                mapping_set, baseline
+            ):
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    id=requirement_assessment.mapping_inference[
+                        "source_requirement_assessment"
+                    ]["id"]
+                )
+                requirement_assessment.evidences.add(
+                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
+                )
+                requirement_assessment.applied_controls.add(
+                    *[
+                        ac.id
+                        for ac in baseline_requirement_assessment.applied_controls.all()
+                    ]
+                )
+                requirement_assessment.save()
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -1528,6 +1629,16 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
 
+    @action(detail=False, name="Get result choices")
+    def result(self, request):
+        return Response(dict(RequirementAssessment.Result.choices))
+
+
+class RequirementMappingSetViewSet(BaseModelViewSet):
+    model = RequirementMappingSet
+
+    filterset_fields = ["target_framework", "source_framework"]
+
 
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
@@ -1597,6 +1708,7 @@ def generate_html(
             "bar_graph": None,
             "direct_evidences": [],
             "applied_controls": [],
+            "result": "",
             "status": "",
             "color_class": "",
         }
@@ -1611,8 +1723,10 @@ def generate_html(
 
             if assessment:
                 node_data["assessments"] = assessment
+                node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
-                node_data["color_class"] = color_css_class(assessment.status)
+                node_data["result_color_class"] = color_css_class(assessment.result)
+                node_data["status_color_class"] = color_css_class(assessment.status)
                 direct_evidences = assessment.evidences.all()
                 if direct_evidences:
                     selected_evidences += direct_evidences

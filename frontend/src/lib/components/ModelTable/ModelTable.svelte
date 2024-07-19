@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import { FIELD_COLORED_TAG_MAP, FIELD_COMPONENT_MAP } from '$lib/utils/crud';
+	import {
+		FIELD_COLORED_TAG_MAP,
+		FIELD_COMPONENT_MAP,
+		CUSTOM_ACTIONS_COMPONENT
+	} from '$lib/utils/crud';
 	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
@@ -90,11 +94,14 @@
 	export let detailQueryParameter: string | undefined;
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
+	export let hideFilters = false;
+
 	const user = $page.data.user;
 
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { listViewFields } from '$lib/utils/table';
 
 	// Reactive
 	$: classesBase = `${$$props.class || 'bg-white'}`;
@@ -113,11 +120,57 @@
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
+	const columnFields = new Set(source.body.length === 0 ? [] : Object.keys(source.body[0]));
 
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
+	$: hasRows = data.length > 0;
+	const allRows = handler.getAllRows();
+	const tableURLModel = source.meta?.urlmodel ?? URLModel;
+	const filters =
+		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+			? listViewFields[tableURLModel].filters
+			: {};
+	const filteredFields = Object.keys(filters).filter(
+		(key) => columnFields.has(key) || filters[key].alwaysDisplay
+	);
+	const filterValues: { [key: string]: any } = {};
+	const filterProps: {
+		[key: string]: { [key: string]: any };
+	} = {};
+
+	function defaultFilterProps(rows, field: string) {
+		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
+		const options = [...new Set(rows.map(getColumn))].sort();
+		return { options };
+	}
+
+	function defaultFilterFunction(columnValue: any, value: any): boolean {
+		return value ? columnValue === value : true;
+	}
+
+	$: {
+		for (const field of filteredFields) {
+			handler.filter(
+				filterValues[field],
+				filters[field].getColumn ?? field,
+				filters[field].filter ?? defaultFilterFunction
+			);
+		}
+	}
+
+	let allowOptionsUpdate = true;
+	allRows.subscribe((rows) => {
+		if (!allowOptionsUpdate) return;
+		for (const key of filteredFields) {
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
+		}
+		if (rows.length > 0) allowOptionsUpdate = false;
+	});
+
 	const rows = handler.getRows();
+	let _sessionStorage = null;
 
 	onMount(() => {
 		if (orderBy) {
@@ -125,7 +178,24 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+		_sessionStorage = sessionStorage;
 	});
+
+	let initStorage = true;
+	$: if (_sessionStorage && initStorage) {
+		initStorage = false;
+		const cachedFilterData = JSON.parse(_sessionStorage.getItem('model_table_filter_data') ?? '{}');
+		const restoredCachedFilterData = cachedFilterData[tableURLModel] ?? {};
+		for (const [key, value] of Object.entries(restoredCachedFilterData)) {
+			filterValues[key] = value;
+		}
+	}
+
+	$: if (_sessionStorage && filterValues) {
+		const cachedFilterData = JSON.parse(_sessionStorage.getItem('model_table_filter_data') ?? '{}');
+		cachedFilterData[tableURLModel] = filterValues;
+		_sessionStorage.setItem('model_table_filter_data', JSON.stringify(cachedFilterData));
+	}
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 
@@ -139,10 +209,43 @@
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-start',
+		closeQuery: 'a[href]'
+	};
 </script>
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
+		{#if filteredFields.length > 0 && hasRows && !hideFilters}
+			<button use:popup={popupFilter} class="btn variant-filled-primary self-end">
+				<i class="fa-solid fa-filter mr-2" />
+				{m.filters()}
+			</button>
+			<div
+				class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 border border-slate-200"
+				data-popup="popupFilter"
+			>
+				<div class="grid grid-cols-3 gap-3 items-center justify-center space-x-4 p-2">
+					{#each filteredFields as field}
+						<svelte:component
+							this={filters[field].component}
+							bind:value={filterValues[field]}
+							alwaysDefined={filters[field].alwaysDefined}
+							{field}
+							{...filterProps[field]}
+							{...filters[field].extraProps}
+						/>
+					{/each}
+				</div>
+			</div>
+		{/if}
 		{#if search}
 			<Search {handler} />
 		{/if}
@@ -234,8 +337,10 @@
                             )?.urlModel
                           }/${val.id}`}
                           <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else}
-                          {val}
+                        {:else if m[toCamelCase(val.split(':')[0])]()}
+                        	<span class="text">{m[toCamelCase(val.split(':')[0]+"Colon")]()} {val.split(':')[1]}</span>
+						{:else}
+						  {val ?? '-'}
                         {/if}
                       </li>
                     {/each}
@@ -278,7 +383,7 @@
 						>
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
-              {@const actionsComponent = field_component_map['actions']}
+              {@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
               {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
               <TableRowActions
                 deleteForm={deleteForm}

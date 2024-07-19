@@ -13,13 +13,20 @@ export const BACKEND_API_EXPOSED_URL = `${
 }`;
 
 export const RISK_COLOR_PALETTE: string[] = ['#BBF7D0', '#BEF264', '#FEF08A', '#FBBF24', '#F87171'];
-export const COMPLIANCE_COLOR_MAP = {
-	in_progress: '#3b82f6',
-	non_compliant: '#f87171',
-	to_do: '#d1d5db',
+
+export const complianceResultColorMap = {
+	not_assessed: '#d1d5db',
 	partially_compliant: '#fde047',
+	non_compliant: '#f87171',
 	not_applicable: '#000000',
 	compliant: '#86efac'
+};
+
+export const complianceStatusColorMap = {
+	to_do: '#9ca3af',
+	in_progress: '#f59e0b',
+	in_review: '#3b82f6',
+	done: '#86efac'
 };
 
 export const MONTH_LIST = [

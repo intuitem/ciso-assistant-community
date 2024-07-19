@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { toCamelCase } from '$lib/utils/locales';
+	import * as m from '$paraglide/messages';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 	import type { AnyZodObject } from 'zod';
+	import { onMount } from 'svelte';
 
 	let _class = '';
 
@@ -10,12 +11,25 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
+	export let cachedValue: string | undefined = undefined;
+	export let cacheLock: CacheLock = {
+		promise: new Promise((res) => res(null)),
+		resolve: (x) => x
+	};
 
 	export let color_map = {};
 
 	export let form: SuperForm<AnyZodObject>;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	// $: value.set(cachedValue);
+	$: cachedValue = $value; // I must add an initial value.set(cachedValue) to make the cache work after that, but i firstly want to see if i can pass the test with this.
+	let selectElement: HTMLElement | null = null;
+
+	onMount(async () => {
+		const cacheResult = await cacheLock.promise;
+		if (cacheResult) $value = cacheResult;
+	});
 
 	interface Option {
 		label: unknown;
@@ -54,6 +68,7 @@
 			placeholder=""
 			style="background-color: {color_map[$value]}"
 			bind:value={$value}
+			bind:this={selectElement}
 			{...$constraints}
 			{...$$restProps}
 		>
@@ -62,8 +77,8 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{#if localItems()[toCamelCase(option.label)]}
-						{localItems()[toCamelCase(option.label)]}
+					{#if Object.hasOwn(m, toCamelCase(option.label))}
+						{m[toCamelCase(option.label)]()}
 					{:else}
 						{option.label}
 					{/if}

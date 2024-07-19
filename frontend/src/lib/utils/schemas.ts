@@ -103,7 +103,8 @@ export const RiskScenarioSchema = baseNamedObject({
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const AppliedControlSchema = baseNamedObject({
@@ -154,6 +155,7 @@ export const AssetSchema = baseNamedObject({
 
 export const RequirementAssessmentSchema = z.object({
 	status: z.string(),
+	result: z.string(),
 	score: z.number().optional().nullable(),
 	is_scored: z.boolean().optional(),
 	comment: z.string().optional().nullable(),
@@ -200,7 +202,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	baseline: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({
@@ -260,6 +263,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
+	'risk-assessment-duplicate': RiskAssessmentSchema,
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,

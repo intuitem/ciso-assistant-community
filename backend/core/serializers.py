@@ -99,9 +99,8 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
 
 class RiskAcceptanceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    approver = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
-
+    approver = FieldsRelatedField(["id", "first_name", "last_name"])
     state = serializers.CharField(source="get_state_display")
 
     class Meta:
@@ -130,7 +129,15 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = RiskAssessment
+        fields = ["name", "version", "project", "description"]
+
+
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
+    str = serializers.CharField(source="__str__")
+    project = FieldsRelatedField(["id", "folder"])
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -205,7 +212,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
-    risk_assessment = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField(["id", "name"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
     project = FieldsRelatedField(
         source="risk_assessment.project", fields=["id", "name", "folder"]
@@ -227,6 +234,8 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
+
+    owner = FieldsRelatedField(many=True)
 
 
 class AppliedControlWriteSerializer(BaseModelSerializer):
@@ -468,8 +477,9 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
+    project = FieldsRelatedField(["id", "folder"])
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition"]
+        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
@@ -481,6 +491,16 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    baseline = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        queryset=ComplianceAssessment.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    def create(self, validated_data: Any):
+        return super().create(validated_data)
+
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
@@ -532,3 +552,27 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
         fields = "__all__"
+
+
+class RequirementMappingSetReadSerializer(BaseModelSerializer):
+    source_framework = FieldsRelatedField()
+    target_framework = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "urn"])
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = RequirementMappingSet
+        fields = "__all__"
+
+
+class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
+    pass
+
+
+class ComputeMappingSerializer(serializers.Serializer):
+    mapping_set = serializers.PrimaryKeyRelatedField(
+        queryset=RequirementMappingSet.objects.all()
+    )
+    source_assessment = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all()
+    )

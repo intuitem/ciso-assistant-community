@@ -3,34 +3,43 @@ simple script to transform an Excel file to a yaml library for CISO assistant
 Conventions:
     | means a cell separation, <> means empty cell
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
-        library_urn                | <urn>
-        library_version            | <version>
-        library_locale             | <en/fr/...>
-        library_ref_id             | <ref_id>
-        library_name               | <name>
-        library_description        | <description>
-        library_copyright          | <copyright>
-        library_provider           | <provider>
-        library_packager           | <packager>
-        library_dependencies       | <urn1, urn2...
-        framework_urn              | <urn>
-        framework_ref_id           | <ref_id>
-        framework_name             | <name>
-        framework_description      | <description>
-        framework_min_score        | <min_score>
-        framework_max_score        | <max_score>
-        reference_control_base_urn | <base_urn> | id
-        threat_base_urn            | <base_urn> | id
-        risk_matrix_urn            | <urn>
-        risk_matrix_ref_id         | <ref_id>
-        risk_matrix_name           | <name>
-        risk_matrix_description    | <description>
-        tab                        | <tab_name> | requirements
-        tab                        | <tab_name> | threats            | <base_urn>
-        tab                        | <tab_name> | reference_controls | <base_urn>
-        tab                        | <tab_name> | scores
-        tab                        | <tab_name> | implementation_groups
-        tab                        | <tab_name> | risk_matrix
+        library_urn                     | <urn>
+        library_version                 | <version>
+        library_locale                  | <en/fr/...>
+        library_ref_id                  | <ref_id>
+        library_name                    | <name>
+        library_description             | <description>
+        library_copyright               | <copyright>
+        library_provider                | <provider>
+        library_packager                | <packager>
+        library_dependencies            | <urn1, urn2...
+        framework_urn                   | <urn>
+        framework_ref_id                | <ref_id>
+        framework_name                  | <name>
+        framework_description           | <description>
+        framework_min_score             | <min_score>
+        framework_max_score             | <max_score>
+        reference_control_base_urn      | <base_urn> | id
+        threat_base_urn                 | <base_urn> | id
+        risk_matrix_urn                 | <urn>
+        risk_matrix_ref_id              | <ref_id>
+        risk_matrix_name                | <name>
+        risk_matrix_description         | <description>
+        mapping_urn                     | <urn>
+        mapping_ref_id                  | <ref_id>
+        mapping_name                    | <name>
+        mapping_description             | <description>
+        mapping_source_framework_urn    | <urn>
+        mapping_target_framework_urn    | <urn>
+        mapping_source_node_base_urn    | <urn>
+        mapping_target_node_base_urn    | <urn>
+        tab                             | <tab_name> | requirements
+        tab                             | <tab_name> | threats            | <base_urn>
+        tab                             | <tab_name> | reference_controls | <base_urn>
+        tab                             | <tab_name> | scores
+        tab                             | <tab_name> | implementation_groups
+        tab                             | <tab_name> | risk_matrix
+        tab                             | <tab_name> | mappings
 
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
@@ -67,6 +76,13 @@ Conventions:
             - grid: several columns describing the matrix with colors. The colors shall be consistent with the color column.
         The grid shall be aligned with the probability objects, the columns being the impact in order of id, and the content of each cell being the id of the risk.
         This is a topological representation. The display on the screen (transposition, direction of axes) will be managed in the frontend, not in the data model.
+    For mappings:
+        The first line is a header, with the following possible fields (* for required):
+            - source_node_id(*)
+            - target_node_id(*)
+            - relationship(*)
+            - rationale
+            - stregth_of_relationship
     A library has a single locale. Translated libraries have the same urns, they are merged during import.
     Dependencies are given as a comma or blank separated list of urns.
 """
@@ -101,6 +117,14 @@ LIBRARY_VARS = (
     "risk_matrix_ref_id",
     "risk_matrix_name",
     "risk_matrix_description",
+    "mapping_urn",
+    "mapping_ref_id",
+    "mapping_name",
+    "mapping_description",
+    "mapping_source_framework_urn",
+    "mapping_target_framework_urn",
+    "mapping_source_node_base_urn",
+    "mapping_target_node_base_urn",
     "tab",
 )
 library_vars = {}
@@ -127,11 +151,11 @@ dataframe = openpyxl.load_workbook(args.input_file_name)
 
 requirement_nodes = []
 reference_controls = []
-threats = []
+threat_definitions = []
 scores_definition = []
 implementation_groups_definition = []
 risk_matrix = {}
-
+requirement_mappings = []
 
 def error(message):
     print("Error:", message)
@@ -306,7 +330,7 @@ for tab in dataframe:
                     else None
                 )
                 name = row[header["name"]].value if "name" in header else None
-                if name and len(name) > 100:
+                if name and len(name) >= 200:
                     print("Name too long:", ref_id, name)
                     exit(1)
                 description = (
@@ -383,10 +407,11 @@ for tab in dataframe:
                         parts = re.split(r":", element)
                         prefix = parts.pop(0)
                         part_name = ":".join(parts)
+                        part_name = part_name.lower().replace(" ", "-")
                         urn_prefix = library_vars_dict_reverse[
-                            "reference_control_base_urn"
+                            "threat_base_urn"
                         ][prefix]
-                        threat_urns.append(f"{urn_prefix}{part_name}")
+                        threat_urns.append(f"{urn_prefix}:{part_name}")
                 if req_reference_controls:
                     for element in re.split(r"[\s,]+", req_reference_controls):
                         parts = re.split(r":", element)
@@ -481,7 +506,7 @@ for tab in dataframe:
                     current_threat["description"] = description
                 if annotation:
                     current_threat["annotation"] = annotation
-                threats.append(current_threat)
+                threat_definitions.append(current_threat)
     elif library_vars_dict["tab"][title] == "scores":
         print("processing scores")
         is_header = True
@@ -573,6 +598,32 @@ for tab in dataframe:
                     exit(1)
         for t in ("probability", "impact", "risk"):
             risk_matrix[t].sort(key=lambda c: c["id"])
+    elif library_vars_dict["tab"][title] == "mappings":
+        print("processing mappings")
+        is_header = True
+        source_prefix=library_vars["mapping_source_node_base_urn"]
+        target_prefix=library_vars["mapping_target_node_base_urn"]
+        for row in tab:
+            if is_header:
+                header = read_header(row)
+                is_header = False
+                assert "source_node_id" in header
+                assert "target_node_id" in header
+                assert "relationship" in header
+            elif any([c.value for c in row]):
+                source_requirement_urn = source_prefix + ":" + row[header["source_node_id"]].value
+                target_requirement_urn = target_prefix + ":" + row[header["target_node_id"]].value
+                relationship = row[header["relationship"]].value
+                rationale = row[header["rationale"]].value if "rationale" in header else None
+                stregth_of_relationship = row[header["stregth_of_relationship"]].value if "stregth_of_relationship" in header else None
+                requirement_mappings.append(
+                    {"source_requirement_urn": source_requirement_urn, 
+                     "target_requirement_urn": target_requirement_urn, 
+                     "relationship": relationship,
+                     "rationale": rationale,
+                     "stregth_of_relationship": stregth_of_relationship,
+                     }
+                )
 
 has_framework = "requirements" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
@@ -581,6 +632,10 @@ has_reference_controls = "reference_controls" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
 ]
 has_threats = "threats" in [
+    library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
+]
+
+has_mappings = "mappings" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
 ]
 
@@ -608,7 +663,19 @@ if has_reference_controls:
     library["objects"]["reference_controls"] = reference_controls
 
 if has_threats:
-    library["objects"]["threats"] = threats
+    library["objects"]["threats"] = threat_definitions
+
+if has_mappings:
+    library["objects"]["requirement_mapping_set"] = {
+        "urn": library_vars["mapping_urn"],
+        "ref_id": library_vars["mapping_ref_id"],
+        "name": library_vars["mapping_name"],
+        "description": library_vars["mapping_description"],
+        "source_framework_urn": library_vars["mapping_source_framework_urn"],
+        "target_framework_urn": library_vars["mapping_target_framework_urn"],
+    }
+    library["objects"]["requirement_mapping_set"]["requirement_mappings"] = requirement_mappings
+
 
 if has_framework:
     library["objects"]["framework"] = {
