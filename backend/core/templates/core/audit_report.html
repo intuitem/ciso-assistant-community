@@ -17,6 +17,9 @@
     <hr class="dotted">
     <div class="flex flex-row space-x-4 justify-center items-center mb-4">
         <h1 class='text-3xl'>{{ compliance_assessment.name }}: {{ compliance_assessment.framework }}</h1>
+        {% if compliance_assessment.get_global_score > -1 %}
+            <p class='font-semibold'>{% trans "Score:" %}</p> <span class="font-semibold">{{ compliance_assessment.get_global_score|floatformat }}</span>
+        {% endif %}
         {% bar_graph assessments ancestors %}
     </div>
     <div class="flex flex-row space-x-4 mb-4">
