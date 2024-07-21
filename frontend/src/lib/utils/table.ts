@@ -222,7 +222,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.csf_function,
 	extraProps: {
-		defaultOptionName: 'csf_function' // Make translations
+		defaultOptionName: 'csfFunction' // Make translations
 	},
 	alwaysDisplay: true
 };
@@ -310,7 +310,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'csf_function', 'eta', 'domain', 'referenceControl'],
+		head: ['name', 'description', 'category', 'csfFunction', 'eta', 'domain', 'referenceControl'],
 		body: ['name', 'description', 'category', 'csf_function', 'eta', 'folder', 'reference_control'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -320,14 +320,14 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	policies: {
-		head: ['name', 'description', 'csf_function', 'eta', 'domain', 'referenceControl'],
+		head: ['name', 'description', 'csfFunction', 'eta', 'domain', 'referenceControl'],
 		body: ['name', 'description', 'csf_function', 'eta', 'folder', 'reference_control'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
 	},
 	'reference-controls': {
-		head: ['ref', 'name', 'description', 'category', 'csf_function', 'provider', 'domain'],
+		head: ['ref', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
