@@ -42,7 +42,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
-			csf_function: 'csf_function',
+			csf_function: 'csfFunction',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
 			eta: 'eta',
@@ -64,7 +64,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
-			csf_function: 'csf_function',
+			csf_function: 'csfFunction',
 			folder: 'domain',
 			eta: 'eta',
 			expiry_date: 'expiryDate',

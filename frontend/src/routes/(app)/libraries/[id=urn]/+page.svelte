@@ -52,7 +52,7 @@
 			name: 'name',
 			description: 'description',
 			category: 'category',
-			csf_function: 'csf_function'
+			csf_function: 'csfFunction'
 		},
 		body: tableSourceMapper(referenceControls, [
 			'ref_id',

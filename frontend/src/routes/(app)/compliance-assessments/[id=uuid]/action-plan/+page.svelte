@@ -15,7 +15,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
-			csf_function: 'csf_function',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -37,7 +37,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
-			csf_function: 'csf_function',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -59,7 +59,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
-			csf_function: 'csf_function',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -81,7 +81,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
-			csf_function: 'csf_function',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
