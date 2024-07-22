@@ -1,6 +1,6 @@
 from core.models import StoredLibrary, LoadedLibrary
 from rest_framework import serializers
-from django.utils.translation import get_language
+from core.serializers import ReferentialSerializer
 
 """class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
@@ -15,9 +15,7 @@ from django.utils.translation import get_language
 """
 
 
-class StoredLibrarySerializer(serializers.ModelSerializer):
-    name=serializers.CharField(source="get_name_translated")
-    description=serializers.CharField(source="get_description_translated")
+class StoredLibrarySerializer(ReferentialSerializer):
     
     class Meta:
         model = StoredLibrary
@@ -37,13 +35,13 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
         ]
 
 
-class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
+class StoredLibraryDetailedSerializer(ReferentialSerializer):
     class Meta:
         model = StoredLibrary
         fields = "__all__"
 
 
-class LoadedLibraryDetailedSerializer(serializers.ModelSerializer):
+class LoadedLibraryDetailedSerializer(ReferentialSerializer):
     class Meta:
         model = LoadedLibrary
         fields = "__all__"
@@ -58,10 +56,8 @@ class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
 """
 
 
-class LoadedLibrarySerializer(serializers.Serializer):
+class LoadedLibrarySerializer(ReferentialSerializer):
     id = serializers.CharField()
-    name = serializers.CharField()
-    description = serializers.CharField()
     locale = serializers.ChoiceField(choices=["en", "fr"])
     # objects = LibraryObjectSerializer(many=True)
     version = serializers.CharField()

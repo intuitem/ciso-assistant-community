@@ -55,6 +55,12 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model: models.Model
+        
+
+class ReferentialSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="get_name_translated")
+    description = serializers.CharField(source="get_description_translated")
+    annotation = serializers.CharField(source="get_annotation_translated")
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
@@ -66,7 +72,7 @@ class AssessmentReadSerializer(BaseModelSerializer):
 # Risk Assessment
 
 
-class RiskMatrixReadSerializer(BaseModelSerializer):
+class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
 
     class Meta:
@@ -160,7 +166,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
 
 
-class ReferenceControlWriteSerializer(BaseModelSerializer):
+class ReferenceControlWriteSerializer(ReferentialSerializer):
     class Meta:
         model = ReferenceControl
         fields = "__all__"
@@ -184,7 +190,7 @@ class LibraryWriteSerializer(BaseModelSerializer):
 """
 
 
-class ThreatWriteSerializer(BaseModelSerializer):
+class ThreatWriteSerializer(ReferentialSerializer):
     class Meta:
         model = Threat
         fields = "__all__"
@@ -192,7 +198,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
     # ["id", "folder", "ref_id", "name", "description", "provider"] # TODO: check why not all?
 
 
-class ThreatReadSerializer(BaseModelSerializer):
+class ThreatReadSerializer(ThreatWriteSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "urn"])
 
@@ -428,7 +434,7 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     pass
 
 
-class RequirementNodeReadSerializer(BaseModelSerializer):
+class RequirementNodeReadSerializer(ReferentialSerializer):
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
