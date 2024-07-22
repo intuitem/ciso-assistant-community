@@ -1,5 +1,5 @@
 import json
-from core.models import RequirementNode
+# from core.models import RequirementNode
 from django.utils.translation import get_language
 
 
@@ -24,7 +24,7 @@ def get_referential_translation(object, parameter: str, locale=None) -> str:
     locale_translations = translations.get(locale, {}) if locale else translations.get(get_language(), {})
     return locale_translations.get(parameter, fallback)
 
-def update_translations_in_object(obj, locale: str):
+def update_translations_in_object(obj, locale=None):
     """
     Recursively update the translations of 'name' and 'description' fields in an object.
 
@@ -40,10 +40,11 @@ def update_translations_in_object(obj, locale: str):
         
         for key, value in obj.items():
             if isinstance(value, dict):
-                update_translations_in_object(value, locale)
+                update_translations_in_object(value, get_language() or locale)
             elif isinstance(value, list):
                 for item in value:
-                    update_translations_in_object(item, locale)
+                    update_translations_in_object(item, get_language() or locale)
+    return obj
 
 def update_translations(data_dict_str, locale=None) -> str:
     """
@@ -56,35 +57,14 @@ def update_translations(data_dict_str, locale=None) -> str:
     Returns:
         str: The updated dictionary as a JSON string.
     """
-    data_dict = json.loads(data_dict_str)
-    for key, objects_list in data_dict.items():
-        if isinstance(objects_list, list):
-            for obj in objects_list:
-                update_translations_in_object(obj, locale)
-                
+    if isinstance(data_dict_str, str):
+        data_dict = json.loads(data_dict_str)
+        for key, objects_list in data_dict.items():
+            if isinstance(objects_list, list):
+                for obj in objects_list:
+                    update_translations_in_object(obj, get_language() or locale)
+    elif isinstance(data_dict_str, list):
+        for obj in data_dict_str:
+            update_translations_in_object(obj, get_language() or locale)
+        return data_dict_str
     return json.dumps(data_dict)
-
-# Change the name of this function
-def preview_library(framework: dict) -> dict[str, list]:
-    """
-    Function to create temporary requirement nodes list
-    Used to display requirements in tree view inside library detail view
-    """
-    preview = {}
-    requirement_nodes_list = []
-    if framework.get("requirement_nodes"):
-        index = 0
-        for requirement_node in framework["requirement_nodes"]:
-            index += 1
-            requirement_nodes_list.append(
-                RequirementNode(
-                    description=get_referential_translation(requirement_node, "description"),
-                    ref_id=requirement_node.get("ref_id"),
-                    name=get_referential_translation(requirement_node, "name"),
-                    urn=requirement_node["urn"],
-                    parent_urn=requirement_node.get("parent_urn"),
-                    order_id=index,
-                )
-            )
-    preview["requirement_nodes"] = requirement_nodes_list
-    return preview
