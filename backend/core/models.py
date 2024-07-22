@@ -88,7 +88,6 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
-        print("get_language", get_language())
         locale_translations = translations.get(get_language(), {})
         return locale_translations.get("name", self.name)
     

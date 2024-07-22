@@ -18,7 +18,7 @@ from core.models import StoredLibrary, LoadedLibrary
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
-from .helpers import preview_library
+from .helpers import preview_library, update_translations
 
 
 from rest_framework.decorators import action
@@ -78,7 +78,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
-        return Response(lib.content)
+        return Response(update_translations(lib.content))
 
     def destroy(self, request, *args, pk, **kwargs):
         if not RoleAssignment.is_access_allowed(
