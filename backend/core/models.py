@@ -57,34 +57,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
 
     class Meta:
         abstract = True
-
-    @property
-    def display_short(self) -> str:
-        _name = (
-            self.ref_id
-            if not self.name
-            else self.name
-            if not self.ref_id
-            else f"{self.ref_id} - {self.name}"
-        )
-        _name = "" if not _name else _name
-        return _name
-
-    @property
-    def display_long(self) -> str:
-        _name = self.display_short
-        _display = (
-            _name
-            if not self.description
-            else self.description
-            if _name == ""
-            else f"{_name}: {self.description}"
-        )
-        return _display
-
-    def __str__(self) -> str:
-        return self.display_short
-
+        
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
@@ -102,6 +75,33 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
         return locale_translations.get("annotation", self.annotation)
+
+    @property
+    def display_short(self) -> str:
+        _name = (
+            self.ref_id
+            if not self.get_name_translated
+            else self.get_name_translated
+            if not self.ref_id
+            else f"{self.ref_id} - {self.get_name_translated}"
+        )
+        _name = "" if not _name else _name
+        return _name
+
+    @property
+    def display_long(self) -> str:
+        _name = self.display_short
+        _display = (
+            _name
+            if not self.get_description_translated
+            else self.get_description_translated
+            if _name == ""
+            else f"{_name}: {self.get_description_translated}"
+        )
+        return _display
+
+    def __str__(self) -> str:
+        return self.display_short
 
 
 class I18nObjectMixin(models.Model):

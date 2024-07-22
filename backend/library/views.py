@@ -26,6 +26,7 @@ from rest_framework.response import Response
 from .serializers import (
     StoredLibraryDetailedSerializer,
     LoadedLibraryDetailedSerializer,
+    LoadedLibrarySerializer,
     StoredLibrarySerializer,
 )
 
@@ -194,6 +195,11 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     lookup_value_regex = r"[\w.:-]+"
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
+    
+    def get_serializer_class(self):
+        if self.action == "list":
+            return LoadedLibrarySerializer
+        return LoadedLibraryDetailedSerializer
 
     def list(self, request, *args, **kwargs):
         if "view_loadedlibrary" not in request.user.permissions:
@@ -275,7 +281,8 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             lib = LoadedLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
-        return Response(lib._objects)
+        print(lib._objects)
+        return Response(update_translations(json.dumps(lib._objects)))
 
     @action(detail=True, methods=["get"])
     def tree(

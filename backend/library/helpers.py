@@ -17,10 +17,12 @@ def get_referential_translation(object, parameter: str, locale=None) -> str:
     Returns:
         str: The translation in the specified locale, or the default value if it does not exist
     """
-    print(get_language())
-    translations = object.get("translations", {})
+    fallback = object.get(parameter) if isinstance(object, dict) else object.__dict__.get(parameter)
+    translations = object.get("translations", {}) if isinstance(object, dict) else object.translations
+    if not translations:
+        return fallback
     locale_translations = translations.get(locale, {}) if locale else translations.get(get_language(), {})
-    return locale_translations.get(parameter, object.get(parameter))
+    return locale_translations.get(parameter, fallback)
 
 def update_translations_in_object(obj, locale: str):
     """
