@@ -5,6 +5,7 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { CUSTOM_MODEL_FETCH_MAP, getModelInfo } from '$lib/utils/crud';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
 import type { LayoutServerLoad } from './$types';
+import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
 	let data = null;
@@ -14,7 +15,11 @@ export const load = (async ({ fetch, params }) => {
 		data = await fetch_function({ fetch, params });
 	} else {
 		const endpoint = `${BASE_API_URL}/${params.model}/`;
-		const res = await fetch(endpoint);
+		const res = await fetch(endpoint, {
+			headers: {
+				'Accept-Language': languageTag()
+			}
+		});
 		data = await res.json().then((res) => res.results);
 	}
 

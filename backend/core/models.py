@@ -767,7 +767,12 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         res = [[risk_matrix["risk"][i] for i in row] for row in grid]
 
         return res
-
+    
+    @property
+    def get_json_translated(self):
+        return update_translations(self.json_definition, "fr")
+        
+    
     def __str__(self) -> str:
         return self.name
 
