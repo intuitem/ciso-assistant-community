@@ -1,4 +1,5 @@
 import json
+
 # from core.models import RequirementNode
 from django.utils.translation import get_language
 
@@ -17,12 +18,23 @@ def get_referential_translation(object, parameter: str, locale=None) -> str:
     Returns:
         str: The translation in the specified locale, or the default value if it does not exist
     """
-    fallback = object.get(parameter) if isinstance(object, dict) else object.__dict__.get(parameter)
-    translations = object.get("translations", {}) if isinstance(object, dict) else object.translations
+    fallback = (
+        object.get(parameter)
+        if isinstance(object, dict)
+        else object.__dict__.get(parameter)
+    )
+    translations = (
+        object.get("translations", {})
+        if isinstance(object, dict)
+        else object.translations
+    )
     if not translations:
         return fallback
-    locale_translations = translations.get(locale, {}) if locale else translations.get(get_language(), {})
+    locale_translations = (
+        translations.get(locale, {}) if locale else translations.get(get_language(), {})
+    )
     return locale_translations.get(parameter, fallback)
+
 
 def update_translations_in_object(obj, locale=None):
     """
@@ -37,7 +49,7 @@ def update_translations_in_object(obj, locale=None):
             obj["name"] = get_referential_translation(obj, "name")
             obj["description"] = get_referential_translation(obj, "description")
             obj["abbreviation"] = get_referential_translation(obj, "abbreviation")
-        
+
         for key, value in obj.items():
             if isinstance(value, dict):
                 update_translations_in_object(value, get_language() or locale)
@@ -45,6 +57,7 @@ def update_translations_in_object(obj, locale=None):
                 for item in value:
                     update_translations_in_object(item, get_language() or locale)
     return obj
+
 
 def update_translations(data_dict_str, locale=None) -> str:
     """

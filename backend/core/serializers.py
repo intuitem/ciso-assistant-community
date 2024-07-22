@@ -55,13 +55,13 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model: models.Model
-        
+
 
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
     description = serializers.CharField(source="get_description_translated")
     annotation = serializers.CharField(source="get_annotation_translated")
-    
+
     class Meta:
         model: ReferentialObjectMixin
         exclude = ["translations"]

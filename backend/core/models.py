@@ -54,23 +54,25 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     )
     description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
-    translations = models.JSONField(null=True, blank=True, verbose_name=_("Translations"))
+    translations = models.JSONField(
+        null=True, blank=True, verbose_name=_("Translations")
+    )
 
     class Meta:
         abstract = True
-        
+
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
         return locale_translations.get("name", self.name)
-    
+
     @property
     def get_description_translated(self) -> str:
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
         return locale_translations.get("description", self.description)
-    
+
     @property
     def get_annotation_translated(self) -> str:
         translations = self.translations if self.translations else {}
@@ -542,10 +544,15 @@ class LoadedLibrary(LibraryMixin):
     def _objects(self):
         res = {}
         if self.frameworks.count() > 0:
-            res["framework"] = update_translations_in_object(model_to_dict(self.frameworks.first()))
+            res["framework"] = update_translations_in_object(
+                model_to_dict(self.frameworks.first())
+            )
             res["framework"].update(self.frameworks.first().library_entry)
         if self.threats.count() > 0:
-            res["threats"] = [update_translations_in_object(model_to_dict(threat)) for threat in self.threats.all()]
+            res["threats"] = [
+                update_translations_in_object(model_to_dict(threat))
+                for threat in self.threats.all()
+            ]
         if self.reference_controls.count() > 0:
             res["reference_controls"] = [
                 update_translations_in_object(model_to_dict(reference_control))
@@ -767,12 +774,11 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         res = [[risk_matrix["risk"][i] for i in row] for row in grid]
 
         return res
-    
+
     @property
     def get_json_translated(self):
         return update_translations(self.json_definition, "fr")
-        
-    
+
     def __str__(self) -> str:
         return self.name
 
