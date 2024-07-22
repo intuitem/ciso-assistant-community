@@ -52,6 +52,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     )
     description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    translations = models.JSONField(null=True, blank=True, verbose_name=_("Translations"))
 
     class Meta:
         abstract = True

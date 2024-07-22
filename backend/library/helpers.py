@@ -1,5 +1,24 @@
 from core.models import RequirementNode
+from django.utils.translation import get_language
 
+
+def get_referential_translation(object, parameter: str, locale=None) -> str:
+    # NOTE: put get_language() as default value for locale doesn't work, default locale "en" is always returned.
+    # get_language() needs to be called in the actual thread to get the current language, it could explain that behavior.
+    """
+    Get the translation of a referential object in a specific locale, if it exists.
+
+    Args:
+        object (ReferentialObject)
+        locale (str): The locale to get the translation for
+        parameter (str): The parameter to get the translation for
+
+    Returns:
+        str: The translation in the specified locale, or the default value if it does not exist
+    """
+    translations = object.get("translations", {})
+    locale_translations = translations.get(locale, {}) if locale else translations.get(get_language(), {})
+    return locale_translations.get(parameter, object.get(parameter))
 
 # Change the name of this function
 def preview_library(framework: dict) -> dict[str, list]:
@@ -15,9 +34,9 @@ def preview_library(framework: dict) -> dict[str, list]:
             index += 1
             requirement_nodes_list.append(
                 RequirementNode(
-                    description=requirement_node.get("description"),
+                    description=get_referential_translation(requirement_node, "description"),
                     ref_id=requirement_node.get("ref_id"),
-                    name=requirement_node.get("name"),
+                    name=get_referential_translation(requirement_node, "name"),
                     urn=requirement_node["urn"],
                     parent_urn=requirement_node.get("parent_urn"),
                     order_id=index,
