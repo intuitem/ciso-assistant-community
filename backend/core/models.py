@@ -12,6 +12,7 @@ from .validators import validate_file_size, validate_file_name
 from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
+from django.utils.translation import get_language
 
 import os
 import json
@@ -83,6 +84,25 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return self.display_short
+
+    @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        print("get_language", get_language())
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("name", self.name)
+    
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("description", self.description)
+    
+    @property
+    def get_annotation_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("annotation", self.annotation)
 
 
 class I18nObjectMixin(models.Model):
@@ -202,6 +222,7 @@ class StoredLibrary(LibraryMixin):
             copyright=library_data.get("copyright"),
             provider=library_data.get("provider"),
             packager=library_data.get("packager"),
+            translations=library_data.get("translations", {}),
             objects_meta=objects_meta,
             dependencies=dependencies,
             is_loaded=is_loaded,

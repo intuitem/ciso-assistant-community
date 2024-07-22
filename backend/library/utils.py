@@ -70,6 +70,7 @@ class RequirementNodeImporter:
             implementation_groups=self.requirement_data.get("implementation_groups"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
+            translations=self.requirement_data.get("translations", {}),
             is_published=True,
         )
 
@@ -283,6 +284,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            translations=self.requirement_data.get("translations", {}),
             is_published=True,
         )
         for requirement_node in self._requirement_nodes:
@@ -310,6 +312,7 @@ class ThreatImporter:
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
+            translations=self.requirement_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
@@ -346,6 +349,7 @@ class ReferenceControlImporter:
             category=self.reference_control_data.get("category"),
             is_published=True,
             locale=library_object.locale,
+            translations=self.requirement_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
@@ -388,6 +392,7 @@ class RiskMatrixImporter:
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            translations=self.requirement_data.get("translations", {}),
             is_published=True,
         )
         logger.info("Risk matrix created", matrix=matrix)
@@ -588,6 +593,7 @@ class LibraryImporter:
                 "is_published": True,
                 "builtin": self._library.builtin,
                 "objects_meta": self._library.objects_meta,
+                "translations": self._library.get("translations", {}),
             },
             urn=_urn,
             locale=_locale,

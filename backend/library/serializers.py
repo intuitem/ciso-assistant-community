@@ -1,5 +1,6 @@
 from core.models import StoredLibrary, LoadedLibrary
 from rest_framework import serializers
+from django.utils.translation import get_language
 
 """class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
@@ -15,7 +16,9 @@ from rest_framework import serializers
 
 
 class StoredLibrarySerializer(serializers.ModelSerializer):
-    # Not used yet
+    name=serializers.CharField(source="get_name_translated")
+    description=serializers.CharField(source="get_description_translated")
+    
     class Meta:
         model = StoredLibrary
         fields = [
