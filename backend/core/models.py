@@ -13,6 +13,7 @@ from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 from django.utils.translation import get_language
+from library.helpers import update_translations_in_object, update_translations
 
 import os
 import json
@@ -541,21 +542,21 @@ class LoadedLibrary(LibraryMixin):
     def _objects(self):
         res = {}
         if self.frameworks.count() > 0:
-            res["framework"] = model_to_dict(self.frameworks.first())
+            res["framework"] = update_translations_in_object(model_to_dict(self.frameworks.first()))
             res["framework"].update(self.frameworks.first().library_entry)
         if self.threats.count() > 0:
-            res["threats"] = [model_to_dict(threat) for threat in self.threats.all()]
+            res["threats"] = [update_translations_in_object(model_to_dict(threat)) for threat in self.threats.all()]
         if self.reference_controls.count() > 0:
             res["reference_controls"] = [
-                model_to_dict(reference_control)
+                update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
         if self.risk_matrices.count() > 0:
             matrix = self.risk_matrices.first()
-            res["risk_matrix"] = model_to_dict(matrix)
-            res["risk_matrix"]["probability"] = matrix.probability
-            res["risk_matrix"]["impact"] = matrix.impact
-            res["risk_matrix"]["risk"] = matrix.risk
+            res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
+            res["risk_matrix"]["probability"] = update_translations(matrix.probability)
+            res["risk_matrix"]["impact"] = update_translations(matrix.impact)
+            res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]

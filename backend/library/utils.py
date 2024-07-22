@@ -1,6 +1,6 @@
 import json
 import time
-import os
+from .helpers import get_referential_translation
 from pathlib import Path
 import re
 from typing import List, Union
@@ -39,6 +39,31 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
+    
+
+def preview_library(framework: dict) -> dict[str, list]:
+    """
+    Function to create temporary requirement nodes list
+    Used to display requirements in tree view inside library detail view
+    """
+    preview = {}
+    requirement_nodes_list = []
+    if framework.get("requirement_nodes"):
+        index = 0
+        for requirement_node in framework["requirement_nodes"]:
+            index += 1
+            requirement_nodes_list.append(
+                RequirementNode(
+                    description=get_referential_translation(requirement_node, "description"),
+                    ref_id=requirement_node.get("ref_id"),
+                    name=get_referential_translation(requirement_node, "name"),
+                    urn=requirement_node["urn"],
+                    parent_urn=requirement_node.get("parent_urn"),
+                    order_id=index,
+                )
+            )
+    preview["requirement_nodes"] = requirement_nodes_list
+    return preview
 
 
 class RequirementNodeImporter:

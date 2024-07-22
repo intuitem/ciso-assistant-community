@@ -18,7 +18,8 @@ from core.models import StoredLibrary, LoadedLibrary
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
-from .helpers import preview_library, update_translations
+from .helpers import update_translations
+from .utils import preview_library
 
 
 from rest_framework.decorators import action
@@ -281,8 +282,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             lib = LoadedLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
-        print(lib._objects)
-        return Response(update_translations(json.dumps(lib._objects)))
+        return Response(lib._objects)
 
     @action(detail=True, methods=["get"])
     def tree(
