@@ -37,7 +37,7 @@ def create_result(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0014_auto_20240522_1731"),
+        ("core", "0013_requirementnode_typical_evidence"),
     ]
 
     operations = [
