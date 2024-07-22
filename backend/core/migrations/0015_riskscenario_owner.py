@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0015_remove_complianceassessment_result_and_more"),
+        ("core", "0014_remove_complianceassessment_result_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

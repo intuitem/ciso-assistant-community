@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0016_riskscenario_owner"),
+        ("core", "0015_riskscenario_owner"),
         ("iam", "0005_alter_user_managers"),
     ]
 
