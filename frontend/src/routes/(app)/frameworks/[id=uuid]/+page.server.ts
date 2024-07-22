@@ -10,15 +10,12 @@ export const load = (async ({ fetch, params }) => {
 		headers: {
 			'Accept-Language': languageTag()
 		}
-	
 	});
 	const framework = await res.json();
 	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`, {
 		headers: {
 			'Accept-Language': languageTag()
 		}
-	}).then((res) =>
-		res.json()
-	);
+	}).then((res) => res.json());
 	return { URLModel, framework, tree };
 }) satisfies PageServerLoad;

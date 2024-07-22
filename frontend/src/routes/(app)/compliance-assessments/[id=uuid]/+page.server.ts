@@ -14,7 +14,7 @@ export const load = (async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const objectEndpoint = `${endpoint}object`;
 
-	const res = await fetch(endpoint,{
+	const res = await fetch(endpoint, {
 		headers: {
 			'Accept-Language': languageTag()
 		}
@@ -23,12 +23,11 @@ export const load = (async ({ fetch, params }) => {
 
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 
-	const tree = await fetch(`${endpoint}tree/`,
-		{
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		}).then((res) => res.json());
+	const tree = await fetch(`${endpoint}tree/`, {
+		headers: {
+			'Accept-Language': languageTag()
+		}
+	}).then((res) => res.json());
 
 	const compliance_assessment_donut_values = await fetch(
 		`${BASE_API_URL}/${URLModel}/${params.id}/donut_data/`

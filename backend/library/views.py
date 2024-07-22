@@ -196,7 +196,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     lookup_value_regex = r"[\w.:-]+"
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
-    
+
     def get_serializer_class(self):
         if self.action == "list":
             return LoadedLibrarySerializer

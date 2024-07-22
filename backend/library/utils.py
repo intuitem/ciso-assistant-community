@@ -39,7 +39,7 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
-    
+
 
 def preview_library(framework: dict) -> dict[str, list]:
     """
@@ -54,7 +54,9 @@ def preview_library(framework: dict) -> dict[str, list]:
             index += 1
             requirement_nodes_list.append(
                 RequirementNode(
-                    description=get_referential_translation(requirement_node, "description"),
+                    description=get_referential_translation(
+                        requirement_node, "description"
+                    ),
                     ref_id=requirement_node.get("ref_id"),
                     name=get_referential_translation(requirement_node, "name"),
                     urn=requirement_node["urn"],

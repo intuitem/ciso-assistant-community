@@ -18,11 +18,13 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		.then((res) => res.results);
 
 	const risk_matrix = await fetch(
-		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`, {
+		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`,
+		{
 			headers: {
 				'Accept-Language': languageTag()
 			}
-		}).then((res) => res.json());
+		}
+	).then((res) => res.json());
 
 	const headFields = [
 		'rid',

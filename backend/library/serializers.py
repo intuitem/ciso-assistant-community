@@ -16,7 +16,6 @@ from core.serializers import ReferentialSerializer
 
 
 class StoredLibrarySerializer(ReferentialSerializer):
-    
     class Meta:
         model = StoredLibrary
         fields = [

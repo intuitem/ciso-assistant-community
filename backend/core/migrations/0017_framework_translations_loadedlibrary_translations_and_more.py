@@ -3,6 +3,7 @@
 from django.db import migrations, models
 from core.models import StoredLibrary, LoadedLibrary
 
+
 def fix_urns_for_enisa_5g_scm(apps, schema_editor):
     enisa_5g_scm_stored_library = StoredLibrary.objects.filter(
         urn="urn:intuitem:risk:library:enisa-5g-scm-v1.3"
@@ -22,54 +23,53 @@ def fix_urns_for_enisa_5g_scm(apps, schema_editor):
                 b.save()
                 count += 1
         print(f"fixed {count} URNs")
-        
+
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0016_requirementassessment_mapping_inference_and_more'),
+        ("core", "0016_requirementassessment_mapping_inference_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='framework',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="framework",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='loadedlibrary',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="loadedlibrary",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='referencecontrol',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="referencecontrol",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='requirementmappingset',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="requirementmappingset",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='requirementnode',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="requirementnode",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='riskmatrix',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="riskmatrix",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='storedlibrary',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="storedlibrary",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.AddField(
-            model_name='threat',
-            name='translations',
-            field=models.JSONField(blank=True, null=True, verbose_name='Translations'),
+            model_name="threat",
+            name="translations",
+            field=models.JSONField(blank=True, null=True, verbose_name="Translations"),
         ),
         migrations.RunPython(fix_urns_for_enisa_5g_scm),
     ]
