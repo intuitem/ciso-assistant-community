@@ -7,6 +7,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
+import { languageTag } from '$paraglide/runtime';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
@@ -17,8 +18,11 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		.then((res) => res.results);
 
 	const risk_matrix = await fetch(
-		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`
-	).then((res) => res.json());
+		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`, {
+			headers: {
+				'Accept-Language': languageTag()
+			}
+		}).then((res) => res.json());
 
 	const headFields = [
 		'rid',

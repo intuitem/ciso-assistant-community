@@ -38,13 +38,13 @@ class StoredLibrarySerializer(ReferentialSerializer):
 class StoredLibraryDetailedSerializer(ReferentialSerializer):
     class Meta:
         model = StoredLibrary
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 class LoadedLibraryDetailedSerializer(ReferentialSerializer):
     class Meta:
         model = LoadedLibrary
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 """

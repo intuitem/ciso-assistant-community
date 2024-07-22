@@ -61,6 +61,10 @@ class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
     description = serializers.CharField(source="get_description_translated")
     annotation = serializers.CharField(source="get_annotation_translated")
+    
+    class Meta:
+        model: ReferentialObjectMixin
+        exclude = ["translations"]
 
 
 class AssessmentReadSerializer(BaseModelSerializer):
@@ -77,7 +81,7 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = RiskMatrix
-        fields = "__all__"
+        exclude = []
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -169,7 +173,7 @@ class AssetReadSerializer(AssetWriteSerializer):
 class ReferenceControlWriteSerializer(ReferentialSerializer):
     class Meta:
         model = ReferenceControl
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
@@ -193,7 +197,7 @@ class LibraryWriteSerializer(BaseModelSerializer):
 class ThreatWriteSerializer(ReferentialSerializer):
     class Meta:
         model = Threat
-        fields = "__all__"
+        exclude = ["translations"]
 
     # ["id", "folder", "ref_id", "name", "description", "provider"] # TODO: check why not all?
 
@@ -421,13 +425,13 @@ class FolderReadSerializer(BaseModelSerializer):
 # Compliance Assessment
 
 
-class FrameworkReadSerializer(BaseModelSerializer):
+class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "urn"])
 
     class Meta:
         model = Framework
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 class FrameworkWriteSerializer(FrameworkReadSerializer):
@@ -442,7 +446,7 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = RequirementNode
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
