@@ -78,10 +78,11 @@ class AssessmentReadSerializer(BaseModelSerializer):
 
 class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
+    json_definition = serializers.JSONField(source="get_json_translated")
 
     class Meta:
         model = RiskMatrix
-        exclude = []
+        exclude = ["translations"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -208,7 +209,7 @@ class ThreatReadSerializer(ThreatWriteSerializer):
 
     class Meta:
         model = Threat
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
