@@ -5,9 +5,16 @@ name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
 copyright: See https://www.iso.org/standard/27001
-version: 2
+version: 3
 provider: ISO/IEC
 packager: intuitem
+translations:
+  fr:
+    name: Norme internationale ISO/IEC 27001:2022
+    description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
+      \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la s\xE9\
+      curit\xE9 \u2014 Exigences"
+    copyright: Voir https://www.iso.org/standard/27001
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -17,28 +24,48 @@ objects:
     name: International standard ISO/IEC 27001:2022
     description: "Information security, cybersecurity and privacy protection \u2014\
       \ Information security management systems \u2014 Requirements"
+    translations:
+      fr:
+        name: Norme internationale ISO/IEC 27001:2022
+        description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
+          \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la\
+          \ s\xE9curit\xE9 \u2014 Exigences"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:iso27001-2022:core
-      name: Core
-      assessable: false
-    - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
       depth: 1
+      ref_id: core
+      name: Core
+      translations:
+        fr:
+          name: "C\u0153ur"
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso27001-2022:4
+      assessable: false
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '4'
       name: 'Context of the organization '
+      translations:
+        fr:
+          name: Contexte de l'organisation
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:4
       ref_id: '4.1'
       name: Understanding the organization and its context
       description: Understand the context and the organization.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
+      translations:
+        fr:
+          name: "Compr\xE9hension de l'organisation et de son contexte"
+          description: Comprendre le contexte et l'organisation
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:4
       ref_id: '4.2'
       name: Understanding the needs and expectations of interested parties
@@ -46,33 +73,52 @@ objects:
         in relation with the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
+      translations:
+        fr:
+          name: "Compr\xE9hension des besoins et attentes des parties int\xE9ress\xE9\
+            es"
+          description: "D\xE9terminer les parties int\xE9ress\xE9es et comprendre\
+            \ leurs besoins en relation avec le SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:4
       ref_id: '4.3'
       name: Determining the scope of the information security management system
       description: Determine the scope of the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.SCOPE
+      translations:
+        fr:
+          name: "D\xE9termination du domaine d'application du syst\xE8me de management\
+            \ de la s\xE9curit\xE9 de l'information"
+          description: "D\xE9terminer le champ d'application du SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:4
       ref_id: '4.4'
       name: Information security management system
       description: Design and implement the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
+      translations:
+        fr:
+          name: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information"
+          description: "Concevoir et mettre en \u0153uvre le SGSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '5'
       name: Leadership
+      translations:
+        fr:
+          name: Leadership
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:5
       ref_id: '5.1'
       name: Leadership and commitment
@@ -85,39 +131,61 @@ objects:
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
       - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      translations:
+        fr:
+          name: Leadership et engagement
+          description: "Veiller \xE0 ce que la direction g\xE9n\xE9rale fournisse\
+            \ un engagement et des ressources ad\xE9quats pour le SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:5
       ref_id: '5.2'
       name: ' Policy'
       description: Define an adequate security policy.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      translations:
+        fr:
+          name: ' Politique'
+          description: "D\xE9finir une politique de s\xE9curit\xE9 adapt\xE9e."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:5
       ref_id: '5.3'
       name: Organizational roles, responsibilities and authorities
       description: Ensure roles and responsibilities are properly defined.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      translations:
+        fr:
+          name: "R\xF4les, responsabilit\xE9s et autorit\xE9s au sein de l'organisation"
+          description: "Veiller \xE0 ce que les r\xF4les et les responsabilit\xE9\
+            s soient correctement d\xE9finis."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '6'
       name: Planning
+      translations:
+        fr:
+          name: Planification
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6
       ref_id: '6.1'
       name: Actions to address risks and opportunities
+      translations:
+        fr:
+          name: "Actions \xE0 mettre en oeuvre face aux risques et opportunit\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       ref_id: 6.1.1
       name: General
@@ -126,9 +194,15 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      translations:
+        fr:
+          name: "G\xE9n\xE9ralit\xE9s"
+          description: "Lors de la planification du SMSI, il convient de tenir compte\
+            \ des risques et opportunit\xE9s, ainsi que des mesures \xE0 prendre pour\
+            \ y rem\xE9dier."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       ref_id: 6.1.2
       name: Information security risk assessment requirement
@@ -136,9 +210,14 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      translations:
+        fr:
+          name: "Appr\xE9ciation des risques de s\xE9curit\xE9 de l'information"
+          description: "Mettre en place un processus adapt\xE9 d'\xE9valuation des\
+            \ risques."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       ref_id: 6.1.3
       name: Information security risk treatment
@@ -148,9 +227,14 @@ objects:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.SOA
+      translations:
+        fr:
+          name: "Traitement des risques de s\xE9curit\xE9 de l'information"
+          description: "Mettre en place un processus appropri\xE9 de traitement des\
+            \ risques et produire une d\xE9claration d'applicabilit\xE9."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6
       ref_id: '6.2'
       name: Information security objectives and planning to achieve them
@@ -160,24 +244,36 @@ objects:
       - urn:intuitem:risk:function:doc-pol:DOC.SO_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+      translations:
+        fr:
+          name: "Objectifs de s\xE9curit\xE9 de l'information et plans pour les atteindre"
+          description: "D\xE9finir et maintenir des objectifs de s\xE9curit\xE9 pertinents."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6
       ref_id: '6.3'
       name: Planning for changes
       description: Plan the changes to the ISMS
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAINTENANCE
+      translations:
+        fr:
+          name: Planification des modifications
+          description: Planifier les changements du SMSI avant de les appliquer.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '7'
       name: ' Support'
+      translations:
+        fr:
+          name: ' Supports'
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.1'
       name: Resources
@@ -186,9 +282,13 @@ objects:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
       - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
+      translations:
+        fr:
+          name: Ressources
+          description: "Fournir des ressources ad\xE9quates pour le SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.2'
       name: Competence
@@ -196,9 +296,14 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+      translations:
+        fr:
+          name: "Comp\xE9tences"
+          description: "G\xE9rer les comp\xE9tences du personnel qui interagit avec\
+            \ le SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.3'
       name: Awareness
@@ -206,57 +311,87 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+      translations:
+        fr:
+          name: Sensibilisation
+          description: Sensibiliser l'ensemble du personnel.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.4'
       name: Communication
       description: Manage communication relevant to the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.COM
+      translations:
+        fr:
+          name: Communication
+          description: "G\xE9rer la communication interne et externe."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.5'
       name: Documented Information
+      translations:
+        fr:
+          name: "Informations document\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       ref_id: 7.5.1
       name: General
       description: Document adequate information relevant to the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+      translations:
+        fr:
+          name: "G\xE9n\xE9ralit\xE9s"
+          description: "Documenter les informations ad\xE9quates relatives au SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       ref_id: 7.5.2
       name: Creating and Updating documented information
       description: Identify properly the documents, and manage reviews and approvals.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+      translations:
+        fr:
+          name: "Cr\xE9ation et mise \xE0 jour"
+          description: "Identifier les documents de fa\xE7on appropri\xE9e et g\xE9\
+            rer les revues et validations."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       ref_id: 7.5.3
       name: Control of documented information
       description: Ensure the ISM documentation is available and adequately protected.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+      translations:
+        fr:
+          name: "Contr\xF4le des informations document\xE9es"
+          description: "Veiller \xE0 ce que la documentation du SMSI soit disponible\
+            \ et prot\xE9g\xE9e de mani\xE8re ad\xE9quate."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '8'
       name: Operations
+      translations:
+        fr:
+          name: Fonctionnement
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:8
       ref_id: '8.1'
       name: Operational planning and control
@@ -264,9 +399,14 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      translations:
+        fr:
+          name: "Planification et contr\xF4le op\xE9rationnels"
+          description: "D\xE9finir et mettre en \u0153uvre des processus ad\xE9quats\
+            \ et les contr\xF4ler."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:8
       ref_id: '8.2'
       name: Information security risk assessment
@@ -274,9 +414,13 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      translations:
+        fr:
+          name: "Appr\xE9ciation des risques de s\xE9curit\xE9 de l'information"
+          description: "Effectuer p\xE9riodiquement des \xE9valuations des risques."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:8
       ref_id: '8.3'
       name: Information security risk treatment
@@ -284,15 +428,23 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      translations:
+        fr:
+          name: "Traitement des risques de s\xE9curit\xE9 de l'information"
+          description: "Mettre en \u0153uvre le plan de traitement des risques."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '9'
       name: Performance evaluation
+      translations:
+        fr:
+          name: "\xC9valuation de la performance"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.1'
       name: Monitoring, measurement, analysis, evaluation
@@ -301,81 +453,124 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MONITOR
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+      translations:
+        fr:
+          name: "Surveillance, mesurages, analyse et \xE9valuation"
+          description: "Mettre en \u0153uvre un suivi pertinent et \xE9valuer les\
+            \ performances et l'efficacit\xE9 du SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.2'
       name: Internal audit
+      translations:
+        fr:
+          name: Audit interne
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       ref_id: 9.2.1
       name: General
       description: Perform regular internal audits of the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      translations:
+        fr:
+          name: "G\xE9n\xE9ralit\xE9s"
+          description: "Effectuer des audits internes r\xE9guliers du SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       ref_id: 9.2.2
       name: Internal audit programme
       description: Manage the internal audit programme appropriately.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+      translations:
+        fr:
+          name: Programme d'audit interne
+          description: "G\xE9rer le programme d'audit interne de mani\xE8re appropri\xE9\
+            e."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.3'
       name: Management review
+      translations:
+        fr:
+          name: Revue de la direction
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       ref_id: 9.3.1
       name: General
       description: Organize management reviews of the ISMS periodically.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      translations:
+        fr:
+          name: "G\xE9n\xE9ralit\xE9s"
+          description: "Organiser p\xE9riodiquement des revues de direction du SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       ref_id: 9.3.2
       name: Management review inputs
       description: Include appropriate data for effective management reviews.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+      translations:
+        fr:
+          name: "El\xE9ments d'entr\xE9e de la revue de direction"
+          description: "Inclure des donn\xE9es appropri\xE9es pour une r\xE9vision\
+            \ efficace de la revue de direction."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
-      depth: 3
+      depth: 4
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       ref_id: 9.3.3
       name: Management review results
       description: Document the results of the management reviews.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+      translations:
+        fr:
+          name: "R\xE9sultats des revues de direction"
+          description: "Documenter les r\xE9sultats des revues de direction."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '10'
       name: Improvement
+      translations:
+        fr:
+          name: "Am\xE9lioration"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:10
       ref_id: '10.1'
       name: "Continual improvement\_"
       description: Improve the ISMS continuously.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      translations:
+        fr:
+          name: "Am\xE9lioration continue\_"
+          description: "Am\xE9liorer en permanence le SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:10
       ref_id: '10.2'
       name: Nonconformity and corrective action
@@ -387,588 +582,999 @@ objects:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+      translations:
+        fr:
+          name: "Non-conformit\xE9 et action corrective"
+          description: "G\xE9rer les non-conformit\xE9s de mani\xE8re appropri\xE9\
+            e."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
-      name: Annex A
-      assessable: false
-    - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
       depth: 1
+      ref_id: annex-a
+      name: Annex A
+      translations:
+        fr:
+          name: Annexe A
+          description: null
+    - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
+      assessable: false
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.5
       name: Organisational controls
+      translations:
+        fr:
+          name: "Mesure de s\xE9curit\xE9 organisationnelles"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.1
       name: Policies for information security
+      translations:
+        fr:
+          name: "Politiques de s\xE9curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.2
       name: Information security roles and responsibilities
+      translations:
+        fr:
+          name: "Fonctions et responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 de\
+            \ l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.3
       name: Segregation of duties
+      translations:
+        fr:
+          name: "S\xE9paration des t\xE2ches"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.4
       name: Management responsibilities
+      translations:
+        fr:
+          name: "Responsabilit\xE9s de la direction"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.5
       name: Contact with authorities
+      translations:
+        fr:
+          name: "Contact avec les autorit\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.6
       name: Contact with special interest groups
+      translations:
+        fr:
+          name: "Contact avec des groupes d'int\xE9r\xEAt sp\xE9cifiques"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.7
       name: Threat intelligence
+      translations:
+        fr:
+          name: Renseignements sur les menaces
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.8
       name: Information security in project management
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.9
       name: Inventory of information and other associated assets
+      translations:
+        fr:
+          name: "Inventaire des informations et autres actifs associ\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.10
       name: Acceptable use of information and other associated assets
+      translations:
+        fr:
+          name: "Utilisation correcte des informations et autres actifs associ\xE9\
+            s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.11
       name: Return of assets
+      translations:
+        fr:
+          name: Restitution des actifs
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.12
       name: Classification of information
+      translations:
+        fr:
+          name: Classification des informations
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.13
       name: Labelling of information
+      translations:
+        fr:
+          name: Marquage des informations
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.14
       name: Information transfer
+      translations:
+        fr:
+          name: Transfert des informations
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.15
       name: Access control
+      translations:
+        fr:
+          name: "Contr\xF4le d'acc\xE8s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.16
       name: Identity management
+      translations:
+        fr:
+          name: "Gestion des identit\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.17
       name: Authentication information
+      translations:
+        fr:
+          name: Informations d'authentification
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.18
       name: Access rights
+      translations:
+        fr:
+          name: "Droits d'acc\xE8s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.19
       name: Information security in supplier relationships
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 de l'information dans les relations avec les fournisseurs"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.20
       name: Addressing information security within supplier agreements
+      translations:
+        fr:
+          name: "La s\xE9curit\xE9 de l'information dans les accords conclus avec\
+            \ les fournisseurs"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.21
       name: Managing information security in the ICT supply chain
+      translations:
+        fr:
+          name: "Gestion de la s\xE9curit\xE9 de l'information dans la cha\xEEne d'approvisionnement\
+            \ des technologies de l'information et de la communication (TIC)"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.22
       name: Monitor, review and change management of supplier services
+      translations:
+        fr:
+          name: "Surveillance, r\xE9vision et gestion des changements des services\
+            \ fournisseurs"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.23
       name: Information security for use of cloud services
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 de l'information dans l'utilisation de services en\
+            \ nuage"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.24
       name: Information security incident management planning and preparation
+      translations:
+        fr:
+          name: "Planification et pr\xE9paration de la gestion des incidents de s\xE9\
+            curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.25
       name: Assessment and decision on information security events
+      translations:
+        fr:
+          name: "\xC9valuation des \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
+            \ et prise de d\xE9cision"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.26
       name: Response to information security incidents
+      translations:
+        fr:
+          name: "R\xE9ponse aux incidents de s\xE9curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.27
       name: Learning from information security incidents
+      translations:
+        fr:
+          name: "Tirer des enseignements des incidents de s\xE9curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.28
       name: Collection of evidence
+      translations:
+        fr:
+          name: Collecte de preuves
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.29
       name: Information security during disruption
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 de l'information pendant une perturbation"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.30
       name: ICT readiness for business continuity
+      translations:
+        fr:
+          name: "Pr\xE9paration des TIC la continuit\xE9 d'activit\xE9"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.31
       name: Legal, statutory, regulatory and contractual requirements
+      translations:
+        fr:
+          name: "Exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.32
       name: ' Intellectual property rights'
+      translations:
+        fr:
+          name: " Droits de propri\xE9t\xE9 intellectuelle"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.33
       name: Protection of records
+      translations:
+        fr:
+          name: Protection des enregistrements
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.34
       name: Privacy and protection of PII
+      translations:
+        fr:
+          name: "Protection de la vie priv\xE9e et des donn\xE9es \xE0 caract\xE8\
+            re personnel (DCP)"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.35
       name: Independent review of information security
+      translations:
+        fr:
+          name: "R\xE9vision ind\xE9pendante de la s\xE9curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.36
       name: Compliance with policies, rules and standards for information security
+      translations:
+        fr:
+          name: "Conformit\xE9 aux politiques, r\xE8gles et normes de s\xE9curit\xE9\
+            \ de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.37
       name: Documented operating procedures
+      translations:
+        fr:
+          name: "Proc\xE9dures d'exploitation document\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.6
       name: People controls
+      translations:
+        fr:
+          name: "Mesures de s\xE9curit\xE9 applicables aux personnes"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.1
       name: Screening
+      translations:
+        fr:
+          name: "S\xE9lection des candidats"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.2
       name: Terms and conditions of employment
+      translations:
+        fr:
+          name: Termes et conditions du contrat de travail
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.3
       name: Information security awareness, education and training
+      translations:
+        fr:
+          name: "Sensibilisation, enseignement et formation en s\xE9curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.4
       name: Disciplinary process
+      translations:
+        fr:
+          name: "Proc\xE9dure disciplinaire"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.5
       name: Responsibilities after termination or change of employment
+      translations:
+        fr:
+          name: "Responsabilit\xE9s apr\xE8s la fin ou le changement d'emploi"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.6
       name: Confidentiality or non-disclosure agreements
+      translations:
+        fr:
+          name: "Accords de confidentialit\xE9 ou de non-divulgation"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.7
       name: Remote working
+      translations:
+        fr:
+          name: "Travail \xE0 distance"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.8
       name: Information security event reporting
+      translations:
+        fr:
+          name: "D\xE9claration des \xE9v\xE9nements de s\xE9curit\xE9 de l'information"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.7
       name: Physical controls
+      translations:
+        fr:
+          name: "Mesures de s\xE9curit\xE9 physique"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.1
       name: Physical security perimeters
+      translations:
+        fr:
+          name: "P\xE9rim\xE8tres de s\xE9curit\xE9 physique"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.2
       name: Physical entry
+      translations:
+        fr:
+          name: "Les entr\xE9es physiques"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.3
       name: Securing offices, rooms and facilities
+      translations:
+        fr:
+          name: "S\xE9curisation des bureaux, des salles et des installations"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.4
       name: Physical security monitoring
+      translations:
+        fr:
+          name: "Surveillance de la s\xE9curit\xE9 physique"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.5
       name: Protecting against physical and environmental threats
+      translations:
+        fr:
+          name: Protection contre les menaces physiques et environnementales
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.6
       name: Working In secure areas
+      translations:
+        fr:
+          name: "Travail dans les zones s\xE9curis\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.7
       name: Clear desk and clear screen
+      translations:
+        fr:
+          name: "Bureau propre et \xE9cran vide"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.8
       name: Equipment siting and protection
+      translations:
+        fr:
+          name: "Emplacement et protection du mat\xE9riel"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.9
       name: Security of assets off-premises
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des actifs hors des locaux"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.10
       name: Storage media
+      translations:
+        fr:
+          name: Supports de stockage
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.11
       name: Supporting utilities
+      translations:
+        fr:
+          name: Services supports
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.12
       name: Cabling security
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 du c\xE2blage"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.13
       name: Equipment maintenance
+      translations:
+        fr:
+          name: "Maintenance du mat\xE9riel"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.14
       name: Secure disposal or re-use of equipment
+      translations:
+        fr:
+          name: "\xC9limination ou recyclage s\xE9curis\xE9(e) du mat\xE9riel"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       assessable: false
-      depth: 1
+      depth: 2
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.8
       name: Technological controls
+      translations:
+        fr:
+          name: "Mesures de s\xE9curit\xE9 technologiques"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.1
       name: User end point devices
+      translations:
+        fr:
+          name: Terminaux finaux des utilisateurs
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.2
       name: Privileged access rights
+      translations:
+        fr:
+          name: "Droits d'acc\xE8s privil\xE9gi\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.3
       name: Information access restriction
+      translations:
+        fr:
+          name: "Restriction d'acc\xE8s aux informations"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.4
       name: Access to source code
+      translations:
+        fr:
+          name: "Acc\xE8s aux codes source"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.5
       name: Secure authentication
+      translations:
+        fr:
+          name: "Authentification s\xE9curis\xE9e"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.6
       name: Capacity management
+      translations:
+        fr:
+          name: Dimensionnement
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.7
       name: Protection against malware
+      translations:
+        fr:
+          name: Protection contre les programmes malveillants (malware)
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.8
       name: Management of technical vulnerabilities
+      translations:
+        fr:
+          name: "Gestion des vuln\xE9rabilit\xE9s techniques"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.9
       name: Configuration management
+      translations:
+        fr:
+          name: Gestion des configurations
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.10
       name: Information deletion
+      translations:
+        fr:
+          name: Suppression des informations
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.11
       name: Data masking
+      translations:
+        fr:
+          name: "Masquage des donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.12
       name: Data leakage prevention
+      translations:
+        fr:
+          name: "Pr\xE9vention de la fuite de donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.13
       name: Information backup
+      translations:
+        fr:
+          name: Sauvegarde des informations
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.14
       name: Redundancy of information processing facilities
+      translations:
+        fr:
+          name: Redondance des moyens de traitement de l'information
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.15
       name: Logging
+      translations:
+        fr:
+          name: Journalisation
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.16
       name: Monitoring activities
+      translations:
+        fr:
+          name: "Activit\xE9s de surveillance"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.17
       name: Clock synchronization
+      translations:
+        fr:
+          name: Synchronisation des horloges
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.18
       name: Use of privileged utility programs
+      translations:
+        fr:
+          name: "Utilisation de programmes utilitaires \xE0 privil\xE8ges"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.19
       name: Installation of software on operational systems
+      translations:
+        fr:
+          name: "Installation de logiciels sur des syst\xE8mes op\xE9rationnels"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.20
       name: Networks security
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des r\xE9seaux"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.21
       name: Security of network services
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des services r\xE9seau"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.22
       name: Segregation of networks
+      translations:
+        fr:
+          name: "Cloisonnement des r\xE9seaux"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.23
       name: 'Web filtering '
+      translations:
+        fr:
+          name: 'Filtrage web '
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.24
       name: Use of cryptography
+      translations:
+        fr:
+          name: Utilisation de la cryptographie
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.25
       name: Secure development life cycle
+      translations:
+        fr:
+          name: "Cycle de vie de d\xE9veloppement s\xE9curis\xE9"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.26
       name: Application security requirements
+      translations:
+        fr:
+          name: "Exigences de s\xE9curit\xE9 des applications"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.27
       name: Secure system architecture and engineering principles
+      translations:
+        fr:
+          name: "Principes d'ing\xE9nierie et d'architecture des syst\xE8mes s\xE9\
+            curis\xE9s"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.28
       name: Secure coding
+      translations:
+        fr:
+          name: "Codage s\xE9curis\xE9"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.29
       name: Security testing in development and acceptance
+      translations:
+        fr:
+          name: "Tests de s\xE9curit\xE9 dans le d\xE9veloppement et l'acceptation"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.30
       name: 'Outsourced development '
+      translations:
+        fr:
+          name: "D\xE9veloppement externalis\xE9 "
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.31
       name: Separation of development, test and production environments
+      translations:
+        fr:
+          name: "S\xE9paration des environnements de d\xE9veloppement, de test et\
+            \ op\xE9rationnels"
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.32
       name: Change management
+      translations:
+        fr:
+          name: Gestion des changements
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.33
       name: Test information
+      translations:
+        fr:
+          name: Informations de test
+          description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
       assessable: true
-      depth: 2
+      depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.34
       name: Protection of information systems during audit testing
+      translations:
+        fr:
+          name: "Protection des syst\xE8mes d'information pendant les tests d'audit"
+          description: null
