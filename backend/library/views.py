@@ -18,7 +18,7 @@ from core.models import StoredLibrary, LoadedLibrary
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
-from .helpers import update_translations
+from .helpers import update_translations, update_translations_in_object
 from .utils import preview_library
 
 
@@ -197,11 +197,6 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
 
-    def get_serializer_class(self):
-        if self.action == "list":
-            return LoadedLibrarySerializer
-        return LoadedLibraryDetailedSerializer
-
     def list(self, request, *args, **kwargs):
         if "view_loadedlibrary" not in request.user.permissions:
             return Response(status=HTTP_403_FORBIDDEN)
@@ -229,12 +224,13 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
                     "builtin",
                     "objects_meta",
                     "reference_count",
+                    "translations",
                 ]
             }
             loaded_library["has_update"] = (
                 last_version.get(library.urn, -1) > library.version
             )
-            loaded_libraries.append(loaded_library)
+            loaded_libraries.append(update_translations_in_object(loaded_library))
 
         return Response({"results": loaded_libraries})
 

@@ -42,7 +42,6 @@
 		setLanguageTag(value);
 		// sessionStorage.setItem('lang', value);
 		setCookie('ciso_lang', value);
-		console.log(window.location.pathname);
 		window.location.reload();
 	}
 
