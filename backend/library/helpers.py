@@ -49,6 +49,7 @@ def update_translations_in_object(obj, locale=None):
             obj["name"] = get_referential_translation(obj, "name")
             obj["description"] = get_referential_translation(obj, "description")
             obj["abbreviation"] = get_referential_translation(obj, "abbreviation")
+            obj["annotation"] = get_referential_translation(obj, "annotation")
 
         for key, value in obj.items():
             if isinstance(value, dict):
