@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0017_requirementassessment_mapping_inference_and_more'),
+        ("core", "0017_requirementassessment_mapping_inference_and_more"),
     ]
 
     operations = [
