@@ -781,7 +781,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return update_translations(self.json_definition, "fr")
 
     def __str__(self) -> str:
-        return self.name
+        return self.get_name_translated
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
