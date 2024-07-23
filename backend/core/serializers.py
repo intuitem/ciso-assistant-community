@@ -59,7 +59,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
-    description = serializers.CharField(source="get_description_translated", allow_blank=True, allow_null=True)
+    description = serializers.CharField(
+        source="get_description_translated", allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model: ReferentialObjectMixin
@@ -179,7 +181,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "urn"])
-    
+
     class Meta:
         model = ReferenceControl
         exclude = ["translations", "annotation"]
@@ -443,7 +445,9 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
 
 
 class RequirementNodeReadSerializer(ReferentialSerializer):
-    annotation = serializers.CharField(source="get_annotation_translated", allow_blank=True, allow_null=True)
+    annotation = serializers.CharField(
+        source="get_annotation_translated", allow_blank=True, allow_null=True
+    )
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
