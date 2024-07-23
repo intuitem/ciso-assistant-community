@@ -59,8 +59,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
 
 class ReferentialSerializer(BaseModelSerializer):
     name = serializers.CharField(source="get_name_translated")
-    description = serializers.CharField(source="get_description_translated")
-    annotation = serializers.CharField(source="get_annotation_translated")
+    description = serializers.CharField(source="get_description_translated", allow_blank=True, allow_null=True)
 
     class Meta:
         model: ReferentialObjectMixin
@@ -82,7 +81,7 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations"]
+        exclude = ["translations", "annotation"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -171,15 +170,19 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
 
 
-class ReferenceControlWriteSerializer(ReferentialSerializer):
+class ReferenceControlWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ReferenceControl
-        exclude = ["translations"]
+        exclude = ["translations", "annotation"]
 
 
-class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
+class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "urn"])
+    
+    class Meta:
+        model = ReferenceControl
+        exclude = ["translations", "annotation"]
 
 
 """class LibraryReadSerializer(BaseModelSerializer):
@@ -195,7 +198,7 @@ class LibraryWriteSerializer(BaseModelSerializer):
 """
 
 
-class ThreatWriteSerializer(ReferentialSerializer):
+class ThreatWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Threat
         exclude = ["translations"]
@@ -203,13 +206,13 @@ class ThreatWriteSerializer(ReferentialSerializer):
     # ["id", "folder", "ref_id", "name", "description", "provider"] # TODO: check why not all?
 
 
-class ThreatReadSerializer(ThreatWriteSerializer):
+class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "urn"])
 
     class Meta:
         model = Threat
-        exclude = ["translations"]
+        exclude = ["translations", "annotation"]
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
@@ -440,6 +443,7 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
 
 
 class RequirementNodeReadSerializer(ReferentialSerializer):
+    annotation = serializers.CharField(source="get_annotation_translated", allow_blank=True, allow_null=True)
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
