@@ -347,6 +347,7 @@ class LibraryUpdater:
             ("ref_id", self.new_library.ref_id),  # Should we even update the ref_id ?
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
+            ("translations", self.new_library.translations),
             ("copyright", self.new_library.copyright),
             ("objects_meta", self.new_library.objects_meta),
         ]:
