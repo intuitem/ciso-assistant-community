@@ -142,7 +142,11 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_locales(self):
-        return [self.locale] + list(self.translations.keys())
+        return (
+            [self.locale] + list(self.translations.keys())
+            if self.translations
+            else [self.locale]
+        )
 
 
 class StoredLibrary(LibraryMixin):
