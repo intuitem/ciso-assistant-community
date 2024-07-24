@@ -191,7 +191,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.locale,
+	getColumn: (row) => row.locales,
 	extraProps: {
 		defaultOptionName: 'language', // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
@@ -386,22 +386,22 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	libraries: {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+		body: ['ref_id', 'name', 'description', 'locales', 'overview']
 	},
 	'stored-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
+		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER,
+			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER_FOR_LIBRARIES
 			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
 	'loaded-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
+		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER,
+			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER_FOR_LIBRARIES
 		}
 	},
