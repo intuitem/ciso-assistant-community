@@ -444,7 +444,7 @@ export const FIELD_COMPONENT_MAP = {
 		attachment: EvidenceFilePreview
 	},
 	libraries: {
-		locale: LanguageDisplay,
+		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	// "stored-libraries": {
