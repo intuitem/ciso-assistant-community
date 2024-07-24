@@ -139,7 +139,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     dependencies = models.JSONField(
         null=True
     )  # models.CharField(blank=False,null=True,max_length=16384)
-    
+
     @property
     def get_locales(self):
         return [self.locale] + list(self.translations.keys())
