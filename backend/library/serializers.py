@@ -17,7 +17,7 @@ from core.serializers import ReferentialSerializer
 
 class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
-    
+
     class Meta:
         model = StoredLibrary
         fields = [
@@ -34,13 +34,13 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "objects_meta",
             "is_loaded",
             "locales",
-            "copyright"
+            "copyright",
         ]
 
 
 class StoredLibraryDetailedSerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
-    
+
     class Meta:
         model = StoredLibrary
         exclude = ["translations"]
@@ -48,7 +48,7 @@ class StoredLibraryDetailedSerializer(ReferentialSerializer):
 
 class LoadedLibraryDetailedSerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
-    
+
     class Meta:
         model = LoadedLibrary
         exclude = ["translations"]
@@ -83,6 +83,7 @@ class LoadedLibrarySerializer(ReferentialSerializer):
             "reference_count",
             "locales",
         ]
+
 
 """class LibraryModelSerializer(BaseModelSerializer):
     class Meta:

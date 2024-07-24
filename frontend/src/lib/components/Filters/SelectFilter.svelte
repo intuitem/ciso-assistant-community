@@ -31,7 +31,7 @@
 			option ? [optionIndex, option.toLowerCase().indexOf(searchText)] : [null, -1]
 		)
 		.filter(([_, matchIndex]) => matchIndex >= 0);
-		
+
 	/* if (transformedOptions.some(x => x === "Domain 1")) { // Code to test the scroll
 		for (let i=4;i<50;i++) {
 			transformedOptions.push(`Dom4in ${i}`);

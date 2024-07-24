@@ -5,7 +5,7 @@
 </script>
 
 <span {...$$restProps}>
-	{#each display as lang }
+	{#each display as lang}
 		<p>{lang}</p>
 	{/each}
 </span>
