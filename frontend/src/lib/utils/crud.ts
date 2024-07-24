@@ -102,6 +102,8 @@ interface ForeignKeyField {
 	field: string;
 	urlModel: urlModel;
 	urlParams?: string;
+	displayAll?: boolean;
+	addOption?: boolean;
 }
 
 interface Field {
@@ -115,6 +117,7 @@ interface SelectField {
 }
 
 export interface ModelMapEntry {
+	urlModel: string;
 	name: string;
 	localName: string;
 	localNamePlural: string;
@@ -135,6 +138,7 @@ type ModelMap = {
 
 export const URL_MODEL_MAP: ModelMap = {
 	folders: {
+		urlModel: 'folders',
 		name: 'folder',
 		localName: 'domain',
 		localNamePlural: 'domains',
@@ -146,6 +150,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [{ field: 'folder', urlModel: 'projects' }]
 	},
 	projects: {
+		urlModel: 'projects',
 		name: 'project',
 		localName: 'project',
 		localNamePlural: 'projects',
@@ -160,6 +165,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'lc_status' }, { field: 'folder' }]
 	},
 	'risk-matrices': {
+		urlModel: 'risk-matrices',
 		name: 'riskmatrix',
 		localName: 'riskMatrix',
 		localNamePlural: 'riskMatrices',
@@ -168,6 +174,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
 	},
 	'risk-assessments': {
+		urlModel: 'risk-assessments',
 		name: 'riskassessment',
 		localName: 'riskAssessment',
 		localNamePlural: 'riskAssessments',
@@ -193,6 +200,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'project', urlModel: 'projects' }]
 	},
 	threats: {
+		urlModel: 'threats',
 		name: 'threat',
 		localName: 'threat',
 		localNamePlural: 'threats',
@@ -201,6 +209,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
 	},
 	'risk-scenarios': {
+		urlModel: 'risk-scenarios',
 		name: 'riskscenario',
 		localName: 'riskScenario',
 		localNamePlural: 'riskScenarios',
@@ -219,6 +228,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
 	'applied-controls': {
+		urlModel: 'applied-controls',
 		name: 'appliedcontrol',
 		localName: 'appliedControl',
 		localNamePlural: 'appliedControls',
@@ -243,7 +253,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
+		reverseForeignKeyFields: [
+			{ displayAll: true, urlModel: 'evidences', field: 'applied_controls', addOption: true }
+		],
 		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },
@@ -254,6 +266,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	policies: {
+		urlModel: 'policies',
 		name: 'appliedcontrol',
 		localName: 'policy',
 		localNamePlural: 'policies',
@@ -273,6 +286,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'risk-acceptances': {
+		urlModel: 'risk-acceptances',
 		name: 'riskacceptance',
 		localName: 'riskAcceptance',
 		localNamePlural: 'riskAcceptances',
@@ -290,6 +304,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'risk_scenarios' }, { field: 'folder' }, { field: 'approver' }]
 	},
 	'reference-controls': {
+		urlModel: 'reference-controls',
 		name: 'referencecontrol',
 		localName: 'referenceControl',
 		localNamePlural: 'referenceControls',
@@ -300,6 +315,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'folder' }]
 	},
 	assets: {
+		urlModel: 'assets',
 		name: 'asset',
 		localName: 'asset',
 		localNamePlural: 'assets',
@@ -313,6 +329,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'parent_assets' }, { field: 'folder' }, { field: 'type' }]
 	},
 	users: {
+		urlModel: 'users',
 		name: 'user',
 		localName: 'user',
 		localNamePlural: 'users',
@@ -322,6 +339,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: []
 	},
 	'user-groups': {
+		urlModel: 'user-groups',
 		name: 'usergroup',
 		localName: 'userGroup',
 		localNamePlural: 'userGroups',
@@ -332,6 +350,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: []
 	},
 	'role-assignments': {
+		urlModel: 'role-assignments',
 		name: 'roleassignment',
 		localName: 'roleAssignment',
 		localNamePlural: 'roleAssignments',
@@ -341,6 +360,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: []
 	},
 	frameworks: {
+		urlModel: 'frameworks',
 		name: 'framework',
 		localName: 'framework',
 		localNamePlural: 'frameworks',
@@ -354,6 +374,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	evidences: {
+		urlModel: 'evidences',
 		name: 'evidence',
 		localName: 'evidence',
 		localNamePlural: 'evidences',
@@ -366,6 +387,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'compliance-assessments': {
+		urlModel: 'compliance-assessments',
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',
 		localNamePlural: 'complianceAssessments',
@@ -382,6 +404,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
+		urlModel: 'requirements',
 		name: 'requirement',
 		localName: 'requirement',
 		localNamePlural: 'requirements',
@@ -389,6 +412,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Requirements'
 	},
 	'requirement-assessments': {
+		urlModel: 'requirement-assessments',
 		name: 'requirementassessment',
 		localName: 'requirementAssessment',
 		localNamePlural: 'requirementAssessments',
@@ -402,6 +426,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'stored-libraries': {
+		urlModel: 'stored-libraries',
 		name: 'storedlibrary',
 		localName: 'storedLibrary',
 		localNamePlural: 'storedLibraries',
@@ -409,6 +434,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'stored Libraries'
 	},
 	'loaded-libraries': {
+		urlModel: 'loaded-libraries',
 		name: 'loadedlibrary',
 		localName: 'loadedLibrary',
 		localNamePlural: 'loadedLibraries',

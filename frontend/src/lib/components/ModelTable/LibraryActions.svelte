@@ -28,6 +28,7 @@
 
 {#if actionsURLModel === 'stored-libraries' && Object.hasOwn(library, 'is_loaded') && !library.is_loaded}
 	{#if loading.form && loading.library === library.urn}
+		<!-- Put this in a snippet once we update to svelte 5 -->
 		<div class="flex items-center cursor-progress" role="status">
 			<svg
 				aria-hidden="true"
