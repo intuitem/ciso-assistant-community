@@ -187,7 +187,6 @@ def get_translations(header, row):
     """read available translations"""
     result = {}
     for i, h in enumerate(header):
-        print(i, h, row[i].value)
         if q := re.match(r"(\w+)\[(\w+)\]", h):
             v = q.group(1)
             lang = q.group(2)
@@ -200,7 +199,6 @@ def get_translations_content(library_vars, prefix):
     """read available translations in library_vars"""
     result = {}
     for k, v in library_vars.items():
-        print(k, v)
         k2 = k
         if q := re.match(prefix + r"_(\w+)\[(\w+)\]", k):
             k2 = q.group(1)
@@ -208,7 +206,6 @@ def get_translations_content(library_vars, prefix):
             if lang not in result:
                 result[lang] = {}
             result[lang][k2] = v
-    print("translations:", result)
     return result
 
 
