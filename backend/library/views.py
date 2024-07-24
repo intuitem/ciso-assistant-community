@@ -189,7 +189,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
 
 class LoadedLibraryViewSet(viewsets.ModelViewSet):
-    # serializer_class = LoadedLibrarySerializer
+    serializer_class = LoadedLibrarySerializer
     # parser_classes = [FileUploadParser]
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
@@ -230,6 +230,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             loaded_library["has_update"] = (
                 last_version.get(library.urn, -1) > library.version
             )
+            loaded_library["locales"] = library.get_locales
             loaded_libraries.append(update_translations_in_object(loaded_library))
 
         return Response({"results": loaded_libraries})
