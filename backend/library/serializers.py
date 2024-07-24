@@ -33,7 +33,8 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "builtin",
             "objects_meta",
             "is_loaded",
-            "locales"
+            "locales",
+            "copyright"
         ]
 
 
