@@ -34,7 +34,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:iso27001-2022:core
       assessable: false
       depth: 1
-      ref_id: core
       name: Clauses
       translations:
         fr:
@@ -590,7 +589,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
-      ref_id: annex-a
       name: Statement of Applicability
       translations:
         fr:
