@@ -38,7 +38,7 @@ objects:
       name: Clauses
       translations:
         fr:
-          name: "Clauses"
+          name: Clauses
           description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
@@ -591,8 +591,10 @@ objects:
       assessable: false
       depth: 1
       ref_id: annex-a
+      name: Statement of Applicability
       translations:
         fr:
+          name: "D\xE9claration d'applicabilit\xE9"
           description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
