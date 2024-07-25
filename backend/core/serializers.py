@@ -62,6 +62,9 @@ class ReferentialSerializer(BaseModelSerializer):
     description = serializers.CharField(
         source="get_description_translated", allow_blank=True, allow_null=True
     )
+    annotation = serializers.CharField(
+        source="get_annotation_translated", allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model: ReferentialObjectMixin
@@ -83,7 +86,7 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations", "annotation"]
+        exclude = ["translations"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -175,7 +178,7 @@ class AssetReadSerializer(AssetWriteSerializer):
 class ReferenceControlWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ReferenceControl
-        exclude = ["translations", "annotation"]
+        exclude = ["translations"]
 
 
 class ReferenceControlReadSerializer(ReferentialSerializer):
@@ -184,7 +187,7 @@ class ReferenceControlReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = ReferenceControl
-        exclude = ["translations", "annotation"]
+        exclude = ["translations"]
 
 
 """class LibraryReadSerializer(BaseModelSerializer):
@@ -214,7 +217,7 @@ class ThreatReadSerializer(ReferentialSerializer):
 
     class Meta:
         model = Threat
-        exclude = ["translations", "annotation"]
+        exclude = ["translations"]
 
 
 class RiskScenarioWriteSerializer(BaseModelSerializer):
@@ -445,9 +448,6 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
 
 
 class RequirementNodeReadSerializer(ReferentialSerializer):
-    annotation = serializers.CharField(
-        source="get_annotation_translated", allow_blank=True, allow_null=True
-    )
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
