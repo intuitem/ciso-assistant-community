@@ -35,10 +35,10 @@ objects:
       assessable: false
       depth: 1
       ref_id: core
-      name: Core
+      name: Clauses
       translations:
         fr:
-          name: "C\u0153ur"
+          name: "Clauses"
           description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
@@ -105,7 +105,7 @@ objects:
       translations:
         fr:
           name: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information"
-          description: "Concevoir et mettre en \u0153uvre le SGSI."
+          description: "Concevoir et mettre en \u0153uvre le SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
       depth: 2
@@ -591,10 +591,8 @@ objects:
       assessable: false
       depth: 1
       ref_id: annex-a
-      name: Annex A
       translations:
         fr:
-          name: Annexe A
           description: null
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
