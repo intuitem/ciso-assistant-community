@@ -260,13 +260,13 @@
 		{/if}
 	{:else if URLModel === 'threats'}
 		<AutocompleteSelect
-				{form}
-				options={getOptions({ objects: model.foreignKeys['folder'] })}
-				field="folder"
-				cacheLock={cacheLocks['folder']}
-				bind:cachedValue={formDataCache['folder']}
-				label={m.domain()}
-				hide={initialData.folder}
+			{form}
+			options={getOptions({ objects: model.foreignKeys['folder'] })}
+			field="folder"
+			cacheLock={cacheLocks['folder']}
+			bind:cachedValue={formDataCache['folder']}
+			label={m.domain()}
+			hide={initialData.folder}
 		/>
 		<TextField
 			{form}
