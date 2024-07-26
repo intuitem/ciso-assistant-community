@@ -284,6 +284,12 @@ USE_TZ = True
 LANGUAGES = [
     ("en", "English"),
     ("fr", "French"),
+    ("es", "Spanish"),
+    ("de", "German"),
+    ("it", "Italian"),
+    ("nd", "Dutch"),
+    ("pl", "Polish"),
+    ("pt", "Portuguese"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

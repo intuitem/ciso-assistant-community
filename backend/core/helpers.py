@@ -5,7 +5,7 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
 
-from core.serializers import ReferenceControlReadSerializer, ThreatReadSerializer
+from library.helpers import get_referential_translation
 
 from .models import *
 from .utils import camel_case
@@ -275,7 +275,7 @@ def get_sorted_requirement_nodes(
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
-                "name": node.name,
+                "name": get_referential_translation(node, "name"),
                 "implementation_groups": node.implementation_groups or None,
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
@@ -292,7 +292,7 @@ def get_sorted_requirement_nodes(
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
-                "description": node.description,
+                "description": get_referential_translation(node, "description"),
                 "children": {},
             }
 
@@ -313,8 +313,8 @@ def get_sorted_requirement_nodes(
                     "urn": child.urn,
                     "ref_id": child.ref_id,
                     "implementation_groups": child.implementation_groups or None,
-                    "name": child.name,
-                    "description": child.description,
+                    "name": get_referential_translation(child, "name"),
+                    "description": get_referential_translation(child, "description"),
                     "ra_id": str(child_req_as.id) if child_req_as else None,
                     "status": child_req_as.status if child_req_as else None,
                     "is_scored": child_req_as.is_scored if child_req_as else None,

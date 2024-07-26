@@ -1114,7 +1114,12 @@ class FrameworkViewSet(BaseModelViewSet):
         uuid_list = request.query_params.getlist("id[]", [])
         queryset = Framework.objects.filter(id__in=uuid_list)
 
-        return Response({str(framework.id): framework.name for framework in queryset})
+        return Response(
+            {
+                str(framework.id): framework.get_name_translated()
+                for framework in queryset
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
