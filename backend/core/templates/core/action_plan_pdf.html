@@ -42,6 +42,7 @@
                             <th class="text-md p-2 text-center">{% trans "Name" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Description" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Category" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "CSF function" %}</th>
                             <th class="text-md p-2 text-center">{% trans "ETA" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Expiry date" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Effort" %}</th>
@@ -54,6 +55,7 @@
                             <td class="text-md p-2 text-center">{{ applied_control.name }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.description|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_category_display|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.get_csf_function_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.eta|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.expiry_date|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_effort_display|default:"--" }}</td>

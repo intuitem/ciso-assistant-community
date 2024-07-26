@@ -42,6 +42,7 @@
 		setLanguageTag(value);
 		// sessionStorage.setItem('lang', value);
 		setCookie('ciso_lang', value);
+		window.location.reload();
 	}
 
 	const popupUser: PopupSettings = {

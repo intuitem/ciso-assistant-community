@@ -273,12 +273,16 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
-    filterset_fields = ["folder", "category"]
+    filterset_fields = ["folder", "category", "csf_function"]
     search_fields = ["name", "description", "provider"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(ReferenceControl.CATEGORY))
+
+    @action(detail=False, name="Get function choices")
+    def csf_function(self, request):
+        return Response(dict(ReferenceControl.CSF_FUNCTION))
 
 
 class RiskMatrixViewSet(BaseModelViewSet):
@@ -423,6 +427,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "measure_name",
                 "measure_desc",
                 "category",
+                "csf_function",
                 "reference_control",
                 "eta",
                 "effort",
@@ -448,6 +453,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.name,
                     mtg.description,
                     mtg.get_category_display(),
+                    mtg.get_csf_function_display(),
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
@@ -604,6 +610,7 @@ class AppliedControlViewSet(BaseModelViewSet):
     filterset_fields = [
         "folder",
         "category",
+        "csf_function",
         "status",
         "reference_control",
         "effort",
@@ -620,6 +627,10 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(AppliedControl.CATEGORY))
+
+    @action(detail=False, name="Get csf_function choices")
+    def csf_function(self, request):
+        return Response(dict(AppliedControl.CSF_FUNCTION))
 
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
@@ -699,6 +710,7 @@ class PolicyViewSet(AppliedControlViewSet):
     model = Policy
     filterset_fields = [
         "folder",
+        "csf_function",
         "status",
         "reference_control",
         "effort",
@@ -707,6 +719,10 @@ class PolicyViewSet(AppliedControlViewSet):
         "evidences",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+
+    @action(detail=False, name="Get csf_function choices")
+    def csf_function(self, request):
+        return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
 class RiskScenarioViewSet(BaseModelViewSet):
@@ -1114,7 +1130,12 @@ class FrameworkViewSet(BaseModelViewSet):
         uuid_list = request.query_params.getlist("id[]", [])
         queryset = Framework.objects.filter(id__in=uuid_list)
 
-        return Response({str(framework.id): framework.name for framework in queryset})
+        return Response(
+            {
+                str(framework.id): framework.get_name_translated()
+                for framework in queryset
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -1782,6 +1803,7 @@ def export_mp_csv(request):
         "measure_name",
         "measure_desc",
         "category",
+        "csf_function",
         "reference_control",
         "eta",
         "effort",
@@ -1802,6 +1824,7 @@ def export_mp_csv(request):
             mtg.name,
             mtg.description,
             mtg.category,
+            mtg.csf_function,
             mtg.reference_control,
             mtg.eta,
             mtg.effort,

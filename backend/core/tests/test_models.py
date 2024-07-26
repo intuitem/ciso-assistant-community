@@ -666,16 +666,20 @@ class TestAppliedControl:
         assert measure1.folder == root_folder
         assert measure2.folder == folder
 
-    def test_measure_category_inherited_from_function(self):
+    def test_applied_control_inherited_from_reference_control(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
-        function = ReferenceControl.objects.create(
-            name="Function", folder=root_folder, category="technical"
+        reference_control = ReferenceControl.objects.create(
+            name="Function",
+            folder=root_folder,
+            category="technical",
+            csf_function="identify",
         )
-        measure = AppliedControl.objects.create(
-            name="Measure", folder=folder, reference_control=function
+        applied_control = AppliedControl.objects.create(
+            name="Measure", folder=folder, reference_control=reference_control
         )
-        assert measure.category == "technical"
+        assert applied_control.category == "technical"
+        assert applied_control.csf_function == "identify"
 
 
 @pytest.mark.django_db

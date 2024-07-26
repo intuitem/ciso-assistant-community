@@ -129,7 +129,7 @@
 									return currentData; // Keep the current values in the edit form.
 								}
 								updated_fields.add('reference_control');
-								return { ...currentData, category: r.category };
+								return { ...currentData, category: r.category, csf_function: r.csf_function };
 							});
 						});
 				}
@@ -259,13 +259,6 @@
 			/>
 		{/if}
 	{:else if URLModel === 'threats'}
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.ref()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -274,6 +267,20 @@
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
 			hide={initialData.folder}
+		/>
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<TextArea
+			{form}
+			field="annotation"
+			label={m.annotation()}
+			cacheLock={cacheLocks['annotation']}
+			bind:cachedValue={formDataCache['annotation']}
 		/>
 		<TextField
 			{form}
@@ -320,6 +327,14 @@
 				bind:cachedValue={formDataCache['category']}
 			/>
 		{/if}
+		<Select
+			{form}
+			options={model.selectOptions['csf_function']}
+			field="csf_function"
+			label={m.csfFunction()}
+			cacheLock={cacheLocks['csf_function']}
+			bind:cachedValue={formDataCache['csf_function']}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
@@ -454,6 +469,14 @@
 			label={m.category()}
 			cacheLock={cacheLocks['category']}
 			bind:cachedValue={formDataCache['category']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['csf_function']}
+			field="csf_function"
+			label={m.csfFunction()}
+			cacheLock={cacheLocks['csf_function']}
+			bind:cachedValue={formDataCache['csf_function']}
 		/>
 		<TextArea
 			{form}
