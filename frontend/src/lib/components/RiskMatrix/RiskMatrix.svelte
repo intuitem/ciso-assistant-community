@@ -30,19 +30,18 @@
 	for (let i = 0; i < parsedRiskMatrix.impact.length; i++) {
 		popupHover[0].push({
 			event: 'hover',
-			target: 'popup'+'impact'+i,
+			target: 'popup' + 'impact' + i,
 			placement: 'bottom'
-		})
+		});
 	}
 	popupHover[1] = [];
 	for (let i = 0; i < parsedRiskMatrix.probability.length; i++) {
 		popupHover[1].push({
 			event: 'hover',
-			target: 'popup'+'probability'+i,
+			target: 'popup' + 'probability' + i,
 			placement: 'bottom'
-		})
+		});
 	}
-	console.log(displayedRiskMatrix[0].length)
 </script>
 
 <div class="flex flex-row items-center">
@@ -55,20 +54,25 @@
 		{#each displayedRiskMatrix as row, i}
 			{@const reverseIndex = displayedRiskMatrix.length - i - 1}
 			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
-			<div class="card bg-black text-gray-200 p-4 z-20" style="color: {probability.hexcolor}" data-popup={"popup"+"probability"+i}>
-				<p class="font-semibold">{probability.description}</p>
-				<div class="arrow bg-black" />
-			</div>
 			<div
 				class="flex flex-col items-center h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center"
 				style="background: {probability.hexcolor}"
 				data-testid="probability-row-header"
 			>
-				<span class="font-semibold p-1" data-testid="probability-name"
-					>{probability.name}</span
+				<div
+					class="card bg-black text-gray-200 p-4 z-20"
+					style="color: {probability.hexcolor}"
+					data-popup={'popup' + 'probability' + i}
 				>
+					<p data-testid="probability-description" class="font-semibold">
+						{probability.description}
+					</p>
+					<div class="arrow bg-black" />
+				</div>
+				<span class="font-semibold p-1" data-testid="probability-name">{probability.name}</span>
 				{#if probability.description}
-					<i class="fa-solid fa-circle-info [&>*]:pointer-events-none" use:popup={popupHover[1][i]}></i>
+					<i class="fa-solid fa-circle-info [&>*]:pointer-events-none" use:popup={popupHover[1][i]}
+					></i>
 				{/if}
 			</div>
 			{#each row as cell, j}
@@ -91,18 +95,25 @@
 		{/each}
 		<div />
 		{#each parsedRiskMatrix.impact as impact, key}
-			<div class="card bg-black text-gray-200 p-4 z-20" style="color: {impact.hexcolor}" data-popup={"popup"+"impact"+key}>
-				<p class="font-semibold">{impact.description}</p>
-				<div class="arrow bg-black" />
-			</div>
 			<div
 				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2 text-center"
 				style="background: {impact.hexcolor}"
 				data-testid="impact-col-header"
 			>
+				<div
+					class="card bg-black text-gray-200 p-4 z-20"
+					style="color: {impact.hexcolor}"
+					data-popup={'popup' + 'impact' + key}
+				>
+					<p data-testid="impact-description" class="font-semibold">{impact.description}</p>
+					<div class="arrow bg-black" />
+				</div>
 				<span class="font-semibold p-1" data-testid="impact-name">{impact.name}</span>
 				{#if impact.description}
-					<i class="fa-solid fa-circle-info [&>*]:pointer-events-none" use:popup={popupHover[0][key]}></i>
+					<i
+						class="fa-solid fa-circle-info [&>*]:pointer-events-none"
+						use:popup={popupHover[0][key]}
+					></i>
 				{/if}
 			</div>
 		{/each}
