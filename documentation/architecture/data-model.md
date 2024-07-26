@@ -201,7 +201,7 @@ erDiagram
         string  provider
 
         string  category
-        string  function
+        string  csf_function
     }
 
     APPLIED_CONTROL {
@@ -209,7 +209,7 @@ erDiagram
         string   description
 
         string   category
-        string   function
+        string   csf_function
         string   status
         date     eta
         date     expiration
@@ -500,6 +500,7 @@ namespace ReferentialObjects {
     class ReferenceControl {
         +LoadedLibrary library
         +CharField category
+        +CharField csf_function
         +JSONField typical_evidence
         +is_deletable() bool
         +frameworks() Framework[]
@@ -573,6 +574,7 @@ namespace DomainObjects {
         +ReferenceControl REFERENCE_CONTROL
         +Evidence[] evidences
         +CharField category
+        +CharField csf_function
         +CharField status
         +DateField eta
         +DateField expiry_date
@@ -748,6 +750,7 @@ Applied controls are fundamental objects for compliance and remediation. They ca
 
 A applied  control has the following specific fields:
 - a category (same as reference controls)
+- a csf_function (same as reference controls)
 - a status (--/planned/active/inactive)
 - an Estimated Time of Arrival date
 - a validity date (expiration field)
@@ -755,7 +758,7 @@ A applied  control has the following specific fields:
 - a url link
 - a list of user-defined tags
 
-When a applied control derives from a reference control, the same category is proposed, but this can be changed.
+When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
 ## Compliance and risk assessments
 
@@ -935,6 +938,7 @@ Referential objects have the following optional fields:
 - ref_id: reference used in the standard for this object (e.g. A.5.5).
 - provider: describes where the object comes from, e.g. ISO, NIST, CIS, MITRE ATT&CK...
 - annotation: provided by the library packager or the user to clarify the meaning of the object. They can be used for search, and are displayed when available.
+- translations: JSON containing the translations of the object.
 
 Framework and risk matrix objects can only come from a library.
 
@@ -948,15 +952,47 @@ The library_manager role will be defined to manage library objects.
 
 ## Referential objects translation
 
-When a several locales are loaded for a same library (same URN), the first one is loaded normaly, and becomes the reference version. The next ones are loaed in a LibraryTranslation object, that is used to adapt the UI.
-
-The translation JSON field contains a dictionary with urn as key and a dictionary of (field_name, value) as value.
+Referential objects translations are contained inside a JSON called previously *translations*. The translation takes place directly inside the yaml at the point where the object is defined.
 
 Example:
-```
+```yaml
 {
-    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]],
-    "urn:intuitem:risk:req_node:iso27001-2022:4.3", ...
+    - urn: urn:intuitem:risk:req_node:iso27001-2022:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
+      ref_id: '4'
+      name: 'Context of the organization '
+      translations:
+        fr:
+          name: Contexte de l'organisation
+          description: null
+        ...
+}
+```
+
+Everything in the library can be translated, from the library itself to the the last object. To specify that the library is available in a language other than the default one, *translations* field has to be filled for the language(s) concerned.
+
+Example:
+```yaml
+{
+    urn: urn:intuitem:risk:library:iso27001-2022
+    locale: en
+    ref_id: ISO/IEC 27001:2022
+    name: International standard ISO/IEC 27001:2022
+    description: "Information security, cybersecurity and privacy protection \u2014 Information\
+    \ security management systems \u2014 Requirements"
+    copyright: See https://www.iso.org/standard/27001
+    version: 3
+    provider: ISO/IEC
+    packager: intuitem
+    translations:
+    fr:
+        name: Norme internationale ISO/IEC 27001:2022
+        description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
+        \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la s\xE9\
+        curit\xE9 \u2014 Exigences"
+        copyright: Voir https://www.iso.org/standard/27001
 }
 ```
 
