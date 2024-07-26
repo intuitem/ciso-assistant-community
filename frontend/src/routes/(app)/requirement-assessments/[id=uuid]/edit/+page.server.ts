@@ -26,7 +26,12 @@ export const load = (async ({ fetch, params }) => {
 		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
 	).then((res) => res.json());
 	const requirement = await fetch(
-		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
+		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`,
+		{
+			headers: {
+				'Accept-Language': languageTag()
+			}
+		}
 	).then((res) => res.json());
 	const parentRequirementNodeEndpoint = `${BASE_API_URL}/requirement-nodes/?urn=${requirement.parent_urn}`;
 	const parent = await fetch(parentRequirementNodeEndpoint)

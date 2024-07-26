@@ -259,13 +259,6 @@
 			/>
 		{/if}
 	{:else if URLModel === 'threats'}
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.ref()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -274,6 +267,20 @@
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
 			hide={initialData.folder}
+		/>
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<TextArea
+			{form}
+			field="annotation"
+			label={m.annotation()}
+			cacheLock={cacheLocks['annotation']}
+			bind:cachedValue={formDataCache['annotation']}
 		/>
 		<TextField
 			{form}

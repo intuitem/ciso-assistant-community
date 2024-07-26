@@ -355,7 +355,7 @@
 	"loadingLibraryUploadButton": "Caricamento pulsante di caricamento della biblioteca",
 	"errorOccuredWhileLoadingLibrary": "Si è verificato il seguente errore durante il caricamento del modulo della biblioteca",
 	"packager": "Impacchettatore",
-	"packagerColon": "Confezionatore:",
+	"packagerColon": "Impacchettatore:",
 	"dependencies": "Dipendenze",
 	"copyright": "Copyright",
 	"addYourLibrary": "Aggiungi la tua biblioteca",

@@ -12,6 +12,8 @@ from .validators import validate_file_size, validate_file_name
 from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
+from django.utils.translation import get_language
+from library.helpers import update_translations_in_object, update_translations
 
 import os
 import json
@@ -52,18 +54,39 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     )
     description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    translations = models.JSONField(
+        null=True, blank=True, verbose_name=_("Translations")
+    )
 
     class Meta:
         abstract = True
 
     @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("name", self.name)
+
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("description", self.description)
+
+    @property
+    def get_annotation_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("annotation", self.annotation)
+
+    @property
     def display_short(self) -> str:
         _name = (
             self.ref_id
-            if not self.name
-            else self.name
+            if not self.get_name_translated
+            else self.get_name_translated
             if not self.ref_id
-            else f"{self.ref_id} - {self.name}"
+            else f"{self.ref_id} - {self.get_name_translated}"
         )
         _name = "" if not _name else _name
         return _name
@@ -73,10 +96,10 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
         _name = self.display_short
         _display = (
             _name
-            if not self.description
-            else self.description
+            if not self.get_description_translated
+            else self.get_description_translated
             if _name == ""
-            else f"{_name}: {self.description}"
+            else f"{_name}: {self.get_description_translated}"
         )
         return _display
 
@@ -116,6 +139,14 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     dependencies = models.JSONField(
         null=True
     )  # models.CharField(blank=False,null=True,max_length=16384)
+
+    @property
+    def get_locales(self):
+        return (
+            [self.locale] + list(self.translations.keys())
+            if self.translations
+            else [self.locale]
+        )
 
 
 class StoredLibrary(LibraryMixin):
@@ -201,6 +232,7 @@ class StoredLibrary(LibraryMixin):
             copyright=library_data.get("copyright"),
             provider=library_data.get("provider"),
             packager=library_data.get("packager"),
+            translations=library_data.get("translations", {}),
             objects_meta=objects_meta,
             dependencies=dependencies,
             is_loaded=is_loaded,
@@ -323,6 +355,7 @@ class LibraryUpdater:
             ("ref_id", self.new_library.ref_id),  # Should we even update the ref_id ?
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
+            ("translations", self.new_library.translations),
             ("copyright", self.new_library.copyright),
             ("objects_meta", self.new_library.objects_meta),
         ]:
@@ -520,21 +553,26 @@ class LoadedLibrary(LibraryMixin):
     def _objects(self):
         res = {}
         if self.frameworks.count() > 0:
-            res["framework"] = model_to_dict(self.frameworks.first())
+            res["framework"] = update_translations_in_object(
+                model_to_dict(self.frameworks.first())
+            )
             res["framework"].update(self.frameworks.first().library_entry)
         if self.threats.count() > 0:
-            res["threats"] = [model_to_dict(threat) for threat in self.threats.all()]
+            res["threats"] = [
+                update_translations_in_object(model_to_dict(threat))
+                for threat in self.threats.all()
+            ]
         if self.reference_controls.count() > 0:
             res["reference_controls"] = [
-                model_to_dict(reference_control)
+                update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
         if self.risk_matrices.count() > 0:
             matrix = self.risk_matrices.first()
-            res["risk_matrix"] = model_to_dict(matrix)
-            res["risk_matrix"]["probability"] = matrix.probability
-            res["risk_matrix"]["impact"] = matrix.impact
-            res["risk_matrix"]["risk"] = matrix.risk
+            res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
+            res["risk_matrix"]["probability"] = update_translations(matrix.probability)
+            res["risk_matrix"]["impact"] = update_translations(matrix.impact)
+            res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
@@ -746,8 +784,12 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
         return res
 
+    @property
+    def get_json_translated(self):
+        return update_translations(self.json_definition, "fr")
+
     def __str__(self) -> str:
-        return self.name
+        return self.get_name_translated
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):

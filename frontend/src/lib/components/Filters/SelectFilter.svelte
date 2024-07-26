@@ -8,8 +8,9 @@
 	export let alwaysDefined: boolean = false;
 	export let optionLabels: { [key: string]: string } = {};
 	const hasOptionLabels = Object.keys(optionLabels).length > 0;
+	let transformedOptions = [...new Set(options.flat())];
 
-	$: optionsCount = options.length - (field === 'status' ? 1 : 0);
+	$: optionsCount = transformedOptions.length - (field === 'status' ? 1 : 0);
 
 	let textInputNode: HTMLElement | null = null;
 	let textInputMountedCount: number = 0;
@@ -25,15 +26,15 @@
 
 	$: searchText = searchText.toLowerCase();
 	// Make the search accent insensitive would be even better.
-	$: matchingOptionsIndices = options
+	$: matchingOptionsIndices = transformedOptions
 		.map((option, optionIndex) =>
 			option ? [optionIndex, option.toLowerCase().indexOf(searchText)] : [null, -1]
 		)
 		.filter(([_, matchIndex]) => matchIndex >= 0);
 
-	/* if (options.some(x => x === "Domain 1")) { // Code to test the scroll
+	/* if (transformedOptions.some(x => x === "Domain 1")) { // Code to test the scroll
 		for (let i=4;i<50;i++) {
-			options.push(`Dom4in ${i}`);
+			transformedOptions.push(`Dom4in ${i}`);
 		}
 	} */
 </script>
@@ -45,7 +46,7 @@
 	}}
 />
 
-{#if options.length > Number(alwaysDefined)}
+{#if transformedOptions.length > Number(alwaysDefined)}
 	{#if !hasOptionLabels}
 		<!-- We should use class="m-0" instead of style="margin: 0;" but i didn't figure out to make tailwind add this class yet -->
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -78,7 +79,7 @@
 							>
 						{/if}
 						{#each matchingOptionsIndices as [optionIndex, matchIndex]}
-							{@const option = options[optionIndex]}
+							{@const option = transformedOptions[optionIndex]}
 							{@const splittedOption = [
 								option.substring(0, matchIndex),
 								option.substring(matchIndex, matchIndex + searchText.length),
@@ -108,7 +109,7 @@
 		</div>
 	{:else}
 		<!-- We should use class="m-0" instead of style="margin: 0;" but i didn't figure out to make tailwind add this class yet -->
-		{#if options.length > 0}
+		{#if transformedOptions.length > 0}
 			<select
 				class="input bg-surface-50 max-w-2xl focus:rounded-b-none"
 				placeholder=""
@@ -116,7 +117,7 @@
 				style="margin: 0;"
 			>
 				<option class="" value={null} selected>{m[defaultOptionName]()}</option>
-				{#each options as option}
+				{#each transformedOptions as option}
 					{#if option}
 						{@const label = optionLabels[option] ?? option}
 						<option class="" value={option}>
