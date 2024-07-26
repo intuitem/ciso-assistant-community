@@ -69,7 +69,6 @@ export const load = (async ({ fetch, params }) => {
 		.then((res) => res.json())
 		.then((data) => data.results);
 	const mappingSetIds = mappingSets.map((mappingSet) => mappingSet.id);
-	console.log(mappingSetIds);
 	auditModel.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};

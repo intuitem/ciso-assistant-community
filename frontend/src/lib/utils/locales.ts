@@ -115,6 +115,7 @@ export function localItems(): LocalItems {
 		firstName: m.firstName(),
 		lastName: m.lastName(),
 		category: m.category(),
+		function: m.csfFunction(),
 		eta: m.eta(),
 		referenceControl: m.referenceControl(),
 		appliedControl: m.appliedControl(),

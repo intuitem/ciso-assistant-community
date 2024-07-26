@@ -270,6 +270,9 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     category = serializers.CharField(
         source="get_category_display"
     )  # type : get_type_display
+    csf_function = serializers.CharField(
+        source="get_csf_function_display"
+    )  # type : get_type_display
     status = serializers.CharField(source="get_status_display")
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")

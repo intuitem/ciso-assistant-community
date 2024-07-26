@@ -88,6 +88,7 @@
 	"firstName": "الاسم الأول",
 	"lastName": "اسم العائلة",
 	"category": "الفئة",
+	"csfFunction": "وظيفة",
 	"eta": "ETA",
 	"referenceControl": "التحكم المرجعي",
 	"appliedControl": "التحكم المطبق",
