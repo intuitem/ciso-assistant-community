@@ -92,6 +92,7 @@
 	"firstName": "Prénom",
 	"lastName": "Nom de famille",
 	"category": "Catégorie",
+	"csfFunction": "Fonction",
 	"eta": "ETA",
 	"referenceControl": "Mesure de référence",
 	"appliedControl": "Mesure appliquée",

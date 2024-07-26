@@ -296,8 +296,8 @@
 					on:keydown={(e) => { onRowKeydown(e, rowIndex); }}
 					aria-rowindex={rowIndex + 1}
 				>
-					{#each Object.entries(row) as [key, value]}
-            {#if key !== 'meta'}
+				{#each Object.entries(row) as [key, value]}
+            		{#if key !== 'meta'}
 						{@const component = field_component_map[key]}
 						<!-- Cell -->
 						<!-- prettier-ignore -->

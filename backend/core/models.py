@@ -18,6 +18,7 @@ from library.helpers import update_translations_in_object, update_translations
 import os
 import json
 import yaml
+import re
 
 from django.core.exceptions import ValidationError
 
@@ -31,6 +32,18 @@ from structlog import get_logger
 logger = get_logger(__name__)
 
 User = get_user_model()
+
+
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
+
+
+def match_urn(urn_string):
+    match = re.match(URN_REGEX, urn_string)
+    if match:
+        return match.groups()  # Returns all captured groups from the regex match
+    else:
+        return None
+
 
 ########################### Referential objects #########################
 
@@ -168,8 +181,6 @@ class StoredLibrary(LibraryMixin):
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False
     ) -> "StoredLibrary | None":
-        from library.utils import match_urn
-
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             return None  # We do not store the library if its hash checksum is in the database.
@@ -182,7 +193,6 @@ class StoredLibrary(LibraryMixin):
         except yaml.YAMLError as e:
             logger.error("Error while loading library content", error=e)
             raise e
-
         missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
 
         if missing_fields:
@@ -247,6 +257,7 @@ class StoredLibrary(LibraryMixin):
     ) -> "StoredLibrary | None":
         with open(fname, "rb") as f:
             library_content = f.read()
+
         return StoredLibrary.store_library_content(library_content, builtin)
 
     def load(self) -> Union[str, None]:
@@ -657,6 +668,15 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         ("physical", _("Physical")),
     ]
 
+    CSF_FUNCTION = [
+        ("govern", _("Govern")),
+        ("identify", _("Identify")),
+        ("protect", _("Protect")),
+        ("detect", _("Detect")),
+        ("respond", _("Respond")),
+        ("recover", _("Recover")),
+    ]
+
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -671,6 +691,14 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         blank=True,
         choices=CATEGORY,
         verbose_name=_("Category"),
+    )
+
+    csf_function = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=CSF_FUNCTION,
+        verbose_name=_("CSF Function"),
     )
 
     typical_evidence = models.JSONField(
@@ -1149,6 +1177,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         INACTIVE = "inactive", _("Inactive")
 
     CATEGORY = ReferenceControl.CATEGORY
+    CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
 
     EFFORT = [
         ("S", _("Small")),
@@ -1178,6 +1207,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         null=True,
         blank=True,
         verbose_name=_("Category"),
+    )
+    csf_function = models.CharField(
+        max_length=20,
+        choices=CSF_FUNCTION,
+        null=True,
+        blank=True,
+        verbose_name=_("CSF Function"),
     )
     status = models.CharField(
         max_length=20,
@@ -1223,6 +1259,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     def save(self, *args, **kwargs):
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
+        if self.reference_control and self.csf_function is None:
+            self.csf_function = self.reference_control.csf_function
         super(AppliedControl, self).save(*args, **kwargs)
 
     @property

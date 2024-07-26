@@ -201,7 +201,7 @@ erDiagram
         string  provider
 
         string  category
-        string  function
+        string  csf_function
     }
 
     APPLIED_CONTROL {
@@ -209,7 +209,7 @@ erDiagram
         string   description
 
         string   category
-        string   function
+        string   csf_function
         string   status
         date     eta
         date     expiration
@@ -500,6 +500,7 @@ namespace ReferentialObjects {
     class ReferenceControl {
         +LoadedLibrary library
         +CharField category
+        +CharField csf_function
         +JSONField typical_evidence
         +is_deletable() bool
         +frameworks() Framework[]
@@ -573,6 +574,7 @@ namespace DomainObjects {
         +ReferenceControl REFERENCE_CONTROL
         +Evidence[] evidences
         +CharField category
+        +CharField csf_function
         +CharField status
         +DateField eta
         +DateField expiry_date
@@ -748,6 +750,7 @@ Applied controls are fundamental objects for compliance and remediation. They ca
 
 A applied  control has the following specific fields:
 - a category (same as reference controls)
+- a csf_function (same as reference controls)
 - a status (--/planned/active/inactive)
 - an Estimated Time of Arrival date
 - a validity date (expiration field)
@@ -755,7 +758,7 @@ A applied  control has the following specific fields:
 - a url link
 - a list of user-defined tags
 
-When a applied control derives from a reference control, the same category is proposed, but this can be changed.
+When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
 ## Compliance and risk assessments
 
