@@ -1,0 +1,109 @@
+urn: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+locale: en
+ref_id: risk-matrix-5x5-iso27005
+name: 5x5 ISO-27005
+description: 5x5 matrix from ISO 27005 Annex A
+copyright: ISO
+version: 1
+provider: intuitem
+packager: intuitem
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:5x5-iso27005
+    ref_id: risk-matrix-5x5-iso27005
+    name: 5x5 ISO-27005
+    description: 5x5 matrix from ISO 27005 Annex A
+    probability:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - unlikely
+      description: The likelihood of the risk scenario is very low
+    - id: 1
+      abbreviation: '2'
+      name: 2 - rather unlikely
+      description: The likelihood of the risk scenario is low
+    - id: 2
+      abbreviation: '3'
+      name: 3 - likely
+      description: The likelihood of the risk scenario is significant
+    - id: 3
+      abbreviation: '4'
+      name: 4 - very likely
+      description: The likelihood of the risk scenario is high
+    - id: 4
+      abbreviation: '5'
+      name: 5 - almost certain
+      description: The likelihood of the risk scenario is very high
+    impact:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - minor
+      description: Negligible consequences for the organization
+    - id: 1
+      abbreviation: '2'
+      name: 2 - significant
+      description: Significant but limited consequences for the organization
+    - id: 2
+      abbreviation: '3'
+      name: 3 - serious
+      description: Substantial consequences for the organization
+    - id: 3
+      abbreviation: '4'
+      name: 4 - critical
+      description: Disastrous consequences for the organization
+    - id: 4
+      abbreviation: '5'
+      name: 5 - Catastrophic
+      description: Sector or regulatory consequences beyond the organization
+    risk:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - very low
+      description: very low - acceptable risk
+      hexcolor: '#D3FF4E'
+    - id: 1
+      abbreviation: '2'
+      name: 2 - low
+      description: low - acceptable risk
+      hexcolor: '#02A45A'
+    - id: 2
+      abbreviation: '3'
+      name: 3 - medium
+      description: medium - tolerable risk
+      hexcolor: '#FFA600'
+    - id: 3
+      abbreviation: '4'
+      name: 4 - high
+      description: high - unacceptable risk
+      hexcolor: '#FF1A00'
+    - id: 4
+      abbreviation: '5'
+      name: 5 - very high
+      description: very high - unacceptable risk
+      hexcolor: '#C00000'
+    grid:
+    - - 0
+      - 0
+      - 1
+      - 1
+      - 1
+    - - 0
+      - 1
+      - 1
+      - 2
+      - 2
+    - - 1
+      - 1
+      - 2
+      - 3
+      - 3
+    - - 2
+      - 2
+      - 3
+      - 3
+      - 4
+    - - 2
+      - 3
+      - 3
+      - 4
+      - 4
