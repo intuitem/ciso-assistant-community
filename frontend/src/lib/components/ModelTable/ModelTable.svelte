@@ -208,6 +208,7 @@
 	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 
 	import { popup } from '@skeletonlabs/skeleton';
