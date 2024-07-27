@@ -645,7 +645,6 @@ for tab in dataframe:
                 }
                 if translations:
                     object["translations"] = translations
-                    print(object, translations)
                 if color:
                     object["hexcolor"] = color
                 risk_matrix[ctype].append(object)
@@ -655,7 +654,6 @@ for tab in dataframe:
         risk_matrix["grid"] = [grid[id] for id in sorted(grid)]
         for id in grid:
             for i, risk_id in enumerate(grid[id]):
-                print(id, i, risk_id)
                 risk_color = (
                     risk_matrix["risk"][risk_id]["hexcolor"]
                     if "hexcolor" in risk_matrix["risk"][risk_id]
@@ -779,7 +777,6 @@ if has_framework:
 if risk_matrix:
     library["objects"]["risk_matrix"] = [risk_matrix]
     translations = get_translations_content(library_vars, "risk_matrix")
-    print("cocuou", translations)
     if translations:
         library["objects"]["risk_matrix"][0]["translations"] = translations
 
