@@ -7,18 +7,27 @@ import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { fail, type Actions } from '@sveltejs/kit';
 import * as m from '$paraglide/messages';
 import { localItems, toCamelCase } from '$lib/utils/locales';
+import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const objectEndpoint = `${endpoint}object`;
 
-	const res = await fetch(endpoint);
+	const res = await fetch(endpoint, {
+		headers: {
+			'Accept-Language': languageTag()
+		}
+	});
 	const compliance_assessment = await res.json();
 
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 
-	const tree = await fetch(`${endpoint}tree/`).then((res) => res.json());
+	const tree = await fetch(`${endpoint}tree/`, {
+		headers: {
+			'Accept-Language': languageTag()
+		}
+	}).then((res) => res.json());
 
 	const compliance_assessment_donut_values = await fetch(
 		`${BASE_API_URL}/${URLModel}/${params.id}/donut_data/`
@@ -60,7 +69,6 @@ export const load = (async ({ fetch, params }) => {
 		.then((res) => res.json())
 		.then((data) => data.results);
 	const mappingSetIds = mappingSets.map((mappingSet) => mappingSet.id);
-	console.log(mappingSetIds);
 	auditModel.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};

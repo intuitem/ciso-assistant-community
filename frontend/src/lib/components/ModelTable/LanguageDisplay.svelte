@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants.js';
-	export let cell: keyof typeof LOCALE_DISPLAY_MAP;
-	export const meta: any = undefined;
-	$: display = LOCALE_DISPLAY_MAP[cell];
+	export let cell: Array<any>;
+	$: display = cell.map((lang) => LOCALE_DISPLAY_MAP[lang]);
 </script>
 
-<span {...$$restProps}>{display}</span>
+<span {...$$restProps}>
+	{#each display as lang}
+		<p>{lang}</p>
+	{/each}
+</span>

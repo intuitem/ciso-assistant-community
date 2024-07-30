@@ -1,3 +1,5 @@
+// description of the columns for each ListView
+
 import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
@@ -191,7 +193,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 
 const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.locale,
+	getColumn: (row) => row.locales,
 	extraProps: {
 		defaultOptionName: 'language', // Make translations
 		optionLabels: LOCALE_DISPLAY_MAP
@@ -212,6 +214,15 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 	getColumn: (row) => row.meta.category,
 	extraProps: {
 		defaultOptionName: 'category' // Make translations
+	},
+	alwaysDisplay: true
+};
+
+const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.csf_function,
+	extraProps: {
+		defaultOptionName: 'csfFunction' // Make translations
 	},
 	alwaysDisplay: true
 };
@@ -255,7 +266,7 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
@@ -299,28 +310,30 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control'],
+		head: ['name', 'description', 'category', 'csfFunction', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'category', 'csf_function', 'eta', 'folder', 'reference_control'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: STATUS_FILTER,
-			category: CATEGORY_FILTER
+			category: CATEGORY_FILTER,
+			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
 	policies: {
-		head: ['name', 'description', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'eta', 'folder', 'reference_control'],
+		head: ['name', 'description', 'csfFunction', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'csf_function', 'eta', 'folder', 'reference_control'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
 	},
 	'reference-controls': {
-		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],
-		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
+		head: ['ref', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
+		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
-			category: CATEGORY_FILTER
+			category: CATEGORY_FILTER,
+			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
 	assets: {
@@ -373,8 +386,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		breadcrumb_link_disabled: true
 	},
 	evidences: {
-		head: ['name', 'file', 'description'],
-		body: ['name', 'attachment', 'description'],
+		head: ['name', 'file', 'size', 'description'],
+		body: ['name', 'attachment', 'size', 'description'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_META, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
 		}
@@ -386,22 +399,22 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	libraries: {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+		body: ['ref_id', 'name', 'description', 'locales', 'overview']
 	},
 	'stored-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
+		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER,
+			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER_FOR_LIBRARIES
 			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
 	'loaded-libraries': {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locale', 'overview'],
+		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
 		filters: {
-			locale: LANGUAGE_FILTER,
+			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER_FOR_LIBRARIES
 		}
 	},

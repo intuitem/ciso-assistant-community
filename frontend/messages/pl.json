@@ -92,6 +92,7 @@
 	"firstName": "Imię",
 	"lastName": "Nazwisko",
 	"category": "Kategoria",
+	"csfFunction": "funkcjonować",
 	"eta": "ETA",
 	"referenceControl": "Kontrola referencyjna",
 	"appliedControl": "Zastosowana kontrola",
@@ -355,7 +356,7 @@
 	"loadingLibraryUploadButton": "Ładowanie przycisku przesyłania biblioteki",
 	"errorOccuredWhileLoadingLibrary": "Wystąpił następujący błąd podczas ładowania formularza biblioteki",
 	"packager": "Paker",
-	"packagerColon": "Pakowacz:",
+	"packagerColon": "Paker:",
 	"dependencies": "Zależności",
 	"copyright": "Prawa autorskie",
 	"addYourLibrary": "Dodaj własną bibliotekę",
@@ -474,6 +475,7 @@
 	"domainManager": "Menadżer domeny",
 	"analyst": "Analityk",
 	"successfullyCreatedObject": "Obiekt {object} został pomyślnie utworzony",
+	"successfullyDuplicateObject": "Obiekt {object} został pomyślnie zduplikowany",
 	"successfullyUpdatedObject": "Obiekt {object} został pomyślnie zaktualizowany",
 	"successfullySavedObject": "Obiekt {object} został pomyślnie zapisany",
 	"successfullyDeletedObject": "Obiekt {object} został pomyślnie usunięty",
@@ -647,5 +649,8 @@
 	"notApplicableScore": "Nie możesz zdobyć punktów, jeśli ocena wymagań nie ma zastosowania",
 	"maturity": "Dojrzałość",
 	"progress": "Postęp",
-	"back": "Powrót"
+	"back": "Powrót",
+	"duplicate": "Duplikować",
+	"duplicateRiskAssessment": "Powielić ocenę ryzyka",
+	"size": "Rozmiar"
 }

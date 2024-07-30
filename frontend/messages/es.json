@@ -92,6 +92,7 @@
 	"firstName": "Nombre",
 	"lastName": "Apellido",
 	"category": "Categoría",
+	"csfFunction": "función",
 	"eta": "ETA",
 	"referenceControl": "Control de referencia",
 	"appliedControl": "Control aplicado",
@@ -474,6 +475,7 @@
 	"domainManager": "Gerente de dominio",
 	"analyst": "Analista",
 	"successfullyCreatedObject": "El objeto {object} se ha creado con éxito",
+	"successfullyDuplicateObject": "El objeto {object} se ha duplicado correctamente",
 	"successfullyUpdatedObject": "El objeto {object} se ha actualizado con éxito",
 	"successfullySavedObject": "El objeto {object} se ha guardado con éxito",
 	"successfullyDeletedObject": "El objeto {object} se ha eliminado con éxito",
@@ -610,5 +612,8 @@
 	"notApplicableScore": "No se puede puntuar si la evaluación de requisitos no es aplicable",
 	"maturity": "Madurez",
 	"progress": "Progresión",
-	"back": "Devolver"
+	"back": "Devolver",
+	"duplicate": "Duplicar",
+	"duplicateRiskAssessment": "Duplicar la evaluación de riesgo",
+	"size": "Tamaño"
 }

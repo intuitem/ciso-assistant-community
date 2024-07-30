@@ -81,6 +81,7 @@ Conventions:
             - name
             - description
             - category (policy/process/techncial/physical).
+            - csf_function (govern/identify/protect/detect/respond/recover).
             - annotation
     For risk matrices:
         The first line is a header, with the following mandatory fields:

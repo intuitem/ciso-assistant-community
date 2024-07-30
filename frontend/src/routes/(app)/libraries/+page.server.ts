@@ -21,8 +21,16 @@ export const load = (async ({ fetch }) => {
 	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/`;
 
 	const [stored_libraries_res, loaded_libaries_res] = await Promise.all([
-		fetch(stored_libraries_endpoint),
-		fetch(loaded_libaries_endpoint)
+		fetch(stored_libraries_endpoint, {
+			headers: {
+				'Accept-Language': languageTag()
+			}
+		}),
+		fetch(loaded_libaries_endpoint, {
+			headers: {
+				'Accept-Language': languageTag()
+			}
+		})
 	]);
 
 	const storedLibraries = await stored_libraries_res.json().then((res) => res.results);

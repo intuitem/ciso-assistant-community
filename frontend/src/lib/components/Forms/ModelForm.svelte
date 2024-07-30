@@ -23,7 +23,6 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { createModalCache } from '$lib/utils/stores';
-	import CreateModal from '../Modals/CreateModal.svelte';
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let context = 'default';
@@ -32,6 +31,7 @@
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
+	export let riskAssessmentDuplication = false;
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -129,7 +129,7 @@
 									return currentData; // Keep the current values in the edit form.
 								}
 								updated_fields.add('reference_control');
-								return { ...currentData, category: r.category };
+								return { ...currentData, category: r.category, csf_function: r.csf_function };
 							});
 						});
 				}
@@ -181,7 +181,7 @@
 			cacheLock={cacheLocks['lc_status']}
 			bind:cachedValue={formDataCache['lc_status']}
 		/>
-	{:else if URLModel === 'risk-assessments'}
+	{:else if URLModel === 'risk-assessments' || URLModel === 'risk-assessment-duplicate'}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
@@ -201,68 +201,64 @@
 			cacheLock={cacheLocks['version']}
 			bind:cachedValue={formDataCache['version']}
 		/>
-		<Select
-			{form}
-			options={model.selectOptions['status']}
-			field="status"
-			label={m.status()}
-			cacheLock={cacheLocks['status']}
-			bind:cachedValue={formDataCache['status']}
-		/>
-		<AutocompleteSelect
-			{form}
-			disabled={object.id}
-			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
-			field="risk_matrix"
-			cacheLock={cacheLocks['risk_matrix']}
-			bind:cachedValue={formDataCache['risk_matrix']}
-			label={m.riskMatrix()}
-			helpText={m.riskAssessmentMatrixHelpText()}
-		/>
-		<AutocompleteSelect
-			{form}
-			multiple
-			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
-			field="authors"
-			cacheLock={cacheLocks['authors']}
-			bind:cachedValue={formDataCache['authors']}
-			label={m.authors()}
-		/>
-		<AutocompleteSelect
-			{form}
-			multiple
-			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
-			field="reviewers"
-			cacheLock={cacheLocks['reviewers']}
-			bind:cachedValue={formDataCache['reviewers']}
-			label={m.reviewers()}
-		/>
-		<TextField
-			type="date"
-			{form}
-			field="eta"
-			label={m.eta()}
-			helpText={m.etaHelpText()}
-			cacheLock={cacheLocks['eta']}
-			bind:cachedValue={formDataCache['eta']}
-		/>
-		<TextField
-			type="date"
-			{form}
-			field="due_date"
-			label={m.dueDate()}
-			helpText={m.dueDateHelpText()}
-			cacheLock={cacheLocks['due_date']}
-			bind:cachedValue={formDataCache['due_date']}
-		/>
+		{#if !riskAssessmentDuplication}
+			<Select
+				{form}
+				options={model.selectOptions['status']}
+				field="status"
+				hide
+				label={m.status()}
+				cacheLock={cacheLocks['status']}
+				bind:cachedValue={formDataCache['status']}
+			/>
+			<AutocompleteSelect
+				{form}
+				disabled={object.id}
+				options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
+				field="risk_matrix"
+				cacheLock={cacheLocks['risk_matrix']}
+				bind:cachedValue={formDataCache['risk_matrix']}
+				label={m.riskMatrix()}
+				helpText={m.riskAssessmentMatrixHelpText()}
+			/>
+			<AutocompleteSelect
+				{form}
+				multiple
+				options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+				field="authors"
+				cacheLock={cacheLocks['authors']}
+				bind:cachedValue={formDataCache['authors']}
+				label={m.authors()}
+			/>
+			<AutocompleteSelect
+				{form}
+				multiple
+				options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+				field="reviewers"
+				cacheLock={cacheLocks['reviewers']}
+				bind:cachedValue={formDataCache['reviewers']}
+				label={m.reviewers()}
+			/>
+			<TextField
+				type="date"
+				{form}
+				field="eta"
+				label={m.eta()}
+				helpText={m.etaHelpText()}
+				cacheLock={cacheLocks['eta']}
+				bind:cachedValue={formDataCache['eta']}
+			/>
+			<TextField
+				type="date"
+				{form}
+				field="due_date"
+				label={m.dueDate()}
+				helpText={m.dueDateHelpText()}
+				cacheLock={cacheLocks['due_date']}
+				bind:cachedValue={formDataCache['due_date']}
+			/>
+		{/if}
 	{:else if URLModel === 'threats'}
-		<TextField
-			{form}
-			field="ref_id"
-			label={m.ref()}
-			cacheLock={cacheLocks['ref_id']}
-			bind:cachedValue={formDataCache['ref_id']}
-		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -271,6 +267,20 @@
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
 			hide={initialData.folder}
+		/>
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<TextArea
+			{form}
+			field="annotation"
+			label={m.annotation()}
+			cacheLock={cacheLocks['annotation']}
+			bind:cachedValue={formDataCache['annotation']}
 		/>
 		<TextField
 			{form}
@@ -284,6 +294,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_assessment'],
+				label: 'str',
 				extra_fields: [['project', 'str']]
 			})}
 			field="risk_assessment"
@@ -316,6 +327,14 @@
 				bind:cachedValue={formDataCache['category']}
 			/>
 		{/if}
+		<Select
+			{form}
+			options={model.selectOptions['csf_function']}
+			field="csf_function"
+			label={m.csfFunction()}
+			cacheLock={cacheLocks['csf_function']}
+			bind:cachedValue={formDataCache['csf_function']}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
@@ -423,7 +442,10 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_scenarios'],
-				extra_fields: [['project', 'str']]
+				extra_fields: [
+					['project', 'str'],
+					['risk_assessment', 'str']
+				]
 			})}
 			field="risk_scenarios"
 			cacheLock={cacheLocks['risk_scenarios']}
@@ -447,6 +469,14 @@
 			label={m.category()}
 			cacheLock={cacheLocks['category']}
 			bind:cachedValue={formDataCache['category']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['csf_function']}
+			field="csf_function"
+			label={m.csfFunction()}
+			cacheLock={cacheLocks['csf_function']}
+			bind:cachedValue={formDataCache['csf_function']}
 		/>
 		<TextArea
 			{form}
@@ -1010,7 +1040,10 @@
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit">{m.save()}</button
+				type="submit"
+				on:click={(event) => {
+					createModalCache.deleteCache(model.urlModel);
+				}}>{m.save()}</button
 			>
 		{:else}
 			{#if cancelButton}
