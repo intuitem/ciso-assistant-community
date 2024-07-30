@@ -4,6 +4,7 @@
 	import * as m from '../../../paraglide/messages';
 	import type { ComponentType } from 'svelte';
 	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { isDark } from '$lib/utils/helpers';
 
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
@@ -42,6 +43,10 @@
 			placement: 'bottom'
 		});
 	}
+
+	$: classesCellText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
+	};
 </script>
 
 <div class="flex flex-row items-center">
@@ -55,7 +60,9 @@
 			{@const reverseIndex = displayedRiskMatrix.length - i - 1}
 			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
 			<div
-				class="flex flex-col items-center h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center"
+				class="flex flex-col items-center h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center {classesCellText(
+					probability.hexcolor ?? '#FFFFFF'
+				)}"
 				style="background: {probability.hexcolor}"
 				data-testid="probability-row-header"
 			>
@@ -77,7 +84,9 @@
 			</div>
 			{#each row as cell, j}
 				<div
-					class="flex flex-wrap items-center space-x-1 justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar"
+					class="flex flex-wrap items-center space-x-1 justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
+						cell.level.hexcolor
+					)}"
 					style="background-color: {cell.level.hexcolor};"
 					data-testid="cell"
 				>
@@ -96,7 +105,9 @@
 		<div />
 		{#each parsedRiskMatrix.impact as impact, key}
 			<div
-				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2 text-center"
+				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2 text-center {classesCellText(
+					impact.hexcolor ?? '#FFFFFF'
+				)}"
 				style="background: {impact.hexcolor}"
 				data-testid="impact-col-header"
 			>
@@ -128,7 +139,9 @@
 				{#each parsedRiskMatrix.risk as risk}
 					<tr class="col">
 						<td
-							class="w-16 text-center border-4 border-white p-2 font-semibold whitespace-nowrap"
+							class="w-16 text-center border-4 border-white p-2 font-semibold whitespace-nowrap {classesCellText(
+								risk.hexcolor
+							)}"
 							style="background-color: {risk.hexcolor}"
 						>
 							{risk.name}
