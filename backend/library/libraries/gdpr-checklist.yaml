@@ -45,20 +45,45 @@ copyright: "Terms and conditions\n\nThe following terms and conditions govern al
   \ to the Agreement shall be subject to the jurisdiction of the competent courts\
   \ of the Canton of Geneva, the jurisdiction of the Swiss Federal Court being expressly\
   \ reserved."
-version: 1
+version: 2
 provider: GDPR.EU
 packager: intuitem
+translations:
+  pl:
+    name: "Lista kontrolna RODO dla administrator\xF3w danych"
+    description: "GDPR.EU Lista kontrolna RODO dla administrator\xF3w danych  (https://gdpr.eu/checklist/)"
+  fr:
+    name: "Liste de contr\xF4le RGPD pour les responsables du traitement des donn\xE9\
+      es"
+    description: "Liste de contr\xF4le RGPD pour les responsables du traitement des\
+      \ donn\xE9es  (https://gdpr.eu/checklist/)"
 objects:
   framework:
     urn: urn:intuitem:risk:framework:gdpr-checklist
     ref_id: GDPR-checklist
     name: GDPR checklist for data controllers
     description: GDPR.EU checklist for data controllers  (https://gdpr.eu/checklist/)
+    translations:
+      pl:
+        name: "Lista kontrolna RODO dla administrator\xF3w danych"
+        description: "Lista kontrolna RODO dla administrator\xF3w danych  (https://gdpr.eu/checklist/)"
+      fr:
+        name: "Liste de contr\xF4le RGPD pour les responsables du traitement des donn\xE9\
+          es"
+        description: "Liste de contr\xF4le RGPD pour les responsables du traitement\
+          \ des donn\xE9es  (https://gdpr.eu/checklist/)"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node2
       assessable: false
       depth: 1
       name: Lawful basis and transparency
+      translations:
+        pl:
+          name: "Podstawy prawne i przejrzysto\u015B\u0107"
+          description: null
+        fr:
+          name: "Base l\xE9gale et transparence"
+          description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node3
       assessable: true
       depth: 2
@@ -76,6 +101,42 @@ objects:
         \ you process, who has access to it in your organization, any third parties\
         \ (and where they are located) that have access, what you're doing to protect\
         \ the data (e.g. encryption), and when you plan to erase it (if possible)."
+      translations:
+        pl:
+          name: "Przeprowad\u017A audyt informacji, aby okre\u015Bli\u0107, jakie\
+            \ informacje przetwarzasz i kto ma do nich dost\u0119p."
+          description: "Organizacje, kt\xF3re zatrudniaj\u0105 co najmniej 250 pracownik\xF3\
+            w lub przetwarzaj\u0105 dane o wysokim ryzyku, s\u0105 zobowi\u0105zane\
+            \ do prowadzenia aktualnej i szczeg\xF3\u0142owej listy swoich czynno\u015B\
+            ci przetwarzania (art. 30 RODO) oraz musz\u0105 by\u0107 przygotowane\
+            \ do przedstawienia tej listy organom nadzorczym na \u017C\u0105danie.\
+            \ Najlepszym sposobem na wykazanie zgodno\u015Bci z RODO jest stosowanie\
+            \ oceny skutk\xF3w dla ochrony danych (art. 35 RODO). Organizacje zatrudniaj\u0105\
+            ce mniej ni\u017C 250 pracownik\xF3w r\xF3wnie\u017C powinny przeprowadzi\u0107\
+            \ tak\u0105 ocen\u0119, co u\u0142atwi spe\u0142nienie pozosta\u0142ych\
+            \ wymaga\u0144 RODO. W swojej li\u015Bcie powiniene\u015B uwzgl\u0119\
+            dni\u0107: cele przetwarzania, rodzaj przetwarzanych danych, kto ma do\
+            \ nich dost\u0119p w organizacji, wszelkie strony trzecie maj\u0105ce\
+            \ dost\u0119p (i ich lokalizacj\u0119), co robisz, aby chroni\u0107 dane\
+            \ (np. szyfrowanie) oraz kiedy planujesz je usun\u0105\u0107 (o ile to\
+            \ mo\u017Cliwe)."
+        fr:
+          name: "Effectuez un audit d\u2019information pour d\xE9terminer quelles\
+            \ informations vous traitez et qui y a acc\xE8s."
+          description: "Les organisations qui comptent au moins 250 employ\xE9s ou\
+            \ qui effectuent des traitements de donn\xE9es \xE0 haut risque sont tenues\
+            \ de tenir \xE0 jour une liste d\xE9taill\xE9e de leurs activit\xE9s de\
+            \ traitement (article 30) et d\u2019\xEAtre pr\xEAtes \xE0 montrer cette\
+            \ liste aux r\xE9gulateurs sur demande. La meilleure fa\xE7on de d\xE9\
+            montrer la conformit\xE9 au RGPD est d\u2019utiliser une analyse d\u2019\
+            impact sur la protection des donn\xE9es (article 35).\nLes organisations\
+            \ de moins de 250 employ\xE9s devraient \xE9galement effectuer une \xE9\
+            valuation, car cela facilitera la conformit\xE9 aux autres exigences du\
+            \ RGPD. Dans votre liste, vous devez inclure : les finalit\xE9s du traitement,\
+            \ le type de donn\xE9es que vous traitez, qui y a acc\xE8s dans votre\
+            \ organisation, les tiers (et o\xF9 ils se trouvent) qui y ont acc\xE8\
+            s, ce que vous faites pour prot\xE9ger les donn\xE9es (par exemple, le\
+            \ cryptage) et quand vous pr\xE9voyez de les effacer (si possible)."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node4
       assessable: true
       depth: 2
@@ -90,6 +151,39 @@ objects:
         \ the ongoing opportunity to revoke consent. If \"legitimate interests\" is\
         \ your lawful basis, you must be able to demonstrate you have conducted a\
         \ privacy impact assessment."
+      translations:
+        pl:
+          name: "Uzyskaj uzasadnienie prawne dla swoich dzia\u0142a\u0144 przetwarzania\
+            \ danych."
+          description: "Przetwarzanie danych jest nielegalne zgodnie z RODO, je\u015B\
+            li nie mo\u017Cesz go uzasadni\u0107 jednym z sze\u015Bciu warunk\xF3\
+            w wymienionych w art. 6. S\u0105 te\u017C inne przepisy dotycz\u0105ce\
+            \ dzieci i specjalnych kategorii danych osobowych w art. 7-11. Przejrzyj\
+            \ te przepisy, wybierz prawid\u0142ow\u0105 podstaw\u0119 prawn\u0105\
+            \ przetwarzania i udokumentuj swoje uzasadnienie. Pami\u0119taj, \u017C\
+            e je\u015Bli wybierzesz \"zgod\u0119\" jako podstaw\u0119 prawn\u0105\
+            , ci\u0105\u017C\u0105 na Tobie dodatkowe obowi\u0105zki, w tym zapewnienie\
+            \ osobom, kt\xF3rych dane dotycz\u0105, ci\u0105g\u0142ej mo\u017Cliwo\u015B\
+            ci wycofania zgody. Je\u015Bli twoj\u0105 podstaw\u0105 prawn\u0105 s\u0105\
+            \ \"uzasadnione interesy\", musisz by\u0107 w stanie wykaza\u0107, \u017C\
+            e przeprowadzi\u0142e\u015B ocen\u0119 wp\u0142ywu na prywatno\u015B\u0107\
+            ."
+        fr:
+          name: "Disposez d\u2019une justification l\xE9gale de vos activit\xE9s de\
+            \ traitement des donn\xE9es."
+          description: "Le traitement des donn\xE9es est ill\xE9gal au regard du RGPD\
+            \ \xE0 moins que vous ne puissiez le justifier selon l\u2019une des six\
+            \ conditions \xE9num\xE9r\xE9es \xE0 l\u2019article 6. Les articles 7\
+            \ \xE0 11 contiennent d\u2019autres dispositions relatives aux enfants\
+            \ et \xE0 des cat\xE9gories particuli\xE8res de donn\xE9es \xE0 caract\xE8\
+            re personnel. Examinez ces dispositions, choisissez une base l\xE9gale\
+            \ pour le traitement et documentez votre justification. Notez que si vous\
+            \ choisissez le \xAB consentement \xBB comme base l\xE9gale, il existe\
+            \ des obligations suppl\xE9mentaires, notamment la possibilit\xE9 de r\xE9\
+            voquer leur consentement en permanence. Si vous vous fondez sur la l\xE9\
+            galit\xE9 des \xAB int\xE9r\xEAts l\xE9gitimes \xBB, vous devez \xEAtre\
+            \ en mesure de d\xE9montrer que vous avez effectu\xE9 une \xE9valuation\
+            \ des facteurs relatifs \xE0 la vie priv\xE9e."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node5
       assessable: true
       depth: 2
@@ -103,10 +197,43 @@ objects:
         their data. It must be presented "in a concise, transparent, intelligible
         and easily accessible form, using clear and plain language, in particular
         for any information addressed specifically to a child."
+      translations:
+        pl:
+          name: "Podaj jasne informacje o przetwarzaniu danych i uzasadnieniu prawnym\
+            \ w polityce prywatno\u015Bci."
+          description: "Musisz poinformowa\u0107 osoby, \u017Ce zbierasz ich dane\
+            \ i dlaczego (Art. 12 RODO). Powiniene\u015B wyja\u015Bni\u0107, jak dane\
+            \ s\u0105 przetwarzane, kto ma do nich dost\u0119p i jak je zabezpieczasz.\
+            \ Informacje te powinny by\u0107 zawarte w twojej polityce prywatno\u015B\
+            ci i dostarczone osobom, kt\xF3rych dane dotycz\u0105 w momencie ich zbierania.\
+            \ Musz\u0105 by\u0107 one przedstawione \"w spos\xF3b zwi\u0119z\u0142\
+            y, przejrzysty, zrozumia\u0142y i \u0142atwo dost\u0119pny, przy u\u017C\
+            yciu jasnego i prostego j\u0119zyka, szczeg\xF3lnie je\u015Bli informacje\
+            \ s\u0105 skierowane specjalnie do dziecka.\""
+        fr:
+          name: "Fournissez des informations claires sur le traitement de vos donn\xE9\
+            es et une justification l\xE9gale dans votre politique de confidentialit\xE9\
+            ."
+          description: "Vous devez dire aux gens que vous collectez leurs donn\xE9\
+            es et pourquoi (article 12). Vous devez expliquer comment les donn\xE9\
+            es sont trait\xE9es, qui y a acc\xE8s et comment vous les prot\xE9gez.\
+            \ Ces informations doivent \xEAtre incluses dans votre politique de confidentialit\xE9\
+            \ et fournies aux personnes concern\xE9es au moment o\xF9 vous collectez\
+            \ leurs donn\xE9es. Il doit \xEAtre pr\xE9sent\xE9 \xAB sous une forme\
+            \ concise, transparente, intelligible et facilement accessible, dans un\
+            \ langage clair et simple, notamment pour toute information s\u2019adressant\
+            \ sp\xE9cifiquement \xE0 un enfant \xBB."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node6
       assessable: false
       depth: 1
       name: Data security
+      translations:
+        pl:
+          name: "Bezpiecze\u0144stwo danych"
+          description: null
+        fr:
+          name: "S\xE9curit\xE9 des donn\xE9es"
+          description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node7
       assessable: true
       depth: 2
@@ -123,6 +250,42 @@ objects:
         \ the amount of personal data you collect or deleting data you no longer need.\
         \ The point is that it needs to be something you and your employees are always\
         \ aware of."
+      translations:
+        pl:
+          name: "Uwzgl\u0119dniaj ochron\u0119 danych przez ca\u0142y czas, od momentu\
+            \ rozpocz\u0119cia tworzenia produktu po ka\u017Cdorazowe przetwarzanie\
+            \ danych."
+          description: "Musisz przestrzega\u0107 zasad 'ochrony danych od samego projektowania\
+            \ i domy\u015Blnej ochrony danych' (privacy by design and by default),\
+            \ w\u0142\u0105czaj\u0105c w to wdra\u017Canie 'odpowiednich \u015Brodk\xF3\
+            w technicznych i organizacyjnych' w celu ochrony danych. Innymi s\u0142\
+            owy, ochrona danych to co\u015B, co teraz musisz uwzgl\u0119dnia\u0107\
+            \ za ka\u017Cdym razem, gdy robisz cokolwiek z danymi osobowymi innych\
+            \ os\xF3b. Musisz r\xF3wnie\u017C upewni\u0107 si\u0119, \u017Ce ka\u017C\
+            de przetwarzanie danych osobowych jest zgodne z zasadami ochrony danych\
+            \ opisanymi w art. 5 RODO. \u015Arodki techniczne obejmuj\u0105 szyfrowanie,\
+            \ a \u015Brodki organizacyjne to takie dzia\u0142ania, jak ograniczanie\
+            \ ilo\u015Bci zbieranych danych osobowych lub usuwanie danych, kt\xF3\
+            rych ju\u017C nie potrzebujesz. Punkt polega na tym, aby to by\u0142a\
+            \ kwestia, o kt\xF3rej ty i twoi pracownicy zawsze pami\u0119tali."
+        fr:
+          name: "Prenez en compte la protection des donn\xE9es \xE0 tout moment, depuis\
+            \ le d\xE9but du d\xE9veloppement d\u2019un produit jusqu\u2019\xE0 chaque\
+            \ traitement de donn\xE9es."
+          description: "Vous devez suivre les principes de \xAB protection des donn\xE9\
+            es d\xE8s la conception et par d\xE9faut \xBB, y compris la mise en \u0153\
+            uvre de \xAB mesures techniques et organisationnelles appropri\xE9es \xBB\
+            \ pour prot\xE9ger les donn\xE9es. En d\u2019autres termes, la protection\
+            \ des donn\xE9es est quelque chose que vous devez d\xE9sormais prendre\
+            \ en compte chaque fois que vous faites quoi que ce soit avec les donn\xE9\
+            es personnelles d\u2019autres personnes. Vous devez \xE9galement vous\
+            \ assurer que tout traitement de donn\xE9es \xE0 caract\xE8re personnel\
+            \ respecte les principes de protection des donn\xE9es d\xE9crits \xE0\
+            \ l\u2019article 5. Les mesures techniques comprennent le cryptage, et\
+            \ les mesures organisationnelles consistent \xE0 limiter la quantit\xE9\
+            \ de donn\xE9es personnelles que vous collectez ou \xE0 supprimer les\
+            \ donn\xE9es dont vous n\u2019avez plus besoin. Le fait est que vous et\
+            \ vos employ\xE9s devez en \xEAtre toujours conscients."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node8
       assessable: true
       depth: 2
@@ -132,6 +295,23 @@ objects:
         \ with\_end-to-end encryption\_built in, including email, messaging, notes,\
         \ and cloud storage. The GDPR requires organizations to\_use encryption or\
         \ pseudeonymization\_whenever feasible."
+      translations:
+        pl:
+          name: "Szyfruj, pseudonimizuj lub anonimizuj dane osobowe tam, gdzie to\
+            \ mo\u017Cliwe."
+          description: "Wi\u0119kszo\u015B\u0107 narz\u0119dzi produkcyjnych u\u017C\
+            ywanych przez firmy jest obecnie dost\u0119pna z wbudowanym szyfrowaniem\
+            \ end-to-end, w tym poczta e-mail, komunikatory, notatki i przechowywanie\
+            \ w chmurze. RODO wymaga od organizacji stosowania szyfrowania lub pseudonimizacji,\
+            \ ilekro\u0107 jest to wykonalne."
+        fr:
+          name: "Chiffrez, pseudonymisez ou anonymisez les donn\xE9es personnelles\
+            \ dans la mesure du possible."
+          description: "La plupart des outils de productivit\xE9 utilis\xE9s par les\
+            \ entreprises sont d\xE9sormais disponibles avec un chiffrement de bout\
+            \ en bout int\xE9gr\xE9, notamment les e-mails, la messagerie, les notes\
+            \ et le stockage dans le cloud. Le RGPD exige que les organisations utilisent\
+            \ le cryptage ou la pseudeonymisation chaque fois que cela est possible."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node9
       assessable: true
       depth: 2
@@ -144,6 +324,33 @@ objects:
         \ about email security, passwords, two-factor authentication, device encryption,\
         \ and\_VPNs. Employees who have access to personal data and non-technical\
         \ employees should receive extra training in the requirements of the GDPR."
+      translations:
+        pl:
+          name: "Utw\xF3rz wewn\u0119trzn\u0105 polityk\u0119 bezpiecze\u0144stwa\
+            \ dla cz\u0142onk\xF3w swojego zespo\u0142u i zwi\u0119kszaj \u015Bwiadomo\u015B\
+            \u0107 ochrony danych."
+          description: "Nawet je\u015Bli twoje bezpiecze\u0144stwo techniczne jest\
+            \ silne, bezpiecze\u0144stwo operacyjne mo\u017Ce nadal stanowi\u0107\
+            \ s\u0142aby punkt. Stw\xF3rz polityk\u0119 bezpiecze\u0144stwa, kt\xF3\
+            ra zapewni, \u017Ce twoi cz\u0142onkowie zespo\u0142u s\u0105 \u015Bwiadomi\
+            \ bezpiecze\u0144stwa danych. Powinna zawiera\u0107 wskaz\xF3wki dotycz\u0105\
+            ce bezpiecze\u0144stwa poczty elektronicznej, hase\u0142, uwierzytelniania\
+            \ dwusk\u0142adnikowego, szyfrowania urz\u0105dze\u0144 i VPN-\xF3w. Pracownicy,\
+            \ kt\xF3rzy maj\u0105 dost\u0119p do danych osobowych i pracownicy nietechniczni,\
+            \ powinni otrzyma\u0107 dodatkowe szkolenie z wymaga\u0144 RODO."
+        fr:
+          name: "Cr\xE9ez une politique de s\xE9curit\xE9 interne pour les membres\
+            \ de votre \xE9quipe et sensibilisez-les \xE0 la protection des donn\xE9\
+            es."
+          description: "M\xEAme si votre s\xE9curit\xE9 technique est forte, la s\xE9\
+            curit\xE9 op\xE9rationnelle peut toujours \xEAtre un maillon faible. Cr\xE9\
+            ez une politique de s\xE9curit\xE9 qui garantit que les membres de votre\
+            \ \xE9quipe sont bien inform\xE9s sur la s\xE9curit\xE9 des donn\xE9es.\
+            \ Il doit inclure des conseils sur la s\xE9curit\xE9 des e-mails, les\
+            \ mots de passe, l\u2019authentification \xE0 deux facteurs, le cryptage\
+            \ des appareils et les VPN. Les employ\xE9s qui ont acc\xE8s aux donn\xE9\
+            es personnelles et les employ\xE9s non techniques doivent recevoir une\
+            \ formation suppl\xE9mentaire sur les exigences du RGPD."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node10
       assessable: true
       depth: 2
@@ -158,6 +365,38 @@ objects:
         \ analysis whenever they plan to use people's data in such a way that it's\
         \ \"likely to result in a high risk to [their] rights and freedoms.\" The\
         \ ICO recommends just doing it anytime you're about to process personal data."
+      translations:
+        pl:
+          name: "Wiedz, kiedy przeprowadzi\u0107 ocen\u0119 wp\u0142ywu na ochron\u0119\
+            \ danych i mie\u0107 procedur\u0119 umo\u017Cliwiaj\u0105c\u0105 jej przeprowadzenie."
+          description: "Ocena wp\u0142ywu na ochron\u0119 danych (tak\u017Ce znana\
+            \ jako ocena wp\u0142ywu na prywatno\u015B\u0107) to spos\xF3b, aby zrozumie\u0107\
+            , jak tw\xF3j produkt lub us\u0142uga mog\u0105 zagrozi\u0107 danym twoich\
+            \ klient\xF3w, a tak\u017Ce jak zminimalizowa\u0107 te ryzyka. Urz\u0105\
+            d Ochrony Danych Osobowych w Polsce ma na swojej stronie internetowej\
+            \ list\u0119 kontroln\u0105 oceny wp\u0142ywu na ochron\u0119 danych.\
+            \ RODO wymaga od organizacji przeprowadzania tego rodzaju analizy, ilekro\u0107\
+            \ planuj\u0105 u\u017Cywa\u0107 danych ludzi w spos\xF3b, kt\xF3ry jest\
+            \ 'prawdopodobnie ryzykowny dla ich praw i wolno\u015Bci'. Urz\u0105d\
+            \ zaleca przeprowadzanie jej za ka\u017Cdym razem, gdy zamierzasz przetwarza\u0107\
+            \ dane osobowe."
+        fr:
+          name: "Sachez quand effectuer une analyse d\u2019impact relative \xE0 la\
+            \ protection des donn\xE9es et mettez en place un processus pour la r\xE9\
+            aliser."
+          description: "Une analyse d\u2019impact sur la protection des donn\xE9es\
+            \ (\xE9galement appel\xE9e \xE9valuation de l\u2019impact sur la vie priv\xE9\
+            e) est un moyen de vous aider \xE0 comprendre comment votre produit ou\
+            \ service pourrait mettre en p\xE9ril les donn\xE9es de vos clients, ainsi\
+            \ que comment minimiser ces risques. L\u2019Information Commissioner\u2019\
+            s Office (ICO) du Royaume-Uni a publi\xE9 une liste de contr\xF4le d\u2019\
+            \xE9valuation de l\u2019impact sur la protection des donn\xE9es sur son\
+            \ site Web. Le RGPD exige que les organisations effectuent ce type d\u2019\
+            analyse chaque fois qu\u2019elles pr\xE9voient d\u2019utiliser les donn\xE9\
+            es des personnes de mani\xE8re \xE0 ce qu\u2019il soit \xAB susceptible\
+            \ d\u2019entra\xEEner un risque \xE9lev\xE9 pour [leurs] droits et libert\xE9\
+            s \xBB. L\u2019ICO recommande de le faire \xE0 tout moment lorsque vous\
+            \ \xEAtes sur le point de traiter des donn\xE9es personnelles."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node11
       assessable: true
       depth: 2
@@ -173,10 +412,50 @@ objects:
         \ in Ireland. You are also required to quickly\_communicate data breaches\
         \ to your data subjects\_unless the breach is unlikely to put them at risk\
         \ (for instance, if the stolen data is encrypted)."
+      translations:
+        pl:
+          name: "Posiadac procedur\u0119 powiadamiania w\u0142adz i os\xF3b, kt\xF3\
+            rych dane dotycz\u0105, w przypadku naruszenia bezpiecze\u0144stwa danych."
+          description: "Je\u015Bli dojdzie do naruszenia bezpiecze\u0144stwa danych\
+            \ i dane osobowe zostan\u0105 ujawnione, jeste\u015B zobowi\u0105zany\
+            \ do powiadomienia odpowiedniego organu nadzorczego w swojej jurysdykcji\
+            \ w ci\u0105gu 72 godzin. Lista wielu organ\xF3w nadzorczych pa\u0144\
+            stw cz\u0142onkowskich UE jest dost\u0119pna tutaj. RODO nie okre\u015B\
+            la, kogo powiniene\u015B powiadomi\u0107, je\u015Bli nie jeste\u015B organizacj\u0105\
+            \ z siedzib\u0105 w UE. Dla os\xF3b w krajach angloj\u0119zycznych spoza\
+            \ UE naj\u0142atwiej mo\u017Ce by\u0107 powiadomi\u0107 Urz\u0105d Komisarza\
+            \ ds. Ochrony Danych w Irlandii. R\xF3wnie\u017C jeste\u015B zobowi\u0105\
+            zany do szybkiego przekazania informacji o naruszeniu bezpiecze\u0144\
+            stwa osobom, kt\xF3rych dane dotycz\u0105, chyba \u017Ce naruszenie jest\
+            \ ma\u0142o prawdopodobne, aby je narazi\u0107 na ryzyko (na przyk\u0142\
+            ad, je\u015Bli skradzione dane s\u0105 zaszyfrowane)."
+        fr:
+          name: "Mettez en place un processus pour informer les autorit\xE9s et vos\
+            \ personnes concern\xE9es en cas de violation de donn\xE9es."
+          description: "En cas de violation de donn\xE9es et d\u2019exposition de\
+            \ donn\xE9es personnelles, vous devez en informer l\u2019autorit\xE9 de\
+            \ contr\xF4le de votre juridiction dans les 72 heures. Une liste de nombreuses\
+            \ autorit\xE9s de surveillance des \xC9tats membres de l\u2019UE peut\
+            \ \xEAtre consult\xE9e ici. Le RGPD ne pr\xE9cise pas qui vous devez notifier\
+            \ si vous n\u2019\xEAtes pas une organisation bas\xE9e dans l\u2019UE.\
+            \ Pour ceux qui se trouvent dans des pays anglophones non membres de l\u2019\
+            UE, il peut \xEAtre plus facile d\u2019en informer le Bureau du commissaire\
+            \ \xE0 la protection des donn\xE9es en Irlande. Vous \xEAtes \xE9galement\
+            \ tenu de communiquer rapidement les violations de donn\xE9es \xE0 vos\
+            \ personnes concern\xE9es, sauf si la violation n\u2019est pas susceptible\
+            \ de les mettre en danger (par exemple, si les donn\xE9es vol\xE9es sont\
+            \ crypt\xE9es)."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
       assessable: false
       depth: 1
       name: Accountability and governance
+      translations:
+        pl:
+          name: "Odpowiedzialno\u015B\u0107 i zarz\u0105dzanie"
+          description: null
+        fr:
+          name: Responsabilisation et gouvernance
+          description: null
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node13
       assessable: true
       depth: 2
@@ -187,6 +466,24 @@ objects:
         25) is making sure someone in your organization is accountable for GDPR compliance.
         This person should be empowered to evaluate data protection policies and the
         implementation of those policies.
+      translations:
+        pl:
+          name: "Wyznacz osob\u0119 odpowiedzialn\u0105 za zapewnienie zgodno\u015B\
+            ci z RODO w ca\u0142ej organizacji."
+          description: "Innym aspektem 'ochrony danych od samego projektowania i domy\u015B\
+            lnej ochrony danych' (art. 25 RODO) jest zapewnienie, \u017Ce w organizacji\
+            \ jest osoba odpowiedzialna za zgodno\u015B\u0107 z RODO. Ta osoba powinna\
+            \ by\u0107 upowa\u017Cniona do oceny polityk ochrony danych i wdra\u017C\
+            ania tych polityk."
+        fr:
+          name: "D\xE9signez une personne charg\xE9e d\u2019assurer la conformit\xE9\
+            \ au RGPD dans l\u2019ensemble de votre organisation."
+          description: "Une autre partie de la \xAB protection des donn\xE9es d\xE8\
+            s la conception et par d\xE9faut \xBB (article 25) consiste \xE0 s\u2019\
+            assurer qu\u2019une personne de votre organisation est responsable de\
+            \ la conformit\xE9 au RGPD. Cette personne devrait \xEAtre habilit\xE9\
+            e \xE0 \xE9valuer les politiques de protection des donn\xE9es et la mise\
+            \ en \u0153uvre de ces politiques."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node14
       assessable: true
       depth: 2
@@ -200,6 +497,32 @@ objects:
         \ spell out the rights and obligations of each party for GDPR compliance.\
         \ You should only use third parties that are reliable and can make sufficient\
         \ data protection guarantees."
+      translations:
+        pl:
+          name: "Podpisz umow\u0119 o przetwarzanie danych mi\u0119dzy Twoj\u0105\
+            \ organizacj\u0105 a wszelkimi stronami trzecimi, kt\xF3re przetwarzaj\u0105\
+            \ dane osobowe w Twoim imieniu."
+          description: "Obejmuje to wszelkie us\u0142ugi stron trzecich, kt\xF3re\
+            \ przetwarzaj\u0105 dane osobowe Twoich os\xF3b, w tym oprogramowanie\
+            \ analityczne, us\u0142ugi e-mail, serwery w chmurze itp. Wi\u0119kszo\u015B\
+            \u0107 us\u0142ug ma standardow\u0105 umow\u0119 o przetwarzanie danych\
+            \ dost\u0119pn\u0105 na swoich stronach internetowych do przegl\u0105\
+            du. Okre\u015Blaj\u0105 one prawa i obowi\u0105zki ka\u017Cdej ze stron\
+            \ zgodnie z RODO. Powiniene\u015B korzysta\u0107 tylko z wiarygodnych\
+            \ stron trzecich, kt\xF3re mog\u0105 zagwarantowa\u0107 wystarczaj\u0105\
+            c\u0105 ochron\u0119 danych."
+        fr:
+          name: "Signez un accord de traitement des donn\xE9es entre votre organisation\
+            \ et tout tiers qui traite des donn\xE9es personnelles en votre nom."
+          description: "Cela inclut tous les services tiers qui traitent les donn\xE9\
+            es personnelles de vos personnes concern\xE9es, y compris les logiciels\
+            \ analytiques, les services de messagerie, les serveurs cloud, etc. La\
+            \ grande majorit\xE9 des services ont un accord standard de traitement\
+            \ des donn\xE9es disponible sur leurs sites Web pour que vous puissiez\
+            \ les consulter. Ils \xE9noncent les droits et obligations de chaque partie\
+            \ en mati\xE8re de conformit\xE9 au RGPD. Vous ne devez faire appel qu\u2019\
+            \xE0 des tiers fiables et capables d\u2019apporter des garanties suffisantes\
+            \ en mati\xE8re de protection des donn\xE9es."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node15
       assessable: true
       depth: 2
@@ -214,6 +537,34 @@ objects:
         is interpreted, it may be prudent to designate a representative in a member
         state that uses your language. Some organizations, like public bodies, are
         not required to appoint a representative in the EU.
+      translations:
+        pl:
+          name: "Je\u015Bli Twoja organizacja znajduje si\u0119 poza UE, wyznacz przedstawiciela\
+            \ w jednym z pa\u0144stw cz\u0142onkowskich UE."
+          description: "Je\u015Bli przetwarzasz dane dotycz\u0105ce os\xF3b w konkretnym\
+            \ pa\u0144stwie cz\u0142onkowskim, musisz wyznaczy\u0107 przedstawiciela\
+            \ w tym kraju, kt\xF3ry b\u0119dzie komunikowa\u0107 si\u0119 w Twoim\
+            \ imieniu z organami ochrony danych. RODO i jego oficjalne dokumenty wspieraj\u0105\
+            ce nie dostarczaj\u0105 wskaz\xF3wek dotycz\u0105cych sytuacji, w kt\xF3\
+            rych przetwarzanie dotyczy os\xF3b z UE w wielu pa\u0144stwach cz\u0142\
+            onkowskich. Dop\xF3ki ten wym\xF3g nie zostanie zinterpretowany, warto\
+            \ wyznaczy\u0107 przedstawiciela w pa\u0144stwie cz\u0142onkowskim, kt\xF3\
+            re u\u017Cywa Twojego j\u0119zyka. Niekt\xF3re organizacje, jak organy\
+            \ publiczne, nie musz\u0105 wyznacza\u0107 przedstawiciela w UE."
+        fr:
+          name: "Si votre organisation se trouve en dehors de l\u2019UE, d\xE9signez\
+            \ un repr\xE9sentant dans l\u2019un des \xC9tats membres de l\u2019UE."
+          description: "Si vous traitez des donn\xE9es relatives \xE0 des personnes\
+            \ dans un \xC9tat membre particulier, vous devez d\xE9signer un repr\xE9\
+            sentant dans ce pays qui peut communiquer en votre nom avec les autorit\xE9\
+            s de protection des donn\xE9es. Le RGPD et ses documents officiels ne\
+            \ donnent pas d\u2019indications pour les situations o\xF9 le traitement\
+            \ affecte des personnes de l\u2019UE dans plusieurs \xC9tats membres.\
+            \ Jusqu\u2019\xE0 ce que cette exigence soit interpr\xE9t\xE9e, il peut\
+            \ \xEAtre prudent de d\xE9signer un repr\xE9sentant dans un \xC9tat membre\
+            \ qui utilise votre langue. Certaines organisations, comme les organismes\
+            \ publics, ne sont pas tenues de d\xE9signer un repr\xE9sentant dans l\u2019\
+            UE."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node16
       assessable: true
       depth: 2
@@ -225,18 +576,44 @@ objects:
         \ data protection whose job is to monitor GDPR compliance, assess data protection\
         \ risks, advise on data protection impact assessments, and cooperate with\
         \ regulators."
+      translations:
+        pl:
+          name: "Wyznacz Inspektora Ochrony Danych (je\u015Bli to konieczne)."
+          description: "S\u0105 trzy sytuacje, w kt\xF3rych organizacje musz\u0105\
+            \ mie\u0107 Inspektora Ochrony Danych (IOD), ale warto mie\u0107 go nawet\
+            \ je\u015Bli nie jest to wymagane. IOD powinien by\u0107 ekspertem w zakresie\
+            \ ochrony danych, kt\xF3rego zadaniem jest monitorowanie zgodno\u015B\
+            ci z RODO, ocena ryzyk zwi\u0105zanych z ochron\u0105 danych, doradztwo\
+            \ w zakresie ocen skutk\xF3w dla ochrony danych i wsp\xF3\u0142praca z\
+            \ regulatorami."
+        fr:
+          name: "Nommez un d\xE9l\xE9gu\xE9 \xE0 la protection des donn\xE9es (si\
+            \ n\xE9cessaire)"
+          description: "Il existe trois circonstances dans lesquelles les organisations\
+            \ sont tenues d\u2019avoir un d\xE9l\xE9gu\xE9 \xE0 la protection des\
+            \ donn\xE9es (DPO), mais ce n\u2019est pas une mauvaise id\xE9e d\u2019\
+            en avoir un m\xEAme si la r\xE8gle ne s\u2019applique pas \xE0 vous. Le\
+            \ DPD doit \xEAtre un expert en mati\xE8re de protection des donn\xE9\
+            es dont le travail consiste \xE0 surveiller la conformit\xE9 au RGPD,\
+            \ \xE0 \xE9valuer les risques li\xE9s \xE0 la protection des donn\xE9\
+            es, \xE0 donner des conseils sur les analyses d\u2019impact relatives\
+            \ \xE0 la protection des donn\xE9es et \xE0 coop\xE9rer avec les r\xE9\
+            gulateurs."
     - urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
-      assessable: true
-      depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node12
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
       assessable: false
       depth: 1
       name: Privacy rights
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node19
+      translations:
+        pl:
+          name: "Prawa prywatno\u015Bci,"
+          description: null
+        fr:
+          name: "Droits \xE0 la vie priv\xE9e"
+          description: null
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: It's easy for your customers to request and receive all the information
         you have about them.
       description: "People have the\_right to see what personal data you have about\
@@ -246,10 +623,36 @@ objects:
         \ for free but can charge a reasonable fee for subsequent copies. Make sure\
         \ you can verify the identity of the person requesting the data. You should\
         \ be able to comply with such requests within a month."
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node20
+      translations:
+        pl:
+          name: "Twoim klientom \u0142atwo jest za\u017C\u0105da\u0107 i otrzyma\u0107\
+            \ wszystkie informacje, kt\xF3re masz na ich temat."
+          description: "Osoby maj\u0105 prawo wgl\u0105du do swoich danych osobowych\
+            \ (Artyku\u0142 15) i sposobu ich wykorzystania. Maj\u0105 te\u017C prawo\
+            \ wiedzie\u0107, jak d\u0142ugo planujesz przechowywa\u0107 ich informacje\
+            \ i dlaczego. Musisz wys\u0142a\u0107 im pierwsz\u0105 kopi\u0119 tych\
+            \ informacji za darmo, ale mo\u017Cesz pobra\u0107 rozs\u0105dn\u0105\
+            \ op\u0142at\u0119 za kolejne kopie. Upewnij si\u0119, \u017Ce mo\u017C\
+            esz zweryfikowa\u0107 to\u017Csamo\u015B\u0107 osoby sk\u0142adaj\u0105\
+            cej wniosek. Powiniene\u015B by\u0107 w stanie zrealizowa\u0107 takie\
+            \ wnioski w ci\u0105gu miesi\u0105ca."
+        fr:
+          name: Il est facile pour vos clients de demander et de recevoir toutes les
+            informations que vous avez sur eux.
+          description: "Les gens ont le droit de voir quelles donn\xE9es personnelles\
+            \ vous d\xE9tenez \xE0 leur sujet (article 15) et comment vous les utilisez.\
+            \ Ils ont \xE9galement le droit de savoir combien de temps vous pr\xE9\
+            voyez de conserver leurs informations et la raison pour laquelle elles\
+            \ sont conserv\xE9es pendant cette p\xE9riode. Vous devez leur envoyer\
+            \ la premi\xE8re copie de ces informations gratuitement, mais vous pouvez\
+            \ facturer des frais raisonnables pour les copies suivantes. Assurez-vous\
+            \ de pouvoir v\xE9rifier l\u2019identit\xE9 de la personne qui demande\
+            \ les donn\xE9es. Vous devriez \xEAtre en mesure de donner suite \xE0\
+            \ ces demandes dans un d\xE9lai d\u2019un mois."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node19
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: It's easy for your customers to correct or update inaccurate or incomplete
         information.
       description: Do your best to keep data up to date by putting a data quality
@@ -257,20 +660,64 @@ objects:
         and update their personal information for accuracy and completeness. Make
         sure you can verify the identity of the person requesting the data. You should
         be able to comply with requests under Article 16 within a month.
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node21
+      translations:
+        pl:
+          name: "Twoim klientom \u0142atwo jest poprawi\u0107 lub zaktualizowa\u0107\
+            \ nie\u015Bcis\u0142e lub niekompletne informacje."
+          description: "R\xF3b wszystko, co w Twojej mocy, aby dane by\u0142y aktualne,\
+            \ wprowadzaj\u0105c proces kontroli jako\u015Bci danych, i umo\u017Cliwiaj\
+            \ swoim klientom wgl\u0105d (Artyku\u0142 15) i aktualizacj\u0119 swoich\
+            \ danych osobowych w celu zachowania ich dok\u0142adno\u015Bci i kompletno\u015B\
+            ci. Upewnij si\u0119, \u017Ce mo\u017Cesz zweryfikowa\u0107 to\u017Csamo\u015B\
+            \u0107 osoby sk\u0142adaj\u0105cej wniosek. Powiniene\u015B by\u0107 w\
+            \ stanie zrealizowa\u0107 wnioski zgodnie z Artyku\u0142em 16 w ci\u0105\
+            gu miesi\u0105ca."
+        fr:
+          name: "Il est facile pour vos clients de corriger ou de mettre \xE0 jour\
+            \ des informations inexactes ou incompl\xE8tes."
+          description: "Faites de votre mieux pour maintenir les donn\xE9es \xE0 jour\
+            \ en mettant en place un processus de qualit\xE9 des donn\xE9es, et faites\
+            \ en sorte qu\u2019il soit facile pour vos clients de consulter (Article\
+            \ 15) et de mettre \xE0 jour leurs informations personnelles pour en assurer\
+            \ l\u2019exactitude et l\u2019exhaustivit\xE9. Assurez-vous de pouvoir\
+            \ v\xE9rifier l\u2019identit\xE9 de la personne qui demande les donn\xE9\
+            es. Vous devriez \xEAtre en mesure de donner suite aux demandes au titre\
+            \ de l\u2019article 16 dans un d\xE9lai d\u2019un mois."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node20
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: It's easy for your customers to request to have their personal data deleted.
       description: People generally have the right to ask you to delete all the personal
         data you have about them, and you have to honor their request within about
         a month. There are a five grounds on which you can deny the request, such
         as the exercise of freedom of speech or compliance with a legal obligation.
         You must also try to verify the identity of the person making the request.
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node22
+      translations:
+        pl:
+          name: "Twoim klientom \u0142atwo jest za\u017C\u0105da\u0107 usuni\u0119\
+            cia swoich danych osobowych."
+          description: "Osoby maj\u0105 prawo \u017C\u0105da\u0107 usuni\u0119cia\
+            \ wszystkich swoich danych osobowych, a Ty musisz spe\u0142ni\u0107 ich\
+            \ \u017C\u0105danie w ci\u0105gu miesi\u0105ca. Istnieje pi\u0119\u0107\
+            \ powod\xF3w, dla kt\xF3rych mo\u017Cesz odm\xF3wi\u0107 wniosku, takich\
+            \ jak korzystanie z wolno\u015Bci wypowiedzi czy wype\u0142nianie obowi\u0105\
+            zku prawnego. Musisz tak\u017Ce spr\xF3bowa\u0107 zweryfikowa\u0107 to\u017C\
+            samo\u015B\u0107 osoby sk\u0142adaj\u0105cej wniosek."
+        fr:
+          name: "Il est facile pour vos clients de demander la suppression de leurs\
+            \ donn\xE9es personnelles."
+          description: "Les gens ont g\xE9n\xE9ralement le droit de vous demander\
+            \ de supprimer toutes les donn\xE9es personnelles que vous avez \xE0 leur\
+            \ sujet, et vous devez honorer leur demande dans un d\xE9lai d\u2019environ\
+            \ un mois. Il y a cinq motifs pour lesquels vous pouvez refuser la demande,\
+            \ tels que l\u2019exercice de la libert\xE9 d\u2019expression ou le respect\
+            \ d\u2019une obligation l\xE9gale. Vous devez \xE9galement tenter de v\xE9\
+            rifier l\u2019identit\xE9 de la personne qui fait la demande."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node21
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: It's easy for your customers to ask you to stop processing their data.
       description: Your data subjects can request to restrict or stop processing of
         their data (Article 18) if certain grounds apply, mainly if there's some dispute
@@ -278,10 +725,34 @@ objects:
         required to honor their request within about a month. While processing is
         restricted, you're still allowed to keep storing their data. You must notify
         the data subject before you begin processing their data again.
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node23
+      translations:
+        pl:
+          name: "Twoim klientom \u0142atwo jest za\u017C\u0105da\u0107 zaprzestania\
+            \ przetwarzania ich danych."
+          description: "Twoje osoby, kt\xF3rych dane dotycz\u0105, mog\u0105 za\u017C\
+            \u0105da\u0107 ograniczenia lub zaprzestania przetwarzania ich danych\
+            \ (Artyku\u0142 18), je\u015Bli zachodz\u0105 pewne podstawy, g\u0142\xF3\
+            wnie w przypadku sporu co do zgodno\u015Bci z prawem przetwarzania lub\
+            \ dok\u0142adno\u015Bci danych. Musisz spe\u0142ni\u0107 ich \u017C\u0105\
+            danie w ci\u0105gu miesi\u0105ca. Gdy przetwarzanie jest ograniczone,\
+            \ mo\u017Cesz nadal przechowywa\u0107 ich dane. Musisz powiadomi\u0107\
+            \ osob\u0119, zanim ponownie rozpoczniesz przetwarzanie jej danych."
+        fr:
+          name: "Il est facile pour vos clients de vous demander d\u2019arr\xEAter\
+            \ de traiter leurs donn\xE9es."
+          description: "Vos personnes concern\xE9es peuvent demander \xE0 restreindre\
+            \ ou \xE0 arr\xEAter le traitement de leurs donn\xE9es (article 18) si\
+            \ certains motifs s\u2019appliquent, principalement en cas de litige quant\
+            \ \xE0 la lic\xE9it\xE9 du traitement ou \xE0 l\u2019exactitude des donn\xE9\
+            es. Vous \xEAtes tenu d\u2019honorer leur demande dans un d\xE9lai d\u2019\
+            environ un mois. Bien que le traitement soit limit\xE9, vous \xEAtes toujours\
+            \ autoris\xE9 \xE0 continuer \xE0 stocker leurs donn\xE9es. Vous devez\
+            \ informer la personne concern\xE9e avant de recommencer \xE0 traiter\
+            \ ses donn\xE9es."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node22
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: It's easy for your customers to receive a copy of their personal data
         in a format that can be easily transferred to another company.
       description: This means that you should be able to send their personal data
@@ -289,19 +760,62 @@ objects:
         them or to a third party they designate. This may seem unfair from a business
         standpoint in that you may have to turn over your customers' data to a competitor.
         But from privacy standpoint, the idea is that people own their data, not you.
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node24
+      translations:
+        pl:
+          name: "Twoim klientom \u0142atwo jest otrzyma\u0107 kopi\u0119 swoich danych\
+            \ osobowych w formacie, kt\xF3ry mo\u017Cna \u0142atwo przekaza\u0107\
+            \ innej firmie."
+          description: "Oznacza to, \u017Ce powiniene\u015B by\u0107 w stanie przes\u0142\
+            a\u0107 ich dane osobowe (Artyku\u0142 20) w powszechnie czytelnym formacie\
+            \ (np. arkusz kalkulacyjny) do nich lub do wyznaczonej przez nich strony\
+            \ trzeciej. Mo\u017Ce to wydawa\u0107 si\u0119 niesprawiedliwe z biznesowego\
+            \ punktu widzenia, poniewa\u017C mo\u017Cesz by\u0107 zmuszony przekaza\u0107\
+            \ dane swoich klient\xF3w konkurencji. Jednak z punktu widzenia prywatno\u015B\
+            ci, idea jest taka, \u017Ce ludzie s\u0105 w\u0142a\u015Bcicielami swoich\
+            \ danych, a nie Ty."
+        fr:
+          name: "Il est facile pour vos clients de recevoir une copie de leurs donn\xE9\
+            es personnelles dans un format qui peut \xEAtre facilement transf\xE9\
+            r\xE9 \xE0 une autre entreprise."
+          description: "Cela signifie que vous devez \xEAtre en mesure d\u2019envoyer\
+            \ leurs donn\xE9es personnelles (article 20) dans un format lisible par\
+            \ tous (par exemple une feuille de calcul) soit \xE0 eux, soit \xE0 un\
+            \ tiers qu\u2019ils d\xE9signent. Cela peut sembler injuste d\u2019un\
+            \ point de vue commercial, dans la mesure o\xF9 vous devrez peut-\xEA\
+            tre remettre les donn\xE9es de vos clients \xE0 un concurrent. Mais du\
+            \ point de vue de la protection de la vie priv\xE9e, l\u2019id\xE9e est\
+            \ que ce sont les gens qui sont propri\xE9taires de leurs donn\xE9es,\
+            \ pas vous."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node23
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: It's easy for your customers to object to you processing their data.
       description: If you're processing their data for the purposes of direct marketing,
         you have to stop processing it immediately (Article 21) for that purpose.
         Otherwise, you may be able to challenge their objection if you can demonstrate
         "compelling legitimate grounds."
-    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node25
+      translations:
+        pl:
+          name: "Twoim klientom \u0142atwo jest sprzeciwi\u0107 si\u0119 przetwarzaniu\
+            \ ich danych."
+          description: "Je\u015Bli przetwarzasz ich dane w celach marketingu bezpo\u015B\
+            redniego, musisz natychmiast zaprzesta\u0107 ich przetwarzania (Artyku\u0142\
+            \ 21) w tym celu. W przeciwnym razie mo\u017Cesz by\u0107 w stanie zakwestionowa\u0107\
+            \ ich sprzeciw, je\u015Bli mo\u017Cesz wykaza\u0107 \"przekonuj\u0105\
+            ce uzasadnione podstawy\"."
+        fr:
+          name: "Il est facile pour vos clients de s\u2019opposer \xE0 ce que vous\
+            \ traitiez leurs donn\xE9es."
+          description: "Si vous traitez leurs donn\xE9es \xE0 des fins de marketing\
+            \ direct, vous devez cesser imm\xE9diatement de les traiter (article 21)\
+            \ \xE0 cette fin. Sinon, vous pourrez peut-\xEAtre contester leur objection\
+            \ si vous pouvez d\xE9montrer l\u2019existence de \xAB motifs l\xE9gitimes\
+            \ imp\xE9rieux \xBB."
+    - urn: urn:intuitem:risk:req_node:gdpr-checklist:node24
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node18
+      parent_urn: urn:intuitem:risk:req_node:gdpr-checklist:node17
       name: If you make decisions about people based on automated processes, you have
         a procedure to protect their rights.
       description: Some types of organizations use automated processes (Article 22)
@@ -310,3 +824,28 @@ objects:
         to ensure you are protecting their rights, freedoms, and legitimate interests.
         You need to make it easy for people to request human intervention, to weigh
         in on decisions, and to challenge decisions you've already made.
+      translations:
+        pl:
+          name: "Je\u015Bli podejmujesz decyzje o ludziach na podstawie zautomatyzowanych\
+            \ proces\xF3w, masz procedur\u0119 ochrony ich praw."
+          description: "Niekt\xF3re organizacje u\u017Cywaj\u0105 zautomatyzowanych\
+            \ proces\xF3w (Artyku\u0142 22) do podejmowania decyzji o ludziach, kt\xF3\
+            re maj\u0105 skutki prawne lub \"podobnie znacz\u0105ce\". Je\u015Bli\
+            \ uwa\u017Casz, \u017Ce to dotyczy Ciebie, musisz ustanowi\u0107 procedur\u0119\
+            \ zapewniaj\u0105c\u0105 ochron\u0119 ich praw, wolno\u015Bci i uzasadnionych\
+            \ interes\xF3w. Musisz umo\u017Cliwi\u0107 osobom \u0142atwe zg\u0142\
+            aszanie interwencji cz\u0142owieka, udzia\u0142 w decyzjach i kwestionowanie\
+            \ ju\u017C podj\u0119tych decyzji."
+        fr:
+          name: "Si vous prenez des d\xE9cisions concernant des personnes sur la base\
+            \ de processus automatis\xE9s, vous disposez d\u2019une proc\xE9dure pour\
+            \ prot\xE9ger leurs droits."
+          description: "Certains types d\u2019organisations utilisent des processus\
+            \ automatis\xE9s (article 22) pour les aider \xE0 prendre des d\xE9cisions\
+            \ concernant des personnes qui ont des effets juridiques ou \xAB d\u2019\
+            importance similaire \xBB. Si vous pensez que cela s\u2019applique \xE0\
+            \ vous, vous devrez mettre en place une proc\xE9dure pour vous assurer\
+            \ que vous prot\xE9gez leurs droits, libert\xE9s et int\xE9r\xEAts l\xE9\
+            gitimes. Vous devez permettre aux gens de demander facilement une intervention\
+            \ humaine, de peser sur les d\xE9cisions et de remettre en question les\
+            \ d\xE9cisions que vous avez d\xE9j\xE0 prises."
