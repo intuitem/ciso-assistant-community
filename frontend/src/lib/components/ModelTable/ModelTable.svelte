@@ -155,7 +155,7 @@
 	$: {
 		for (const field of filteredFields) {
 			handler.filter(
-				filterValues[field],
+				filterValues[field] ? filterValues[field].map((v) => v.value ?? v) : [],
 				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
 					? filters[field].getColumn
 					: field,
