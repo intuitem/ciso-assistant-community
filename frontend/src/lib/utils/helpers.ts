@@ -51,7 +51,7 @@ export function getSecureRedirect(url: any): string {
 
 export function darkenColor(hex: string, amount: number) {
 	hex = hex.slice(1);
-	let num = parseInt(hex, 16);
+	const num = parseInt(hex, 16);
 
 	let r = (num >> 16) - amount * 255;
 	let g = ((num >> 8) & 0x00ff) - amount * 255;
@@ -62,4 +62,11 @@ export function darkenColor(hex: string, amount: number) {
 	b = Math.max(0, Math.min(255, b));
 
 	return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+export function stringify(value: string | number | boolean = null) {
+	return String(value)
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '');
 }

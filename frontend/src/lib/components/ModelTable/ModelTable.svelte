@@ -7,6 +7,7 @@
 		CUSTOM_ACTIONS_COMPONENT
 	} from '$lib/utils/crud';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { stringify } from '$lib/utils/helpers';
 
 	import { tableA11y } from './actions';
 	// Types
@@ -147,15 +148,16 @@
 		return { options };
 	}
 
-	function defaultFilterFunction(columnValue: any, value: any): boolean {
+	function defaultFilterFunction(entry: any, value: any[]): boolean {
 		if (!value || value.length < 1) return true;
-		return value.includes(columnValue);
+		value = value.map((v) => stringify(v));
+		return value.includes(stringify(entry));
 	}
 
 	$: {
 		for (const field of filteredFields) {
 			handler.filter(
-				filterValues[field] ? filterValues[field].map((v) => v.value ?? v) : [],
+				filterValues[field] ? filterValues[field].map((v) => v.value) : [],
 				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
 					? filters[field].getColumn
 					: field,
