@@ -39,10 +39,10 @@
 	import MultiSelect from 'svelte-multiselect';
 </script>
 
-<div hidden={hide}>
-	<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
-	<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
-		{#if selectOptions && Object.entries(selectOptions).length > 0}
+{#if selectOptions && Object.entries(selectOptions).length > 0}
+	<div hidden={hide}>
+		<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
+		<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
 			<MultiSelect
 				bind:value
 				options={selectOptions}
@@ -56,9 +56,9 @@
 					{option.label}
 				{/if}
 			</MultiSelect>
+		</div>
+		{#if helpText}
+			<p class="text-sm text-gray-500">{helpText}</p>
 		{/if}
 	</div>
-	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
-	{/if}
-</div>
+{/if}
