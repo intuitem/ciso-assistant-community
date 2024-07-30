@@ -215,12 +215,17 @@
 
 	import { popup } from '@skeletonlabs/skeleton';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { isDark } from '$lib/utils/helpers';
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
 		target: 'popupFilter',
 		placement: 'bottom-start',
 		closeQuery: 'a[href]'
+	};
+
+	$: classesHexBackgroundText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
 	};
 </script>
 
@@ -358,13 +363,13 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">
-					{#if localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
-						{localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
-					{:else}
-						{value.name ?? value.str ?? '-'}
-					{/if}
-				</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(value.hexcolor)}" style="background-color: {value.hexcolor}">
+                    {#if localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
+                      {localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
+                    {:else}
+                      {value.name ?? value.str ?? '-'}
+                    {/if}
+                  </p>
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
