@@ -15,7 +15,15 @@
 	export let hide = false;
 	export let translateOptions = true;
 
-	export let options: string[] = [];
+	export let options: string[];
+	options = [...new Set(options.flat())];
+
+	const selectOptions = options.map((option) => {
+		return {
+			label: optionLabels[option] || option,
+			value: option
+		};
+	});
 
 	import * as m from '$paraglide/messages';
 
@@ -33,14 +41,18 @@
 <div hidden={hide}>
 	<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
 	<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
-		{#if options.length > 0}
-			<MultiSelect bind:value {options} {...multiSelectOptions} {...$$restProps} let:option>
-				{#if translateOptions && Object.hasOwn(m, option)}
-					{m[toCamelCase(option)]()}
-				{:else if optionLabels[option]}
-					{optionLabels[option]}
+		{#if selectOptions && Object.entries(selectOptions).length > 0}
+			<MultiSelect
+				bind:value
+				options={selectOptions}
+				{...multiSelectOptions}
+				{...$$restProps}
+				let:option
+			>
+				{#if translateOptions && Object.hasOwn(m, option.label)}
+					{m[toCamelCase(option.label)]()}
 				{:else}
-					{option}
+					{option.label}
 				{/if}
 			</MultiSelect>
 		{/if}
