@@ -208,6 +208,7 @@
 	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 
 	import { popup } from '@skeletonlabs/skeleton';
@@ -296,8 +297,8 @@
 					on:keydown={(e) => { onRowKeydown(e, rowIndex); }}
 					aria-rowindex={rowIndex + 1}
 				>
-					{#each Object.entries(row) as [key, value]}
-            {#if key !== 'meta'}
+				{#each Object.entries(row) as [key, value]}
+            		{#if key !== 'meta'}
 						{@const component = field_component_map[key]}
 						<!-- Cell -->
 						<!-- prettier-ignore -->

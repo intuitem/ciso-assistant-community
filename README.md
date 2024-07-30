@@ -100,7 +100,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 6. PCI DSS 4.0 💳
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
-9. GDPR checklist from GDPR.EU 🇪🇺
+9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
 10. Essential Eight 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA 🇪🇺
@@ -144,7 +144,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
-53. General Data Protection Regulation (GDPR) 🇪🇺
+53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 
 ### Community contributions
 

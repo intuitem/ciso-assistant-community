@@ -277,7 +277,7 @@
 		</div>
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
-				<button class="btn variant-filled-primary" use:popup={popupDownload}
+				<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
 					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
 				>
 				<div

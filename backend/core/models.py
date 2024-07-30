@@ -12,10 +12,13 @@ from .validators import validate_file_size, validate_file_name
 from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
+from django.utils.translation import get_language
+from library.helpers import update_translations_in_object, update_translations
 
 import os
 import json
 import yaml
+import re
 
 from django.core.exceptions import ValidationError
 
@@ -29,6 +32,18 @@ from structlog import get_logger
 logger = get_logger(__name__)
 
 User = get_user_model()
+
+
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
+
+
+def match_urn(urn_string):
+    match = re.match(URN_REGEX, urn_string)
+    if match:
+        return match.groups()  # Returns all captured groups from the regex match
+    else:
+        return None
+
 
 ########################### Referential objects #########################
 
@@ -52,18 +67,39 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     )
     description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    translations = models.JSONField(
+        null=True, blank=True, verbose_name=_("Translations")
+    )
 
     class Meta:
         abstract = True
 
     @property
+    def get_name_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("name", self.name)
+
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("description", self.description)
+
+    @property
+    def get_annotation_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("annotation", self.annotation)
+
+    @property
     def display_short(self) -> str:
         _name = (
             self.ref_id
-            if not self.name
-            else self.name
+            if not self.get_name_translated
+            else self.get_name_translated
             if not self.ref_id
-            else f"{self.ref_id} - {self.name}"
+            else f"{self.ref_id} - {self.get_name_translated}"
         )
         _name = "" if not _name else _name
         return _name
@@ -73,10 +109,10 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
         _name = self.display_short
         _display = (
             _name
-            if not self.description
-            else self.description
+            if not self.get_description_translated
+            else self.get_description_translated
             if _name == ""
-            else f"{_name}: {self.description}"
+            else f"{_name}: {self.get_description_translated}"
         )
         return _display
 
@@ -117,6 +153,14 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         null=True
     )  # models.CharField(blank=False,null=True,max_length=16384)
 
+    @property
+    def get_locales(self):
+        return (
+            [self.locale] + list(self.translations.keys())
+            if self.translations
+            else [self.locale]
+        )
+
 
 class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
@@ -137,8 +181,6 @@ class StoredLibrary(LibraryMixin):
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False
     ) -> "StoredLibrary | None":
-        from library.utils import match_urn
-
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             return None  # We do not store the library if its hash checksum is in the database.
@@ -151,7 +193,6 @@ class StoredLibrary(LibraryMixin):
         except yaml.YAMLError as e:
             logger.error("Error while loading library content", error=e)
             raise e
-
         missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
 
         if missing_fields:
@@ -201,6 +242,7 @@ class StoredLibrary(LibraryMixin):
             copyright=library_data.get("copyright"),
             provider=library_data.get("provider"),
             packager=library_data.get("packager"),
+            translations=library_data.get("translations", {}),
             objects_meta=objects_meta,
             dependencies=dependencies,
             is_loaded=is_loaded,
@@ -215,6 +257,7 @@ class StoredLibrary(LibraryMixin):
     ) -> "StoredLibrary | None":
         with open(fname, "rb") as f:
             library_content = f.read()
+
         return StoredLibrary.store_library_content(library_content, builtin)
 
     def load(self) -> Union[str, None]:
@@ -323,6 +366,7 @@ class LibraryUpdater:
             ("ref_id", self.new_library.ref_id),  # Should we even update the ref_id ?
             ("description", self.new_library.description),
             ("annotation", self.new_library.annotation),
+            ("translations", self.new_library.translations),
             ("copyright", self.new_library.copyright),
             ("objects_meta", self.new_library.objects_meta),
         ]:
@@ -520,21 +564,26 @@ class LoadedLibrary(LibraryMixin):
     def _objects(self):
         res = {}
         if self.frameworks.count() > 0:
-            res["framework"] = model_to_dict(self.frameworks.first())
+            res["framework"] = update_translations_in_object(
+                model_to_dict(self.frameworks.first())
+            )
             res["framework"].update(self.frameworks.first().library_entry)
         if self.threats.count() > 0:
-            res["threats"] = [model_to_dict(threat) for threat in self.threats.all()]
+            res["threats"] = [
+                update_translations_in_object(model_to_dict(threat))
+                for threat in self.threats.all()
+            ]
         if self.reference_controls.count() > 0:
             res["reference_controls"] = [
-                model_to_dict(reference_control)
+                update_translations_in_object(model_to_dict(reference_control))
                 for reference_control in self.reference_controls.all()
             ]
         if self.risk_matrices.count() > 0:
             matrix = self.risk_matrices.first()
-            res["risk_matrix"] = model_to_dict(matrix)
-            res["risk_matrix"]["probability"] = matrix.probability
-            res["risk_matrix"]["impact"] = matrix.impact
-            res["risk_matrix"]["risk"] = matrix.risk
+            res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
+            res["risk_matrix"]["probability"] = update_translations(matrix.probability)
+            res["risk_matrix"]["impact"] = update_translations(matrix.impact)
+            res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
@@ -619,6 +668,15 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         ("physical", _("Physical")),
     ]
 
+    CSF_FUNCTION = [
+        ("govern", _("Govern")),
+        ("identify", _("Identify")),
+        ("protect", _("Protect")),
+        ("detect", _("Detect")),
+        ("respond", _("Respond")),
+        ("recover", _("Recover")),
+    ]
+
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -633,6 +691,14 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         blank=True,
         choices=CATEGORY,
         verbose_name=_("Category"),
+    )
+
+    csf_function = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=CSF_FUNCTION,
+        verbose_name=_("CSF Function"),
     )
 
     typical_evidence = models.JSONField(
@@ -746,8 +812,12 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
         return res
 
+    @property
+    def get_json_translated(self):
+        return update_translations(self.json_definition, "fr")
+
     def __str__(self) -> str:
-        return self.name
+        return self.get_name_translated
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
@@ -1087,6 +1157,18 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def filename(self):
         return os.path.basename(self.attachment.name)
 
+    def get_size(self):
+        if not self.attachment:
+            return None
+        # get the attachment size with the correct unit
+        size = self.attachment.size
+        if size < 1024:
+            return f"{size} B"
+        elif size < 1024 * 1024:
+            return f"{size / 1024:.1f} KB"
+        else:
+            return f"{size / 1024 / 1024:.1f} MB"
+
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
@@ -1095,6 +1177,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         INACTIVE = "inactive", _("Inactive")
 
     CATEGORY = ReferenceControl.CATEGORY
+    CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
 
     EFFORT = [
         ("S", _("Small")),
@@ -1124,6 +1207,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         null=True,
         blank=True,
         verbose_name=_("Category"),
+    )
+    csf_function = models.CharField(
+        max_length=20,
+        choices=CSF_FUNCTION,
+        null=True,
+        blank=True,
+        verbose_name=_("CSF Function"),
     )
     status = models.CharField(
         max_length=20,
@@ -1169,6 +1259,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     def save(self, *args, **kwargs):
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
+        if self.reference_control and self.csf_function is None:
+            self.csf_function = self.reference_control.csf_function
         super(AppliedControl, self).save(*args, **kwargs)
 
     @property
@@ -1306,7 +1398,7 @@ class RiskAssessment(Assessment):
         verbose_name_plural = _("Risk assessments")
 
     def __str__(self) -> str:
-        return f"{self.project}/{self.name} - {self.version}"
+        return f"{self.name} - {self.version}"
 
     @property
     def path_display(self) -> str:
@@ -1832,6 +1924,7 @@ class ComplianceAssessment(Assessment):
             .exclude(score=None)
             .exclude(status=RequirementAssessment.Result.NOT_APPLICABLE)
             .exclude(is_scored=False)
+            .exclude(requirement__assessable=False)
         )
         ig = (
             set(self.selected_implementation_groups)

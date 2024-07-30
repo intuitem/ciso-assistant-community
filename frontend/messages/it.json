@@ -92,6 +92,7 @@
 	"firstName": "Nome",
 	"lastName": "Cognome",
 	"category": "Categoria",
+	"csfFunction": "funzione",
 	"eta": "ETA",
 	"referenceControl": "Controllo di riferimento",
 	"appliedControl": "Controllo applicato",
@@ -355,7 +356,7 @@
 	"loadingLibraryUploadButton": "Caricamento pulsante di caricamento della biblioteca",
 	"errorOccuredWhileLoadingLibrary": "Si è verificato il seguente errore durante il caricamento del modulo della biblioteca",
 	"packager": "Impacchettatore",
-	"packagerColon": "Confezionatore:",
+	"packagerColon": "Impacchettatore:",
 	"dependencies": "Dipendenze",
 	"copyright": "Copyright",
 	"addYourLibrary": "Aggiungi la tua biblioteca",
@@ -474,6 +475,7 @@
 	"domainManager": "Manager di dominio",
 	"analyst": "Analista",
 	"successfullyCreatedObject": "L'oggetto {object} è stato creato con successo",
+	"successfullyDuplicateObject": "L'oggetto {object} è stato duplicato con successo",
 	"successfullyUpdatedObject": "L'oggetto {object} è stato aggiornato con successo",
 	"successfullySavedObject": "L'oggetto {object} è stato salvato con successo",
 	"successfullyDeletedObject": "L'oggetto {object} è stato eliminato con successo",
@@ -610,5 +612,8 @@
 	"notApplicableScore": "Non è possibile ottenere un punteggio se la valutazione dei requisiti non è applicabile",
 	"maturity": "Scadenza",
 	"progress": "Progressione",
-	"back": "Ritorno"
+	"back": "Ritorno",
+	"duplicate": "Duplicare",
+	"duplicateRiskAssessment": "Duplicare la valutazione del rischio",
+	"size": "Dimensione"
 }
