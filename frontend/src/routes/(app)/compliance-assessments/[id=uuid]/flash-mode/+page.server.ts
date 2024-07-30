@@ -25,6 +25,7 @@ export const load = (async ({ fetch, params }) => {
 export const actions: Actions = {
 	updateRequirementAssessment: async (event) => {
 		const data = await event.request.json();
+		console.debug(data);
 		const value: { id: string; result: string } = data;
 		const URLModel = 'requirement-assessments';
 		const endpoint = `${BASE_API_URL}/${URLModel}/${value.id}/`;
@@ -34,6 +35,7 @@ export const actions: Actions = {
 			body: JSON.stringify(value)
 		};
 
-		await event.fetch(endpoint, requestInitOptions);
+		const res = await event.fetch(endpoint, requestInitOptions);
+		console.debug(await res.json());
 	}
 };
