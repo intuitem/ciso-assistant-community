@@ -116,42 +116,16 @@
 		modalStore.trigger(modal);
 	}
 
-	const riskMap = (scenarios: RiskScenario[], risk_matrix: RiskMatrix) => {
-		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
-		return scenarios.map((s) => {
-			const currentImpact = parsedRiskMatrix.impact.findIndex(
-				(e) => e.name === s.current_impact.toString()
-			);
-			const currentProbability = parsedRiskMatrix.probability.findIndex(
-				(e) => e.name === s.current_proba.toString()
-			);
-			const residualImpact = parsedRiskMatrix.impact.findIndex(
-				(e) => e.name === s.residual_impact.toString()
-			);
-			const residualProbability = parsedRiskMatrix.probability.findIndex(
-				(e) => e.name === s.residual_proba.toString()
-			);
-			return {
-				...s,
-				current_impact: { label: s.current_impact, value: currentImpact },
-				current_proba: { label: s.current_proba, value: currentProbability },
-				residual_impact: { label: s.residual_impact, value: residualImpact },
-				residual_proba: { label: s.residual_proba, value: residualProbability }
-			};
-		});
-	};
-
 	const buildRiskCluster = (
-		_scenarios: RiskScenario[],
+		scenarios: RiskScenario[],
 		risk_matrix: RiskMatrix,
 		risk: 'current' | 'residual'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
-		const scenarios = riskMap(_scenarios, risk_matrix);
-		const grid: string[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
+		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
 			Array.from({ length: parsedRiskMatrix.impact.length }, () => [])
 		);
-		scenarios.forEach((scenario: RiskScenario, index: number) => {
+		scenarios.forEach((scenario: RiskScenario) => {
 			const probability = scenario[`${risk}_proba`].value;
 			const impact = scenario[`${risk}_impact`].value;
 			probability >= 0 && impact >= 0 ? grid[probability][impact].push(scenario) : undefined;

@@ -134,10 +134,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_proba]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_proba)]}
-						{localItems()[toCamelCase(data.scenario.current_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.current_proba.name)]}
+						{localItems()[toCamelCase(data.scenario.current_proba.name)]}
 					{:else}
-						{data.scenario.current_proba}
+						{data.scenario.current_proba.name}
 					{/if}
 				</span>
 			</p>
@@ -148,10 +148,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_impact]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_impact)]}
-						{localItems()[toCamelCase(data.scenario.current_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.current_impact.name)]}
+						{localItems()[toCamelCase(data.scenario.current_impact.name)]}
 					{:else}
-						{data.scenario.current_impact}
+						{data.scenario.current_impact.name}
 					{/if}
 				</span>
 			</p>
@@ -190,10 +190,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_proba]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_proba)]}
-						{localItems()[toCamelCase(data.scenario.residual_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_proba.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_proba.name)]}
 					{:else}
-						{data.scenario.residual_proba}
+						{data.scenario.residual_proba.name}
 					{/if}
 				</span>
 			</p>
@@ -204,10 +204,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_impact]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_impact)]}
-						{localItems()[toCamelCase(data.scenario.residual_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_impact.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_impact.name)]}
 					{:else}
-						{data.scenario.residual_impact}
+						{data.scenario.residual_impact.name}
 					{/if}
 				</span>
 			</p>

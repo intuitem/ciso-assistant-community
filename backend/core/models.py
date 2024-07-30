@@ -1821,21 +1821,38 @@ class RiskScenario(NameDescriptionMixin):
                 "name": "--",
                 "description": "not rated",
                 "hexcolor": "#A9A9A9",
+                "value": -1,
             }
         risk_matrix = self.get_matrix()
-        return risk_matrix["risk"][self.current_level]
+        return {**risk_matrix["risk"][self.current_level], "value": self.current_level}
 
     def get_current_impact(self):
         if self.current_impact < 0:
-            return {"abbreviation": "--", "name": "--", "description": "not rated"}
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
         risk_matrix = self.get_matrix()
-        return risk_matrix["impact"][self.current_impact]
+        return {
+            **risk_matrix["impact"][self.current_impact],
+            "value": self.current_impact,
+        }
 
     def get_current_proba(self):
         if self.current_proba < 0:
-            return {"abbreviation": "--", "name": "--", "description": "not rated"}
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
         risk_matrix = self.get_matrix()
-        return risk_matrix["probability"][self.current_proba]
+        return {
+            **risk_matrix["probability"][self.current_proba],
+            "value": self.current_proba,
+        }
 
     def get_residual_risk(self):
         if self.residual_level < 0:
@@ -1844,21 +1861,41 @@ class RiskScenario(NameDescriptionMixin):
                 "name": "--",
                 "description": "not rated",
                 "hexcolor": "#A9A9A9",
+                "value": -1,
             }
         risk_matrix = self.get_matrix()
-        return risk_matrix["risk"][self.residual_level]
+        return {
+            **risk_matrix["risk"][self.residual_level],
+            "value": self.residual_level,
+        }
 
     def get_residual_impact(self):
         if self.residual_impact < 0:
-            return {"abbreviation": "--", "name": "--", "description": "not rated"}
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
         risk_matrix = self.get_matrix()
-        return risk_matrix["impact"][self.residual_impact]
+        return {
+            **risk_matrix["impact"][self.residual_impact],
+            "value": self.residual_impact,
+        }
 
     def get_residual_proba(self):
         if self.residual_proba < 0:
-            return {"abbreviation": "--", "name": "--", "description": "not rated"}
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
         risk_matrix = self.get_matrix()
-        return risk_matrix["probability"][self.residual_proba]
+        return {
+            **risk_matrix["probability"][self.residual_proba],
+            "value": self.residual_proba,
+        }
 
     def get_strength_of_knowledge(self):
         if self.strength_of_knowledge < 0:
