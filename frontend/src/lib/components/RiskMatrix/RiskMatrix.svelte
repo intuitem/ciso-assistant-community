@@ -61,7 +61,7 @@
 			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
 			<div
 				class="flex flex-col items-center h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center {classesCellText(
-					probability.hexcolor
+					probability.hexcolor ?? '#FFFFFF'
 				)}"
 				style="background: {probability.hexcolor}"
 				data-testid="probability-row-header"
@@ -106,7 +106,7 @@
 		{#each parsedRiskMatrix.impact as impact, key}
 			<div
 				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2 text-center {classesCellText(
-					impact.hexcolor
+					impact.hexcolor ?? '#FFFFFF'
 				)}"
 				style="background: {impact.hexcolor}"
 				data-testid="impact-col-header"
