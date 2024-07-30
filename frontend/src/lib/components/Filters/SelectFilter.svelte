@@ -19,8 +19,9 @@
 	options = [...new Set(options.flat())];
 
 	const selectOptions = options.map((option) => {
+		const label = optionLabels[option] ?? option;
 		return {
-			label: optionLabels[option] || option,
+			label: label ?? m.undefined(),
 			value: option
 		};
 	});
