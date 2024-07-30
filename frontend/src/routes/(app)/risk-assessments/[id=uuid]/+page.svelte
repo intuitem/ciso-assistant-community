@@ -122,7 +122,6 @@
 		risk: 'current' | 'residual'
 	) => {
 		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
-		console.log(scenarios);
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
 			Array.from({ length: parsedRiskMatrix.impact.length }, () => [])
 		);
