@@ -242,11 +242,11 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     treatment = serializers.CharField(source="get_treatment_display")
 
-    current_proba = serializers.CharField(source="get_current_proba.name")
-    current_impact = serializers.CharField(source="get_current_impact.name")
+    current_proba = serializers.JSONField(source="get_current_proba")
+    current_impact = serializers.JSONField(source="get_current_impact")
     current_level = serializers.JSONField(source="get_current_risk")
-    residual_proba = serializers.CharField(source="get_residual_proba.name")
-    residual_impact = serializers.CharField(source="get_residual_impact.name")
+    residual_proba = serializers.JSONField(source="get_residual_proba")
+    residual_impact = serializers.JSONField(source="get_residual_impact")
     residual_level = serializers.JSONField(source="get_residual_risk")
 
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
