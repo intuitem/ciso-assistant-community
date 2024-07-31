@@ -421,6 +421,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         exclude = [
             "builtin",
             "content_type",
+            "parent_folder",
         ]
 
 
