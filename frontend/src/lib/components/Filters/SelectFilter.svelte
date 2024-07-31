@@ -13,6 +13,7 @@
 	export let multiple = true;
 
 	export let hide = false;
+
 	export let translateOptions = true;
 
 	export let options: string[];
@@ -25,6 +26,8 @@
 			value: option
 		};
 	});
+
+	hide = hide || !(selectOptions && Object.entries(selectOptions).length > 1);
 
 	import * as m from '$paraglide/messages';
 
@@ -39,8 +42,8 @@
 	import MultiSelect from 'svelte-multiselect';
 </script>
 
-{#if selectOptions && Object.entries(selectOptions).length > 1}
-	<div hidden={hide}>
+{#if !hide}
+	<div>
 		<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
 		<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
 			<MultiSelect
