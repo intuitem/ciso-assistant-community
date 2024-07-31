@@ -19,13 +19,15 @@
 	export let options: string[];
 	options = [...new Set(options.flat())];
 
-	const selectOptions = options.map((option) => {
-		const label = optionLabels[option] ?? option;
-		return {
-			label: label ?? m.undefined(),
-			value: option
-		};
-	});
+	const selectOptions = options
+		.map((option) => {
+			const label = optionLabels[option] ?? option;
+			return {
+				label: label ?? m.undefined(),
+				value: option
+			};
+		})
+		.sort((a, b) => a.label.localeCompare(b.label));
 
 	hide = hide || !(selectOptions && Object.entries(selectOptions).length > 1);
 
