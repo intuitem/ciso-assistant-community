@@ -39,7 +39,7 @@
 	import MultiSelect from 'svelte-multiselect';
 </script>
 
-{#if selectOptions && Object.entries(selectOptions).length > 0}
+{#if selectOptions && Object.entries(selectOptions).length > 1}
 	<div hidden={hide}>
 		<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
 		<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
