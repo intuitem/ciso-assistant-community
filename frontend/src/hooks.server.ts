@@ -5,6 +5,8 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { setLanguageTag } from '$paraglide/runtime';
 
+import { loadFeatureFlags } from '$lib/feature-flags';
+
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
 	if (!csrfToken) {
@@ -46,6 +48,8 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	event.locals.featureFlags = loadFeatureFlags();
+
 	await ensureCsrfToken(event);
 
 	if (event.locals.user) return await resolve(event);
