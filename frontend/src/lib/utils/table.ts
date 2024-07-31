@@ -17,6 +17,7 @@ interface ListViewFilterConfig {
 	extraProps?: { [key: string]: any };
 	alwaysDisplay?: boolean;
 	alwaysDefined?: boolean;
+	hide?: boolean;
 }
 
 interface ListViewFieldsConfig {

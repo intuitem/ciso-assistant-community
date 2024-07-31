@@ -42,7 +42,6 @@
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
 	export let tags = true;
-	export let displayFilters = true;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
@@ -97,6 +96,11 @@
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	export let hideFilters = false;
+	$: hideFilters =
+		hideFilters ||
+		!Object.entries(filters).some(([key, filter]) => {
+			if (!filter.hide) return true;
+		});
 
 	const user = $page.data.user;
 
@@ -247,6 +251,7 @@
 					<svelte:component
 						this={filters[field].component}
 						bind:value={filterValues[field]}
+						bind:hide={filters[field].hide}
 						{field}
 						{...filterProps[field]}
 						{...filters[field].extraProps}
