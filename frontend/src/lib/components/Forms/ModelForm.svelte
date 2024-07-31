@@ -181,6 +181,18 @@
 			cacheLock={cacheLocks['lc_status']}
 			bind:cachedValue={formDataCache['lc_status']}
 		/>
+	{:else if URLModel === 'folders'}
+		{#if $page.data.featureFlags.enterprise === true}
+			<AutocompleteSelect
+				{form}
+				options={getOptions({ objects: model.foreignKeys['parent_folder'] })}
+				field="parent_folder"
+				cacheLock={cacheLocks['parent_folder']}
+				bind:cachedValue={formDataCache['parent_folder']}
+				label="_parent folder"
+				hide={initialData.parent_folder}
+			/>
+		{/if}
 	{:else if URLModel === 'risk-assessments' || URLModel === 'risk-assessment-duplicate'}
 		<AutocompleteSelect
 			{form}
