@@ -44,7 +44,9 @@
 
 {#if !hide}
 	<div>
-		<label class="text-sm font-semibold" for={field}>{m[label]()}</label>
+		<label class="text-sm font-semibold" for={field}
+			>{m[label]()} <span class="text-xs font-normal">({selectOptions.length})</span></label
+		>
 		<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
 			<MultiSelect
 				bind:value
