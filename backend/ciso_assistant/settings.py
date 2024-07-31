@@ -82,7 +82,7 @@ logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
 FEATURE_FLAGS = {
-    "enterprise": os.environ.get("FF_ENTERPRISE", "False") == "True",
+    "enterprise": os.environ.get("FF_ENTERPRISE", "false") == "true",
 }
 
 logger.info("BASE_DIR: %s", BASE_DIR)
