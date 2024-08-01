@@ -64,6 +64,13 @@ export function darkenColor(hex: string, amount: number) {
 	return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
+export function stringify(value: string | number | boolean | null = null) {
+	return String(value)
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '');
+}
+
 export function isDark(hexcolor: string): boolean {
 	const r = parseInt(hexcolor.slice(1, 3), 16);
 	const g = parseInt(hexcolor.slice(3, 5), 16);
