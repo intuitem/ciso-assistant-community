@@ -1,7 +1,7 @@
 urn: urn:intuitem:risk:library:cjis-policy-5.9
 locale: en
 ref_id: CJIS-POLICY-5.9.5
-name: Criminal Justice Information Services (CJIS) Security Policy
+name: Criminal Justice Information Services (CJIS) Security Policy 5.9.5
 description: The Criminal Justice Information Services (CJIS) Security Policy is a
   set of standards and guidelines developed by the FBI to help secure criminal justice
   information (CJI), such as fingerprints, criminal histories, and other data. The
@@ -15,7 +15,7 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:cjis-policy-5.9
     ref_id: CJIS-POLICY-5.9.5
-    name: Criminal Justice Information Services (CJIS) Security Policy
+    name: Criminal Justice Information Services (CJIS) Security Policy 5.9.5
     description: The Criminal Justice Information Services (CJIS) Security Policy
       is a set of standards and guidelines developed by the FBI to help secure criminal
       justice information (CJI), such as fingerprints, criminal histories, and other
