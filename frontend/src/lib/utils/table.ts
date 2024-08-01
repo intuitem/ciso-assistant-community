@@ -17,6 +17,7 @@ interface ListViewFilterConfig {
 	extraProps?: { [key: string]: any };
 	alwaysDisplay?: boolean;
 	alwaysDefined?: boolean;
+	hide?: boolean;
 }
 
 interface ListViewFieldsConfig {
@@ -140,21 +141,7 @@ const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.threats,
-	filter: (rowThreatName, threatName) => {
-		if (!threatName) return true;
-		return rowThreatName === threatName;
-	},
-	filterProps: (rows, _) => {
-		const threatSet = new Set();
-		for (const row of rows) {
-			for (const threat of row.meta.threats) {
-				threatSet.add(threat.str);
-			}
-		}
-		const options = [...threatSet].sort();
-		return { options };
-	},
+	getColumn: (row) => (row.meta.threats.length ? row.meta.threats.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'threat'
 	}
@@ -162,21 +149,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.assets,
-	filter: (rowAssetName, assetName) => {
-		if (!assetName) return true;
-		return rowAssetName === assetName;
-	},
-	filterProps: (rows, _) => {
-		const assetSet = new Set();
-		for (const row of rows) {
-			for (const asset of row.meta.assets) {
-				assetSet.add(asset.str);
-			}
-		}
-		const options = [...assetSet].sort();
-		return { options };
-	},
+	getColumn: (row) => (row.meta.assets.length ? row.meta.assets.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'asset'
 	},
