@@ -81,6 +81,8 @@ structlog.configure(
 logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
+FEATURE_FLAGS = {}
+
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
