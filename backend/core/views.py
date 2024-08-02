@@ -10,8 +10,6 @@ from typing import Any, Tuple, List
 from uuid import UUID
 from datetime import date, timedelta
 
-from ciso_assistant.settings import FEATURE_FLAGS
-
 import django_filters as df
 from ciso_assistant.settings import (
     BUILD,
@@ -95,15 +93,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return super().get_serializer_class()
 
         # Dynamically import the serializer module and get the serializer class
-        if FEATURE_FLAGS["enterprise"]:
-            try:
-                serializer_module = importlib.import_module(
-                    "enterprise." + self.serializers_module
-                )
-                serializer_class = getattr(serializer_module, serializer_name)
-                return serializer_class
-            except (ModuleNotFoundError, AttributeError):
-                pass
         serializer_module = importlib.import_module(self.serializers_module)
         serializer_class = getattr(serializer_module, serializer_name)
 
