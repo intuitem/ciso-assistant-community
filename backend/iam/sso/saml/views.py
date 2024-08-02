@@ -132,6 +132,7 @@ class FinishACSView(SAMLViewMixin, View):
             login.state["next"] += f"sso/authenticate/{token}"
             return complete_social_login(request, login)
         except User.DoesNotExist:
+            # NOTE: We might want to allow signup some day
             logger.warning("User does not exist")
             return render_authentication_error(
                 request, provider, error="UserDoesNotExist"
