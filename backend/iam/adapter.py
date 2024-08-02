@@ -24,9 +24,6 @@ User = get_user_model()
 
 
 class MyAccountAdapter(DefaultAccountAdapter):
-    def is_open_for_signup(self, request):
-        return False
-
     def is_safe_url(self, url):
         allowed_hosts = {urlparse(settings.CISO_ASSISTANT_URL).hostname} | set(
             settings.ALLOWED_HOSTS
