@@ -68,7 +68,6 @@
 				useFocusTrap={false}
 				onSubmit={() => {
 					const fileInput = document.querySelector(`input[type="file"]`);
-					console.log(fileInput);
 					fileInput.value = '';
 				}}
 				{...$$restProps}

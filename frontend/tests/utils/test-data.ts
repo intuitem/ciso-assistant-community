@@ -6,6 +6,8 @@ export default {
 	projectName: 'Test project',
 	riskAcceptanceName: 'Test risk acceptance',
 	riskAssessmentName: 'Test risk assessment',
+	riskAssessmentVersion: '1.4.2',
+	riskAssessmentVersion2: '1.4.3',
 	riskScenarioName: 'Test risk scenario',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
@@ -199,6 +201,7 @@ export default {
 	referenceControl: {
 		name: 'POL.PHYSICAL - Physical security policy',
 		category: 'policy',
+		csf_function: 'govern',
 		library: {
 			name: 'Documents and policies',
 			ref: 'doc-pol',
@@ -209,6 +212,7 @@ export default {
 	referenceControl2: {
 		name: 'DOC.CONTROLS - Controls accountability matrix',
 		category: 'process',
+		csf_function: 'protect',
 		library: {
 			name: 'Documents and policies',
 			ref: 'doc-pol',
