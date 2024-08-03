@@ -3,7 +3,7 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 
 	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { isDark } from '$lib/utils/helpers';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -43,6 +43,10 @@
 		$probabilityValue >= 0 && $impactValue >= 0
 			? riskMatrix.risk[gridPosition($probabilityValue, $impactValue)!]
 			: undefined;
+
+	$: classesCellText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
+	};
 </script>
 
 <div class="flex flex-col">
@@ -51,7 +55,9 @@
 	{/if}
 	{#if riskLevel}
 		<div
-			class="flex font-medium w-32 justify-center p-2 rounded-token"
+			class="flex font-medium w-32 justify-center p-2 rounded-token {classesCellText(
+				riskLevel.hexcolor
+			)}"
 			style="background-color: {riskLevel.hexcolor}"
 		>
 			{#if localItems()[toCamelCase(riskLevel.name)]}

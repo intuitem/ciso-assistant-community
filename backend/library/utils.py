@@ -1,6 +1,6 @@
 import json
 import time
-import os
+from .helpers import get_referential_translation
 from pathlib import Path
 import re
 from typing import List, Union
@@ -30,15 +30,32 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
 
-
-def match_urn(urn_string):
-    match = re.match(URN_REGEX, urn_string)
-    if match:
-        return match.groups()  # Returns all captured groups from the regex match
-    else:
-        return None
+def preview_library(framework: dict) -> dict[str, list]:
+    """
+    Function to create temporary requirement nodes list
+    Used to display requirements in tree view inside library detail view
+    """
+    preview = {}
+    requirement_nodes_list = []
+    if framework.get("requirement_nodes"):
+        index = 0
+        for requirement_node in framework["requirement_nodes"]:
+            index += 1
+            requirement_nodes_list.append(
+                RequirementNode(
+                    description=get_referential_translation(
+                        requirement_node, "description"
+                    ),
+                    ref_id=requirement_node.get("ref_id"),
+                    name=get_referential_translation(requirement_node, "name"),
+                    urn=requirement_node["urn"],
+                    parent_urn=requirement_node.get("parent_urn"),
+                    order_id=index,
+                )
+            )
+    preview["requirement_nodes"] = requirement_nodes_list
+    return preview
 
 
 class RequirementNodeImporter:
@@ -70,6 +87,7 @@ class RequirementNodeImporter:
             implementation_groups=self.requirement_data.get("implementation_groups"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
+            translations=self.requirement_data.get("translations", {}),
             is_published=True,
         )
 
@@ -283,6 +301,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            translations=self.framework_data.get("translations", {}),
             is_published=True,
         )
         for requirement_node in self._requirement_nodes:
@@ -310,6 +329,7 @@ class ThreatImporter:
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
+            translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
@@ -318,6 +338,9 @@ class ThreatImporter:
 class ReferenceControlImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in ReferenceControl.CATEGORY)
+    CSF_FUNCTIONS = set(
+        _csf_function[0] for _csf_function in ReferenceControl.CSF_FUNCTION
+    )
 
     def __init__(self, reference_control_data: dict):
         self.reference_control_data = reference_control_data
@@ -334,6 +357,14 @@ class ReferenceControlImporter:
                     category, ", ".join(ReferenceControlImporter.CATEGORIES)
                 )
 
+        if (
+            csf_function := self.reference_control_data.get("csf_function")
+        ) is not None:
+            if csf_function not in ReferenceControlImporter.CSF_FUNCTIONS:
+                return "Invalid CSF function '{}', the function must be among the following list : {}".format(
+                    csf_function, ", ".join(ReferenceControlImporter.CSF_FUNCTIONS)
+                )
+
     def import_reference_control(self, library_object: LoadedLibrary):
         ReferenceControl.objects.create(
             library=library_object,
@@ -344,8 +375,10 @@ class ReferenceControlImporter:
             provider=library_object.provider,
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
+            csf_function=self.reference_control_data.get("csf_function"),
             is_published=True,
             locale=library_object.locale,
+            translations=self.reference_control_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
@@ -388,6 +421,7 @@ class RiskMatrixImporter:
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            translations=self.risk_matrix_data.get("translations", {}),
             is_published=True,
         )
         logger.info("Risk matrix created", matrix=matrix)
@@ -588,6 +622,7 @@ class LibraryImporter:
                 "is_published": True,
                 "builtin": self._library.builtin,
                 "objects_meta": self._library.objects_meta,
+                "translations": self._library.translations,
             },
             urn=_urn,
             locale=_locale,

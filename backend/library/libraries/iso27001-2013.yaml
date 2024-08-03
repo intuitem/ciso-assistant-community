@@ -42,7 +42,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
       ref_id: '4.2'
       name: Understanding the needs and expectations of interested parties
-      description: Determine interested parties and understand therir requirements
+      description: Determine interested parties and understand their requirements
         in relation with the ISMS.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
@@ -236,7 +236,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
       ref_id: 7.5.3
       name: Control of documented information
-      description: Ensure the ISM documentation is available and adequately protected.
+      description: Ensure the ISMS documentation is available and adequately protected.
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2013:8

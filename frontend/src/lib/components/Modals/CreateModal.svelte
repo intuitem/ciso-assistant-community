@@ -12,6 +12,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
+	export let riskAssessmentDuplication = false;
 	export let formAction = 'create';
 	export let context = 'default';
 	let closeModal = true;
@@ -50,6 +51,8 @@
 			{model}
 			{closeModal}
 			{context}
+			{riskAssessmentDuplication}
+			caching={true}
 			action="?/{formAction}"
 			{debug}
 		/>
