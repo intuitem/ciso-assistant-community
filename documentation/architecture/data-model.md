@@ -189,6 +189,8 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
+        string  question
+        boolean no_result
     }
 
     REFERENCE_CONTROL {
@@ -227,6 +229,8 @@ erDiagram
         string result
         string mapping_inference
         bool   selected
+        string review_conclusion
+        string review_observation
     }
 
     EVIDENCE {
@@ -1083,3 +1087,115 @@ Names of built-in objects can be internationalized.
 A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
 
 SSO Settings are defined in a dedicated object SSO_SETTINGS.
+
+## TPRM evolution
+
+### Retained approach
+
+The following approach has been retained:
+- An "entity" model is added to modelize third parties in a generic way.
+- A third party is an entity that is provider of the entity representing the client using CISO Assistant.
+- An evaluation of a third party is based on a compliance assessment, to leverage a huge amount of existing models and code.
+- This compliance assessment is done by the third party.
+- This compliance assessment is reviewed by the client, requirement by requirement.
+- An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
+- Review features are added to compliance assessment to enable this workflow in a generic way.
+- A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
+- A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
+
+### New models
+
+```mermaid
+erDiagram
+
+    ASSET                 }o--o{ SOLUTION              : contains
+    ENTITY                }o--o{ DOMAIN                : owns
+    SOLUTION              }o--o{ VULNERABILITY         : contains
+    SOLUTION              }o--o| ENTITY                : provided_by
+    CONTRACT              }o--o{ SOLUTION              : formalizes
+    CONTRACT              }o--o{ EVIDENCE              : has
+    ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
+    ENTITY                }o--o{ PERSON                : employs
+    ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY                }o--|| ENTITY                : is_provider_of
+    COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+    ENTITY {
+        string  name
+        string  description
+        string  missions  
+        entity  parent_entity
+        url     reference_link
+    }
+
+    ASSET {
+        string      name
+        string      description
+        string      business_value
+        string      type
+        string      security_need
+        asset       parent_asset
+    }
+
+
+    SOLUTION {
+        string      name
+        string      description
+        string      type
+        string      cpe
+        product[]   products
+        string      version
+    }
+
+    CONTRACT {
+        string name
+        string description
+        entity client
+        entity provider
+        date   start_date
+        date   end_date
+    }
+
+    ENTITY_EVALUATION {
+        string name
+        string description
+        date   send_date
+        date   due_date
+        int    penetration
+        int    dependency
+        int    maturity
+        int    trust
+    }
+
+    PERSON {
+        string email
+        string first_name
+        string last_name
+        string phone
+        string role
+        string description
+    }
+
+```
+
+```mermaid
+erDiagram
+    DOMAIN          ||--o{ CONTRACT             : contains
+    DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
+    DOMAIN          ||--o{ SOLUTION             : contains
+```
+```mermaid
+erDiagram
+    GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
+    GLOBAL_DOMAIN   ||--o{ PERSON          : contains
+```
+
+### Evolution of existing models
+
+requirement_assessment - add the following fields:
+- review_conclusion: --|blocker|warning|ok|N/A
+- review_observation
+
+requirement_node - add the following fields:
+- no_result
+- question
+
