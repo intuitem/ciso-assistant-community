@@ -1,18 +1,17 @@
 urn: urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux
 locale: fr
-ref_id: 'ANSSI-RECOMMANDATIONS-CONFIGURATION-SYSTEME-GNU-LINUX '
-name: "ANSSI - Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
+ref_id: ANSSI
+name: "Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
 description: "Renforcer la s\xE9curit\xE9 d\u2019un syst\xE8me GNU-Linux\nhttps://cyber.gouv.fr/sites/default/files/document/fr_np_linux_configuration-v2.0.pdf"
 copyright: Licence ouverte / Open Licence v2.0 (Etalab)
-version: 1
+version: 2
 provider: ANSSI
 packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-recommandations-configuration-systeme-gnu-linux
-    ref_id: 'ANSSI-RECOMMANDATIONS-CONFIGURATION-SYSTEME-GNU-LINUX '
-    name: "ANSSI - Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me\
-      \ GNU-Linux"
+    ref_id: ANSSI
+    name: "Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
     description: "Renforcer la s\xE9curit\xE9 d\u2019un syst\xE8me GNU-Linux"
     implementation_groups_definition:
     - ref_id: M
@@ -342,10 +341,10 @@ objects:
       ref_id: R13
       name: "D\xE9sactiver le plan IPv6"
       description: "Quand IPv6 n\u2019est pas utilis\xE9, il est recommand\xE9 de\
-        \ d\xE9sactiver la pile IPv6 en :\L\n- Ajoutant la directive ipv6.disable=1\
+        \ d\xE9sactiver la pile IPv6 en :\L\LAjoutant la directive ipv6.disable=1\
         \ \xE0 la liste des param\xE8tres du noyau choisi lors du d\xE9marrage en\
         \ plus de celles d\xE9j\xE0 pr\xE9sentes dans les fichiers de configuration\
-        \  du chargeur de d\xE9marrage\L\n- Activant les options de configuration du r\xE9\
+        \  du chargeur de d\xE9marrage\LActivant les options de configuration du r\xE9\
         seau pr\xE9sent\xE9es dans la liste ci-dessous.\L\nListe des options de configuration\
         \ du r\xE9seau pour d\xE9sactiver le plan IPv6\L\nLes options de configuration\
         \ du r\xE9seau d\xE9taill\xE9es dans cette liste d\xE9sactivent le plan IPv6.\
@@ -1106,11 +1105,11 @@ objects:
       ref_id: R48
       name: "Param\xE9trer les variables SELinux"
       description: "Il est recommand\xE9 d\u2019appliquer les politiques de s\xE9\
-        curit\xE9 suivantes :\L\n- Interdit aux processus de rendre ex\xE9cutable leur\
-        \ tas - heap -\L\n- Interdit aux processus d\u2019avoir une zone m\xE9moire avec\
-        \ des droits en \xE9criture - w - et en ex\xE9cution - x -\L\n- Interdit aux processus\
-        \ le droit de rendre leur pile - stack - ex\xE9cutable\L\n- Interdit le chargement\
-        \ dynamique des modules par n\u2019importe quel processus ;\L\n- Interdit les\
+        curit\xE9 suivantes :\LInterdit aux processus de rendre ex\xE9cutable leur\
+        \ tas - heap -\LInterdit aux processus d\u2019avoir une zone m\xE9moire avec\
+        \ des droits en \xE9criture - w - et en ex\xE9cution - x -\LInterdit aux processus\
+        \ le droit de rendre leur pile - stack - ex\xE9cutable\L\L- Interdit le chargement\
+        \ dynamique des modules par n\u2019importe quel processus ; s Interdit les\
         \ logins SSH de se connecter directement en r\xF4le sysadmin."
       implementation_groups:
       - E
@@ -1541,8 +1540,8 @@ objects:
       ref_id: R74
       name: Durcir le service de messagerie locale
       description: "Quand un service de messagerie est install\xE9 sur la machine,\
-        \ il doit \xEAtre configur\xE9 pour n\u2019accepter que :\L\n- Les messages \xE0\
-        \ destination d\u2019un compte utilisateur local \xE0 la machine\L\n- Les connexions\
+        \ il doit \xEAtre configur\xE9 pour n\u2019accepter que :\LLes messages \xE0\
+        \ destination d\u2019un compte utilisateur local \xE0 la machine\LLes connexions\
         \ sur l\u2019interface r\xE9seau de la boucle locale, les connexions distantes\
         \ au service de messagerie doivent \xEAtre rejet\xE9es."
       implementation_groups:

@@ -1,0 +1,625 @@
+urn: urn:protocolpaladin:risk:library:anssi-recommandations-securite-relatives-tls
+locale: fr
+ref_id: ANSSI
+name: "Recommandations de s\xE9curit\xE9 relatives \xE0 TLS"
+description: "Ce guide a pour objectif de pr\xE9senter les bonnes pratiques relatives\
+  \ au protocole TLS.\L \nIl s\u2019adresse \xE0 tous les publics qui souhaitent se\
+  \ familiariser ou interagir avec le protocole TLS : responsables de la s\xE9curit\xE9\
+  \ des syst\xE8mes d\u2019information, administrateurs d\u2019organismes de toutes\
+  \ tailles, ou encore d\xE9veloppeurs de solutions souhaitant s\xE9curiser des \xE9\
+  changes d\u2019information par l\u2019interm\xE9diaire de TLS.\L\nhttps://cyber.gouv.fr/sites/default/files/2017/07/anssi-guide-recommandations_de_securite_relatives_a_tls-v1.2.pdf"
+copyright: Licence ouverte / Open Licence (Etalab v1)
+version: 1
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-recommandations-securite-relatives-tls
+    ref_id: ANSSI
+    name: "Recommandations de s\xE9curit\xE9 relatives \xE0 TLS"
+    description: "Ce guide a pour objectif de pr\xE9senter les bonnes pratiques relatives\
+      \ au protocole TLS.\L \nIl s\u2019adresse \xE0 tous les publics qui souhaitent\
+      \ se familiariser ou interagir avec le protocole TLS : responsables de la s\xE9\
+      curit\xE9 des syst\xE8mes d\u2019information, administrateurs d\u2019organismes\
+      \ de toutes tailles, ou encore d\xE9veloppeurs de solutions souhaitant s\xE9\
+      curiser des \xE9changes d\u2019information par l\u2019interm\xE9diaire de TLS."
+    implementation_groups_definition:
+    - ref_id: "Rx\u2013"
+      name: Recommandation alternative de premier niveau
+      description: "Dans le cas o\xF9 l\u2019application de la recommandation de s\xE9\
+        curit\xE9 optimale est impossible, ou insuffisante au regard des besoins en\
+        \ compatibilit\xE9, cette mesure propose un premier niveau d\xE9rogatoire.\
+        \ Le niveau de confiance est plus faible qu\u2019avec Rx."
+    - ref_id: Rx
+      name: "Recommandation \xE0 l'\xE9tat de l'art"
+      description: "Cette recommandation permet de mettre en place l\u2019architecture\
+        \ cible offrant un niveau de s\xE9curit\xE9 conforme \xE0 l\u2019\xE9tat de\
+        \ l\u2019art."
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:0
+      assessable: false
+      depth: 1
+      ref_id: '0'
+      name: Comment lire les recommandations ?
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r1
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:0
+      ref_id: R1
+      name: "Restreindre la compatibilit\xE9 en fonction du profil des clients"
+      description: "Lorsque les clients d\u2019un serveur ne sont pas ma\xEEtris\xE9\
+        s, il convient d\u2019\xE9tablir un profil des clients souhait\xE9s. Le suivi\
+        \ \xE9ventuel de recommandations d\xE9grad\xE9es (Rx\u2013) s\u2019appuie\
+        \ sur ce profil."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "N\xE9gociation des param\xE8tres TLS"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r2
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2
+      ref_id: R2
+      name: "Utiliser des composants logiciels \xE0 jour"
+      description: "Les composants dont d\xE9pend le d\xE9ploiement de TLS doivent\
+        \ \xEAtre tenus \xE0 jour."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2
+      ref_id: '2.1'
+      name: Versions de protocole
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.1
+      ref_id: R3
+      name: "Privil\xE9gier TLS 1.3 et accepter TLS 1.2"
+      description: "La version TLS 1.3 doit \xEAtre prise en charge et privil\xE9\
+        gi\xE9e. La version TLS 1.2 est \xE9galement accept\xE9e sous condition de\
+        \ suivre les recommandations de ce guide."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r4
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.1
+      ref_id: R4
+      name: Ne pas utiliser SSL v2, SSL v3, TLS 1.0 et TLS 1.1
+      description: "Les versions SSLv2, SSLv3, TLS 1.0 et TLS 1.1 sont \xE0 proscrire.\
+        \ De plus, il faut privil\xE9gier l\u2019usage de composants logiciels qui\
+        \ ne prennent pas en charge ces versions du protocole, par exemple parce que\
+        \ le support de ces versions a \xE9t\xE9 d\xE9sactiv\xE9 \xE0 la \ncompilation."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2
+      ref_id: '2.2'
+      name: Suites cryptographiques
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r5
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R5
+      name: "Authentifier le serveur \xE0 l\u2019\xE9change de cl\xE9"
+      description: "Au cours d\u2019un \xE9change de cl\xE9, le serveur doit \xEA\
+        tre authentifi\xE9 par le client. Les alternatives anonymis\xE9es de ces \xE9\
+        changes ou.reposant sur l\u2019utilisation de certificat brut d\xE9finies\
+        \ dans la RFC 7250 sont fortement d\xE9conseill\xE9es."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r6
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R6
+      name: "\xC9changer les cl\xE9s en assurant toujours la PFS"
+      description: "La propri\xE9t\xE9 de confidentialit\xE9 persistante doit \xEA\
+        tre assur\xE9e. Il faut pour cela employer une suite cryptographique reposant\
+        \ sur un \xE9change Diffie\u2013Hellman \xE9ph\xE9m\xE8re (ECDHE ou, \xE0\
+        \ d\xE9faut, DHE)."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r7
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R7
+      name: "\xC9changer les cl\xE9s avec l\u2019algorithme ECDHE"
+      description: "Les \xE9changes de cl\xE9s ECDHE doivent \xEAtre privil\xE9gi\xE9\
+        s, \xE0 l\u2019aide des courbes secp256r1, secp384r1, secp521r1. Les courbes\
+        \ x25519 et x448 constituent des variantes acceptables. Les courbes brainpoolP256r,\
+        \ brainpoolP384r et brainpoolP512r1 sont \xE9galement acceptables."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r7-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R7-
+      name: "\xC9changer les cl\xE9s avec l\u2019algorithme DHE"
+      description: "Les \xE9changes de cl\xE9s DHE sont tol\xE9r\xE9s en utilisant\
+        \ les groupes 2048-bits ou plus (3072-bits ou plus si l\u2019information doit\
+        \ \xEAtre prot\xE9g\xE9e au-del\xE0 de 2030) d\xE9finis dans [34]."
+      annotation: "L\u2019ensemble des groupes d\u2019entiers et des courbes elliptiques\
+        \ retenus dans les sp\xE9cifications de TLS 1.3 respectent le RGS."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r8
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R8
+      name: Authentifier le serveur par certificat
+      description: "Au cours d\u2019un \xE9change de cl\xE9s, le serveur doit \xEA\
+        tre authentifi\xE9 par le client \xE0 l\u2019aide \nd\u2019un m\xE9canisme\
+        \ asym\xE9trique. Les m\xE9thodes bas\xE9es sur ECDSA ou EdDSA sont \xE0 privil\xE9\
+        gier. Les m\xE9thodes bas\xE9es sur RSA sont tol\xE9r\xE9es (RSASSA-PSS ou\
+        \ \xE0 d\xE9faut RSASSA-PKCS1-v1_5). "
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r8-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R8-
+      name: "Authentifier le serveur avec un m\xE9canisme sym\xE9trique"
+      description: "Au cours d\u2019un \xE9change de cl\xE9s, l\u2019authentification\
+        \ du serveur par le client \xE0 l\u2019aide d\u2019un m\xE9canisme sym\xE9\
+        trique est tol\xE9r\xE9."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r9
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R9
+      name: "Privil\xE9gier AES ou ChaCha20"
+      description: "Les suites mettant en \u0153uvre l\u2019algorithme de chiffrement\
+        \ par bloc AES sont \xE0 privil\xE9gier. L\u2019algorithme de chiffrement\
+        \ par flot ChaCha20 constitue une alternative acceptable."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r9-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R9-
+      name: "Tol\xE9rer Camellia et ARIA"
+      description: "Les suites mettant en \u0153uvre les algorithmes de chiffrement\
+        \ par bloc Camellia et ARIA sont tol\xE9r\xE9es. La prise en charge de l\u2019\
+        algorithme AES est conseill\xE9e, mais pas obligatoire."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r10
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R10
+      name: "Utiliser un mode de chiffrement int\xE8gre"
+      description: "La suite cryptographique retenue doit mettre en \u0153uvre un\
+        \ mode de chiffrement int\xE8gre. Les modes GCM et CCM (hors CCM-8) sont \xE0\
+        \ privil\xE9gi\xE9s. Le mode combin\xE9 ChaCha20_Poly1305 offre une alternative\
+        \ acceptable."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r10-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R10-
+      name: "Tol\xE9rer le mode CBC avec encrypt_then_mac"
+      description: "La combinaison CBC + HMAC en conjonction avec l\u2019extension\
+        \ encrypt_then_mac est tol\xE9r\xE9e."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r11
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R11
+      name: Utiliser SHA-2 comme fonction de hachage
+      description: "Les fonctions de hachage de la famille SHA-2 doivent \xEAtre utilis\xE9\
+        es."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r12
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R12
+      name: Disposer de plusieurs suites cryptographiques
+      description: "\xC0 des fins pr\xE9ventives, les parties communicantes doivent\
+        \ impl\xE9menter plusieurs suites acceptables. Lorsque l\u2019infrastructure\
+        \ est ma\xEEtris\xE9e de bout en bout, elles peuvent ensuite n\u2019en utiliser\
+        \ qu\u2019une seule."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r13
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.2
+      ref_id: R13
+      name: "Pr\xE9f\xE9rer l\u2019ordre de suites du serveur"
+      description: "Lorsque les clients d\u2019un serveur ne sont pas ma\xEEtris\xE9\
+        s, l\u2019ordre des suites cryptographiques qui figure dans sa configuration\
+        \ doit pr\xE9valoir sur l\u2019ordre des suites signal\xE9es par les clients."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2
+      ref_id: '2.3'
+      name: Extensions
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r14
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.3
+      ref_id: R14
+      name: Utiliser les extensions du tableau 2.4
+      description: "Les extensions recommand\xE9es dans le cadre g\xE9n\xE9ral de\
+        \ l\u2019utilisation du protocole TLS figurent dans le tableau 2.4. Elles\
+        \ doivent \xEAtre prises en charge par les \xE9quipements ma\xEEtris\xE9s\
+        \ et utilis\xE9es dans les contextes pr\xE9cis\xE9s."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r15
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.3
+      ref_id: R15
+      name: "\xC9valuer l\u2019utilit\xE9 des extensions du tableau 2.8"
+      description: "Les extensions du tableau 2.8 sont relatives \xE0 des d\xE9ploiements\
+        \ sp\xE9cifiques. Seules celles \xE9valu\xE9es n\xE9cessaires doivent \xEA\
+        tre impl\xE9ment\xE9es et utilis\xE9es."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r16
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.3
+      ref_id: R16
+      name: Ne pas utiliser les extensions du tableau 2.9
+      description: "Les extensions du tableau 2.9 sont toujours d\xE9conseill\xE9\
+        es."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2
+      ref_id: '2.4'
+      name: "Consid\xE9rations additionnelles"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r17
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R17
+      name: "Utiliser un g\xE9n\xE9rateur d\u2019al\xE9a robuste"
+      description: "Les al\xE9as utilis\xE9s dans le ClientHello et le ServerHello\
+        \ doivent provenir de g\xE9n\xE9rateurs d\u2019al\xE9a de qualit\xE9 cryptographique."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r18
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R18
+      name: "Privil\xE9gier l\u2019al\xE9a du serveur avec un suffixe pr\xE9dictible"
+      description: "L\u2019al\xE9a utilis\xE9 dans le ClientHello doit privil\xE9\
+        gier une construction sur 32 octets al\xE9atoires tandis que l\u2019al\xE9\
+        a utilis\xE9 dans le ServerHello doit privil\xE9gier une construction de 24\
+        \ octets al\xE9atoires avec, en suffixe les valeurs sp\xE9cifi\xE9es dans\
+        \ [11]."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r18-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R18-
+      name: "Privil\xE9gier les al\xE9as sans pr\xE9fixe pr\xE9dictible"
+      description: "Les al\xE9as utilis\xE9s dans le ClientHello et le ServerHello\
+        \ doivent privil\xE9gier les 32 octets al\xE9atoires plut\xF4t que la construction\
+        \ pr\xE9fix\xE9e par une heure Unix."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r19
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R19
+      name: Ne pas utiliser la compression TLS
+      description: "L\u2019utilisation du m\xE9canisme de compression TLS est \xE0\
+        \ proscrire."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r20
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R20
+      name: "Limiter la dur\xE9e de vie des tickets"
+      description: "Le serveur doit \xEAtre configur\xE9 afin d\u2019\xE9mettre des\
+        \ tickets dont la dur\xE9e de vie n\u2019exc\xE8de pas 24 heures."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r21
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R21
+      name: "Effectuer des reprises de session avec \xE9change de cl\xE9"
+      description: "L\u2019utilisation du m\xE9canisme de reprise de.session avec\
+        \ un \xE9change de cl\xE9 Diffie\u2013Hellman est recommand\xE9e."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r21-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R21-
+      name: Effectuer des reprises de session avec PFS
+      description: "Si le m\xE9canisme de reprise de session est utilis\xE9, alors\
+        \ l\u2019utilisation de tickets de session doit \xEAtre pr\xE9f\xE9r\xE9e\
+        \ \xE0 celle d\u2019identifiants de session. Dans le cas des tickets de session,\
+        \ les tickets doivent \xEAtre supprim\xE9s \xE0 intervalles r\xE9duits, et\
+        \ les cl\xE9s de chiffrement doivent \xEAtre supprim\xE9es et reg\xE9n\xE9\
+        r\xE9es r\xE9guli\xE8rement. Dans le cas des identifiants de session, les\
+        \ donn\xE9es mises en cache doivent \xEAtre supprim\xE9es de part et d\u2019\
+        autre \xE0 intervalles r\xE9duits."
+      implementation_groups:
+      - "Rx\u2013"
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r22
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R22
+      name: "Toujours activer l\u2019extension pour la ren\xE9gociation s\xE9curis\xE9\
+        e"
+      description: "Un client TLS, qu\u2019il souhaite ou non effectuer des ren\xE9\
+        gociations, doit utiliser l\u2019extension renegotiation_info. Un serveur\
+        \ TLS, s\u2019il souhaite effectuer des ren\xE9gociations, doit utiliser l\u2019\
+        extension renegotiation_info."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r23
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:2.4
+      ref_id: R23
+      name: "Ne pas transmettre de donn\xE9es 0-RTT"
+      description: "Il est d\xE9conseill\xE9 \xE0 un client de transmettre.de donn\xE9\
+        es 0-RTT. Un serveur ne doit pas accepter les donn\xE9es 0-RTT lorsqu\u2019\
+        il en re\xE7oit."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Mise en place de l\u02BCIGC"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3
+      ref_id: '3.1'
+      name: Attributs des certificats X.509
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1
+      ref_id: 3.1.1
+      name: Champs de base
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r24
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.1
+      ref_id: R24
+      name: "Pr\xE9senter un certificat sign\xE9 avec SHA-2"
+      description: "La fonction de hachage utilis\xE9e pour la signature du certificat\
+        \ doit faire partie de la famille SHA-2."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r25
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.1
+      ref_id: R25
+      name: "Pr\xE9senter un certificat valide pendant 3 ans ou moins"
+      description: "La p\xE9riode de validit\xE9 d\u2019un certificat d\u2019authentification\
+        \ TLS (serveur ou client) ne doit pas exc\xE9der 3 ans. Pour un certificat\
+        \ \xE9mis apr\xE8s le 1 mars 2018, sa p\xE9riode de validit\xE9 ne doit pas\
+        \ d\xE9passer 825 jours."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r26
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.1
+      ref_id: R26
+      name: "Utiliser des cl\xE9s de taille suffisante"
+      description: "Pour une protection des communications jusqu\u2019en 2030, les\
+        \ cl\xE9s RSA doivent avoir \nune taille minimale de 2048 bits, et les cl\xE9\
+        s ECDSA doivent avoir une taille minimale de 256 bits. Pour ECDSA, les courbes\
+        \ \xE9prouv\xE9es retenues sont secp256r1, secp384r1, secp521r1, ainsi que\
+        \ brainpoolP256r1, brainpoolP384r1 et brainpoolP512r1. Pour RSA, l\u2019exposant\
+        \ de la cl\xE9 publique doit \xEAtre sup\xE9rieur ou \xE9gal \xE0 2 puissance\
+        \ 16 + 1."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1
+      ref_id: 3.1.2
+      name: Extensions
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r27
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R27
+      name: "Pr\xE9senter un KeyUsage appropri\xE9"
+      description: "Dans un certificat d\u2019authentification, l\u2019extension Key\
+        \ Usage doit \xEAtre pr\xE9sente et marqu\xE9e comme critique. Pour un serveur,\
+        \ elle doit contenir les valeurs digitalSignature et/ou keyEncipherment. Pour\
+        \ un client, elle doit contenir la valeur digitalSignature. Aucune autre valeur\
+        \ n\u2019est admise."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r28
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R28
+      name: "Pr\xE9senter un ExtendedKeyUsage appropri\xE9"
+      description: "Dans un certificat d\u2019authentification, l\u2019extension Extended\
+        \ Key Usage doit \xEAtre pr\xE9sente et marqu\xE9e comme non-critique. Pour\
+        \ un.serveur, elle doit uniquement contenir la valeur id-kp-serverAuth. Pour\
+        \ un client, elle doit uniquement contenir la valeur id-kp- clientAuth."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r29
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R29
+      name: "Pr\xE9senter un SubjectAlternativeName appropri\xE9 (c\xF4t\xE9 serveur)"
+      description: "Pour un certificat d\u2019authentification utilis\xE9 par un serveur\
+        \ TLS, l\u2019extension Subject Alternative Name doit \xEAtre pr\xE9sente\
+        \ et marqu\xE9e comme non-critique. Elle doit contenir au moins une entr\xE9\
+        e dNSName correspondant \xE0 l\u2019un des FQDN du service applicatif qui\
+        \ utilise le certificat."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r30
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R30
+      name: "R\xE9server chaque certificat \xE0 une seule terminaison TLS"
+      description: "Un m\xEAme certificat d\u2019authentification ne doit pas \xEA\
+        tre utilis\xE9 par plus d\u2019une seule terminaison TLS."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r31
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R31
+      description: "Pour une m\xEAme terminaison, il est recommand\xE9 d\u2019utiliser\
+        \ autant de certificats que de versions et de m\xE9thodes d\u2019\xE9change\
+        \ de cl\xE9s accept\xE9es."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r32
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R32
+      name: "Pr\xE9senter un AKI correspondant au SKI d\xE9fini par l\u2019AC"
+      description: "Pour un certificat d\u2019authentification TLS (serveur ou client),\
+        \ l\u2019extension AKI doit \xEAtre pr\xE9sente, marqu\xE9e comme non-critique\
+        \ et.contenir l\u2019identifiant pr\xE9sent dans l\u2019extension SKI du certificat\
+        \ de l\u2019AC relatif \xE0 la cl\xE9 de signature utilis\xE9e."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r33
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.1.2
+      ref_id: R33
+      name: "Pr\xE9senter un certificat avec des sources de r\xE9vocation"
+      description: "Au moins une extension parmi CRLDP et AIA doit \xEAtre pr\xE9\
+        sente et marqu\xE9e comme non-critique."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3
+      ref_id: '3.2'
+      name: "Contr\xF4le de validit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r34
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      ref_id: R34
+      name: "Transmettre une cha\xEEne de certificats ordonn\xE9e et compl\xE8te"
+      description: "Les cha\xEEnes de certificats transmises \xE0 l\u2019aide des\
+        \ messages Certificate doivent, afin de conserver une compatibilit\xE9 avec\
+        \ TLS 1.2, \xEAtre ordonn\xE9es et compl\xE8tes."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r35
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      ref_id: R35
+      name: "Pr\xE9f\xE9rer l\u2019agrafage OCSP"
+      description: "Lorsque le protocole OCSP est mis en \u0153uvre, il est recommand\xE9\
+        \ d\u2019utiliser l\u2019agrafage OCSP. Cette solution est aussi pr\xE9f\xE9\
+        rable \xE0 la distribution de CRL."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r36
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      ref_id: R36
+      name: "Pr\xE9voir une redondance des moyens de r\xE9vocation"
+      description: "Pour des raisons de disponibilit\xE9, des m\xE9canismes de redondance\
+        \ de publication des informations de r\xE9vocation doivent \xEAtre mis en\
+        \ \u0153uvre."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r37
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      ref_id: R37
+      name: "R\xE9agir en hard-fail"
+      description: "Les composants logiciels TLS privil\xE9giant la s\xE9curit\xE9\
+        \ doivent r\xE9agir en hard-fail."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r38
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      ref_id: R38
+      name: "Utiliser des certificats enregistr\xE9s par CT"
+      description: "Dans le cadre d\u2019une IGC publique, il est recommand\xE9 d\u2019\
+        utiliser des certificats d\u2019authentification enregistr\xE9s par leur AC\
+        \ parmi les registres du programme CT."
+      implementation_groups:
+      - Rx
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:r39
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-relatives-tls:3.2
+      ref_id: R39
+      name: "Rejeter tous les certificats invalid\xE9s par CT"
+      description: "Dans le cadre d\u2019une IGC publique, les clients TLS doivent\
+        \ rejeter tous les certificats qui sont accompagn\xE9s d\u2019un Signed Certificate.Timestamp\
+        \ (SCT) invalide, et les certificats EV qui ne sont pas accompagn\xE9s d\u2019\
+        un SCT."
+      implementation_groups:
+      - Rx
