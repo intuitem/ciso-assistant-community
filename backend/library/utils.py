@@ -128,28 +128,17 @@ class RequirementMappingImporter:
                 urn=self.data["target_requirement_urn"], default_locale=True
             )
         except RequirementNode.DoesNotExist:
-            print(
-                f"ERROR: source requirement with URN {self.data['target_requirement_urn']} does not exist"
-            )
-            raise Http404(
-                "ERROR: target requirement with URN {} does not exist".format(
-                    self.data["target_requirement_urn"]
-                )
-            )
-
+            err_msg = f"ERROR: target requirement with URN {self.data['target_requirement_urn']} does not exist"
+            print(err_msg)
+            raise Http404(err_msg)
         try:
             source_requirement = RequirementNode.objects.get(
                 urn=self.data["source_requirement_urn"], default_locale=True
             )
         except RequirementNode.DoesNotExist:
-            print(
-                f"ERROR: source requirement with URN {self.data['source_requirement_urn']} does not exist"
-            )
-            raise Http404(
-                "ERROR: source requirement with URN {} does not exist".format(
-                    self.data["source_requirement"]
-                )
-            )
+            err_msg = f"ERROR: source requirement with URN {self.data['source_requirement_urn']} does not exist"
+            print(err_msg)
+            raise Http404(err_msg)
         return RequirementMapping.objects.create(
             mapping_set=mapping_set,
             target_requirement=target_requirement,
