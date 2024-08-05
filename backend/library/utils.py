@@ -130,7 +130,7 @@ class RequirementMappingImporter:
         except RequirementNode.DoesNotExist:
             raise Http404(
                 "ERROR: target requirement with URN {} does not exist".format(
-                    self.data["target_requirement"]
+                    self.data["target_requirement_urn"]
                 )
             )
 
