@@ -654,9 +654,9 @@ class LibraryImporter:
         """Main method to import a library."""
         if (error_message := self.init()) is not None:
             return error_message  # This error check should be done when storing the Library but no after.
-        print(":: Getting Dependencies :::")
+        print("::: Getting Dependencies :::")
         error_msg = self.check_and_import_dependencies()
-        print(":::Dependencies are ok :::")
+        print("::: Dependencies are ok :::")
         if error_msg is not None:
             return error_msg
 
