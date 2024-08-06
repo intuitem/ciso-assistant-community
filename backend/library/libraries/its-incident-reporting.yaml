@@ -1,0 +1,436 @@
+urn: urn:intuitem:risk:library:its-dora-incident-reporting
+locale: en
+ref_id: ITS-DORA-incident-reporting
+name: ITS-DORA-incident-reporting
+description: 'Article 20 of DORA mandates the European Supervisory Authorities (ESAs)
+  to develop through the Joint Committee and in consultation with the European Central
+  Bank and European Union Agency for Cybersecurity, Draft Implementing Technical Standards
+  (ITS) establishing the standard forms, templates and procedures for FEs to report
+  a major ICT related incident or to notify a significant cyber threat.
+
+
+  Here is the link of the Second batch of policy products under DORA:
+
+  https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en
+
+
+  Here is the link of the document :
+
+  https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf'
+copyright: ESMA
+version: 1
+provider: ESMA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:its-dora-incident-reporting
+    ref_id: ITS-DORA-incident-reporting
+    name: ITS-DORA-incident-reporting
+    description: 'Article 20 of DORA mandates the European Supervisory Authorities
+      (ESAs) to develop through the Joint Committee and in consultation with the European
+      Central Bank and European Union Agency for Cybersecurity, Draft Implementing
+      Technical Standards (ITS) establishing the standard forms, templates and procedures
+      for FEs to report a major ICT related incident or to notify a significant cyber
+      threat.
+
+
+      Here is the link of the Second batch of policy products under DORA:
+
+      https://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en
+
+
+      Here is the link of the document :
+
+      https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-1
+      assessable: false
+      depth: 1
+      ref_id: Recital 1
+      description: In order to ensure consistent reporting of major incidents and
+        submission of good quality data, it should be specified which data fields
+        need to be provided by financial entities at various stages of the reporting,
+        when providing initial notification, inter- mediate and final reports as referred
+        to in Article 19(4) of Regulation (EU) 2024/25542 . It is important that information
+        provided over the different reporting stages until the final report is presented
+        in a way that allows for a single overview. Therefore, there should be a single
+        template which covers all necessary information throughout the reporting stages
+        that should be used for the submission of the initial notification, the intermediate
+        and final report.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-2
+      assessable: false
+      depth: 1
+      ref_id: Recital 2
+      description: Financial entities should complete those data fields of the template,
+        which corre- spond to the information requirements of the respective notification
+        or report. How- ever, where financial entities have information which they
+        are required to provide at a later reporting stage, i.e. the intermediate
+        or final report as relevant, they should be allowed to anticipate that data
+        and complete those data fields and provide to the com- petent authorities.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-3
+      assessable: false
+      depth: 1
+      ref_id: Recital 3
+      description: The design of the template and data fields should also enable the
+        reporting of multiple or recurring incidents, since those incidents may constitute
+        a major incident in ac- cordance with Commission Delegated Regulation specifying
+        Article 18(3) of Regu- lation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-4
+      assessable: false
+      depth: 1
+      ref_id: Recital 4
+      description: In order to ensure accurate and up to date information, financial
+        entities should up- date the previously submitted information when submitting
+        the intermediate and final report, respectively, and should reclassify major
+        incidents as non-major, where nec- essary.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-5
+      assessable: false
+      depth: 1
+      ref_id: Recital 5
+      description: The legal identification of entities within the scope of this Implementing
+        Regulation should be aligned with the identifiers specified in the Commission
+        Implementing Regulation specifying Art. 28(9) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-6
+      assessable: false
+      depth: 1
+      ref_id: Recital 6
+      description: To identify more easily the impact of an incident having occurred
+        at or being caused by a third-party provider affecting multiple financial
+        entities within a single Member State, and to reduce the reporting effort
+        for financial entities, the reporting template should allow for the submission
+        of an aggregated report covering aggregated infor- mation about the impact
+        of the incident on all impacted financial entities that have classified the
+        incident as major.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-7
+      assessable: false
+      depth: 1
+      ref_id: Recital 7
+      description: The design of the template should be technology and reporting format
+        neutral to al- low for its integration into various incident reporting solutions
+        that already exist or may be developed for the implementation of the requirements
+        of the Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-8
+      assessable: false
+      depth: 1
+      ref_id: Recital 8
+      description: The design of the reporting templates and data fields should facilitate
+        the reporting of major ICT-related incidents by third parties to whom financial
+        entities outsourced their reporting obligation in accordance with Article
+        19(5) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-9
+      assessable: false
+      depth: 1
+      ref_id: Recital 9
+      description: This Regulation is based on the draft implementing technical standards
+        submitted to the Commission by the European Supervisory Authorities (ESAs).
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:recital-10
+      assessable: false
+      depth: 1
+      ref_id: Recital 10
+      description: The ESAs have conducted open public consultations on the draft
+        implementing tech- nical standards on which this Regulation is based, analysed
+        the potential related costs and benefits and requested the advice of the Banking
+        Stakeholder Group established in accordance with Article 37 of Regulations
+        (EU) No 1093/2010, 1094/2010, 1095/2010 of the European Parliament and of
+        the Council,
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node12
+      assessable: false
+      depth: 1
+      name: Article 1
+      description: Standard form for reporting of ICT-related major incidents
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node12
+      ref_id: '1.1'
+      description: 'Financial entities shall use the template in Annex I to submit
+        the initial notification, intermediate and final report as follows:'
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
+      ref_id: 1.a
+      description: Where an initial notification is submitted, financial entities
+        shall complete the data fields of the template which correspond to the information
+        to be provided in accord- ance with Article 3 of Commission Delegated Regulation
+        specifying Article 20a of Regulation (EU) 2022/2554. Financial entities may
+        complete data fields, the com- pletion of which is not required for an initial
+        notification, but for an intermediate or final report, where they have the
+        relevant information.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
+      ref_id: 1.b
+      description: Where an intermediate report is submitted, financial entities shall
+        complete the data fields of the template which correspond to the information
+        to be provided in accord- ance with Article 4 of Commission Delegated Regulation
+        specifying Article 20a of Regulation (EU) 2022/2554. Financial entities may
+        complete data fields, the com- pletion of which is not required for the intermediate
+        report, but for the final report, where they have the relevant information.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
+      ref_id: 1.c
+      description: Where a final report is submitted, financial entities shall complete
+        the data fields of the template be completed which correspond to the information
+        to be provided in accordance with Article 5 of Commission Delegated Regulation
+        specifying Article 20a of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node12
+      ref_id: '1.2'
+      description: Financial entities shall ensure that the information contained
+        in the initial notification, intermediate and final report is complete and
+        accurate.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node12
+      ref_id: '1.3'
+      description: Where accurate data is not available at the time of reporting for
+        the initial notification or the intermediate report, the financial entity
+        shall provide estimated values based on other available data and information
+        to the extent possible.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node12
+      ref_id: '1.4'
+      description: When submitting an intermediate or final report, financial entities
+        shall update, where applicable, the information that was previously provided
+        with the initial notification or the intermediate report.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node12
+      ref_id: '1.5'
+      description: Financial entities shall follow the data glossary and instructions
+        set out in Annex II when completing the template in Annex I
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node21
+      assessable: false
+      depth: 1
+      name: Article 2
+      description: Submission of initial notification, intermediate and final reports
+        together
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node21
+      description: Financial entities may combine the submission of the initial notification,
+        intermediate report and/or final report to provide two or all of those at
+        the same time, where regular activities have been recovered and/or the root
+        cause analysis has been completed, provided that the timelines set out in
+        Article 6 of the Commission Delegated Regulation specifying Article 20a of
+        Regulation (EU) 2022/2554 are met.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node23
+      assessable: false
+      depth: 1
+      name: Article 3
+      description: Recurring incidents
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node23
+      description: Where the information is provided for recurring incidents, which
+        do not individually meet the criteria for a major ICT related incident but
+        do so cumulatively in accordance with Article 8(2) of Commission Delegated
+        Regulation specifying Article 18(3) of Regulation (EU) 2022/2554, financial
+        entities shall provide aggregated information regarding such incidents.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node25
+      assessable: false
+      depth: 1
+      name: Article 4
+      description: Use of secure channels in case of deviation from established channels
+        or time limits
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node25
+      ref_id: '4.1'
+      description: Financial entities shall use secure electronic channels set out
+        by their competent author- ity to submit the initial notification and intermediate
+        and final reports .
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node25
+      ref_id: '4.2'
+      description: Where financial entities are unable to use established channels
+        to submit incident noti- fications or reports to their competent authority,
+        financial entities shall inform the com- petent authority about the major
+        incident through other secure means, after consulting with or as previously
+        agreed with the competent authority. If required by the competent authority,
+        financial entities shall resubmit the initial notification, intermediate or
+        final report through the established channels under paragraph 1 once they
+        are able to do so.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node28
+      assessable: false
+      depth: 1
+      name: Article 5
+      description: Reclassification of major incidents
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node28
+      description: "Where after further assessment of the incident, the financial\
+        \ entity reaches the conclusion that the incident previously reported as major\
+        \ at no time fulfilled the classification criteria and thresholds in accordance\
+        \ with Article 18(4) of Commission Delegated Regulation specifying Article\
+        \ 18(3) of Regulation (EU) 2022/2554, the financial entity shall indicate\
+        \ it has reclassified the incident from major to non-major and shall submit\
+        \ the information related to the reclassification of the major incident as\
+        \ non-major by completing the template in Annex II in relation to the fields\
+        \ \u2018type of report\u2019 and \u2018other information\u2019 Where after\
+        \ further assessment of the incident, the financial entity reaches the conclusion\
+        \ that the incident previously reported as major at no time fulfilled the\
+        \ classification criteria and thresholds in accordance with Article 18(4)\
+        \ of Commission Delegated Regulation specifying Article 18(3) of Regulation\
+        \ (EU) 2022/2554, the financial entity shall indicate it has reclassified\
+        \ the incident from major to non-major and shall submit the information related\
+        \ to the reclassification of the major incident as non-major by completing\
+        \ the template in Annex II in relation to the fields \u2018type of report\u2019\
+        \ and \u2018other information\u2019 Where after further assessment of the\
+        \ incident, the financial entity reaches the conclusion that the incident\
+        \ previously reported as major at no time fulfilled the classification criteria\
+        \ and thresholds in accordance with Article 18(4) of Commission Delegated\
+        \ Regulation specifying Article 18(3) of Regulation (EU) 2022/2554, the financial\
+        \ entity shall indicate it has reclassified the incident from major to non-major\
+        \ and shall submit the information related to the reclassification of the\
+        \ major incident as non-major by completing the template in Annex II in relation\
+        \ to the fields \u2018type of report\u2019 and \u2018other information\u2019"
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node30
+      assessable: false
+      depth: 1
+      name: Article 6
+      description: Notification of outsourcing of the reporting obligation
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node30
+      description: Where financial entities intend to outsource the incident reporting
+        obligation in accordance with Article 19(5) of Regulation (EU) 2022/2554,
+        including where such outsourcing will be part of a general and/or long-term
+        outsourcing arrangement, they shall inform their compe- tent authority prior
+        to the first notification or reporting under such an arrangement and the latest
+        as soon as the outsourcing arrangement has been concluded. Financial entities
+        shall provide to the competent authority the name, contact details, and an
+        identification code of the third-party that will submit the incident notifications
+        or reports for them. Financial enti- ties shall also inform their competent
+        authority, where such outsourcing no longer takes place or has been cancelled.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node32
+      assessable: false
+      depth: 1
+      name: Article 7
+      description: Aggregated reporting
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node32
+      ref_id: '7.1'
+      description: 'A third-party provider, to whom reporting obligations have been
+        outsourced, may aggregate the information about a major ICT-related incident
+        impacting multiple financial entities in one single notification or report,
+        and submit it to the competent authority for all impacted financial entities,
+        provided that all of the following conditions are met:'
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      ref_id: 7.1.a
+      description: the major incidents to be reported originate from or is being caused
+        by a third-party provider;
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      ref_id: 7.1.b
+      description: this third-party provider provides the relevant ICT service to
+        more than one financial entity, or to a group, in the Member State;
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      ref_id: 7.1.c
+      description: the incident is classified as major individually by each financial
+        entity covered in the aggregated report,
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      ref_id: 7.1.d
+      description: the incident affects financial entities within a single Member
+        State and the aggregated report relates to financial entities which are supervised
+        by the same competent authority;
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      ref_id: 7.1.e
+      description: the financial entities affected by the incident have outsourced
+        reporting obligations to a third-party provider in accordance with Art. 19(5)
+        of Regulation (EU) 2022/2554 and Article 6 of this Regulation, and
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.1
+      ref_id: 7.1.f
+      description: competent authorities have explicitly permitted aggregated reporting
+        to those financial entities.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node32
+      ref_id: '7.2'
+      description: Significant credit institutions in accordance with Article 6(4)
+        of Regulation (EU) No 1024/2013, operators of trading venues and central counterparties
+        shall be required to submit an incident notification or report at solo level
+        to their competent authority.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node32
+      ref_id: '7.3'
+      description: Upon request by the competent authority, financial entities shall
+        submit a separate individual incident notification or report.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node42
+      assessable: false
+      depth: 1
+      name: Article 8
+      description: Standard form for voluntary reporting of notification of significant
+        cyber threats
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node42
+      ref_id: '8.1'
+      description: When notifying the competent authorities of significant cyber threats
+        in accordance with Article 19(2) of Regulation (EU) 2022/2554, financial entities
+        shall use the template in Annex III and follow the data glossary and instructions
+        set out Annex IV.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node42
+      ref_id: '8.2'
+      description: Financial entities shall ensure that the information contained
+        in the cyber threat notification is complete and accurate.
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node45
+      assessable: false
+      depth: 1
+      name: Article 9
+      description: Entry into force and application
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node46
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node45
+      description: This Regulation shall enter into force on the twentieth day following
+        that of its publication in the Official Journal of the European Union
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node47
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:node45
+      description: This Regulation shall be binding in its entirety and directly applicable
+        in all Member States.
