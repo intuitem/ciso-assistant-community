@@ -47,8 +47,20 @@
 	};
 
 	const referenceControlsTable: TableSource = {
-		head: { ref_id: 'ref', name: 'name', description: 'description', category: 'category' },
-		body: tableSourceMapper(referenceControls, ['ref_id', 'name', 'description', 'category'])
+		head: {
+			ref_id: 'ref',
+			name: 'name',
+			description: 'description',
+			category: 'category',
+			csf_function: 'csfFunction'
+		},
+		body: tableSourceMapper(referenceControls, [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csf_function'
+		])
 	};
 
 	const threatsTable: TableSource = {

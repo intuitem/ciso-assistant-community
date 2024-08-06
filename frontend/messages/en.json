@@ -16,7 +16,7 @@
 	"addRiskAssessment": "Add risk assessment",
 	"addRiskScenario": "Add risk scenario",
 	"addRiskAcceptance": "Add risk acceptance",
-	"addComplianceAssessment": "Start Audit",
+	"addComplianceAssessment": "New Audit",
 	"addEvidence": "Add evidence",
 	"addDomain": "Add domain",
 	"addProject": "Add project",
@@ -92,6 +92,7 @@
 	"firstName": "First name",
 	"lastName": "Last name",
 	"category": "Category",
+	"csfFunction": "CSF Function",
 	"eta": "ETA",
 	"referenceControl": "Reference control",
 	"appliedControl": "Applied control",
@@ -474,6 +475,7 @@
 	"domainManager": "Domain manager",
 	"analyst": "Analyst",
 	"successfullyCreatedObject": "The {object} object has been successfully created",
+	"successfullyDuplicateObject": "The {object} object has been successfully duplicated",
 	"successfullyUpdatedObject": "The {object} object has been successfully updated",
 	"successfullySavedObject": "The {object} object has been successfully saved",
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
@@ -647,5 +649,12 @@
 	"full": "Full",
 	"partial": "Partial",
 	"noResultFound": "No result found",
-	"filters": "Filters"
+	"filters": "Filters",
+	"notApplicableScore": "You cannot score if the requirement assessment is not applicable",
+	"maturity": "Maturity",
+	"progress": "Progress",
+	"back": "Back",
+	"duplicate": "Duplicate",
+	"duplicateRiskAssessment": "Duplicate the risk assessment",
+	"size": "Size"
 }

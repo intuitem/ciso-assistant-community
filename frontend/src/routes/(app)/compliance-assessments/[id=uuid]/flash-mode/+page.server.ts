@@ -34,6 +34,7 @@ export const actions: Actions = {
 			body: JSON.stringify(value)
 		};
 
-		await event.fetch(endpoint, requestInitOptions);
+		const res = await event.fetch(endpoint, requestInitOptions);
+		return { status: res.status, body: await res.json() };
 	}
 };

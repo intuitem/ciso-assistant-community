@@ -92,6 +92,7 @@
 	"firstName": "Vorname",
 	"lastName": "Nachname",
 	"category": "Kategorie",
+	"csfFunction": "Funktion",
 	"eta": "ETA",
 	"referenceControl": "Referenzkontrolle",
 	"appliedControl": "Angewendete Kontrolle",
@@ -474,6 +475,7 @@
 	"domainManager": "Domänen-Manager",
 	"analyst": "Analyst",
 	"successfullyCreatedObject": "Das {object} Objekt wurde erfolgreich erstellt",
+	"successfullyDuplicateObject": "Das Objekt {object} wurde erfolgreich dupliziert",
 	"successfullyUpdatedObject": "Das {object} Objekt wurde erfolgreich aktualisiert",
 	"successfullySavedObject": "Das {object} Objekt wurde erfolgreich gespeichert",
 	"successfullyDeletedObject": "Das {object} Objekt wurde erfolgreich gelöscht",
@@ -606,5 +608,12 @@
 	"full": "Voll",
 	"partial": "Teilweise",
 	"noResultFound": "Keine Einträge gefunden",
-	"filters": "Filter"
+	"filters": "Filter",
+	"notApplicableScore": "Sie können keine Punkte erzielen, wenn die Anforderungsbewertung nicht anwendbar ist",
+	"maturity": "Reife",
+	"progress": "Fortschreiten",
+	"back": "Zurückkehren",
+	"duplicate": "Duplikat",
+	"duplicateRiskAssessment": "Duplizieren Sie die Risikobewertung",
+	"size": "Größe"
 }

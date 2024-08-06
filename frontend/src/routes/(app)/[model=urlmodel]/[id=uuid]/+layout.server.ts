@@ -10,11 +10,16 @@ import { superValidate } from 'sveltekit-superforms';
 import { z, type AnyZodObject } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
+import { languageTag } from '$paraglide/runtime';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${params.model}/${params.id}/`;
 
-	const res = await fetch(endpoint);
+	const res = await fetch(endpoint, {
+		headers: {
+			'Accept-Language': languageTag()
+		}
+	});
 	const data = await res.json();
 
 	type RelatedModel = {

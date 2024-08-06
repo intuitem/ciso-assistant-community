@@ -9,6 +9,7 @@
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { isDark } from '$lib/utils/helpers';
 
 	export let data: PageData;
 
@@ -23,6 +24,10 @@
 	data.riskMatrix.risk.forEach((risk, i) => {
 		color_map[risk.name] = risk.hexcolor;
 	});
+
+	$: classesCellText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
+	};
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -129,10 +134,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_proba]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_proba)]}
-						{localItems()[toCamelCase(data.scenario.current_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.current_proba.name)]}
+						{localItems()[toCamelCase(data.scenario.current_proba.name)]}
 					{:else}
-						{data.scenario.current_proba}
+						{data.scenario.current_proba.name}
 					{/if}
 				</span>
 			</p>
@@ -143,10 +148,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_impact]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_impact)]}
-						{localItems()[toCamelCase(data.scenario.current_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.current_impact.name)]}
+						{localItems()[toCamelCase(data.scenario.current_impact.name)]}
 					{:else}
-						{data.scenario.current_impact}
+						{data.scenario.current_impact.name}
 					{/if}
 				</span>
 			</p>
@@ -154,7 +159,9 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.currentRiskLevel()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
+					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+						data.scenario.current_level.hexcolor
+					)}"
 					style="background-color: {data.scenario.current_level.hexcolor}"
 				>
 					{#if localItems()[toCamelCase(data.scenario.current_level.name)]}
@@ -183,10 +190,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_proba]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_proba)]}
-						{localItems()[toCamelCase(data.scenario.residual_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_proba.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_proba.name)]}
 					{:else}
-						{data.scenario.residual_proba}
+						{data.scenario.residual_proba.name}
 					{/if}
 				</span>
 			</p>
@@ -197,10 +204,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_impact]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_impact)]}
-						{localItems()[toCamelCase(data.scenario.residual_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_impact.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_impact.name)]}
 					{:else}
-						{data.scenario.residual_impact}
+						{data.scenario.residual_impact.name}
 					{/if}
 				</span>
 			</p>
@@ -208,7 +215,9 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.residualRiskLevel()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
+					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+						data.scenario.residual_level.hexcolor
+					)}"
 					style="background-color: {data.scenario.residual_level.hexcolor}"
 				>
 					{#if localItems()[toCamelCase(data.scenario.residual_level.name)]}
