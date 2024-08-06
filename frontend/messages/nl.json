@@ -92,6 +92,7 @@
 	"firstName": "Voornaam",
 	"lastName": "Achternaam",
 	"category": "Categorie",
+	"csfFunction": "functie",
 	"eta": "ETA",
 	"referenceControl": "Referentiecontrole",
 	"appliedControl": "Toegepaste controle",
@@ -355,7 +356,7 @@
 	"loadingLibraryUploadButton": "Bibliotheek uploadknop laden",
 	"errorOccuredWhileLoadingLibrary": "De volgende fout deed zich voor tijdens het laden van het bibliotheekformulier",
 	"packager": "Pakkageerder",
-	"packagerColon": "Verpakker:",
+	"packagerColon": "Pakkageerder:",
 	"dependencies": "Afhankelijkheden",
 	"copyright": "Auteursrecht",
 	"addYourLibrary": "Voeg je eigen bibliotheek toe",
@@ -474,6 +475,7 @@
 	"domainManager": "Domeinbeheerder",
 	"analyst": "Analist",
 	"successfullyCreatedObject": "Het {object} object is succesvol aangemaakt",
+	"successfullyDuplicateObject": "Het object {object} is succesvol gedupliceerd",
 	"successfullyUpdatedObject": "Het {object} object is succesvol bijgewerkt",
 	"successfullySavedObject": "Het {object} object is succesvol opgeslagen",
 	"successfullyDeletedObject": "Het {object} object is succesvol verwijderd",
@@ -606,5 +608,12 @@
 	"full": "Vol",
 	"partial": "Gedeeltelijk",
 	"noResultFound": "geen resultaat gevonden",
-	"filters": "Filters"
+	"filters": "Filters",
+	"notApplicableScore": "U kunt niet scoren als de eisenbeoordeling niet van toepassing is",
+	"maturity": "Volwassenheid",
+	"progress": "Progressie",
+	"back": "Opbrengst",
+	"duplicate": "Duplicaat",
+	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling",
+	"size": "Grootte"
 }

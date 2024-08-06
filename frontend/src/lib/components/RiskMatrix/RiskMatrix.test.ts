@@ -1,6 +1,9 @@
 import { render } from '@testing-library/svelte';
 import { within } from '@testing-library/dom';
 import { describe, it, expect } from 'vitest';
+import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+import { storePopup } from '@skeletonlabs/skeleton';
+storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 import Matrix from './RiskMatrix.svelte';
 import type { RiskMatrix } from '$lib/utils/types';

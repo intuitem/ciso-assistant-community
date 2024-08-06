@@ -5,12 +5,20 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
 
-from core.serializers import ReferenceControlReadSerializer, ThreatReadSerializer
+from library.helpers import get_referential_translation
 
 from .models import *
 from .utils import camel_case
 
 from typing import List, Dict, Optional
+
+from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError as DjValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.views import api_settings
+from rest_framework.views import exception_handler as drf_exception_handler
+
+DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
 
 def flatten_dict(
@@ -267,7 +275,7 @@ def get_sorted_requirement_nodes(
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
-                "name": node.name,
+                "name": get_referential_translation(node, "name"),
                 "implementation_groups": node.implementation_groups or None,
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
@@ -284,7 +292,7 @@ def get_sorted_requirement_nodes(
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
-                "description": node.description,
+                "description": get_referential_translation(node, "description"),
                 "children": {},
             }
 
@@ -305,8 +313,8 @@ def get_sorted_requirement_nodes(
                     "urn": child.urn,
                     "ref_id": child.ref_id,
                     "implementation_groups": child.implementation_groups or None,
-                    "name": child.name,
-                    "description": child.description,
+                    "name": get_referential_translation(child, "name"),
+                    "description": get_referential_translation(child, "description"),
                     "ra_id": str(child_req_as.id) if child_req_as else None,
                     "status": child_req_as.status if child_req_as else None,
                     "is_scored": child_req_as.is_scored if child_req_as else None,
@@ -998,3 +1006,17 @@ def threats_count_per_name(user: User):
         label["max"] = max_offset
 
     return {"labels": labels, "values": values}
+
+
+def handle(exc, context):
+    # translate django validation error which ...
+    # .. causes HTTP 500 status ==> DRF validation which will cause 400 HTTP status
+    if isinstance(exc, DjValidationError):
+        data = exc.message_dict
+        if DJ_NON_FIELD_ERRORS in data:
+            data[DRF_NON_FIELD_ERRORS] = data[DJ_NON_FIELD_ERRORS]
+            del data[DJ_NON_FIELD_ERRORS]
+
+        exc = DRFValidationError(detail=data)
+
+    return drf_exception_handler(exc, context)

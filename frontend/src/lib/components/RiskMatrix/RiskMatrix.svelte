@@ -3,6 +3,8 @@
 
 	import * as m from '../../../paraglide/messages';
 	import type { ComponentType } from 'svelte';
+	import { popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import { isDark } from '$lib/utils/helpers';
 
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
@@ -24,33 +26,67 @@
 			? data.slice().reverse()
 			: undefined;
 	}
+	let popupHover: PopupSettings[][] = [];
+	popupHover[0] = [];
+	for (let i = 0; i < parsedRiskMatrix.impact.length; i++) {
+		popupHover[0].push({
+			event: 'hover',
+			target: 'popup' + 'impact' + i,
+			placement: 'bottom'
+		});
+	}
+	popupHover[1] = [];
+	for (let i = 0; i < parsedRiskMatrix.probability.length; i++) {
+		popupHover[1].push({
+			event: 'hover',
+			target: 'popup' + 'probability' + i,
+			placement: 'bottom'
+		});
+	}
+
+	$: classesCellText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
+	};
 </script>
 
 <div class="flex flex-row items-center">
 	<div class="flex font-semibold text-xl -rotate-90">{m.probability()}</div>
 	<div
 		class="{wrapperClass} grid gap-1 w-full"
-		style="grid-template-columns: repeat({displayedRiskMatrix.length + 1}, minmax(0, 1fr));"
+		style="grid-template-columns: repeat({displayedRiskMatrix[0].length + 1}, minmax(0, 1fr));"
 		data-testid="risk-matrix"
 	>
 		{#each displayedRiskMatrix as row, i}
 			{@const reverseIndex = displayedRiskMatrix.length - i - 1}
 			{@const probability = parsedRiskMatrix.probability[reverseIndex]}
 			<div
-				class="flex flex-col items-center justify-center bg-gray-200 border-dotted border-black border-2"
+				class="flex flex-col items-center h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center {classesCellText(
+					probability.hexcolor ?? '#FFFFFF'
+				)}"
 				style="background: {probability.hexcolor}"
 				data-testid="probability-row-header"
 			>
-				<span class="font-semibold text-center" data-testid="probability-name"
-					>{probability.name}</span
+				<div
+					class="card bg-black text-gray-200 p-4 z-20"
+					style="color: {probability.hexcolor}"
+					data-popup={'popup' + 'probability' + i}
 				>
-				<span class="text-xs text-center" data-testid="probability-description"
-					>{probability.description}</span
-				>
+					<p data-testid="probability-description" class="font-semibold">
+						{probability.description}
+					</p>
+					<div class="arrow bg-black" />
+				</div>
+				<span class="font-semibold p-1" data-testid="probability-name">{probability.name}</span>
+				{#if probability.description}
+					<i class="fa-solid fa-circle-info [&>*]:pointer-events-none" use:popup={popupHover[1][i]}
+					></i>
+				{/if}
 			</div>
 			{#each row as cell, j}
 				<div
-					class="flex flex-wrap items-center space-x-1 justify-center h-20 [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar"
+					class="flex flex-wrap items-center space-x-1 justify-center h-full [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar {classesCellText(
+						cell.level.hexcolor
+					)}"
 					style="background-color: {cell.level.hexcolor};"
 					data-testid="cell"
 				>
@@ -67,14 +103,29 @@
 			{/each}
 		{/each}
 		<div />
-		{#each parsedRiskMatrix.impact as impact}
+		{#each parsedRiskMatrix.impact as impact, key}
 			<div
-				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2"
+				class="flex flex-col items-center justify-center bg-gray-200 h-20 border-dotted border-black border-2 text-center {classesCellText(
+					impact.hexcolor ?? '#FFFFFF'
+				)}"
 				style="background: {impact.hexcolor}"
 				data-testid="impact-col-header"
 			>
-				<span class="font-semibold" data-testid="impact-name">{impact.name}</span>
-				<span class="text-xs" data-testid="impact-description">{impact.description}</span>
+				<div
+					class="card bg-black text-gray-200 p-4 z-20"
+					style="color: {impact.hexcolor}"
+					data-popup={'popup' + 'impact' + key}
+				>
+					<p data-testid="impact-description" class="font-semibold">{impact.description}</p>
+					<div class="arrow bg-black" />
+				</div>
+				<span class="font-semibold p-1" data-testid="impact-name">{impact.name}</span>
+				{#if impact.description}
+					<i
+						class="fa-solid fa-circle-info [&>*]:pointer-events-none"
+						use:popup={popupHover[0][key]}
+					></i>
+				{/if}
 			</div>
 		{/each}
 	</div>
@@ -88,7 +139,9 @@
 				{#each parsedRiskMatrix.risk as risk}
 					<tr class="col">
 						<td
-							class="w-16 text-center border-4 border-white p-2 font-semibold whitespace-nowrap"
+							class="w-16 text-center border-4 border-white p-2 font-semibold whitespace-nowrap {classesCellText(
+								risk.hexcolor
+							)}"
 							style="background-color: {risk.hexcolor}"
 						>
 							{risk.name}

@@ -47,9 +47,8 @@
 				}
 			},
 			legend: {
-				top: 20,
-				// left: 'center',
-				right: 10,
+				top: 'bottom',
+				right: '0',
 				orient: orientation
 			},
 			series: [
@@ -70,7 +69,7 @@
 					emphasis: {
 						label: {
 							show: true,
-							fontSize: '40',
+							fontSize: '24',
 							fontWeight: 'bold'
 						}
 					},

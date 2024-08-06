@@ -3,14 +3,14 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { COMPLIANCE_COLOR_MAP } from '$lib/utils/constants';
+	import { complianceResultColorMap } from '$lib/utils/constants';
 
 	export let data: PageData;
 
 	breadcrumbObject.set(data.compliance_assessment);
 
 	const possible_options = [
-		{ id: '', label: m.notAssessed() },
+		{ id: 'not_assessed', label: m.notAssessed() },
 		{ id: 'non_compliant', label: m.nonCompliant() },
 		{ id: 'partially_compliant', label: m.partiallyCompliant() },
 		{ id: 'compliant', label: m.compliant() },
@@ -20,7 +20,7 @@
 	// Reactive variable to keep track of the current item index
 	let currentIndex = 0;
 
-	$: color = COMPLIANCE_COLOR_MAP[data.requirement_assessments[currentIndex].result];
+	$: color = complianceResultColorMap[data.requirement_assessments[currentIndex].result];
 
 	$: requirement = data.requirements.find(
 		(req) => req.id === data.requirement_assessments[currentIndex].requirement
@@ -55,7 +55,6 @@
 
 	// Function to update the result of the current item
 	function updateResult(event) {
-		console.log(event.target.value);
 		data.requirement_assessments[currentIndex].result = event.target.value;
 		const form = document.getElementById('flashModeForm');
 		const formData = {
@@ -76,7 +75,7 @@
 	>
 		{#if data.requirement_assessments[currentIndex]}
 			<div class="flex flex-col w-full h-full space-y-4">
-				<div class="flex justify-between h-1/6">
+				<div class="flex justify-between">
 					<div class="">
 						<a
 							href="/compliance-assessments/{data.compliance_assessment.id}"
@@ -88,34 +87,36 @@
 					</div>
 					<div class="font-semibold">{currentIndex + 1}/{data.requirement_assessments.length}</div>
 				</div>
-				<div class="flex flex-col h-1/2 items-center text-center justify-center">
+				<div class="flex flex-col items-center text-center justify-center">
 					<p class="font-semibold">{title}</p>
+				</div>
+				<div class="flex flex-col items-center justify-center">
 					{#if data.requirement_assessments[currentIndex].description}
 						{data.requirement_assessments[currentIndex].description}
 					{/if}
 				</div>
-				<div class="items-center">
-					<div>
-						<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-							<ul
-								class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-							>
-								<RadioGroup class="w-full flex-wrap items-center">
-									{#each possible_options as option}
-										<RadioItem
-											class="h-full"
-											id={option.id}
-											value={option.id}
-											bind:group={result}
-											name="result"
-											style="border-color: {color}"
-											on:change={updateResult}>{option.label}</RadioItem
-										>
-									{/each}
-								</RadioGroup>
-							</ul>
-						</form>
-					</div>
+			</div>
+			<div class="items-center my-4">
+				<div>
+					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
+						<ul
+							class=" items-center w-full text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+						>
+							<RadioGroup class="w-full flex-wrap items-center">
+								{#each possible_options as option}
+									<RadioItem
+										class="h-full"
+										id={option.id}
+										value={option.id}
+										bind:group={result}
+										name="result"
+										style="border-color: {color}"
+										on:change={updateResult}>{option.label}</RadioItem
+									>
+								{/each}
+							</RadioGroup>
+						</ul>
+					</form>
 				</div>
 			</div>
 			<div class="flex justify-between">

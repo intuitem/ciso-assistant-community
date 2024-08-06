@@ -1,0 +1,179 @@
+urn: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+locale: en
+ref_id: risk-matrix-5x5-iso27005
+name: 5x5 ISO-27005
+description: 5x5 matrix from ISO 27005 Annex A
+copyright: ISO
+version: 2
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: Matrice 5x5 ISO-27005
+    description: "Matrice 5x5 d\xE9crite dans la norme ISO-27005 annexe A"
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:5x5-iso27005
+    ref_id: risk-matrix-5x5-iso27005
+    name: 5x5 ISO-27005
+    description: 5x5 matrix from ISO 27005 Annex A
+    probability:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - unlikely
+      description: The likelihood of the risk scenario is very low
+      translations:
+        fr:
+          name: 1 - peu probable
+          description: "La vraisemblance du sc\xE9nario de risque est tr\xE8s faible"
+    - id: 1
+      abbreviation: '2'
+      name: 2 - rather unlikely
+      description: The likelihood of the risk scenario is low
+      translations:
+        fr:
+          name: "2 - plut\xF4t probable"
+          description: "La vraisemblance du sc\xE9nario de risque est faible"
+    - id: 2
+      abbreviation: '3'
+      name: 3 - likely
+      description: The likelihood of the risk scenario is significant
+      translations:
+        fr:
+          name: 3 - probable
+          description: "La vraisemblance du sc\xE9nario de risque est significative"
+    - id: 3
+      abbreviation: '4'
+      name: 4 - very likely
+      description: The likelihood of the risk scenario is high
+      translations:
+        fr:
+          name: "4 - tr\xE8s probable"
+          description: "La vraisemblance du sc\xE9nario de risque est \xE9lev\xE9e"
+    - id: 4
+      abbreviation: '5'
+      name: 5 - almost certain
+      description: The likelihood of the risk scenario is very high
+      translations:
+        fr:
+          name: 5 - presque certain
+          description: "La vraisemblance du sc\xE9nario de risque est tr\xE8s \xE9\
+            lev\xE9e"
+    impact:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - minor
+      description: Negligible consequences for the organization
+      translations:
+        fr:
+          name: 1 - mineur
+          description: "Cons\xE9quences n\xE9gligeables pour l'oraganisation"
+    - id: 1
+      abbreviation: '2'
+      name: 2 - significant
+      description: Significant but limited consequences for the organization
+      translations:
+        fr:
+          name: 2 - significatif
+          description: "Cons\xE9quences significatives mais limit\xE9es pour l'organisation"
+    - id: 2
+      abbreviation: '3'
+      name: 3 - serious
+      description: Substantial consequences for the organization
+      translations:
+        fr:
+          name: 3 - serieux
+          description: "Cons\xE9quences substantielles pour l'organisation"
+    - id: 3
+      abbreviation: '4'
+      name: 4 - critical
+      description: Disastrous consequences for the organization
+      translations:
+        fr:
+          name: 4 - critique
+          description: "Cons\xE9quences d\xE9sastreuses pour l'organisation"
+    - id: 4
+      abbreviation: '5'
+      name: 5 - catastrophic
+      description: Sector or regulatory consequences beyond the organization
+      translations:
+        fr:
+          name: 5 - catastrophique
+          description: "Cons\xE9quences sectorielles ou r\xE9glementaires au-del\xE0\
+            \ de l\u2019organisation"
+    risk:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - very low
+      description: very low - acceptable risk
+      translations:
+        fr:
+          name: "1 - tr\xE8s faible"
+          description: "tr\xE8s faible - risque acceptable"
+      hexcolor: '#D3FF4E'
+    - id: 1
+      abbreviation: '2'
+      name: 2 - low
+      description: low - acceptable risk
+      translations:
+        fr:
+          name: 2 - faible
+          description: faible - risque acceptable
+      hexcolor: '#02A45A'
+    - id: 2
+      abbreviation: '3'
+      name: 3 - medium
+      description: medium - tolerable risk
+      translations:
+        fr:
+          name: 3 - moyen
+          description: moyen - risque tolerable
+      hexcolor: '#FFA600'
+    - id: 3
+      abbreviation: '4'
+      name: 4 - high
+      description: high - unacceptable risk
+      translations:
+        fr:
+          name: "4 - \xE9lev\xE9"
+          description: "\xE9lev\xE9 - risque inacceptable"
+      hexcolor: '#FF1A00'
+    - id: 4
+      abbreviation: '5'
+      name: 5 - very high
+      description: very high - unacceptable risk
+      translations:
+        fr:
+          name: "5 - tr\xE8s \xE9lev\xE9"
+          description: "tr\xE8s \xE9lev\xE9 - risque inacceptable"
+      hexcolor: '#C00000'
+    grid:
+    - - 0
+      - 0
+      - 1
+      - 1
+      - 1
+    - - 0
+      - 1
+      - 1
+      - 2
+      - 2
+    - - 1
+      - 1
+      - 2
+      - 3
+      - 3
+    - - 1
+      - 2
+      - 3
+      - 3
+      - 4
+    - - 2
+      - 3
+      - 3
+      - 4
+      - 4
+    translations:
+      fr:
+        name: Matrice 5x5 ISO-27005
+        description: "Matrice 5x5 d\xE9crite dans la norme ISO-27005 annexe A"
