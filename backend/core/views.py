@@ -23,6 +23,7 @@ from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django.utils import translation
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, permissions, status, viewsets
@@ -40,7 +41,7 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet
+from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet, ReferentialObjectMixin
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
@@ -79,6 +80,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 Folder.get_root_folder(), self.request.user, self.model
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
+
+        if issubclass(self.model, ReferentialObjectMixin) :
+            if (lang := self.request.COOKIES.get("ciso_lang")) :
+                translation.activate(lang)
+
         return queryset
 
     def get_serializer_class(self):
