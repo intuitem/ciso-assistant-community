@@ -7,7 +7,6 @@ from allauth.socialaccount.internal.flows.login import (
 )
 from allauth.socialaccount.models import PermissionDenied, SocialLogin
 from allauth.socialaccount.providers.saml.views import (
-    AuthError,
     AuthProcess,
     LoginSession,
     OneLogin_Saml2_Error,
@@ -18,6 +17,7 @@ from allauth.socialaccount.providers.saml.views import (
     httpkit,
     render_authentication_error,
 )
+from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
 from allauth.utils import ValidationError
 from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import Http404
@@ -31,6 +31,14 @@ from iam.sso.models import SSOSettings
 from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
+
+
+class AuthError(AllauthAuthError):
+    IDP_INITIATED_SSO_REJECTED = "idpInitiatedSSORejected"
+    SIGNUP_CLOSED = "signupClosed"
+    PERMISSION_DENIED = "permissionDenied"
+    FAILED_SSO = "failedSSO"
+    USER_DOES_NOT_EXIST = "UserDoesNotExist"
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -116,7 +124,7 @@ class FinishACSView(SAMLViewMixin, View):
             if reject:
                 logger.error("IdP initiated SSO rejected")
                 return render_authentication_error(
-                    request, provider, error="idpInitiatedSSORejected"
+                    request, provider, error=AuthError.IDP_INITIATED_SSO_REJECTED
                 )
             next_url = (
                 decode_relay_state(acs_request.POST.get("RelayState")) or next_url
@@ -147,19 +155,19 @@ class FinishACSView(SAMLViewMixin, View):
             record_authentication(request, login)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
-            error = "UserDoesNotExist"
+            error = AuthError.USER_DOES_NOT_EXIST
             logger.warning("User does not exist", exc_info=e)
         except SignupClosedException as e:
-            error = "signupClosed"
+            error = AuthError.SIGNUP_CLOSED
             logger.warning("Signup closed", exc_info=e)
         except PermissionDenied as e:
-            error = "permissionDenied"
+            error = AuthError.PERMISSION_DENIED
             logger.error("Permission denied", exc_info=e)
         except ValidationError as e:
             error = e.code
             logger.error("Validation error", exc_info=e)
         except Exception as e:
-            error = "failedSSO"
+            error = AuthError.FAILED_SSO
             logger.error("SSO failed", exc_info=e)
         else:
             next_url = login.state["next"]
