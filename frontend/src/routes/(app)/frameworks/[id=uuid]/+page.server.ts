@@ -8,6 +8,8 @@ export const load = (async ({ fetch, params }) => {
 
 	const res = await fetch(endpoint);
 	const framework = await res.json();
-	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`).then((res) => res.json());
+	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`).then((res) =>
+		res.json()
+	);
 	return { URLModel, framework, tree };
 }) satisfies PageServerLoad;

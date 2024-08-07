@@ -585,9 +585,7 @@ class LoadedLibrary(LibraryMixin):
         if self.risk_matrices.count() > 0:
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
-            res["risk_matrix"]["probability"] = update_translations(
-                matrix.probability
-            )
+            res["risk_matrix"]["probability"] = update_translations(matrix.probability)
             res["risk_matrix"]["impact"] = update_translations(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
