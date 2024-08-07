@@ -1,33 +1,30 @@
-from pathlib import Path
-from django.apps import apps
-from django.core.validators import MaxValueValidator
-from django.forms.models import model_to_dict
-from django.contrib.auth import get_user_model
-from django.db import models, transaction
-from django.utils.translation import gettext_lazy as _
-from django.db.models import Q
-
-from .base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
-from .validators import validate_file_size, validate_file_name
-from .utils import camel_case, sha256
-from iam.models import FolderMixin, PublishInRootFolderMixin
-from django.core import serializers
-from django.utils.translation import get_language
-from library.helpers import update_translations_in_object, update_translations
-
-import os
 import json
-import yaml
+import os
 import re
-
-from django.core.exceptions import ValidationError
-
-from django.urls import reverse
 from datetime import date, datetime
-from typing import Union, Dict, Set, List, Tuple, Type, Self
-from django.utils.html import format_html
+from pathlib import Path
+from typing import Self, Type, Union
 
+import yaml
+from django.apps import apps
+from django.contrib.auth import get_user_model
+from django.core import serializers
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
+from django.db import models, transaction
+from django.db.models import Q
+from django.forms.models import model_to_dict
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from iam.models import FolderMixin, PublishInRootFolderMixin
+from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
+
+from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from .utils import camel_case, sha256
+from .validators import validate_file_name, validate_file_size
 
 logger = get_logger(__name__)
 
