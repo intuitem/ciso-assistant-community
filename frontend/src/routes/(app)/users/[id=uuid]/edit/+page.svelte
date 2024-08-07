@@ -22,7 +22,6 @@
 	let debugText = '...';
 </script>
 
-<code style="font-size: 32px;border: 10px solid blue;" bind:this={debugCodeElem}>{debugText}</code>
 <div class="card bg-white shadow p-4">
 	<ModelForm form={data.form} schema={UserEditSchema} model={data.model} />
 </div>
