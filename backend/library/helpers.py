@@ -69,7 +69,7 @@ def update_translations(data_dict_str, locale=None) -> str:
         locale (str): The locale to get the translation for.
 
     Returns:
-        str: The updated dictionary as a JSON string.
+        str: The updated dictionary.
     """
     if isinstance(data_dict_str, str):
         data_dict = json.loads(data_dict_str)
@@ -81,4 +81,17 @@ def update_translations(data_dict_str, locale=None) -> str:
         for obj in data_dict_str:
             update_translations_in_object(obj, get_language() or locale)
         return data_dict_str
-    return json.dumps(data_dict)
+    return data_dict
+
+def update_translations_as_string(data_dict_str, locale=None) -> str:
+    """
+    Update the translations of 'name' and 'description' fields in a dictionary of objects.
+
+    Args:
+        data_dict_str (str): The JSON string of the dict of objects to update.
+        locale (str): The locale to get the translation for.
+
+    Returns:
+        str: The updated dictionary as a JSON string.
+    """
+    return json.dumps(update_translations(data_dict_str, locale))

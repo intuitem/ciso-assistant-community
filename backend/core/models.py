@@ -13,7 +13,7 @@ from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 from django.utils.translation import get_language
-from library.helpers import update_translations_in_object, update_translations
+from library.helpers import update_translations_in_object, update_translations_as_string, update_translations
 
 import os
 import json
@@ -581,9 +581,9 @@ class LoadedLibrary(LibraryMixin):
         if self.risk_matrices.count() > 0:
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
-            res["risk_matrix"]["probability"] = update_translations(matrix.probability)
-            res["risk_matrix"]["impact"] = update_translations(matrix.impact)
-            res["risk_matrix"]["risk"] = update_translations(matrix.risk)
+            res["risk_matrix"]["probability"] = update_translations_as_string(matrix.probability)
+            res["risk_matrix"]["impact"] = update_translations_as_string(matrix.impact)
+            res["risk_matrix"]["risk"] = update_translations_as_string(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
@@ -777,6 +777,9 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
+    def parse_json_translated(self):
+        return update_translations(self.json_definition, get_language())
+
     @property
     def grid(self) -> list:
         risk_matrix = self.parse_json()
@@ -814,7 +817,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations(self.json_definition, "fr")
+        return update_translations_as_string(self.json_definition, "fr")
 
     def __str__(self) -> str:
         return self.get_name_translated
