@@ -11,16 +11,8 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 	const contentEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/content`;
 
 	const [res, contentRes] = await Promise.all([
-		fetch(endpoint, {
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		}),
-		fetch(contentEndpoint, {
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		})
+		fetch(endpoint),
+		fetch(contentEndpoint)
 	]);
 
 	if (!res.ok) error(res.status as NumericRange<400, 599>, await res.json());
