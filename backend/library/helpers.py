@@ -77,12 +77,11 @@ def update_translations(data_dict_str, locale=None) -> str:
             if isinstance(objects_list, list):
                 for obj in objects_list:
                     update_translations_in_object(obj, get_language() or locale)
+        return data_dict
     elif isinstance(data_dict_str, list):
         for obj in data_dict_str:
             update_translations_in_object(obj, get_language() or locale)
-        return data_dict_str
-    return data_dict
-
+    return data_dict_str
 
 def update_translations_as_string(data_dict_str, locale=None) -> str:
     """
