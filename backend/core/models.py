@@ -224,7 +224,7 @@ class StoredLibrary(LibraryMixin):
             outdated_library.delete()
 
         objects_meta = {
-            key: (1 if key == "framework" or "requirement_mapping_set" else len(value))
+            key: (1 if key in ["framework", "requirement_mapping_set"] else len(value))
             for key, value in library_data["objects"].items()
         }
 
