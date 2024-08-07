@@ -1,8 +1,10 @@
 import structlog
-from allauth.account.authentication import record_authentication
 from allauth.core.exceptions import SignupClosedException
 from allauth.socialaccount.adapter import get_account_adapter
-from allauth.socialaccount.internal.flows.login import pre_social_login
+from allauth.socialaccount.internal.flows.login import (
+    pre_social_login,
+    record_authentication,
+)
 from allauth.socialaccount.models import PermissionDenied, SocialLogin
 from allauth.socialaccount.providers.saml.views import (
     AuthError,
@@ -113,7 +115,9 @@ class FinishACSView(SAMLViewMixin, View):
             )
             if reject:
                 logger.error("IdP initiated SSO rejected")
-                return render_authentication_error(request, provider)
+                return render_authentication_error(
+                    request, provider, error="idpInitiatedSSORejected"
+                )
             next_url = (
                 decode_relay_state(acs_request.POST.get("RelayState")) or next_url
             )
