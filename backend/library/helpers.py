@@ -83,6 +83,7 @@ def update_translations(data_dict_str, locale=None) -> str:
             update_translations_in_object(obj, get_language() or locale)
     return data_dict_str
 
+
 def update_translations_as_string(data_dict_str, locale=None) -> str:
     """
     Update the translations of 'name' and 'description' fields in a dictionary of objects.
