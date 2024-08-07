@@ -48,6 +48,7 @@ class StoredLibraryDetailedSerializer(ReferentialSerializer):
 
 class LoadedLibraryDetailedSerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
+    dependencies = serializers.JSONField(source="get_dependencies")
 
     class Meta:
         model = LoadedLibrary
