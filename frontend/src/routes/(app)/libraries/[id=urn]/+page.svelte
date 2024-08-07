@@ -139,7 +139,9 @@
 					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
 						<li>
-							<a href="/libraries/{dependency.urn}" target="_parent" class="anchor">{dependency.name}</a>
+							<a href="/libraries/{dependency.urn}" target="_parent" class="anchor"
+								>{dependency.name}</a
+							>
 						</li>
 					{/each}
 				</p>
