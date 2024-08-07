@@ -80,11 +80,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 Folder.get_root_folder(), self.request.user, self.model
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
-
-        if issubclass(self.model, ReferentialObjectMixin) :
-            if (lang := self.request.COOKIES.get("ciso_lang")) :
-                translation.activate(lang)
-
         return queryset
 
     def get_serializer_class(self):
