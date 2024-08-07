@@ -545,6 +545,16 @@ class LoadedLibrary(LibraryMixin):
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
 
+    @property
+    def get_dependencies(self) :
+        return [
+            {
+                "name": dependency.name,
+                "urn": dependency.urn
+            }
+            for dependency in self.dependencies.all()
+        ]
+
     @transaction.atomic
     def update(self):
         new_libraries = [
