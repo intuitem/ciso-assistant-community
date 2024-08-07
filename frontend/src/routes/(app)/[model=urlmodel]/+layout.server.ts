@@ -15,11 +15,7 @@ export const load = (async ({ fetch, params }) => {
 		data = await fetch_function({ fetch, params }, languageTag());
 	} else {
 		const endpoint = `${BASE_API_URL}/${params.model}/`;
-		const res = await fetch(endpoint, {
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		});
+		const res = await fetch(endpoint);
 		data = await res.json().then((res) => res.results);
 	}
 

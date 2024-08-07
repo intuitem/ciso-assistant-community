@@ -6,16 +6,8 @@ export const load = (async ({ fetch, params }) => {
 	const URLModel = 'frameworks';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object`;
 
-	const res = await fetch(endpoint, {
-		headers: {
-			'Accept-Language': languageTag()
-		}
-	});
+	const res = await fetch(endpoint);
 	const framework = await res.json();
-	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`, {
-		headers: {
-			'Accept-Language': languageTag()
-		}
-	}).then((res) => res.json());
+	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`).then((res) => res.json());
 	return { URLModel, framework, tree };
 }) satisfies PageServerLoad;
