@@ -4,7 +4,7 @@ import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'frameworks';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object`;
+	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 
 	const res = await fetch(endpoint);
 	const framework = await res.json();
