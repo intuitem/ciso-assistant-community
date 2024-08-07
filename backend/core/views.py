@@ -41,7 +41,12 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet, ReferentialObjectMixin
+from core.models import (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementMappingSet,
+    ReferentialObjectMixin,
+)
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 

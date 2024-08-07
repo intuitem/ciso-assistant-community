@@ -1,0 +1,108 @@
+urn: urn:intuitem:risk:library:custom
+locale: en
+ref_id: Custom
+name: CUSTOM LIBRARY
+description: A nice custom library
+copyright: "THIS IS THE SWAG LIB"
+version: 4
+provider: Monsieur Sw4g
+packager: Monsieur Sw4g
+translations:
+  fr:
+    name: "Librairie customisée <3"
+    description: "Une librairie customisée très sympa <3<3<3"
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:reference_control:custom:ref-ctl-1
+    ref_id: REF-CTL-01
+    category: process
+    description: Custom Reference Control ONE
+    translations:
+      fr:
+        description: Première mesure de référence !
+  - urn: urn:intuitem:risk:reference_control:custom:ref-ctl-2
+    ref_id: REF-CTL-02
+    category: technical
+    description: Custom Reference Control TWO
+    translations:
+      fr:
+        description: Deuxième mesure de référence !
+  - urn: urn:intuitem:risk:reference_control:custom:ref-ctl-3
+    ref_id: REF-CTL-03
+    category: physical
+    description: Custom Reference Control THREE
+    translations:
+      fr:
+        description: Troisième mesure de référence !
+  threats:
+  - urn: urn:intuitem:risk:threat:mitre-attack:t1047
+    ref_id: THREAT-1
+    name: Threat Number ONE
+    description: 'This is the threat number two'
+    translations:
+      fr:
+        name: Première Threat
+        description: C'est la première threat !
+  - urn: urn:intuitem:risk:threat:mitre-attack:t1113
+    ref_id: THREAT-2
+    name: Threat Number TWO
+    description: 'This is the threat number two'
+    translations:
+      fr:
+        name: Deuxième Threat
+        description: C'est la deuxième threat !
+  framework:
+    urn: urn:intuitem:risk:framework:custom-iso27001-2022
+    ref_id: ISO/IEC 27001:2022
+    name: International standard ISO/IEC 27001:2022
+    description: "Information security, cybersecurity and privacy protection \u2014\
+      \ Information security management systems \u2014 Requirements"
+    translations:
+      fr:
+        name: Norme internationale ISO/IEC 27001:2022
+        description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
+          \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la\
+          \ s\xE9curit\xE9 \u2014 Exigences"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:custom-iso27001-2022:core
+      assessable: false
+      depth: 1
+      name: Clauses
+      translations:
+        fr:
+          name: Clauses
+          description: null
+    - urn: urn:intuitem:risk:req_node:custom-iso27001-2022:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:custom-iso27001-2022:core
+      ref_id: '4'
+      name: 'Context of the organization '
+      translations:
+        fr:
+          name: Contexte de l'organisation
+          description: null
+    - urn: urn:intuitem:risk:req_node:custom-iso27001-2022:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:custom-iso27001-2022:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Understand the context and the organization.
+      reference_controls:
+      - urn:intuitem:risk:reference_control:custom:ref-ctl-1
+      translations:
+        fr:
+          name: "Compr\xE9hension de l'organisation et de son contexte"
+          description: Comprendre le contexte et l'organisation
+    - urn: urn:intuitem:risk:req_node:custom-iso27001-2022:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:custom-iso27001-2022:4
+      ref_id: '4.2'
+      name: This the baguette
+      description: Big baguette
+      translations:
+        fr:
+          name: "C'est une baguette"
+          description: Grosse baguette

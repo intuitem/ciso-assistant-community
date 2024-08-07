@@ -13,7 +13,11 @@ from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 from django.utils.translation import get_language
-from library.helpers import update_translations_in_object, update_translations_as_string, update_translations
+from library.helpers import (
+    update_translations_in_object,
+    update_translations_as_string,
+    update_translations,
+)
 
 import os
 import json
@@ -581,7 +585,9 @@ class LoadedLibrary(LibraryMixin):
         if self.risk_matrices.count() > 0:
             matrix = self.risk_matrices.first()
             res["risk_matrix"] = update_translations_in_object(model_to_dict(matrix))
-            res["risk_matrix"]["probability"] = update_translations_as_string(matrix.probability)
+            res["risk_matrix"]["probability"] = update_translations_as_string(
+                matrix.probability
+            )
             res["risk_matrix"]["impact"] = update_translations_as_string(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations_as_string(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
