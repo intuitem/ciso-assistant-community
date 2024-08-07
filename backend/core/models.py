@@ -546,12 +546,9 @@ class LoadedLibrary(LibraryMixin):
     )
 
     @property
-    def get_dependencies(self) :
+    def get_dependencies(self):
         return [
-            {
-                "name": dependency.name,
-                "urn": dependency.urn
-            }
+            {"name": dependency.name, "urn": dependency.urn}
             for dependency in self.dependencies.all()
         ]
 
