@@ -4,7 +4,7 @@ import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'frameworks';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object`;
+	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 
 	const res = await fetch(endpoint, {
 		headers: {
@@ -12,7 +12,7 @@ export const load = (async ({ fetch, params }) => {
 		}
 	});
 	const framework = await res.json();
-	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`, {
+	const tree = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree/`, {
 		headers: {
 			'Accept-Language': languageTag()
 		}
