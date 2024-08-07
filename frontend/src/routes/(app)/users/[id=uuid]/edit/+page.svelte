@@ -1,12 +1,11 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { page } from '$app/stores';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { UserEditSchema } from '$lib/utils/schemas';
-	import { page } from '$app/stores';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import type { PageData } from './$types';
 
 	import * as m from '$paraglide/messages';
-	import { goto } from '$app/navigation';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.object);
@@ -21,10 +20,7 @@
 		<a
 			href="{$page.url.pathname}/set-password"
 			class="text-primary-700 hover:text-primary-500"
-			data-testid="set-password-btn"
-			on:click={(_) => {
-				goto(`${$page.url.pathname}/set-password`);
-			}}>{m.setTemporaryPassword()}</a
+			data-testid="set-password-btn">{m.setTemporaryPassword()}</a
 		>. {m.setTemporaryPassword2()}.
 	</p>
 </div>
