@@ -111,6 +111,7 @@ erDiagram
     RISK_SCENARIO                }o--o{ ASSET                 : threatens
     RISK_ACCEPTANCE              }o--o{ RISK_SCENARIO         : covers
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
+    RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
 
     PROJECT {
         string name
@@ -167,6 +168,16 @@ erDiagram
     }
 
     THREAT {
+        string  urn
+        string  locale
+        string  ref_id
+        string  name
+        string  description
+        string  annotation
+        string  provider
+    }
+
+    VULNERABILITY {
         string  urn
         string  locale
         string  ref_id
@@ -734,7 +745,11 @@ Note: the score scale for a framework can be overridden when creating a complian
 
 ## Threats
 
-Threats are referential objects used to clarify the aim of a requirement node or a applied  control. They are informative, assessments can be realised without using them.
+Threats are referential objects used to clarify the aim of a requirement node or a applied control. They are informative, assessments can be realised without using them.
+
+## Vulnerabilities
+
+Vulnerabilities are referential objects used to clarify a risk scenario and to follow remediations. They are informative, risk assessments can be realised without using them. Well-known providers are NVD and CISA KEV, but custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
 
 ## Reference controls
 
@@ -892,6 +907,7 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 Libraries can contain:
 - frameworks (including requirement nodes)
 - threats
+- vulnerabilities
 - reference controls
 - risk matrices
 - requirement mapping sets
@@ -919,7 +935,7 @@ Deleting a library is possible only if none of its objects is currently used. Re
 
 ## Referential objects
 
-Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
+Frameworks (including requirement nodes), mappings, threats, vulnerabilities, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
 
 Referential objects can be downloaded from a library. They are called "global referential objects" or "library objects" in that case, and they have the following characteristics:
 - they have a non-null URN identifier *urn* of the form: ```urn:intuitem:<domain>:<object_type>:[<framework>:]<short_id>```. Client-defined URNs are also possible. The framework part is present for items that are part of a framework.
