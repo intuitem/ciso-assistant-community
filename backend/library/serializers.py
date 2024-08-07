@@ -1,6 +1,7 @@
 from core.models import StoredLibrary, LoadedLibrary
 from rest_framework import serializers
 from core.serializers import ReferentialSerializer
+from core.serializer_fields import FieldsRelatedField
 
 """class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
@@ -48,7 +49,7 @@ class StoredLibraryDetailedSerializer(ReferentialSerializer):
 
 class LoadedLibraryDetailedSerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
-    dependencies = serializers.JSONField(source="get_dependencies")
+    dependencies = FieldsRelatedField(many=True, fields=["urn", "str", "name"])
 
     class Meta:
         model = LoadedLibrary
