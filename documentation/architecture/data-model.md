@@ -746,7 +746,7 @@ Reference controls are templates for Applied controls. They facilitate the creat
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
 
-Reference controls have a function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
+Reference controls have a csf_function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
 
 ## Applied controls
 
@@ -1110,7 +1110,7 @@ erDiagram
 
     ASSET                 }o--o{ SOLUTION              : contains
     ENTITY                }o--o{ DOMAIN                : owns
-    SOLUTION              }o--o{ VULNERABILITY         : contains
+    VULNERABILITY         }o--o{ SOLUTION              : affects
     SOLUTION              }o--o| ENTITY                : provided_by
     CONTRACT              }o--o{ SOLUTION              : formalizes
     CONTRACT              }o--o{ EVIDENCE              : has
@@ -1140,9 +1140,8 @@ erDiagram
     SOLUTION {
         string      name
         string      description
-        string      type
-        string      cpe
-        product[]   products
+        string      solution_type
+        string      ref_id
         string      version
     }
 
@@ -1189,6 +1188,9 @@ erDiagram
     GLOBAL_DOMAIN   ||--o{ PERSON          : contains
 ```
 
+- The solution_type of a solution is a string with the following possible values: --|product|maintenance|hosting.
+- The ref_id for a solution can be null or use a formal id like CPE.
+ 
 ### Evolution of existing models
 
 requirement_assessment - add the following fields:
