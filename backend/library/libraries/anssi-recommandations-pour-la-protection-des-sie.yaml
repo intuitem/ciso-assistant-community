@@ -1,8 +1,7 @@
 urn: urn:protocolpaladin:risk:library:anssi-recommandations-pour-la-protection-des-sie
 locale: fr
-ref_id: ANSSI-RECOMMANDATIONS-POUR-LA-PROTECTION-DES-SYSTEMES-D-INFORMATION-ESSENTIELS
-name: "ANSSI - Recommandations pour la protection des syst\xE8mes d\u2019information\
-  \ essentiels"
+ref_id: ANSSI
+name: "Recommandations pour la protection des syst\xE8mes d\u2019information essentiels"
 description: "La directive Network and Information System Security a \xE9t\xE9 adopt\xE9\
   e par les institutions europ\xE9ennes en 2016 et transpos\xE9e en droit fran\xE7\
   ais en 2018. Elle cr\xE9e notamment l'obligation pour les op\xE9rateurs de services\
@@ -22,15 +21,14 @@ description: "La directive Network and Information System Security a \xE9t\xE9 a
   \ ayant des besoins de protection de ses SI, et pour leurs prestataires tels que\
   \ les entreprises de services num\xE9riques (ESN).\nhttps://cyber.gouv.fr/sites/default/files/2020/12/guide_protection_des_systemes_essentiels.pdf"
 copyright: Licence ouverte / Open Licence v2.0 (Etalab)
-version: 1
+version: 2
 provider: ANSSI
 packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-recommandations-pour-la-protection-des-sie
-    ref_id: ANSSI-RECOMMANDATIONS-POUR-LA-PROTECTION-DES-SYSTEMES-D-INFORMATION-ESSENTIELS
-    name: "ANSSI - Recommandations pour la protection des syst\xE8mes d\u2019information\
-      \ essentiels"
+    ref_id: ANSSI
+    name: "Recommandations pour la protection des syst\xE8mes d\u2019information essentiels"
     description: "La directive Network and Information System Security a \xE9t\xE9\
       \ adopt\xE9e par les institutions europ\xE9ennes en 2016 et transpos\xE9e en\
       \ droit fran\xE7ais en 2018. Elle cr\xE9e notamment l'obligation pour les op\xE9\
