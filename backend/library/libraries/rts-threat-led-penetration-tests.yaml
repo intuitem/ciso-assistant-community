@@ -1,0 +1,3104 @@
+urn: urn:intuitem:risk:library:rts-dora-threat-led-penetration-tests
+locale: en
+ref_id: RTS-DORA-TLPT
+name: RTS-dora-threat-led-penetration-tests
+description: "Regulation (EU) 2022/2554 of the European Parliament and of the Council\
+  \ of 14 December 2022 on digital operational resilience for the financial sector\
+  \ and amending Regulations (EC) No 1060/2009, (EU) No 648/2012, (EU) No 600/2014,\
+  \ (EU) No 909/2014 and (EU) 2016/1011 (hereinafter \u2018DORA\u2019) under its Article\
+  \ 26(11), tasks the ESAs, \u2018in agreement with the ECB\u2019 to develop draft\
+  \ regulatory technical standards (\u2018RTS\u2019) \u2018in accordance with the\
+  \ TIBER-EU framework\u2019 to specify further the criteria used for identifying\
+  \ financial entities required to perform threat-led penetration testing (TLPT),\
+  \ the requirements and standards governing the use of internal testers, the requirements\
+  \ in relation to scope, testing methodology and approach for each phase of the testing,\
+  \ results, closure and remediation stages and the type of supervisory and other\
+  \ relevant cooperation needed for the implementation of TLPT and for the facilitation\
+  \ of mutual recognition. Section 2 of this report presents in detail the mandate\
+  \ and background to the final draft RTS which is included in Section 3.\n\nhttps://www.esma.europa.eu/sites/default/files/2024-07/JC_2024-29_-_Final_report_DORA_RTS_on_TLPT.pdf"
+copyright: ESMA
+version: 1
+provider: ESMA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:rts-dora-threat-led-penetration-tests
+    ref_id: RTS-DORA-TLPT
+    name: RTS-threat-led-penetration-tests
+    description: "Regulation (EU) 2022/2554 of the European Parliament and of the\
+      \ Council of 14 December 2022 on digital operational resilience for the financial\
+      \ sector and amending Regulations (EC) No 1060/2009, (EU) No 648/2012, (EU)\
+      \ No 600/2014, (EU) No 909/2014 and (EU) 2016/1011 (hereinafter \u2018DORA\u2019\
+      ) under its Article 26(11), tasks the ESAs, \u2018in agreement with the ECB\u2019\
+      \ to develop draft regulatory technical standards (\u2018RTS\u2019) \u2018in\
+      \ accordance with the TIBER-EU framework\u2019 to specify further the criteria\
+      \ used for identifying financial entities required to perform threat-led penetration\
+      \ testing (TLPT), the requirements and standards governing the use of internal\
+      \ testers, the requirements in relation to scope, testing methodology and approach\
+      \ for each phase of the testing, results, closure and remediation stages and\
+      \ the type of supervisory and other relevant cooperation needed for the implementation\
+      \ of TLPT and for the facilitation of mutual recognition. Section 2 of this\
+      \ report presents in detail the mandate and background to the final draft RTS\
+      \ which is included in Section 3.\n\nhttps://www.esma.europa.eu/sites/default/files/2024-07/JC_2024-29_-_Final_report_DORA_RTS_on_TLPT.pdf"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-1
+      assessable: false
+      depth: 1
+      ref_id: Recital 1
+      description: This Regulation has been drafted in accordance with the TIBER-EU
+        framework and mirrors the methodology, process and structure of TLPT as described
+        in TIBER-EU. Financial entities subject to TLPT may refer to and apply the
+        TIBER-EU framework, or one of its national implementations, in as much as
+        that framework or implementation is consistent with the requirements set out
+        in Articles 26 and 27 of Regulation (EU) 2022/2554 and this Regulation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-2
+      assessable: false
+      depth: 1
+      ref_id: Recital 2
+      description: The designation of a single public authority in the financial sector
+        responsible for TLPT-related matters at national level according to Article
+        26(9) of Regulation (EU) 2022/2554 should be without prejudice to the competence
+        for the TLPT of competent authorities entrusted with supervision at Union
+        level of certain financial entities to which Regulation (EU) 2022/2554 applies,
+        such as, for instance, the European Central Bank for significant credit institutions.
+        Where only some tasks are delegated in a Member State in accordance with the
+        national implementation of Article 26(10) of Regulation (EU) 2022/2554, the
+        competent authority in accordance with Article 46 of Regulation (EU) 2022/2554
+        should remain the authority for those TLPT-related tasks that have been not
+        delegated.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-3
+      assessable: false
+      depth: 1
+      ref_id: Recital 3
+      description: Considering the complexity of the TLPT and the risks relating to
+        it, the test should be performed only by financial entities for which it is
+        justified. Hence, authorities responsible for TLPT matters (TLPT authorities,
+        either at national or Union level) should exclude from the scope of TLPT those
+        financial entities operating in core financial services subsectors for which
+        a TLPT is not justified. It means that credit institutions, payment and electronic
+        money institutions, central security depositories, central counterparties,
+        trading venues, insurance and reinsurance undertakings, even though when meeting
+        the quantitative criteria identified in this Regulation, could be opted out
+        of the TLPT scope in light of an overall assessment of their ICT risk profile
+        and maturity, impact on the financial sector and related financial stability
+        concerns.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-4
+      assessable: false
+      depth: 1
+      ref_id: Recital 4
+      description: TLPT authorities should assess, in light of an overall assessment
+        of the ICT risk profile and maturity, of the impact on the financial sector
+        and related financial stability concerns, whether any type of financial entity
+        other than credit institutions, payment institutions, electronic money institutions,
+        central counterparties, central securities depositories, trading venues, insurance
+        and reinsurance undertakings should be subject to TLPT. The assessment of
+        the abovementioned qualitative elements should aim at identifying financial
+        entities for which the TLPT is appropriate by using cross-sector and objective
+        indicators. At the same time, the assessment of these elements should limit
+        the entities subject to TLPT to those for which the test is justified. These
+        elements should also be assessed with reference to new market participants
+        (such as crypto asset service providers referred to in Title V of Regulation
+        (EU) 2023/1114) which might have a more important role for the financial sector
+        in the future.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-5
+      assessable: false
+      depth: 1
+      ref_id: Recital 5
+      description: Where financial entities have the same ICT intra-group service
+        provider or where they belong to the same group and rely on common ICT systems,
+        it is important that TLPT authorities consider the structure and its systemic
+        character or importance for the financial sector at national or Union level
+        in the assessment of whether a financial entity should be subject to TLPT
+        and of whether the TLPT should be conducted at entity level or at group level
+        (through a joint TLPT).
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-6
+      assessable: false
+      depth: 1
+      ref_id: Recital 6
+      description: "In order to mirror the TIBER-EU framework, it is necessary that\
+        \ the testing methodology provides for the involvement of the following main\
+        \ participants: the financial entity, with a control team (mirroring the TIBER-EU\
+        \ so-called \u2018white team\u2019) and a blue team (mirroring the TIBER-EU\
+        \ \u2018blue team\u2019), the TLPT authority, in the form of a TLPT cyber\
+        \ team (mirroring the TIBER-EU so-called \u2018TIBER cyber teams\u2019), a\
+        \ threat intelligence provider and testers (the latter mirroring the TIBER\
+        \ so- called \u2018red team provider\u2019)."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-7
+      assessable: false
+      depth: 1
+      ref_id: Recital 7
+      description: In order to ensure that the TLPT benefits from the experience developed
+        in the framework of TIBER-EU implementation and to reduce the risks associated
+        to the performance of TLPT, it should be ensured that the responsibilities
+        of the TLPT cyber teams to be set up at the level of TLPT authorities match
+        as closely as possible those of the TIBER cyber teams under TIBER-EU. Hence,
+        the TLPT cyber teams should include test managers responsible for overseeing
+        the individual TLPTs and be responsible for planning and coordination of individual
+        tests. TLPT cyber teams should serve as single point of contact for test-related
+        communication to internal and external stakeholders, collect and process feedback
+        and lessons learned from previously conducted tests and provide support to
+        financial entities undergoing TLPT testing.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-8
+      assessable: false
+      depth: 1
+      ref_id: Recital 8
+      description: To mirror the TIBER-EU framework methodology, test managers should
+        have sufficient skills and capabilities to provide advice and challenge tester
+        proposals. Building on the experience under the TIBER-EU framework, it has
+        proven to be valuable to have a team of at least two test managers assigned
+        to each test. To reflect that the TLPT is used to encourage the learning experience,
+        to safeguard the confidentiality of tests, and unless they have resources
+        or expertise issues, TLPT authorities are strongly encouraged to consider
+        that, for the duration of a TLPT, test managers should not conduct supervisory
+        activities on the same financial entity undergoing a TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-9
+      assessable: false
+      depth: 1
+      ref_id: Recital 9
+      description: ' It is important, for consistency with the TIBER-EU framework,
+        that the TLPT authority closely follows the test in each of its stages. Considering
+        the nature of the test and the risks associated to it, it is fundamental that
+        the approach to be followed for each specific phase of the testing refers,
+        where relevant, to the role of the TLPT authority. In particular, the TLPT
+        authority should be consulted and should validate those assessments or decisions
+        of the financial entities that may, on the one hand, have an effect on the
+        effectiveness of the test and, on the other hand, have an impact on the risks
+        associated with the test. Examples of the fundamental steps on which a specific
+        involvement of the TLPT authority is necessary include the validation of certain
+        fundamental documentation of the test, the selection of threat intelligence
+        providers and testers and risk management measures. The involvement of the
+        TLPT authority, with particular reference to validations, should not result
+        in an excessive burden for the authorities and should therefore be limited
+        to those documentation and decisions directly affecting the positive outcome
+        of the TLPT. The involvement of the TLPT authority as described in this Regulation
+        is also necessary for the purposes of the issuance of the attestation pursuant
+        to Article 26(7) of Regulation (EU) 2022/2554. Through the active participation
+        to each phase of the testing the TLPT authorities may effectively assess compliance
+        of the financial entities with the relevant requirements.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-10
+      assessable: false
+      depth: 1
+      ref_id: Recital 10
+      description: The secrecy of a TLPT is of utmost importance to ensure that the
+        conditions of the test are realistic, therefore, testing should be covert,
+        and precautions should be taken in order to keep the TLPT confidential, including
+        the choice of codenames designed in such a way as not allowing the identification
+        of the TLPT by third parties. Should staff members responsible for the security
+        of the financial team be aware of a planned or ongoing TLPT, it is likely
+        that they would be more observant and alert than during normal working conditions,
+        thereby resulting in an altered outcome of the test. Therefore, staff members
+        of the financial entity outside of the control team should be made aware of
+        any planned or ongoing TLPT only in presence of cogent reasons and subject
+        to prior agreement of the test managers. This may for example be to ensure
+        the secrecy of the test in case a blue team member has detected the test.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-11
+      assessable: false
+      depth: 1
+      ref_id: Recital 11
+      description: "As evidenced through the experience gathered in the TIBER-EU framework\
+        \ with respect to the \u2018white team\u2019, the selection of an adequate\
+        \ control team lead (CTL) is indispensable for the safe conduct of a TLPT.\
+        \ The CTL should have the necessary mandate within the financial entity to\
+        \ guide all the aspects of the test, without compromising the confidentiality\
+        \ of the test. Aspects such as deep knowledge of the financial entity, the\
+        \ CTL\u2019s job role and strategic positioning, seniority and access to the\
+        \ management board should be considered for the purposes of the appointment.\
+        \ The control team should be as small as possible in order to reduce the risk\
+        \ of compromising the TLPT."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-12
+      assessable: false
+      depth: 1
+      ref_id: Recital 12
+      description: "There are inherent elements of risks associated with TLPT as critical\
+        \ functions are tested in live production environment, with the possibility\
+        \ of causing denial-of- service incidents, unexpected system crashes, damages\
+        \ to critical live production systems, or the loss, modification, or disclosure\
+        \ of data, highlights the need for robust risk management measures. Hence,\
+        \ it is very important that financial entities are at all points aware of\
+        \ the particular risks that arise in a TLPT and that these are mitigated,\
+        \ to ensure the TLPT is conducted in a controlled manner all along the test.\
+        \ In that respect, without prejudice to the internal processes of the financial\
+        \ entity and the responsibility and delegations already provided to the control\
+        \ team lead,information or, in particular cases, approval of the TLPT risk\
+        \ management measures by the financial entity\u2019s management body itself\
+        \ may be appropriate. It is also essential that the testers and threat intelligence\
+        \ providers have the highest level of skills and expertise and an appropriate\
+        \ experience in threat intelligence and TLPT in the financial services industry\
+        \ to be able to deliver effective and most qualified professional services\
+        \ and to reduce the abovementioned risks."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-13
+      assessable: false
+      depth: 1
+      ref_id: Recital 13
+      description: Intelligence-led red team tests differ from conventional penetration
+        tests, which provide a detailed and useful assessment of technical and configuration
+        vulnerabilities often of a single system or environment in isolation, but
+        contrary to the former, do not assess the full scenario of a targeted attack
+        against an entire entity, including the complete scope of its people, processes
+        and technologies. During the selection process, financial entities should
+        ensure that testers possess the requisite skills to perform intelligence-led
+        red team tests, and not only penetration tests. This Regulation establishes
+        comprehensive criteria for testers, both internal and external, and threat
+        intelligence providers, always external. In case the threat intelligence provider
+        and the external testers are part of the same company, the staff assigned
+        to the test should be adequately separated. Acknowledging the evolving state
+        of this market, there may be exceptional circumstances where financial entities
+        are unable to secure suitable providers who meet these standards. Therefore,
+        financial entities, upon evidencing the unavailability of fully compliant
+        and suitable providers, should be permitted to engage those who do not satisfy
+        all criteria, conditional upon the proper mitigation of any resultant additional
+        risks and to an assessment of all these elements by TLPT authority.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-14
+      assessable: false
+      depth: 1
+      ref_id: Recital 14
+      description: When several financial entities and several TLPT authorities are
+        involved in a TLPT, the roles of all parties in the TLPT process should be
+        specified to conduct the most efficient and safe test. For the purposes of
+        pooled testing, specific requirements are necessary to specify the role of
+        the designated financial entity, and namely that it should be in charge of
+        providing all necessary documentation to the lead TLPT authority and monitoring
+        the test process. The designated financial entity should also be in charge
+        of the common aspects of the risk management assessment. Notwithstanding the
+        role of the designated financial entity, the obligations of each financial
+        entity participating to the pooled TLPT process remain unaffected during the
+        pooled test. The same principle is valid for joint TLPTs.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-15
+      assessable: false
+      depth: 1
+      ref_id: Recital 15
+      description: 'As evidenced by the experience of the implementations of the TIBER-EU
+        framework, holding in-person or virtual meetings including all relevant stakeholders
+        (financial entities, authorities, testers and threat intelligence providers)
+        is the most efficient way to ensure the appropriate conduct of the test. Therefore
+        in-person and virtual meetings are strongly encouraged and should be held
+        at various steps of the process, and in particular: during the preparation
+        phase at the launch of the TLPT and to finalise on its scope; during the testing
+        phase, to finalise the threat intelligence report and the red team test plan
+        and for the weekly updates; and during the closure phase, for the purposes
+        of replaying testers and blue team actions, purple teaming and to exchange
+        feedback on the TLPT.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-16
+      assessable: false
+      depth: 1
+      ref_id: Recital 16
+      description: In order to ensure the smooth performance of the TLPT, the TLPT
+        authority should clearly present its expectations with respect to the test
+        to the financial entity. In that respect, the test managers should ensure
+        that an appropriate flow of information is established with the control team
+        within the financial entity, with the testers and threat intelligence providers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-17
+      assessable: false
+      depth: 1
+      ref_id: Recital 17
+      description: The financial entity should select the critical or important functions
+        that will be in scope of the TLPT based on various criteria relating to the
+        importance of the function for the financial entity itself and the financial
+        sector, at national and at Union level, not only in economic terms but also
+        considering for instance the symbolic or political status of the function.
+        If the testers and threat intelligence provider are not involved during the
+        scoping process, the control team should provide them with detailed information
+        on the agreed scoping, to facilitate a smooth transition to the phase of threat
+        intelligence gathering.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-18
+      assessable: false
+      depth: 1
+      ref_id: Recital 18
+      description: "The threat intelligence provider should collect intelligence or\
+        \ information that cover at least two key areas of interest: the targets,\
+        \ by identifying potential attack surfaces across the financial entity, and\
+        \ the threats, by identifying relevant threat actors and probable threat scenarios\
+        \ in order to provide the testers with the information needed to simulate\
+        \ a real-life and realistic attack on the financial entity\u2019s live systems\
+        \ underpinning its critical or important functions. In order to ensure that\
+        \ the threat intelligence provider considers the relevant threats for the\
+        \ financial entity, the threat intelligence provider should exchange on the\
+        \ draft threat intelligence report and on the draft red team test plan with\
+        \ the testers, the control team and the test managers. The threat intelligence\
+        \ provider may take into account a generic threat landscape provided by the\
+        \ TLPT authority for the financial sector of a member state, if applicable,\
+        \ as a baseline for the national threat landscape. Based on the TIBER-EU framework\
+        \ application, the threat intelligence gathering process is typically lasting\
+        \ approximately four weeks."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-19
+      assessable: false
+      depth: 1
+      ref_id: Recital 19
+      description: It is essential that, prior to the red team testing phase of the
+        TLPT, the testers receive detailed explanations on the targeted threat intelligence
+        report and analysis of possible threat scenarios from the threat intelligence
+        provider, to allow the tester to gain insight and further review the scope
+        specification document and target threat intelligence report to finalise the
+        red team test plan.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-20
+      assessable: false
+      depth: 1
+      ref_id: Recital 20
+      description: It is important that sufficient time be allocated to the active
+        red team testing phase to allow testers to conduct a realistic and comprehensive
+        test in which all attack phases are executed, and flags are reached. On the
+        basis of the experience gathered with the TIBER-EU framework, the time allocated
+        should be at least twelve weeks and be determined taking into account the
+        number of parties involved, the TLPT scope, the resources of the involved
+        financial entity or entities, any external requirements and the availability
+        of supporting information supplied by the financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-21
+      assessable: false
+      depth: 1
+      ref_id: Recital 21
+      description: "During the active red team testing phase, the testers should deploy\
+        \ a range of tactics, techniques and procedures (TTPs) to adequately test\
+        \ the live production systems of the financial entity. The TTPs should include,\
+        \ as appropriate, reconnaissance (i.e. collecting as much information as possible\
+        \ on a target), weaponization (i.e. analysing information on the infrastructure,\
+        \ facilities and employees and preparing for the operations specific to the\
+        \ target), delivery (i.e. the active launch of the full operation on the target),\
+        \ exploitation (i.e. where the testers\u2019 goal is to compromise the servers,\
+        \ networks of the financial entity and exploit its staff through social engineering),\
+        \ control and movement (i.e. attempts to move from the compromise systems\
+        \ to further vulnerable or high value ones) and actions on target (i.e. gaining\
+        \ further access to compromise systems and acquiring access to the previously\
+        \ agreed target information and data, as previously agreed in the red team\
+        \ test plan)."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-22
+      assessable: false
+      depth: 1
+      ref_id: Recital 22
+      description: "While carrying out a TLPT, testers should act considering the\
+        \ time available to perform the attack, resources and ethical and legal boundaries.\
+        \ Should the testers be unable to progress to the programmed next stage of\
+        \ the attack, occasional assistance should be provided by the control team,\
+        \ upon agreement of the TLPT authority, in the form of \u2018leg-ups\u2019\
+        . Leg-ups can broadly be categorized in information and access leg-ups and\
+        \ may for instance consist of the provision of access to ICT system or internal\
+        \ networks to continue with the test and focus on the following attack steps."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-23
+      assessable: false
+      depth: 1
+      ref_id: Recital 23
+      description: "During the active red teaming in the testing phase, purple teaming\
+        \ activities should be used as a last resort in exceptional circumstances\
+        \ and once all alternative options have been exhausted. In the context ofthis\
+        \ limited purple teaming exercise, the following methods can be used: \u201C\
+        catch-and-release\u201D, where testers attempt to continue the scenarios,\
+        \ get detected and then resume the testing again; \u201Cwar gaming\u201D,\
+        \ which allows for more complex scenarios to test strategic decision making;\
+        \ or \u201Ccollaborative proof-of-concept\u201D which allows testers and blue\
+        \ team members to jointly validate specific security measures, tools, or techniques\
+        \ in a controlled and cooperative environment."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-24
+      assessable: false
+      depth: 1
+      ref_id: Recital 24
+      description: The TLPT should be used as a learning experience to enhance the
+        digital operational resilience of financial entities. In that respect, the
+        blue team and testers should replay the attack and review the steps taken
+        in order to learn from the testing experience in collaboration with the testers.
+        For this purpose and to allow for adequate preparation, the red team test
+        report and the blue team test report should be made available to all parties
+        involved in the replay activities, prior to conducting any replay activities.
+        Additionally, a purple teaming exercise, in the closure phase, should be carried
+        out to maximize the learning experience. Methods that may be used for purple
+        teaming in the closure phase include discussions of alternative attack scenarios,
+        exploration on live systems of alternative scenarios or the re-exploration
+        of planned scenarios on live systems that the testers had been unable to complete
+        or execute during the testing phase.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-25
+      assessable: false
+      depth: 1
+      ref_id: Recital 25
+      description: To further facilitate the learning experience of all parties involved
+        in the TLPT, for the benefit of future tests and to further the digital operational
+        resilience of financial entities parties concerned should provide feedback
+        to each other on the overall process, and in particular identifying which
+        activities progressed well or could have been improved, which aspects of the
+        TLPT process worked well or could be improved.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-26
+      assessable: false
+      depth: 1
+      ref_id: Recital 26
+      description: Competent authorities referred to in Article 46 of Regulation (EU)
+        2022/2554 and TLPT authorities, where different, should work together to incorporate
+        advanced testing by means of TLPT into the existing supervisory processes.
+        In that respect it is appropriate that, especially, for the test summary report
+        and remediation plans, a close cooperation between test managers who were
+        involved in the TLPT and the responsible supervisors is established, in order
+        to share the correct understanding of the TLPT findings and of how they should
+        be interpreted.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-27
+      assessable: false
+      depth: 1
+      ref_id: Recital 27
+      description: Financial entities should ensure that, as required by Article 26(8),
+        first subparagraph, of Regulation (EU) 2022/2554, every three tests they contract
+        external testers. Where financial entities include in the team of testers
+        both internal and external testers, this should be considered as a TLPT performed
+        with internal testers for the purposes of Article 26(8), first subparagraph,
+        of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-28
+      assessable: false
+      depth: 1
+      ref_id: Recital 28
+      description: This Regulation is based on the draft regulatory technical standards
+        submitted to the Commission by the European Banking Authority, the European
+        Insurance and Occupational Pensions Authority, the European Securities and
+        Markets Authority (European Supervisory Authorities), in agreement with the
+        European Central Bank.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:recital-29
+      assessable: false
+      depth: 1
+      ref_id: Recital 29
+      description: The European Supervisory Authorities have conducted open public
+        consultations on the draft regulatory technical standards on which this Regulation
+        is based, analysed the potential related costs and benefits and requested
+        the advice of the Banking Stakeholder Group established in accordance with
+        Article 37 of Regulation (EU) No 1093/2010 of the European Parliament and
+        of the Council12 , the Insurance and Reinsurance Stakeholder Group and the
+        Occupational Pensions Stakeholder Group established in accordance with Article
+        37 of Regulation (EU) No 1094/2010 of the European Parliament and of the Council13
+        and the Securities and Markets Stakeholder Group established in accordance
+        with Article 37 of Regulation (EU) No 1095/2010 of the European Parliament
+        and of the Council14 ,
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node31
+      assessable: false
+      depth: 1
+      name: CHAPTER I
+      description: GENERAL PROVISIONS
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node31
+      ref_id: Article 1
+      description: Definitions
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-1
+      description: 'For the purposes of this Regulation, the following definitions
+        shall apply:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.1'
+      description: "\u2018control team\u2019 means the team composed of staff of the\
+        \ tested financial entity and, where relevant in consideration of the scope\
+        \ of the TLPT, staff of its third- party service providers and any other party,\
+        \ who manages the test."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.2'
+      description: "\u2018control team lead\u2019 means the staff member of the financial\
+        \ entity responsible for the conduct of all TLPT-related activities for the\
+        \ financial entity in the context of a given test;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.3'
+      description: "\u2018blue team\u2019 means the staff of the financial entity\
+        \ and, where relevant, staff of the financial entity\u2019s third-party service\
+        \ providers and any other party deemed relevant in consideration of the scope\
+        \ of the TLPT, of the financial entity\u2019s third- party service providers,\
+        \ that are defending a financial entity's use of network and information systems\
+        \ by maintaining its security posture against simulated or real attacks and\
+        \ that is not aware of the TLPT;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.4'
+      description: "\u2018blue team tasks\u2019 means tasks that are typically carried\
+        \ out by the blue team such as security operation centre (SOC), ICT infrastructure\
+        \ services, helpdesk services, incident management services at operational\
+        \ level;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.5'
+      description: "\u2018purple teaming\u2019 means a collaborative testing activity\
+        \ that involves both the testers and the blue team;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.6'
+      description: "\u2018TLPT authority\u2019 means:"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6.(a).a
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6
+      ref_id: 1.6.(a).a
+      description: (a) the single public authority in the financial sector designated
+        in accordance with Article 26(9) of Regulation (EU) 2022/2554, or
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6.(a).b
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6
+      ref_id: 1.6.(a).b
+      description: the authority in the financial sector to which the exercise of
+        some or all of the tasks in relation to TLPT is delegated in accordance with
+        Article 26(10) of Regulation (EU) 2022/2554, or
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6.(a).c
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.6
+      ref_id: 1.6.(a).c
+      description: the competent authority in accordance with Article 46 of Regulation
+        (EU) 2022/2554
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.7'
+      description: "\u2018TLPT Cyber Team\u2019 or \u2018TCT\u2019 means the staff\
+        \ within the TLPT authority(ies), that is responsible for TLPT-related matters;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.8
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.8'
+      description: "\u2018test managers\u2019 means staff designated to lead the activities\
+        \ of the TLPT authority for a specific TLPT to monitor compliance with the\
+        \ requirements of this Regulation;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.9
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.9'
+      description: "\u2018threat intelligence provider\u2019 means the expert(s),\
+        \ external to the financial entity and to ICT intra-group service providers\
+        \ if any, who collect and analyse targeted threat intelligence relevant for\
+        \ the financial entities in scope of a specific TLPT exercise and develop\
+        \ matching relevant and realistic threat scenarios;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.10
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.10'
+      description: "\u2018leg-up\u2019 means the assistance or information provided\
+        \ by the control team to the testers to allow the testers to continue the\
+        \ execution of an attack path where they are not able to advance on their\
+        \ own, and where no other reasonable alternative exists, including for insufficient\
+        \ time or resources in a given TLPT;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.11
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.11'
+      description: "\u2018attack path\u2019 means the route followed by testers during\
+        \ the active red team testing phase of the TLPT in order to reach the flags\
+        \ defined for that TLPT;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.12
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.12'
+      description: "\u2018flags\u2019 are key objectives in the ICT systems supporting\
+        \ critical or important functions of a financial entity that the testers try\
+        \ to achieve through the test;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.13
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.13'
+      description: "\u2018sensitive information\u2019 means information that can readily\
+        \ be leveraged to carry out attacks against the ICT systems of the financial\
+        \ entity, intellectual property, confidential business data and/or personal\
+        \ data that can directly or indirectly harm the financial entity and its ecosystem\
+        \ would it fall in the hands of malicious actors;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.14
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.14'
+      description: "\u2018pool\u2019 means all the financial entities participating\
+        \ in a pooled TLPT pursuant to Article 26(4) of Regulation (EU) 2022/2554;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.15
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.15'
+      description: "\u2018host Member State\u2019 means host Member State in accordance\
+        \ with applicable sectoral legislation;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:1.16
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node33
+      ref_id: '1.16'
+      description: "\u2018joint TLPT\u2019 means a TLPT, other than a pooled TLPT\
+        \ referred to in Article 26(4) of Regulation (EU) 2022/2554, involving several\
+        \ financial entities using the same ICT intra-group service provider, or belonging\
+        \ to the same group and using common ICT systems."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node53
+      assessable: false
+      depth: 1
+      name: CHAPTER II
+      description: CRITERIA TO IDENTIFY FINANCIAL ENTITIES REQUIRED TO PERFORM TLPT
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node53
+      ref_id: Article 2
+      description: Identification of financial entities required to perform TLPT
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-2
+      ref_id: '2.1'
+      description: 'TLPT authorities shall require all of the following financial
+        entities to perform TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.a
+      description: Credit institutions identified as global systemically important
+        institutions (G-SIIs) in accordance with Article 131 of Directive 2013/36/EU
+        of the European Parliament and of the Council 15 or as other systemically
+        important institutions (O-SIIs) or that are part of a G-SIIs or O-SIIs.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.b
+      description: Payment institutions, exceeding in each of the previous two financial
+        years EUR 150 billion of total value of payment transactions as defined in
+        point (5) of Article 4 of Directive (EU) 2015/2366 of the European Parliament
+        and of the Council16 .
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.c
+      description: Electronic money institutions, exceeding in each of the previous
+        two financial years EUR 150 billion of total value of payment transactions
+        as defined in point (5) of Article 4 of Directive (EU) 2015/2366 or EUR 40
+        billion of total value of the amount of outstanding electronic money.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.d
+      description: Central securities depositories;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.e
+      description: Central counterparties;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.f
+      description: 'Trading venues with an electronic trading system that meet at
+        least one of the following criteria:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f
+      ref_id: 2.1.f.i
+      description: 'the trading venue with the highest market share in terms of turnover
+        at national level in each of the preceding two financial years in one or more
+        of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node63
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.i
+      description: "\u2014transferable securities as defined in point (44)(a) of Article\
+        \ 4(1) of Directive 2014/65/EU of the European Parliament and of the Council17;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node64
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.i
+      description: "\u2014transferable securities as defined in point (44)(b) of Article\
+        \ 4(1) of Directive 2014/65/EU;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node65
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.i
+      description: "\u2014derivatives as defined in Article 2(1)(29) of Regulation\
+        \ (EU) No 600/2014 of the European Parliament and of the Council18;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node66
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.i
+      description: "\u2014structured finance products as defined in Article 2(1)(28)\
+        \ of Regulation (EU) No 600/2014 ;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node67
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node66
+      description: 'emission allowances as defined in point (11) of Section C of Annex
+        I to Directive 2014/65/EU; '
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f
+      ref_id: 2.1.f.ii
+      description: 'the trading venue whose market share in terms of turnover at Union
+        level exceeds 5% in each of the preceding two financial years in one or more
+        of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node69
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.ii
+      description: "\u2014transferable securities as defined in point (44)(a) of Article\
+        \ 4(1) of Directive 2014/65/EU19 ,"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node70
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.ii
+      description: "\u2014transferable securities as defined in point (44)(b) of Article\
+        \ 4(1) of directive Directive 2014/65/EU,"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node71
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.ii
+      description: "\u2014derivatives as defined in Article 2(1)(29) of Regulation\
+        \ (EU) No 600/2014,"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node72
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.f.ii
+      description: "\u2014structured finance products as defined in Article 2(1)(28)\
+        \ of Regulation (EU) No 600/2014;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node73
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node72
+      description: emission allowances as defined in point (11) of Section C of Annex
+        I to Directive 2014/65/EU;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node74
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      description: For the purposes of point (ii) of this point (f), where the trading
+        venue is part of a group using common ICT systems or the same ICT intra-group
+        service provider, the turnover of the securities and derivatives contracts
+        on all trading venues pertaining to the same group and established in the
+        Union shall be considered.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      ref_id: 2.1.g
+      description: ' Insurance and reinsurance undertakings that meet all the following
+        criteria:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g
+      ref_id: 2.1.g.i
+      description: gross written premium (GWP) exceeding EUR 1 500 000 000;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g
+      ref_id: 2.1.g.ii
+      description: ' technical provisions exceeding EUR 10 000 000 000;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1.g
+      ref_id: 2.1.g.iii
+      description: ' in case of life insurance undertakings, as referred to in Article
+        13, point (1), of Directive 2009/138/EC of the European Parliament and of
+        the Council20 , and of insurance undertakings pursuing both life and non-life
+        activities, total assets exceeding 3.5% of the sum of the total assets valuated
+        according to Article 75 of Directive 2009/138/EC of the insurance and reinsurance
+        undertakings established in the Member State.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node79
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.1
+      description: 'TLPT authorities shall create a subset of all insurance and reinsurance
+        undertakings by applying the criteria listed in the first subparagraph. Insurance
+        and reinsurance undertakings included in this subset shall be required to
+        perform TLPT where they also meet one or more of the following criteria:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node80
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node79
+      description: (i) gross written premium (GWP) exceeding EUR 3 000 000 000;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node81
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node79
+      description: (ii) technical provisions exceeding EUR 30 000 000 000;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node82
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node79
+      description: (iii)total assets exceeding 10% of the sum of the total assets
+        valuated according to Article 75 of Directive 2009/138/EC of the insurance
+        and reinsurance undertakings established in the Member State.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-2
+      ref_id: '2.2'
+      description: Financial entities referred to in points (a) to (g) of paragraph
+        1 shall not be required to carry out TLPT where the assessment of the criteria
+        listed in paragraph 4 indicates that the impact of the financial entity, financial
+        stability concerns relating to it or its ICT risk profile do not justify the
+        performance of the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-2
+      ref_id: '2.3'
+      description: Where more than one financial entity belonging to the same group
+        and using common ICT systems, or where more than one financial entity using
+        the same ICT intra-group service provider meet the criteria set out in points
+        (a) to (g) of paragraph 1, the TLPT authorities of these financial entities
+        shall decide if the requirement to perform TLPT on an individual basis is
+        relevant for these financial entities, in accordance with Article 14(2). Where
+        the TLPT authority of the parent undertaking of such group is different from
+        the TLPT authority(ies) of the financial entities referred to in the first
+        subparagraph, it shall be consulted.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-2
+      ref_id: '2.4'
+      description: 'TLPT authorities shall assess whether any financial entities other
+        than those referred to in paragraph 1 shall be required to perform TLPT, taking
+        into account their impact, systemic character and ICT risk profile, assessed
+        on the basis of all of the following criteria:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4
+      ref_id: 2.4.(a)
+      description: 'impact-related and systemic character related factors:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a).i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      ref_id: 2.4.(a).i
+      description: the size of the financial entity, determined taking into account
+        whether the financial entity provides financial services in the national or
+        Union market and by comparing the activities of the financial entity to those
+        of other financial entities providing similar services. Where possible, the
+        TLPT authority shall consider the market share position at national and EU
+        level, the range of activities offered by the financial entity and the market
+        share of the services provided or of the activities undertaken at national
+        and at Union level;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a).ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      ref_id: 2.4.(a).ii
+      description: the extent and nature of the interconnectedness of the financial
+        entity with other financial entities in the financial sector at national and
+        Union level;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a).iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      ref_id: 2.4.(a).iii
+      description: the criticality or importance of the services provided to the financial
+        sector;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a).iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      ref_id: 2.4.(a).iv
+      description: the substitutability of the services provided by the financial
+        entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a).v
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      ref_id: 2.4.(a).v
+      description: the complexity of the business model of the financial entity and
+        the related services and processes. Where possible, the TLPT authority shall
+        consider whether the financial entity operates more than one business models
+        and the interconnectedness of different business processes and the related
+        services;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a).vi
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(a)
+      ref_id: 2.4.(a).vi
+      description: whether the financial entity is part of a group of systemic character
+        at Union or national level in the financial sector and using common ICT systems;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4
+      ref_id: 2.4.(b)
+      description: 'ICT risk related factors:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).i
+      description: the risk profile of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).ii
+      description: the threat landscape of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).iii
+      description: the degree of dependence of critical or important functions or
+        their supporting functions of the financial entity on ICT systems and processes;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).iv
+      description: the complexity of the ICT architecture of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).v
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).v
+      description: the ICT services and functions supported by ICT third-party service
+        providers, the quantity and type of contractual arrangements with ICT third-party
+        service providers or ICT intra-group service providers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).vi
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).vi
+      description: outcomes of any supervisory reviews relevant for the assessment
+        of the ICT maturity of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).vii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).vii
+      description: the maturity of ICT business continuity plans and ICT response
+        and recovery plans;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).viii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).viii
+      description: "the maturity of the operational ICT security detection and mitigation\
+        \ measures including the ability to monitor the financial entity\u2019s ICT\
+        \ infrastructure on a permanent basis, to detect ICT-related events in real\
+        \ time, to analyse events, to respond to them in a timely and effective manner;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b).ix
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:2.4.(b)
+      ref_id: 2.4.(b).ix
+      description: whether the financial entity is part of a group active in the financial
+        sector at Union or national level and using common ICT systems.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node103
+      assessable: false
+      depth: 1
+      name: CHAPTER III
+      description: REQUIREMENTS REGARDING TEST SCOPE, TESTING METHODOLOGY AND RESULTS
+        OF TLPT
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node104
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node103
+      name: Section I
+      description: TESTING METHODOLOGY
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node104
+      ref_id: Article 3
+      description: TCT and TLPT Test Managers
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-3
+      ref_id: '3.1'
+      description: A TLPT authority shall assign the responsibility for coordinating
+        TLPT-related activities to a TCT. A TCT shall include test managers that are
+        assigned to oversee an individual TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-3
+      ref_id: '3.2'
+      description: For each test, a test manager and at least one alternate shall
+        be designated.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-3
+      ref_id: '3.3'
+      description: The test managers shall monitor and ensure that the requirements
+        laid out in this Regulation are complied with.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-3
+      ref_id: '3.4'
+      description: The contact details of the TCT shall be communicated to the financial
+        entity through the notification referred to in Article 8(1).
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-3
+      ref_id: '3.5'
+      description: The TLPT authority shall participate to all the phases of the TLPT
+        and shall endeavour to provide feedback, validations or approvals in a period
+        of time adequate to expediently carry out the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node104
+      ref_id: Article 4
+      description: Organisational arrangements for financial entities
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-4
+      ref_id: '4.1'
+      description: Financial entities shall appoint a control team lead who shall
+        be responsible for the day-to- day management of the TLPT and the decisions
+        and actions of the control team.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-4
+      ref_id: '4.2'
+      description: 'Financial entities shall establish organisational and procedural
+        measures ensuring that:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      ref_id: 4.2.a
+      description: access to information pertaining to any planned or ongoing TLPT
+        is limited on a need-to-know basis to the control team, the management body,
+        the testers, the threat intelligence provider and the TLPT authority;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      ref_id: 4.2.b
+      description: the control team consults the test managers prior to involving
+        any member of the blue team in a TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      ref_id: 4.2.c
+      description: the control team is informed of any detection of the TLPT by staff
+        members of the financial entity or of its third-party service providers, where
+        relevant, and the control team contains the escalation of the resulting incident
+        response, where needed;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      ref_id: 4.2.d
+      description: arrangements relating to the secrecy of the TLPT, applicable to
+        staff of the financial entity, to the staff of relevant ICT third party service
+        providers, to testers and to the threat intelligence provider are in place;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      ref_id: 4.2.e
+      description: the control team provides any information pertaining to the TLPT
+        to the test managers upon request;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:4.2
+      ref_id: 4.2.f
+      description: where possible, parties involved in the TLPT refer to it by code
+        name only.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node104
+      ref_id: Article 5
+      description: Risk management for TLPT
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-5
+      ref_id: '5.1'
+      description: During the preparation phase referred to in Article 8, the control
+        team shall conduct an assessment of the risks associated with the testing
+        of live production systems of critical or important functions of the financial
+        entity, including potential impacts on the financial sector, as well as on
+        financial stability at Union or national level, and shall review it throughout
+        the conduct of the test.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-5
+      ref_id: '5.2'
+      description: 'The control team shall take measures to manage the risks referred
+        to in paragraph 1 and in particular shall ensure that, for each TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.a
+      description: ' the threat intelligence provider and external testers provide
+        copies of certifications that are appropriate according to recognised market
+        standards for the performance of their activities;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.b
+      description: ' the threat intelligence provider and external tester are duly
+        and fully covered by relevant professional indemnity insurances, including
+        against risks of misconduct and negligence;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.c
+      description: the threat intelligence provider provides at least three references
+        from previous assignments in the context of penetration testing and red team
+        testing;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.d
+      description: the external testers provide at least five references from previous
+        assignments related to penetration testing and red team testing;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.e
+      description: 'the staff of the threat intelligence provider assigned to the
+        TLPT shall:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e
+      ref_id: 5.2.e.i
+      description: be composed of at least a manager with at least five years of experience
+        in threat intelligence as well as at least one additional member with at least
+        two years of experience in threat intelligence;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e
+      ref_id: 5.2.e.ii
+      description: display a broad range and appropriate level of professional knowledge
+        and skills including intelligence gathering tactics, techniques and procedures,
+        geopolitical, technical and sectorial knowledge as well as adequate communication
+        skills to clearly present and report on the result of the engagement.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e.iii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e
+      ref_id: 5.2.e.iii
+      description: have a combined participation in at least three previous assignments
+        in threat intelligence in the context of penetration testing and red team
+        testing;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e.iv
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e
+      ref_id: 5.2.e.iv
+      description: not simultaneously perform any blue team tasks or other services
+        that may present a conflict of interest with respect to the financial entity,
+        ICT third-party service provider or an ICT intra-group service provider involved
+        in TLPT to which they are assigned;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e.v
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.e
+      ref_id: 5.2.e.v
+      description: be separated from and not reporting to staff of the same provider
+        providing external testers for the same TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.f
+      description: 'for external testers, the staff of the red team assigned to the
+        TLPT shall:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f
+      ref_id: 5.2.f.i
+      description: be composed of at least a manager, with at least five years of
+        experience in penetration testing and red team testing as well as at least
+        two additional testers, each with penetration testing and red team testing
+        of at least two years;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f
+      ref_id: 5.2.f.ii
+      description: display a broad range and appropriate level of professional knowledge
+        and skills, including, knowledge about the business of the financial entity,
+        reconnaissance, risk management, exploit development, physical penetration,
+        social engineering, vulnerability analysis, as well as adequate communication
+        skills to clearly present and report on the result of the engagement;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f.iii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f
+      ref_id: 5.2.f.iii
+      description: have a combined participation in at least five previous assignments
+        related to penetration testing and red team testing.;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f.iv
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f
+      ref_id: 5.2.f.iv
+      description: not be employed by, nor provide services to, a provider that simultaneously
+        performs blue team tasks for a financial entity, ICT third- party service
+        provider or an ICT intra-group service provider involved in the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f.v
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.f
+      ref_id: 5.2.f.v
+      description: be separated from any staff of the same provider simultaneously
+        providing threat-intelligence services for the same TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.g
+      description: the testers and the threat intelligence provider shall carry out
+        restoration procedures at the end of testing, including secure deletion of
+        information related to passwords, credentials and other secret keys compromised
+        during the TLPT, secure communication to the financial entities of the accounts
+        compromised, secure collection, storage, management, and disposal of data
+        collected;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.h
+      description: ' in addition to the restoration procedures at the end of testing
+        as referred to in point (g), testers shall carry out the following restoration
+        procedures:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      ref_id: 5.2.h.i
+      description: command and control deactivation;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      ref_id: 5.2.h.ii
+      description: scope and date kill switch(es);
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h.iii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      ref_id: 5.2.h.iii
+      description: removal of backdoors and other malware;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h.iv
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      ref_id: 5.2.h.iv
+      description: potential breach notification;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h.v
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      ref_id: 5.2.h.v
+      description: procedures for future back-up restauration which may contain malware
+        or tools installed during the test;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h.vi
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.h
+      ref_id: 5.2.h.vi
+      description: monitoring of the blue team activities and information to the control
+        team of any possible detections; and
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2
+      ref_id: 5.2.i
+      description: 'testers and the threat intelligence provider are prohibited from
+        the following activities:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i
+      ref_id: 5.2.i.i
+      description: unauthorised destruction of equipment of the financial entity and
+        of its ICT third-party service providers, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i
+      ref_id: 5.2.i.ii
+      description: uncontrolled modification of information and ICT assets of the
+        financial entity and of its ICT third-party service providers, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i.iii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i
+      ref_id: 5.2.i.iii
+      description: intentionally compromising the continuity of critical or important
+        functions of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i.iv
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i
+      ref_id: 5.2.i.iv
+      description: unauthorised inclusion of out-of-scope systems;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i.v
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.2.i
+      ref_id: 5.2.i.v
+      description: unauthorised disclosure of test results.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-5
+      ref_id: '5.3'
+      description: The control team shall keep record of the documentation provided
+        by the testers and the threat intelligence providers to evidence compliance
+        with the points (a) to (f) above, including detailed curriculum vitae of the
+        staff of the external tester and of the threat intelligence provider employed
+        for the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node154
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-5
+      description: In exceptional circumstances, financial entities may contract external
+        testers and threat intelligence providers that are not meeting one or more
+        of the requirements listed in points (a) to (f) of paragraph 2, provided that
+        they adopt appropriate measures to mitigate the risks relating to the lack
+        of compliance with such points and record them.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-5
+      ref_id: '5.4'
+      description: 'In the performance of risk assessment and management, the control
+        team shall at least consider the following types of risks related to:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      ref_id: 5.4.a
+      description: granting access to threat intelligence provider and external testers,
+        where applicable, to sensitive information and confidential information on
+        the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      ref_id: 5.4.b
+      description: lack of compliance of the TLPT with Regulation (EU) 2022/2554 and
+        with this Regulation resulting in lack of the attestation referred to in Article
+        26(7) of Regulation (EU) 2022/2554, including where due to breaches of confidentiality
+        on the TLPT or to lack of ethical conduct;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      ref_id: 5.4.c
+      description: crisis and incident escalation;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      ref_id: 5.4.d
+      description: active red team phase, including risks related to interruption
+        of critical activities and corruption of data due to the activities of the
+        testers and potential impacts on third parties;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      ref_id: 5.4.e
+      description: blue team activity, including risks related to interruption of
+        critical activities and corruption of data due to the activities of the blue
+        team and potential impacts on third parties;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:5.4
+      ref_id: 5.4.f
+      description: incomplete restoration of systems affected by the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node104
+      ref_id: Article 6
+      description: Risk management for pooled and joint TLPTs
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-6
+      ref_id: '6.1'
+      description: In the case of a joint TLPT or a pooled TLPT, the control team
+        of each financial entity shall conduct its own risk assessment and establish
+        its own risk management measures.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:6.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-6
+      ref_id: '6.2'
+      description: The control team of the designated financial entity referred to
+        in Article 14(3)(b) or in Article 26(4) of Regulation (EU) 2022/2554 shall
+        consider, in conducting the risk assessment, aspects relating to the involvement
+        in the TLPT of multiple financial entities. The control teams of the involved
+        financial entities shall cooperate to identify potential joint risks
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node103
+      name: Section II
+      description: Testing Process
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      ref_id: Article 7
+      description: Specificities for pooled and joint TLPTs
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:7.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-7
+      ref_id: '7.1'
+      description: Unless otherwise decided by the lead TLPT authority, where several
+        financial entities, selected according to Article 14(2) or 14(4) are involved
+        in a TLPT, each financial entity shall follow each of the steps described
+        in Articles 8 to 13.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:7.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-7
+      ref_id: '7.2'
+      description: "Unless otherwise provided in this Regulation, where several TLPT\
+        \ authorities are involved in a joint TLPT or in a pooled TLPT, references\
+        \ in Articles 8 to 13 to the \u201CTLPT authority\u201D shall be understood\
+        \ as a reference to the lead TLPT authority for such pooled or joint TLPT,\
+        \ as referred to in Article 14(3) or 14(5)."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      ref_id: Article 8
+      description: Preparation phase
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.1'
+      description: 'The financial entity shall submit to the test managers within
+        three months from having received a notification from the TLPT authority that
+        a TLPT shall be carried out, all of the following TLPT initiation documents:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1
+      ref_id: 8.1.a
+      description: a project charter including a high-level project plan, containing
+        the information set out in Annex I;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1
+      ref_id: 8.1.b
+      description: the contact details of the control team lead;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1
+      ref_id: 8.1.c
+      description: ' information on intended use of internal or external testers or
+        both, where relevant as detailed in Article 13;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1
+      ref_id: 8.1.d
+      description: information on the communication channels to be used during the
+        TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.1
+      ref_id: 8.1.e
+      description: the code name for the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.2'
+      description: Where the documents referred to in points (a) to (e) of paragraph
+        1 are complete and ensure the suitability and effective performance of the
+        TLPT, the TLPT authority shall validate the TLPT initiation documents of the
+        financial entity and notify the latter thereof.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.3'
+      description: 'Following the validation of the TLPT initiation documents by the
+        TLPT authority, the financial entity shall set up a control team to support
+        the control team lead in its tasks of:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.a
+      description: defining communications channels and processes within the control
+        team, with the testers and the threat intelligence providers in all matters
+        related to the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.b
+      description: informing the management body of the financial entity about the
+        progress of the TLPT and the associated risks;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.c
+      description: taking decisions based on subject matter expertise throughout the
+        TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.d
+      description: executing the TLPT in compliance with the requirements set out
+        in this Regulation;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.e
+      description: selecting the threat intelligence provider for the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.f
+      description: selecting the external testers, the internal testers or both; and
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.3
+      ref_id: 8.3.g
+      description: preparing the scope specification document.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.4'
+      description: Where the TLPT authority considers that the initial composition
+        of the control team and any subsequent changes to it are adequate for the
+        performance of the tasks referred to in paragraph 3, the TLPT authority shall
+        validate the control team and notify the control team lead thereof.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.5'
+      description: The financial entity shall submit a scope specification document
+        containing all information set out in Annex II to the test managers within
+        six months from the receipt of the notification from the TLPT authority referred
+        to in paragraph 1. The scope specification document shall be approved by the
+        management body of the financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.6'
+      description: 'Financial entities shall consider the following criteria for the
+        inclusion of critical or important functions in the scope of the TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.a
+      description: the criticality or importance of the function and its possible
+        impact to the financial sector and on financial stability at national and
+        Union level;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.b
+      description: the importance of the function for the day-to-day business operations
+        of the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.c
+      description: the exchangeability of the function;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.d
+      description: the interconnectedness with other functions;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.e
+      description: the geographical location of the function;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.f
+      description: the sectoral dependence of other entities on the function;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.6
+      ref_id: 8.6.g
+      description: where available, threat intelligence concerning the function.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.7'
+      description: The control team shall share the initiation documents and the scope
+        specification document with the testers and threat intelligence providers
+        once these are contracted. The control team shall inform the testers and threat
+        intelligence providers about the testing process to be followed.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.8'
+      description: The financial entity shall ensure that the procurement or assignement
+        of testers and threat intelligence providers is completed prior to the initiation
+        of the testing phase.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.9'
+      description: Prior to the initiation of the testing phase, the control team
+        shall consult the test managers on the TLPT risk assessment and on the risk
+        management measures. The control team shall review the risk assessment or
+        the risk management measures where the TLPT authority assesses that they do
+        not adequately address the risks of the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.10'
+      description: The control team shall assess the compliance of threat intelligence
+        providers and testers they consider involving in the TLPT with the requirements
+        laid out in Article 27 of Regulation (EU) 2022/2554 and with Article 5(2)
+        of this Regulation and document the outcome of this assessment. The control
+        team shall select provider(s) in accordance with this assessment and its risk
+        management practices. Prior to contracting the selected threat intelligence
+        provider and external tester, the control team shall provide evidence of compliance
+        to the test managers. The control team shall not proceed with contracting
+        the selected threat intelligence provider and external testers where the TLPT
+        authority assesses that the selected threat intelligence providers and external
+        testers do not ensure compliance with, where appropriate, national security
+        legislations or Article 5(2), or when the financial entity does not comply
+        with Article 5(3), first subparagraph, or when the circumstances described
+        in Article 5(3), second subparagraph, are not met.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:8.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-8
+      ref_id: '8.11'
+      description: Where the scope specification document is complete and ensures
+        the performance of an appropriate and effective TLPT, the TLPT authority shall
+        inform the control team lead of its validation thereof.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      ref_id: Article 9
+      description: 'Testing phase: Threat intelligence'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      ref_id: '9.1'
+      description: Following approval of the scope specification document by the TLPT
+        authority, the threat intelligence provider shall analyse generic and sector-specific
+        threat intelligence relevant for the financial entity. The threat intelligence
+        provider shall identify cyber threats and existing or potential vulnerabilities
+        concerning the financial entity. Furthermore, the threat intelligence provider
+        shall gather information on, and analyse concrete, actionable and contextualized
+        target and threat intelligence concerning the financial entity, including
+        through consulting the control team and the test managers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      ref_id: '9.2'
+      description: The threat intelligence provider shall present the relevant threats
+        and targeted threat intelligence, and propose appropriate scenarios to the
+        control team, testers and test managers. The proposed scenarios shall differ
+        with reference to the identified threat actors and associated tactics, techniques
+        and procedures and shall target each and every critical or important functions
+        in the scope of the TLPT.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      ref_id: '9.3'
+      description: 'The control team lead shall select at least three scenarios to
+        conduct the TLPT, on the basis of all of the following elements:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3
+      ref_id: 9.3.a
+      description: the recommendation by the threat intelligence provider and the
+        threat-led nature of each scenario;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3
+      ref_id: 9.3.b
+      description: the input provided by the test managers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3
+      ref_id: 9.3.c
+      description: the feasibility of the proposed scenarios for execution, based
+        on the expert judgement of the testers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.3
+      ref_id: 9.3.d
+      description: the size, complexity and overall risk profile of the financial
+        entity and the nature, scale and complexity of its services, activities and
+        operations.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      ref_id: '9.4'
+      description: No more than one of the selected scenarios may be non-threat-led
+        and may be based on a forward looking and potentially fictive threat with
+        high predictive, anticipative, opportunistic or prospective value given the
+        anticipated developments of the threat landscape concerning the financial
+        entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node209
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      description: "For pooled TLPTs, without prejudice to the scenarios targeting\
+        \ directly the critical or important functions of the financial entities involved\
+        \ in the test, at least one scenario shall include the ICT third-party services\
+        \ provider\u2019s relevant underlying ICT systems, processes and technologies\
+        \ supporting the critical or important functions of the financial entities\
+        \ in scope."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node210
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      description: "Where the test is a joint TLPT involving an ICT intra-group service\
+        \ provider, without prejudice to the scenarios targeting directly the critical\
+        \ or important functions of the financial entities involved in the test, at\
+        \ least one scenario shall include the ICT intragroup services provider\u2019\
+        s relevant underlying ICT systems, processes and technologies supporting the\
+        \ critical or important functions of the financial entities in scope."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      ref_id: '9.5'
+      description: The threat intelligence provider shall provide the targeted threat
+        intelligence report to the control team, including the scenarios selected
+        according to paragraphs 2 to 4. The threat intelligence report shall include
+        the information set out in Annex III.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:9.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-9
+      ref_id: '9.6'
+      description: The control team shall submit the targeted threat intelligence
+        report to the test manager for approval. Where the targeted threat intelligence
+        report is complete and ensure the performance of an effective TLPT, the TLPT
+        authority shall inform the control team lead of its approval thereof.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      ref_id: Article 10
+      description: 'Testing phase: Red Team Test'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.1'
+      description: Following approval of the targeted threat intelligence report by
+        the TLPT authority, the testers shall prepare the red team test plan that
+        shall include the information set out in Annex IV. The testers shall use the
+        scope specification document and the targeted threat intelligence report as
+        a basis for producing the attack scenarios.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.2'
+      description: The testers shall consult the control team, the threat intelligence
+        provider and the test managers on the red team test plan, including the communication,
+        procedural and project management arrangement, the preparation and use-cases
+        for leg-up activation, and the reporting agreements to the control team and
+        test managers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.3'
+      description: The red team test plan shall be approved by the control team and
+        TLPT authority. Where the red team test plan is complete and ensure the performance
+        of an effective TLPT, the TLPT authority shall inform the control team lead
+        of its approval.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.4'
+      description: Upon approval of the red team test plan in accordance with paragraph
+        3, the testers shall carry out the TLPT during the active red team testing
+        phase.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.5'
+      description: The duration of the active red team testing phase shall be proportionate
+        to the TLPT scope, to the scale, activity, complexity and number of the financial
+        entities and ICT third-party or ICT intragroup service providers involved
+        in the TLPT, and in any case shall last for at least twelve weeks. Attack
+        scenarios may be executed in sequence or at the same time. The control team,
+        the threat intelligence provider, the testers and the test managers shall
+        agree on the end of the active red team testing phase.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.6'
+      description: Any changes to the red team test plan subsequent to its approval,
+        including to the timeline, scope, target systems or flags, shall be approved
+        by the control team lead and the test managers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.7'
+      description: During the entire active red team testing phase, testers shall
+        report at least weekly to the control team and test managers on the progress
+        made in the TLPT, and the threat intelligence provider shall remain available
+        for consultation and additional threat intelligence when requested by the
+        control team.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.8'
+      description: The control team shall timely provide leg-ups designed on the basis
+        of the red team test plan. Leg-ups may be added or adapted upon approval by
+        the control team and the test managers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.9'
+      description: In case of detection of the testing activities by any staff member
+        of the financial entity or of its ICT third-party service providers or ICT
+        intragroup service provider, where relevant, the control team, in consultation
+        with the testers and without prejudice to paragraph 10, shall propose and
+        submit measures allowing to continue the TLPT while ensuring its secrecy to
+        the test managers for validation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:10.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-10
+      ref_id: '10.10'
+      description: Under exceptional circumstances triggering risks of impact on data,
+        damage to assets, and disruption to critical or important functions, services
+        or operations of the financial entity itself, of its ICT third-party service
+        providers or ICT intragroup services providers, or disruptions to its counterparts
+        or to the financial sector, the control team lead may suspend the TLPT, or,
+        as a last resort, if the continuation of the TLPT is not otherwise possible
+        and subject to prior validation by the TLPT authority, continue the TLPT using
+        a limited purple teaming exercise. The duration of the limited purple teaming
+        exercise shall be counted for the purpose of the twelve week minimum duration
+        of the active red team testing phase.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      ref_id: Article 11
+      description: Closure phase
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.1'
+      description: Following the end of the active red team testing phase, the control
+        team lead shall inform the blue team that a TLPT took place.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.2'
+      description: Within four weeks from the end of the active red team testing phase,
+        the testers shall submit to the control team a red team test report containing
+        the information set out in Annex V.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.3'
+      description: Without undue delay, the control team shall provide the red team
+        test report to the blue team and test managers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node228
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      description: At the request of the test managers, the report referred to in
+        the first subparagraph of this paragraph shall not contain sensitive information.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.4'
+      description: Upon receipt of the red team test report, and no later than ten
+        weeks after the end of the active red team testing phase, the blue team shall
+        submit to the control team a blue team test report containing the information
+        set out in Annex VI. Without undue delay, the control team shall provide the
+        blue team test report to the testers and the test managers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node230
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      description: At the request of the test managers, the report referred to in
+        the first subparagraph of this paragraph shall not contain sensitive information.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.5'
+      description: No later than ten weeks after the end of the active red team testing
+        phase, the blue team and the testers shall carry out a replay of the offensive
+        and defensive actions performed during the TLPT. The control team shall also
+        conduct a purple teaming exercise on topics jointly identified by the blue
+        team and the testers, based on vulnerabilities identified during the test
+        and, where relevant, on issues that could not be tested during the active
+        red team testing phase.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.6'
+      description: After completion of the replay and purple teaming exercises, the
+        control team, the blue team, the testers and threat intelligence providers
+        shall provide feedback to each other on the TLPT process. The test managers
+        may provide feedback.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:11.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      ref_id: '11.7'
+      description: Once the TLPT authority has notified the control team lead that
+        it has assessed that the blue team test report and the red team test report
+        contain the information set out in Annex V and Annex VI, the financial entity
+        shall within eight weeks submit the report summarizing the relevant findings
+        of the TLPT referred to in Article 26(6) of Regulation (EU) 2022/2554, containing
+        the elements set out in Annex VII for approval.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node234
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-11
+      description: At the request of the TLPT authority, the report referred to in
+        the first subparagraph of this paragraph shall not contain sensitive information.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node165
+      ref_id: Article 12
+      description: Remediation plan
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-12
+      ref_id: '12.1'
+      description: "Within eight weeks from the notification referred to in Article\
+        \ 11(7), the financial entity shall provide the remediation plans referred\
+        \ to in Article 26(6) of Regulation (EU) 2022/2554 to the TLPT authority and,\
+        \ where different, to the financial entity\u2019s competent authority."
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-12
+      ref_id: '12.2'
+      description: 'The remediation plan referred in paragraph 1 shall include, for
+        each finding occurred in the framework of the TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2
+      ref_id: 12.2.a
+      description: a description of the identified shortcomings;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2
+      ref_id: 12.2.b
+      description: a description of the proposed remediation measures and of their
+        prioritisation and expected completion, including where relevant measure to
+        improve the identification, protection, detection and response capabilities;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2
+      ref_id: 12.2.c
+      description: ' a root cause analysis;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2
+      ref_id: 12.2.d
+      description: "the financial entity\u2019s staff or functions responsible for\
+        \ the implementation of the proposed remediation measures or improvements;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:12.2
+      ref_id: 12.2.e
+      description: ' the risks associated to not implementing the measures referred
+        to in point (b) and, where relevant, risks associated to the implementation
+        of such measures.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node243
+      assessable: false
+      depth: 1
+      name: CHAPTER IV
+      description: REQUIREMENTS AND STANDARDS GOVERNING THE USE OF INTERNAL TESTERS
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node243
+      ref_id: Article 13
+      description: Use of internal testers
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-13
+      ref_id: '13.1'
+      description: 'Financial entities shall establish all of the following arrangements
+        for the use of internal testers:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1
+      ref_id: 13.1.a
+      description: 'the definition and implementation of a policy for the management
+        of internal testers in a TLPT. Such policy shall:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a
+      ref_id: 13.1.a.i
+      description: include criteria to assess suitability, competence, potential conflicts
+        of interest of the internal testers and define management responsibilities
+        in the testing process. The policy shall be documented and periodically reviewed;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a.ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a
+      ref_id: 13.1.a.ii
+      description: provide that the internal testing team includes a test lead, and
+        at least two additional members. The policy shall require that all members
+        of the test team have been employed by the financial entity or by an ICT intra-group
+        service provider for the preceding 12 months;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a.iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.a
+      ref_id: 13.1.a.iii
+      description: include provisions on training on how to perform penetration testing
+        and red team testing of the internal testers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1
+      ref_id: 13.1.b
+      description: "measures to ensure that the use of internal testers to perform\
+        \ TLPT will not negatively impact the financial entity\u2019s general defensive\
+        \ or resilience capabilities regarding ICT-related incidents or significantly\
+        \ impact the availability of resources devoted to ICT-related tasks during\
+        \ a TLPT;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1
+      ref_id: 13.1.c
+      description: measures to ensure that internal testers have sufficient resources
+        and capabilities available to perform TLPT in accordance with this Regulation;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.1
+      ref_id: 13.1.d
+      description: when a TLPT authority approves the use of internal testers according
+        to Article 27(2)(a) of Regulation (EU) 2022/2554, the TLPT authority shall
+        consider the requirements laid down in Article 5(2) of this Regulation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-13
+      ref_id: '13.2'
+      description: 'When using internal testers, the financial entity shall ensure
+        that such use is mentioned in the following documents:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2
+      ref_id: 13.2.a
+      description: ' the test initiation documents referred to in Article 8;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2
+      ref_id: 13.2.b
+      description: the red team test report referred to in Article 11(2);
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.2
+      ref_id: 13.2.c
+      description: the report summarizing the relevant findings of the TLPT referred
+        to in Article 26(6) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:13.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-13
+      ref_id: '13.3'
+      description: For the purposes of this Regulation, testers employed by an ICT
+        intra-group service provider shall be considered as internal testers of the
+        financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node258
+      assessable: false
+      depth: 1
+      name: CHAPTER V
+      description: COOPERATION AND MUTUAL RECOGNITION AND FINAL PROVISIONS
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node258
+      ref_id: Article 14
+      description: Cooperation
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.1'
+      description: 'For the purposes of conducting a TLPT in relation to a financial
+        entity providing services in more than one Member State, including through
+        a branch, its TLPT authority shall:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1
+      ref_id: 14.1.a
+      description: determine which TLPT authorities in host Member States shall be
+        involved, taking into account whether one or more critical or important functions
+        are operated in, or shared across, host Member States;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1
+      ref_id: 14.1.b
+      description: inform the TLPT authorities identified according to point (a) of
+        the decision to carry out a TLPT test on the financial entity. Within 20 working
+        days from the receipt of the information on a future conduct of a TLPT, the
+        TLPT authorities of the host Member States may either express their interest
+        in following the TLPT as observers or assign a test manager to participate
+        in the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.1
+      ref_id: 14.1.c
+      description: unless otherwise agreed by the TLPT authorities, the TLPT authority
+        of the financial entity shall lead the TLPT. The lead TLPT authority shall
+        provide all TLPT authorities acting as observers in TLPT with the scope specification
+        document, the test summary report, remediation plan and attestation. The lead
+        TLPT authority shall coordinate all participating TLPT authorities throughout
+        the test and adopt all the decisions necessary to carry out the TLPT appropriately
+        and effectively. The lead TLPT authority may set a maximum number of participating
+        TLPT authorities, where the efficient conduct of the TLPT might otherwise
+        be compromised.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.2'
+      description: Where a financial entity uses the same ICT intra-group service
+        provider as financial entities established in other Member States, or belongs
+        to a group and uses ICT systems common to financial entities of the same group
+        established in other Member States, the TLPT authority of the financial entity
+        shall contact the TLPT authorities of the other financial entities using the
+        same ICT intra-group service provider or using the same ICT systems as part
+        of the group and assess with them the feasibility and suitability of conducting
+        a joint TLPT in their respect. A joint TLPT shall be preferred to an individual
+        TLPT where it may result in reduction of costs and resources for the financial
+        entities and for the TLPT authorities, provided that the soundness and efficacy
+        of the test is not prejudiced.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.3'
+      description: 'For the purposes of conducting a joint TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3
+      ref_id: 14.3.a
+      description: the TLPT authorities of the financial entities shall agree on which
+        financial entity shall be designated to conduct the TLPT, considering the
+        group structure and the efficiency of the test;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3
+      ref_id: 14.3.b
+      description: the TLPT authority of the financial entity designated in accordance
+        with point (a) shall lead the TLPT, unless otherwise agreed by the TLPT authorities
+        of the financial entities participating in the joint TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.3
+      ref_id: 14.3.c
+      description: ' the TLPT authorities of the financial entities other than the
+        designated financial entity to lead the joint TLPT may either express their
+        interest in following the TLPT as observers or assign a test manager for that
+        TLPT. The lead TLPT authority shall coordinate all TLPT authorities involved
+        in the joint TLPT and adopt all the decisions necessary to carry out the joint
+        TLPT in a sound and effective way.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.4'
+      description: Where a financial entity intends to conduct a pooled TLPT as referred
+        to in Article 26(4) of Regulation (EU) 2022/2554 possibly involving financial
+        entities established in other Member States, its TLPT authority shall contact
+        the TLPT authorities of the other financial entities and assess with them
+        the feasibility and suitability of conducting a pooled TLPT in their respect
+        in accordance with Article 26(4) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.5'
+      description: 'For the purposes of conducting a pooled TLPT as referred to in
+        Article 26(4) of Regulation (EU) 2022/2554:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5
+      ref_id: 14.5.a
+      description: the TLPT authorities of the financial entities shall agree on which
+        financial entity shall be designated to conduct the pooled TLPT, considering
+        the ICT services provided by the ICT third-party service provider to the financial
+        entities and the efficiency of the test;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5
+      ref_id: 14.5.b
+      description: the TLPT authority of the financial entity designated in accordance
+        with point (a) shall lead the TLPT, unless otherwise agreed by the TLPT authorities
+        of the financial entities participating in the pooled or joint TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.5
+      ref_id: 14.5.c
+      description: the TLPT authorities of the financial entities other than the designated
+        financial entity to lead the pooled TLPT may either express their interest
+        in following the TLPT as observers or assign a test manager to that TLPT.
+        The lead TLPT authority shall coordinate all TLPT authorities involved in
+        the pooled TLPT and adopt all the decisions necessary to carry out the pooled
+        TLPT in a sound and effective way.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.6'
+      description: Where, in relation to a financial entity required to perform a
+        TLPT, its TLPT authority differs from its competent authority as referred
+        to in Article 46 of Regulation (EU) 2022/2554, these authorities shall share
+        any relevant information in respect of all TLPT- related matters for the purposes
+        of carrying out the TLPT or to carry out their duties in accordance with Regulation
+        (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.7'
+      description: The attestation referred to in Article 26(7) of Regulation (EU)
+        2022/2554 shall at least mention the information set out in Annex VIII.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:14.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-14
+      ref_id: '14.8'
+      description: Where several TLPT authorities have been involved in a TLPT, the
+        attestation referred to in Article 26(7) of Regulation (EU) 2022/2554 shall
+        be provided by the lead TLPT authority.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node258
+      ref_id: Article 15
+      description: Entry into force and application
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node278
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-15
+      description: This Regulation shall enter into force on the twentieth day following
+        that of its publication in the Official Journal of the European Union.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node279
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:article-15
+      description: This Regulation shall be binding in its entirety and directly applicable
+        in all Member States.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-i
+      assessable: false
+      depth: 1
+      ref_id: ANNEX I
+      name: Content of the project charter
+      description: '( you will find a table in the official document) '
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node281
+      assessable: false
+      depth: 1
+      name: ANNEX II
+      description: Content of the scope specification document
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node281
+      ref_id: ANNEX II.1
+      description: The scope specification document shall include a list of all critical
+        or important functions identified by the financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node281
+      ref_id: ANNEX II.2
+      description: 'For each identified critical or important function, the following
+        information shall be included:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2
+      ref_id: ANNEX II.2.a
+      description: Where the critical or important function is not included in the
+        scope of the TLPT, the explanation of the reasons for which it is not included;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2
+      ref_id: ANNEX II.2.b
+      description: 'Where the critical or important function is included in the scope
+        of the TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.i
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b
+      ref_id: ANNEX II.2.b.i
+      description: the explanation of the reasons for its inclusion;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.ii
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b
+      ref_id: ANNEX II.2.b.ii
+      description: the identified ICT system(s) supporting this critical or important
+        function;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b
+      ref_id: ANNEX II.2.b.iii
+      description: 'for each identified ICT system:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii.1
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii
+      ref_id: ANNEX II.2.b.iii.1
+      description: whether it is outsourced and if so, the name of the ICT third party
+        service provider;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii.2
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii
+      ref_id: ANNEX II.2.b.iii.2
+      description: the jurisdictions in which the ICT system is used;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii.3
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-ii.2.b.iii
+      ref_id: ANNEX II.2.b.iii.3
+      description: a high-level description of preliminary flag(s), indicating which
+        security aspect of confidentiality, integrity, authenticity and/or availability
+        is covered by each flag.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node292
+      assessable: false
+      depth: 1
+      name: ANNEX III
+      description: Content of the targeted threat intelligence report
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node292
+      description: 'The targeted threat intelligence report shall include information
+        on all of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      ref_id: ANNEX III.1
+      description: 'Overall scope of the intelligence research including at least
+        the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1
+      ref_id: ANNEX III.1.a
+      description: critical or important functions in scope;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1
+      ref_id: ANNEX III.1.b
+      description: their geographical location;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1
+      ref_id: ANNEX III.1.c
+      description: official EU language in use;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1.d
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1
+      ref_id: ANNEX III.1.d
+      description: relevant ICT third party services providers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1.e
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.1
+      ref_id: ANNEX III.1.e
+      description: period of time over which the research is gathered.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      ref_id: ANNEX III.2
+      description: 'Overall assessment of what concrete actionable intelligence can
+        be found about the financial entity, such as:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.a
+      description: employee usernames and passwords;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.b
+      description: look-alike domains which can be mistaken for official domains of
+        the financial entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.c
+      description: 'technical reconnaissance: vulnerable and/or exploitable software,
+        systems and technologies;'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.d
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.d
+      description: information posted by employees on social media, related to the
+        financial entity, which might be used for the purposes of an attack;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.e
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.e
+      description: information for sale on the dark web;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.f
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.f
+      description: any other relevant information available on the internet or public
+        networks;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2.g
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.2
+      ref_id: ANNEX III.2.g
+      description: where relevant, physical targeting information, including ways
+        of access to the premises of the financial entity.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      ref_id: ANNEX III.3
+      description: 'Threat intelligence analysis considering the general threat landscape
+        and the particular situation of the financial entity, including, at least:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3
+      ref_id: ANNEX III.3.a
+      description: Geopolitical environment;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3
+      ref_id: ANNEX III.3.b
+      description: Economic environment;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.3
+      ref_id: ANNEX III.3.c
+      description: Technological trends and any other trends related to the activities
+        in the financial services sector;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      ref_id: ANNEX III.4
+      description: Threat profiles of the malicious actors (specific individual/group
+        or generic class) that may target the financial entity, including the systems
+        of the financial entity that malicious actors are most likely to compromise
+        or target, the possible motivation, intent and rationale for the potential
+        targeting and the possible modus operandi of the attackers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      ref_id: ANNEX III.5
+      description: 'Threat scenarios: At least three end-to-end threat scenarios for
+        the threat profiles identified in accordance with point 4 who exhibit the
+        highest threat severity scores. The threat scenarios shall describe the end-to-end
+        attack path and shall include, at least:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5
+      ref_id: ANNEX III.5.a
+      description: one scenario that includes but is not limited to compromised service
+        availability;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5
+      ref_id: ANNEX III.5.b
+      description: one scenario that includes but is not limited to compromised data
+        integrity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.5
+      ref_id: ANNEX III.5.c
+      description: one scenario that includes but is not limited to compromised information
+        confidentiality.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iii.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node293
+      ref_id: ANNEX III.6
+      description: ' Where relevant, description of the scenario referred to in Article
+        7(4).'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node318
+      assessable: false
+      depth: 1
+      name: ANNEX IV
+      description: Content of the red team test plan
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node318
+      description: 'The red team test plan shall include information on all of the
+        following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.i
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.i
+      description: communication channels and procedures;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.ii
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.ii
+      description: the tactics, techniques and procedures allowed and not-allowed
+        for use in the attack including ethical boundaries for social engineering,
+        and how the privacy of involved parties is being safeguarded;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iii
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.iii
+      description: risk management measures to be followed by the testers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.iv
+      description: 'a description for each scenario, including:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv.a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv
+      ref_id: ANNEX IV.iv.a
+      description: the simulated threat actor;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv.b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv
+      ref_id: ANNEX IV.iv.b
+      description: their intent, motivation and goals;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv.c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv
+      ref_id: ANNEX IV.iv.c
+      description: the target function(s) and the supporting ICT system or systems;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv.d
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv
+      ref_id: ANNEX IV.iv.d
+      description: the targeted confidentiality, integrity, availability and authenticity
+        aspects;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv.e
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.iv
+      ref_id: ANNEX IV.iv.e
+      description: flags;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.v
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.v
+      description: a detailed description of each expected attack path, including
+        pre-requisites and possible leg-ups to be provided by the control team, including
+        deadlines for their provision and potential usage;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.vi
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.vi
+      description: "scheduling of red teaming activities, including time planning\
+        \ for the execution of each scenario, at a minimum split according to the\
+        \ three phases a tester takes throughout the testing phase, respectively entering\
+        \ financial entities\u2019 ICT systems, moving through the ICT systems and\
+        \ ultimately executing actions on objectives and eventually extracting itself\
+        \ from the ICT systems (in, through and out phases);"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.vii
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.vii
+      description: "particularities of the financial entities\u2019 infrastructure\
+        \ to be considered during testing;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-iv.viii
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node319
+      ref_id: ANNEX IV.viii
+      description: if any, additional information or other resources necessary to
+        the testers for executing the scenarios.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node333
+      assessable: false
+      depth: 1
+      name: ANNEX V
+      description: Content of the red team test report
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node334
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node333
+      description: 'The red team test report shall include information on at least
+        all of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node334
+      ref_id: ANNEX V.(a)
+      description: 'Information on the performed attack, including:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).a
+      description: the targeted critical or important functions and identified ICT
+        systems, processes and technologies supporting the critical or important function,
+        as identified in the red team test plan;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).b
+      description: summary of each scenario;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).c
+      description: flags reached and not reached;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).d
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).d
+      description: attack paths followed successfully and unsuccessfully;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).e
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).e
+      description: tactics, techniques and procedures used successfully and unsuccessfully;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).f
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).f
+      description: deviations from the red team test plan, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a).g
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(a)
+      ref_id: ANNEX V.(a).g
+      description: leg-ups granted, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(b)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node334
+      ref_id: ANNEX V.(b)
+      description: All actions that the testers are aware of that were performed by
+        the blue team to reconstruct the attack and to mitigate its effects;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node334
+      ref_id: ANNEX V.(c)
+      description: 'discovered vulnerabilities and other findings, including:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c).a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c)
+      ref_id: ANNEX V.(c).a
+      description: vulnerability and other finding description including their criticality;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c).b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c)
+      ref_id: ANNEX V.(c).b
+      description: root cause analysis of successful attacks;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c).c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-v.(c)
+      ref_id: ANNEX V.(c).c
+      description: recommendations for remediation including indication of the remediation
+        priority.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node348
+      assessable: false
+      depth: 1
+      name: ANNEX VI
+      description: Content of the blue team test report
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node348
+      description: 'The blue team test report shall include information on at least
+        of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      ref_id: ANNEX VI.1
+      description: 'for each attack step described by the testers in the red team
+        test report:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.1.(a)
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.1
+      ref_id: ANNEX VI.1.(a)
+      description: list of detected attack actions;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.1.(b)
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.1
+      ref_id: ANNEX VI.1.(b)
+      description: log entries corresponding to these detections;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      ref_id: ANNEX VI.2
+      description: assessment of the findings and recommendations of the testers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      ref_id: ANNEX VI.3
+      description: evidence of the attack by the testers collected by the blue team;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      ref_id: ANNEX VI.4
+      description: blue team root cause analysis of successful attacks by the testers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      ref_id: ANNEX VI.5
+      description: list of lessons learned and identified potential for improvement;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vi.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node349
+      ref_id: ANNEX VI.6
+      description: list of topics to be addressed in purple teaming.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node358
+      assessable: false
+      depth: 1
+      name: ANNEX VII
+      description: 'Details of the report summarizing the relevant findings of the
+        TLPT referred to in
+
+        Article 26(6) of Regulation (EU) 2022/2554'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node358
+      description: 'The test summary report shall include information on at least
+        of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.a
+      description: the parties involved;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.b
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.b
+      description: the project plan;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.c
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.c
+      description: the validated scope, including the rationale behind the inclusion
+        or exclusion of critical or important functions and identified ICT systems,
+        processes and technologies supporting the critical or important functions
+        covered by the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.d
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.d
+      description: selected scenarios and any significant deviation from the targeted
+        threat intelligence report;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.e
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.e
+      description: "\_executed attack paths, and used tactics, techniques and procedures;"
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.f
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.f
+      description: captured and non-captured flags;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.g
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.g
+      description: deviations from the red team test plan, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.h
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.h
+      description: blue team detections, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.i
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.i
+      description: purple teaming in testing phase, where conducted and the related
+        conditions;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.j
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.j
+      description: leg-ups used, if any;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.k
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.k
+      description: risk management measures taken;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.l
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.l
+      description: identified vulnerabilities and other findings, including their
+        criticality;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.m
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.m
+      description: root cause analysis of successful attacks;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.n
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.n
+      description: high level plan for remediation, linking the vulnerabilities and
+        other findings, their root causes and remediation priority;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-vii.o
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node359
+      ref_id: ANNEX VII.o
+      description: lessons derived from feedback received.
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node375
+      assessable: false
+      depth: 1
+      name: ANNEX VIII
+      description: Details of the attestation of the TLPT
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node376
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node375
+      description: 'The attestation referred to in Article 26(7) of Regulation (EU)
+        2022/2554 shall include at least the following information:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node376
+      ref_id: ANNEX VIII.(a)
+      description: 'on the performed TLPT:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).a
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).a
+      description: the starting and end dates of the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).b
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).b
+      description: the critical or important functions in scope of the test;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).c
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).c
+      description: where relevant, information on critical or important functions
+        in scope of the test in relation to which the TLPT was not performed;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).d
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).d
+      description: where relevant, other financial entities that were involved in
+        the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).e
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).e
+      description: where relevant, the ICT third-party services providers that participated
+        in the TLPT;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).f
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).f
+      description: 'in respect of testers:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).f.i
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).f
+      ref_id: ANNEX VIII.(a).f.i
+      description: whether internal testers were used;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).f.ii
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).f
+      ref_id: ANNEX VIII.(a).f.ii
+      description: whether Article 5(3), second subparagraph, was used by the financial
+        entity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a).g
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(a)
+      ref_id: ANNEX VIII.(a).g
+      description: the duration, in calendar days, of the active red team testing
+        phase;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(b)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node376
+      ref_id: ANNEX VIII.(b)
+      description: where several TLPT authorities have been involved in the TLPT,
+        the other TLPT authorities, and in which capacity;
+    - urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:annex-viii.(c)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-threat-led-penetration-tests:node376
+      ref_id: ANNEX VIII.(c)
+      description: list of the documents examined by the TLPT authority for the purposes
+        of the attestation.
