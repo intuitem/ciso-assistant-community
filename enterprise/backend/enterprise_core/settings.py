@@ -17,8 +17,9 @@ import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR_ENTERPRISE = Path(__file__).resolve().parent.parent
+BASE_DIR = BASE_DIR_ENTERPRISE.parent.parent / "backend"
+
 load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -83,6 +84,8 @@ logger = structlog.getLogger(__name__)
 
 FEATURE_FLAGS = {}
 MODULE_PATHS = {}
+
+logger.info("Launchup CISO Assistant Enterprise")
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
@@ -380,3 +383,10 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+FEATURE_FLAGS["enterprise"] = os.environ.get("FF_ENTERPRISE", "false") == "true"
+MODULE_PATHS["serializers"] = ["enterprise_core.serializers"]
+
+logger.info(
+    "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
+)

@@ -142,9 +142,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'domains',
 		verboseName: 'Domain',
 		verboseNamePlural: 'Domains',
-		foreignKeyFields: [
-			{ field: 'parent_folder', urlModel: 'folders', urlParams: 'content_type=GL' }
-		],
+		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [{ field: 'folder', urlModel: 'projects' }]
 	},
 	projects: {

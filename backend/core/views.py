@@ -6,7 +6,7 @@ import tempfile
 import uuid
 import zipfile
 from datetime import datetime
-from typing import Any, Tuple, List
+from typing import Any, Tuple
 from uuid import UUID
 from datetime import date, timedelta
 
@@ -47,6 +47,8 @@ from core.utils import RoleCodename, UserGroupCodename
 from .models import *
 from .serializers import *
 
+from django.conf import settings
+
 User = get_user_model()
 
 
@@ -82,19 +84,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        base_name = self.model.__name__
-
-        if self.action in ["list", "retrieve"]:
-            serializer_name = f"{base_name}ReadSerializer"
-        elif self.action in ["create", "update", "partial_update"]:
-            serializer_name = f"{base_name}WriteSerializer"
-        else:
-            # Default to the parent class's implementation if action doesn't match
-            return super().get_serializer_class()
-
-        # Dynamically import the serializer module and get the serializer class
-        serializer_module = importlib.import_module(self.serializers_module)
-        serializer_class = getattr(serializer_module, serializer_name)
+        MODULE_PATHS = settings.MODULE_PATHS
+        serializer_factory = SerializerFactory(
+            "core.serializers", *MODULE_PATHS.get("serializers", [])
+        )
+        serializer_class = serializer_factory.get_serializer(
+            self.model.__name__, self.action
+        )
 
         return serializer_class
 
