@@ -1027,7 +1027,7 @@ class EndpointTestsQueries:
             ), "reference endpoint is not accessible"
 
             content = json.loads(reference.content)
-            if isinstance(content, str) :
+            if isinstance(content, str):
                 content = json.loads(content)
 
             for object in content["framework"][object_name.lower().replace(" ", "_")][
