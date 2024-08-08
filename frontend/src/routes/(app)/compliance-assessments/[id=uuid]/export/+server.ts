@@ -11,11 +11,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		(res) => res.json()
 	);
 
-	const res = await fetch(endpoint, {
-		headers: {
-			'Accept-Language': languageTag()
-		}
-	});
+	const res = await fetch(endpoint);
 	if (!res.ok) {
 		error(400, 'Error fetching the ZIP file');
 	}

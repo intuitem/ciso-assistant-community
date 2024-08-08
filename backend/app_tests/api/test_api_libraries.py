@@ -66,7 +66,6 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = lib_detail_response["framework"]
 
         # Asserts that the library is not already loaded
@@ -134,7 +133,6 @@ class TestLibrariesAuthenticated:
             )
         )
         lib_detail_response = lib_detail_response.content
-        lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = lib_detail_response["risk_matrix"][0]
 

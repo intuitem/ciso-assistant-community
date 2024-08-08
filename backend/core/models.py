@@ -9,6 +9,18 @@ import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
+from django.utils.translation import get_language
+from library.helpers import (
+    update_translations_in_object,
+    update_translations_as_string,
+    update_translations,
+)
+
+import os
+import json
+import yaml
+import re
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models, transaction
@@ -774,6 +786,9 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
+    def parse_json_translated(self):
+        return update_translations(self.json_definition, get_language())
+
     @property
     def grid(self) -> list:
         risk_matrix = self.parse_json()
@@ -811,7 +826,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations(self.json_definition, "fr")
+        return update_translations_as_string(self.json_definition, "fr")
 
     def __str__(self) -> str:
         return self.get_name_translated

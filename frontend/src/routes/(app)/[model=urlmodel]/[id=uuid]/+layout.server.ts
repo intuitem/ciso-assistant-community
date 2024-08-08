@@ -15,11 +15,7 @@ import { languageTag } from '$paraglide/runtime';
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${params.model}/${params.id}/`;
 
-	const res = await fetch(endpoint, {
-		headers: {
-			'Accept-Language': languageTag()
-		}
-	});
+	const res = await fetch(endpoint);
 	const data = await res.json();
 
 	type RelatedModel = {
