@@ -1109,11 +1109,10 @@ The following approach has been retained:
 erDiagram
 
     ASSET                 }o--o{ SOLUTION              : contains
-    ENTITY                }o--o{ DOMAIN                : owns
+    ENTITY                |o--o{ DOMAIN                : owns
     VULNERABILITY         }o--o{ SOLUTION              : affects
     SOLUTION              }o--o| ENTITY                : provided_by
-    CONTRACT              }o--o{ SOLUTION              : formalizes
-    CONTRACT              }o--o{ EVIDENCE              : has
+    APPLIED_CONTROL       }o--o{ SOLUTION              : secures
     ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
     ENTITY                }o--o{ PERSON                : employs
     ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
@@ -1136,22 +1135,12 @@ erDiagram
         asset       parent_asset
     }
 
-
     SOLUTION {
         string      name
         string      description
         string      solution_type
         string      ref_id
         string      version
-    }
-
-    CONTRACT {
-        string name
-        string description
-        entity client
-        entity provider
-        date   start_date
-        date   end_date
     }
 
     ENTITY_EVALUATION {
@@ -1178,7 +1167,6 @@ erDiagram
 
 ```mermaid
 erDiagram
-    DOMAIN          ||--o{ CONTRACT             : contains
     DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
     DOMAIN          ||--o{ SOLUTION             : contains
 ```
@@ -1201,3 +1189,4 @@ requirement_node - add the following fields:
 - no_result
 - question
 
+reference and applied controls - add the following category: contract
