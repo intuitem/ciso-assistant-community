@@ -1,13 +1,14 @@
-from rest_framework.response import Response
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import SSOSettings
-from .serializers import SSOSettingsReadSerializer, SSOSettingsWriteSerializer
-from rest_framework.decorators import action
-from allauth.socialaccount import providers
 from allauth.headless.base.views import APIView
 from allauth.headless.socialaccount.forms import RedirectToProviderForm
+from allauth.socialaccount import providers
 from allauth.socialaccount.providers.saml.views import render_authentication_error
+from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from structlog import get_logger
+
+from .models import SSOSettings
+from .serializers import SSOSettingsWriteSerializer
 
 logger = get_logger(__name__)
 

@@ -1,0 +1,155 @@
+urn: urn:intuitem:risk:library:risk-matrix-4x4-with-5-levels
+locale: en
+ref_id: risk-matrix-4x4-with-5-levels
+name: 4x4 risk matrix with 5 risk levels
+description: 4x4 risk matrix with 5 risk levels
+copyright: public domain
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: "Matrice 4x4 \xE0 5 niveaux de risque"
+    description: "Matrice 4x4 \xE0 5 niveaux de risque"
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:4x4-with-5-levels
+    ref_id: risk-matrix-4x4-with-5-levels
+    name: 4x4 risk matrix with 5 risk levels
+    description: 4x4 risk matrix with 5 risk levels
+    probability:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - minimal
+      description: null
+      translations:
+        fr:
+          name: 1 - minime
+          description: null
+    - id: 1
+      abbreviation: '2'
+      name: 2 - significant
+      description: null
+      translations:
+        fr:
+          name: 2 - significative
+          description: null
+    - id: 2
+      abbreviation: '3'
+      name: 3 - high
+      description: null
+      translations:
+        fr:
+          name: 3 - forte
+          description: null
+    - id: 3
+      abbreviation: '4'
+      name: 4 - maximal
+      description: null
+      translations:
+        fr:
+          name: 4 - maximale
+          description: null
+    impact:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - low
+      description: null
+      translations:
+        fr:
+          name: 1 - faible
+          description: null
+    - id: 1
+      abbreviation: '2'
+      name: 2 - limited
+      description: null
+      translations:
+        fr:
+          name: "2 - limit\xE9"
+          description: null
+    - id: 2
+      abbreviation: '3'
+      name: 3 - important
+      description: null
+      translations:
+        fr:
+          name: 3 - important
+          description: null
+    - id: 3
+      abbreviation: '4'
+      name: 4 - critical
+      description: null
+      translations:
+        fr:
+          name: 4 - critique
+          description: null
+    risk:
+    - id: 0
+      abbreviation: '1'
+      name: 1 - very low
+      description: 'The risk is acceptable as it stands '
+      translations:
+        fr:
+          name: "1 - tr\xE8s faible"
+          description: "Le risque est acceptable en l'\xE9tat"
+      hexcolor: '#92D050'
+    - id: 1
+      abbreviation: '2'
+      name: 2 - low
+      description: 'Risk is acceptable under control '
+      translations:
+        fr:
+          name: 2 - faible
+          description: "Le risque est acceptable sous contr\xF4le"
+      hexcolor: '#FFFF00'
+    - id: 2
+      abbreviation: '3'
+      name: 3 - medium
+      description: 'The risk is tolerable subject to a followed risk reduction plan '
+      translations:
+        fr:
+          name: 3 - moyen
+          description: "Le risque est tol\xE9rable sous r\xE9serve d'un plan de r\xE9\
+            duction des risques suivi"
+      hexcolor: '#FFA600'
+    - id: 3
+      abbreviation: '4'
+      name: 4 - high
+      description: 'The risk is tolerable over a short period of time and accompanied
+        by effective reduction measures '
+      translations:
+        fr:
+          name: "4 - \xE9lev\xE9"
+          description: "Le risque est tol\xE9rable sur une dur\xE9e courte et accompagn\xE9\
+            e de mesures de r\xE9duction effectives"
+      hexcolor: '#FF1A00'
+    - id: 4
+      abbreviation: '5'
+      name: 5 - very high
+      description: The risk is unacceptable
+      translations:
+        fr:
+          name: "5 - intol\xE9rable"
+          description: Le risque est inacceptable
+      hexcolor: '#000000'
+    grid:
+    - - 0
+      - 0
+      - 1
+      - 1
+    - - 0
+      - 1
+      - 2
+      - 2
+    - - 1
+      - 2
+      - 3
+      - 3
+    - - 1
+      - 2
+      - 3
+      - 4
+    translations:
+      fr:
+        name: "Matrice 4x4 \xE0 5 niveaux de risque"
+        description: "Matrice 4x4 \xE0 5 niveaux de risque"

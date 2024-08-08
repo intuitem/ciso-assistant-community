@@ -1,0 +1,225 @@
+urn: urn:intuitem:risk:library:gl-on-cost-and-losses
+locale: en
+ref_id: GL-on-costs-and-losses
+name: GL-on-costs-and-losses
+description: "Article 11(11) of Regulation 2022/2554 on digital operational resilience\
+  \ for the financial sector\n(DORA) mandates the European Supervisory Authorities\
+  \ (ESAs), to develop \u2018common guidelines on\nthe estimation of aggregated annual\
+  \ costs and losses caused by major ICT-related incidents\u2019. These\nGuidelines\
+  \ aim at harmonising the estimation by financial entities of their aggregated annual\
+  \ costs\nand losses caused by major information and communication technology (ICT)-related\
+  \ incidents\naccording to Article 11(10) DORA.\n\nHere is the link of the Second\
+  \ batch of policy products under DORA:\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+  \nHere is the link of the document :\nhttps://www.eiopa.europa.eu/document/download/d0d65117-2a8d-46db-bfe2-12acf9816bc9_en?filename=JC%202024-34%20-%20Final%20report%20GL%20on%20costs%20and%20losses.pdf"
+copyright: ESMA
+version: 1
+provider: ESMA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:gl-on-cost-and-losses
+    ref_id: GL-on-costs-and-losses
+    name: GL-on-costs-and-losses
+    description: "Article 11(11) of Regulation 2022/2554 on digital operational resilience\
+      \ for the financial sector (DORA) mandates the European Supervisory Authorities\
+      \ (ESAs), to develop \u2018common guidelines on the estimation of aggregated\
+      \ annual costs and losses caused by major ICT-related incidents\u2019. These\
+      \ Guidelines aim at harmonising the estimation by financial entities of their\
+      \ aggregated annual costs and losses caused by major information and communication\
+      \ technology (ICT)-related incidents according to Article 11(10) DORA.\n\nHere\
+      \ is the link of the Second batch of policy products under DORA:\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+      \nHere is the link of the document :\nhttps://www.eiopa.europa.eu/document/download/d0d65117-2a8d-46db-bfe2-12acf9816bc9_en?filename=JC%202024-34%20-%20Final%20report%20GL%20on%20costs%20and%20losses.pdf"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-i
+      assessable: false
+      depth: 1
+      ref_id: Title I
+      description: Subject matter, scope, addressees, and definitions
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-i
+      name: Subject matter and Scope of application
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:1.
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node3
+      ref_id: '1.'
+      description: These guidelines are aimed at fulfilling the mandate given to the
+        ESAs under Article 11(11) of Regulation (EU) 2022/25545, to develop common
+        guidelines on the estimation of aggregated annual costs and losses of major
+        ICT-related incidents referred to Article 11(10) of that Regulation. These
+        guidelines also specify a common template for the submission of the aggregated
+        annual costs and losses.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-i
+      name: Addressees
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:2.
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node5
+      ref_id: '2.'
+      description: These guidelines are addressed to competent authorities as defined
+        in Article 46 of Regulation 2022/2554 and to financial institutions as defined
+        in Article 4(1) of Regulation (EU) 1093/2010, Article 4(1) of Regulation (EU)
+        1094/2010 and Article 4(1) of Regulation (EU) 1095/2010 .
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-i
+      name: Definitions
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:3.
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node7
+      ref_id: '3.'
+      description: Terms used and defined in Regulation (EU) 2022/2554 have the same
+        meaning in these guidelines.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-ii
+      assessable: false
+      depth: 1
+      ref_id: Title II
+      description: Implementation
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-ii
+      name: Date of application
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:4.
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:node10
+      ref_id: '4.'
+      description: These Guidelines apply from [expected date of application 17 January
+        2025, or at the latest two months after the date of publication of the translations
+        of these Guidelines in all official EU languages].
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      assessable: false
+      depth: 1
+      ref_id: Title III
+      description: Provisions on the estimation of aggregated annual costs and losses
+        of major ICT-related incidents
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:5.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '5.'
+      description: Financial entities should estimate the aggregate annual costs and
+        losses of major ICT-related incidents by aggregating the costs and losses
+        for major ICT-related incidents that fall within the reference year for which
+        the competent authority requested the estimation. The financial entity may
+        choose whether the reference year should correspond to either the completed
+        calendar year, or to the completed accounting year of the financial entity
+        for which the financial entity has finalised its financial statements. Once
+        a financial entity has decided whether it will provide the estimation based
+        on the calendar year or its accounting year, such a decision should be applied
+        to future estimations of aggregated annual costs and losses. The financial
+        entity may change that decision by notifying the competent authority, and
+        provided that the competent authority does not object within two months of
+        receiving the notification. Financial entities should not include costs and
+        losses related to those incidents that fall before or after that reference
+        year.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:6.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '6.'
+      description: Financial entities should include in the estimation all ICT-related
+        incidents that, irrespective of the reason, were classified as major in accordance
+        with Commission Delegated Regulation [insert OJ given number once published
+        for RTS on incident classification] 6 on incident classification and
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:6.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:6.
+      ref_id: 6.a
+      description: for which the financial entity has submitted a final report in
+        accordance with Article 19(4)(c) Regulation (EU) 2022/2554 in the relevant
+        reference year, or
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:6.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:6.
+      ref_id: 6.b
+      description: any incident for which the financial entity submitted in previous
+        reference years a final report in accordance with Article 19(4)(c) of Regulation
+        (EU) 2022/2554 that had a quantifiable financial impact on the financial entity
+        in the relevant reference year.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '7.'
+      description: 'Financial entities should estimate the aggregated annual costs
+        and losses by applying the follow sequential steps:'
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.
+      ref_id: 7.a
+      description: estimate the costs and losses of each major ICT-related incident
+        as referred to in paragraph 6 individually. Those estimations should produce
+        the gross costs and losses taking into account the types of costs and losses
+        as set out in Article 7(1) and (2) of the Commission Delegated Regulation
+        [insert OJ given number once published for RTS on incident classification];
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.
+      ref_id: 7.b
+      description: for each major ICT-related incident, financial entities should
+        also estimate the financial recoveries as specified in Annex II to Commission
+        Implementing Regulation [insert OJ given number once published for ITS on
+        incident reporting]7;
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:7.
+      ref_id: 7.c
+      description: financial entities should aggregate the gross costs and losses
+        and the financial recoveries across major ICT-related incidents.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:8.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '8.'
+      description: As basis for the estimations, financial entities should refer to
+        the costs, losses and financial recoveries that are reflected in their financial
+        statements such as the profit and loss account, or where applicable in their
+        supervisory reporting, of the relevant reference year. In their estimation,
+        financial entities should also include accounting provisions that are reflected
+        in their financial statements such as the profit and loss account of the relevant
+        reference year. Where accurate data is not available, financial entities should
+        base their estimation on other available data and information to the extent
+        possible.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:9.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '9.'
+      description: ' Financial entities should include adjustments on the costs and
+        losses of an estimation that it submitted for a previous year in the estimation
+        of the relevant reference year in which the adjustments are made.'
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:10.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '10.'
+      description: Financial entities should include in the report of their estimation
+        of the aggregated annual costs and losses also the breakdown of gross costs
+        and losses and of financial recoveries for each major ICT-related incident
+        that were included in the aggregation.
+    - urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:11.
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:gl-on-cost-and-losses:title-iii
+      ref_id: '11.'
+      description: Financial entities should use the template in the Annex to submit
+        to the competent authority the estimation of their aggregated annual costs
+        and losses for the reference year. For each item under paragraph 6 and 9 that
+        is included in the estimation of the reference year, financial entities should
+        use the same incident reference codes provided by the financial entity as
+        the ones used in the final report in accordance with Article 19(4)(c) of Regulation
+        (EU) 2022/2554.

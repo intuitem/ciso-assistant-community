@@ -4,9 +4,13 @@ ref_id: doc-pol
 name: Documents and policies
 description: Typical documents and policies recommended by intuitem
 copyright: "\xA9 intuitem - 2024"
-version: 1
+version: 2
 provider: intuitem
 packager: intuitem
+translations:
+  fr:
+    name: Documents et politiques
+    description: "Documents et politiques typiques recommand\xE9s par intuitem"
 objects:
   reference_controls:
   - urn: urn:intuitem:risk:function:doc-pol:doc.overview
@@ -25,6 +29,11 @@ objects:
     annotation: '5.1.a
 
       5.1.c'
+    translations:
+      fr:
+        name: "Pr\xE9sentation de l\u2019organisation"
+        description: "Objectifs organisationnels\nOrganigramme\nObjectifs de l\u2019\
+          ISMS\nResponsabilit\xE9s du RSSI\nExamen de la direction du SMSI"
   - urn: urn:intuitem:risk:function:doc-pol:doc.context
     ref_id: DOC.CONTEXT
     name: Context of organization document
@@ -41,6 +50,11 @@ objects:
       A.5.6
 
       A.5.5'
+    translations:
+      fr:
+        name: Contexte de l'organisation
+        description: "Parties prenantes\nAutorit\xE9s\nGroupes d\u2019int\xE9r\xEA\
+          ts"
   - urn: urn:intuitem:risk:function:doc-pol:doc.scope
     ref_id: DOC.SCOPE
     name: ISMS Scope document
@@ -65,6 +79,14 @@ objects:
 
       Scope statement'
     annotation: '4.3'
+    translations:
+      fr:
+        name: "P\xE9rim\xE8tre du SMSI"
+        description: "Produits et services\nProduits et services n\xE9cessitant une\
+          \ certification\nLocaux\nVue de l\u2019organisation\nVue de l\u2019architecture\
+          \ d\u2019entreprise\nVue de l\u2019architecture des donn\xE9es\nVue de l\u2019\
+          architecture d\u2019application\nVue de l\u2019architecture technologique\n\
+          Vue r\xE9seau\n\xC9nonc\xE9 du champ d\u2019application"
   - urn: urn:intuitem:risk:function:doc-pol:doc.legal
     ref_id: DOC.LEGAL
     name: legal register
@@ -79,15 +101,29 @@ objects:
       A.6.5
 
       A.6.6'
+    translations:
+      fr:
+        name: "Registre l\xE9gal"
+        description: "Exigences l\xE9gales \nExigences l\xE9gales \nExigences r\xE9\
+          glementaires \nExigences contractuelles \nDroits de propri\xE9t\xE9 intellectuelle\n\
+          Contrats de travail\nNDA"
   - urn: urn:intuitem:risk:function:doc-pol:doc.soa
     ref_id: DOC.SOA
     name: Statement of Applicabilty document
     category: process
+    translations:
+      fr:
+        name: "D\xE9claration d'applicabilit\xE9"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.controls
     ref_id: DOC.CONTROLS
     name: Controls accountability matrix
     category: process
     annotation: 5.1.c
+    translations:
+      fr:
+        name: "Matrice de responsabilit\xE9 des mesures"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.audit_plan
     ref_id: DOC.AUDIT_PLAN
     name: Audit plan document
@@ -114,21 +150,40 @@ objects:
 
       Technological controls'
     annotation: 5.1.e
+    translations:
+      fr:
+        name: Plan d'audit
+        description: "Contexte de l\u2019organisation\nLeadership\nPlanification\n\
+          Soutien\nOp\xE9ration\n\xC9valuation des performances\nAm\xE9lioration\n\
+          Contr\xF4les organisationnels\nContr\xF4les du personnel\nContr\xF4les physiques\n\
+          Contr\xF4les technologiques"
   - urn: urn:intuitem:risk:function:doc-pol:doc.competency
     ref_id: DOC.COMPETENCY
     name: Competency matrix
     category: process
     annotation: 5.1.f
+    translations:
+      fr:
+        name: "Matrice de comp\xE9tence"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.raci
     ref_id: DOC.RACI
     name: Responsibility matrix
     category: process
     description: RACI for ISMS
+    translations:
+      fr:
+        name: "Matrice de responsabilit\xE9"
+        description: RACI du SMSI
   - urn: urn:intuitem:risk:function:doc-pol:doc.com
     ref_id: DOC.COM
     name: Communication plan document
     category: process
     annotation: '7.4'
+    translations:
+      fr:
+        name: Plan de communication
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.risk_register
     ref_id: DOC.RISK_REGISTER
     name: Risk register
@@ -147,14 +202,24 @@ objects:
 
       Treatment option
 
-      Mitigations - recommended controls'
+      Mitigations - recommended security measures'
     annotation: "6.1\n6.1.2.c.2 \n6.1.2.d.1 \n6.1.2.d.2\n6.1.2.d.3 \n6.1.2.e.1 \n\
       6.1.2.e.2 \n6.1.3.a \n6.1.3.b "
+    translations:
+      fr:
+        name: Registre des risques
+        description: "Propri\xE9taire du risque\nImpact\nVraisemblance\nNiveau de\
+          \ risque\n\xC9valuation\nPriorit\xE9\nOption de traitement\nMesures d\u2019\
+          att\xE9nuation - mesures de s\xE9curit\xE9 recommand\xE9es"
   - urn: urn:intuitem:risk:function:doc-pol:doc.so_register
     ref_id: DOC.SO_REGISTER
     name: Security objectives register
     category: process
     annotation: '6.2'
+    translations:
+      fr:
+        name: "registre des objectifs de s\xE9curit\xE9"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.mgmt_review
     ref_id: DOC.MGMT_REVIEW
     name: Management review plan document
@@ -169,11 +234,21 @@ objects:
 
       Review of non-conformities'
     annotation: "9.3\n6.1.1.e.1 \n6.2.e"
+    translations:
+      fr:
+        name: Plan de la revue de management
+        description: "Examen des risques\nExamen des objectifs de s\xE9curit\xE9\n\
+          Examen des incidents de s\xE9curit\xE9\nExamen de la gestion des vuln\xE9\
+          rabilit\xE9s\nExamen des non-conformit\xE9s"
   - urn: urn:intuitem:risk:function:doc-pol:doc.educ_register
     ref_id: DOC.EDUC_REGISTER
     name: Training and awareness register
     category: process
     annotation: '7.2'
+    translations:
+      fr:
+        name: Registre de formation et sensibilisation
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.doc_register
     ref_id: DOC.DOC_REGISTER
     name: Document register
@@ -186,6 +261,11 @@ objects:
 
       Continual improvement'
     annotation: '7.5'
+    translations:
+      fr:
+        name: Registre des documents
+        description: "R\xE8gles d\u2019\xE9dition et de maintenance\nContr\xF4le de\
+          \ version\nRegistre\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:doc.proc_register
     ref_id: DOC.PROC_REGISTER
     name: Operational procedures register
@@ -218,6 +298,14 @@ objects:
       A.7.1
 
       A.8.2'
+    translations:
+      fr:
+        name: "Registre des proc\xE9dures op\xE9rationnelles"
+        description: "Processus de gestion des risques\nProc\xE9dure de gestion des\
+          \ incidents\nProc\xE9dure de gestion des probl\xE8mes\nProc\xE9dure de gestion\
+          \ des vuln\xE9rabilit\xE9s\nProc\xE9dures RH\nProc\xE9dure de gestion du\
+          \ changement\nProc\xE9dure d\u2019externalisation\nProc\xE9dures de s\xE9\
+          curit\xE9 physique\nProc\xE9dure d\u2019acc\xE8s privil\xE9gi\xE9"
   - urn: urn:intuitem:risk:function:doc-pol:doc.nc_log
     ref_id: DOC.NC_LOG
     name: Log of non-conformities
@@ -225,21 +313,38 @@ objects:
     description: "List of non-conformities (incident, problems, \u2026)\nCorrective\
       \ action taken"
     annotation: '10.1'
+    translations:
+      fr:
+        name: "Registre des non-conformit\xE9s"
+        description: "Liste des non-conformit\xE9s (incident, probl\xE8mes, ...)\n\
+          Mesures correctives prises"
   - urn: urn:intuitem:risk:function:doc-pol:doc.internal_rules
     ref_id: DOC.INTERNAL_RULES
     name: Rules of procedure document
     category: process
     annotation: A.5.4, A.6.2
+    translations:
+      fr:
+        name: "R\xE8glement int\xE9rieur"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.asset_register
     ref_id: DOC.ASSET_REGISTER
     name: Registry of assets
     category: process
     annotation: A.5.9
+    translations:
+      fr:
+        name: Registre des biens
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.supplier_register
     ref_id: DOC.SUPPLIER_REGISTER
     name: Registry of suppliers
     category: process
     description: Risk management
+    translations:
+      fr:
+        name: Registre des fournisseurs
+        description: Gestion des risques
   - urn: urn:intuitem:risk:function:doc-pol:pol.main
     ref_id: POL.MAIN
     name: Main policy
@@ -262,6 +367,12 @@ objects:
       9.3.1
 
       5.1.g'
+    translations:
+      fr:
+        name: Politique principale
+        description: "Objectifs de s\xE9curit\xE9 de l\u2019information\nengagement\n\
+          Revue de direction\nPolitiques applicables\nGestion des non-conformit\xE9\
+          s\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.educ
     ref_id: POL.EDUC
     name: Information security awareness and traning policy
@@ -276,6 +387,12 @@ objects:
       A.6.8
 
       5.1.g'
+    translations:
+      fr:
+        name: "Politique de sensibilisation et de formation \xE0 la s\xE9curit\xE9\
+          \ de l\u2019information"
+        description: "cons\xE9quences du non-respect\nRapports sur les \xE9v\xE9nements\
+          \ de s\xE9curit\xE9\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.work
     ref_id: POL.WORK
     name: Workstations and teleworking policy
@@ -298,6 +415,11 @@ objects:
       A.5.11
 
       5.1.g'
+    translations:
+      fr:
+        name: "Politique des postes de travail et de t\xE9l\xE9travail"
+        description: "Postes\nAppareils mobiles\nT\xE9l\xE9travail\nGestion des mots\
+          \ de passe\nRestitution des avoirs\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.crypto
     ref_id: POL.CRYPTO
     name: Cryptographic policy
@@ -308,6 +430,10 @@ objects:
 
       Continual improvement'
     annotation: 5.1.g
+    translations:
+      fr:
+        name: Politique cryptographique
+        description: "Gestion des cl\xE9s\nChiffrement\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.classif
     ref_id: POL.CLASSIF
     name: Information classification and handling policy
@@ -338,20 +464,39 @@ objects:
       A.8.33
 
       5.1.g'
+    translations:
+      fr:
+        name: "Politique de classification et de traitement de l\u2019information"
+        description: "classification\nProtection et traitement des informations\n\
+          Conservation et traitement des PII\nbureau d\xE9gag\xE9\n\xE9cran clair\n\
+          Protection des registres\nR\xE8gles de conservation\nUtilisation des informations\
+          \ de test\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.audit
     ref_id: POL.AUDIT
     name: Internal and external audit policy
     category: policy
     description: Protection of audit information
     annotation: A.8.34
+    translations:
+      fr:
+        name: "Politique d\u2019audit interne et externe"
+        description: "Protection des informations d\u2019audit"
   - urn: urn:intuitem:risk:function:doc-pol:pol.bcp
     ref_id: POL.BCP
     name: Business continuity policy
     category: policy
+    translations:
+      fr:
+        name: "Politique de continuit\xE9 d\u2019activit\xE9"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.seg_duty
     ref_id: POL.SEG_DUTY
     name: Segregation of duties policy
     category: policy
+    translations:
+      fr:
+        name: "Politique sur la s\xE9paration des t\xE2ches"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.access
     ref_id: POL.ACCESS
     name: Access control policy
@@ -382,6 +527,13 @@ objects:
     annotation: 'A.5.15
 
       5.1.g'
+    translations:
+      fr:
+        name: "Politique de contr\xF4le d\u2019acc\xE8s"
+        description: "Identification\nauthentification\nGestion des mots de passe\n\
+          RBAC\nR\xE9vision des droits d\u2019acc\xE8s\nFourniture\nSortants\nAcc\xE8\
+          s \xE0 distance\nGestion des acc\xE8s \xE0 privil\xE8ges\nAcc\xE8s par des\
+          \ tiers\nSurveillance et rapports\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.malware
     ref_id: POL.MALWARE
     name: Malware protection policy
@@ -389,6 +541,12 @@ objects:
     description: 'antivirus
 
       EDR'
+    translations:
+      fr:
+        name: Politique de protection contre les logiciels malveillants
+        description: 'antivirus
+
+          EDR'
   - urn: urn:intuitem:risk:function:doc-pol:pol.risk
     ref_id: POL.RISK
     name: Risk management policy
@@ -422,34 +580,68 @@ objects:
       Continual improvement'
     annotation: "6.1.2.a.1 \n6.1.2.a.2 \n6.1.2.b \n6.1.2.c.1 \n6.1.3.c \nA.5.18\n\
       5.1.g"
+    translations:
+      fr:
+        name: Politique de gestion des risques
+        description: "D\xE9finition de la gestion des risques\nApp\xE9tit pour le\
+          \ risque\nCrit\xE8res d\u2019acceptation des risques\nCrit\xE8res d\u2019\
+          \xE9valuation des risques\nIdentification des risques\n\xC9valuation du\
+          \ risque\nApproche CIAP\nRapports sur les risques\nExamen des risques\n\
+          Traitement des risques (att\xE9nuation, acceptation, transfert)\n\xC9valuation\
+          \ des risques\nUtilisation des commandes ISO27002\nGestion des droits d\u2019\
+          acc\xE8s\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.asset
     ref_id: POL.ASSET
     name: Asset management policy
     category: policy
+    translations:
+      fr:
+        name: "Politique de gestion d\u2019actifs"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.backup
     ref_id: POL.BACKUP
     name: Backup and restore policy
     category: policy
+    translations:
+      fr:
+        name: Politique de sauvegarde et de restauration
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.supplier
     ref_id: POL.SUPPLIER
     name: Third party supplier security policy
     category: policy
     annotation: A.5.19, A.5.20, A.5.21, A.5.22, A.5.23
+    translations:
+      fr:
+        name: "Politique de s\xE9curit\xE9 des fournisseurs tiers"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.monitor
     ref_id: POL.MONITOR
     name: Logging and monitoring policy
     category: policy
     description: Logging
     annotation: A.8.15
+    translations:
+      fr:
+        name: Politique de journalisation et de surveillance
+        description: Journalisation
   - urn: urn:intuitem:risk:function:doc-pol:pol.transfer
     ref_id: POL.TRANSFER
     name: Information transfer policy
     category: policy
     annotation: A.5.14
+    translations:
+      fr:
+        name: "Politique de transfert d\u2019informations"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.secdev
     ref_id: POL.SECDEV
     name: Secure development policy
     category: policy
+    translations:
+      fr:
+        name: "Politique de d\xE9veloppement s\xE9curis\xE9"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.physical
     ref_id: POL.PHYSICAL
     name: Physical security policy
@@ -468,19 +660,38 @@ objects:
 
       Continual improvement'
     annotation: 5.1.g
+    translations:
+      fr:
+        name: "Politique de s\xE9curit\xE9 physique"
+        description: "P\xE9rim\xE8tre de s\xE9curit\xE9 physique\nZones s\xE9curis\xE9\
+          es\nContr\xF4le d\u2019acc\xE8s des employ\xE9s\nContr\xF4le d\u2019acc\xE8\
+          s des visiteurs\nGestion des livraisons\nS\xE9curit\xE9 du c\xE2blage\n\
+          Am\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.network
     ref_id: POL.NETWORK
     name: Network security management policy
     category: policy
+    translations:
+      fr:
+        name: "Politique de gestion de la s\xE9curit\xE9 du r\xE9seau"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.accept
     ref_id: POL.ACCEPT
     name: Acceptable use policy
     category: policy
     annotation: A.5.10
+    translations:
+      fr:
+        name: "Politique d\u2019utilisation acceptable"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.project
     ref_id: POL.PROJECT
     name: IS project integration policy
     category: policy
+    translations:
+      fr:
+        name: "Politique d\u2019int\xE9gration de projets SI"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:pol.threat_intel
     ref_id: POL.THREAT_INTEL
     name: Threat intelligence policy
@@ -491,6 +702,11 @@ objects:
 
       Continual improvement'
     annotation: 5.1.g
+    translations:
+      fr:
+        name: Politique de renseignement sur les menaces
+        description: "Vuln\xE9rabilit\xE9s exploit\xE9es connues\nActivit\xE9 des\
+          \ acteurs de la menace\nAm\xE9lioration continue"
   - urn: urn:intuitem:risk:function:doc-pol:pol.incident
     ref_id: POL.INCIDENT
     name: IS incident management policy
@@ -499,6 +715,11 @@ objects:
 
       Vulnerability management'
     annotation: A.5.24, A.5.25, A.5.26, A.5.27
+    translations:
+      fr:
+        name: Politique de gestion des incidents du SI
+        description: "Gestion des incidents de s\xE9curit\xE9\nGestion des vuln\xE9\
+          rabilit\xE9s"
   - urn: urn:intuitem:risk:function:doc-pol:pol.maintenance
     ref_id: POL.MAINTENANCE
     name: Maintenance policy
@@ -509,3 +730,8 @@ objects:
 
       Change management'
     annotation: A.7.13
+    translations:
+      fr:
+        name: Politique de maintenance
+        description: "Gestion de l\u2019obsolescence\nContrats de maintenance\nGestion\
+          \ du changement"
