@@ -78,12 +78,7 @@ erDiagram
     LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
     LOADED_LIBRARY      ||--o{ REQUIREMMENT_MAPPING_SET : contains
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
-    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY           : translates
 
-    LIBRARY_TRANSLATION {
-        string locale
-        json translation
-    }
 ```
 
 ### General data model
@@ -127,6 +122,8 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
+
         json    implementation_groups_definition
         int     min_score
         int     max_score
@@ -174,6 +171,7 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
     }
 
     REQUIREMENT_NODE {
@@ -184,6 +182,7 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
 
         urn     parent_urn
         int     order_id
@@ -199,6 +198,7 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
 
         string  category
         string  csf_function
@@ -245,6 +245,7 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
 
         json    definition
     }
@@ -312,15 +313,16 @@ erDiagram
     REQUIREMENT_MAPPING_SET   }o--|| TARGET_FRAMEWORK : contains
 
     REQUIREMENT_MAPPING_SET {
-        string    urn
-        string    locale
-        string    ref_id
-        string    name
-        string    description
-        string    annotation
-        string    provider
+        string  urn
+        string  locale
+        string  ref_id
+        string  name
+        string  description
+        string  annotation
+        string  provider
+        json    translations
 
-        json      mapping_rules
+        json    mapping_rules
     }
 
 
@@ -902,10 +904,10 @@ Libraries have a copyright that contains relevant copyright information.
 
 Libraries have a URN to uniquely identify them.
 
-Libraries have a locale that describes the locale for the whole content of the library.
+Libraries have a locale that describes the main locale for the whole content of the library.
 
 Libraries have an integer version that completes the URN. The highest version for a given URN shall always be privileged. So:
-- a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn and locale.
+- a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn.
 - if a breaking change is necessary, the URN should be changed.
 
 
@@ -926,7 +928,7 @@ Referential objects can be downloaded from a library. They are called "global re
 - they are read-only in the database once imported. They can be removed only by removing the corresponding library.
 - they are attached to the root folder.
 - Everyone has the right to read them, they are "published" to all domains.
-- The couple (URN, locale) is unique.
+- The URN is unique.
 - They have a link to their library.
 
 Conversely, a referential object with a null URN is called a "local referential object" has the following characteristics:
@@ -936,8 +938,8 @@ Conversely, a referential object with a null URN is called a "local referential 
 
 Referential objects have the following optional fields:
 - ref_id: reference used in the standard for this object (e.g. A.5.5).
-- provider: describes where the object comes from, e.g. ISO, NIST, CIS, MITRE ATT&CK...
 - annotation: provided by the library packager or the user to clarify the meaning of the object. They can be used for search, and are displayed when available.
+- provider: describes where the object comes from, e.g. ISO, NIST, CIS, MITRE ATT&CK...
 - translations: JSON containing the translations of the object.
 
 Framework and risk matrix objects can only come from a library.
