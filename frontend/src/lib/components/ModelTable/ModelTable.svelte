@@ -163,45 +163,39 @@
 		return value.includes(stringify(entry));
 	}
 
-	function parseQueryParams(queryParams: string): {[key: string]: string} {
-		if (queryParams.startsWith("?"))
-			queryParams = queryParams.substring(1);
+	function parseQueryParams(queryParams: string): { [key: string]: string } {
+		if (queryParams.startsWith('?')) queryParams = queryParams.substring(1);
 
-		if (!queryParams)
-			return {};
+		if (!queryParams) return {};
 
 		return Object.fromEntries(
-			queryParams.split("&")
-				.map((param) => {
-					const key = param.split("=")[0];
-					const value = param.substring(key.length+1);
-					return [key, value];
-				}
-			)
+			queryParams.split('&').map((param) => {
+				const key = param.split('=')[0];
+				const value = param.substring(key.length + 1);
+				return [key, value];
+			})
 		);
 	}
 
-	function stringifyQueryParams(queryParams: {[key: string]: string}): string {
+	function stringifyQueryParams(queryParams: { [key: string]: string }): string {
 		const stringifiedParams = Object.entries(queryParams)
 			.map(([key, value]) => `${key}=${value}`)
-			.join("&");
+			.join('&');
 		return `?${stringifiedParams}`;
 	}
 
-	function setFiltersInUrl(filters: {[key: string]: string}) {
+	function setFiltersInUrl(filters: { [key: string]: string }) {
 		const stringifiedQueryParams = stringifyQueryParams(filters);
 		const newHref = $page.url.pathname + stringifiedQueryParams;
 		goto(newHref);
-	};
+	}
 
 	$: if (browser) {
 		const filterList = {};
 		for (const field of filteredFields) {
-			const values = filterValues[field] ? filterValues[field].map(option => option.value) : [];
+			const values = filterValues[field] ? filterValues[field].map((option) => option.value) : [];
 			if (values.length > 0) {
-				filterList[field] = values
-					.map((value) => encodeURIComponent(value))
-					.join(",");
+				filterList[field] = values.map((value) => encodeURIComponent(value)).join(',');
 			}
 			handler.filter(
 				values,
@@ -247,10 +241,9 @@
 		}
 		const queryParams = parseQueryParams($page.url.search);
 		const urlFilterValues = Object.fromEntries(
-			Object.entries(queryParams)
-			.map(([key, value]) => [
-				key, value.split(",")
-					.map((option) => decodeURIComponent(option))
+			Object.entries(queryParams).map(([key, value]) => [
+				key,
+				value.split(',').map((option) => decodeURIComponent(option))
 			])
 		);
 		for (const [field, value] of Object.entries(urlFilterValues)) {

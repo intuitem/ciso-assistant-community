@@ -1,4 +1,4 @@
-import type { CacheLock } from "./types";
+import type { CacheLock } from './types';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);

@@ -220,29 +220,23 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 const LIBRARY_TYPE_FILTER = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		const overviewKeys = new Set(
-			row.overview
-				.map((overviewRow) => overviewRow.split(":")[0])
-		);
+		const overviewKeys = new Set(row.overview.map((overviewRow) => overviewRow.split(':')[0]));
 		const libraryDatatypeSet = new Set([
-			"framework",
-			"risk_matrix",
-			"threats",
-			"requirement_mapping_set",
-			"reference_controls"
+			'framework',
+			'risk_matrix',
+			'threats',
+			'requirement_mapping_set',
+			'reference_controls'
 		]);
-		const datatypes = setIntersection(
-			libraryDatatypeSet,
-			overviewKeys
-		);
+		const datatypes = setIntersection(libraryDatatypeSet, overviewKeys);
 		return [...datatypes];
 	},
 	extraProps: {
-		defaultOptionName: "objectType",
+		defaultOptionName: 'objectType',
 		optionLabels: {
-			"reference_controls": "referenceControls",
-			"requirement_mapping_set": "requirementMappingSet",
-			"risk_matrix": "riskMatrix"
+			reference_controls: 'referenceControls',
+			requirement_mapping_set: 'requirementMappingSet',
+			risk_matrix: 'riskMatrix'
 		}
 	},
 	alwaysDisplay: true
