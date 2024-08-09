@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { toCamelCase } from '$lib/utils/locales';
+	import type { CacheLock } from '$lib/utils/types';
+	import * as m from '$paraglide/messages';
+	import MultiSelect from 'svelte-multiselect';
+	import { onMount } from 'svelte';
 
-	export let value: string;
+	export let value: string[];
 
 	export let field: string;
+	export let cacheLock: CacheLock;
 	export let helpText: string | undefined = undefined;
 
 	export let defaultOptionName = 'undefined';
@@ -31,8 +36,6 @@
 
 	hide = hide || !(selectOptions && Object.entries(selectOptions).length > 1);
 
-	import * as m from '$paraglide/messages';
-
 	export let multiSelectOptions = {
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !variant-filled' : '!bg-transparent',
@@ -41,7 +44,18 @@
 		closeDropdownOnSelect: !multiple
 	};
 
-	import MultiSelect from 'svelte-multiselect';
+	onMount(async () => {
+		const cacheResult = await cacheLock.promise;
+		if (cacheResult && cacheResult.length > 0) {
+			value = cacheResult.map((option) => {
+				const label = optionLabels[option] ?? option;
+				return {
+					label: label,
+					value: option
+				};
+			});
+		}
+	});
 </script>
 
 {#if !hide}

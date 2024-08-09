@@ -615,5 +615,6 @@
 	"back": "Opbrengst",
 	"duplicate": "Duplicaat",
 	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling",
-	"size": "Grootte"
+	"size": "Grootte",
+	"objectType": "objecttype"
 }

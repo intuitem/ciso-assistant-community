@@ -656,5 +656,6 @@
 	"back": "Back",
 	"duplicate": "Duplicate",
 	"duplicateRiskAssessment": "Duplicate the risk assessment",
-	"size": "Size"
+	"size": "Size",
+	"objectType": "Object type"
 }

@@ -20,7 +20,7 @@
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { getSecureRedirect, makeCacheLock } from '$lib/utils/helpers';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { createModalCache } from '$lib/utils/stores';
 	export let form: SuperValidated<AnyZodObject>;
@@ -47,14 +47,6 @@
 	}
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
-
-	function makeCacheLock(): CacheLock {
-		let resolve: (_: any) => any = (_) => _;
-		const promise = new Promise((res) => {
-			resolve = res;
-		});
-		return { resolve, promise };
-	}
 
 	let cacheLocks = {};
 	$: if (shape)

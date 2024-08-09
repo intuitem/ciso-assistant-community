@@ -1,3 +1,5 @@
+import type { CacheLock } from "./types";
+
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
 	return date.toLocaleDateString(locale, {
@@ -79,4 +81,22 @@ export function isDark(hexcolor: string): boolean {
 	// https://www.w3.org/tr/aert/#color-contrast
 	const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 	return brightness < 128;
+}
+
+export function makeCacheLock(): CacheLock {
+	let resolve: (_: any) => any = (_) => _;
+	const promise = new Promise((res) => {
+		resolve = res;
+	});
+	return { resolve, promise };
+}
+
+export function setIntersection<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+	const result: Set<T> = new Set();
+	for (const value of set1) {
+		if (set2.has(value)) {
+			result.add(value);
+		}
+	}
+	return result;
 }

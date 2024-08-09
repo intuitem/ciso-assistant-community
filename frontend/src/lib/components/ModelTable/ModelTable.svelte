@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import {
 		FIELD_COLORED_TAG_MAP,
@@ -7,11 +8,11 @@
 		CUSTOM_ACTIONS_COMPONENT
 	} from '$lib/utils/crud';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { stringify } from '$lib/utils/helpers';
+	import { stringify, makeCacheLock } from '$lib/utils/helpers';
 
 	import { tableA11y } from './actions';
 	// Types
-	import type { urlModel } from '$lib/utils/types.js';
+	import type { urlModel, CacheLock } from '$lib/utils/types.js';
 	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
@@ -141,7 +142,11 @@
 	const filteredFields = Object.keys(filters).filter(
 		(key) => columnFields.has(key) || filters[key].alwaysDisplay
 	);
+
 	const filterValues: { [key: string]: any } = {};
+	const filterCacheLocks: { [key: string]: CacheLock } = Object.fromEntries(
+		filteredFields.map((field) => [field, makeCacheLock()])
+	);
 	const filterProps: {
 		[key: string]: { [key: string]: any };
 	} = {};
@@ -158,10 +163,48 @@
 		return value.includes(stringify(entry));
 	}
 
-	$: {
+	function parseQueryParams(queryParams: string): {[key: string]: string} {
+		if (queryParams.startsWith("?"))
+			queryParams = queryParams.substring(1);
+
+		if (!queryParams)
+			return {};
+
+		return Object.fromEntries(
+			queryParams.split("&")
+				.map((param) => {
+					const key = param.split("=")[0];
+					const value = param.substring(key.length+1);
+					return [key, value];
+				}
+			)
+		);
+	}
+
+	function stringifyQueryParams(queryParams: {[key: string]: string}): string {
+		const stringifiedParams = Object.entries(queryParams)
+			.map(([key, value]) => `${key}=${value}`)
+			.join("&");
+		return `?${stringifiedParams}`;
+	}
+
+	function setFiltersInUrl(filters: {[key: string]: string}) {
+		const stringifiedQueryParams = stringifyQueryParams(filters);
+		const newHref = $page.url.pathname + stringifiedQueryParams;
+		goto(newHref);
+	};
+
+	$: if (browser) {
+		const filterList = {};
 		for (const field of filteredFields) {
+			const values = filterValues[field] ? filterValues[field].map(option => option.value) : [];
+			if (values.length > 0) {
+				filterList[field] = values
+					.map((value) => encodeURIComponent(value))
+					.join(",");
+			}
 			handler.filter(
-				filterValues[field] ? filterValues[field].map((v) => v.value) : [],
+				values,
 				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
 					? filters[field].getColumn
 					: field,
@@ -170,6 +213,7 @@
 					: defaultFilterFunction
 			);
 		}
+		setFiltersInUrl(filterList);
 	}
 
 	let allowOptionsUpdate = true;
@@ -200,6 +244,17 @@
 			orderBy.direction === 'asc'
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
+		}
+		const queryParams = parseQueryParams($page.url.search);
+		const urlFilterValues = Object.fromEntries(
+			Object.entries(queryParams)
+			.map(([key, value]) => [
+				key, value.split(",")
+					.map((option) => decodeURIComponent(option))
+			])
+		);
+		for (const [field, value] of Object.entries(urlFilterValues)) {
+			filterCacheLocks[field].resolve(value);
 		}
 	});
 
@@ -252,6 +307,7 @@
 						this={filters[field].component}
 						bind:value={filterValues[field]}
 						bind:hide={filters[field].hide}
+						cacheLock={filterCacheLocks[field]}
 						{field}
 						{...filterProps[field]}
 						{...filters[field].extraProps}

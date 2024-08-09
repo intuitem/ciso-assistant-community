@@ -4,6 +4,7 @@ import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
 import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
+import { setIntersection } from './helpers';
 import type { Row } from '@vincjo/datatables';
 import * as m from '$paraglide/messages';
 
@@ -64,7 +65,7 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.project.str,
 	extraProps: {
-		defaultOptionName: 'project' // Make translations
+		defaultOptionName: 'project'
 	}
 };
 
@@ -160,7 +161,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.framework.ref_id,
 	extraProps: {
-		defaultOptionName: 'framework' // Make translations
+		defaultOptionName: 'framework'
 	}
 };
 
@@ -168,7 +169,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.locales,
 	extraProps: {
-		defaultOptionName: 'language', // Make translations
+		defaultOptionName: 'language',
 		optionLabels: LOCALE_DISPLAY_MAP
 	}
 };
@@ -177,7 +178,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.type,
 	extraProps: {
-		defaultOptionName: 'type' // Make translations
+		defaultOptionName: 'type'
 	},
 	alwaysDisplay: true
 };
@@ -186,7 +187,7 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.category,
 	extraProps: {
-		defaultOptionName: 'category' // Make translations
+		defaultOptionName: 'category'
 	},
 	alwaysDisplay: true
 };
@@ -195,7 +196,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => row.meta.csf_function,
 	extraProps: {
-		defaultOptionName: 'csfFunction' // Make translations
+		defaultOptionName: 'csfFunction'
 	},
 	alwaysDisplay: true
 };
@@ -207,14 +208,45 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 			line => line.startsWith("risk_matrix")
 		); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
 	},
-	filterProps: (rows: any[],field: string) => new Object(),
+	filterProps: (rows: any[], field: string) => new Object(),
 	filter: (builtin: boolean, value: boolean): boolean => {
 		return value ? !builtin : true;
 	},
 	extraProps: {
-		title: "Only display matrix libraries" // Make translations
+		title: "Only display matrix libraries"
 	}
 }; */
+
+const LIBRARY_TYPE_FILTER = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const overviewKeys = new Set(
+			row.overview
+				.map((overviewRow) => overviewRow.split(":")[0])
+		);
+		const libraryDatatypeSet = new Set([
+			"framework",
+			"risk_matrix",
+			"threats",
+			"requirement_mapping_set",
+			"reference_controls"
+		]);
+		const datatypes = setIntersection(
+			libraryDatatypeSet,
+			overviewKeys
+		);
+		return [...datatypes];
+	},
+	extraProps: {
+		defaultOptionName: "objectType",
+		optionLabels: {
+			"reference_controls": "referenceControls",
+			"requirement_mapping_set": "requirementMappingSet",
+			"risk_matrix": "riskMatrix"
+		}
+	},
+	alwaysDisplay: true
+};
 
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
@@ -379,7 +411,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
 		}
 	},
@@ -388,7 +421,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'sso-settings': {

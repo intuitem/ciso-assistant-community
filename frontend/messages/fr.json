@@ -615,5 +615,6 @@
 	"back": "Retour",
 	"duplicate": "Dupliquer",
 	"duplicateRiskAssessment": "Dupliquer l’évaluation de risque",
-	"size": "Taille"
+	"size": "Taille",
+	"objectType": "Type d'objet"
 }
