@@ -21,7 +21,7 @@ description: 'AirCyber is the AeroSpace and Defense official standard for Cybers
 copyright: "\xA9 Boost Aerospace\nThis work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike\
   \ 4.0 International License. Any commercial use of this work must be contracted\
   \ with BoostAeroSpace.\nPermission given to include AirCyber in CISO Assistant.\n"
-version: 2
+version: 3
 provider: Boost Aerospace
 packager: intuitem
 objects:
@@ -48,13 +48,13 @@ objects:
       '
     implementation_groups_definition:
     - ref_id: Bronze
-      name: null
+      name: Bronze
       description: null
     - ref_id: Silver
-      name: null
+      name: Silver
       description: null
     - ref_id: Gold
-      name: null
+      name: Gold
       description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.1
