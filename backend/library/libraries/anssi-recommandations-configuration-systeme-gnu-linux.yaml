@@ -1,6 +1,6 @@
 urn: urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux
 locale: fr
-ref_id: ANSSI
+ref_id: ANSSI-REC-LINUX
 name: "Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
 description: "Renforcer la s\xE9curit\xE9 d\u2019un syst\xE8me GNU-Linux\nhttps://cyber.gouv.fr/sites/default/files/document/fr_np_linux_configuration-v2.0.pdf"
 copyright: Licence ouverte / Open Licence v2.0 (Etalab)
@@ -10,7 +10,7 @@ packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-recommandations-configuration-systeme-gnu-linux
-    ref_id: ANSSI
+    ref_id: ANSSI-REC-LINUX
     name: "Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
     description: "Renforcer la s\xE9curit\xE9 d\u2019un syst\xE8me GNU-Linux"
     implementation_groups_definition:
