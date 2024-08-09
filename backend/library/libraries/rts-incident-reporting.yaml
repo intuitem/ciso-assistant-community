@@ -1,7 +1,7 @@
 urn: urn:intuitem:risk:library:rts-dora-incident-reporting
 locale: en
 ref_id: RTS-DORA-incident-reporting
-name: RTS-DORA-incident-reporting
+name: RTS DORA incident reporting
 description: 'Article 20 of DORA mandates the European Supervisory Authorities (ESAs)
   to develop through the Joint Committee and in consultation with the European Central
   Bank and European Union Agency for Cybersecurity, Draft Regulatory Technical Standards
@@ -18,15 +18,15 @@ description: 'Article 20 of DORA mandates the European Supervisory Authorities (
   Here is the link of the document :
 
   https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf'
-copyright: ESMA
+copyright: ESA
 version: 1
-provider: ESMA
+provider: ESA
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:rts-dora-incident-reporting
     ref_id: RTS-DORA-incident-reporting
-    name: RTS-DORA-incident-reporting
+    name: RTS DORA incident reporting
     description: '"Article 20 of DORA mandates the European Supervisory Authorities
       (ESAs) to develop through the Joint Committee and in consultation with the European
       Central Bank and European Union Agency for Cybersecurity, Draft Regulatory Technical

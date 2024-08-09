@@ -1,7 +1,7 @@
 urn: urn:intuitem:risk:library:its-dora-incident-reporting
 locale: en
 ref_id: ITS-DORA-incident-reporting
-name: ITS-DORA-incident-reporting
+name: ITS DORA incident reporting
 description: 'Article 20 of DORA mandates the European Supervisory Authorities (ESAs)
   to develop through the Joint Committee and in consultation with the European Central
   Bank and European Union Agency for Cybersecurity, Draft Implementing Technical Standards
@@ -17,15 +17,15 @@ description: 'Article 20 of DORA mandates the European Supervisory Authorities (
   Here is the link of the document :
 
   https://www.eiopa.europa.eu/document/download/0dfbccfd-97b2-4076-9644-b5cf4566fc6f_en?filename=JC%202024-33%20-%20Final%20report%20on%20the%20draft%20RTS%20and%20ITS%20on%20incident%20reporting.pdf'
-copyright: ESMA
+copyright: ESA
 version: 1
-provider: ESMA
+provider: ESA
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:its-dora-incident-reporting
     ref_id: ITS-DORA-incident-reporting
-    name: ITS-DORA-incident-reporting
+    name: ITS DORA incident reporting
     description: 'Article 20 of DORA mandates the European Supervisory Authorities
       (ESAs) to develop through the Joint Committee and in consultation with the European
       Central Bank and European Union Agency for Cybersecurity, Draft Implementing
@@ -145,11 +145,11 @@ objects:
       ref_id: '1.1'
       description: 'Financial entities shall use the template in Annex I to submit
         the initial notification, intermediate and final report as follows:'
-    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.a
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1.a
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
-      ref_id: 1.a
+      ref_id: 1.1.a
       description: Where an initial notification is submitted, financial entities
         shall complete the data fields of the template which correspond to the information
         to be provided in accord- ance with Article 3 of Commission Delegated Regulation
@@ -157,22 +157,22 @@ objects:
         complete data fields, the com- pletion of which is not required for an initial
         notification, but for an intermediate or final report, where they have the
         relevant information.
-    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.b
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1.b
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
-      ref_id: 1.b
+      ref_id: 1.1.b
       description: Where an intermediate report is submitted, financial entities shall
         complete the data fields of the template which correspond to the information
         to be provided in accord- ance with Article 4 of Commission Delegated Regulation
         specifying Article 20a of Regulation (EU) 2022/2554. Financial entities may
         complete data fields, the com- pletion of which is not required for the intermediate
         report, but for the final report, where they have the relevant information.
-    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.c
+    - urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1.c
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:its-dora-incident-reporting:1.1
-      ref_id: 1.c
+      ref_id: 1.1.c
       description: Where a final report is submitted, financial entities shall complete
         the data fields of the template be completed which correspond to the information
         to be provided in accordance with Article 5 of Commission Delegated Regulation
