@@ -58,11 +58,11 @@
 							{m['add' + capitalizeFirstLetter(data.model.localName)]()}
 						</button>
 					{:else if URLModel === 'risk-matrices'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+						<a href="/libraries?objectType=risk_matrix" class="btn variant-filled-primary" data-testid="add-button"
 							><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
 						>
 					{:else if URLModel === 'frameworks'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+						<a href="/libraries?objectType=framework" class="btn variant-filled-primary" data-testid="add-button"
 							><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
 						>
 					{/if}
