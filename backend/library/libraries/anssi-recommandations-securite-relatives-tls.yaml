@@ -1,6 +1,6 @@
 urn: urn:protocolpaladin:risk:library:anssi-recommandations-securite-relatives-tls
 locale: fr
-ref_id: ANSSI
+ref_id: ANSSI-REC-TLS
 name: "Recommandations de s\xE9curit\xE9 relatives \xE0 TLS"
 description: "Ce guide a pour objectif de pr\xE9senter les bonnes pratiques relatives\
   \ au protocole TLS.\L \nIl s\u2019adresse \xE0 tous les publics qui souhaitent se\
@@ -15,7 +15,7 @@ packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-recommandations-securite-relatives-tls
-    ref_id: ANSSI
+    ref_id: ANSSI-REC-TLS
     name: "Recommandations de s\xE9curit\xE9 relatives \xE0 TLS"
     description: "Ce guide a pour objectif de pr\xE9senter les bonnes pratiques relatives\
       \ au protocole TLS.\L \nIl s\u2019adresse \xE0 tous les publics qui souhaitent\

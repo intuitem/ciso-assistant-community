@@ -1,6 +1,6 @@
 urn: urn:protocolpaladin:risk:library:anssi-recommandations-pour-la-protection-des-sie
 locale: fr
-ref_id: ANSSI
+ref_id: ANSSI-REC-SIE
 name: "Recommandations pour la protection des syst\xE8mes d\u2019information essentiels"
 description: "La directive Network and Information System Security a \xE9t\xE9 adopt\xE9\
   e par les institutions europ\xE9ennes en 2016 et transpos\xE9e en droit fran\xE7\
@@ -27,7 +27,7 @@ packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-recommandations-pour-la-protection-des-sie
-    ref_id: ANSSI
+    ref_id: ANSSI-REC-SIE
     name: "Recommandations pour la protection des syst\xE8mes d\u2019information essentiels"
     description: "La directive Network and Information System Security a \xE9t\xE9\
       \ adopt\xE9e par les institutions europ\xE9ennes en 2016 et transpos\xE9e en\

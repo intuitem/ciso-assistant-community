@@ -1,6 +1,6 @@
 urn: urn:protocolpaladin:risk:library:anssi-recommandations-securite-architecture-systeme-journalisation
 locale: fr
-ref_id: ANSSI
+ref_id: ANSSI-REC-JOURNALISATION
 name: "Recommandations de s\xE9curit\xE9 pour l'architecture d'un syst\xE8me de journalisation"
 description: "Cette note technique d\xE9taille les pr\xE9requis n\xE9cessaires \xE0\
   \ la mise en \u0153uvre d\u2019un syst\xE8me de journalisation efficace et s\xE9\
@@ -14,7 +14,7 @@ packager: protocolpaladin
 objects:
   framework:
     urn: urn:protocolpaladin:risk:framework:anssi-recommandations-securite-architecture-systeme-journalisation
-    ref_id: ANSSI
+    ref_id: ANSSI-REC-JOURNALISATION
     name: "Recommandations de s\xE9curit\xE9 pour l'architecture d'un syst\xE8me de\
       \ journalisation"
     description: "Cette note technique d\xE9taille les pr\xE9requis n\xE9cessaires\
