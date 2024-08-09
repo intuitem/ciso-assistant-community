@@ -1,0 +1,571 @@
+urn: urn:intuitem:risk:library:rts-dora-on-JET
+locale: en
+ref_id: RTS-DORA-on-JET
+name: RTS DORA on JET
+description: "Regulatory technical standard on the harmonisation of conditions enabling\
+  \ the conduct of the oversight activities under Article 41(1)(c) of Regulation (EU)\
+  \ 2022/2554.  The draft RTS shall specify, the criteria for determining the composition\
+  \ of the joint examination team, their designation, tasks, and working arrangements.\
+  \ \n\nHere is the link of the Second batch of policy products under DORA:\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+  \nHere is the link of the document :\nhttps://www.eiopa.europa.eu/document/download/9b6339f9-7b1f-4095-9350-54913fb5efe5_en?filename=JC%202024-54%20-%20Final%20Report%20RTS%20on%20JET.pdf"
+copyright: ESA
+version: 1
+provider: ESA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:rts-dora-on-JET
+    ref_id: RTS-DORA-on-JET
+    name: RTS DORA on JET
+    description: "Regulatory technical standard on the harmonisation of conditions\
+      \ enabling the conduct of the oversight activities under Article 41(1)(c) of\
+      \ Regulation (EU) 2022/2554.  The draft RTS shall specify, the criteria for\
+      \ determining the composition of the joint examination team, their designation,\
+      \ tasks, and working arrangements. \n\nHere is the link of the Second batch\
+      \ of policy products under DORA:\nhttps://www.eiopa.europa.eu/publications/second-batch-policy-products-under-dora_en\n\
+      \nHere is the link of the document :\nhttps://www.eiopa.europa.eu/document/download/9b6339f9-7b1f-4095-9350-54913fb5efe5_en?filename=JC%202024-54%20-%20Final%20Report%20RTS%20on%20JET.pdf"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-1
+      assessable: false
+      depth: 1
+      ref_id: Recital 1
+      description: The oversight framework established by Regulation (EU) 2022/2554
+        should be built on a structured and continuous cooperation between the European
+        Supervisory Authorities (ESAs) and the competent authorities through the Oversight
+        Forum and the joint examination teams .
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-2
+      assessable: false
+      depth: 1
+      ref_id: Recital 2
+      description: After the designation of the critical information and communication
+        technology (ICT) third-party service providers and taking into account the
+        annual oversight plans for all critical ICT third-party service providers,
+        the authorities listed in Article 40(2) of Regulation (EU) 2022/2554 should
+        be asked to nominate their staff as member of the joint examination teams.
+        These authorities should ensure that the nominated staff meet the specific
+        technical expertise required in the profiles needed in the joint examination
+        teams. The demonstration that an authority does not have staff meeting the
+        specific technical expertise needed in the joint examination teams should
+        be considered by the Lead Overseer as justification to discharge, at that
+        point in time, the authorities of their obligation to nominate staff members
+        to the joint examination teams. In that case, the authority should nevertheless
+        commit on the best effort basis to address this shortfall of expertise and
+        try to reinforce its capabilities to contribute to the joint examination teams
+        in the context of the next exercise. The staff members designated as members
+        of a joint examination team should continue to be employees of the nominating
+        authority and therefore subject to working hours and permanent location of
+        work as included in their employment contracts.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-3
+      assessable: false
+      depth: 1
+      ref_id: Recital 3
+      description: In order to ensure the most effective use of resources in the execution
+        of oversight activities, a joint examination team should be able to oversee
+        multiple critical ICT third- party service providers. The grouping of the
+        critical ICT third-party service providers to be assigned to a specific joint
+        examination team, and its overall staffing needs should take into account
+        the risk profile of the critical ICT third-party service providers, and the
+        envisaged level of intensity of oversight activities. This should result in
+        a strategic multi-annual oversight plan, updated annually by the Lead Overseer
+        to the extent necessary, and reflected into the individual annual oversight
+        plan. To ensure the reliability of the planned and ongoing commitment of resource
+        staffing of the joint examination teams by the nominating authorities, the
+        Lead Overseer should consult both the joint oversight network and the Oversight
+        Forum.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-4
+      assessable: false
+      depth: 1
+      ref_id: Recital 4
+      description: The Lead Overseer should apply a combination of criteria and principles
+        when identifying the number of staff members in each joint examination team
+        and the resulting composition. Those criteria and principles should take into
+        account the technical nature of the oversight tasks, the different grade of
+        dependency of financial entities on the services provided by the critical
+        ICT third-party service providers, the geographical distribution, the size
+        and the number of financial entities relying on those services and, where
+        possible, a proportionate cross-sectoral representation. In performing this
+        task, the Lead Overseer should rely on the information provided by competent
+        authorities in the context of designation of the critical ICT third-party
+        service providers, including the results of the calculation of all the sub-criteria
+        as defined in Commission Delegated Regulation (EU) 2024/1502 3 and consider
+        the criticality of the critical ICT third-party service providers for the
+        provisioning of specific financial services both at Member State and Union
+        level.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-5
+      assessable: false
+      depth: 1
+      ref_id: Recital 5
+      description: The Lead Overseer and the members of the joint examination teams
+        should periodically assess the achievements of the joint examination teams
+        to ensure that the structure and the composition of the joint examination
+        teams are fit for purpose and continuously improving the efficiency and effectiveness
+        of the Oversight Framework. The Lead Overseer and the nominating authorities
+        should make use of these assessments to review the membership of the joint
+        examination teams, when appropriate.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-6
+      assessable: false
+      depth: 1
+      ref_id: Recital 6
+      description: The ESAs should define the oversight procedures to be followed
+        by the members of the joint examination teams and the Lead Overseer coordinator
+        in the performance of their duties.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-7
+      assessable: false
+      depth: 1
+      ref_id: Recital 7
+      description: Since the oversight tasks involve the processing of confidential
+        information, the Lead Overseer should grant members of the joint examination
+        team access to such information and to the relating IT (e.g. tools, applications,
+        datasets) and non-IT (e.g. policy, procedures, documentation) resources on
+        a need-to-know basis and within the defined scope of their assignments if
+        this is necessary for members of the joint examination team to assist the
+        Lead Overseer in the fulfilment of its statutory functions or tasks.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-8
+      assessable: false
+      depth: 1
+      ref_id: Recital 8
+      description: When defining arrangements between the Lead Overseer and the compentent
+        authorities to implement this Regulation, consistently with the Commission
+        Delegated Regulation (EU) 2024/1505 of 22 February 2024 supplementing Regulation
+        (EU) 2022/2554 of the European Parliament and of the Council by determining
+        the amount of the oversight fees to be charged by the Lead Overseer to critical
+        ICT third-party service providers and the way in which those fees are to be
+        paid, the Lead Overseer should include in such arrangements a section detailing
+        the procedure of reimbursement of the direct and indirect costs of all nominating
+        authorities involved in the joint examination teams. The arrangements should
+        also ensure that the members of the joint examination teams are free from
+        any conflict of interests while performing their duties.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-9
+      assessable: false
+      depth: 1
+      ref_id: Recital 9
+      description: This Regulation is based on the draft regulatory technical standards
+        submitted to the European Commission by the European Banking Authority, the
+        European Insurance and Occupational Pensions Authority, and the European Securities
+        and Markets Authority.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:recital-10
+      assessable: false
+      depth: 1
+      ref_id: Recital 10
+      description: The Joint Committee of the European Supervisory Authorities referred
+        to in Article 54 of Regulation (EU) No 1093/2010 of the European Parliament
+        and of the Council4, in Article 54 of Regulation (EU) No 1094/2010 of the
+        European Parliament and of the Council5 and in Article 54 of Regulation (EU)
+        No 1095/2010 of the European Parliament and of the Council6 has conducted
+        open public consultations on the draft regulatory technical standards on which
+        this Regulation is based, analysed the potential costs and benefits of the
+        proposed standards and requested advice of the Banking Stakeholder Group established
+        in accordance with Article 37 of Regulation (EU) No 1093/2010, the Insurance
+        and Reinsurance Stakeholder Group and the Occupational Pensions Stakeholder
+        Group established in accordance with Article 37 of Regulation (EU) No 1094/2010,
+        and the Securities and Markets Stakeholder Group established in accordance
+        with Article 37 of Regulation (EU) No 1095/2010,
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-1
+      assessable: false
+      depth: 1
+      ref_id: Article 1
+      description: Tasks of the members of a joint examination team
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-1
+      ref_id: '1.1'
+      description: The joint examination team shall assist the Lead Overseer in conducting
+        oversight activities, including the individual oversight plan adopted annually
+        according to Article 33(4) of Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-1
+      ref_id: '1.2'
+      description: 'The tasks of the members of the joint examination team shall be
+        performed under the coordination of the Lead Overseer coordinator and shall
+        include any of the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.a
+      description: assisting the Lead Overseer in the preparation and drafting of
+        the individual annual oversight plan describing the annual oversight objectives
+        and the main oversight activities planned for each critical ICT third-party
+        service provider that are to be carried out by the Lead Overseer and the joint
+        examination team;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.b
+      description: assisting the Lead Overseer in performing the assessment referred
+        to in Article 33(2) of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.c
+      description: collecting and assessing the information submitted by the critical
+        ICT third- party service provider according to Article 37 of Regulation (EU)
+        2022/2554 and Chapter II of Commission Delegated Regulation xxx [RTS on harmonisation
+        of the conditions of oversight conduct];
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.d
+      description: conducting general investigations on the critical ICT third-party
+        service providers according to Article 38 of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.e
+      description: conducting inspections of the critical ICT third-party service
+        providers according to Article 39 of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.f
+      description: drafting the recommendations addressed to the critical ICT third-party
+        service provider as defined in Article 35(1), point (d) of Regulation (EU)
+        2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.g
+      description: assessing the remediation plan and the progress reports as defined
+        in Article 4 of Commission Delegated Regulation xxx [RTS on harmonisation
+        of the conditions of oversight conduct];
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.h
+      description: preparing and drafting the requests and decisions to the critical
+        ICT third-party service provider referred to in Article 35(6), Article 37(1),
+        Article 38(4), and Article 39(6) of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.i
+      description: assisting the Lead Overseer in its contribution to horizontal oversight
+        activities, including in the development of benchmarking, as referred to in
+        Article 32(3) of Regulation (EU) 2022/2554;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.j
+      description: ensuring that the relevant information relating to financial entities
+        making use of the services provided by the critical ICT third-party service
+        providers are shared with the Lead Overseer;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2.k
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.2
+      ref_id: 1.2.k
+      description: assisting the Lead Overseer in unplanned ad hoc activities deemed
+        necessary by the Lead Overseer for the purpose of oversight.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-1
+      ref_id: '1.3'
+      description: In case the individual annual oversight plan is significantly revised
+        during the year by the Lead Overseer, the Lead Overseer shall involve the
+        joint examination team in the process of the revision and execution of the
+        individual annual oversight plan according to point (a) of paragraph 2.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      assessable: true
+      depth: 1
+      ref_id: Article 2
+      description: Establishment of a joint examination team
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.1'
+      description: ' After the first designation of the ICT third-party service provider
+        as critical in accordance with Article 31(1) of Regulation (EU) 2022/2554,
+        the Lead Overseer, in agreement with the joint oversight network, shall establish
+        the joint examination team responsible to carry out the oversight activities
+        concerning the assigned critical ICT third-party service provider.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.2'
+      description: When material changes regarding the critical ICT third-party service
+        provider occur, the Lead Overseer may consider to update the composition of
+        the joint examination team responsible to carry out the oversight activities
+        concerning the assigned critical ICT third-party service provider.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:node30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      description: 'For the purpose of this paragraph, material changes regarding
+        the critical ICT third- party service provider relate to:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.2.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:node30
+      ref_id: 2.2.a
+      description: the services provided by critical ICT third-party service provider;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.2.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:node30
+      ref_id: 2.2.b
+      description: the activities performed by financial entities supported by ICT
+        services of the critical ICT third-party service provider; or
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.2.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:node30
+      ref_id: 2.2.c
+      description: the list of critical ICT third-party service providers at Union
+        level referred in Article 31(9) or Regulation (EU) 2022/2554.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.3'
+      description: The Lead Overseer shall identify the number of members of the joint
+        examination team and its composition according to Article 3(1), and depending
+        on the envisaged level of intensity of oversight activities to be performed
+        in relation to all critical ICT third-party service providers.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.4'
+      description: The authorities referred to in Article 40(2) of Regulation (EU)
+        2022/2554 shall nominate one or more individuals from their staff to be appointed
+        as members of the joint examination team. An individual may be nominated and
+        appointed as member of one or more joint examination teams.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.5'
+      description: The Lead Overseer shall appoint the nominated individuals as members
+        of the joint examination team either on a full-time or on a part-time basis
+        depending on their availability, the specific needs of the Lead Overseer,
+        and the agreement between the nominating authority and the Lead Overseer.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.6'
+      description: When nominating the members of the joint examination teams, the
+        authorities shall assess their technical expertise, qualifications and skills
+        in ICT and relevant areas, including communication and collaboration skills,
+        as well as audit and supervision skills.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.7'
+      description: The Lead Overseer may require the nominating authorities to modify
+        their nominations only in justified circumstances and when the profiles of
+        the nominated individuals do not match the profile of the resources needed.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-2
+      ref_id: '2.8'
+      description: ' The Lead Overseer and the authorities shall take all appropriate
+        and possible measures to ensure the joint examination team is staffed adequately
+        in accordance with the annual individual oversight plan.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-3
+      assessable: false
+      depth: 1
+      ref_id: Article 3
+      description: Members of the joint examination team
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-3
+      ref_id: '3.1'
+      description: 'The Lead Overseer shall define the number of members of the joint
+        examination team and its composition in agreement with the Joint Oversight
+        Network and in consultation with the Oversight Forum, as part of the process
+        of establishment of the joint examination team, and as required over time,
+        taking into account the tasks included in the individual annual oversight
+        plans drafted for each critical ICT third-party service provider overseen
+        by the joint examination team. To define the number and the composition of
+        members in the joint examination team, the Lead Overseer shall consider at
+        least the following:'
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.a
+      description: the number of critical ICT third-party service providers overseen
+        by the joint examination team and by the ESAs as Lead Overseers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.b
+      description: the specific individual oversight needs related to the specific
+        critical ICT third- party service provider, as assessed by the Lead Overseer;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.c
+      description: the stability of the composition of the joint examination team,
+        ensuring a proper knowledge retention ;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.d
+      description: the necessary skills required for the execution of the tasks by
+        the joint examination team, considering the technical and non-technical ICT
+        knowledge requirements;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.e
+      description: the Member States in which the critical ICT third-party service
+        provider provides ICT services supporting critical or important functions
+        of the financial entities, and the competent authorities which supervise the
+        financial entities making use of those services;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.f
+      description: the different types, sizes and number of financial entities to
+        which the critical ICT third-party service provider provides ICT services
+        supporting critical or important functions;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.g
+      description: the competent authorities which supervise the financial entities
+        which are the most dependent on the ICT services provided by the critical
+        ICT third-party service providers;
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.1
+      ref_id: 3.1.h
+      description: a proportionate cross-sectoral representation of the nominating
+        authorities of the joint examination team.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-3
+      ref_id: '3.2'
+      description: When nominating members of the joint examination team, the authorities
+        referred to in Article 40(2) of Regulation (EU) 2022/2554 shall consider at
+        least points (b), (c), (d), (f) and (g) of paragraph 1.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-3
+      ref_id: '3.3'
+      description: The members of the joint examination team shall be involved either
+        in the execution of specific tasks, or in the ongoing support of the activities
+        carried out by the Lead Overseer, considering the tasks defined in Article
+        1(2) of this Regulation.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-4
+      assessable: false
+      depth: 1
+      ref_id: Article 4
+      description: Renewal of the membership in the joint examination team
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:node53
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-4
+      description: Periodically, or in cases where the appointed Lead Overseer changes,
+        or in cases where material changes as defined in Article 2(2) occur, the Lead
+        Overseer, after consulting the members of the joint examination team, shall
+        assess the achievements of the joint examination team. The results of this
+        assessment shall be used by both the nominating authorities and Lead Overseer
+        to decide whether it is appropriate to renew the membership of the joint examination
+        team.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-5
+      assessable: false
+      depth: 1
+      ref_id: Article 5
+      description: Working arrangements of the members of the joint examination team
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-5
+      ref_id: '5.1'
+      description: The members of the joint examination team shall carry out their
+        tasks identified in the individual annual oversight plan with due skill, care
+        and diligence without any bias and in accordance with the instructions of
+        the Lead Overseer coordinator.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-5
+      ref_id: '5.2'
+      description: When carrying out oversight tasks, the members of the joint examination
+        team shall follow oversight procedures drafted jointly by the European Supervisory
+        Authorities in relation to the conduct of oversight activities and any relevant
+        operational area, including but not limited to specifications relating to
+        the use of IT tools and equipment, and time management.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-5
+      ref_id: '5.3'
+      description: The members of the joint examination team shall follow the information
+        and data handling specifications and instructions as provided by the Lead
+        Overseer coordinator and shall comply with the confidentiality regime of the
+        European Supervisory Authorities.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-5
+      ref_id: '5.4'
+      description: The Lead Overseer and the nominating authorities shall establish
+        arrangements to implement the requirements in this Regulation, including arrangements
+        on the time spent and estimated costs related to the oversight activities
+        performed by the joint examination team, training and ethical and conduct
+        considerations in relation to the role of the member of the joint examination
+        team, where appropriate.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-5
+      ref_id: '5.5'
+      description: ' The Lead Overseer and the nominating authorities shall ensure
+        that the arrangements referred to in paragraph 4 are timely implemented, reviewed
+        and kept up to date.'
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-6
+      assessable: false
+      depth: 1
+      ref_id: Article 6
+      description: Entry into force
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-6
+      ref_id: '6.1'
+      description: This Regulation shall enter into force on the twentieth day following
+        that of its publication in the Official Journal of the European Union.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-6
+      ref_id: '6.2'
+      description: This Regulation shall apply from 17 January 2025.
+    - urn: urn:intuitem:risk:req_node:rts-dora-on-JET:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:rts-dora-on-JET:article-6
+      ref_id: '6.3'
+      description: This Regulation shall be binding in its entirety and directly applicable
+        in all Member States.
