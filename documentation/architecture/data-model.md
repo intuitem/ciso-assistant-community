@@ -1137,7 +1137,6 @@ erDiagram
         asset       parent_asset
     }
 
-
     SOLUTION {
         string      name
         string      description
@@ -1177,7 +1176,6 @@ erDiagram
 
 ```mermaid
 erDiagram
-    DOMAIN          ||--o{ CONTRACT             : contains
     DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
     DOMAIN          ||--o{ SOLUTION             : contains
 ```
