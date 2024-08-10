@@ -1103,21 +1103,22 @@ The following approach has been retained:
 - A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
 - A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
 
-### New models
+### Entity-relationship diagram
 
 ```mermaid
 erDiagram
 
     ASSET                 }o--o{ SOLUTION              : contains
-    ENTITY                }o--o{ DOMAIN                : owns
+    ENTITY2                }o--o| DOMAIN                : owns
     VULNERABILITY         }o--o{ SOLUTION              : affects
     SOLUTION              }o--o| ENTITY                : provided_by
     CONTRACT              }o--o{ SOLUTION              : formalizes
     CONTRACT              }o--o{ EVIDENCE              : has
+    APPLIED_CONTROL       }o--o| CONTRACT              : leverages
     ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
     ENTITY                }o--o{ PERSON                : employs
     ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
-    ENTITY                }o--|| ENTITY                : is_provider_of
+    ENTITY                }o--o{ ENTITY2               : is_provider_of
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
     ENTITY {
         string  name
@@ -1148,8 +1149,6 @@ erDiagram
     CONTRACT {
         string name
         string description
-        entity client
-        entity provider
         date   start_date
         date   end_date
     }
@@ -1193,11 +1192,23 @@ erDiagram
  
 ### Evolution of existing models
 
-requirement_assessment - add the following fields:
-- review_conclusion: --|blocker|warning|ok|N/A
-- review_observation
+#### Requirement assessment
 
-requirement_node - add the following fields:
-- no_result
-- question
+- add the following fields:
+  - review_conclusion: --|blocker|warning|ok|N/A
+  - review_observation
 
+#### Requirement node 
+
+- Add the following fields:
+  - no_result
+  - question
+
+#### Applied control
+
+- Add a "contract" category
+- Add a foreign key "contract" to point to a contract
+
+The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
+
+Note: in the future, we will use the same approach for policies.
