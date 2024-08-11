@@ -42,7 +42,9 @@
 						<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 							<i class="fa-solid fa-right-to-bracket" />
 						</div>
-						<h3 class="font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
+						<h3
+							class="font-bold leading-tight tracking-tight md:text-2xl bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+						>
 							{m.logIntoYourAccount()}
 						</h3>
 						<p class="text-center text-gray-600 text-sm">
