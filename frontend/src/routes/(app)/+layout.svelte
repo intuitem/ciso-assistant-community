@@ -16,7 +16,7 @@
 
 <!-- App Shell -->
 <AppShell
-	slotPageContent="p-8 bg-slate-200"
+	slotPageContent="p-8 bg-gradient-to-br from-violet-100 to-slate-200"
 	regionPage="transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
 >
 	<svelte:fragment slot="sidebarLeft">
@@ -24,7 +24,10 @@
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4">
-			<span class="text-2xl font-bold pb-1" id="page-title">
+			<span
+				class="text-2xl font-bold pb-1 bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+				id="page-title"
+			>
 				{#if Object.hasOwn(m, $pageTitle)}
 					{m[$pageTitle]()}
 				{:else}
