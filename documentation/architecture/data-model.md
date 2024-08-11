@@ -188,6 +188,8 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
+        string  question
+        boolean no_result
     }
 
     REFERENCE_CONTROL {
@@ -227,6 +229,8 @@ erDiagram
         string result
         string mapping_inference
         bool   selected
+        string review_conclusion
+        string review_observation
     }
 
     EVIDENCE {
@@ -744,7 +748,7 @@ Reference controls are templates for Applied controls. They facilitate the creat
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
 
-Reference controls have a function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
+Reference controls have a csf_function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
 
 ## Applied controls
 
@@ -1085,3 +1089,126 @@ Names of built-in objects can be internationalized.
 A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
 
 SSO Settings are defined in a dedicated object SSO_SETTINGS.
+
+## TPRM evolution
+
+### Retained approach
+
+The following approach has been retained:
+- An "entity" model is added to modelize third parties in a generic way.
+- A third party is an entity that is provider of the entity representing the client using CISO Assistant.
+- An evaluation of a third party is based on a compliance assessment, to leverage a huge amount of existing models and code.
+- This compliance assessment is done by the third party.
+- This compliance assessment is reviewed by the client, requirement by requirement.
+- An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
+- Review features are added to compliance assessment to enable this workflow in a generic way.
+- A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
+- A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
+
+### Entity-relationship diagram
+
+```mermaid
+erDiagram
+
+    ASSET                 }o--o{ SOLUTION              : contains
+    ENTITY2                }o--o| DOMAIN                : owns
+    VULNERABILITY         }o--o{ SOLUTION              : affects
+    SOLUTION              }o--o| ENTITY                : provided_by
+    CONTRACT              }o--o{ SOLUTION              : formalizes
+    CONTRACT              }o--o{ EVIDENCE              : has
+    APPLIED_CONTROL       }o--o| CONTRACT              : leverages
+    ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
+    ENTITY                }o--o{ PERSON                : employs
+    ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY                }o--o{ ENTITY2               : is_provider_of
+    COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+    ENTITY {
+        string  name
+        string  description
+        string  missions  
+        entity  parent_entity
+        url     reference_link
+    }
+
+    ASSET {
+        string      name
+        string      description
+        string      business_value
+        string      type
+        string      security_need
+        asset       parent_asset
+    }
+
+    SOLUTION {
+        string      name
+        string      description
+        string      solution_type
+        string      ref_id
+        string      version
+    }
+
+    CONTRACT {
+        string name
+        string description
+        date   start_date
+        date   end_date
+    }
+
+    ENTITY_EVALUATION {
+        string name
+        string description
+        date   send_date
+        date   due_date
+        int    penetration
+        int    dependency
+        int    maturity
+        int    trust
+    }
+
+    PERSON {
+        string email
+        string first_name
+        string last_name
+        string phone
+        string role
+        string description
+    }
+
+```
+
+```mermaid
+erDiagram
+    DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
+    DOMAIN          ||--o{ SOLUTION             : contains
+```
+```mermaid
+erDiagram
+    GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
+    GLOBAL_DOMAIN   ||--o{ PERSON          : contains
+```
+
+- The solution_type of a solution is a string with the following possible values: --|product|maintenance|hosting.
+- The ref_id for a solution can be null or use a formal id like CPE.
+ 
+### Evolution of existing models
+
+#### Requirement assessment
+
+- add the following fields:
+  - review_conclusion: --|blocker|warning|ok|N/A
+  - review_observation
+
+#### Requirement node 
+
+- Add the following fields:
+  - no_result
+  - question
+
+#### Applied control
+
+- Add a "contract" category
+- Add a foreign key "contract" to point to a contract
+
+The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
+
+Note: in the future, we will use the same approach for policies.
