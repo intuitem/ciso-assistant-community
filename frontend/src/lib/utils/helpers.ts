@@ -92,5 +92,5 @@ export function makeCacheLock(): CacheLock {
 }
 
 export function setIntersection<T>(set1: Set<T>, set2: Set<T>): Set<T> {
-	return new Set([...set1].filter(x => set2.has(x)));
+	return new Set([...set1].filter((x) => set2.has(x)));
 }
