@@ -573,7 +573,7 @@
 	"riskAcceptanceExpired": "Acceptance has expired. Consider updating the status or the date",
 	"complianceAssessmentInProgress": "Audit is still in progress",
 	"complianceAssessmentNoAuthor": "No author assigned to this audit",
-	"requirementAssessmentNoAppliedControl": "Requirement assessment result is compliant or partially compliant with no applied control applied",
+	"requirementAssessmentNoAppliedControl": "Requirement assessment result is compliant or partially compliant with no applied control",
 	"appliedControlNoReferenceControl": "Applied control has no reference control selected",
 	"evidenceNoFile": "Evidence has no file uploaded",
 	"requirementAppliedControlHelpText": "Evidences linked to the selected measures will be automatically associated with the requirement.",
