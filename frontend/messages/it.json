@@ -573,7 +573,7 @@
 	"riskAcceptanceExpired": "L'accettazione è scaduta. Valuta la possibilità di aggiornare lo stato o la data",
 	"complianceAssessmentInProgress": "La verifica è ancora in corso",
 	"complianceAssessmentNoAuthor": "Nessun autore assegnato a questo controllo",
-	"requirementAssessmentNoAppliedControl": "Lo stato di valutazione dei requisiti è conforme o parzialmente conforme senza alcun controllo applicato",
+	"requirementAssessmentNoAppliedControl": "Il risultato della valutazione dei requisiti è conforme o parzialmente conforme senza alcuna misura applicata",
 	"appliedControlNoReferenceControl": "Per il controllo applicato non è selezionato alcun controllo di riferimento",
 	"evidenceNoFile": "Nessun file è stato caricato nelle prove",
 	"requirementAppliedControlHelpText": "Le evidenze legate alle misure selezionate verranno automaticamente associate al requisito.",
