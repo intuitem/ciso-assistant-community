@@ -58,7 +58,8 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('slide-toggle').click({ force: true });
+	// await page.getByTestId('slide-toggle').click({ force: true });
+	await page.getByTestId('slide-toggle').locator(`input[type="checkbox"]`).click();
 	await expect(page.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', '25');
 
 	const IDAM1SliderBoundingBox = await page.getByTestId('range-slider-input').boundingBox();

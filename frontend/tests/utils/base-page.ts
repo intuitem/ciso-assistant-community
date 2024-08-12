@@ -29,7 +29,6 @@ export abstract class BasePage {
 	}
 
 	async hasUrl() {
-		// this.url
 		await expect(this.page).toHaveURL(RegExp(`${this.url}.*`));
 	}
 
