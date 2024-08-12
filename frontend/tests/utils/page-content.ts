@@ -104,7 +104,7 @@ export class PageContent extends BasePage {
 		await this.page.waitForURL(new RegExp('^.*\\' + this.url + '/.+'));
 	}
 
-		getRow(value?: string, additional?: any) {
+	getRow(value?: string, additional?: any) {
 		return value
 			? additional
 				? this.page
