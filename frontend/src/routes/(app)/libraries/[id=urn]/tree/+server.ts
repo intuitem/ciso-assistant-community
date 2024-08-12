@@ -6,7 +6,7 @@ import { languageTag } from '$paraglide/runtime';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const URLModel = url.searchParams.has('loaded') ? 'loaded-libraries' : 'stored-libraries';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/tree`;
+	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/tree/`;
 	const res = await fetch(endpoint, {
 		headers: {
 			'Accept-Language': languageTag()

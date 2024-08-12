@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
-	const endpoint = `${BASE_API_URL}/evidences/${params.id}/attachment`;
+	const endpoint = `${BASE_API_URL}/evidences/${params.id}/attachment/`;
 
 	try {
 		const attachmentResponse = await fetch(endpoint);
