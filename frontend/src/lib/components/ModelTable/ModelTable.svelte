@@ -247,7 +247,9 @@
 			])
 		);
 		for (const [field, value] of Object.entries(urlFilterValues)) {
-			filterCacheLocks[field].resolve(value);
+			if (filterCacheLocks.hasOwnProperty(field)) {
+				filterCacheLocks[field].resolve(value);
+			}
 		}
 	});
 
