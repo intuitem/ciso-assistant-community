@@ -2182,13 +2182,13 @@ class ComplianceAssessment(Assessment):
             requirement_assessments.append(ra_dict)
         for requirement_assessment in requirement_assessments:
             if (
-                requirement_assessment["status"] in ("compliant", "partially_compliant")
+                requirement_assessment["result"] in ("compliant", "partially_compliant")
                 and len(requirement_assessment["applied_controls"]) == 0
             ):
                 warnings_lst.append(
                     {
                         "msg": _(
-                            "{}: Requirement assessment status is compliant or partially compliant with no applied control applied"
+                            "{}: Requirement assessment result is compliant or partially compliant with no applied control applied"
                         ).format(requirement_assessment["name"]),
                         "msgid": "requirementAssessmentNoAppliedControl",
                         "link": f"requirement-assessments/{requirement_assessment['id']}",
