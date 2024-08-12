@@ -879,6 +879,9 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             ]
         return node_dict
 
+    def __str__(self) -> str:
+        return f"{self.provider} - {self.name}"
+
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     threats = models.ManyToManyField(
