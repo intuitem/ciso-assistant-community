@@ -475,7 +475,6 @@ Set DJANGO_DEBUG=False for security reason.
 - IT: Italian
 - PL: Polish
 
-
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
