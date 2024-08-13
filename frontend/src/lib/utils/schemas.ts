@@ -117,7 +117,7 @@ export const AppliedControlSchema = baseNamedObject({
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable(),
+	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable()
@@ -129,7 +129,7 @@ export const PolicySchema = baseNamedObject({
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable(),
+	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable()
@@ -217,7 +217,7 @@ export const EvidenceSchema = baseNamedObject({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().nullable()
+	link: z.string().optional().or(z.literal(''))
 });
 
 export const SSOSettingsSchema = z.object({
