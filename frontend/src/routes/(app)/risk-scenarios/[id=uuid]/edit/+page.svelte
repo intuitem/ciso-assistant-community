@@ -175,6 +175,14 @@
 					<div class=" w-1/4">
 						<Select
 							{form}
+							options={data.qualificationChoices}
+							field="qualification"
+							label={m.qualficationStatus()}
+						/>
+					</div>
+					<div class=" w-1/4">
+						<Select
+							{form}
 							options={data.treatmentChoices}
 							field="treatment"
 							label={m.treatmentStatus()}
