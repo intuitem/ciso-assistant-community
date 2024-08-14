@@ -57,6 +57,11 @@ def update_translations_in_object(obj, locale=None):
             elif isinstance(value, list):
                 for item in value:
                     update_translations_in_object(item, get_language() or locale)
+
+    elif isinstance(obj, list) :
+        for i in range(len(obj)) :
+            obj[i] = update_translations_in_object(obj[i])
+
     return obj
 
 

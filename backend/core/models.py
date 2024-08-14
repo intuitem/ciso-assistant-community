@@ -14,6 +14,7 @@ from library.helpers import (
     update_translations_in_object,
     update_translations_as_string,
     update_translations,
+    get_referential_translation
 )
 
 import os
@@ -785,6 +786,11 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
+
+    def parse_json_translated(self) -> dict:
+        return update_translations_in_object(
+            json.loads(self.json_definition)
+        )
 
     def parse_json_translated(self):
         return update_translations(self.json_definition, get_language())
@@ -1836,7 +1842,9 @@ class RiskScenario(NameDescriptionMixin):
                 "value": -1,
             }
         risk_matrix = self.get_matrix()
-        return {**risk_matrix["risk"][self.current_level], "value": self.current_level}
+        current_risk = {**risk_matrix["risk"][self.current_level], "value": self.current_level}
+        update_translations_in_object(current_risk)
+        return current_risk
 
     def get_current_impact(self):
         if self.current_impact < 0:
@@ -1876,10 +1884,12 @@ class RiskScenario(NameDescriptionMixin):
                 "value": -1,
             }
         risk_matrix = self.get_matrix()
-        return {
+        residual_risk = {
             **risk_matrix["risk"][self.residual_level],
             "value": self.residual_level,
         }
+        update_translations_in_object(residual_risk)
+        return residual_risk
 
     def get_residual_impact(self):
         if self.residual_impact < 0:
@@ -2402,7 +2412,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return self.requirement.display_short
 
     def get_requirement_description(self) -> str:
-        return self.requirement.description
+        return get_referential_translation({
+            "description": self.requirement.description,
+            "translations": self.requirement.translations
+        }, "description")
 
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self

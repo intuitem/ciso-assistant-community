@@ -6,13 +6,21 @@ export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
-	const res = await fetch(endpoint);
-	const compliance_assessment = await res.json();
-
-	const flashMode = await fetch(`${endpoint}flash_mode/`).then((res) => res.json());
+	const [compliance_assessment, flashMode] = await Promise.all([
+		endpoint,
+		`${endpoint}flash_mode/`
+	].map(
+		(endpoint) => fetch(endpoint).then((res) => res.json())
+	));
 
 	const requirement_assessments = flashMode.requirement_assessments;
 	const requirements = flashMode.requirements;
+
+	requirements.forEach(requirement => {
+		if (requirement.name && requirement.name.indexOf("Compréhension de l'organisation et de son contexte") >= 0 && requirement.description) {
+			console.log(requirement);
+		}
+	})
 
 	return {
 		URLModel,

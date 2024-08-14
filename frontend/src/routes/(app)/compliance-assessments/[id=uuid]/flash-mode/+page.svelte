@@ -19,12 +19,14 @@
 
 	// Reactive variable to keep track of the current item index
 	let currentIndex = 0;
+	$: currentRequirementAssessment = data.requirement_assessments[currentIndex]
 
-	$: color = complianceResultColorMap[data.requirement_assessments[currentIndex].result];
+	$: color = complianceResultColorMap[currentRequirementAssessment.result];
 
-	$: requirement = data.requirements.find(
-		(req) => req.id === data.requirement_assessments[currentIndex].requirement
-	);
+	const requirementHashmap = Object.fromEntries(data.requirements.map(
+		(requirement) => [requirement.id, requirement]
+	));
+	$: requirement = requirementHashmap[currentRequirementAssessment.requirement];
 	$: parent = data.requirements.find((req) => req.urn === requirement.parent_urn);
 
 	$: title = requirement.display_short
@@ -51,14 +53,14 @@
 		}
 	}
 
-	$: result = data.requirement_assessments[currentIndex].result;
+	$: result = currentRequirementAssessment.result;
 
 	// Function to update the result of the current item
 	function updateResult(event) {
-		data.requirement_assessments[currentIndex].result = event.target.value;
+		currentRequirementAssessment.result = event.target.value;
 		const form = document.getElementById('flashModeForm');
 		const formData = {
-			id: data.requirement_assessments[currentIndex].id,
+			id: currentRequirementAssessment.id,
 			result: event.target.value
 		};
 		fetch(form.action, {
@@ -73,7 +75,7 @@
 		style="border-color: {color}"
 		class="flex flex-col bg-white w-3/4 h-3/4 rounded-xl shadow-xl p-4 border-4"
 	>
-		{#if data.requirement_assessments[currentIndex]}
+		{#if currentRequirementAssessment}
 			<div class="flex flex-col w-full h-full space-y-4">
 				<div class="flex justify-between">
 					<div class="">
@@ -91,8 +93,8 @@
 					<p class="font-semibold">{title}</p>
 				</div>
 				<div class="flex flex-col items-center justify-center">
-					{#if data.requirement_assessments[currentIndex].description}
-						{data.requirement_assessments[currentIndex].description}
+					{#if currentRequirementAssessment.description}
+						{currentRequirementAssessment.description}
 					{/if}
 				</div>
 			</div>
