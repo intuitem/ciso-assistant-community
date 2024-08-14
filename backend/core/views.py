@@ -1326,11 +1326,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 compliance_assessment_object.get_requirement_assessments()
             )
             applied_controls = [
-                {
-                    **model_to_dict(applied_control),
-                    "id": applied_control.id
-                }
-                for applied_control in  AppliedControl.objects.filter(
+                {**model_to_dict(applied_control), "id": applied_control.id}
+                for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
                 ).distinct()
             ]
