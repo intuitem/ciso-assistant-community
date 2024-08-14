@@ -231,7 +231,7 @@
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg space-y-2">
 		<div>
-			<p class="text-sm font-semibold text-gray-400">{m.qualificationStatus()}</p>
+			<p class="text-sm font-semibold text-gray-400">{m.qualification()}</p>
 			<p>
 				<span class="font-semibold">
 					{localItems()[toCamelCase(data.scenario.qualification)] || data.scenario.qualification || localItems()["undefined"]}
