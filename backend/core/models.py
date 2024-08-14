@@ -1680,6 +1680,23 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
+    QUALIFICATIONS = [
+        ("Financial", _("Financial")),
+        ("Legal", _("Legal")),
+        ("Reputation", _("Reputation")),
+        ("Operational", _("Operational")),
+        ("Confidentiality", _("Confidentiality")),
+        ("Integrity", _("Integrity")),
+        ("Availability", _("Availability"))
+    ]
+
+    class Status(models.TextChoices):
+        TODO = "to_do", _("To do")
+        IN_PROGRESS = "in_progress", _("In progress")
+        IN_REVIEW = "in_review", _("In review")
+        DONE = "done", _("Done")
+
+
     DEFAULT_SOK_OPTIONS = {
         -1: {
             "name": _("--"),
@@ -1785,6 +1802,13 @@ class RiskScenario(NameDescriptionMixin):
         choices=TREATMENT_OPTIONS,
         default="open",
         verbose_name=_("Treatment status"),
+    )
+
+    qualification = models.CharField(
+        max_length=20,
+        choices=QUALIFICATIONS,
+        null=True,
+        verbose_name=_("Financial"),
     )
 
     strength_of_knowledge = models.IntegerField(
