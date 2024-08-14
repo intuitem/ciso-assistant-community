@@ -217,7 +217,7 @@ export const EvidenceSchema = baseNamedObject({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().or(z.literal(''))
+	link: z.string().optional().nullable(),
 });
 
 export const SSOSettingsSchema = z.object({
