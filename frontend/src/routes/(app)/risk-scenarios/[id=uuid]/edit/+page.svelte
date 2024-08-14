@@ -175,14 +175,6 @@
 					<div class=" w-1/4">
 						<Select
 							{form}
-							options={data.qualificationChoices}
-							field="qualification"
-							label={m.qualificationStatus()}
-						/>
-					</div>
-					<div class=" w-1/4">
-						<Select
-							{form}
 							options={data.treatmentChoices}
 							field="treatment"
 							label={m.treatmentStatus()}
@@ -319,6 +311,12 @@
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
+			<Select
+				{form}
+				options={data.qualificationChoices}
+				field="qualification"
+				label={m.qualificationStatus()}
+			/>
 			<Select
 				{form}
 				options={strengthOfKnowledgeFormChoices}
