@@ -1687,7 +1687,7 @@ class RiskScenario(NameDescriptionMixin):
         ("Operational", _("Operational")),
         ("Confidentiality", _("Confidentiality")),
         ("Integrity", _("Integrity")),
-        ("Availability", _("Availability"))
+        ("Availability", _("Availability")),
     ]
 
     class Status(models.TextChoices):
@@ -1695,7 +1695,6 @@ class RiskScenario(NameDescriptionMixin):
         IN_PROGRESS = "in_progress", _("In progress")
         IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
-
 
     DEFAULT_SOK_OPTIONS = {
         -1: {
