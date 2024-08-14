@@ -61,7 +61,9 @@ test('compliance assessments scoring is working properly', async ({
 	// await page.getByTestId('slide-toggle').click({ force: true });
 	// await page.getByTestId('slide-toggle').locator(`input[type="checkbox"]`).click({ force: true });
 
-	const scoreCheckbox = document.querySelector('[data-testid="slide-toggle"] input[type="checkbox"]');
+	const scoreCheckbox = document.querySelector(
+		'[data-testid="slide-toggle"] input[type="checkbox"]'
+	);
 	(scoreCheckbox as HTMLInputElement).checked = true;
 
 	await expect(page.getByTestId('progress-radial')).toHaveAttribute('aria-valuenow', '25');
