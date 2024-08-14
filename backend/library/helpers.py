@@ -5,6 +5,7 @@ from django.utils.translation import get_language
 
 from typing import Union
 
+
 def get_referential_translation(object, parameter: str, locale=None) -> str:
     # NOTE: put get_language() as default value for locale doesn't work, default locale "en" is always returned.
     # get_language() needs to be called in the actual thread to get the current language, it could explain that behavior.
