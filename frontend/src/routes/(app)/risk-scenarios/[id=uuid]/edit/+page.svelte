@@ -177,7 +177,7 @@
 							{form}
 							options={data.qualificationChoices}
 							field="qualification"
-							label={m.qualficationStatus()}
+							label={m.qualificationStatus()}
 						/>
 					</div>
 					<div class=" w-1/4">
