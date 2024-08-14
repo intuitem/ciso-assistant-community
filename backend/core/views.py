@@ -585,6 +585,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     description=scenario.description,
                     existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
+                    qualification=scenario.qualification,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -736,6 +737,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "risk_assessment__project",
         "risk_assessment__project__folder",
         "treatment",
+        "qualification",
         "threats",
         "assets",
         "applied_controls",
@@ -744,6 +746,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
+
+    @action(detail=False, name="Get qualificatio choices")
+    def qualification(self, request) :
+        return Response(dict(RiskScenario.QUALIFICATIONS))
 
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
