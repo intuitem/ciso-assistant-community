@@ -1781,6 +1781,7 @@ def generate_html(
         return node_data, selected_evidences
 
     top_level_nodes = [req for req in requirement_nodes if not req.parent_urn]
+    update_translations_in_object(top_level_nodes)
     top_level_nodes_data = []
     for requirement_node in top_level_nodes:
         node_data, node_evidences = generate_data_rec(requirement_node)
