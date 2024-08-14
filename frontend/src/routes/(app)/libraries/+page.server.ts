@@ -38,7 +38,6 @@ export const load = (async ({ fetch }) => {
 
 	const prepareRow = (row: Record<string, any>) => {
 		row.overview = [
-			`Provider: ${row.provider}`,
 			`Packager: ${row.packager}`,
 			`Version: ${row.version}`,
 			...Object.entries(row.objects_meta).map(([key, value]) => `${key}: ${value}`)
