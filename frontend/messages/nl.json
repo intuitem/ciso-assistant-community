@@ -102,7 +102,7 @@
 	"urn": "URN",
 	"id": "ID",
 	"treatmentStatus": "Behandelstatus",
-	"qualificationStatus": "Kwalificatiestatus",
+	"qualification": "Kwalificatie",
 	"currentLevel": "Huidig niveau",
 	"residualLevel": "Restniveau",
 	"riskMatrix": "Risicomatrix",

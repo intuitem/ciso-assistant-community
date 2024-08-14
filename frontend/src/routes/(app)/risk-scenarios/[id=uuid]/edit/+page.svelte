@@ -315,7 +315,7 @@
 				{form}
 				options={data.qualificationChoices}
 				field="qualification"
-				label={m.qualificationStatus()}
+				label={m.qualification()}
 			/>
 			<Select
 				{form}

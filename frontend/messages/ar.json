@@ -97,7 +97,7 @@
 	"urn": "URN",
 	"id": "معرف",
 	"treatmentStatus": "حالة المعالجة",
-	"qualificationStatus": "حالة التأهيل",
+	"qualification": "المؤهلات",
 	"currentLevel": "المستوى الحالي",
 	"residualLevel": "المستوى المتبقي",
 	"riskMatrix": "مصفوفة المخاطر",
