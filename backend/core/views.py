@@ -748,7 +748,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
     @action(detail=False, name="Get qualificatio choices")
-    def qualification(self, request) :
+    def qualification(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
 
     @action(detail=True, name="Get probability choices")
