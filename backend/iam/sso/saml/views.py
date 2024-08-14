@@ -156,10 +156,10 @@ class FinishACSView(SAMLViewMixin, View):
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
             error = AuthError.USER_DOES_NOT_EXIST
-            logger.warning("User does not exist", exc_info=e)
+            logger.error("User does not exist", exc_info=e)
         except SignupClosedException as e:
             error = AuthError.SIGNUP_CLOSED
-            logger.warning("Signup closed", exc_info=e)
+            logger.error("Signup closed", exc_info=e)
         except PermissionDenied as e:
             error = AuthError.PERMISSION_DENIED
             logger.error("Permission denied", exc_info=e)
@@ -169,11 +169,11 @@ class FinishACSView(SAMLViewMixin, View):
         except Exception as e:
             error = AuthError.FAILED_SSO
             logger.error("SSO failed", exc_info=e)
-        else:
+        finally:
             next_url = login.state["next"]
             if error:
                 next_url = httpkit.add_query_params(
                     next_url,
                     {"error": error, "error_process": login.state["process"]},
                 )
-        return HttpResponseRedirect(next_url)
+            return HttpResponseRedirect(next_url)
