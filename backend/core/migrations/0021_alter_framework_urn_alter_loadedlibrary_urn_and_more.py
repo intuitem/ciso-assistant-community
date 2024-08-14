@@ -4,55 +4,72 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0020_fix_libraries_objects_meta'),
+        ("core", "0020_fix_libraries_objects_meta"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='framework',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='URN'),
+            model_name="framework",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, unique=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='loadedlibrary',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='URN'),
+            model_name="loadedlibrary",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='referencecontrol',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='URN'),
+            model_name="referencecontrol",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, unique=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='requirementmappingset',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='URN'),
+            model_name="requirementmappingset",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, unique=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='requirementnode',
-            name='parent_urn',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Parent URN'),
+            model_name="requirementnode",
+            name="parent_urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Parent URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='requirementnode',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='URN'),
+            model_name="requirementnode",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, unique=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='riskmatrix',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='URN'),
+            model_name="riskmatrix",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, unique=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='storedlibrary',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='URN'),
+            model_name="storedlibrary",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
-            model_name='threat',
-            name='urn',
-            field=models.CharField(blank=True, max_length=255, null=True, unique=True, verbose_name='URN'),
+            model_name="threat",
+            name="urn",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, unique=True, verbose_name="URN"
+            ),
         ),
     ]
