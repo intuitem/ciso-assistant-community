@@ -70,8 +70,8 @@
 							active="bg-primary-500"
 							name="score-slider"
 						>
-							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
-						>
+							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p>
+						</SlideToggle>
 						{#if $isScored && scores_definition && $value !== null}
 							{#each scores_definition as definition}
 								{#if definition.score === $value}

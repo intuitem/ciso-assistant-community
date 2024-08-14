@@ -29,7 +29,7 @@ export abstract class BasePage {
 	}
 
 	async hasUrl() {
-		await expect(this.page).toHaveURL(RegExp(`${this.url}.*`));
+		await expect(this.page).toHaveURL(RegExp(`${this.url}((\\?|#).*)?`));
 	}
 
 	async hasBreadcrumbPath(paths: (string | RegExp)[], fullPath = true, origin = 'Home') {
