@@ -19,13 +19,13 @@
 
 	// Reactive variable to keep track of the current item index
 	let currentIndex = 0;
-	$: currentRequirementAssessment = data.requirement_assessments[currentIndex]
+	$: currentRequirementAssessment = data.requirement_assessments[currentIndex];
 
 	$: color = complianceResultColorMap[currentRequirementAssessment.result];
 
-	const requirementHashmap = Object.fromEntries(data.requirements.map(
-		(requirement) => [requirement.id, requirement]
-	));
+	const requirementHashmap = Object.fromEntries(
+		data.requirements.map((requirement) => [requirement.id, requirement])
+	);
 	$: requirement = requirementHashmap[currentRequirementAssessment.requirement];
 	$: parent = data.requirements.find((req) => req.urn === requirement.parent_urn);
 
