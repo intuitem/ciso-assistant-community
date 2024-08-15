@@ -1,17 +1,24 @@
-from allauth.socialaccount.models import SocialLogin
+import structlog
+from allauth.core.exceptions import SignupClosedException
+from allauth.socialaccount.adapter import get_account_adapter
+from allauth.socialaccount.internal.flows.login import (
+    pre_social_login,
+    record_authentication,
+)
+from allauth.socialaccount.models import PermissionDenied, SocialLogin
 from allauth.socialaccount.providers.saml.views import (
-    AuthError,
     AuthProcess,
     LoginSession,
     OneLogin_Saml2_Error,
     SAMLViewMixin,
     binascii,
     build_auth,
-    complete_social_login,
     decode_relay_state,
     httpkit,
     render_authentication_error,
 )
+from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
+from allauth.utils import ValidationError
 from django.http import HttpRequest, HttpResponseRedirect
 from django.http.response import Http404
 from django.urls import reverse
@@ -19,13 +26,19 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from rest_framework.views import csrf_exempt
 
-import structlog
-
 from iam.models import User
 from iam.sso.models import SSOSettings
 from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
+
+
+class AuthError(AllauthAuthError):
+    IDP_INITIATED_SSO_REJECTED = "idpInitiatedSSORejected"
+    SIGNUP_CLOSED = "signupClosed"
+    PERMISSION_DENIED = "permissionDenied"
+    FAILED_SSO = "failedSSO"
+    USER_DOES_NOT_EXIST = "UserDoesNotExist"
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -44,6 +57,8 @@ class ACSView(SAMLViewMixin, View):
 
 class FinishACSView(SAMLViewMixin, View):
     def dispatch(self, request, organization_slug):
+        error = None
+        next_url = "/"
         if len(SSOSettings.objects.all()) == 0:
             raise Http404()
         try:
@@ -108,11 +123,14 @@ class FinishACSView(SAMLViewMixin, View):
             )
             if reject:
                 logger.error("IdP initiated SSO rejected")
-                return render_authentication_error(request, provider)
-            next_url = decode_relay_state(acs_request.POST.get("RelayState"))
+                return render_authentication_error(
+                    request, provider, error=AuthError.IDP_INITIATED_SSO_REJECTED
+                )
+            next_url = (
+                decode_relay_state(acs_request.POST.get("RelayState")) or next_url
+            )
             login.state["process"] = AuthProcess.LOGIN
-            if next_url:
-                login.state["next"] = next_url
+            login.state["next"] = next_url
         try:
             email = auth._nameid
             user = User.objects.get(email=email)
@@ -130,12 +148,32 @@ class FinishACSView(SAMLViewMixin, View):
             user.save()
             token = generate_token(user)
             login.state["next"] += f"sso/authenticate/{token}"
-            return complete_social_login(request, login)
-        except User.DoesNotExist:
+            pre_social_login(request, login)
+            if request.user.is_authenticated:
+                get_account_adapter(request).logout(request)
+            login._accept_login()
+            record_authentication(request, login)
+        except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
-            logger.warning("User does not exist")
-            return render_authentication_error(
-                request, provider, error="UserDoesNotExist"
-            )
-        except:
-            return render_authentication_error(request, provider, error="failedSSO")
+            error = AuthError.USER_DOES_NOT_EXIST
+            logger.error("User does not exist", exc_info=e)
+        except SignupClosedException as e:
+            error = AuthError.SIGNUP_CLOSED
+            logger.error("Signup closed", exc_info=e)
+        except PermissionDenied as e:
+            error = AuthError.PERMISSION_DENIED
+            logger.error("Permission denied", exc_info=e)
+        except ValidationError as e:
+            error = e.code
+            logger.error("Validation error", exc_info=e)
+        except Exception as e:
+            error = AuthError.FAILED_SSO
+            logger.error("SSO failed", exc_info=e)
+        finally:
+            next_url = login.state["next"]
+            if error:
+                next_url = httpkit.add_query_params(
+                    next_url,
+                    {"error": error, "error_process": login.state["process"]},
+                )
+            return HttpResponseRedirect(next_url)

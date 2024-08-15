@@ -60,7 +60,9 @@ export const LOCALE_DISPLAY_MAP = {
 	it: '🇮🇹 Italiano',
 	nl: '🇳🇱 Nederlands',
 	pt: '🇵🇹 Português',
-	pl: '🇵🇱 Polski'
+	pl: '🇵🇱 Polski',
+	ro: '🇷🇴 Română',
+	ar: '🇸🇦 العربية'
 };
 
 export const ISO_8601_REGEX =

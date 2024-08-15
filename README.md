@@ -103,7 +103,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
 10. Essential Eight 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
-12. DORA 🇪🇺
+12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
@@ -145,6 +145,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
 53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
+54. Part-IS ✈️🇪🇺
 
 ### Community contributions
 
@@ -165,10 +166,9 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- Part-IS
+- ENS Esquema Nacional de seguridad (español)
 - NIST 800-82
 - Korea ISA: ISMS-P
-- ENS Esquema Nacional de seguridad (español)
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -474,7 +474,6 @@ Set DJANGO_DEBUG=False for security reason.
 - NL: Dutch
 - IT: Italian
 - PL: Polish
-
 
 ## Built With 💜
 
