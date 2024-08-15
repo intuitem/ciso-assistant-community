@@ -3,6 +3,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 </p>
 
 <p align="center">
+    <a href="https://trendshift.io/repositories/9343" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9343" alt="intuitem%2Fciso-assistant-community | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
@@ -16,13 +17,15 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="#supported-frameworks-">Frameworks</a>
     <br />
+
 </p>
 
 ![](gh_banner.png)
 
-[![Backend code coverage](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml)
+[![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/795e9d4203bf469dafcc45a9f3131d57)](https://app.codacy.com/gh/intuitem/ciso-assistant-community/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
