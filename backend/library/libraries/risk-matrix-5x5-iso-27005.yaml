@@ -4,7 +4,7 @@ ref_id: risk-matrix-5x5-iso27005
 name: 5x5 ISO-27005
 description: 5x5 matrix from ISO 27005 Annex A
 copyright: ISO
-version: 2
+version: 3
 provider: intuitem
 packager: intuitem
 translations:
@@ -24,7 +24,7 @@ objects:
       description: The likelihood of the risk scenario is very low
       translations:
         fr:
-          name: 1 - peu probable
+          name: 1 - improbable
           description: "La vraisemblance du sc\xE9nario de risque est tr\xE8s faible"
     - id: 1
       abbreviation: '2'
@@ -32,7 +32,7 @@ objects:
       description: The likelihood of the risk scenario is low
       translations:
         fr:
-          name: "2 - plut\xF4t probable"
+          name: "2 - plut\xF4t improbable"
           description: "La vraisemblance du sc\xE9nario de risque est faible"
     - id: 2
       abbreviation: '3'
