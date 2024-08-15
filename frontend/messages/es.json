@@ -573,7 +573,7 @@
 	"riskAcceptanceExpired": "La aceptación ha caducado. Considere actualizar el estado o la fecha",
 	"complianceAssessmentInProgress": "La auditoría aún está en progreso",
 	"complianceAssessmentNoAuthor": "Ningún autor asignado a esta auditoría",
-	"requirementAssessmentNoAppliedControl": "El estado de la evaluación de requisitos es conforme o parcialmente conforme sin que se haya aplicado ningún control.",
+	"requirementAssessmentNoAppliedControl": "El resultado de la evaluación de requisitos es conforme o parcialmente conforme sin ninguna medida aplicada",
 	"appliedControlNoReferenceControl": "El control aplicado no tiene ningún control de referencia seleccionado",
 	"evidenceNoFile": "La evidencia no tiene ningún archivo subido",
 	"requirementAppliedControlHelpText": "Las evidencias vinculadas a las medidas seleccionadas se asociarán automáticamente al requisito.",
