@@ -573,7 +573,7 @@
 	"riskAcceptanceExpired": "Acceptatie is verlopen. Overweeg om de status of de datum bij te werken",
 	"complianceAssessmentInProgress": "De audit is nog in volle gang",
 	"complianceAssessmentNoAuthor": "Er is geen auteur toegewezen aan deze audit",
-	"requirementAssessmentNoAppliedControl": "De status van de vereistenbeoordeling is conform of gedeeltelijk conform en er is geen toegepaste controle toegepast",
+	"requirementAssessmentNoAppliedControl": "Het resultaat van de beoordeling van de vereisten is conform of gedeeltelijk conform zonder dat er een maatregel is toegepast",
 	"appliedControlNoReferenceControl": "Voor de toegepaste regeling is geen referentieregeling geselecteerd",
 	"evidenceNoFile": "Er is geen bestand geüpload voor bewijsmateriaal",
 	"requirementAppliedControlHelpText": "Bewijsstukken die verband houden met de geselecteerde maatregelen worden automatisch aan de eis gekoppeld.",

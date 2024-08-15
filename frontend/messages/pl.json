@@ -573,7 +573,7 @@
 	"riskAcceptanceExpired": "Akceptacja wygasła. Rozważ zaktualizowanie statusu lub daty",
 	"complianceAssessmentInProgress": "Audyt jest nadal w toku",
 	"complianceAssessmentNoAuthor": "Brak autora przypisanego do tego audytu",
-	"requirementAssessmentNoAppliedControl": "Status oceny wymagań jest zgodny lub częściowo zgodny bez zastosowanej kontroli",
+	"requirementAssessmentNoAppliedControl": "Wynik oceny wymagań jest zgodny lub częściowo zgodny bez zastosowania żadnych środków",
 	"appliedControlNoReferenceControl": "Zastosowana kontrola nie ma wybranej kontroli referencyjnej",
 	"evidenceNoFile": "Dowód nie ma załadowanego pliku",
 	"requirementAppliedControlHelpText": "Dowody związane z wybranymi środkami zostaną automatycznie powiązane z wymaganiem.",
