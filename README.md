@@ -154,7 +154,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
 4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-
+6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
+7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 <br/>
 
 > [!NOTE]
