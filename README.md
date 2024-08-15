@@ -475,6 +475,7 @@ Set DJANGO_DEBUG=False for security reason.
 - NL: Dutch
 - IT: Italian
 - PL: Polish
+- RO: Romanian
 
 ## Built With 💜
 
