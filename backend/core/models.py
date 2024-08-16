@@ -1,33 +1,30 @@
-from pathlib import Path
-from django.apps import apps
-from django.core.validators import MaxValueValidator
-from django.forms.models import model_to_dict
-from django.contrib.auth import get_user_model
-from django.db import models, transaction
-from django.utils.translation import gettext_lazy as _
-from django.db.models import Q
-
-from .base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
-from .validators import validate_file_size, validate_file_name
-from .utils import camel_case, sha256
-from iam.models import FolderMixin, PublishInRootFolderMixin
-from django.core import serializers
-from django.utils.translation import get_language
-from library.helpers import update_translations_in_object, update_translations
-
-import os
 import json
-import yaml
+import os
 import re
-
-from django.core.exceptions import ValidationError
-
-from django.urls import reverse
 from datetime import date, datetime
-from typing import Union, Dict, Set, List, Tuple, Type, Self
-from django.utils.html import format_html
+from pathlib import Path
+from typing import Self, Type, Union
 
+import yaml
+from django.apps import apps
+from django.contrib.auth import get_user_model
+from django.core import serializers
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
+from django.db import models, transaction
+from django.db.models import Q
+from django.forms.models import model_to_dict
+from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from iam.models import FolderMixin, PublishInRootFolderMixin
+from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
+
+from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from .utils import camel_case, sha256
+from .validators import validate_file_name, validate_file_size
 
 logger = get_logger(__name__)
 
@@ -54,7 +51,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
 
     urn = models.CharField(
-        max_length=100, null=True, blank=True, unique=True, verbose_name=_("URN")
+        max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
     )
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
@@ -135,7 +132,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         abstract = True
         unique_together = [["urn", "locale", "version"]]
 
-    urn = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("URN"))
+    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -220,7 +217,7 @@ class StoredLibrary(LibraryMixin):
             outdated_library.delete()
 
         objects_meta = {
-            key: (1 if key == "framework" or "requirement_mapping_set" else len(value))
+            key: (1 if key in ["framework", "requirement_mapping_set"] else len(value))
             for key, value in library_data["objects"].items()
         }
 
@@ -882,6 +879,9 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             ]
         return node_dict
 
+    def __str__(self) -> str:
+        return f"{self.provider} - {self.name}"
+
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     threats = models.ManyToManyField(
@@ -905,7 +905,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         related_name="requirement_nodes",
     )
     parent_urn = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
+        max_length=255, null=True, blank=True, verbose_name=_("Parent URN")
     )
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
     implementation_groups = models.JSONField(
@@ -2185,13 +2185,13 @@ class ComplianceAssessment(Assessment):
             requirement_assessments.append(ra_dict)
         for requirement_assessment in requirement_assessments:
             if (
-                requirement_assessment["status"] in ("compliant", "partially_compliant")
+                requirement_assessment["result"] in ("compliant", "partially_compliant")
                 and len(requirement_assessment["applied_controls"]) == 0
             ):
                 warnings_lst.append(
                     {
                         "msg": _(
-                            "{}: Requirement assessment status is compliant or partially compliant with no applied control applied"
+                            "{}: Requirement assessment result is compliant or partially compliant with no applied control applied"
                         ).format(requirement_assessment["name"]),
                         "msgid": "requirementAssessmentNoAppliedControl",
                         "link": f"requirement-assessments/{requirement_assessment['id']}",
