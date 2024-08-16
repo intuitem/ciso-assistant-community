@@ -1,3 +1,5 @@
+// define the content of forms
+
 import type { urlModel } from './types';
 import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
@@ -64,8 +66,8 @@ export const getOptions = ({
 								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
-						  '/' +
-						  my_label
+							'/' +
+							my_label
 						: my_label,
 				value: object[value],
 				suggested: false
@@ -184,6 +186,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
+	'risk-assessment_duplicate': {
+		name: 'riskassessment',
+		localName: 'riskAssessment',
+		localNamePlural: 'riskAssessments',
+		verboseName: 'Risk assessment',
+		verboseNamePlural: 'Risk assessments',
+		foreignKeyFields: [{ field: 'project', urlModel: 'projects' }]
+	},
 	threats: {
 		name: 'threat',
 		localName: 'threat',
@@ -221,6 +231,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
@@ -236,11 +247,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
-		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'category' },
+			{ field: 'csf_function' },
+			{ field: 'effort' }
+		],
 		filters: [
 			{ field: 'reference_control' },
 			{ field: 'status' },
 			{ field: 'category' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'folder' }
 		]
@@ -256,9 +273,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'effort' }],
+		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },
+			{ field: 'csf_function' },
 			{ field: 'status' },
 			{ field: 'effort' },
 			{ field: 'folder' }
@@ -288,7 +306,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
-		selectFields: [{ field: 'category' }],
+		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]
 	},
 	assets: {
@@ -422,8 +440,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Requirement mapping set',
 		verboseNamePlural: 'Requirement mapping sets',
 		foreignKeyFields: [
-			{ field: 'focal_framework', urlModel: 'frameworks' },
-			{ field: 'reference_framework', urlModel: 'frameworks' },
+			{ field: 'source_framework', urlModel: 'frameworks' },
+			{ field: 'target_framework', urlModel: 'frameworks' },
 			{ field: 'library', urlModel: 'libraries' }
 		]
 	}
@@ -436,7 +454,7 @@ export const FIELD_COMPONENT_MAP = {
 		attachment: EvidenceFilePreview
 	},
 	libraries: {
-		locale: LanguageDisplay,
+		locales: LanguageDisplay,
 		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
 	// "stored-libraries": {
@@ -544,27 +562,32 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	}
 };
 
-export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any) => any } = {
-	frameworks: async ({ fetch }) => {
-		const endpoint = `${BASE_API_URL}/frameworks/`;
-		const res = await fetch(endpoint);
-		const response_data = await res.json();
-		const frameworks = response_data.results;
+export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
+	{
+		frameworks: async ({ fetch }, language) => {
+			const endpoint = `${BASE_API_URL}/frameworks/`;
+			const res = await fetch(endpoint, {
+				headers: {
+					'Accept-Language': language
+				}
+			});
+			const response_data = await res.json();
+			const frameworks = response_data.results;
 
-		let compliance_assessment_req = null;
-		let compliance_assessment_data = null;
+			let compliance_assessment_req = null;
+			let compliance_assessment_data = null;
 
-		for (const framework of frameworks) {
-			compliance_assessment_req = await fetch(
-				`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
-			);
-			compliance_assessment_data = await compliance_assessment_req.json();
-			framework.compliance_assessments = compliance_assessment_data.count;
+			for (const framework of frameworks) {
+				compliance_assessment_req = await fetch(
+					`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
+				);
+				compliance_assessment_data = await compliance_assessment_req.json();
+				framework.compliance_assessments = compliance_assessment_data.count;
+			}
+
+			return frameworks;
 		}
-
-		return frameworks;
-	}
-};
+	};
 
 export const urlParamModelVerboseName = (model: string): string => {
 	return URL_MODEL_MAP[model]?.verboseName || '';

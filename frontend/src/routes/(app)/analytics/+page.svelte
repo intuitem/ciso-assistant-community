@@ -42,6 +42,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
 			eta: 'eta',
@@ -50,6 +51,7 @@
 		body: tableSourceMapper(data.measures, [
 			'name',
 			'category',
+			'csf_function',
 			'folder',
 			'ranking_score',
 			'eta',
@@ -62,6 +64,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			folder: 'domain',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
@@ -70,6 +73,7 @@
 		body: tableSourceMapper(data.measures_to_review, [
 			'name',
 			'category',
+			'csf_function',
 			'folder',
 			'eta',
 			'expiry_date',
@@ -203,13 +207,7 @@
 							name="riskScenariosStatus"
 							title={m.riskScenariosStatus()}
 							values={data.riskScenariosPerStatus.values}
-						/>
-						<BarChart
-							classesContainer="basis-1/3 card p-4 bg-white"
-							name="usedMatrices"
-							title={m.usedRiskMatrices()}
-							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
-							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+							orientation="horizontal"
 						/>
 					</div>
 				</section>
@@ -222,6 +220,7 @@
 						<ModelTable
 							URLModel="applied-controls"
 							source={appliedControlTodoTable}
+							hideFilters={true}
 							search={false}
 							rowsPerPage={false}
 							orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
@@ -245,6 +244,7 @@
 							<ModelTable
 								source={appliedControlWatchlistTable}
 								URLModel="applied-controls"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -254,6 +254,7 @@
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
 								URLModel="risk-acceptances"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>

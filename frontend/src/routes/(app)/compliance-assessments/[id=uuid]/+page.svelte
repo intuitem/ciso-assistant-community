@@ -17,7 +17,7 @@
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceResultColorMap, complianceStatusColorMap } from './utils';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
@@ -236,7 +236,7 @@
 		</div>
 		<div class="flex w-1/3 relative">
 			{#if data.global_score.score >= 0}
-				<div class="absolute font-bold text-sm">Maturity</div>
+				<div class="absolute font-bold text-sm">{m.maturity()}</div>
 				<div class="flex justify-center items-center w-full">
 					<ProgressRadial
 						stroke={100}
@@ -255,7 +255,7 @@
 			<DonutChart
 				s_label="Result"
 				name="compliance_result"
-				title="Compliance"
+				title={m.compliance()}
 				orientation="horizontal"
 				values={compliance_assessment_donut_values.result.values}
 				colors={compliance_assessment_donut_values.result.values.map(
@@ -267,7 +267,7 @@
 			<DonutChart
 				s_label="Status"
 				name="compliance_status"
-				title="Progress"
+				title={m.progress()}
 				orientation="horizontal"
 				values={compliance_assessment_donut_values.status.values}
 				colors={compliance_assessment_donut_values.status.values.map(
@@ -277,7 +277,7 @@
 		</div>
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
-				<button class="btn variant-filled-primary" use:popup={popupDownload}
+				<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
 					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
 				>
 				<div
@@ -307,12 +307,15 @@
 			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
+			<span class="pt-4 font-light text-sm">Power-ups:</span>
 			<a
 				href={`${$page.url.pathname}/flash-mode`}
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
-			<button class="btn variant-filled-surface" on:click={(_) => modalCreateForm()}
+			<button
+				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
+				on:click={(_) => modalCreateForm()}
 				><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
 			</button>
 		</div>

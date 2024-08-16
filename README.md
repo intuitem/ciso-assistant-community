@@ -3,6 +3,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 </p>
 
 <p align="center">
+    <a href="https://trendshift.io/repositories/9343" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9343" alt="intuitem%2Fciso-assistant-community | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
@@ -16,13 +17,15 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="#supported-frameworks-">Frameworks</a>
     <br />
+
 </p>
 
 ![](gh_banner.png)
 
-[![Backend code coverage](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml)
+[![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/795e9d4203bf469dafcc45a9f3131d57)](https://app.codacy.com/gh/intuitem/ciso-assistant-community/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
@@ -100,10 +103,10 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 6. PCI DSS 4.0 💳
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
-9. GDPR checklist from GDPR.EU 🇪🇺
+9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
 10. Essential Eight 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
-12. DORA 🇪🇺
+12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
@@ -141,7 +144,11 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
 48. Secure Controls Framework (SCF) 🇺🇸🌐
 49. NCSC Cyber Assessment Framework (CAF) 🇬🇧
-50. California Consumer Privacy Act (CCPA) 🇺🇸☀️ 
+50. California Consumer Privacy Act (CCPA) 🇺🇸
+51. California Consumer Privacy Act Regulations 🇺🇸
+52. NCSC Cyber Essentials 🇬🇧
+53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
+54. Part-IS ✈️🇪🇺
 
 ### Community contributions
 
@@ -150,7 +157,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
 4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-
+6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
+7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 <br/>
 
 > [!NOTE]
@@ -162,11 +170,9 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- NCSC Cyber Essentials
-- Part-IS
+- ENS Esquema Nacional de seguridad (español)
 - NIST 800-82
 - Korea ISA: ISMS-P
-- ENS Esquema Nacional de seguridad (español)
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -177,6 +183,8 @@ A library can be a framework, a catalog of threats or reference controls, and ev
 Take a look at the `tools` directory and its dedicated readme. The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+
+There is also a tool to facilitate the creation of mappings, called `prepare_mapping.py` that will create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
 
 ## Community
 
@@ -470,7 +478,7 @@ Set DJANGO_DEBUG=False for security reason.
 - NL: Dutch
 - IT: Italian
 - PL: Polish
-
+- RO: Romanian
 
 ## Built With 💜
 

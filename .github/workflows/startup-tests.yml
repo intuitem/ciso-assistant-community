@@ -46,8 +46,8 @@ jobs:
       - name: Install dependencies
         working-directory: ${{ env.working-directory }}
         run: |
-          npm install
-          npm ci
+          npm install -g pnpm
+          pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps
@@ -101,8 +101,8 @@ jobs:
       - name: Install dependencies
         working-directory: ${{ env.working-directory }}
         run: |
-          npm install
-          npm ci
+          npm install -g pnpm
+          pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps
@@ -115,7 +115,7 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 30 # give the migrations time to finish (included in the up on the previous step)
+          sleep 60 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.working-directory }}

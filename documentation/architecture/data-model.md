@@ -78,12 +78,7 @@ erDiagram
     LOADED_LIBRARY      ||--o{ RISK_MATRIX              : contains
     LOADED_LIBRARY      ||--o{ REQUIREMMENT_MAPPING_SET : contains
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
-    LIBRARY_TRANSLATION }o--|| LOADED_LIBRARY           : translates
 
-    LIBRARY_TRANSLATION {
-        string locale
-        json translation
-    }
 ```
 
 ### General data model
@@ -111,6 +106,7 @@ erDiagram
     RISK_SCENARIO                }o--o{ ASSET                 : threatens
     RISK_ACCEPTANCE              }o--o{ RISK_SCENARIO         : covers
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
+    RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
 
     PROJECT {
         string name
@@ -127,6 +123,8 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
+
         json    implementation_groups_definition
         int     min_score
         int     max_score
@@ -174,6 +172,17 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
+    }
+
+    VULNERABILITY {
+        string  urn
+        string  locale
+        string  ref_id
+        string  name
+        string  description
+        string  annotation
+        string  provider
     }
 
     REQUIREMENT_NODE {
@@ -184,11 +193,14 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
 
         urn     parent_urn
         int     order_id
         json    implementation_groups
         boolean assessable
+        string  question
+        boolean no_result
     }
 
     REFERENCE_CONTROL {
@@ -199,9 +211,10 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
 
         string  category
-        string  function
+        string  csf_function
     }
 
     APPLIED_CONTROL {
@@ -209,7 +222,7 @@ erDiagram
         string   description
 
         string   category
-        string   function
+        string   csf_function
         string   status
         date     eta
         date     expiration
@@ -227,6 +240,8 @@ erDiagram
         string result
         string mapping_inference
         bool   selected
+        string review_conclusion
+        string review_observation
     }
 
     EVIDENCE {
@@ -245,6 +260,7 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    translations
 
         json    definition
     }
@@ -254,7 +270,7 @@ erDiagram
         string description
 
         string business_value
-        string category
+        string type
         asset  parent_asset
     }
 
@@ -304,23 +320,24 @@ erDiagram
 
 ```
 
-### Requirement mappings (crosswalk)
+### Requirement mappings
 
 ```mermaid
 erDiagram
-    REQUIREMENT_MAPPING_SET   }o--|| REFERENCE_FRAMEWORK : contains
-    REQUIREMENT_MAPPING_SET   }o--|| FOCAL_FRAMEWORK     : contains
+    REQUIREMENT_MAPPING_SET   }o--|| SOURCE_FRAMEWORK : contains
+    REQUIREMENT_MAPPING_SET   }o--|| TARGET_FRAMEWORK : contains
 
     REQUIREMENT_MAPPING_SET {
-        string    urn
-        string    locale
-        string    ref_id
-        string    name
-        string    description
-        string    annotation
-        string    provider
+        string  urn
+        string  locale
+        string  ref_id
+        string  name
+        string  description
+        string  annotation
+        string  provider
+        json    translations
 
-        json      mapping_rules
+        json    mapping_rules
     }
 
 
@@ -500,6 +517,7 @@ namespace ReferentialObjects {
     class ReferenceControl {
         +LoadedLibrary library
         +CharField category
+        +CharField csf_function
         +JSONField typical_evidence
         +is_deletable() bool
         +frameworks() Framework[]
@@ -536,7 +554,7 @@ namespace ReferentialObjects {
 
     class Mapping {
         +CharField    reference_urn
-        +CharField    focal_urn
+        +CharField    target_urn
         +CharField    rationale
         +CharField    relationship
         +BooleanField fulfilled_by
@@ -573,6 +591,7 @@ namespace DomainObjects {
         +ReferenceControl REFERENCE_CONTROL
         +Evidence[] evidences
         +CharField category
+        +CharField csf_function
         +CharField status
         +DateField eta
         +DateField expiry_date
@@ -695,7 +714,7 @@ Projects have the following fields:
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
-Assets are of category primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
+Assets are of type primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
 
 ## Frameworks
 
@@ -732,7 +751,11 @@ Note: the score scale for a framework can be overridden when creating a complian
 
 ## Threats
 
-Threats are referential objects used to clarify the aim of a requirement node or a applied  control. They are informative, assessments can be realised without using them.
+Threats are referential objects used to clarify the aim of a requirement node or a applied control. They are informative, assessments can be realised without using them.
+
+## Vulnerabilities
+
+Vulnerabilities are referential objects used to clarify a risk scenario and to follow remediations. They are informative, risk assessments can be realised without using them. Well-known providers are NVD and CISA KEV, but custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
 
 ## Reference controls
 
@@ -740,7 +763,7 @@ Reference controls are templates for Applied controls. They facilitate the creat
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
 
-Reference controls have a function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
+Reference controls have a csf_function within the following possibilities: --/Govern/Identify/Protect/Detect/Respond/Recover.
 
 ## Applied controls
 
@@ -748,6 +771,7 @@ Applied controls are fundamental objects for compliance and remediation. They ca
 
 A applied  control has the following specific fields:
 - a category (same as reference controls)
+- a csf_function (same as reference controls)
 - a status (--/planned/active/inactive)
 - an Estimated Time of Arrival date
 - a validity date (expiration field)
@@ -755,7 +779,7 @@ A applied  control has the following specific fields:
 - a url link
 - a list of user-defined tags
 
-When a applied control derives from a reference control, the same category is proposed, but this can be changed.
+When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
 ## Compliance and risk assessments
 
@@ -806,26 +830,26 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a reference framework to a focal framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
 A mapping_rules is a list of elements containing:
-- a reference requirement URN
-- a focal requirement URN
-- a rationale giving the explanation for why a Reference Document Element and a Focal Document Element are related. This will be syntactic, semantic, or functional.
-- a relationship that provides the type of logical relationship that the OLIR Developer asserts the Reference Document Element has compared to the Focal Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
-- a strength of relationship, optionally providing the extent to which a Reference Document Element and a Focal Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
+- a source requirement URN
+- a target requirement URN
+- a rationale giving the explanation for why a Source Document Element and a Target Document Element are related. This will be syntactic, semantic, or functional.
+- a relationship that provides the type of logical relationship that the OLIR Developer asserts the Source Document Element has compared to the Target Document Element. The Developer conducting the assertion should focus on the perceived intent of each of the Elements. This will be one of the following: subset of, intersects with, equal to, superset of, or not related to.
+- a strength of relationship, optionally providing the extent to which a Source Document Element and a Target Document Element are similar. It is typically between 0 (no relation) to 10 (equal).
 
-Requirement mapping rules are used to automatically generate a draft compliance assessment for a focal framework, given existing reference assessments.
+Requirement mapping rules are used to automatically generate a draft compliance assessment for a target framework, given existing source assessments.
 
 The following inference rules are used:
 - there is an order relation in results: compliant > non-compliant minor > non-compliant major
-- N/A or -- in reference makes the mapping not usable.
-- when several mappings exist for a focal requirement, the strongest inference result is used to determine the compliance result.
+- N/A or -- in source makes the mapping not usable.
+- when several mappings exist for a target requirement, the strongest inference result is used to determine the compliance result.
 - all requirement mappings are described in the mapping_inference field.
-- a superset or equal mapping pushes the reference result to the focal result.
-- an subset mapping pushes a most a partial compliance result to the focal result
+- a superset or equal mapping pushes the source result to the target result.
+- an subset mapping pushes a partial compliance result to the target result
 
 ### Risk assessments and risk matrices
 
@@ -889,6 +913,7 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 Libraries can contain:
 - frameworks (including requirement nodes)
 - threats
+- vulnerabilities
 - reference controls
 - risk matrices
 - requirement mapping sets
@@ -899,10 +924,10 @@ Libraries have a copyright that contains relevant copyright information.
 
 Libraries have a URN to uniquely identify them.
 
-Libraries have a locale that describes the locale for the whole content of the library.
+Libraries have a locale that describes the main locale for the whole content of the library.
 
 Libraries have an integer version that completes the URN. The highest version for a given URN shall always be privileged. So:
-- a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn and locale.
+- a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn.
 - if a breaking change is necessary, the URN should be changed.
 
 
@@ -916,14 +941,14 @@ Deleting a library is possible only if none of its objects is currently used. Re
 
 ## Referential objects
 
-Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
+Frameworks (including requirement nodes), mappings, threats, vulnerabilities, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
 
 Referential objects can be downloaded from a library. They are called "global referential objects" or "library objects" in that case, and they have the following characteristics:
 - they have a non-null URN identifier *urn* of the form: ```urn:intuitem:<domain>:<object_type>:[<framework>:]<short_id>```. Client-defined URNs are also possible. The framework part is present for items that are part of a framework.
 - they are read-only in the database once imported. They can be removed only by removing the corresponding library.
 - they are attached to the root folder.
 - Everyone has the right to read them, they are "published" to all domains.
-- The couple (URN, locale) is unique.
+- The URN is unique.
 - They have a link to their library.
 
 Conversely, a referential object with a null URN is called a "local referential object" has the following characteristics:
@@ -933,8 +958,9 @@ Conversely, a referential object with a null URN is called a "local referential 
 
 Referential objects have the following optional fields:
 - ref_id: reference used in the standard for this object (e.g. A.5.5).
-- provider: describes where the object comes from, e.g. ISO, NIST, CIS, MITRE ATT&CK...
 - annotation: provided by the library packager or the user to clarify the meaning of the object. They can be used for search, and are displayed when available.
+- provider: describes where the object comes from, e.g. ISO, NIST, CIS, MITRE ATT&CK...
+- translations: JSON containing the translations of the object.
 
 Framework and risk matrix objects can only come from a library.
 
@@ -948,15 +974,47 @@ The library_manager role will be defined to manage library objects.
 
 ## Referential objects translation
 
-When a several locales are loaded for a same library (same URN), the first one is loaded normaly, and becomes the reference version. The next ones are loaed in a LibraryTranslation object, that is used to adapt the UI.
-
-The translation JSON field contains a dictionary with urn as key and a dictionary of (field_name, value) as value.
+Referential objects translations are contained inside a JSON called previously *translations*. The translation takes place directly inside the yaml at the point where the object is defined.
 
 Example:
-```
+```yaml
 {
-    "urn:intuitem:risk:req_node:iso27001-2022:4": [["name","Contexte de l'organisation"],["description","..."],["annotation","..."]],
-    "urn:intuitem:risk:req_node:iso27001-2022:4.3", ...
+    - urn: urn:intuitem:risk:req_node:iso27001-2022:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
+      ref_id: '4'
+      name: 'Context of the organization '
+      translations:
+        fr:
+          name: Contexte de l'organisation
+          description: null
+        ...
+}
+```
+
+Everything in the library can be translated, from the library itself to the the last object. To specify that the library is available in a language other than the default one, *translations* field has to be filled for the language(s) concerned.
+
+Example:
+```yaml
+{
+    urn: urn:intuitem:risk:library:iso27001-2022
+    locale: en
+    ref_id: ISO/IEC 27001:2022
+    name: International standard ISO/IEC 27001:2022
+    description: "Information security, cybersecurity and privacy protection \u2014 Information\
+    \ security management systems \u2014 Requirements"
+    copyright: See https://www.iso.org/standard/27001
+    version: 3
+    provider: ISO/IEC
+    packager: intuitem
+    translations:
+    fr:
+        name: Norme internationale ISO/IEC 27001:2022
+        description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
+        \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la s\xE9\
+        curit\xE9 \u2014 Exigences"
+        copyright: Voir https://www.iso.org/standard/27001
 }
 ```
 
@@ -1047,3 +1105,126 @@ Names of built-in objects can be internationalized.
 A user can be authenticated either locally or with SSO. A boolean is_sso indicates if the user is local or SSO.
 
 SSO Settings are defined in a dedicated object SSO_SETTINGS.
+
+## TPRM evolution
+
+### Retained approach
+
+The following approach has been retained:
+- An "entity" model is added to modelize third parties in a generic way.
+- A third party is an entity that is provider of the entity representing the client using CISO Assistant.
+- An evaluation of a third party is based on a compliance assessment, to leverage a huge amount of existing models and code.
+- This compliance assessment is done by the third party.
+- This compliance assessment is reviewed by the client, requirement by requirement.
+- An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
+- Review features are added to compliance assessment to enable this workflow in a generic way.
+- A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
+- A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
+
+### Entity-relationship diagram
+
+```mermaid
+erDiagram
+
+    ASSET                 }o--o{ SOLUTION              : contains
+    ENTITY2                }o--o| DOMAIN                : owns
+    VULNERABILITY         }o--o{ SOLUTION              : affects
+    SOLUTION              }o--o| ENTITY                : provided_by
+    CONTRACT              }o--o{ SOLUTION              : formalizes
+    CONTRACT              }o--o{ EVIDENCE              : has
+    APPLIED_CONTROL       }o--o| CONTRACT              : leverages
+    ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
+    ENTITY                }o--o{ PERSON                : employs
+    ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY                }o--o{ ENTITY2               : is_provider_of
+    COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+    ENTITY {
+        string  name
+        string  description
+        string  missions  
+        entity  parent_entity
+        url     reference_link
+    }
+
+    ASSET {
+        string      name
+        string      description
+        string      business_value
+        string      type
+        string      security_need
+        asset       parent_asset
+    }
+
+    SOLUTION {
+        string      name
+        string      description
+        string      solution_type
+        string      ref_id
+        string      version
+    }
+
+    CONTRACT {
+        string name
+        string description
+        date   start_date
+        date   end_date
+    }
+
+    ENTITY_EVALUATION {
+        string name
+        string description
+        date   send_date
+        date   due_date
+        int    penetration
+        int    dependency
+        int    maturity
+        int    trust
+    }
+
+    PERSON {
+        string email
+        string first_name
+        string last_name
+        string phone
+        string role
+        string description
+    }
+
+```
+
+```mermaid
+erDiagram
+    DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
+    DOMAIN          ||--o{ SOLUTION             : contains
+```
+```mermaid
+erDiagram
+    GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
+    GLOBAL_DOMAIN   ||--o{ PERSON          : contains
+```
+
+- The solution_type of a solution is a string with the following possible values: --|product|maintenance|hosting.
+- The ref_id for a solution can be null or use a formal id like CPE.
+ 
+### Evolution of existing models
+
+#### Requirement assessment
+
+- add the following fields:
+  - review_conclusion: --|blocker|warning|ok|N/A
+  - review_observation
+
+#### Requirement node 
+
+- Add the following fields:
+  - no_result
+  - question
+
+#### Applied control
+
+- Add a "contract" category
+- Add a foreign key "contract" to point to a contract
+
+The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
+
+Note: in the future, we will use the same approach for policies.

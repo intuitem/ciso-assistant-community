@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { page } from '$app/stores';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { UserEditSchema } from '$lib/utils/schemas';
-	import { page } from '$app/stores';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import type { PageData } from './$types';
 
 	import * as m from '$paraglide/messages';
 

@@ -1,5 +1,7 @@
 from core.models import StoredLibrary, LoadedLibrary
 from rest_framework import serializers
+from core.serializers import ReferentialSerializer
+from core.serializer_fields import FieldsRelatedField
 
 """class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
@@ -14,8 +16,9 @@ from rest_framework import serializers
 """
 
 
-class StoredLibrarySerializer(serializers.ModelSerializer):
-    # Not used yet
+class StoredLibrarySerializer(ReferentialSerializer):
+    locales = serializers.ListField(source="get_locales", read_only=True)
+
     class Meta:
         model = StoredLibrary
         fields = [
@@ -31,19 +34,26 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
             "builtin",
             "objects_meta",
             "is_loaded",
+            "locales",
+            "copyright",
         ]
 
 
-class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
+class StoredLibraryDetailedSerializer(ReferentialSerializer):
+    locales = serializers.ListField(source="get_locales", read_only=True)
+
     class Meta:
         model = StoredLibrary
-        fields = "__all__"
+        exclude = ["translations"]
 
 
-class LoadedLibraryDetailedSerializer(serializers.ModelSerializer):
+class LoadedLibraryDetailedSerializer(ReferentialSerializer):
+    locales = serializers.ListField(source="get_locales", read_only=True)
+    dependencies = FieldsRelatedField(many=True, fields=["urn", "str", "name"])
+
     class Meta:
         model = LoadedLibrary
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 """
@@ -55,15 +65,26 @@ class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
 """
 
 
-class LoadedLibrarySerializer(serializers.Serializer):
-    id = serializers.CharField()
-    name = serializers.CharField()
-    description = serializers.CharField()
-    locale = serializers.ChoiceField(choices=["en", "fr"])
-    # objects = LibraryObjectSerializer(many=True)
-    version = serializers.CharField()
-    copyright = serializers.CharField()
-    builtin = serializers.BooleanField()
+class LoadedLibrarySerializer(ReferentialSerializer):
+    locales = serializers.ListField(source="get_locales", read_only=True)
+
+    class Meta:
+        model = LoadedLibrary
+        fields = [
+            "id",
+            "name",
+            "description",
+            "urn",
+            "ref_id",
+            "locale",
+            "version",
+            "packager",
+            "provider",
+            "builtin",
+            "objects_meta",
+            "reference_count",
+            "locales",
+        ]
 
 
 """class LibraryModelSerializer(BaseModelSerializer):

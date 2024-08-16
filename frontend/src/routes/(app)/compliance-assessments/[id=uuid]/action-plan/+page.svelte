@@ -15,6 +15,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -23,6 +24,7 @@
 		body: tableSourceMapper(data.actionPlan.planned, [
 			'name',
 			'category',
+			'csf_function',
 			'eta',
 			'expiry_date',
 			'efforts',
@@ -35,6 +37,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -43,6 +46,7 @@
 		body: tableSourceMapper(data.actionPlan.active, [
 			'name',
 			'category',
+			'csf_function',
 			'eta',
 			'expiry_date',
 			'efforts',
@@ -55,6 +59,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -63,6 +68,7 @@
 		body: tableSourceMapper(data.actionPlan.inactive, [
 			'name',
 			'category',
+			'csf_function',
 			'eta',
 			'expiry_date',
 			'efforts',
@@ -75,6 +81,7 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
@@ -83,6 +90,7 @@
 		body: tableSourceMapper(data.actionPlan.none, [
 			'name',
 			'category',
+			'csf_function',
 			'eta',
 			'expiry_date',
 			'efforts',

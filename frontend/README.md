@@ -16,13 +16,14 @@ export PUBLIC_BACKEND_API_URL=http://127.0.0.1:8000/api
 3. Install dependencies
 
 ```bash
-npm install
+npm install -g pnpm
+pnpm install
 ```
 
 4. Start a development server (ensure that the django app is running)
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ## Building
@@ -30,9 +31,9 @@ npm run dev
 To create a production version of your app:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
-You can preview the production build with `npm run preview`.
+You can preview the production build with `pnpm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.

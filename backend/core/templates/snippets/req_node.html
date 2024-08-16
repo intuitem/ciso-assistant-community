@@ -15,10 +15,16 @@
                 <div class='flex flex-row space-x-2'>
                     <div class='text-center rounded-lg whitespace-nowrap px-2 py-1 text-{{ node.status_color_class }}'>{{ node.status }}</div>
                     <div class='text-white text-center rounded-lg whitespace-nowrap px-2 py-1 bg-{{ node.result_color_class }}'>{{ node.result }}</div>
+                    {% if node.assessments.is_scored %}
+                        <div class='text-center whitespace-nowrap px-2 py-1'>{{ node.assessments.score }}</div>
+                    {% endif %}
                 </div>
             </div>
             {% if node.assessments.requirement.description %}
                 <div class='text-left w-full'>{{ node.assessments.requirement.description }}</div>
+            {% endif %}
+            {% if node.assessments.observation %}
+                <div class='text-left w-full'><p class="font-semibold">{% trans "Observation:" %}<p> {{ node.assessments.observation }}</div>
             {% endif %}
         </div>
         {% if node.bar_graph %}

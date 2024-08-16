@@ -18,7 +18,8 @@ from core.models import StoredLibrary, LoadedLibrary
 from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
-from .helpers import preview_library
+from .helpers import update_translations, update_translations_in_object
+from .utils import preview_library
 
 
 from rest_framework.decorators import action
@@ -26,6 +27,7 @@ from rest_framework.response import Response
 from .serializers import (
     StoredLibraryDetailedSerializer,
     LoadedLibraryDetailedSerializer,
+    LoadedLibrarySerializer,
     StoredLibrarySerializer,
 )
 
@@ -78,7 +80,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
-        return Response(lib.content)
+        return Response(update_translations(lib.content))
 
     def destroy(self, request, *args, pk, **kwargs):
         if not RoleAssignment.is_access_allowed(
@@ -187,7 +189,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
 
 class LoadedLibraryViewSet(viewsets.ModelViewSet):
-    # serializer_class = LoadedLibrarySerializer
+    serializer_class = LoadedLibrarySerializer
     # parser_classes = [FileUploadParser]
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
@@ -222,12 +224,14 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
                     "builtin",
                     "objects_meta",
                     "reference_count",
+                    "translations",
                 ]
             }
             loaded_library["has_update"] = (
                 last_version.get(library.urn, -1) > library.version
             )
-            loaded_libraries.append(loaded_library)
+            loaded_library["locales"] = library.get_locales
+            loaded_libraries.append(update_translations_in_object(loaded_library))
 
         return Response({"results": loaded_libraries})
 

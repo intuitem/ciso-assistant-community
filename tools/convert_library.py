@@ -3,35 +3,46 @@ simple script to transform an Excel file to a yaml library for CISO assistant
 Conventions:
     | means a cell separation, <> means empty cell
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
-        library_urn                | <urn>
-        library_version            | <version>
-        library_locale             | <en/fr/...>
-        library_ref_id             | <ref_id>
-        library_name               | <name>
-        library_description        | <description>
-        library_copyright          | <copyright>
-        library_provider           | <provider>
-        library_packager           | <packager>
-        library_dependencies       | <urn1, urn2...
-        framework_urn              | <urn>
-        framework_ref_id           | <ref_id>
-        framework_name             | <name>
-        framework_description      | <description>
-        framework_min_score        | <min_score>
-        framework_max_score        | <max_score>
-        reference_control_base_urn | <base_urn> | id
-        threat_base_urn            | <base_urn> | id
-        risk_matrix_urn            | <urn>
-        risk_matrix_ref_id         | <ref_id>
-        risk_matrix_name           | <name>
-        risk_matrix_description    | <description>
-        tab                        | <tab_name> | requirements
-        tab                        | <tab_name> | threats            | <base_urn>
-        tab                        | <tab_name> | reference_controls | <base_urn>
-        tab                        | <tab_name> | scores
-        tab                        | <tab_name> | implementation_groups
-        tab                        | <tab_name> | risk_matrix
+        library_urn                     | <urn>
+        library_version                 | <version>
+        library_locale                  | <en/fr/...>
+        library_ref_id                  | <ref_id>
+        library_name                    | <name>
+        library_description             | <description>
+        library_copyright               | <copyright>
+        library_provider                | <provider>
+        library_packager                | <packager>
+        library_dependencies            | <urn1, urn2...
+        framework_urn                   | <urn>
+        framework_ref_id                | <ref_id>
+        framework_name                  | <name>
+        framework_description           | <description>
+        framework_min_score             | <min_score>
+        framework_max_score             | <max_score>
+        reference_control_base_urn      | <base_urn> | id
+        threat_base_urn                 | <base_urn> | id
+        risk_matrix_urn                 | <urn>
+        risk_matrix_ref_id              | <ref_id>
+        risk_matrix_name                | <name>
+        risk_matrix_description         | <description>
+        mapping_urn                     | <urn>
+        mapping_ref_id                  | <ref_id>
+        mapping_name                    | <name>
+        mapping_description             | <description>
+        mapping_source_framework_urn    | <urn>
+        mapping_target_framework_urn    | <urn>
+        mapping_source_node_base_urn    | <urn>
+        mapping_target_node_base_urn    | <urn>
+        tab                             | <tab_name> | requirements
+        tab                             | <tab_name> | threats            | <base_urn>
+        tab                             | <tab_name> | reference_controls | <base_urn>
+        tab                             | <tab_name> | scores
+        tab                             | <tab_name> | implementation_groups
+        tab                             | <tab_name> | risk_matrix
+        tab                             | <tab_name> | mappings
 
+        variables can also have a translation in the form "variable[locale]"
+        
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
@@ -55,6 +66,7 @@ Conventions:
             - name
             - description
             - category (policy/process/techncial/physical).
+            - csf_function (govern/identitfy/protect/detect/respond/recover).
             - annotation
     For risk matrices:
         The first line is a header, with the following mandatory fields:
@@ -67,7 +79,14 @@ Conventions:
             - grid: several columns describing the matrix with colors. The colors shall be consistent with the color column.
         The grid shall be aligned with the probability objects, the columns being the impact in order of id, and the content of each cell being the id of the risk.
         This is a topological representation. The display on the screen (transposition, direction of axes) will be managed in the frontend, not in the data model.
-    A library has a single locale. Translated libraries have the same urns, they are merged during import.
+    For mappings:
+        The first line is a header, with the following possible fields (* for required):
+            - source_node_id(*)
+            - target_node_id(*)
+            - relationship(*)
+            - rationale
+            - stregth_of_relationship
+    A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
 """
 
@@ -77,6 +96,7 @@ import re
 import yaml
 from pprint import pprint
 from collections import defaultdict
+
 
 LIBRARY_VARS = (
     "library_urn",
@@ -101,6 +121,14 @@ LIBRARY_VARS = (
     "risk_matrix_ref_id",
     "risk_matrix_name",
     "risk_matrix_description",
+    "mapping_urn",
+    "mapping_ref_id",
+    "mapping_name",
+    "mapping_description",
+    "mapping_source_framework_urn",
+    "mapping_target_framework_urn",
+    "mapping_source_node_base_urn",
+    "mapping_target_node_base_urn",
     "tab",
 )
 library_vars = {}
@@ -131,7 +159,7 @@ threat_definitions = []
 scores_definition = []
 implementation_groups_definition = []
 risk_matrix = {}
-
+requirement_mappings = []
 
 def error(message):
     print("Error:", message)
@@ -139,13 +167,47 @@ def error(message):
 
 
 def read_header(row):
+    """
+    read header
+    use a trick for "grid" columns, to store all of them: rename second one as "grid1", third as "grid2", etc.
+    """
     i = 0
     header = {}
+    grid_count = 0
     for v in row:
         v = str(v.value).lower()
+        if v == 'grid':
+            v = f"{v}{grid_count}"
+            grid_count += 1
         header[v] = i
         i += 1
     return header
+
+
+def get_translations(header, row):
+    """read available translations"""
+    result = {}
+    for i, h in enumerate(header):
+        if q := re.match(r"(\w+)\[(\w+)\]", h):
+            v = q.group(1)
+            lang = q.group(2)
+            if lang not in result:
+                result[lang] = {}
+            result[lang][v] = row[i].value
+    return result
+
+def get_translations_content(library_vars, prefix):
+    """read available translations in library_vars"""
+    result = {}
+    for k, v in library_vars.items():
+        k2 = k
+        if q := re.match(prefix + r"_(\w+)\[(\w+)\]", k):
+            k2 = q.group(1)
+            lang = q.group(2)
+            if lang not in result:
+                result[lang] = {}
+            result[lang][k2] = v
+    return result
 
 
 # https://gist.github.com/Mike-Honey/b36e651e9a7f1d2e1d60ce1c63b9b633
@@ -255,6 +317,8 @@ def get_color(wb, cell):
     return "#" + color
 
 
+################################################################
+
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
@@ -264,7 +328,11 @@ for tab in dataframe:
             if any([r.value for r in row]):
                 (v1, v2, v3) = (r.value for r in row[0:3])
                 v4 = row[3].value if len(row) > 3 else None
-                if v1 in LIBRARY_VARS:
+                v1b = v1
+                if q := re.match(r"(\w+)\[(\w+)\]", v1):
+                    v1b = q.group(1)
+                    lang = q.group(2)
+                if v1b in LIBRARY_VARS:
                     library_vars[v1] = v2
                     library_vars_dict[v1][str(v2)] = v3
                     library_vars_dict_reverse[v1][str(v3)] = v2
@@ -327,6 +395,7 @@ for tab in dataframe:
                     if "implementation_groups" in header
                     else None
                 )
+                translations = get_translations(header, row)
                 skip_count = "skip_count" in header and bool(
                     row[header["skip_count"]].value
                 )
@@ -385,7 +454,7 @@ for tab in dataframe:
                         part_name = ":".join(parts)
                         part_name = part_name.lower().replace(" ", "-")
                         urn_prefix = library_vars_dict_reverse[
-                            "reference_control_base_urn"
+                            "threat_base_urn"
                         ][prefix]
                         threat_urns.append(f"{urn_prefix}:{part_name}")
                 if req_reference_controls:
@@ -401,6 +470,8 @@ for tab in dataframe:
                     req_node["threats"] = threat_urns
                 if function_urns:
                     req_node["reference_controls"] = function_urns
+                if translations:
+                    req_node["translations"] = translations
                 requirement_nodes.append(req_node)
             else:
                 pass
@@ -430,9 +501,13 @@ for tab in dataframe:
                 category = (
                     row[header["category"]].value if "category" in header else None
                 )
+                csf_function = (
+                    row[header["csf_function"]].value if "csf_function" in header else None
+                )
                 annotation = (
                     row[header["annotation"]].value if "annotation" in header else None
                 )
+                translations = get_translations(header, row)
                 ref_id_urn = ref_id.lower().replace(" ", "-")
                 current_function = {}
                 current_function["urn"] = f"{reference_control_base_urn}:{ref_id_urn}"
@@ -441,10 +516,14 @@ for tab in dataframe:
                     current_function["name"] = name
                 if category:
                     current_function["category"] = category
+                if csf_function:
+                    current_function["csf_function"] = csf_function
                 if description:
                     current_function["description"] = description
                 if annotation:
                     current_function["annotation"] = annotation
+                if translations:
+                    current_function["translations"] = translations
                 reference_controls.append(current_function)
     elif library_vars_dict["tab"][title] == "threats":
         print("processing threats")
@@ -472,6 +551,7 @@ for tab in dataframe:
                 annotation = (
                     row[header["annotation"]].value if "annotation" in header else None
                 )
+                translations = get_translations(header, row)
                 ref_id_urn = ref_id.lower().replace(" ", "-")
                 current_threat = {}
                 current_threat["urn"] = f"{threat_base_urn}:{ref_id_urn}"
@@ -482,6 +562,8 @@ for tab in dataframe:
                     current_threat["description"] = description
                 if annotation:
                     current_threat["annotation"] = annotation
+                if translations:
+                    current_threat["translations"] = translations
                 threat_definitions.append(current_threat)
     elif library_vars_dict["tab"][title] == "scores":
         print("processing scores")
@@ -497,9 +579,11 @@ for tab in dataframe:
                 score = row[header["score"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
-                scores_definition.append(
-                    {"score": score, "name": name, "description": description}
-                )
+                translations = get_translations(header, row)
+                current_score = {"score": score, "name": name, "description": description}
+                if translations:
+                    current_score["translations"] = translations
+                scores_definition.append(current_score)
     elif library_vars_dict["tab"][title] == "implementation_groups":
         print("processing implementation groups")
         is_header = True
@@ -514,9 +598,11 @@ for tab in dataframe:
                 ref_id = row[header["ref_id"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
-                implementation_groups_definition.append(
-                    {"ref_id": ref_id, "name": name, "description": description}
-                )
+                translations = get_translations(header, row)
+                current_def = {"ref_id": ref_id, "name": name, "description": description}
+                if translations:
+                    current_def["translations"] = translations
+                implementation_groups_definition.append(current_def)
     elif library_vars_dict["tab"][title] == "risk_matrix":
         print("processing risk matrix")
         risk_matrix["urn"] = library_vars["risk_matrix_urn"]
@@ -540,7 +626,8 @@ for tab in dataframe:
                 assert "abbreviation" in header
                 assert "name" in header
                 assert "description" in header
-                assert "grid" in header
+                assert "grid0" in header
+                size_grid = len([h for h in header if len(h) > 4 and h[0:4] == "grid"])
             elif any([c.value for c in row]):
                 ctype = row[header["type"]].value
                 assert ctype in ("probability", "impact", "risk")
@@ -549,17 +636,20 @@ for tab in dataframe:
                 abbreviation = row[header["abbreviation"]].value
                 name = row[header["name"]].value
                 description = row[header["description"]].value
+                translations = get_translations(header, row)
                 object = {
                     "id": id,
                     "abbreviation": abbreviation,
                     "name": name,
                     "description": description,
                 }
+                if translations:
+                    object["translations"] = translations
                 if color:
                     object["hexcolor"] = color
                 risk_matrix[ctype].append(object)
                 if ctype == "probability":
-                    grid[id] = [c.value for c in row[6:]]
+                    grid[id] = [c.value for c in row[6:6+size_grid]]
                     grid_color[id] = [get_color(dataframe, c) for c in row[6:]]
         risk_matrix["grid"] = [grid[id] for id in sorted(grid)]
         for id in grid:
@@ -574,6 +664,32 @@ for tab in dataframe:
                     exit(1)
         for t in ("probability", "impact", "risk"):
             risk_matrix[t].sort(key=lambda c: c["id"])
+    elif library_vars_dict["tab"][title] == "mappings":
+        print("processing mappings")
+        is_header = True
+        source_prefix=library_vars["mapping_source_node_base_urn"]
+        target_prefix=library_vars["mapping_target_node_base_urn"]
+        for row in tab:
+            if is_header:
+                header = read_header(row)
+                is_header = False
+                assert "source_node_id" in header
+                assert "target_node_id" in header
+                assert "relationship" in header
+            elif any([c.value for c in row]):
+                source_requirement_urn = source_prefix + ":" + row[header["source_node_id"]].value
+                target_requirement_urn = target_prefix + ":" + row[header["target_node_id"]].value
+                relationship = row[header["relationship"]].value
+                rationale = row[header["rationale"]].value if "rationale" in header else None
+                stregth_of_relationship = row[header["stregth_of_relationship"]].value if "stregth_of_relationship" in header else None
+                requirement_mappings.append(
+                    {"source_requirement_urn": source_requirement_urn, 
+                     "target_requirement_urn": target_requirement_urn, 
+                     "relationship": relationship,
+                     "rationale": rationale,
+                     "stregth_of_relationship": stregth_of_relationship,
+                     }
+                )
 
 has_framework = "requirements" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
@@ -582,6 +698,10 @@ has_reference_controls = "reference_controls" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
 ]
 has_threats = "threats" in [
+    library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
+]
+
+has_mappings = "mappings" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
 ]
 
@@ -596,7 +716,9 @@ library = {
     "provider": library_vars["library_provider"],
     "packager": library_vars["library_packager"],
 }
-
+translations = get_translations_content(library_vars, "library")
+if translations:
+    library["translations"] = translations
 if "library_dependencies" in library_vars:
     dependencies = [
         x for x in re.split(r"[\s,]+", library_vars["library_dependencies"])
@@ -611,6 +733,21 @@ if has_reference_controls:
 if has_threats:
     library["objects"]["threats"] = threat_definitions
 
+if has_mappings:
+    library["objects"]["requirement_mapping_set"] = {
+        "urn": library_vars["mapping_urn"],
+        "ref_id": library_vars["mapping_ref_id"],
+        "name": library_vars["mapping_name"],
+        "description": library_vars["mapping_description"],
+        "source_framework_urn": library_vars["mapping_source_framework_urn"],
+        "target_framework_urn": library_vars["mapping_target_framework_urn"],
+    }
+    translations = get_translations_content(library_vars, "mapping")
+    if translations:
+        library["objects"]["requirement_mapping_set"]["translations"] = translations
+    library["objects"]["requirement_mapping_set"]["requirement_mappings"] = requirement_mappings
+
+
 if has_framework:
     library["objects"]["framework"] = {
         "urn": library_vars["framework_urn"],
@@ -618,6 +755,9 @@ if has_framework:
         "name": library_vars["framework_name"],
         "description": library_vars["framework_description"],
     }
+    translations = get_translations_content(library_vars, "framework")
+    if translations:
+        library["objects"]["framework"]["translations"] = translations
     if "framework_min_score" in library_vars:
         library["objects"]["framework"]["min_score"] = library_vars[
             "framework_min_score"
@@ -636,7 +776,9 @@ if has_framework:
 
 if risk_matrix:
     library["objects"]["risk_matrix"] = [risk_matrix]
-
+    translations = get_translations_content(library_vars, "risk_matrix")
+    if translations:
+        library["objects"]["risk_matrix"][0]["translations"] = translations
 
 print("generating", output_file_name)
 with open(output_file_name, "w", encoding="utf8") as file:

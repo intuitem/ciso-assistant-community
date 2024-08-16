@@ -196,6 +196,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "core.helpers.handle",
 }
 
 REST_KNOX = {
@@ -283,6 +284,14 @@ USE_TZ = True
 LANGUAGES = [
     ("en", "English"),
     ("fr", "French"),
+    ("es", "Spanish"),
+    ("de", "German"),
+    ("it", "Italian"),
+    ("nd", "Dutch"),
+    ("pl", "Polish"),
+    ("pt", "Portuguese"),
+    ("ar", "Arabic"),
+    ("ro", "Romanian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -352,8 +361,8 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-ACCOUNT_ADAPTER = "iam.adapter.MyAccountAdapter"
-SOCIALACCOUNT_ADAPTER = "iam.adapter.MySocialAccountAdapter"
+ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "iam.adapter.SocialAccountAdapter"
 
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True

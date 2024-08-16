@@ -36,6 +36,10 @@ export const LOCALE_MAP = {
 	pl: {
 		name: 'polish',
 		flag: '🇵🇱'
+	},
+	ro: {
+		name: 'romanian',
+		flag: '🇷🇴'
 	}
 };
 
@@ -64,6 +68,7 @@ export function localItems(): LocalItems {
 		dutch: m.dutch(),
 		italian: m.italian(),
 		polish: m.polish(),
+		romanian: m.romanian(),
 		home: m.home(),
 		edit: m.edit(),
 		overview: m.overview(),
@@ -116,6 +121,7 @@ export function localItems(): LocalItems {
 		firstName: m.firstName(),
 		lastName: m.lastName(),
 		category: m.category(),
+		function: m.csfFunction(),
 		eta: m.eta(),
 		referenceControl: m.referenceControl(),
 		appliedControl: m.appliedControl(),
