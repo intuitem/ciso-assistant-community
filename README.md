@@ -159,6 +159,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
 6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
 7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
+8. New Zealand Information Security Manual (NZISM) ɴᴢ
 <br/>
 
 > [!NOTE]
