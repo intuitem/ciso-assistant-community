@@ -160,7 +160,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
 7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 8. New Zealand Information Security Manual (NZISM) ɴᴢ
-br/>
+<br/>
 
 > [!NOTE]
 > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
