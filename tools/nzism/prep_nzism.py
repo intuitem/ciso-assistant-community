@@ -6,7 +6,6 @@ import openpyxl
 import sys
 import re
 import argparse
-import lxml
 from openpyxl.styles import numbers
 from bs4 import BeautifulSoup
 
