@@ -10,7 +10,7 @@
 	breadcrumbObject.set(data.compliance_assessment);
 
 	const possible_options = [
-		{ id: '', label: m.notAssessed() },
+		{ id: 'not_assessed', label: m.notAssessed() },
 		{ id: 'non_compliant', label: m.nonCompliant() },
 		{ id: 'partially_compliant', label: m.partiallyCompliant() },
 		{ id: 'compliant', label: m.compliant() },
@@ -55,7 +55,6 @@
 
 	// Function to update the result of the current item
 	function updateResult(event) {
-		console.log(event.target.value);
 		data.requirement_assessments[currentIndex].result = event.target.value;
 		const form = document.getElementById('flashModeForm');
 		const formData = {

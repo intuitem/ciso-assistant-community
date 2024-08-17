@@ -51,7 +51,7 @@ export function getSecureRedirect(url: any): string {
 
 export function darkenColor(hex: string, amount: number) {
 	hex = hex.slice(1);
-	let num = parseInt(hex, 16);
+	const num = parseInt(hex, 16);
 
 	let r = (num >> 16) - amount * 255;
 	let g = ((num >> 8) & 0x00ff) - amount * 255;
@@ -62,4 +62,21 @@ export function darkenColor(hex: string, amount: number) {
 	b = Math.max(0, Math.min(255, b));
 
 	return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
+export function stringify(value: string | number | boolean | null = null) {
+	return String(value)
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '');
+}
+
+export function isDark(hexcolor: string): boolean {
+	const r = parseInt(hexcolor.slice(1, 3), 16);
+	const g = parseInt(hexcolor.slice(3, 5), 16);
+	const b = parseInt(hexcolor.slice(5, 7), 16);
+	// compute brightness from rgb values
+	// https://www.w3.org/tr/aert/#color-contrast
+	const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+	return brightness < 128;
 }

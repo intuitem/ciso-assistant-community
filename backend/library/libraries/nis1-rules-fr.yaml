@@ -1,0 +1,3202 @@
+urn: urn:intuitem:risk:library:nis1-rules-fr
+locale: fr
+ref_id: NIS-1 FR
+name: Loi NIS-1 FR
+description: "Arr\xEAt\xE9 du 14 septembre 2018 fixant les r\xE8gles de s\xE9curit\xE9\
+  \ et les d\xE9lais mentionn\xE9s \xE0 l'article 10 du d\xE9cret n\xB0 2018-384 du\
+  \ 23 mai 2018 relatif \xE0 la s\xE9curit\xE9 des r\xE9seaux et syst\xE8mes d'information\
+  \ des op\xE9rateurs de services essentiels et des fournisseurs de service num\xE9\
+  rique\nhttps://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/"
+copyright: "Loi fran\xE7aise"
+version: 1
+provider: "Gouvernement fran\xE7ais"
+packager: intuitem
+translations:
+  en:
+    name: NIS-1 rules
+    description: 'Order of 14 September 2018 setting the security rules and deadlines
+      mentioned in Article 10 of Decree No. 2018-384 of 23 May 2018 on the security
+      of networks and information systems of operators of essential services and digital
+      service providers
+
+      https://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/'
+    copyright: French law
+    provider: French government
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+- urn:intuitem:risk:library:mitre-attack-v14
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nis1-rules-fr
+    ref_id: NIS-1 FR
+    name: Loi NIS-1 FR
+    description: "Arr\xEAt\xE9 du 14 septembre 2018 fixant les r\xE8gles de s\xE9\
+      curit\xE9 et les d\xE9lais mentionn\xE9s \xE0 l'article 10 du d\xE9cret n\xB0\
+      \ 2018-384 du 23 mai 2018 relatif \xE0 la s\xE9curit\xE9 des r\xE9seaux et syst\xE8\
+      mes d'information des op\xE9rateurs de services essentiels et des fournisseurs\
+      \ de service num\xE9rique\nhttps://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/"
+    translations:
+      en:
+        name: NIS-1 rules for FR
+        description: 'Order of 14 September 2018 setting the security rules and deadlines
+          mentioned in Article 10 of Decree No. 2018-384 of 23 May 2018 on the security
+          of networks and information systems of operators of essential services and
+          digital service providers
+
+          https://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      assessable: false
+      depth: 1
+      name: Chapitre I
+      description: "R\xE8gles relatives \xE0 la gouvernance de la s\xE9curit\xE9 des\
+        \ r\xE9seaux et syst\xE8mes d'information"
+      translations:
+        en:
+          name: Chapter I
+          description: Rules relating to the governance of the security of networks
+            and information systems
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      ref_id: '1'
+      name: "R\xE8gle 1"
+      description: Analyse de risque
+      translations:
+        en:
+          name: Rule 1
+          description: Risk Analysis
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:1
+      description: "L'op\xE9rateur de services essentiels effectue et tient \xE0 jour,\
+        \ dans le cadre de l'homologation de s\xE9curit\xE9 pr\xE9vue \xE0 la r\xE8\
+        gle 3, une analyse de risque de ses syst\xE8mes d'information essentiels (SIE)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall carry out and maintain,
+            as part of the security approval provided for in Rule 3, a risk analysis
+            of its critical information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:1
+      description: "Cette analyse de risque prend notamment en compte l'analyse que\
+        \ l'op\xE9rateur a men\xE9e pour identifier ses syst\xE8mes d'information\
+        \ en tant que SIE."
+      translations:
+        en:
+          name: null
+          description: This risk analysis takes into account the analysis that the
+            operator has carried out to identify its information systems as EIS.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      ref_id: '2'
+      name: "R\xE8gle 2"
+      description: "Politique de s\xE9curit\xE9"
+      translations:
+        en:
+          name: Rule 2
+          description: Security Policy
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.1'
+      description: "L'op\xE9rateur de services essentiels \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre une politique de s\xE9curit\xE9 des r\xE9seaux et syst\xE8\
+        mes d'information (PSSI)."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall develop, maintain
+            and implement a network and information systems security policy (ISSP).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.2'
+      description: "La PSSI d\xE9crit l'ensemble des proc\xE9dures et des moyens organisationnels\
+        \ et techniques mis en \u0153uvre par l'op\xE9rateur afin d'assurer la s\xE9\
+        curit\xE9 de ses syst\xE8mes d'information essentiels (SIE)."
+      translations:
+        en:
+          name: null
+          description: The ISSP describes all the procedures and organisational and
+            technical means implemented by the operator in order to ensure the security
+            of its essential information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.3'
+      description: "Dans le domaine de la gouvernance de la s\xE9curit\xE9, la PSSI\
+        \ d\xE9finit :"
+      translations:
+        en:
+          name: null
+          description: 'In the area of security governance, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.3
+      description: "- les objectifs et les orientations strat\xE9giques en mati\xE8\
+        re de s\xE9curit\xE9 des SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- EIS security objectives and strategic directions;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.3
+      description: "- l'organisation de la gouvernance de la s\xE9curit\xE9 et notamment\
+        \ les r\xF4les et les responsabilit\xE9s du personnel interne et du personnel\
+        \ externe (prestataires, fournisseurs, etc.) \xE0 l'\xE9gard de la s\xE9curit\xE9\
+        \ des SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- the organization of security governance and in particular
+            the roles and responsibilities of internal staff and external personnel
+            (contractors, suppliers, etc.) with regard to the security of EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.3
+      description: "- les plans de sensibilisation \xE0 la s\xE9curit\xE9 des SIE\
+        \ au profit de l'ensemble du personnel ainsi que des plans de formation \xE0\
+        \ la s\xE9curit\xE9 des SIE au profit des personnes ayant des responsabilit\xE9\
+        s particuli\xE8res, notamment les personnes en charge de l'administration\
+        \ et de la s\xE9curit\xE9 des SIE et les utilisateurs disposant de droits\
+        \ d'acc\xE8s privil\xE9gi\xE9s aux SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- EIS security awareness plans for all staff as well as EIS
+            security training plans for persons with specific responsibilities, including
+            those in charge of the administration and security of EIS and users with
+            privileged access rights to EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.3
+      description: "- la proc\xE9dure d'homologation de s\xE9curit\xE9 des SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- the security approval procedure for EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.3
+      description: "- les proc\xE9dures de contr\xF4le et d'audit de la s\xE9curit\xE9\
+        \ des SIE, notamment celles mises en \u0153uvre dans le cadre de l'homologation\
+        \ de s\xE9curit\xE9."
+      translations:
+        en:
+          name: null
+          description: '- procedures for monitoring and auditing the security of EIS,
+            including those implemented in the context of security accreditation.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.4'
+      description: "Dans le domaine de la protection, la PSSI d\xE9finit :"
+      translations:
+        en:
+          name: null
+          description: 'In the area of protection, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.4
+      description: "- les mesures de s\xE9curit\xE9 g\xE9n\xE9rales, notamment en\
+        \ mati\xE8re de gestion et de s\xE9curit\xE9 des ressources mat\xE9rielles\
+        \ et logicielles des SIE, de contr\xF4le d'acc\xE8s aux SIE, d'exploitation\
+        \ et d'administration des SIE et de s\xE9curit\xE9 des r\xE9seaux, des postes\
+        \ de travail et des donn\xE9es ;"
+      translations:
+        en:
+          name: null
+          description: '- general security measures, including the management and
+            security of EIS hardware and software resources, access control to EIS,
+            operation and administration of EIS, and network, workstation and data
+            security;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.4
+      description: "- les proc\xE9dures et les mesures de s\xE9curit\xE9 physique\
+        \ et environnementale applicables aux SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- physical and environmental security procedures and measures
+            applicable to EFAs;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.4
+      description: "- la proc\xE9dure de maintien en conditions de s\xE9curit\xE9\
+        \ des ressources des SIE."
+      translations:
+        en:
+          name: null
+          description: '- the procedure for maintaining the security of EIS resources.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.5'
+      description: "Dans le domaine de la d\xE9fense, la PSSI d\xE9finit :"
+      translations:
+        en:
+          name: null
+          description: 'In the field of defence, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node20
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.5
+      description: "- la proc\xE9dure de d\xE9tection des incidents de s\xE9curit\xE9\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: '- the procedure for detecting security incidents;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.5
+      description: "- la proc\xE9dure de traitement des incidents de s\xE9curit\xE9\
+        ."
+      translations:
+        en:
+          name: null
+          description: '- the procedure for handling security incidents.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.6'
+      description: "Dans le domaine de la r\xE9silience des activit\xE9s, la PSSI\
+        \ d\xE9finit\_:"
+      translations:
+        en:
+          name: null
+          description: 'In the area of business resilience, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node23
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.6
+      description: "- la proc\xE9dure de gestion de crises en cas d'incidents de s\xE9\
+        curit\xE9 ayant un impact majeur sur les services essentiels de l'op\xE9rateur\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: '- the crisis management procedure in the event of security
+            incidents having a major impact on the operator''s essential services;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node24
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.6
+      description: "- les proc\xE9dures de continuit\xE9 et de reprise d'activit\xE9\
+        ."
+      translations:
+        en:
+          name: null
+          description: '- Business continuity and disaster recovery procedures.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.7'
+      description: "La PSSI et ses documents d'application sont approuv\xE9s formellement\
+        \ par la direction de l'op\xE9rateur."
+      translations:
+        en:
+          name: null
+          description: The ISSP and its application documents are formally approved
+            by the operator's management.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node26
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.7
+      description: "L'op\xE9rateur \xE9labore au profit de sa direction, au moins\
+        \ annuellement, un rapport sur la mise en \u0153uvre de la PSSI et de ses\
+        \ documents d'application."
+      translations:
+        en:
+          name: null
+          description: The operator shall prepare a report for the benefit of its
+            management, at least annually, on the implementation of the ISSP and its
+            application documents.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node27
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.7
+      description: "Ce rapport pr\xE9cise notamment l'\xE9tat des lieux des risques,\
+        \ le niveau de s\xE9curit\xE9 des SIE et les actions de s\xE9curisation men\xE9\
+        es et pr\xE9vues."
+      translations:
+        en:
+          name: null
+          description: This report specifies in particular the state of the risks,
+            the level of security of the EFAs and the security actions carried out
+            and planned.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:2
+      ref_id: '2.8'
+      description: "L'op\xE9rateur tient \xE0 la disposition de l'Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d'information la PSSI, ses documents\
+        \ d'application et les rapports sur leur mise en \u0153uvre."
+      translations:
+        en:
+          name: null
+          description: The operator shall make available to the National Agency for
+            the Security of Information Systems the PSSI, its application documents
+            and the reports on their implementation.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      ref_id: '3'
+      name: "R\xE8gle 3"
+      description: "Homologation de s\xE9curit\xE9"
+      translations:
+        en:
+          name: Rule 3
+          description: Security Approval
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      ref_id: '3.1'
+      description: "L'op\xE9rateur de services essentiels proc\xE8de \xE0 l'homologation\
+        \ de s\xE9curit\xE9 de chaque syst\xE8me d'information essentiel (SIE), en\
+        \ mettant en \u0153uvre la proc\xE9dure d'homologation pr\xE9vue par sa politique\
+        \ de s\xE9curit\xE9 des r\xE9seaux et syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services carries out the security
+            approval of each essential information system (EIS), by implementing the
+            approval procedure provided for in its network and information systems
+            security policy.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      ref_id: '3.2'
+      description: "L'homologation d'un syst\xE8me est une d\xE9cision formelle prise\
+        \ par l'op\xE9rateur qui atteste que les risques pesant sur la s\xE9curit\xE9\
+        \ de ce syst\xE8me ont \xE9t\xE9 identifi\xE9s et que les mesures n\xE9cessaires\
+        \ pour le prot\xE9ger sont mises en \u0153uvre. Elle atteste \xE9galement\
+        \ que les \xE9ventuels risques r\xE9siduels ont \xE9t\xE9 identifi\xE9s et\
+        \ accept\xE9s par l'op\xE9rateur."
+      translations:
+        en:
+          name: null
+          description: The approval of a system is a formal decision taken by the
+            operator that the risks to the safety of the system have been identified
+            and that the necessary measures to protect it are implemented. It also
+            certifies that any residual risks have been identified and accepted by
+            the operator.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      ref_id: '3.3'
+      description: "Dans le cadre de l'homologation, un audit de la s\xE9curit\xE9\
+        \ du SIE doit \xEAtre r\xE9alis\xE9 conform\xE9ment \xE0 la r\xE8gle 5."
+      translations:
+        en:
+          name: null
+          description: As part of the approval, a safety audit of the EIS shall be
+            carried out in accordance with Regulation 5.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      ref_id: '3.4'
+      description: "L'op\xE9rateur prend la d\xE9cision d'homologuer un SIE sur la\
+        \ base du dossier d'homologation comportant notamment :"
+      translations:
+        en:
+          name: null
+          description: 'The operator makes the decision to approve an EIS on the basis
+            of the approval file, which includes, in particular:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node34
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.4
+      description: "- l'analyse de risques et les objectifs de s\xE9curit\xE9 du SIE\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: '- the risk analysis and security objectives of the EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node35
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.4
+      description: "- les proc\xE9dures et les mesures de s\xE9curit\xE9 appliqu\xE9\
+        es au SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- the procedures and security measures applied to the EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node36
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.4
+      description: "- les rapports d'audit de la s\xE9curit\xE9 du SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- EIS security audit reports;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node37
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.4
+      description: "- les risques r\xE9siduels et les raisons justifiant leur acceptation."
+      translations:
+        en:
+          name: null
+          description: '- the residual risks and the reasons for their acceptance.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      ref_id: '3.5'
+      description: "La validit\xE9 de l'homologation est r\xE9examin\xE9e par l'op\xE9\
+        rateur au moins tous les trois ans et lors de chaque \xE9v\xE9nement ou \xE9\
+        volution de nature \xE0 modifier le contexte d\xE9crit dans le dossier d'homologation."
+      translations:
+        en:
+          name: null
+          description: The validity of the approval shall be reviewed by the operator
+            at least every three years and at the time of each event or development
+            likely to change the context described in the approval dossier.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node39
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.5
+      description: "Chaque r\xE9examen de l'homologation est consign\xE9 dans le dossier\
+        \ d'homologation."
+      translations:
+        en:
+          name: null
+          description: Each re-examination of the registration is recorded in the
+            registration file.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node40
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.5
+      description: "L'op\xE9rateur proc\xE8de au renouvellement de l'homologation\
+        \ d\xE8s qu'elle n'est plus valide."
+      translations:
+        en:
+          name: null
+          description: The operator shall renew the approval as soon as it is no longer
+            valid.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:3
+      ref_id: '3.6'
+      description: "L'op\xE9rateur tient \xE0 la disposition de l'Agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d'information les d\xE9cisions et dossiers\
+        \ d'homologation."
+      translations:
+        en:
+          name: null
+          description: The operator shall make decisions and approval files available
+            to the National Agency for the Security of Information Systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      ref_id: '4'
+      name: "R\xE8gle  4"
+      description: Indicateurs
+      translations:
+        en:
+          name: Rule  4
+          description: Indicators
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4
+      ref_id: '4.1'
+      description: "L'op\xE9rateur de services essentiels \xE9value et tient \xE0\
+        \ jour, pour chaque syst\xE8me d'information essentiel (SIE), les indicateurs\
+        \ suivants :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall assess and maintain
+            the following indicators for each critical information system (EIS):'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node44
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " des indicateurs relatifs au maintien en conditions de s\xE9curit\xE9\
+        \ des ressources :"
+      translations:
+        en:
+          name: null
+          description: ' Indicators relating to the maintenance of resources in a
+            safe condition:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node45
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " le pourcentage de postes utilisateurs dont les ressources syst\xE8\
+        mes ne sont pas install\xE9es dans une version support\xE9e par le fournisseur\
+        \ ou le fabricant ;"
+      translations:
+        en:
+          name: null
+          description: ' The percentage of user workstations whose system resources
+            are not installed in a version supported by the vendor or manufacturer.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node46
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " le pourcentage de serveurs dont les ressources syst\xE8mes ne\
+        \ sont pas install\xE9es dans une version support\xE9e par le fournisseur\
+        \ ou le fabricant ;"
+      translations:
+        en:
+          name: null
+          description: ' The percentage of servers whose system resources are not
+            installed in a version supported by the vendor or manufacturer.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node47
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " des indicateurs relatifs aux droits d'acc\xE8s des utilisateurs\
+        \ et \xE0 l'authentification des acc\xE8s aux ressources :"
+      translations:
+        en:
+          name: null
+          description: ' Indicators relating to user access rights and authentication
+            of access to resources:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node48
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " le pourcentage d'utilisateurs acc\xE9dant au SIE au moyen de\
+        \ comptes privil\xE9gi\xE9s ;"
+      translations:
+        en:
+          name: null
+          description: ' the percentage of users accessing the EIS through privileged
+            accounts;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node49
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " le pourcentage de ressources dont les \xE9l\xE9ments secrets\
+        \ d'authentification ne peuvent pas \xEAtre modifi\xE9s par l'op\xE9rateur\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: ' The percentage of resources whose authentication secrets
+            cannot be changed by the operator.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node50
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " des indicateurs relatifs \xE0 l'administration des ressources\
+        \ :"
+      translations:
+        en:
+          name: null
+          description: ' Indicators related to the administration of resources:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node51
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " le pourcentage de ressources administr\xE9es dont l'administration\
+        \ est effectu\xE9e \xE0 partir d'un compte non sp\xE9cifique d'administration\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: ' The percentage of administered resources that are administered
+            from a non-specific administrative account.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node52
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.1
+      description: " le pourcentage de ressources administr\xE9es dont l'administration\
+        \ ne peut pas \xEAtre effectu\xE9e au travers d'une liaison r\xE9seau physique\
+        \ ou d'une interface d'administration physique."
+      translations:
+        en:
+          name: null
+          description: ' The percentage of managed resources that cannot be administered
+            through a physical network link or physical administration interface.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4
+      ref_id: '4.2'
+      description: "L'op\xE9rateur pr\xE9cise pour chaque indicateur la m\xE9thode\
+        \ d'\xE9valuation employ\xE9e et, le cas \xE9ch\xE9ant, la marge d'incertitude\
+        \ de son \xE9valuation."
+      translations:
+        en:
+          name: null
+          description: The operator shall specify for each indicator the method of
+            assessment used and, where appropriate, the margin of uncertainty in its
+            assessment.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node54
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.2
+      description: "Lorsqu'un indicateur \xE9volue de fa\xE7on significative par rapport\
+        \ \xE0 l'\xE9valuation pr\xE9c\xE9dente, l'op\xE9rateur en pr\xE9cise les\
+        \ raisons."
+      translations:
+        en:
+          name: null
+          description: When an indicator changes significantly compared to the previous
+            assessment, the operator specifies the reasons for this.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:4
+      ref_id: '4.3'
+      description: "L'op\xE9rateur communique \xE0 l'Agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information, \xE0 sa demande, les indicateurs\
+        \ mis \xE0 jour sur un support \xE9lectronique."
+      translations:
+        en:
+          name: null
+          description: The operator shall provide the National Agency for the Security
+            of Information Systems, at its request, with the updated indicators on
+            an electronic medium.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      ref_id: '5'
+      name: "R\xE8gle  5"
+      description: "Audits de la s\xE9curit\xE9"
+      translations:
+        en:
+          name: Rule  5
+          description: Security Audits
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5
+      ref_id: '5.1'
+      description: "L'op\xE9rateur de services essentiels r\xE9alise, dans le cadre\
+        \ de l'homologation de s\xE9curit\xE9 pr\xE9vue \xE0 la r\xE8gle 3, un audit\
+        \ de la s\xE9curit\xE9 de chaque syst\xE8me d'information essentiel (SIE)"
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall, as part of the security
+            approval provided for in Regulation 3, carry out a security audit of each
+            critical information system (EIS)
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node58
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.1
+      description: "L'audit doit aussi \xEAtre r\xE9alis\xE9 lors de chaque renouvellement\
+        \ de l'homologation en prenant notamment en compte les r\xE9sultats de la\
+        \ mise \xE0 jour de l'analyse de risque du SIE."
+      translations:
+        en:
+          name: null
+          description: The audit must also be carried out at the time of each renewal
+            of the accreditation, taking into account in particular the results of
+            the update of the EIS risk analysis.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5
+      ref_id: '5.2'
+      description: "Cet audit vise \xE0 v\xE9rifier l'application et l'efficacit\xE9\
+        \ des mesures de s\xE9curit\xE9 du SIE et notamment le respect des pr\xE9\
+        sentes r\xE8gles de s\xE9curit\xE9."
+      translations:
+        en:
+          name: null
+          description: The purpose of this audit is to verify the application and
+            effectiveness of the EIS security measures and in particular compliance
+            with these safety rules.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node60
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.2
+      description: "Il doit permettre d'\xE9valuer le niveau de s\xE9curit\xE9 du\
+        \ SIE au regard des menaces et des vuln\xE9rabilit\xE9s connues et comporte\
+        \ notamment la r\xE9alisation d'un audit d'architecture, d'un audit de configuration\
+        \ et d'un audit organisationnel et physique."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      translations:
+        en:
+          name: null
+          description: It must make it possible to assess the security level of the
+            EIS with regard to known threats and vulnerabilities and includes in particular
+            the performance of an architecture audit, a configuration audit and an
+            organizational and physical audit.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5
+      ref_id: '5.3'
+      description: "L'op\xE9rateur ou le prestataire mandat\xE9 \xE0 cet effet r\xE9\
+        alise cet audit en s'appuyant sur les exigences du r\xE9f\xE9rentiel en mati\xE8\
+        re d'audit de s\xE9curit\xE9 des syst\xE8mes d'information pris en application\
+        \ de l'article 10 du d\xE9cret n\xB0 2015-350 du 27 mars 2015 modifi\xE9 relatif\
+        \ \xE0 la qualification des produits de s\xE9curit\xE9 et des prestataires\
+        \ de service de confiance pour les besoins de la s\xE9curit\xE9 des syst\xE8\
+        mes d'information."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      translations:
+        en:
+          name: null
+          description: The operator or service provider mandated for this purpose
+            carries out this audit based on the requirements of the reference framework
+            for information systems security audits adopted pursuant to Article 10
+            of Decree No. 2015-350 of 27 March 2015,  as amended, relating to the
+            qualification of security products and trust service providers for the
+            purposes of information system security.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5
+      ref_id: '5.4'
+      description: "A l'issue de l'audit, l'op\xE9rateur ou, le cas \xE9ch\xE9ant,\
+        \ le prestataire \xE9labore un rapport d'audit qui expose les constatations\
+        \ sur les mesures appliqu\xE9es et sur le respect des pr\xE9sentes r\xE8gles\
+        \ de s\xE9curit\xE9."
+      translations:
+        en:
+          name: null
+          description: At the end of the audit, the operator or, where applicable,
+            the service provider shall draw up an audit report setting out the findings
+            on the measures applied and on compliance with these safety rules.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node63
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.4
+      description: "Le rapport pr\xE9cise si le niveau de s\xE9curit\xE9 atteint est\
+        \ conforme aux objectifs de s\xE9curit\xE9, compte tenu des menaces et des\
+        \ vuln\xE9rabilit\xE9s connues."
+      translations:
+        en:
+          name: null
+          description: The report specifies whether the level of security achieved
+            is consistent with the security objectives, taking into account known
+            threats and vulnerabilities.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node64
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:5.4
+      description: "Il formule des recommandations pour rem\xE9dier aux \xE9ventuelles\
+        \ non-conformit\xE9s et vuln\xE9rabilit\xE9s d\xE9couvertes."
+      translations:
+        en:
+          name: null
+          description: It makes recommendations to address any non-conformities and
+            vulnerabilities discovered.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node2
+      ref_id: '6'
+      name: "R\xE8gle 6"
+      description: Cartographie
+      translations:
+        en:
+          name: Rule 6
+          description: Cartography
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6
+      ref_id: '6.1'
+      description: "L'op\xE9rateur de services essentiels \xE9labore et tient \xE0\
+        \ jour, pour chaque syst\xE8me d'information essentiel (SIE), les \xE9l\xE9\
+        ments de cartographie suivants :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall develop and maintain
+            the following mapping elements for each essential information system (EIS):'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node67
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " les noms et les fonctions des applications, supportant les activit\xE9\
+        s de l'op\xE9rateur, install\xE9es sur le SIE ;"
+      translations:
+        en:
+          name: null
+          description: ' the names and functions of the applications, supporting the
+            operator''s activities, installed on the EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node68
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " le cas \xE9ch\xE9ant, les plages d'adresses IP de sortie du SIE\
+        \ vers internet ou un r\xE9seau tiers, ou accessibles depuis ces r\xE9seaux\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: ' if applicable, IP address ranges from the SIE to or accessible
+            from the Internet or a third-party network;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node69
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " le cas \xE9ch\xE9ant, les plages d'adresses IP associ\xE9es aux\
+        \ diff\xE9rents sous-r\xE9seaux composant le SIE ;"
+      translations:
+        en:
+          name: null
+          description: ' if applicable, the IP address ranges associated with the
+            different subnets that make up the EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node70
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " la description fonctionnelle et les lieux d'installation du SIE\
+        \ et de ses diff\xE9rents sous-r\xE9seaux ;"
+      translations:
+        en:
+          name: null
+          description: ' the functional description and installation locations of
+            the EIS and its various sub-networks;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node71
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " la description fonctionnelle des points d'interconnexion du SIE\
+        \ et de ses diff\xE9rents sous-r\xE9seaux avec des r\xE9seaux tiers, notamment\
+        \ la description des \xE9quipements et des fonctions de filtrage et de protection\
+        \ mis en \u0153uvre au niveau de ces interconnexions ;"
+      translations:
+        en:
+          name: null
+          description: ' the functional description of the points of interconnection
+            of the EIS and its various subnetworks with third-party networks, including
+            a description of the equipment and the filtering and protection functions
+            implemented at the level of those interconnections;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node72
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " l'inventaire et l'architecture des dispositifs d'administration\
+        \ du SIE permettant de r\xE9aliser notamment les op\xE9rations d'installation\
+        \ \xE0 distance, de mise \xE0 jour, de supervision, de gestion des configurations,\
+        \ d'authentification ainsi que de gestion des comptes et des droits d'acc\xE8\
+        s ;"
+      translations:
+        en:
+          name: null
+          description: ' the inventory and architecture of the EIS management devices
+            to carry out remote installation, update, supervision, configuration management,
+            authentication as well as account and access rights management;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node73
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " la liste des comptes disposant de droits d'acc\xE8s privil\xE9\
+        gi\xE9s au SIE (appel\xE9s \xAB comptes privil\xE9gi\xE9s \xBB). Cette liste\
+        \ pr\xE9cise pour chaque compte le niveau et le p\xE9rim\xE8tre des droits\
+        \ d'acc\xE8s associ\xE9s, notamment les comptes sur lesquels portent ces droits\
+        \ (comptes d'utilisateurs, comptes de messagerie, comptes de processus, etc.)\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: ' the list of accounts with privileged access rights to the
+            EIS (referred to as "privileged accounts"). This list specifies for each
+            account the level and scope of the associated access rights, including
+            the accounts to which these rights relate (user accounts, email accounts,
+            process accounts, etc.);'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node74
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.1
+      description: " l'inventaire, l'architecture et le positionnement des services\
+        \ de r\xE9solution de noms d'h\xF4te, de messagerie, de relais internet et\
+        \ d'acc\xE8s distant mis en \u0153uvre par le SIE."
+      translations:
+        en:
+          name: null
+          description: ' the inventory, architecture, and positioning of hostname
+            resolution, messaging, Internet relay, and remote access services implemented
+            by the EIS.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:6
+      ref_id: '6.2'
+      description: "L'op\xE9rateur communique \xE0 l'Agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information, \xE0 sa demande, les \xE9l\xE9ments\
+        \ de cartographie mis \xE0 jour sur un support \xE9lectronique."
+      translations:
+        en:
+          name: null
+          description: The operator shall provide the National Agency for the Security
+            of Information Systems, at its request, with the updated mapping elements
+            on an electronic medium.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node76
+      assessable: false
+      depth: 1
+      name: Chapitre II
+      description: "R\xE8gles relatives \xE0 la protection des r\xE9seaux et syst\xE8\
+        mes d'information"
+      reference_controls:
+      - urn:intuitem:risk:function:mitre-attack:M1026
+      translations:
+        en:
+          name: Chapter II
+          description: Rules relating to the protection of networks and information
+            systems
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node77
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node76
+      name: Section II.1
+      description: "S\xE9curit\xE9 de l'architecture"
+      translations:
+        en:
+          name: Section II.1
+          description: Architecture Security
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node77
+      ref_id: '7'
+      name: "R\xE8gle 7"
+      description: Configuration
+      translations:
+        en:
+          name: Rule 7
+          description: Configuration
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:7.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:7
+      ref_id: '7.1'
+      description: "L'op\xE9rateur de services essentiels respecte les r\xE8gles suivantes\
+        \ lorsqu'il installe des services et des \xE9quipements sur ses syst\xE8mes\
+        \ d'information essentiels (SIE) :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall comply with the following
+            rules when installing services and equipment on its essential information
+            systems (EIS):'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node80
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:7.1
+      description: "- l'op\xE9rateur installe sur ses SIE les seuls services et fonctionnalit\xE9\
+        s qui sont indispensables \xE0 leur fonctionnement ou \xE0 leur s\xE9curit\xE9\
+        . "
+      translations:
+        en:
+          name: null
+          description: '- the operator installs on its EFS only those services and
+            functionalities that are essential for their operation or security. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node81
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node80
+      description: "Il d\xE9sactive les services et les fonctionnalit\xE9s qui ne\
+        \ sont pas indispensables, notamment ceux install\xE9s par d\xE9faut, et les\
+        \ d\xE9sinstalle si cela est possible. "
+      translations:
+        en:
+          name: null
+          description: 'It disables services and features that are not essential,
+            including those installed by default, and uninstalls them if possible. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node82
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node80
+      description: "Lorsque la d\xE9sinstallation n'est pas possible, l'op\xE9rateur\
+        \ le mentionne dans le dossier d'homologation du SIE concern\xE9 en pr\xE9\
+        cisant les services et fonctionnalit\xE9s concern\xE9s et les mesures de r\xE9\
+        duction du risque mises en \u0153uvre ;"
+      translations:
+        en:
+          name: null
+          description: When de-installation is not possible, the operator shall mention
+            this in the approval file of the SIE concerned, specifying the services
+            and functionalities concerned and the risk reduction measures implemented;
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node83
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:7.1
+      description: "- l'op\xE9rateur ne connecte \xE0 ses SIE que des \xE9quipements,\
+        \ mat\xE9riels p\xE9riph\xE9riques et supports amovibles dont il assure la\
+        \ gestion et qui sont indispensables au fonctionnement ou \xE0 la s\xE9curit\xE9\
+        \ de ses SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- the operator only connects to its EIS equipment, peripheral
+            hardware and removable media which it manages and which are essential
+            for the operation or security of its EFS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node84
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:7.1
+      description: "- les supports amovibles inscriptibles connect\xE9s aux SIE sont\
+        \ utilis\xE9s exclusivement pour le fonctionnement, y compris la maintenance\
+        \ et l'administration, ou la s\xE9curit\xE9 des SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- removable writable media connected to the EFS are used exclusively
+            for the operation, including maintenance and administration, or security
+            of the EFS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node85
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:7.1
+      description: "- l'op\xE9rateur proc\xE8de, avant chaque utilisation de supports\
+        \ amovibles, \xE0 l'analyse de leur contenu, notamment \xE0 la recherche de\
+        \ code malveillant. "
+      translations:
+        en:
+          name: null
+          description: '- The operator scan the contents of removable media, including
+            for malicious code, before each use of removable media. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node86
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node85
+      description: "L'op\xE9rateur met en place, sur les \xE9quipements auxquels sont\
+        \ connect\xE9s ces supports amovibles, des m\xE9canismes de protection contre\
+        \ les risques d'ex\xE9cution de code malveillant provenant de ces supports."
+      translations:
+        en:
+          name: null
+          description: The operator shall set up mechanisms on the equipment to which
+            these removable media are connected to protect against the risk of malicious
+            code execution from these media.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node77
+      ref_id: '8'
+      name: "R\xE8gle 8"
+      description: Cloisonnement
+      translations:
+        en:
+          name: Rule 8
+          description: Partitioning
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8
+      ref_id: '8.1'
+      description: "L'op\xE9rateur de services essentiels proc\xE8de au cloisonnement\
+        \ de ses syst\xE8mes d'information essentiels (SIE) afin de limiter la propagation\
+        \ des attaques informatiques au sein de ses syst\xE8mes ou ses sous-syst\xE8\
+        mes. Il respecte les r\xE8gles suivantes :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services compartmentalizes its essential
+            information systems (EIS) in order to limit the spread of computer attacks
+            within its systems or subsystems. It complies with the following rules:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node89
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.1
+      description: "- chaque SIE est cloisonn\xE9 physiquement ou logiquement vis-\xE0\
+        -vis des autres syst\xE8mes d'information de l'op\xE9rateur et des syst\xE8\
+        mes d'information de tiers ;"
+      translations:
+        en:
+          name: null
+          description: '- each EIS is physically or logically partitioned from the
+            operator''s other information systems and the information systems of third
+            parties;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node90
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.1
+      description: "- lorsqu'un SIE est lui-m\xEAme constitu\xE9 de sous-syst\xE8\
+        mes, ceux-ci sont cloisonn\xE9s entre eux physiquement ou logiquement. Un\
+        \ sous-syst\xE8me peut \xEAtre constitu\xE9 pour assurer une fonctionnalit\xE9\
+        \ ou un ensemble homog\xE8ne de fonctionnalit\xE9s d'un SIE ou encore pour\
+        \ isoler des ressources d'un SIE n\xE9cessitant un m\xEAme besoin de s\xE9\
+        curit\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: '- where an EIS is itself made up of subsystems, these are
+            physically or logically segregated from each other. A subsystem can be
+            set up to ensure a homogeneous functionality or set of functionalities
+            of an EIS or to isolate resources from an EIS requiring the same security
+            need;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node91
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.1
+      description: "- seules les interconnexions strictement n\xE9cessaires au bon\
+        \ fonctionnement et \xE0 la s\xE9curit\xE9 d'un SIE sont mises en place entre\
+        \ le SIE et les autres syst\xE8mes ou entre les sous-syst\xE8mes du SIE."
+      translations:
+        en:
+          name: null
+          description: '- only those interconnections that are strictly necessary
+            for the proper functioning and security of an EIS shall be put in place
+            between the EIS and other systems or between the subsystems of the EIS.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8
+      ref_id: '8.2'
+      description: "Dans le cas particulier d'une interconnexion entre internet et\
+        \ un SIE n\xE9cessaire \xE0 la fourniture de services d'h\xE9bergement de\
+        \ noms de domaine, d'h\xE9bergement de zones de premier niveau, de r\xE9solution\
+        \ de noms de domaine ou d'interconnexion par appairage pour l'\xE9change de\
+        \ trafic internet, l'op\xE9rateur n'est pas tenu d'assurer un cloisonnement\
+        \ physique ou logique au niveau de cette interconnexion mais met en \u0153\
+        uvre des mesures de protection appropri\xE9es telles que celles pr\xE9conis\xE9\
+        es par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: In the particular case of an interconnection between the internet
+            and an EIS necessary for the provision of domain name hosting, top-level
+            zone hosting, domain name resolution or peering interconnection for the
+            exchange of internet traffic, the operator is not required to ensure physical
+            or logical partitioning at the level of such interconnection but shall
+            implement appropriate protection measures such as those recommended by
+            the Agency National Information Systems Security Authority.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8
+      ref_id: '8.3'
+      description: "Par ailleurs, lorsqu'un service essentiel n\xE9cessite que le\
+        \ SIE n\xE9cessaire \xE0 sa fourniture soit accessible via un r\xE9seau public,\
+        \ l'op\xE9rateur organise ce SIE, selon le principe de la d\xE9fense en profondeur,\
+        \ en au moins deux sous-syst\xE8mes comme suit :"
+      translations:
+        en:
+          name: null
+          description: 'In addition, where an essential service requires the EIS necessary
+            for its provision to be accessible via a public network, the operator
+            shall organise that EIS, in accordance with the principle of defence in
+            depth, into at least two subsystems as follows:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node94
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.3
+      description: "- un premier sous-syst\xE8me correspondant \xE0 la partie du SIE\
+        \ directement accessible via ce r\xE9seau public, auquel l'op\xE9rateur applique\
+        \ des mesures de cloisonnement appropri\xE9es telles que celles pr\xE9conis\xE9\
+        es par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: '- a first subsystem corresponding to the part of the EIS directly
+            accessible via this public network, to which the operator applies appropriate
+            partitioning measures such as those recommended by the National Agency
+            for the Security of Information Systems;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node95
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.3
+      description: "- un deuxi\xE8me sous-syst\xE8me correspondant \xE0 la partie\
+        \ interne du SIE auquel l'op\xE9rateur applique la pr\xE9sente r\xE8gle sur\
+        \ le cloisonnement."
+      translations:
+        en:
+          name: null
+          description: '- a second subsystem corresponding to the internal part of
+            the EIS to which the operator applies this partitioning rule.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:8.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:8
+      ref_id: '8.4'
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation de chaque\
+        \ SIE les m\xE9canismes de cloisonnement qu'il met en place."
+      translations:
+        en:
+          name: null
+          description: The operator shall describe in the approval file for each EIS
+            the compartmentalization mechanisms that he or she puts in place.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node77
+      ref_id: '9'
+      name: "R\xE8gle 9"
+      description: "Acc\xE8s distant"
+      translations:
+        en:
+          name: Rule 9
+          description: Remote Access
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9
+      ref_id: '9.1'
+      description: "L'op\xE9rateur de services essentiels prot\xE8ge les acc\xE8s\
+        \ \xE0 ses syst\xE8mes d'information essentiels (SIE) effectu\xE9s \xE0 travers\
+        \ des syst\xE8mes d'information tiers."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services protects access to its essential
+            information systems (EIS) through third-party information systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9
+      ref_id: '9.2'
+      description: "En particulier, lorsqu'un service essentiel n\xE9cessite que le\
+        \ SIE n\xE9cessaire \xE0 sa fourniture soit accessible via un r\xE9seau public,\
+        \ l'op\xE9rateur prot\xE8ge cet acc\xE8s au moyen de m\xE9canismes cryptographiques\
+        \ conformes aux r\xE8gles pr\xE9conis\xE9es par l'Agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: In particular, where an essential service requires the EIS
+            necessary for its provision to be accessible via a public network, the
+            operator shall protect that access by means of cryptographic mechanisms
+            in accordance with the rules recommended by the National Agency for the
+            Security of Information Systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9
+      ref_id: '9.3'
+      description: "Par ailleurs, lorsque l'op\xE9rateur ou un prestataire qu'il a\
+        \ mandat\xE9 \xE0 cet effet acc\xE8de \xE0 un SIE via un syst\xE8me d'information\
+        \ qui n'est pas sous le contr\xF4le de l'op\xE9rateur ou du prestataire, l'op\xE9\
+        rateur applique ou fait appliquer \xE0 son prestataire les r\xE8gles suivantes\
+        \ :"
+      translations:
+        en:
+          name: null
+          description: 'In addition, when the operator or a service provider authorised
+            by it for this purpose accesses an EIS via an information system which
+            is not under the control of the operator or service provider, the operator
+            shall apply or cause to be applied to its service provider the following
+            rules:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node101
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.3
+      description: "- l'acc\xE8s au SIE est prot\xE9g\xE9 par des m\xE9canismes de\
+        \ chiffrement et d'authentification conformes aux r\xE8gles pr\xE9conis\xE9\
+        es par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: '- Access to the EIS is protected by encryption and authentication
+            mechanisms in accordance with the rules recommended by the National Agency
+            for the Security of Information Systems;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node102
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.3
+      description: "- lorsque l'acc\xE8s au SIE est effectu\xE9 depuis un site ext\xE9\
+        rieur \xE0 celui de l'op\xE9rateur, le m\xE9canisme d'authentification est\
+        \ renforc\xE9 en mettant en \u0153uvre une authentification \xE0 double facteur\
+        \ (authentification impliquant \xE0 la fois un \xE9l\xE9ment secret et un\
+        \ autre \xE9l\xE9ment propre \xE0 l'utilisateur), sauf si des raisons techniques\
+        \ ou op\xE9rationnelles, pr\xE9cis\xE9es dans le dossier d'homologation du\
+        \ SIE, ne le permettent pas ;"
+      translations:
+        en:
+          name: null
+          description: '- when access to the EIS is made from a site outside that
+            of the operator, the authentication mechanism is reinforced by implementing
+            two-factor authentication (authentication involving both a secret element
+            and another element specific to the user), unless technical or operational
+            reasons, specified in the EIS approval file,  do not allow it;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node103
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.3
+      description: "- les \xE9quipements utilis\xE9s pour acc\xE9der au SIE sont g\xE9\
+        r\xE9s et configur\xE9s par l'op\xE9rateur ou, le cas \xE9ch\xE9ant, par le\
+        \ prestataire."
+      translations:
+        en:
+          name: null
+          description: '- the equipment used to access the EIS is managed and configured
+            by the operator or, where applicable, by the service provider.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node104
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node103
+      description: "Lorsque l'acc\xE8s au SIE est effectu\xE9 depuis un site ext\xE9\
+        rieur \xE0 celui de l'op\xE9rateur, les m\xE9moires de masse de ces \xE9quipements\
+        \ sont en permanence prot\xE9g\xE9es par des m\xE9canismes de chiffrement\
+        \ et d'authentification conformes aux r\xE8gles pr\xE9conis\xE9es par l'Agence\
+        \ nationale de la s\xE9curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: When access to the EIS is made from a site outside that of
+            the operator, the mass storage of this equipment is permanently protected
+            by encryption and authentication mechanisms in accordance with the rules
+            recommended by the National Agency for the Security of Information Systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:9.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:9
+      ref_id: '9.4'
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation de chaque\
+        \ SIE les m\xE9canismes de protection des acc\xE8s au SIE qu'il met en place."
+      translations:
+        en:
+          name: null
+          description: The operator shall describe in the approval file for each EIS
+            the mechanisms it has in place to protect access to the EIS.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node77
+      ref_id: '10'
+      name: "R\xE8gle 10"
+      description: Filtrage
+      translations:
+        en:
+          name: Rule 10
+          description: Filtering
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10
+      ref_id: '10.1'
+      description: "L'op\xE9rateur de services essentiels met en place des m\xE9canismes\
+        \ de filtrage des flux de donn\xE9es circulant dans ses syst\xE8mes d'information\
+        \ essentiels (SIE) afin de bloquer la circulation des flux inutiles au fonctionnement\
+        \ de ses syst\xE8mes et susceptibles de faciliter des attaques informatiques.\
+        \ Il respecte les r\xE8gles suivantes :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services implements mechanisms to
+            filter the data flows circulating in its essential information systems
+            (EIS) in order to block the circulation of flows that are useless to the
+            operation of its systems and likely to facilitate computer attacks. It
+            complies with the following rules:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node108
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.1
+      description: "- l'op\xE9rateur d\xE9finit les r\xE8gles de filtrage des flux\
+        \ de donn\xE9es (filtrage sur les adresses r\xE9seau, sur les protocoles,\
+        \ sur les num\xE9ros de port, etc.) permettant de limiter la circulation des\
+        \ flux aux seuls flux de donn\xE9es n\xE9cessaires au fonctionnement et \xE0\
+        \ la s\xE9curit\xE9 de ses SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- the operator defines the rules for filtering data flows
+            (filtering on network addresses, protocols, port numbers, etc.) to limit
+            the flow of flows to only those data flows necessary for the operation
+            and security of its EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node109
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.1
+      description: "- les flux entrants et sortants des SIE ainsi que les flux entre\
+        \ sous-syst\xE8mes des SIE sont filtr\xE9s au niveau de leurs interconnexions\
+        \ de mani\xE8re \xE0 ne permettre la circulation que des seuls flux strictement\
+        \ n\xE9cessaires au fonctionnement et \xE0 la s\xE9curit\xE9 des SIE. Les\
+        \ flux qui ne sont pas conformes aux r\xE8gles de filtrage sont bloqu\xE9\
+        s par d\xE9faut ;"
+      translations:
+        en:
+          name: null
+          description: '- the incoming and outgoing flows of the EFAs as well as the
+            flows between subsystems of the EFAs shall be filtered at the level of
+            their interconnections in such a way as to allow the circulation of only
+            those flows which are strictly necessary for the operation and security
+            of the EFAs. Feeds that don''t comply with the filtering rules are blocked
+            by default;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node110
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.1
+      description: "- l'op\xE9rateur \xE9tablit et tient \xE0 jour une liste des r\xE8\
+        gles de filtrage mentionnant l'ensemble des r\xE8gles en vigueur ou supprim\xE9\
+        es depuis moins d'un an. Cette liste pr\xE9cise pour chaque r\xE8gle :"
+      translations:
+        en:
+          name: null
+          description: '- The operator shall establish and maintain a list of filtering
+            rules mentioning all the rules in force or abolished for less than one
+            year. This list specifies for each rule:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node111
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.1
+      description: "- le motif et la date de la mise en \u0153uvre, de la modification\
+        \ ou de la suppression de la r\xE8gle ;"
+      translations:
+        en:
+          name: null
+          description: '- the reason for and when the rule was implemented, modified,
+            or removed;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node112
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.1
+      description: "- les modalit\xE9s techniques de mise en \u0153uvre de la r\xE8\
+        gle."
+      translations:
+        en:
+          name: null
+          description: '- the technical modalities for the implementation of the rule.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10
+      ref_id: '10.2'
+      description: "Dans le cas particulier d'un SIE n\xE9cessaire \xE0 la fourniture\
+        \ de service d'interconnexion par appairage pour l'\xE9change de trafic internet,\
+        \ l'op\xE9rateur ne met en place de m\xE9canismes de filtrage que pour les\
+        \ flux de donn\xE9es autres que ceux correspondant au trafic internet proprement\
+        \ dit."
+      translations:
+        en:
+          name: null
+          description: In the specific case of an EIS necessary for the provision
+            of peering interconnection service for the exchange of internet traffic,
+            the operator shall only put in place filtering mechanisms for data flows
+            other than those corresponding to the internet traffic itself.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:10.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:10
+      ref_id: '10.3'
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation de chaque\
+        \ SIE les m\xE9canismes de filtrage qu'il met en place."
+      translations:
+        en:
+          name: null
+          description: The operator shall describe in the approval file for each EIS
+            the filtering mechanisms he or she puts in place.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node115
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node76
+      name: Section II.2
+      description: "S\xE9curit\xE9 de l'administration"
+      translations:
+        en:
+          name: Section II.2
+          description: Administration Security
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node115
+      ref_id: '11'
+      name: "R\xE8gle 11"
+      description: Comptes d'administration
+      translations:
+        en:
+          name: Rule 11
+          description: Administrative Accounts
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11
+      ref_id: '11.1'
+      description: "L'op\xE9rateur de services essentiels cr\xE9e des comptes (appel\xE9\
+        s \xAB comptes d'administration \xBB) destin\xE9s aux seules personnes (appel\xE9\
+        es \xAB administrateurs \xBB) charg\xE9es d'effectuer les op\xE9rations d'administration\
+        \ (installation, configuration, gestion, maintenance, supervision, etc.) des\
+        \ ressources de ses syst\xE8mes d'information essentiels (SIE)."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services creates accounts (called
+            "administrative accounts") for the sole purpose of persons (called "administrators")
+            responsible for carrying out the administrative operations (installation,
+            configuration, management, maintenance, supervision, etc.) of the resources
+            of its essential information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11
+      ref_id: '11.2'
+      description: "L'op\xE9rateur d\xE9finit, conform\xE9ment \xE0 sa politique de\
+        \ s\xE9curit\xE9 des r\xE9seaux et syst\xE8mes d'information, les r\xE8gles\
+        \ de gestion et d'attribution des comptes d'administration de ses SIE, et\
+        \ respecte les r\xE8gles suivantes :"
+      translations:
+        en:
+          name: null
+          description: 'The operator shall define, in accordance with its network
+            and information systems security policy, the rules for the management
+            and assignment of the administrative accounts of its EIS, and shall comply
+            with the following rules:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node119
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.2
+      description: "- l'attribution des droits aux administrateurs respecte le principe\
+        \ du moindre privil\xE8ge (seuls les droits strictement n\xE9cessaires sont\
+        \ accord\xE9s). En particulier, afin de limiter la port\xE9e des droits individuels,\
+        \ ils sont attribu\xE9s \xE0 chaque administrateur en les restreignant autant\
+        \ que possible au p\xE9rim\xE8tre fonctionnel et technique dont cet administrateur\
+        \ est responsable ;"
+      translations:
+        en:
+          name: null
+          description: '- The granting of rights to administrators respects the principle
+            of least privilege (only strictly necessary rights are granted). In particular,
+            in order to limit the scope of individual rights, they are assigned to
+            each administrator by restricting them as much as possible to the functional
+            and technical scope for which this administrator is responsible;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node120
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.2
+      description: "- un compte d'administration est utilis\xE9 exclusivement pour\
+        \ se connecter \xE0 un syst\xE8me d'information d'administration (syst\xE8\
+        me d'information utilis\xE9 pour les op\xE9rations d'administration des ressources)\
+        \ ou \xE0 une ressource administr\xE9e ;"
+      translations:
+        en:
+          name: null
+          description: '- An administrative account is used exclusively to connect
+            to an administrative information system (information system used for resource
+            administration operations) or to an administered resource;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node121
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.2
+      description: "- les op\xE9rations d'administration sont effectu\xE9es exclusivement\
+        \ \xE0 partir de comptes d'administration, et inversement, les comptes d'administration\
+        \ sont utilis\xE9s exclusivement pour les op\xE9rations d'administration ;"
+      translations:
+        en:
+          name: null
+          description: '- Administration operations are performed exclusively from
+            administrative accounts, and conversely, administrative accounts are used
+            exclusively for administrative operations.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node122
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.2
+      description: "- lorsque l'administration d'une ressource ne peut pas techniquement\
+        \ \xEAtre effectu\xE9e \xE0 partir d'un compte sp\xE9cifique d'administration,\
+        \ l'op\xE9rateur met en place des mesures permettant d'assurer la tra\xE7\
+        abilit\xE9 et le contr\xF4le des op\xE9rations d'administration r\xE9alis\xE9\
+        es sur cette ressource et des mesures de r\xE9duction du risque li\xE9 \xE0\
+        \ l'utilisation d'un compte non sp\xE9cifique \xE0 l'administration. "
+      translations:
+        en:
+          name: null
+          description: '- When the administration of a resource cannot technically
+            be carried out from a specific administration account, the operator shall
+            put in place measures to ensure the traceability and control of the administration
+            operations carried out on that resource and measures to reduce the risk
+            associated with the use of a non-administration-specific account. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node123
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node122
+      description: "Il d\xE9crit dans le dossier d'homologation du SIE concern\xE9\
+        \ ces mesures ainsi que les raisons techniques ayant emp\xEAch\xE9 l'utilisation\
+        \ d'un compte d'administration ;"
+      translations:
+        en:
+          name: null
+          description: It describes these measures in the approval dossier of the
+            SIE concerned as well as the technical reasons that prevented the use
+            of an administration account;
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node124
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:11.2
+      description: "- l'op\xE9rateur \xE9tablit et tient \xE0 jour la liste des comptes\
+        \ d'administration de ses SIE et les g\xE8re en tant que comptes privil\xE9\
+        gi\xE9s."
+      translations:
+        en:
+          name: null
+          description: '- the operator shall establish and maintain the list of administrative
+            accounts of its EFAs and manage them as privileged accounts.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node115
+      ref_id: '12'
+      name: "R\xE8gle 12"
+      description: "Syst\xE8mes d'information d'administration"
+      translations:
+        en:
+          name: Rule 12
+          description: Administrative Information Systems
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12
+      ref_id: '12.1'
+      description: "L'op\xE9rateur de services essentiels applique les r\xE8gles suivantes\
+        \ aux syst\xE8mes d'information (appel\xE9s \xAB syst\xE8mes d'information\
+        \ d'administration \xBB) utilis\xE9s pour effectuer l'administration de ses\
+        \ syst\xE8mes d'information essentiels (SIE) :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall apply the following
+            rules to the information systems (referred to as "administrative information
+            systems") used to carry out the administration of its essential information
+            systems (EIS):'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node127
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- les ressources mat\xE9rielles et logicielles des syst\xE8mes\
+        \ d'information d'administration sont g\xE9r\xE9es et configur\xE9es par l'op\xE9\
+        rateur ou, le cas \xE9ch\xE9ant, par le prestataire qu'il a mandat\xE9 pour\
+        \ r\xE9aliser les op\xE9rations d'administration ;"
+      translations:
+        en:
+          name: null
+          description: '- the hardware and software resources of the administration
+            information systems are managed and configured by the operator or, where
+            applicable, by the service provider it has mandated to carry out the administration
+            operations;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node128
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- les ressources mat\xE9rielles et logicielles des syst\xE8mes\
+        \ d'information d'administration sont utilis\xE9es exclusivement pour r\xE9\
+        aliser des op\xE9rations d'administration."
+      translations:
+        en:
+          name: null
+          description: '- The hardware and software resources of the administrative
+            information systems are used exclusively to carry out administrative operations.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node129
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node128
+      description: "Cependant, lorsque des raisons techniques ou organisationnelles\
+        \ le justifient, le poste de travail physique de l'administrateur peut \xEA\
+        tre utilis\xE9 pour r\xE9aliser des op\xE9rations autres que des op\xE9rations\
+        \ d'administration. Dans ce cas, des m\xE9canismes de durcissement du syst\xE8\
+        me d'exploitation du poste de travail et de cloisonnement doivent \xEAtre\
+        \ mis en place pour permettre d'isoler l'environnement logiciel utilis\xE9\
+        \ pour ces autres op\xE9rations de l'environnement logiciel utilis\xE9 pour\
+        \ les op\xE9rations d'administration ;"
+      translations:
+        en:
+          name: null
+          description: However, where technical or organizational reasons warrant,
+            the administrator's physical workstation may be used to perform operations
+            other than administrative operations. In this case, mechanisms for hardening
+            the workstation operating system and partitioning must be put in place
+            to isolate the software environment used for these other operations from
+            the software environment used for administrative operations;
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node130
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- un environnement logiciel utilis\xE9 pour effectuer des op\xE9\
+        rations d'administration ne doit pas \xEAtre utilis\xE9 \xE0 d'autres fins,\
+        \ comme l'acc\xE8s \xE0 des sites ou serveurs de messagerie sur internet ;"
+      translations:
+        en:
+          name: null
+          description: '- A software environment used to perform administrative operations
+            must not be used for any other purpose, such as accessing websites or
+            mail servers on the Internet;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node131
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- un utilisateur ne doit pas se connecter \xE0 un syst\xE8me d'information\
+        \ d'administration au moyen d'un environnement logiciel utilis\xE9 pour d'autres\
+        \ fonctions que des op\xE9rations d'administration ;"
+      translations:
+        en:
+          name: null
+          description: '- A user must not connect to an administrative information
+            system by means of a software environment used for functions other than
+            administrative operations;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node132
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- les flux de donn\xE9es associ\xE9s \xE0 des op\xE9rations autres\
+        \ que des op\xE9rations d'administration doivent, lorsqu'ils transitent sur\
+        \ les syst\xE8mes d'information d'administration, \xEAtre cloisonn\xE9s au\
+        \ moyen de m\xE9canismes de chiffrement et d'authentification conformes aux\
+        \ r\xE8gles pr\xE9conis\xE9es par l'Agence nationale de la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information ;"
+      translations:
+        en:
+          name: null
+          description: '- Data flows associated with operations other than administrative
+            operations must, when they transit through administrative information
+            systems, be partitioned by means of encryption and authentication mechanisms
+            in accordance with the rules recommended by the National Agency for the
+            Security of Information Systems;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node133
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- les syst\xE8mes d'information d'administration sont connect\xE9\
+        s aux ressources du SIE \xE0 administrer au travers d'une liaison r\xE9seau\
+        \ physique utilis\xE9e exclusivement pour les op\xE9rations d'administration. "
+      translations:
+        en:
+          name: null
+          description: '- the administrative information systems are connected to
+            the resources of the EIS to be administered through a physical network
+            link used exclusively for administrative operations. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node134
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node133
+      description: "Ces ressources sont administr\xE9es au travers de leur interface\
+        \ d'administration physique."
+      translations:
+        en:
+          name: null
+          description: These resources are administered through their physical administration
+            interface.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node135
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node133
+      description: "Lorsque des raisons techniques emp\xEAchent d'administrer une\
+        \ ressource au travers d'une liaison r\xE9seau physique ou de son interface\
+        \ d'administration physique, l'op\xE9rateur met en \u0153uvre des mesures\
+        \ de r\xE9duction du risque telles que des mesures de s\xE9curit\xE9 logique."
+      translations:
+        en:
+          name: null
+          description: When technical reasons prevent the administration of a resource
+            through a physical network link or its physical administration interface,
+            the operator shall implement risk mitigation measures such as logical
+            security measures.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node136
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node133
+      description: "Dans ce cas, il d\xE9crit ces mesures et leurs justifications\
+        \ dans le dossier d'homologation du SIE concern\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: In this case, it shall describe these measures and their justifications
+            in the approval dossier of the SIE concerned;
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node137
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- lorsqu'ils ne circulent pas dans le syst\xE8me d'information\
+        \ d'administration, les flux d'administration sont prot\xE9g\xE9s par des\
+        \ m\xE9canismes de chiffrement et d'authentification conformes aux r\xE8gles\
+        \ pr\xE9conis\xE9es par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8\
+        mes d'information. "
+      translations:
+        en:
+          name: null
+          description: '- When they do not circulate in the administration information
+            system, administration flows are protected by encryption and authentication
+            mechanisms that comply with the rules recommended by the National Agency
+            for Information Systems Security. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node138
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node137
+      description: "Si le chiffrement et l'authentification de ces flux ne sont pas\
+        \ possibles pour des raisons techniques, l'op\xE9rateur met en \u0153uvre\
+        \ des mesures permettant de prot\xE9ger la confidentialit\xE9 et l'int\xE9\
+        grit\xE9 de ces flux et de renforcer le contr\xF4le et la tra\xE7abilit\xE9\
+        \ des op\xE9rations d'administration. "
+      translations:
+        en:
+          name: null
+          description: 'If encryption and authentication of these flows are not possible
+            for technical reasons, the operator shall implement measures to protect
+            the confidentiality and integrity of these flows and to strengthen the
+            control and traceability of administrative operations. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node139
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node137
+      description: "Dans ce cas, il d\xE9crit ces mesures et leurs justifications\
+        \ dans le dossier d'homologation du SIE concern\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: In this case, it shall describe these measures and their justifications
+            in the approval dossier of the SIE concerned;
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node140
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:12.1
+      description: "- les journaux enregistrant les \xE9v\xE9nements g\xE9n\xE9r\xE9\
+        s par les ressources des syst\xE8mes d'information d'administration ne contiennent\
+        \ aucun mot de passe ou autre \xE9l\xE9ment secret d'authentification en clair\
+        \ ou sous forme d'empreinte cryptographique."
+      translations:
+        en:
+          name: null
+          description: '- Logs recording events generated by administrative information
+            system resources do not contain passwords or other secret authentication
+            elements in plain text or in the form of a cryptographic fingerprint.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node141
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node76
+      name: Section II.3
+      description: "Gestion des identit\xE9s et des acc\xE8s"
+      translations:
+        en:
+          name: Section II.3
+          description: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:13
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node141
+      ref_id: '13'
+      name: "R\xE8gle 13"
+      description: Identification
+      translations:
+        en:
+          name: Rule 13
+          description: Identification
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:13
+      ref_id: '13.1'
+      description: "L'op\xE9rateur de services essentiels cr\xE9e des comptes individuels\
+        \ pour tous les utilisateurs (y compris les utilisateurs ayant des comptes\
+        \ privil\xE9gi\xE9s ou des comptes d'administration) et pour les processus\
+        \ automatiques acc\xE9dant aux ressources de ses syst\xE8mes d'information\
+        \ essentiels (SIE)."
+      translations:
+        en:
+          name: null
+          description: The operator of critical services creates individual accounts
+            for all users (including users with privileged accounts or administrative
+            accounts) and for automatic processes accessing the resources of its critical
+            information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:13.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:13
+      ref_id: '13.2'
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles ne permettent\
+        \ pas de cr\xE9er de comptes individuels pour les utilisateurs ou pour les\
+        \ processus automatiques, l'op\xE9rateur met en place des mesures permettant\
+        \ de r\xE9duire le risque li\xE9 \xE0 l'utilisation de comptes partag\xE9\
+        s et d'assurer la tra\xE7abilit\xE9 de l'utilisation de ces comptes. "
+      translations:
+        en:
+          name: null
+          description: 'Where technical or operational reasons do not allow the creation
+            of individual accounts for users or for automatic processes, the operator
+            shall put in place measures to reduce the risk associated with the use
+            of shared accounts and to ensure traceability of the use of those accounts. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node145
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:13.2
+      description: "Dans ce cas, l'op\xE9rateur d\xE9crit ces mesures dans le dossier\
+        \ d'homologation du SIE concern\xE9 et les raisons justifiant le recours \xE0\
+        \ des comptes partag\xE9s."
+      translations:
+        en:
+          name: null
+          description: In this case, the operator shall describe these measures in
+            the approval dossier of the relevant EIS and the reasons for the use of
+            shared accounts.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:13.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:13
+      ref_id: '13.3'
+      description: "Par ailleurs, lorsqu'un service essentiel n\xE9cessite de diffuser\
+        \ de l'information au public, l'op\xE9rateur n'est pas tenu de cr\xE9er de\
+        \ comptes pour l'acc\xE8s du public \xE0 cette information."
+      translations:
+        en:
+          name: null
+          description: In addition, where an essential service requires the dissemination
+            of information to the public, the operator is not required to create accounts
+            for public access to that information.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:13.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:13
+      ref_id: '13.4'
+      description: "L'op\xE9rateur d\xE9sactive sans d\xE9lai les comptes qui ne sont\
+        \ plus n\xE9cessaires."
+      translations:
+        en:
+          name: null
+          description: The operator shall immediately deactivate accounts that are
+            no longer needed.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node141
+      ref_id: '14'
+      name: "R\xE8gle  14"
+      description: Authentification
+      translations:
+        en:
+          name: Rule  14
+          description: Authentification
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14
+      ref_id: '14.1'
+      description: "L'op\xE9rateur de services essentiels prot\xE8ge les acc\xE8s\
+        \ aux ressources de ses syst\xE8mes d'information essentiels (SIE), que ce\
+        \ soit par un utilisateur ou par un processus automatique, au moyen d'un m\xE9\
+        canisme d'authentification impliquant un \xE9l\xE9ment secret."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall protect access to
+            the resources of its critical information systems (EIS), whether by a
+            user or by an automated process, by means of an authentication mechanism
+            involving a secret element.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14
+      ref_id: '14.2'
+      description: "L'op\xE9rateur d\xE9finit, conform\xE9ment \xE0 sa politique de\
+        \ s\xE9curit\xE9 des r\xE9seaux et syst\xE8mes d'information, les r\xE8gles\
+        \ de gestion des \xE9l\xE9ments secrets d'authentification mis en \u0153uvre\
+        \ dans ses SIE."
+      translations:
+        en:
+          name: null
+          description: The operator shall define, in accordance with its network and
+            information systems security policy, the rules for managing the secret
+            authentication elements implemented in its EIS.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14
+      ref_id: '14.3'
+      description: "Lorsque la ressource le permet techniquement, les \xE9l\xE9ments\
+        \ secrets d'authentification doivent pouvoir \xEAtre modifi\xE9s par l'op\xE9\
+        rateur chaque fois que cela est n\xE9cessaire. Dans ce cas, l'op\xE9rateur\
+        \ respecte les r\xE8gles suivantes :"
+      translations:
+        en:
+          name: null
+          description: 'Where technically possible, the authentication secrets must
+            be able to be modified by the operator whenever necessary. In this case,
+            the operator complies with the following rules:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node152
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.3
+      description: "- l'op\xE9rateur doit modifier les \xE9l\xE9ments secrets d'authentification\
+        \ lorsqu'ils ont \xE9t\xE9 install\xE9s par le fabricant ou le fournisseur\
+        \ de la ressource, avant sa mise en service. A cet effet, l'op\xE9rateur s'assure\
+        \ aupr\xE8s du fabricant ou du fournisseur qu'il dispose des moyens et des\
+        \ droits permettant de r\xE9aliser ces op\xE9rations ;"
+      translations:
+        en:
+          name: null
+          description: '- The operator must modify the authentication secrets when
+            they have been installed by the manufacturer or supplier of the resource,
+            before it is put into service. To this end, the operator shall check with
+            the manufacturer or supplier that it has the means and rights to carry
+            out these operations;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node153
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.3
+      description: "- l'\xE9l\xE9ment secret d'authentification d'un compte partag\xE9\
+        \ doit \xEAtre renouvel\xE9 r\xE9guli\xE8rement et \xE0 chaque retrait d'un\
+        \ utilisateur de ce compte ;"
+      translations:
+        en:
+          name: null
+          description: '- The secret authentication element of a shared account must
+            be renewed regularly and each time a user withdraws from that account.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node154
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.3
+      description: "- les utilisateurs qui n'en ont pas la responsabilit\xE9, ne peuvent\
+        \ pas modifier les \xE9l\xE9ments secrets d'authentification. Ils ne peuvent\
+        \ pas non plus acc\xE9der \xE0 ces \xE9l\xE9ments en clair ;"
+      translations:
+        en:
+          name: null
+          description: '- Users who are not responsible for this cannot change the
+            authentication secrets. They also can''t access these elements in plain
+            text;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node155
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.3
+      description: "- lorsque les \xE9l\xE9ments secrets d'authentification sont des\
+        \ mots de passe, les utilisateurs ne doivent pas les r\xE9utiliser entre comptes\
+        \ privil\xE9gi\xE9s ou entre un compte privil\xE9gi\xE9 et un compte non privil\xE9\
+        gi\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: '- When the authentication secrets are passwords, users should
+            not reuse them between privileged accounts or between a privileged and
+            a non-privileged account.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node156
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.3
+      description: "- lorsque les \xE9l\xE9ments secrets d'authentification sont des\
+        \ mots de passe, ceux-ci sont conformes aux r\xE8gles de l'art telles que\
+        \ celles pr\xE9conis\xE9es par l'Agence nationale de la s\xE9curit\xE9 des\
+        \ syst\xE8mes d'information, en mati\xE8re de complexit\xE9 (longueur du mot\
+        \ de passe et types de caract\xE8res), en tenant compte du niveau de complexit\xE9\
+        \ maximal permis par la ressource concern\xE9e, et en mati\xE8re de renouvellement."
+      translations:
+        en:
+          name: null
+          description: '- when the secret authentication elements are passwords, they
+            comply with the rules of the art such as those recommended by the National
+            Agency for the Security of Information Systems, in terms of complexity
+            (length of the password and types of characters), taking into account
+            the maximum level of complexity allowed by the resource concerned,  and
+            renewal.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14
+      ref_id: '14.4'
+      description: "Lorsque la ressource ne permet pas techniquement de modifier l'\xE9\
+        l\xE9ment secret d'authentification, l'op\xE9rateur met en place un contr\xF4\
+        le d'acc\xE8s appropri\xE9 \xE0 la ressource concern\xE9e ainsi que des mesures\
+        \ de tra\xE7abilit\xE9 des acc\xE8s et de r\xE9duction du risque li\xE9 \xE0\
+        \ l'utilisation d'un \xE9l\xE9ment secret d'authentification fixe."
+      translations:
+        en:
+          name: null
+          description: When the resource does not technically allow the authentication
+            secret element to be modified, the operator shall put in place appropriate
+            access control to the relevant resource as well as measures to trace access
+            and reduce the risk associated with the use of a fixed authentication
+            secret element.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.4
+      ref_id: '14.5'
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation du SIE\
+        \ concern\xE9 ces mesures et les raisons techniques ayant emp\xEAch\xE9 la\
+        \ modification de l'\xE9l\xE9ment secret d'authentification."
+      translations:
+        en:
+          name: null
+          description: The operator shall describe in the approval file of the SIE
+            concerned these measures and the technical reasons which prevented the
+            modification of the authentication secret element.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:14.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:14
+      ref_id: '14.6'
+      description: "Par ailleurs, lorsqu'un service essentiel n\xE9cessite de diffuser\
+        \ de l'information au public, l'op\xE9rateur n'est pas tenu de mettre en place\
+        \ de m\xE9canismes d'authentification pour l'acc\xE8s du public \xE0 cette\
+        \ information."
+      translations:
+        en:
+          name: null
+          description: In addition, where an essential service requires the dissemination
+            of information to the public, the operator is not required to put in place
+            authentication mechanisms for public access to that information.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:15
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node141
+      ref_id: '15'
+      name: "R\xE8gle 15"
+      description: "Droits d'acc\xE8s"
+      translations:
+        en:
+          name: Rule 15
+          description: Access rights
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:15.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:15
+      ref_id: '15.1'
+      description: "L'op\xE9rateur de services essentiels d\xE9finit, conform\xE9\
+        ment \xE0 sa politique de s\xE9curit\xE9 des r\xE9seaux et syst\xE8mes d'information,\
+        \ les r\xE8gles de gestion et d'attribution des droits d'acc\xE8s aux ressources\
+        \ de ses syst\xE8mes d'information essentiels (SIE), et respecte les r\xE8\
+        gles suivantes :"
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall define, in accordance
+            with its network and information systems security policy, the rules for
+            managing and assigning access rights to the resources of its essential
+            information systems (EIS), and shall comply with the following rules:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node162
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:15.1
+      description: "- l'op\xE9rateur n'attribue \xE0 un utilisateur ou \xE0 un processus\
+        \ automatique les droits d'acc\xE8s \xE0 une ressource que si cet acc\xE8\
+        s est strictement n\xE9cessaire \xE0 l'exercice des missions de l'utilisateur\
+        \ ou au fonctionnement du processus automatique ;"
+      translations:
+        en:
+          name: null
+          description: '- the operator assigns to a user or an automatic process access
+            rights to a resource only if such access is strictly necessary for the
+            performance of the user''s tasks or the operation of the automatic process;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node163
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:15.1
+      description: "- l'op\xE9rateur d\xE9finit les acc\xE8s aux diff\xE9rentes fonctionnalit\xE9\
+        s de chaque ressource et en attribue les droits uniquement aux utilisateurs\
+        \ et aux processus automatiques qui en ont strictement le besoin ;"
+      translations:
+        en:
+          name: null
+          description: '- The operator defines access to the various functionalities
+            of each resource and assigns the rights only to the users and automatic
+            processes that strictly need them;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node164
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:15.1
+      description: "- les droits d'acc\xE8s sont r\xE9vis\xE9s p\xE9riodiquement,\
+        \ au moins tous les ans, par l'op\xE9rateur. Cette r\xE9vision porte sur les\
+        \ liens entre les comptes, les droits d'acc\xE8s associ\xE9s et les ressources\
+        \ ou les fonctionnalit\xE9s qui en font l'objet ;"
+      translations:
+        en:
+          name: null
+          description: '- Access rights are reviewed periodically, at least annually,
+            by the operator. This review addresses the relationship between accounts,
+            the associated access rights, and the resources or features that are the
+            subject of them;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node165
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:15.1
+      description: "- l'op\xE9rateur \xE9tablit et tient \xE0 jour la liste des comptes\
+        \ privil\xE9gi\xE9s. "
+      translations:
+        en:
+          name: null
+          description: '- The operator shall establish and maintain the list of privileged
+            accounts. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node166
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node165
+      description: "Toute modification d'un compte privil\xE9gi\xE9 (ajout, suppression,\
+        \ suspension ou modification des droits associ\xE9s) fait l'objet d'un contr\xF4\
+        le formel de l'op\xE9rateur destin\xE9 \xE0 v\xE9rifier que les droits d'acc\xE8\
+        s aux ressources et fonctionnalit\xE9s sont attribu\xE9s selon le principe\
+        \ du moindre privil\xE8ge (seuls les droits strictement n\xE9cessaires sont\
+        \ accord\xE9s) et en coh\xE9rence avec les besoins d'utilisation du compte."
+      translations:
+        en:
+          name: null
+          description: Any modification of a privileged account (addition, deletion,
+            suspension or modification of associated rights) is subject to a formal
+            control by the operator to verify that access rights to resources and
+            features are allocated according to the principle of least privilege (only
+            strictly necessary rights are granted) and in line with the needs of use
+            of the account.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node167
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node76
+      name: Section II.4
+      description: "Maintien en conditions de s\xE9curit\xE9"
+      translations:
+        en:
+          name: Section II.4
+          description: Safe maintenance
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node167
+      ref_id: '16'
+      name: "R\xE8gle 16"
+      description: "Proc\xE9dure de maintien en conditions de s\xE9curit\xE9"
+      translations:
+        en:
+          name: Rule 16
+          description: Safe Maintenance Procedure
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16
+      ref_id: '16.1'
+      description: "L'op\xE9rateur de services essentiels \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre une proc\xE9dure de maintien en conditions de s\xE9\
+        curit\xE9 des ressources mat\xE9rielles et logicielles de ses syst\xE8mes\
+        \ d'information essentiels (SIE), conform\xE9ment \xE0 sa politique de s\xE9\
+        curit\xE9 des r\xE9seaux et syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall develop, maintain
+            and implement a procedure for maintaining the security of the hardware
+            and software resources of its essential information systems (EIS), in
+            accordance with its network and information systems security policy.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16
+      ref_id: '16.2'
+      description: "Cette proc\xE9dure d\xE9finit les conditions permettant de maintenir\
+        \ le niveau de s\xE9curit\xE9 des ressources des SIE en fonction de l'\xE9\
+        volution des vuln\xE9rabilit\xE9s et des menaces et pr\xE9cise notamment la\
+        \ politique d'installation de toute nouvelle version et mesure correctrice\
+        \ de s\xE9curit\xE9 d'une ressource et les v\xE9rifications \xE0 effectuer\
+        \ avant l'installation. Elle pr\xE9voit que :"
+      translations:
+        en:
+          name: null
+          description: 'This procedure defines the conditions for maintaining the
+            security level of EIS resources in response to evolving vulnerabilities
+            and threats, including the policy for installing any new version and security
+            remediation of a resource and the checks to be performed prior to installation.
+            It provides that:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node171
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.2
+      description: "- l'op\xE9rateur se tient inform\xE9 des vuln\xE9rabilit\xE9s\
+        \ et des mesures correctrices de s\xE9curit\xE9 susceptibles de concerner\
+        \ les ressources mat\xE9rielles et logicielles de ses SIE, qui sont diffus\xE9\
+        es notamment par les fournisseurs ou les fabricants de ces ressources ou par\
+        \ des centres de pr\xE9vention et d'alerte en mati\xE8re de cyber s\xE9curit\xE9\
+        \ tels que le CERT-FR (centre gouvernemental de veille, d'alerte et de r\xE9\
+        ponse aux attaques informatiques) ;"
+      translations:
+        en:
+          name: null
+          description: '- the operator keeps itself informed of vulnerabilities and
+            security corrective measures likely to affect the hardware and software
+            resources of its EIS, which are disseminated in particular by the suppliers
+            or manufacturers of these resources or by cybersecurity prevention and
+            alert centres such as the CERT-FR (government monitoring centre,  Alert
+            and Response to Cyber Attacks);'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node172
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.2
+      description: "- sauf en cas de difficult\xE9s techniques ou op\xE9rationnelles\
+        \ justifi\xE9es, l'op\xE9rateur installe et maintient toutes les ressources\
+        \ mat\xE9rielles et logicielles de ses SIE dans des versions support\xE9es\
+        \ par leurs fournisseurs ou leurs fabricants et comportant les mises \xE0\
+        \ jour de s\xE9curit\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: '- Except in the event of justified technical or operational
+            difficulties, the operator installs and maintains all the hardware and
+            software resources of its EIS in versions supported by their suppliers
+            or manufacturers and including security updates;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node173
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.2
+      description: "- pr\xE9alablement \xE0 l'installation de toute nouvelle version,\
+        \ l'op\xE9rateur s'assure de l'origine de cette version et de son int\xE9\
+        grit\xE9, et en analyse l'impact sur le SIE concern\xE9 d'un point de vue\
+        \ technique et op\xE9rationnel ;"
+      translations:
+        en:
+          name: null
+          description: '- prior to the installation of any new version, the operator
+            shall ensure the origin of this version and its integrity, and analyse
+            its impact on the SIE concerned from a technical and operational point
+            of view;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node174
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.2
+      description: "- d\xE8s qu'il a connaissance d'une mesure correctrice de s\xE9\
+        curit\xE9 concernant une de ses ressources, et sauf en cas de difficult\xE9\
+        s techniques ou op\xE9rationnelles justifi\xE9es, l'op\xE9rateur en planifie\
+        \ l'installation apr\xE8s avoir effectu\xE9 les v\xE9rifications mentionn\xE9\
+        es \xE0 l'alin\xE9a pr\xE9c\xE9dent, et proc\xE8de \xE0 cette installation\
+        \ dans les d\xE9lais pr\xE9vus par la proc\xE9dure de maintien en conditions\
+        \ de s\xE9curit\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: '- as soon as he becomes aware of a corrective safety measure
+            concerning one of his resources, and except in the case of justified technical
+            or operational difficulties, the operator shall plan the installation
+            after having carried out the checks referred to in the preceding paragraph,
+            and carry out this installation within the time limits laid down by the
+            procedure for maintaining conditions in safe conditions;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node175
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:16.2
+      description: "- lorsque des raisons techniques ou op\xE9rationnelles le justifient,\
+        \ l'op\xE9rateur peut d\xE9cider, pour certaines ressources de ses SIE, de\
+        \ ne pas installer une version support\xE9e par le fournisseur ou le fabricant\
+        \ de la ressource concern\xE9e ou de ne pas installer une mesure correctrice\
+        \ de s\xE9curit\xE9. Dans ce cas, l'op\xE9rateur met en \u0153uvre des mesures\
+        \ techniques ou organisationnelles pr\xE9vues par la proc\xE9dure de maintien\
+        \ en conditions de s\xE9curit\xE9 pour r\xE9duire les risques li\xE9s \xE0\
+        \ l'utilisation d'une version obsol\xE8te ou comportant des vuln\xE9rabilit\xE9\
+        s connues. "
+      translations:
+        en:
+          name: null
+          description: '- where justified by technical or operational reasons, the
+            operator may decide, for certain resources of its EIS, not to install
+            a version supported by the supplier or manufacturer of the resource concerned
+            or not to install a security corrective measure. In this case, the operator
+            shall implement technical or organisational measures provided for in the
+            security maintenance procedure to reduce the risks associated with the
+            use of an outdated version or a version with known vulnerabilities. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node176
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node175
+      description: "L'op\xE9rateur d\xE9crit dans le dossier d'homologation du SIE\
+        \ concern\xE9 ces mesures de r\xE9duction des risques et les raisons techniques\
+        \ ou op\xE9rationnelles ayant emp\xEAch\xE9 l'installation d'une version support\xE9\
+        e ou d'une mesure correctrice de s\xE9curit\xE9."
+      translations:
+        en:
+          name: null
+          description: The operator shall describe in the approval dossier of the
+            relevant EIS these risk reduction measures and the technical or operational
+            reasons that prevented the installation of a supported version or a safety
+            corrective measure.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node177
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node76
+      name: Section II.5
+      description: "S\xE9curit\xE9 physique et environnementale"
+      translations:
+        en:
+          name: Section II.5
+          description: Physical and Environmental Security
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:17
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node177
+      ref_id: '17'
+      name: "R\xE8gle  17"
+      description: "S\xE9curit\xE9 physique et environnementale"
+      translations:
+        en:
+          name: Rule  17
+          description: Physical and Environmental Security
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:17.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:17
+      ref_id: '17.1'
+      description: "L'op\xE9rateur de services essentiels d\xE9finit et met en \u0153\
+        uvre, conform\xE9ment \xE0 sa politique de s\xE9curit\xE9 des r\xE9seaux et\
+        \ syst\xE8mes d'information, les proc\xE9dures et les mesures de s\xE9curit\xE9\
+        \ physique et environnementale applicables \xE0 ses syst\xE8mes d'information\
+        \ essentiels (SIE). "
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall define and implement,
+            in accordance with its network and information systems security policy,
+            the physical and environmental security procedures and measures applicable
+            to its essential information systems (EIS). '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node180
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:17.1
+      description: "Ces proc\xE9dures et mesures portent notamment sur le contr\xF4\
+        le du personnel interne et du personnel externe, le contr\xF4le d'acc\xE8\
+        s physique aux SIE et, le cas \xE9ch\xE9ant, la protection des SIE contre\
+        \ les risques environnementaux tels que les catastrophes naturelles."
+      translations:
+        en:
+          name: null
+          description: Those procedures and measures shall include the control of
+            internal and external staff, the control of physical access to EIAs and,
+            where appropriate, the protection of EFAs against environmental risks
+            such as natural disasters.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node181
+      assessable: false
+      depth: 1
+      name: Chapitre III
+      description: "R\xE8gles relatives \xE0 la d\xE9fense des r\xE9seaux et syst\xE8\
+        mes d'information"
+      translations:
+        en:
+          name: Chapter III
+          description: Rules relating to the defence of information networks and systems
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node182
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node181
+      name: Section III.1
+      description: "D\xE9tection des incidents de s\xE9curit\xE9"
+      translations:
+        en:
+          name: Section III.1
+          description: Security Incident Detection
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node182
+      ref_id: '18'
+      name: "R\xE8gle 18"
+      description: "D\xE9tection"
+      translations:
+        en:
+          name: Rule 18
+          description: Detection
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      ref_id: '18.1'
+      description: "L'op\xE9rateur de services essentiels \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre, conform\xE9ment \xE0 sa politique de s\xE9curit\xE9\
+        \ des r\xE9seaux et syst\xE8mes d'information, une proc\xE9dure de d\xE9tection\
+        \ des incidents de s\xE9curit\xE9 affectant ses syst\xE8mes d'information\
+        \ essentiels (SIE)."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall develop, maintain
+            and implement, in accordance with its network and information systems
+            security policy, a procedure for detecting security incidents affecting
+            its essential information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      ref_id: '18.2'
+      description: "Cette proc\xE9dure pr\xE9voit des mesures organisationnelles et\
+        \ techniques destin\xE9es \xE0 d\xE9tecter les incidents de s\xE9curit\xE9\
+        \ affectant les SIE."
+      translations:
+        en:
+          name: null
+          description: This procedure shall provide for organisational and technical
+            measures to detect security incidents affecting EIS.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node186
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.2
+      description: "Les mesures organisationnelles comprennent les modalit\xE9s d'exploitation\
+        \ des dispositifs de d\xE9tection et d\xE9crivent la cha\xEEne de traitement\
+        \ des \xE9v\xE9nements de s\xE9curit\xE9 identifi\xE9s par ces dispositifs."
+      translations:
+        en:
+          name: null
+          description: The organizational measures include the modalities of operation
+            of the detection devices and describe the chain of processing of the security
+            events identified by these devices.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node187
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.2
+      description: "Les mesures techniques pr\xE9cisent la nature et le positionnement\
+        \ des dispositifs de d\xE9tection."
+      translations:
+        en:
+          name: null
+          description: The technical measurements specify the nature and positioning
+            of the detection devices.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      ref_id: '18.3'
+      description: "L'op\xE9rateur met en \u0153uvre des dispositifs de d\xE9tection\
+        \ capables d'identifier des \xE9v\xE9nements caract\xE9ristiques d'un incident\
+        \ de s\xE9curit\xE9 notamment d'une attaque en cours ou \xE0 venir et de permettre\
+        \ la recherche de traces d'incidents ant\xE9rieurs. A cet effet, ces dispositifs\
+        \ :"
+      translations:
+        en:
+          name: null
+          description: 'The operator implements detection devices capable of identifying
+            events characteristic of a security incident, in particular an ongoing
+            or future attack, and of allowing the search for traces of previous incidents.
+            To this end, these devices:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node189
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.3
+      description: "- collectent les donn\xE9es pertinentes sur le fonctionnement\
+        \ de chaque SIE (notamment des donn\xE9es \xAB r\xE9seau \xBB ou des donn\xE9\
+        es \xAB syst\xE8me \xBB) \xE0 partir de capteurs positionn\xE9s de mani\xE8\
+        re \xE0 identifier les \xE9v\xE9nements de s\xE9curit\xE9 li\xE9s \xE0 l'ensemble\
+        \ des flux de donn\xE9es \xE9chang\xE9s entre les SIE et les syst\xE8mes d'information\
+        \ tiers \xE0 ceux de l'op\xE9rateur ;"
+      translations:
+        en:
+          name: null
+          description: '- collect relevant data on the operation of each EIS (in particular
+            "network" or "system" data) from sensors positioned in such a way as to
+            identify security events related to all data flows exchanged between EIS
+            and information systems other than those of the operator;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node190
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.3
+      description: "- analysent les donn\xE9es issues des capteurs notamment en recherchant\
+        \ des marqueurs techniques d'attaques connus, dans le but d'identifier les\
+        \ \xE9v\xE9nements de s\xE9curit\xE9 et de les caract\xE9riser ;"
+      translations:
+        en:
+          name: null
+          description: '- Analyze sensor data, in particular by looking for technical
+            markers of known attacks, in order to identify security events and characterize
+            them;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node191
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.3
+      description: "- archivent les m\xE9tadonn\xE9es des \xE9v\xE9nements identifi\xE9\
+        s afin de permettre une recherche a posteriori de marqueurs techniques d'attaques\
+        \ ou de compromission sur une dur\xE9e d'au moins six mois."
+      translations:
+        en:
+          name: null
+          description: '- Archive the metadata of the identified events in order to
+            allow a posteriori search for technical markers of attacks or compromises
+            over a period of at least six months.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      ref_id: '18.4'
+      description: "Dans le cas particulier d'un SIE n\xE9cessaire \xE0 la fourniture\
+        \ de service d'interconnexion par appairage pour l'\xE9change de trafic internet,\
+        \ l'op\xE9rateur ne met en \u0153uvre de dispositifs de d\xE9tection que pour\
+        \ les flux de donn\xE9es autres que ceux correspondant au trafic internet\
+        \ proprement dit."
+      translations:
+        en:
+          name: null
+          description: In the specific case of an EIS necessary for the provision
+            of peering interconnection service for the exchange of internet traffic,
+            the operator shall implement detection devices only for data flows other
+            than those corresponding to the internet traffic itself.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      ref_id: '18.5'
+      description: "L'op\xE9rateur ou le prestataire mandat\xE9 \xE0 cet effet exploite\
+        \ les dispositifs de d\xE9tection en s'appuyant sur les exigences du r\xE9\
+        f\xE9rentiel en mati\xE8re de d\xE9tection des incidents de s\xE9curit\xE9\
+        \ pris en application de l'article 10 du d\xE9cret n\xB0 2015-350 du 27 mars\
+        \ 2015 modifi\xE9 relatif \xE0 la qualification des produits de s\xE9curit\xE9\
+        \ et des prestataires de service de confiance pour les besoins de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: The operator or service provider mandated for this purpose
+            operates the detection devices in accordance with the requirements of
+            the standard for the detection of security incidents adopted pursuant
+            to Article 10 of Decree No. 2015-350 of 27 March 2015,  as amended, relating
+            to the qualification of security products and trust service providers
+            for the purposes of information system security.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:18.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:18
+      ref_id: '18.6'
+      description: "L'op\xE9rateur veille en particulier \xE0 ce que l'installation\
+        \ et l'exploitation des dispositifs de d\xE9tection n'affectent pas la s\xE9\
+        curit\xE9 et le fonctionnement de ses SIE."
+      translations:
+        en:
+          name: null
+          description: In particular, the operator shall ensure that the installation
+            and operation of the detection devices does not affect the safety and
+            operation of its EIS.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:19
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node182
+      ref_id: '19'
+      name: "R\xE8gle 19"
+      description: Journalisation
+      translations:
+        en:
+          name: Rule 19
+          description: Journaling
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19
+      ref_id: '19.1'
+      description: "L'op\xE9rateur de services essentiels met en \u0153uvre sur chaque\
+        \ syst\xE8me d'information essentiel (SIE) un syst\xE8me de journalisation\
+        \ qui enregistre les \xE9v\xE9nements relatifs \xE0 l'authentification des\
+        \ utilisateurs, \xE0 la gestion des comptes et des droits d'acc\xE8s, \xE0\
+        \ l'acc\xE8s aux ressources, aux modifications des r\xE8gles de s\xE9curit\xE9\
+        \ du SIE ainsi qu'au fonctionnement du SIE. Le syst\xE8me de journalisation\
+        \ contribue \xE0 la d\xE9tection d'incidents de s\xE9curit\xE9 en collectant\
+        \ les donn\xE9es de journalisation."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall implement a logging
+            system on each critical information system (EIS) that records events relating
+            to user authentication, account and access rights management, access to
+            resources, changes to EIS security rules and the operation of the EIS.
+            The logging system helps in the detection of security incidents by collecting
+            the log data.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19
+      ref_id: '19.2'
+      description: "Le syst\xE8me de journalisation porte sur les \xE9quipements suivants\
+        \ lorsqu'ils g\xE9n\xE8rent les \xE9v\xE9nements mentionn\xE9s au premier\
+        \ alin\xE9a :"
+      translations:
+        en:
+          name: null
+          description: 'The logging system shall cover the following equipment when
+            it generates the events referred to in the first subparagraph:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node198
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: ' les serveurs applicatifs supportant les services essentiels ;'
+      translations:
+        en:
+          name: null
+          description: ' application servers supporting essential services;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node199
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: " les serveurs d'infrastructure syst\xE8me ;"
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MONITOR
+      - urn:intuitem:risk:function:mitre-attack:M1029
+      translations:
+        en:
+          name: null
+          description: ' system infrastructure servers;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node200
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: " les serveurs d'infrastructure r\xE9seau ;"
+      translations:
+        en:
+          name: null
+          description: ' network infrastructure servers;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node201
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: " les \xE9quipements de s\xE9curit\xE9 ;"
+      translations:
+        en:
+          name: null
+          description: ' safety equipment;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node202
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: " les postes d'ing\xE9nierie et de maintenance des syst\xE8mes\
+        \ industriels ;"
+      translations:
+        en:
+          name: null
+          description: ' engineering and maintenance positions for industrial systems;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node203
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: " les \xE9quipements r\xE9seau ;"
+      translations:
+        en:
+          name: null
+          description: ' network equipment;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node204
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.2
+      description: ' les postes d''administration.'
+      translations:
+        en:
+          name: null
+          description: ' administrative positions.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19
+      ref_id: '19.3'
+      description: "Les \xE9v\xE9nements enregistr\xE9s par le syst\xE8me de journalisation\
+        \ sont horodat\xE9s au moyen de sources de temps synchronis\xE9es."
+      translations:
+        en:
+          name: null
+          description: Events recorded by the logging system are timestamped using
+            synchronized time sources.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node206
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.3
+      description: "Ils sont, pour chaque SIE, centralis\xE9s et archiv\xE9s pendant\
+        \ une dur\xE9e d'au moins six mois."
+      translations:
+        en:
+          name: null
+          description: For each EIS, they shall be centralised and archived for a
+            period of at least six months.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node207
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:19.3
+      description: "Le format d'archivage des \xE9v\xE9nements permet de r\xE9aliser\
+        \ des recherches automatis\xE9es sur ces \xE9v\xE9nements."
+      translations:
+        en:
+          name: null
+          description: The event archiving format allows for automated searches of
+            event events.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:20
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node182
+      ref_id: '20'
+      name: "R\xE8gle  20"
+      description: "Corr\xE9lation et analyse de journaux"
+      translations:
+        en:
+          name: Rule  20
+          description: Log correlation and analysis
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:20.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:20
+      ref_id: '20.1'
+      description: "L'op\xE9rateur de services essentiels met en \u0153uvre un syst\xE8\
+        me de corr\xE9lation et d'analyse de journaux qui exploite les \xE9v\xE9nements\
+        \ enregistr\xE9s par le syst\xE8me de journalisation install\xE9 sur chacun\
+        \ des syst\xE8mes d'information essentiels (SIE), afin de d\xE9tecter des\
+        \ \xE9v\xE9nements susceptibles d'affecter la s\xE9curit\xE9 des SIE. Le syst\xE8\
+        me de corr\xE9lation et d'analyse de journaux contribue \xE0 la d\xE9tection\
+        \ d'incidents de s\xE9curit\xE9 en analysant les donn\xE9es de journalisation."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall implement a log correlation
+            and analysis system that exploits the events recorded by the logging system
+            installed on each of the critical information systems (EIS), in order
+            to detect events that may affect the security of the EFS. The log correlation
+            and analysis system helps detect security incidents by analyzing log data.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:20.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:20
+      ref_id: '20.2'
+      description: "Le syst\xE8me de corr\xE9lation et d'analyse de journaux est install\xE9\
+        \ et exploit\xE9 sur un syst\xE8me d'information mis en place exclusivement\
+        \ \xE0 des fins de d\xE9tection d'\xE9v\xE9nements susceptibles d'affecter\
+        \ la s\xE9curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: The log correlation and analysis system is installed and operated
+            on an information system set up exclusively for the purpose of detecting
+            events likely to affect the security of information systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node211
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:20
+      description: "L'op\xE9rateur ou le prestataire mandat\xE9 \xE0 cet effet installe\
+        \ et exploite ce syst\xE8me de corr\xE9lation et d'analyse de journaux en\
+        \ s'appuyant sur les exigences du r\xE9f\xE9rentiel en mati\xE8re de d\xE9\
+        tection des incidents de s\xE9curit\xE9 pris en application de l'article 10\
+        \ du d\xE9cret n\xB0 2015-350 du 27 mars 2015 modifi\xE9 relatif \xE0 la qualification\
+        \ des produits de s\xE9curit\xE9 et des prestataires de service de confiance\
+        \ pour les besoins de la s\xE9curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: The operator or service provider mandated for this purpose
+            installs and operates this log correlation and analysis system based on
+            the requirements of the standard for the detection of security incidents
+            adopted pursuant to Article 10 of Decree No. 2015-350 of 27 March 2015,  as
+            amended, relating to the qualification of security products and trust
+            service providers for the purposes of information system security.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node212
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node181
+      name: Section III.2
+      description: "Gestion des incidents de s\xE9curit\xE9"
+      translations:
+        en:
+          name: Section III.2
+          description: Security Incident Management
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:21
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node212
+      ref_id: '21'
+      name: "R\xE8gle 21"
+      description: "R\xE9ponse aux incidents"
+      translations:
+        en:
+          name: Rule 21
+          description: Incident Response
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:21.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:21
+      ref_id: '21.1'
+      description: "L'op\xE9rateur de services essentiels \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre, conform\xE9ment \xE0 sa politique de s\xE9curit\xE9\
+        \ des r\xE9seaux et syst\xE8mes d'information, une proc\xE9dure de traitement\
+        \ des incidents de s\xE9curit\xE9 affectant ses syst\xE8mes d'information\
+        \ essentiels (SIE)."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall develop, maintain
+            and implement, in accordance with its network and information systems
+            security policy, a procedure for dealing with security incidents affecting
+            its essential information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:21.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:21
+      ref_id: '21.2'
+      description: "L'op\xE9rateur ou le prestataire mandat\xE9 \xE0 cet effet proc\xE8\
+        de au traitement des incidents en s'appuyant sur les exigences du r\xE9f\xE9\
+        rentiel en mati\xE8re de r\xE9ponse aux incidents de s\xE9curit\xE9 pris en\
+        \ application de l'article 10 du d\xE9cret n\xB0 2015-350 du 27 mars 2015\
+        \ modifi\xE9 relatif \xE0 la qualification des produits de s\xE9curit\xE9\
+        \ et des prestataires de service de confiance pour les besoins de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information."
+      translations:
+        en:
+          name: null
+          description: The operator or service provider mandated for this purpose
+            processes incidents based on the requirements of the security incident
+            response framework adopted pursuant to Article 10 of Decree No. 2015-350
+            of 27 March 2015,  as amended, relating to the qualification of security
+            products and trust service providers for the security needs of information
+            systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:21.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:21
+      ref_id: '21.3'
+      description: "Un syst\xE8me d'information sp\xE9cifique doit \xEAtre mis en\
+        \ place pour traiter les incidents, notamment pour stocker les relev\xE9s\
+        \ techniques relatifs aux analyses des incidents. Ce syst\xE8me est cloisonn\xE9\
+        \ vis-\xE0-vis du SIE concern\xE9 par l'incident."
+      translations:
+        en:
+          name: null
+          description: A specific information system must be set up to deal with incidents,
+            in particular to store technical records relating to incident analyses.
+            This system is compartmentalized with respect to the EIS concerned by
+            the incident.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:21.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:21
+      ref_id: '21.4'
+      description: "L'op\xE9rateur conserve les relev\xE9s techniques relatifs aux\
+        \ analyses des incidents pendant une dur\xE9e d'au moins six mois. Il tient\
+        \ ces relev\xE9s techniques \xE0 la disposition de l'Agence nationale de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d'information."
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
+      - urn:intuitem:risk:function:doc-pol:POL.BCP
+      translations:
+        en:
+          name: null
+          description: The operator shall keep the technical records relating to the
+            analysis of incidents for a period of at least six months. It shall make
+            these technical records available to the National Agency for the Security
+            of Information Systems.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:22
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node212
+      ref_id: '22'
+      name: "R\xE8gle 22"
+      description: Traitement des alertes
+      translations:
+        en:
+          name: Rule 22
+          description: Alert Processing
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:22.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:22
+      ref_id: '22.1'
+      description: "L'op\xE9rateur de services essentiels met en place un service\
+        \ lui permettant de prendre connaissance, dans les meilleurs d\xE9lais, d'informations\
+        \ transmises par l'Agence nationale de la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ relatives \xE0 des incidents, des vuln\xE9rabilit\xE9s et des menaces. "
+      translations:
+        en:
+          name: null
+          description: 'The operator of essential services shall set up a service
+            enabling it to become aware, as soon as possible, of information transmitted
+            by the National Agency for the Security of Information Systems relating
+            to incidents, vulnerabilities and threats. '
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node220
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:22.1
+      description: "Il met en \u0153uvre une proc\xE9dure pour traiter les informations\
+        \ ainsi re\xE7ues et le cas \xE9ch\xE9ant prendre les mesures de s\xE9curit\xE9\
+        \ n\xE9cessaires \xE0 la protection de ses syst\xE8mes d'information essentiels\
+        \ (SIE)."
+      translations:
+        en:
+          name: null
+          description: It implements a procedure to process the information thus received
+            and, if necessary, to take the necessary security measures to protect
+            its essential information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node221
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:22
+      description: "L'op\xE9rateur communique \xE0 l'Agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information les coordonn\xE9es (nom du service,\
+        \ num\xE9ro de t\xE9l\xE9phone et adresse \xE9lectronique) tenues \xE0 jour\
+        \ du service pr\xE9vu \xE0 l'alin\xE9a pr\xE9c\xE9dent."
+      translations:
+        en:
+          name: null
+          description: The operator shall provide the National Agency for the Security
+            of Information Systems with the up-to-date contact details (name of the
+            service, telephone number and e-mail address) of the service provided
+            for in the preceding paragraph.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node222
+      assessable: false
+      depth: 1
+      name: Chapitre IV
+      description: "R\xE8gles relatives \xE0 la r\xE9silience des activit\xE9s"
+      translations:
+        en:
+          name: Chapter IV
+          description: Business Resilience Rules
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node222
+      ref_id: '23'
+      name: "R\xE8gle  23"
+      description: Gestion de crises
+      translations:
+        en:
+          name: Rule  23
+          description: Crisis Management
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:23
+      ref_id: '23.1'
+      description: "L'op\xE9rateur de services essentiels \xE9labore, tient \xE0 jour\
+        \ et met en \u0153uvre, conform\xE9ment \xE0 sa politique de s\xE9curit\xE9\
+        \ des r\xE9seaux et syst\xE8mes d'information, une proc\xE9dure de gestion\
+        \ de crises en cas d'incidents de s\xE9curit\xE9 ayant un impact majeur sur\
+        \ les services essentiels de l'op\xE9rateur."
+      translations:
+        en:
+          name: null
+          description: The operator of essential services shall develop, maintain
+            and implement, in accordance with its network and information systems
+            security policy, a crisis management procedure in the event of security
+            incidents having a major impact on the operator's essential services.
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:23
+      ref_id: '23.2'
+      description: "Cette proc\xE9dure d\xE9crit l'organisation de la gestion de crises\
+        \ mise en place par l'op\xE9rateur et pr\xE9voit notamment l'application des\
+        \ mesures techniques suivantes aux syst\xE8mes d'information essentiels (SIE)\
+        \ :"
+      translations:
+        en:
+          name: null
+          description: 'This procedure describes the organisation of crisis management
+            put in place by the operator and provides in particular for the application
+            of the following technical measures to essential information systems (EIS):'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node226
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:23.2
+      description: "- configurer les SIE de mani\xE8re \xE0 \xE9viter les attaques\
+        \ ou \xE0 en limiter les effets. Cette configuration peut viser :"
+      translations:
+        en:
+          name: null
+          description: '- Configure EIS to prevent or limit the effects of attacks.
+            This configuration can be used to:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node227
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node226
+      description: "- \xE0 proscrire l'utilisation de supports de stockage amovibles\
+        \ ou la connexion d'\xE9quipements nomades aux SIE ;"
+      translations:
+        en:
+          name: null
+          description: '- prohibit the use of removable storage media or the connection
+            of mobile equipment to EFAs;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node228
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node226
+      description: "- \xE0 installer une mesure correctrice de s\xE9curit\xE9 sur\
+        \ un SIE particulier ;"
+      translations:
+        en:
+          name: null
+          description: '- install a security corrective measure on a particular EIS;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node229
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node226
+      description: "- \xE0 restreindre le routage ;"
+      translations:
+        en:
+          name: null
+          description: '- Restrict routing.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node230
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:23.2
+      description: "- mettre en place des r\xE8gles de filtrage sur les r\xE9seaux\
+        \ ou des configurations particuli\xE8res sur les \xE9quipements terminaux.\
+        \ Cette mesure peut viser :"
+      translations:
+        en:
+          name: null
+          description: '- Set up filtering rules on networks or specific configurations
+            on terminal equipment. This measure may include:'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node231
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node230
+      description: "- \xE0 effectuer des restrictions d'acc\xE8s sous forme de listes\
+        \ blanches et de listes noires d'utilisateurs ;"
+      translations:
+        en:
+          name: null
+          description: '- Carry out access restrictions in the form of whitelists
+            and blacklists of users.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node232
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node230
+      description: "- \xE0 bloquer les \xE9changes de fichiers d'un type particulier\
+        \ ;"
+      translations:
+        en:
+          name: null
+          description: '- Block file exchanges of a particular type.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node233
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:node230
+      description: "- \xE0 isoler de tout r\xE9seau des sites internet, des applications,\
+        \ ou des \xE9quipements informatiques de l'op\xE9rateur ;"
+      translations:
+        en:
+          name: null
+          description: '- isolate the operator''s websites, applications, or computer
+            equipment from any network;'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:node234
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:23.2
+      description: "- isoler du r\xE9seau internet les SIE de l'op\xE9rateur. Cette\
+        \ mesure impose de d\xE9connecter physiquement ou logiquement les interfaces\
+        \ r\xE9seau des SIE concern\xE9s."
+      translations:
+        en:
+          name: null
+          description: '- isolate the operator''s EIS from the internet network. This
+            requires the network interfaces of the SIEs concerned to be physically
+            or logically disconnected.'
+    - urn: urn:intuitem:risk:req_node:nis1-rules-fr:23.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nis1-rules-fr:23
+      ref_id: '23.3'
+      description: "La proc\xE9dure pr\xE9cise les conditions dans lesquelles ces\
+        \ mesures peuvent \xEAtre appliqu\xE9es compte tenu des contraintes techniques\
+        \ et organisationnelles de mise en \u0153uvre."
+      translations:
+        en:
+          name: null
+          description: The procedure shall specify the conditions under which these
+            measures may be applied, taking into account the technical and organisational
+            constraints of implementation.

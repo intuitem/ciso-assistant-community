@@ -47,8 +47,20 @@
 	};
 
 	const referenceControlsTable: TableSource = {
-		head: { ref_id: 'ref', name: 'name', description: 'description', category: 'category' },
-		body: tableSourceMapper(referenceControls, ['ref_id', 'name', 'description', 'category'])
+		head: {
+			ref_id: 'ref',
+			name: 'name',
+			description: 'description',
+			category: 'category',
+			csf_function: 'csfFunction'
+		},
+		body: tableSourceMapper(referenceControls, [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'csf_function'
+		])
 	};
 
 	const threatsTable: TableSource = {
@@ -127,7 +139,9 @@
 					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
 						<li>
-							<a href="/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a>
+							<a href="/libraries/{dependency.urn}" target="_parent" class="anchor"
+								>{dependency.name}</a
+							>
 						</li>
 					{/each}
 				</p>
