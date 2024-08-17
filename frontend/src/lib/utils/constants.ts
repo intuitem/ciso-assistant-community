@@ -55,7 +55,14 @@ export const URN_REGEX =
 export const LOCALE_DISPLAY_MAP = {
 	en: '🇬🇧 English',
 	fr: '🇫🇷 Français',
-	de: '🇩🇪 Deutsch'
+	de: '🇩🇪 Deutsch',
+	es: '🇪🇸 Español',
+	it: '🇮🇹 Italiano',
+	nl: '🇳🇱 Nederlands',
+	pt: '🇵🇹 Português',
+	pl: '🇵🇱 Polski',
+	ro: '🇷🇴 Română',
+	ar: '🇸🇦 العربية'
 };
 
 export const ISO_8601_REGEX =
