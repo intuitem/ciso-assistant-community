@@ -199,8 +199,7 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
-        string  question
-        boolean no_result
+        json    question
     }
 
     REFERENCE_CONTROL {
@@ -242,6 +241,7 @@ erDiagram
         bool   selected
         string review_conclusion
         string review_observation
+        json   answer
     }
 
     EVIDENCE {
@@ -1122,8 +1122,7 @@ The following approach has been retained:
 - This compliance assessment is reviewed by the client, requirement by requirement.
 - An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
 - Review features are added to compliance assessment to enable this workflow in a generic way.
-- A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
-- A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
+- A requirement node can include a question (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
 
 ### Entity-relationship diagram
 
@@ -1138,7 +1137,7 @@ erDiagram
     CONTRACT              }o--o{ EVIDENCE              : has
     APPLIED_CONTROL       }o--o| CONTRACT              : leverages
     ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
-    ENTITY                }o--o{ INDIVIDUAL            : employs
+    ENTITY                }o--o{ REPRESENTATIVE        : mandates
     ENTITY_ASSESSMENT     }o--|| COMPLIANCE_ASSESSMENT : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
 
@@ -1192,7 +1191,7 @@ erDiagram
         int         trust
     }
 
-    INDIVIDUAL {
+    REPRESENTATIVE {
         string      email
         string      first_name
         string      last_name
@@ -1217,7 +1216,7 @@ erDiagram
 ```mermaid
 erDiagram
     GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
-    GLOBAL_DOMAIN   ||--o{ INDIVIDUAL          : contains
+    GLOBAL_DOMAIN   ||--o{ REPRESENTATIVE          : contains
 ```
 
 ### New models
@@ -1249,11 +1248,11 @@ The criticality of a solution is an integer representing the importance of the s
 
 An entity can contain products, that are referenced by a string. This can be e.g. the CPE of the product.
 
-#### Individual
+#### Representative
 
 This represents a person that is linked to an entity (typically an employee), and that is relevant for the main entity, like a contact person for an assessment.
 
-There is no link between indivuduals (modeling of the ecosystem) and users of the solution (access control mechanism).
+There is no link between representatives (modeling of the ecosystem) and users of the solution (access control mechanism).
 
 ### Evolution of existing models
 
@@ -1262,13 +1261,19 @@ There is no link between indivuduals (modeling of the ecosystem) and users of th
 - add the following fields:
   - review_conclusion: --|blocker|warning|ok|N/A
   - review_observation
+  - answer: a json corresponding to the optional question of the requirement node.
+
+#### Compliance assessment
+
+- add the following fields:
   - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
+
+Note: implementation_group_selector is not retained for MVP.
 
 #### Requirement node 
 
 - Add the following fields:
-  - no_result
-  - question
+  - question: a json field describing a form.
 
 #### Applied control
 
@@ -1277,4 +1282,22 @@ There is no link between indivuduals (modeling of the ecosystem) and users of th
 
 The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
 
+Note: this change in applied control is not retained for MVP.
+
 Note: in the future, we will use the same approach for policies.
+
+### Question and answer format
+
+The format for question and answer json fields will evolve over time. The initial format is the following:
+
+- question:
+```json
+{
+    "question": {
+        "version": 1
+        "schema": {...}
+    }
+}
+```
+
+The schema variable follows JSON Schema standard (WIP).
