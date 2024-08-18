@@ -1108,6 +1108,10 @@ SSO Settings are defined in a dedicated object SSO_SETTINGS.
 
 ## TPRM evolution
 
+### Objective
+
+The goal of Third-Party Risk Management is to manage the risk incurred by a provider (vendor, partner, supplier, contractor, service provider). The point of view for the modeling is focusing on risk.
+
 ### Retained approach
 
 The following approach has been retained:
@@ -1126,23 +1130,22 @@ The following approach has been retained:
 ```mermaid
 erDiagram
 
-    ASSET                 }o--o{ SOLUTION              : contains
-    ENTITY2                }o--o| DOMAIN                : owns
-    VULNERABILITY         }o--o{ SOLUTION              : affects
-    SOLUTION              }o--o| ENTITY                : provided_by
+    ASSET                 }o--o{ SOLUTION              : leverages
+    ENTITY2               }o--o| DOMAIN                : owns
+    SOLUTION              }o--|| ENTITY2               : is_provided_to
+    SOLUTION              }o--|| ENTITY                : is_provided_by
     CONTRACT              }o--o{ SOLUTION              : formalizes
     CONTRACT              }o--o{ EVIDENCE              : has
     APPLIED_CONTROL       }o--o| CONTRACT              : leverages
-    ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
-    ENTITY                }o--o{ PERSON                : employs
-    ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
-    ENTITY                }o--o{ ENTITY2               : is_provider_of
+    ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
+    ENTITY                }o--o{ INDIVIDUAL            : employs
+    ENTITY_ASSESSMENT     }o--|| COMPLIANCE_ASSESSMENT : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+
     ENTITY {
         string  name
         string  description
         string  missions  
-        entity  parent_entity
         url     reference_link
     }
 
@@ -1158,10 +1161,11 @@ erDiagram
     SOLUTION {
         string      name
         string      description
-        string      solution_type
         string      ref_id
-        string      version
+        int         criticality
+        string[]    products
     }
+
 
     CONTRACT {
         string name
@@ -1170,42 +1174,87 @@ erDiagram
         date   end_date
     }
 
-    ENTITY_EVALUATION {
-        string name
-        string description
-        date   send_date
-        date   due_date
-        int    penetration
-        int    dependency
-        int    maturity
-        int    trust
+    ENTITY_ASSESSMENT {
+        string      name
+        string      description
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string[]    tags
+
+        int         criticality
+        int         penetration
+        int         dependency
+        int         maturity
+        int         trust
     }
 
-    PERSON {
-        string email
-        string first_name
-        string last_name
-        string phone
-        string role
-        string description
+    INDIVIDUAL {
+        string      email
+        string      first_name
+        string      last_name
+        string      phone
+        string      role
+        string      description
+    }
+
+    COMPLIANCE_ASSESSMENT {
+        string      review_conclusion
+        string      review_observation
+        json        implementation_groups_selector
     }
 
 ```
 
 ```mermaid
 erDiagram
-    DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
+    DOMAIN          ||--o{ ENTITY_ASSESSMENT    : contains
     DOMAIN          ||--o{ SOLUTION             : contains
 ```
 ```mermaid
 erDiagram
     GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
-    GLOBAL_DOMAIN   ||--o{ PERSON          : contains
+    GLOBAL_DOMAIN   ||--o{ INDIVIDUAL          : contains
 ```
 
-- The solution_type of a solution is a string with the following possible values: --|product|maintenance|hosting.
-- The ref_id for a solution can be null or use a formal id like CPE.
- 
+### New models
+
+#### Entity
+
+An entity represents a legal entity, a corporate body, an administrative body, an association. An entity can be:
+- the main subject for the current CISO Assistant instance ("main entity").
+- a subisdiary of another entity.
+- a provider of another entity.
+- a threat actor.
+- ...
+
+An entity can own a domain. The entity that owns the global domain is the main subject for the current CISO Assistant instance.
+
+An entity can provides a solution to another entity (see solution model). TPRM is done mainly for providers of the main entity, but nothing prevents doing an entity evaluation for any entity.
+
+#### Entity assessment
+
+An entity assessment is similar to a risk assessment, but focused on the risk incurred by the provider of a solution.
+
+An entity assessment is based on a questionnaire/compliance assessment. Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
+
+#### Solution
+
+A solution represents what en entity provides to one another. A solution can leverage products, but this is not always the case, as a solution can consist in pure service.
+
+The criticality of a solution is an integer representing the importance of the solution for the client of the solution in decreasing sensitivity (0: most critical). This can be determined grossly at the beginning, and revised after an entity or risk assessment. This number is used to prioritize entity assessments.
+
+An entity can contain products, that are referenced by a string. This can be e.g. the CPE of the product.
+
+#### Individual
+
+This represents a person that is linked to an entity (typically an employee), and that is relevant for the main entity, like a contact person for an assessment.
+
+There is no link between indivuduals (modeling of the ecosystem) and users of the solution (access control mechanism).
+
 ### Evolution of existing models
 
 #### Requirement assessment
@@ -1213,6 +1262,7 @@ erDiagram
 - add the following fields:
   - review_conclusion: --|blocker|warning|ok|N/A
   - review_observation
+  - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
 #### Requirement node 
 
