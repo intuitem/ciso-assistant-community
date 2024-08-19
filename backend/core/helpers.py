@@ -748,7 +748,11 @@ def risks_per_project_groups(user: User):
 
 
 def get_counters(user: User):
-    print()
+    controls_count = len(
+        RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, AppliedControl
+        )[0]
+    )
     return {
         "domains": len(
             RoleAssignment.get_accessible_object_ids(
@@ -760,11 +764,7 @@ def get_counters(user: User):
                 Folder.get_root_folder(), user, Project
             )[0]
         ),
-        "applied_controls": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, AppliedControl
-            )[0]
-        ),
+        "applied_controls": controls_count,
         "risk_assessments": len(
             RoleAssignment.get_accessible_object_ids(
                 Folder.get_root_folder(), user, RiskAssessment
@@ -780,7 +780,136 @@ def get_counters(user: User):
                 Folder.get_root_folder(), user, Policy
             )[0]
         ),
+        "controls": {
+            "total": controls_count,
+            "to_do": 4,
+            "in_progress": 12,
+            "on_hold": 5,
+            "done": 3,
+            "expired": 1,
+        },
     }
+
+
+"""
+non_compliant
+
+"""
+
+
+def build_audits_tree_metrics():
+    tree = list()
+    for project in Project.objects.all():
+        block_prj = {"name": project.name, "children": []}
+        children = []
+        for audit in ComplianceAssessment.objects.filter(project=project):
+            cnt_reqs = RequirementAssessment.objects.filter(
+                compliance_assessment=audit
+            ).count()
+            cnt_res = {}
+            for result in RequirementAssessment.Result.choices:
+                cnt_res[result[0]] = (
+                    RequirementAssessment.objects.filter(compliance_assessment=audit)
+                    .filter(result=result[0])
+                    .count()
+                )
+            blk_audit = {
+                "name": audit.name,
+                "value": cnt_reqs,
+                "children": [
+                    {
+                        "name": "OK",
+                        "children": [
+                            {
+                                "name": "compliant",
+                                "value": cnt_res["compliant"],
+                            },
+                            {
+                                "name": "n/a",
+                                "value": cnt_res["not_applicable"],
+                            },
+                        ],
+                    },
+                    {
+                        "name": "KO",
+                        "value": cnt_res["not_assessed"]
+                        + cnt_res["partially_compliant"]
+                        + cnt_res["non_compliant"],
+                        "children": [
+                            {
+                                "name": "partial",
+                                "value": cnt_res["partially_compliant"],
+                            },
+                            {
+                                "name": "Non compliant",
+                                "value": cnt_res["non_compliant"],
+                            },
+                        ],
+                    },
+                ],
+            }
+            children.append(blk_audit)
+        block_prj["children"] = children
+        tree.append(block_prj)
+    return tree
+
+
+def csf_functions():
+    source = "Controls function"
+    cnt = dict()
+    for choice in ReferenceControl.CSF_FUNCTION:
+        cnt[choice[0]] = AppliedControl.objects.filter(csf_function=choice[0]).count()
+    unset = AppliedControl.objects.filter(csf_function__isnull=True).count()
+    links = [
+        {"source": source, "target": "--", "value": unset},
+        {"source": source, "target": "Govern", "value": cnt["govern"]},
+        {"source": source, "target": "Identify", "value": cnt["identify"]},
+        {"source": source, "target": "Protect", "value": cnt["protect"]},
+        {"source": source, "target": "Detect", "value": cnt["detect"]},
+        {"source": source, "target": "Respond", "value": cnt["respond"]},
+        {"source": source, "target": "Recover", "value": cnt["recover"]},
+    ]
+
+    return links
+
+
+def get_metrics():
+    controls_count = AppliedControl.objects.count()
+
+    data = {
+        "controls": {
+            "total": controls_count,
+            "to_do": AppliedControl.objects.filter(status="planned").count(),
+            "in_progress": AppliedControl.objects.filter(status="planned").count(),
+            "on_hold": AppliedControl.objects.filter(status="planned").count(),
+            "done": AppliedControl.objects.filter(status="active").count(),
+            "expired": AppliedControl.objects.filter(status="inactive").count(),
+        },
+        "risk": {
+            "assessments": RiskAssessment.objects.count(),
+            "scenarios": RiskScenario.objects.count(),
+            "threats": Threat.objects.filter(risk_scenarios__isnull=False)
+            .distinct()
+            .count(),
+            "acceptances": RiskAcceptance.objects.count(),
+        },
+        "compliance": {
+            "audits": ComplianceAssessment.objects.count(),
+            "active_audits": ComplianceAssessment.objects.filter(
+                status__in=["in_progress", "in_review", "done"]
+            ).count(),
+            "evidences": Evidence.objects.count(),
+            "compliant_items": RequirementAssessment.objects.filter(
+                result="compliant"
+            ).count(),
+            "non_compliant_items": RequirementAssessment.objects.filter(
+                result="non_compliant"
+            ).count(),
+        },
+        "audits_tree": build_audits_tree_metrics(),
+        "csf_functions": csf_functions(),
+    }
+    return data
 
 
 def risk_status(user: User, risk_assessment_list):
