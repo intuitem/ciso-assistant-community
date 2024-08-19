@@ -1807,6 +1807,7 @@ class RiskScenario(NameDescriptionMixin):
         max_length=20,
         choices=QUALIFICATIONS,
         blank=True,
+        null=False,
         verbose_name=_("Financial"),
     )
 
