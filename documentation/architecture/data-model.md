@@ -1138,7 +1138,8 @@ erDiagram
     APPLIED_CONTROL       }o--o| CONTRACT              : leverages
     ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
     ENTITY                }o--o{ REPRESENTATIVE        : mandates
-    ENTITY_ASSESSMENT     }o--|| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY_ASSESSMENT     }o--o| EVIDENCE2             : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
 
     ENTITY {
@@ -1238,7 +1239,9 @@ An entity can provides a solution to another entity (see solution model). TPRM i
 
 An entity assessment is similar to a risk assessment, but focused on the risk incurred by the provider of a solution.
 
-An entity assessment is based on a questionnaire/compliance assessment. Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
+An entity assessment is based on a questionnaire/compliance assessment, and/or on an existing document, stored in an evidence (variable "external_questionnaire"). This allows beginning the assessment without questionnaire, adding an existing external questionnaire if available, and starting a new integrated questionnaire later.
+
+Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
 
 #### Solution
 
