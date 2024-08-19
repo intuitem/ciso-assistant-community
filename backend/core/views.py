@@ -1039,6 +1039,15 @@ def get_counters_view(request):
     return Response({"results": get_counters(request.user)})
 
 
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_metrics_view(request):
+    """
+    API endpoint that returns the counters
+    """
+    return Response({"results": get_metrics()})
+
+
 # TODO: Add all the proper docstrings for the following list of functions
 
 
