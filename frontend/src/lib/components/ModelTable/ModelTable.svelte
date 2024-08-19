@@ -247,7 +247,7 @@
 			])
 		);
 		for (const [field, value] of Object.entries(urlFilterValues)) {
-			if (filterCacheLocks.hasOwnProperty(field)) {
+			if (field in filterCacheLocks) {
 				filterCacheLocks[field].resolve(value);
 			}
 		}

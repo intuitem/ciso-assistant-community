@@ -11,7 +11,7 @@
 
 	import { getOptions } from '$lib/utils/crud';
 	import { modelSchema } from '$lib/utils/schemas';
-	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
+	import type { ModelInfo, urlModel } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import HiddenInput from './HiddenInput.svelte';

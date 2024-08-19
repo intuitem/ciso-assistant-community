@@ -84,7 +84,7 @@ export function isDark(hexcolor: string): boolean {
 }
 
 export function makeCacheLock(): CacheLock {
-	let resolve: (_: any) => any = (_) => _;
+	let resolve = (_) => _; // (_: any) => any (make code factor test fail)
 	const promise = new Promise((res) => {
 		resolve = res;
 	});
