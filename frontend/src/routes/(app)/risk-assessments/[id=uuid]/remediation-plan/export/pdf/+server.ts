@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { languageTag } from '$paraglide/runtime';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
