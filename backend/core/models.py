@@ -1806,7 +1806,7 @@ class RiskScenario(NameDescriptionMixin):
     qualification = models.CharField(
         max_length=20,
         choices=QUALIFICATIONS,
-        null=True,
+        blank=True,
         verbose_name=_("Financial"),
     )
 
