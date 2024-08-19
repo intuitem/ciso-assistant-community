@@ -4,15 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0020_fix_libraries_objects_meta'),
+        ("core", "0020_fix_libraries_objects_meta"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='riskscenario',
-            name='qualification',
-            field=models.CharField(blank=True, choices=[('Financial', 'Financial'), ('Legal', 'Legal'), ('Reputation', 'Reputation'), ('Operational', 'Operational'), ('Confidentiality', 'Confidentiality'), ('Integrity', 'Integrity'), ('Availability', 'Availability')], max_length=20, verbose_name='Financial'),
+            model_name="riskscenario",
+            name="qualification",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("Financial", "Financial"),
+                    ("Legal", "Legal"),
+                    ("Reputation", "Reputation"),
+                    ("Operational", "Operational"),
+                    ("Confidentiality", "Confidentiality"),
+                    ("Integrity", "Integrity"),
+                    ("Availability", "Availability"),
+                ],
+                max_length=20,
+                verbose_name="Financial",
+            ),
         ),
     ]
