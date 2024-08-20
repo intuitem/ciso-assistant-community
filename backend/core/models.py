@@ -1687,7 +1687,7 @@ class RiskScenario(NameDescriptionMixin):
         ("Operational", _("Operational")),
         ("Confidentiality", _("Confidentiality")),
         ("Integrity", _("Integrity")),
-        ("Availability", _("Availability"))
+        ("Availability", _("Availability")),
     ]
 
     class Status(models.TextChoices):
