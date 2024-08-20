@@ -1680,6 +1680,16 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
+    QUALIFICATIONS = [
+        ("Financial", _("Financial")),
+        ("Legal", _("Legal")),
+        ("Reputation", _("Reputation")),
+        ("Operational", _("Operational")),
+        ("Confidentiality", _("Confidentiality")),
+        ("Integrity", _("Integrity")),
+        ("Availability", _("Availability"))
+    ]
+
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
