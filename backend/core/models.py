@@ -51,7 +51,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
 
     urn = models.CharField(
-        max_length=100, null=True, blank=True, unique=True, verbose_name=_("URN")
+        max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
     )
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
@@ -132,7 +132,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         abstract = True
         unique_together = [["urn", "locale", "version"]]
 
-    urn = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("URN"))
+    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -905,7 +905,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         related_name="requirement_nodes",
     )
     parent_urn = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
+        max_length=255, null=True, blank=True, verbose_name=_("Parent URN")
     )
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
     implementation_groups = models.JSONField(
