@@ -1137,7 +1137,7 @@ erDiagram
     CONTRACT              }o--o{ EVIDENCE              : has
     APPLIED_CONTROL       }o--o| CONTRACT              : leverages
     ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
-    ENTITY                }o--o{ REPRESENTATIVE        : mandates
+    ENTITY                ||--o{ REPRESENTATIVE        : mandates
     ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
     ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
@@ -1211,13 +1211,9 @@ erDiagram
 
 ```mermaid
 erDiagram
-    DOMAIN          ||--o{ ENTITY_ASSESSMENT    : contains
+    PROJECT         ||--o{ ENTITY_ASSESSMENT    : contains
     DOMAIN          ||--o{ SOLUTION             : contains
-```
-```mermaid
-erDiagram
-    GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
-    GLOBAL_DOMAIN   ||--o{ REPRESENTATIVE          : contains
+    DOMAIN          ||--o{ ENTITY               : contains
 ```
 
 ### New models
