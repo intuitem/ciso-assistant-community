@@ -1130,8 +1130,8 @@ The following approach has been retained:
 erDiagram
 
     ASSET                 }o--o{ SOLUTION              : leverages
-    ENTITY2               }o--o| DOMAIN                : owns
-    SOLUTION              }o--|| ENTITY2               : is_provided_to
+    ENTITY                |o--o{ DOMAIN                : owns
+    SOLUTION              }o--|| ENTITY                : is_provided_to
     SOLUTION              }o--|| ENTITY                : is_provided_by
     CONTRACT              }o--o{ SOLUTION              : formalizes
     CONTRACT              }o--o{ EVIDENCE              : has
@@ -1139,7 +1139,7 @@ erDiagram
     ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
     ENTITY                }o--o{ REPRESENTATIVE        : mandates
     ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
-    ENTITY_ASSESSMENT     }o--o| EVIDENCE2             : leverages
+    ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
 
     ENTITY {
