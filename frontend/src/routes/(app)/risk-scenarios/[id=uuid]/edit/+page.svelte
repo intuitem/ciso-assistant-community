@@ -314,6 +314,7 @@
 			<Select
 				{form}
 				options={data.qualificationChoices}
+				blank={true}
 				field="qualification"
 				label={m.qualification()}
 			/>
