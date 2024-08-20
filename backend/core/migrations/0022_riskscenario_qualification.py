@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0021_alter_framework_urn_alter_loadedlibrary_urn_and_more'),
+        ("core", "0021_alter_framework_urn_alter_loadedlibrary_urn_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='riskscenario',
-            name='qualification',
-            field=models.CharField(blank=True, default='', max_length=20, verbose_name='Financial'),
+            model_name="riskscenario",
+            name="qualification",
+            field=models.CharField(
+                blank=True, default="", max_length=20, verbose_name="Financial"
+            ),
         ),
     ]
