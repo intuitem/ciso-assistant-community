@@ -260,6 +260,9 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_globalsettings",
     "view_requirementmappingset",
     "view_requirementmapping",
+    "add_entity",
+    "view_entity",
+    "delete_entity",
 ]
 
 

@@ -1,5 +1,8 @@
 from iam.sso.views import SSOSettingsViewSet
 from .views import *
+from tprm.views import (
+    EntityViewSet,
+)
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
 from iam.sso.saml.views import FinishACSView
 
@@ -11,6 +14,7 @@ from ciso_assistant.settings import DEBUG
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(r"entities", EntityViewSet, basename="entities")
 router.register(r"projects", ProjectViewSet, basename="projects")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")

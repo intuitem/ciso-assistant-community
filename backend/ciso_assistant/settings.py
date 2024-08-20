@@ -125,6 +125,7 @@ INSTALLED_APPS = [
     "global_settings",
     "core",
     "cal",
+    "tprm",
     "django_filters",
     # "debug_toolbar",
     "library",
