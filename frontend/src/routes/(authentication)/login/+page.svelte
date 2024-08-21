@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import CisoLogo from '$lib/assets/ciso.svg';
+	import Logo from '$lib/components/Logo/Logo.svelte';
 	import { loginSchema } from '$lib/utils/schemas';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -15,8 +15,8 @@
 
 <div class="relative h-screen w-screen bg-slate-200">
 	<div class="absolute top-5 left-5">
-		<div class="flex flex-row w-full space-x-4 pb-3">
-			<img class="c" height="200" width="200" src={CisoLogo} alt="Ciso-assistant icon" />
+		<div class="flex flex-row max-w-48 space-x-4 pb-3">
+			<Logo />
 		</div>
 	</div>
 	<div class="absolute top-1/2 left-1/2 w-full transform -translate-x-1/2 -translate-y-1/2">
