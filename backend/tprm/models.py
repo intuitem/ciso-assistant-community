@@ -10,7 +10,7 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     An entity represents a legal entity, a corporate body, an administrative body, an association
     """
 
-    mission = models.TextField(blank=True, null=True)
+    mission = models.TextField(blank=True)
     reference_link = models.URLField(blank=True, null=True)
     owned_folders = models.ManyToManyField(
         "iam.Folder",
