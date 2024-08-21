@@ -276,6 +276,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_product",
     "view_product",
     "delete_product",
+    "add_entityassessment",
+    "change_entityassessment",
+    "view_entityassessment",
+    "delete_entityassessment",
 ]
 
 

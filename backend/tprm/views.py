@@ -1,5 +1,5 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from tprm.models import Entity, Representative, Solution, Product
+from tprm.models import Entity, Representative, Solution, Product, EntityAssessment
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
@@ -11,7 +11,15 @@ class EntityViewSet(BaseModelViewSet):
     """
 
     model = Entity
-    
+
+
+class EntityAssessmentViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows entity assessments to be viewed or edited.
+    """
+
+    model = EntityAssessment
+
 
 class RepresentativeViewSet(BaseModelViewSet):
     """
