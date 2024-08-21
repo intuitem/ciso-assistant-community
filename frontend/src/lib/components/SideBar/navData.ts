@@ -140,6 +140,11 @@ export const navData = {
 					href: '/projects'
 				},
 				{
+					name: 'entities',
+					fa_icon: 'fa-solid fa-building',
+					href: '/entities'
+				},
+				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users'
