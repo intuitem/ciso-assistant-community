@@ -108,8 +108,8 @@ class TestReferenceControlsAuthenticated:
             },
             {
                 "folder": {
-                    "str": Folder.get_root_folder().name,
                     "id": Folder.get_root_folder().id,
+                    "str": Folder.get_root_folder().name,
                 },
             },
             user_group=test.user_group,
@@ -161,8 +161,8 @@ class TestReferenceControlsAuthenticated:
             },
             {
                 "folder": {
-                    "str": Folder.get_root_folder().name,
                     "id": Folder.get_root_folder().id,
+                    "str": Folder.get_root_folder().name,
                 },
             },
             user_group=test.user_group,

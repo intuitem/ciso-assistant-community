@@ -100,8 +100,8 @@ class TestLibrariesAuthenticated:
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
                 "folder": {
-                    "str": Folder.get_root_folder().name,
                     "id": Folder.get_root_folder().id,
+                    "str": Folder.get_root_folder().name,
                 },
             },
             base_count=1,
@@ -170,8 +170,8 @@ class TestLibrariesAuthenticated:
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
                 "folder": {
-                    "str": Folder.get_root_folder().name,
                     "id": Folder.get_root_folder().id,
+                    "str": Folder.get_root_folder().name,
                 },
                 #                                 'json_definition': lib_detail_response  # TODO: restore this test
             },
