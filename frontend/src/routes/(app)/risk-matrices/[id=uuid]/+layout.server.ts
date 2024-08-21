@@ -9,7 +9,6 @@ import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
-import { languageTag } from '$paraglide/runtime';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const URLModel: urlModel = 'risk-matrices';

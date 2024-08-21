@@ -5,7 +5,6 @@ import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
 import { getSecureRedirect } from '$lib/utils/helpers';
