@@ -472,7 +472,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
-	},
+	}
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
