@@ -660,5 +660,11 @@
 	"back": "Back",
 	"duplicate": "Duplicate",
 	"duplicateRiskAssessment": "Duplicate the risk assessment",
-	"size": "Size"
+	"size": "Size",
+	"entity": "Entity",
+	"entities": "Entities",
+	"addEntity": "Add entity",
+	"referenceLink": "Reference link",
+	"mission": "Mission",
+	"ownedFolders": "Owned domains"
 }

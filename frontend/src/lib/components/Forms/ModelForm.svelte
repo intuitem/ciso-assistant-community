@@ -698,6 +698,41 @@
 		<HiddenInput {form} field="folder" />
 		<HiddenInput {form} field="requirement" />
 		<HiddenInput {form} field="compliance_assessment" />
+	{:else if URLModel === 'entities'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['folder'] })}
+			field="owned_folders"
+			multiple
+			cacheLock={cacheLocks['folder']}
+			bind:cachedValue={formDataCache['folder']}
+			label={m.ownedDomains()}
+			hide={initialData.folder}
+		/>
+		<TextArea
+			{form}
+			field="mission"
+			label={m.mission()}
+			cacheLock={cacheLocks['mission']}
+			bind:cachedValue={formDataCache['mission']}
+		/>
+		<TextField
+			{form}
+			field="reference_link"
+			label={m.referenceLink()}
+			helpText={m.linkHelpText()}
+			cacheLock={cacheLocks['reference_link']}
+			bind:cachedValue={formDataCache['reference_link']}
+		/>
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['folder'] })}
+			field="folder"
+			cacheLock={cacheLocks['folder']}
+			bind:cachedValue={formDataCache['folder']}
+			label={m.domain()}
+			hide={initialData.folder}
+		/>
 	{:else if URLModel === 'users'}
 		<TextField
 			{form}

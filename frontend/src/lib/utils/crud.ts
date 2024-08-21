@@ -444,7 +444,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'target_framework', urlModel: 'frameworks' },
 			{ field: 'library', urlModel: 'libraries' }
 		]
-	}
+	},
+	entities: {
+		name: 'entity',
+		localName: 'entity',
+		localNamePlural: 'entities',
+		verboseName: 'Entity',
+		verboseNamePlural: 'Entities',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'owned_folders', urlModel: 'folders' }
+		]
+	},
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

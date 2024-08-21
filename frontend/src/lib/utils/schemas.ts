@@ -264,6 +264,14 @@ export const SSOSettingsSchema = z.object({
 	want_name_id_encrypted: z.boolean().optional().nullable()
 });
 
+export const EntitiesSchema = baseNamedObject({
+	folder: z.string(),
+	owned_folders: z.string().uuid().optional().array().optional(),
+	mission: z.string().optional(),
+	reference_link: z.string().optional(),
+	
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -281,7 +289,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
-	'sso-settings': SSOSettingsSchema
+	'sso-settings': SSOSettingsSchema,
+	entities: EntitiesSchema
 };
 
 export const modelSchema = (model: string) => {
