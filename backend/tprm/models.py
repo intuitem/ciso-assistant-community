@@ -51,11 +51,17 @@ class Solution(NameDescriptionMixin):
     A solution represents a product or service that is offered by an entity
     """
     
-    entity = models.ForeignKey(
+    provider_entity = models.ForeignKey(
         Entity,
         on_delete=models.CASCADE,
-        related_name="solutions",
-        verbose_name=_("Entity"),
+        related_name="provided_solutions",
+        verbose_name=_("Provider entity"),
+    )
+    recipient_entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        related_name="received_solutions",
+        verbose_name=_("Recipient entity"),
     )
     ref_id = models.CharField(max_length=255, blank=True)
     criticality = models.IntegerField(
