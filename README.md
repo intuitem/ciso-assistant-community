@@ -149,6 +149,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 52. NCSC Cyber Essentials 🇬🇧
 53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 54. Part-IS ✈️🇪🇺
+55. ENS Esquema Nacional de seguridad 🇪🇸
 
 ### Community contributions
 
@@ -171,7 +172,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- ENS Esquema Nacional de seguridad (español)
 - NIST 800-82
 - Korea ISA: ISMS-P
 
