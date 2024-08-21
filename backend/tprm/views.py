@@ -1,5 +1,7 @@
+from rest_framework.response import Response
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from tprm.models import Entity, Representative, Solution, Product, EntityAssessment
+from rest_framework.decorators import action
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -21,6 +23,15 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     """
 
     model = EntityAssessment
+    filterset_fields = ["status", 
+                        "project",
+                        "project__folder",
+                        "authors",
+                        "entity"]
+    
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(EntityAssessment.Status.choices))
 
 
 class RepresentativeViewSet(BaseModelViewSet):

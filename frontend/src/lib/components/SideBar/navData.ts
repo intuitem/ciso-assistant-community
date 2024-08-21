@@ -157,7 +157,7 @@ export const navData = {
 			]
 		},
 		{
-			name: 'Third Party',
+			name: 'thirdParty',
 			items: [
 				{
 					name: 'entities',
@@ -166,7 +166,7 @@ export const navData = {
 				},
 				{
 					name: 'entityAssessments',
-					fa_icon: 'fa-solid fa-clipboard-list-check',
+					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/entity-assessments'
 				},
 				{

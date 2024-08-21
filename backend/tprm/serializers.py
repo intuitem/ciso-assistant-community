@@ -38,6 +38,8 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityAssessmentReadSerializer(BaseModelSerializer):
     compliance_assessment = FieldsRelatedField()
     evidence = FieldsRelatedField()
+    project = FieldsRelatedField()
+    entity = FieldsRelatedField()
 
     class Meta:
         model = EntityAssessment
