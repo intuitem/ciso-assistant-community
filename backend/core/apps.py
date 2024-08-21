@@ -261,8 +261,13 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_requirementmappingset",
     "view_requirementmapping",
     "add_entity",
+    "change_entity",
     "view_entity",
     "delete_entity",
+    "add_representative",
+    "change_representative",
+    "view_representative",
+    "delete_representative",
 ]
 
 

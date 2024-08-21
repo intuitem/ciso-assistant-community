@@ -1,7 +1,7 @@
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 from iam.models import Folder
-from tprm.models import Entity
+from tprm.models import Entity, Representative
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
@@ -32,4 +32,23 @@ class EntityWriteSerializer(BaseModelSerializer):
     
     class Meta:
         model = Entity
+        exclude = []
+        
+
+class RepresentativeReadSerializer(BaseModelSerializer):
+    entity = FieldsRelatedField()
+
+    class Meta:
+        model = Representative
+        exclude = []
+
+
+class RepresentativeWriteSerializer(BaseModelSerializer):
+    entity = serializers.PrimaryKeyRelatedField(
+        queryset=Entity.objects.all(),
+        required=True,
+    )
+
+    class Meta:
+        model = Representative
         exclude = []

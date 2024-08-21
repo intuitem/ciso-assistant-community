@@ -1,5 +1,5 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from tprm.models import Entity
+from tprm.models import Entity, Representative
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
@@ -11,3 +11,14 @@ class EntityViewSet(BaseModelViewSet):
     """
 
     model = Entity
+    
+
+class RepresentativeViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows folders to be viewed or edited.
+    """
+
+    model = Representative
+    filterset_fields = [
+        "entity"
+    ]

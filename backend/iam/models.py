@@ -149,6 +149,7 @@ class Folder(NameDescriptionMixin):
             ["folder"],
             ["parent_folder"],
             ["project", "folder"],
+            ["entity", "folder"],
             ["risk_assessment", "project", "folder"],
             ["risk_scenario", "risk_assessment", "project", "folder"],
             ["compliance_assessment", "project", "folder"],
