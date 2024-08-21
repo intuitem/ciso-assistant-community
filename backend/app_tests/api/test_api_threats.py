@@ -109,7 +109,8 @@ class TestThreatsAuthenticated:
                 "is_published": True,
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"str": Folder.get_root_folder().name,
+                           "id": Folder.get_root_folder().id},
             },
             user_group=test.user_group,
             scope="Global",
