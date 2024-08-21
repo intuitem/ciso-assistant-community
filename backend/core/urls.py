@@ -17,7 +17,9 @@ from ciso_assistant.settings import DEBUG
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
 router.register(r"entities", EntityViewSet, basename="entities")
-router.register(r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments")
+router.register(
+    r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
+)
 router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"products", ProductViewSet, basename="products")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")

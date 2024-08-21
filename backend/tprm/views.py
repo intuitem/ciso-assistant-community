@@ -1,8 +1,10 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from tprm.models import Entity, Representative, Solution, Product, EntityAssessment
 
+
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
+
 
 # Create your views here.
 class EntityViewSet(BaseModelViewSet):
@@ -27,9 +29,7 @@ class RepresentativeViewSet(BaseModelViewSet):
     """
 
     model = Representative
-    filterset_fields = [
-        "entity"
-    ]
+    filterset_fields = ["entity"]
 
 
 class SolutionViewSet(BaseModelViewSet):
@@ -44,5 +44,5 @@ class ProductViewSet(BaseModelViewSet):
     """
     API endpoint that allows products to be viewed or edited.
     """
-    
+
     model = Product
