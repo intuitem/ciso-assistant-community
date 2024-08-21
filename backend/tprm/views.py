@@ -23,12 +23,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     """
 
     model = EntityAssessment
-    filterset_fields = ["status", 
-                        "project",
-                        "project__folder",
-                        "authors",
-                        "entity"]
-    
+    filterset_fields = ["status", "project", "project__folder", "authors", "entity"]
+
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(EntityAssessment.Status.choices))

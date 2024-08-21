@@ -269,8 +269,7 @@ export const EntitiesSchema = baseNamedObject({
 	folder: z.string(),
 	owned_folders: z.string().uuid().optional().array().optional(),
 	mission: z.string().optional(),
-	reference_link: z.string().optional(),
-	
+	reference_link: z.string().optional()
 });
 
 export const entityAssessmentsSchema = baseNamedObject({
@@ -283,7 +282,7 @@ export const entityAssessmentsSchema = baseNamedObject({
 	reviewers: z.array(z.string().optional()).optional(),
 	entity: z.string(),
 	compliance_assessment: z.string().optional(),
-	evidence: z.string().optional(),
+	evidence: z.string().optional()
 	// criticality: z.number().optional().nullable(),
 	// penetration: z.number().optional().nullable(),
 	// dependency: z.number().optional().nullable(),

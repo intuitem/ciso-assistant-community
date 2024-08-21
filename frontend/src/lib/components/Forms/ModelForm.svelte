@@ -794,14 +794,14 @@
 			bind:cachedValue={formDataCache['due_date']}
 		/>
 		<AutocompleteSelect
-				{form}
-				multiple
-				options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
-				field="authors"
-				cacheLock={cacheLocks['authors']}
-				bind:cachedValue={formDataCache['authors']}
-				label={m.authors()}
-			/>
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+			field="authors"
+			cacheLock={cacheLocks['authors']}
+			bind:cachedValue={formDataCache['authors']}
+			label={m.authors()}
+		/>
 		<AutocompleteSelect
 			{form}
 			multiple
@@ -813,7 +813,7 @@
 		/>
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['compliance_assessment'], label: 'str'})}
+			options={getOptions({ objects: model.foreignKeys['compliance_assessment'], label: 'str' })}
 			field="compliance_assessment"
 			cacheLock={cacheLocks['compliance_assessment']}
 			bind:cachedValue={formDataCache['compliance_assessment']}
