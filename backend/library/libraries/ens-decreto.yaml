@@ -248,7 +248,7 @@ objects:
         \ por las autoridades auton\xF3micas de protecci\xF3n de datos, sin perjuicio\
         \ de los requisitos establecidos en el presente real decreto"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:3.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-3"
@@ -259,7 +259,7 @@ objects:
         n de Datos y, en los supuestos de su art\xEDculo 35, una evaluaci\xF3n de\
         \ impacto en la protecci\xF3n de datos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:3.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-3"
@@ -306,43 +306,43 @@ objects:
         n. Por ello, en materia de seguridad de la informaci\xF3n deber\xE1n tenerse\
         \ en cuenta los siguientes principios b\xE1sicos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.a
       description: Seguridad como proceso integral.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.b
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.b
       description: "Gesti\xF3n de la seguridad basada en los riesgos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.c
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.c
       description: "Prevenci\xF3n, detecci\xF3n, respuesta y conservaci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.d
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.d
       description: "Existencia de l\xEDneas de defensa."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.e
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.e
       description: Vigilancia continua.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.f
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.f
       description: "Reevaluaci\xF3n peri\xF3dica."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:5.g
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node23
       ref_id: 5.g
@@ -355,7 +355,7 @@ objects:
       ref_id: "Art\xEDculo 6"
       name: La seguridad como un proceso integral
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:6.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-6"
@@ -366,7 +366,7 @@ objects:
         n del ENS estar\xE1 presidida por este principio, que excluye cualquier actuaci\xF3\
         n puntual o tratamiento coyuntural"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:6.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-6"
@@ -384,7 +384,7 @@ objects:
       ref_id: "Art\xEDculo 7"
       name: "Gesti\xF3n de la seguridad basada en los riesgos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:7.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-7"
@@ -393,7 +393,7 @@ objects:
         \ del proceso de seguridad, debiendo constituir una actividad continua y permanentemente\
         \ actualizada"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:7.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-7"
@@ -412,7 +412,7 @@ objects:
       ref_id: "Art\xEDculo 8"
       name: "Prevenci\xF3n, detecci\xF3n, respuesta y conservaci\xF3n"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:8.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-8"
@@ -423,7 +423,7 @@ objects:
         \ no se materialicen o que, en el caso de hacerlo, no afecten gravemente a\
         \ la informaci\xF3n que maneja o a los servicios que presta"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:8.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-8"
@@ -432,7 +432,7 @@ objects:
         \ orientados a la disuasi\xF3n o a la reducci\xF3n de la superficie de exposici\xF3\
         n, deben eliminar o reducir la posibilidad de que las amenazas lleguen a materializarse"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:8.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-8"
@@ -440,7 +440,7 @@ objects:
       description: "Las medidas de detecci\xF3n ir\xE1n dirigidas a descubrir la presencia\
         \ de un ciberincidente"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:8.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-8"
@@ -449,7 +449,7 @@ objects:
         \ estar\xE1n orientadas a la restauraci\xF3n de la informaci\xF3n y los servicios\
         \ que pudieran haberse visto afectados por un incidente de seguridad"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:8.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-8"
@@ -458,7 +458,7 @@ objects:
         \ m\xEDnimos establecidos, el sistema de informaci\xF3n garantizar\xE1 la\
         \ conservaci\xF3n de los datos e informaci\xF3n en soporte electr\xF3nico"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node43
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-8"
@@ -474,7 +474,7 @@ objects:
       ref_id: "Art\xEDculo 9"
       name: "Existencia de l\xEDneas de defensa"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:9.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-9"
@@ -483,7 +483,7 @@ objects:
         \ de protecci\xF3n constituida por m\xFAltiples capas de seguridad, dispuesta\
         \ de forma que, cuando una de las capas sea comprometida, permita"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:9.1.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:9.1
       ref_id: 9.1.a
@@ -491,13 +491,13 @@ objects:
         \ no han podido evitarse, reduciendo la probabilidad de que el sistema sea\
         \ comprometido en su conjunto"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:9.1.b
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:9.1
       ref_id: 9.1.b
       description: Minimizar el impacto final sobre el mismo
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:9.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-9"
@@ -512,7 +512,7 @@ objects:
       ref_id: "Art\xEDculo 10"
       name: "Vigilancia continua y reevaluaci\xF3n peri\xF3dica"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:10.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-10"
@@ -520,7 +520,7 @@ objects:
       description: "La vigilancia continua permitir\xE1 la detecci\xF3n de actividades\
         \ o comportamientos an\xF3malos y su oportuna respuesta"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:10.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-10"
@@ -529,7 +529,7 @@ objects:
         \ activos permitir\xE1 medir su evoluci\xF3n, detectando vulnerabilidades\
         \ e identificando deficiencias de configuraci\xF3n"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:10.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-10"
@@ -555,7 +555,7 @@ objects:
         \ de la informaci\xF3n, el responsable del servicio, el responsable de la\
         \ seguridad y el responsable del sistema"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:11.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-11"
@@ -564,7 +564,7 @@ objects:
         n estar\xE1 diferenciada de la responsabilidad sobre la explotaci\xF3n de\
         \ los sistemas de informaci\xF3n concernidos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:11.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-11"
@@ -638,7 +638,7 @@ objects:
       ref_id: 12.1.f
       description: Los riesgos que se derivan del tratamiento de los datos personales
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-12"
@@ -649,7 +649,7 @@ objects:
         \ en el \xE1mbito subjetivo del art\xEDculo 2 deber\xE1 contar con una pol\xED\
         tica de seguridad formalmente aprobada por el \xF3rgano competente"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node67
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-12"
@@ -688,7 +688,7 @@ objects:
         \ propia pol\xEDtica de seguridad, que ser\xE1 aprobada por la persona titular\
         \ de la misma."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-12"
@@ -698,7 +698,7 @@ objects:
         \ la responsabilidad de la seguridad de la informaci\xF3n de los sistemas\
         \ municipales"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-12"
@@ -707,98 +707,98 @@ objects:
         \ principios b\xE1sicos se\xF1alados en el cap\xEDtulo II y se desarrollar\xE1\
         \ aplicando los siguientes requisitos m\xEDnimos:"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.a
       description: "Organizaci\xF3n e implantaci\xF3n del proceso de seguridad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.b
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.b
       description: "An\xE1lisis y gesti\xF3n de los riesgos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.c
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.c
       description: "Gesti\xF3n de personal."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.d
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.d
       description: Profesionalidad.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.e
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.e
       description: "Autorizaci\xF3n y control de los accesos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.f
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.f
       description: "Protecci\xF3n de las instalaciones."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.g
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.g
       description: "Adquisici\xF3n de productos de seguridad y contrataci\xF3n de\
         \ servicios de seguridad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.h
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.h
       description: "M\xEDnimo privilegio."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.i
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.i
       description: "Integridad y actualizaci\xF3n del sistema."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.j
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.j
       description: "Protecci\xF3n de la informaci\xF3n almacenada y en tr\xE1nsito."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.k
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.k
       description: "Prevenci\xF3n ante otros sistemas de informaci\xF3n interconectados."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.l
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.l
       description: "Registro de la actividad y detecci\xF3n de c\xF3digo da\xF1ino."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.m
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.m
       description: Incidentes de seguridad.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.n
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: 12.6.n
       description: Continuidad de la actividad.
     - urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6.\xF1"
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.6
       ref_id: "12.6.\xF1"
       description: Mejora continua del proceso de seguridad.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:12.7
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-12"
@@ -815,7 +815,7 @@ objects:
       ref_id: "Art\xEDculo 13"
       name: "Organizaci\xF3n e implantaci\xF3n del proceso de seguridad"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-13"
@@ -823,7 +823,7 @@ objects:
       description: "La seguridad de los sistemas de informaci\xF3n deber\xE1 comprometer\
         \ a todos los miembros de la organizaci\xF3n"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-13"
@@ -835,21 +835,21 @@ objects:
         \ de forma inequ\xEDvoca a los responsables de velar por su cumplimiento,\
         \ los cuales tendr\xE1n las siguientes funciones"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2
       ref_id: 13.2.a
       description: "El responsable de la informaci\xF3n determinar\xE1 los requisitos\
         \ de la informaci\xF3n tratada"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2.b
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2
       ref_id: 13.2.b
       description: "El responsable del servicio determinar\xE1 los requisitos de los\
         \ servicios prestados."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2.c
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2
       ref_id: 13.2.c
@@ -858,7 +858,7 @@ objects:
         \ supervisar\xE1 la implantaci\xF3n de las medidas necesarias para garantizar\
         \ que se satisfacen los requisitos y reportar\xE1 sobre estas cuestiones."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2.d
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.2
       ref_id: 13.2.d
@@ -868,7 +868,7 @@ objects:
         n diaria del mismo, pudiendo delegar en administradores u operadores bajo\
         \ su responsabilidad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-13"
@@ -882,7 +882,7 @@ objects:
         \ del principio de diferenciaci\xF3n de responsabilidades previsto en el art\xED\
         culo 11."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-13"
@@ -891,7 +891,7 @@ objects:
         \ de Certificaci\xF3n de Responsables de la Seguridad, que recoger\xE1 las\
         \ condiciones y requisitos exigibles a esta figura."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:13.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-13"
@@ -905,7 +905,7 @@ objects:
         \ como las comunicaciones relativas a la seguridad de la informaci\xF3n y\
         \ la gesti\xF3n de los incidentes para el \xE1mbito de dicho servicio."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node98
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-13"
@@ -922,7 +922,7 @@ objects:
       ref_id: "Art\xEDculo 14"
       name: "An\xE1lisis y gesti\xF3n de los riesgos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:14.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-14"
@@ -931,7 +931,7 @@ objects:
         \ tratamiento de la informaci\xF3n o la prestaci\xF3n de servicios realizar\xE1\
         \ su propia gesti\xF3n de riesgos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:14.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-14"
@@ -941,7 +941,7 @@ objects:
         \ dispuesto en el anexo II, se emplear\xE1 alguna metodolog\xEDa reconocida\
         \ internacionalmente."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:14.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-14"
@@ -957,7 +957,7 @@ objects:
       ref_id: "Art\xEDculo 15"
       name: "Gesti\xF3n de personal"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:15.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-15"
@@ -969,7 +969,7 @@ objects:
         \ los procedimientos establecidos, aplicar\xE1 las normas y procedimientos\
         \ operativos de seguridad aprobados en el desempe\xF1o de sus cometidos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:15.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-15"
@@ -985,7 +985,7 @@ objects:
       ref_id: "Art\xEDculo 16"
       name: Profesionalidad
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:16.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-16"
@@ -996,7 +996,7 @@ objects:
         n, construcci\xF3n, despliegue, explotaci\xF3n, mantenimiento, gesti\xF3n\
         \ de incidencias y desmantelamiento."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:16.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-16"
@@ -1006,7 +1006,7 @@ objects:
         \ que les presten servicios de seguridad cuenten con profesionales cualificados\
         \ y con unos niveles id\xF3neos de gesti\xF3n y madurez en los servicios prestados."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:16.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-16"
@@ -1022,7 +1022,7 @@ objects:
       ref_id: "Art\xEDculo 17"
       name: "Autorizaci\xF3n y control de los accesos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node111
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-17"
@@ -1038,7 +1038,7 @@ objects:
       ref_id: "Art\xEDculo 18"
       name: "Protecci\xF3n de las instalaciones"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node113
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-18"
@@ -1059,7 +1059,7 @@ objects:
       name: "Adquisici\xF3n de productos de seguridad y contrataci\xF3n de servicios\
         \ de seguridad"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-19"
@@ -1072,7 +1072,7 @@ objects:
         \ determinados, aquellos que tengan certificada la funcionalidad de seguridad\
         \ relacionada con el objeto de su adquisici\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-19"
@@ -1087,28 +1087,28 @@ objects:
         \ del producto o servicio concreto dentro de sus competencias, determinar\xE1\
         \ los siguientes aspectos:"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2
       ref_id: 19.2.a
       description: "Los requisitos funcionales de seguridad y de aseguramiento de\
         \ la certificaci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2.b
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2
       ref_id: 19.2.b
       description: Otras certificaciones de seguridad adicionales que se requieran
         normativamente.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2.c
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.2
       ref_id: 19.2.c
       description: Excepcionalmente, el criterio a seguir en los casos en que no existan
         productos o servicios certificados.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:19.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-19"
@@ -1124,7 +1124,7 @@ objects:
       ref_id: "Art\xEDculo 20"
       name: "M\xEDnimo privilegio"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node122
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-20"
@@ -1132,7 +1132,7 @@ objects:
         \ otorgando los m\xEDnimos privilegios necesarios para su correcto desempe\xF1\
         o, lo que implica incorporar los siguientes aspectos:"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:20.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node122
       ref_id: 20.a
@@ -1149,7 +1149,7 @@ objects:
         \ equipos asimismo autorizados; pudiendo exigirse, en su caso, restricciones\
         \ de horario y puntos de acceso facultados."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:20.c
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node122
       ref_id: 20.c
@@ -1175,7 +1175,7 @@ objects:
       ref_id: "Art\xEDculo 21"
       name: "Integridad y actualizaci\xF3n del sistema"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:21.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-21"
@@ -1184,7 +1184,7 @@ objects:
         \ el cat\xE1logo actualizado de activos del sistema, o su modificaci\xF3n,\
         \ requerir\xE1 autorizaci\xF3n formal previa."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:21.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-21"
@@ -1202,7 +1202,7 @@ objects:
       ref_id: "Art\xEDculo 22"
       name: "Protecci\xF3n de informaci\xF3n almacenada y en tr\xE1nsito"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:22.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-22"
@@ -1214,7 +1214,7 @@ objects:
         \ redes abiertas, que deber\xE1n analizarse especialmente para lograr una\
         \ adecuada protecci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:22.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-22"
@@ -1224,7 +1224,7 @@ objects:
         \ por los sistemas de informaci\xF3n comprendidos en el \xE1mbito de aplicaci\xF3\
         n de este real decreto, cuando ello sea exigible."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:22.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-22"
@@ -1243,7 +1243,7 @@ objects:
       ref_id: "Art\xEDculo 23"
       name: "Prevenci\xF3n ante otros sistemas de informaci\xF3n interconectados"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node135
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-23"
@@ -1253,7 +1253,7 @@ objects:
         ndose las tareas de prevenci\xF3n, detecci\xF3n y respuesta a incidentes de\
         \ seguridad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node136
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-23"
@@ -1269,7 +1269,7 @@ objects:
       ref_id: "Art\xEDculo 24"
       name: "Registro de actividad y detecci\xF3n de c\xF3digo da\xF1ino."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:24.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-24"
@@ -1284,7 +1284,7 @@ objects:
         \ indebidas o no autorizadas, permitiendo identificar en cada momento a la\
         \ persona que act\xFAa."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:24.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-24"
@@ -1303,7 +1303,7 @@ objects:
         \ de c\xF3digo da\xF1ino as\xED como otros da\xF1os a las antedichas redes\
         \ y sistemas de informaci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:24.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-24"
@@ -1353,7 +1353,7 @@ objects:
       ref_id: "Art\xEDculo 26"
       name: Continuidad de la actividad.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node145
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-26"
@@ -1368,7 +1368,7 @@ objects:
       ref_id: "Art\xEDculo 27"
       name: Mejora continua del proceso de seguridad
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node147
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-27"
@@ -1385,7 +1385,7 @@ objects:
       ref_id: "Art\xEDculo 28"
       name: "Cumplimiento de los requisitos m\xEDnimos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-28"
@@ -1395,26 +1395,26 @@ objects:
         \ de aplicaci\xF3n adoptar\xE1n las medidas y refuerzos de seguridad correspondientes\
         \ indicados en el anexo II, teniendo en cuenta:"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1.a
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1
       ref_id: 28.1.a
       description: "Los activos que constituyen los sistemas de informaci\xF3n concernidos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1.b
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1
       ref_id: 28.1.b
       description: "La categor\xEDa del sistema, seg\xFAn lo previsto en el art\xED\
         culo 40 y en el anexo I."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1.c
-      assessable: true
+      assessable: false
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.1
       ref_id: 28.1.c
       description: Las decisiones que se adopten para gestionar los riesgos identificados.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-28"
@@ -1428,7 +1428,7 @@ objects:
         \ se formalizar\xE1 en un documento denominado Declaraci\xF3n de Aplicabilidad,\
         \ firmado por el responsable de la seguridad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:28.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-28"
@@ -1471,7 +1471,7 @@ objects:
       name: "Perfiles de cumplimiento espec\xEDficos y acreditaci\xF3n de entidades\
         \ de\nimplementaci\xF3n de configuraciones seguras."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:30.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-30"
@@ -1483,7 +1483,7 @@ objects:
         \ causa del preceptivo an\xE1lisis de riesgos, resulten id\xF3neas para una\
         \ concreta categor\xEDa de seguridad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:30.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-30"
@@ -1496,7 +1496,7 @@ objects:
         n de personas, que garanticen la seguridad de dichas soluciones o plataformas\
         \ y la conformidad con lo dispuesto en este real decreto."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:30.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-30"
@@ -1507,7 +1507,7 @@ objects:
         \ con las instrucciones t\xE9cnicas de seguridad y gu\xEDas de seguridad aprobadas\
         \ conforme a lo previsto en la disposici\xF3n adicional segunda."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:30.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-30"
@@ -1531,7 +1531,7 @@ objects:
       ref_id: "Art\xEDculo 31"
       name: "Auditor\xEDa de la seguridad"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1541,7 +1541,7 @@ objects:
         \ ordinaria, al menos cada dos a\xF1os, que verifique el cumplimiento de los\
         \ requerimientos del ENS."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node165
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1553,7 +1553,7 @@ objects:
         \ realizaci\xF3n de la siguiente auditor\xEDa regular ordinaria, indicados\
         \ en el p\xE1rrafo anterior."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node166
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1562,7 +1562,7 @@ objects:
         \ fuerza mayor no imputables a la entidad titular del sistema o sistemas de\
         \ informaci\xF3n concernidos."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1573,7 +1573,7 @@ objects:
         \ con lo regulado en la Instrucci\xF3n T\xE9cnica de Seguridad de Auditor\xED\
         a de la Seguridad de los Sistemas de Informaci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1583,7 +1583,7 @@ objects:
         \ as\xED como la normalizaci\xF3n nacional e internacional aplicables a este\
         \ tipo de actividades."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1597,7 +1597,7 @@ objects:
         n T\xE9cnica de Seguridad de Auditor\xEDa de la Seguridad de los Sistemas\
         \ de Informaci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1607,7 +1607,7 @@ objects:
         \ por este \xFAltimo que presentar\xE1 sus conclusiones al responsable del\
         \ sistema para que adopte las medidas correctoras adecuadas."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1619,7 +1619,7 @@ objects:
         \ operaci\xF3n del sistema, hasta su adecuada subsanaci\xF3n o mitigaci\xF3\
         n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:31.7
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-31"
@@ -1752,7 +1752,7 @@ objects:
         \ de reducir el impacto para, en la medida de lo posible, evitar que vuelvan\
         \ a darse las circunstancias que lo propiciaron."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node184
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-33"
@@ -1766,7 +1766,7 @@ objects:
         \ incluidos los compartidos o transversales, si un informe de superficie de\
         \ exposici\xF3n del CCN-CERT hubiere determinado que el riesgo es asumible."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node185
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-33"
@@ -1930,7 +1930,7 @@ objects:
       ref_id: "Art\xEDculo 37"
       name: Mecanismos de control.
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node203
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-37"
@@ -1948,7 +1948,7 @@ objects:
       name: "Procedimientos de determinaci\xF3n de la conformidad con el Esquema Nacional\
         \ de Seguridad."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:38.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-38"
@@ -1963,7 +1963,7 @@ objects:
         n para su declaraci\xF3n de la conformidad, sin perjuicio de que se puedan\
         \ someter igualmente a una auditoria de certificaci\xF3n."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:38.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-38"
@@ -1974,7 +1974,7 @@ objects:
         \ Instrucci\xF3n T\xE9cnica de Seguridad, que concretar\xE1 asimismo los requisitos\
         \ exigibles a las entidades certificadoras."
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:38.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: "urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:art\xED\
         culo-38"
@@ -2669,9 +2669,16 @@ objects:
         \ con lo dispuesto en el art\xEDculo 12 de este real decreto, se plasmar\xE1\
         \ en un documento en el que, de forma clara, se precise, al menos, lo siguiente:"
       implementation_groups:
-      - "B\xC1SICA;MEDIA; ALTA;C;I;T;A;D"
+      - "B\xC1SICA"
+      - MEDIA
+      - ' ALTA'
+      - C
+      - I
+      - T
+      - A
+      - D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.1.1
-      assessable: true
+      assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node300
       ref_id: org.1.1
@@ -2680,9 +2687,16 @@ objects:
         \u2013 Categor\xEDa MEDIA: org.1.\n\u2013 Categor\xEDa ALTA: org.1\nP\xE1\
         gina 33"
       implementation_groups:
-      - "B\xC1SICA;MEDIA; ALTA;C;I;T;A;D"
+      - "B\xC1SICA"
+      - MEDIA
+      - ' ALTA'
+      - C
+      - I
+      - T
+      - A
+      - D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.1.2
-      assessable: true
+      assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node300
       ref_id: org.1.2
@@ -2692,9 +2706,16 @@ objects:
         \u2013 Categor\xEDa MEDIA: org.1.\n\u2013 Categor\xEDa ALTA: org.1\nP\xE1\
         gina 33"
       implementation_groups:
-      - "B\xC1SICA;MEDIA; ALTA;C;I;T;A;D"
+      - "B\xC1SICA"
+      - MEDIA
+      - ' ALTA'
+      - C
+      - I
+      - T
+      - A
+      - D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.1.3
-      assessable: true
+      assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node300
       ref_id: org.1.3
@@ -2705,9 +2726,16 @@ objects:
         \u2013 Categor\xEDa MEDIA: org.1.\n\u2013 Categor\xEDa ALTA: org.1\nP\xE1\
         gina 33"
       implementation_groups:
-      - "B\xC1SICA;MEDIA; ALTA;C;I;T;A;D"
+      - "B\xC1SICA"
+      - MEDIA
+      - ' ALTA'
+      - C
+      - I
+      - T
+      - A
+      - D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.1.4
-      assessable: true
+      assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node300
       ref_id: org.1.4
@@ -2719,9 +2747,16 @@ objects:
         \u2013 Categor\xEDa MEDIA: org.1.\n\u2013 Categor\xEDa ALTA: org.1\nP\xE1\
         gina 33"
       implementation_groups:
-      - "B\xC1SICA;MEDIA; ALTA;C;I;T;A;D"
+      - "B\xC1SICA"
+      - MEDIA
+      - ' ALTA'
+      - C
+      - I
+      - T
+      - A
+      - D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.1.5
-      assessable: true
+      assessable: false
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node300
       ref_id: org.1.5
@@ -2731,7 +2766,14 @@ objects:
         \u2013 Categor\xEDa MEDIA: org.1.\n\u2013 Categor\xEDa ALTA: org.1\nP\xE1\
         gina 33"
       implementation_groups:
-      - "B\xC1SICA;MEDIA; ALTA;C;I;T;A;D"
+      - "B\xC1SICA"
+      - MEDIA
+      - ' ALTA'
+      - C
+      - I
+      - T
+      - A
+      - D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.2
       assessable: false
       depth: 3
@@ -2739,7 +2781,7 @@ objects:
       ref_id: org.2
       name: 'Normativa de seguridad '
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node307
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.2
       description: "Se dispondr\xE1 de una serie de documentos que describan:"
@@ -2781,7 +2823,7 @@ objects:
       ref_id: org.3
       name: Procedimientos de seguridad
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node311
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.3
       description: "Se dispondr\xE1 de una serie de documentos que detallen de forma\
@@ -2927,7 +2969,7 @@ objects:
       ref_id: org.4
       name: "Proceso de autorizaci\xF3n"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node323
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:org.4
       description: "Se establecer\xE1 un proceso formal de autorizaciones que cubra\
@@ -3045,7 +3087,7 @@ objects:
       ref_id: op.pl.1
       name: "An\xE1lisis de riesgos"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node335
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.1
       description: "Se realizar\xE1 un an\xE1lisis de riesgos informal, realizado\
@@ -3159,7 +3201,7 @@ objects:
       ref_id: op.pl.2
       name: Arquitectura de seguridad
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node341
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.2
       description: "La seguridad del sistema ser\xE1 objeto de un planteamiento integral\
@@ -3255,7 +3297,7 @@ objects:
       ref_id: op.pl.3
       name: "Adquisici\xF3n de nuevos componentes"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node347
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.3
       description: "Se establecer\xE1 un proceso formal para planificar la adquisici\xF3\
@@ -3303,7 +3345,7 @@ objects:
       ref_id: op.pl.4
       name: "Dimensionamiento / gesti\xF3n de la capacidad "
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node352
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.4
       description: "Con car\xE1cter previo a la puesta en explotaci\xF3n, se realizar\xE1\
@@ -3418,7 +3460,7 @@ objects:
       implementation_groups:
       - MEDIA; ALTA;C;I;T;A;D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node360
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.5
       description: "En caso de que no existan productos o servicios en el CPSTIC que\
@@ -3435,7 +3477,7 @@ objects:
       implementation_groups:
       - MEDIA; ALTA;C;I;T;A;D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node361
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.pl.5
       description: "Una Instrucci\xF3n T\xE9cnica de Seguridad detallar\xE1 los criterios\
@@ -4402,7 +4444,7 @@ objects:
       ref_id: op.acc.6
       name: "Mecanismo de autenticaci\xF3n (usuarios de la organizaci\xF3n)"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node407
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.acc.6
       description: "Esta medida se refiere a personal del organismo, propio o contratado,\
@@ -5002,7 +5044,7 @@ objects:
       ref_id: op.exp.2
       name: " Configuraci\xF3n de seguridad "
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node421
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.exp.2
       description: "Se configurar\xE1n los equipos previamente a su entrada en operaci\xF3\
@@ -5126,7 +5168,7 @@ objects:
       ref_id: op.exp.3
       name: "Gesti\xF3n de la configuraci\xF3n de seguridad"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node432
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.exp.3
       description: "Se gestionar\xE1 de forma continua la configuraci\xF3n de los\
@@ -5374,7 +5416,7 @@ objects:
       ref_id: op.exp.4
       name: Mantenimiento y actualizaciones de seguridad
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node440
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.exp.4
       description: "Para mantener el equipamiento f\xEDsico y l\xF3gico que constituye\
@@ -5485,7 +5527,7 @@ objects:
       ref_id: op.exp.5
       name: "Gesti\xF3n de cambios"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node445
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.exp.5
       description: "Se mantendr\xE1 un control continuo de los cambios realizados\
@@ -5936,7 +5978,7 @@ objects:
       ref_id: op.exp.9
       name: "Registro de la gesti\xF3n de incidentes"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node465
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.exp.9
       description: "Se registrar\xE1n todas las actuaciones relacionadas con la gesti\xF3\
@@ -6197,7 +6239,7 @@ objects:
       ref_id: op.ext.4
       name: "Interconexi\xF3n de sistemas"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node485
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.ext.4
       description: "Se denomina interconexi\xF3n al establecimiento de enlaces con\
@@ -6429,7 +6471,7 @@ objects:
       ref_id: op.cont.2
       name: Plan de continuidad
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node500
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:op.cont.2
       description: "Se desarrollar\xE1 un plan de continuidad que establezca las acciones\
@@ -6845,7 +6887,7 @@ objects:
       ref_id: mp.if.3
       name: Acondicionamiento de los locales
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node532
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.if.3
       description: "Los locales donde se ubiquen los sistemas de informaci\xF3n y\
@@ -7025,7 +7067,7 @@ objects:
       ref_id: mp.per.2
       name: Deberes y obligaciones
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node549
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.per.2
       description: "Se informar\xE1 a cada persona que trabaje en el sistema de los\
@@ -7136,7 +7178,7 @@ objects:
       ref_id: mp.per.3
       name: "Concienciaci\xF3n"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node557
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.per.3
       description: "Se realizar\xE1n las acciones necesarias para concienciar regularmente\
@@ -7236,7 +7278,7 @@ objects:
       implementation_groups:
       - "B\xC1SICA;MEDIA;ALTA;C;I;T;A;D"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node566
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.per.4
       description: "Adem\xE1s, se evaluar\xE1 la eficacia de las acciones formativas\
@@ -7299,7 +7341,7 @@ objects:
       ref_id: mp.eq.3
       name: "Protecci\xF3n de dispositivos port\xE1tiles"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node573
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.eq.3
       description: "Los equipos (ordenadores port\xE1tiles, tabletas, etc.) que sean\
@@ -7309,7 +7351,7 @@ objects:
       implementation_groups:
       - "B\xC1SICA;MEDIA;ALTA;;C;I;T;A;D"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node574
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.eq.3
       description: "Sin perjuicio de las medidas generales que les afecten, se adoptar\xE1\
@@ -7404,7 +7446,7 @@ objects:
       ref_id: mp.eq.4
       name: Otros dispositivos conectados a la red
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node580
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.eq.4
       description: "Esta medida afecta a todo tipo de dispositivos conectados a la\
@@ -7684,7 +7726,7 @@ objects:
       ref_id: mp.com.4
       name: "Separaci\xF3n de flujos de informaci\xF3n en la red"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node598
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.com.4
       description: "La segmentaci\xF3n acota el acceso a la informaci\xF3n y, consiguientemente,\
@@ -7693,7 +7735,7 @@ objects:
       implementation_groups:
       - MEDIA;ALTA;C;I;T;A;D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node599
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.com.4
       description: "Cuando la transmisi\xF3n de informaci\xF3n por la red se restringe\
@@ -7719,7 +7761,7 @@ objects:
       implementation_groups:
       - MEDIA;ALTA;C;I;T;A;D
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node600
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.com.4
       description: "Los flujos de informaci\xF3n se separar\xE1n en segmentos de forma\
@@ -7838,7 +7880,7 @@ objects:
       ref_id: mp.si.2
       name: "Criptograf\xEDa"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node607
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.si.2
       description: "Esta medida se aplica, en particular, a todos los dispositivos\
@@ -7918,7 +7960,7 @@ objects:
       ref_id: mp.si.4
       name: Transporte
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node614
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.si.4
       description: "El responsable del sistema garantizar\xE1 que los dispositivos\
@@ -7981,7 +8023,7 @@ objects:
       ref_id: mp.si.5
       name: "Borrado y destrucci\xF3n"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node620
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.si.5
       description: "La medida de borrado y destrucci\xF3n de soportes de informaci\xF3\
@@ -8018,7 +8060,7 @@ objects:
       implementation_groups:
       - BAJO;MEDIO;ALTO;C
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node622
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.si.5
       description: "Las gu\xEDas CCN-STIC del CCN precisar\xE1n los criterios para\
@@ -8093,7 +8135,7 @@ objects:
       ref_id: mp.sw.2
       name: "Aceptaci\xF3n y puesta en servicio"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node627
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.sw.2
       description: "Antes de pasar a producci\xF3n se comprobar\xE1 el correcto funcionamiento\
@@ -8288,7 +8330,7 @@ objects:
       ref_id: mp.info.4
       name: Sellos de tiempo
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node643
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.info.4
       description: "La utilizaci\xF3n de sellos de tiempo exigir\xE1 adoptar las siguientes\
@@ -8380,7 +8422,7 @@ objects:
       implementation_groups:
       - BAJO;MEDIO; ALTO;C
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node650
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.info.5
       description: "Esta medida es especialmente relevante cuando el documento se\
@@ -8518,7 +8560,7 @@ objects:
       ref_id: mp.s.1
       name: "Protecci\xF3n del correo electr\xF3nico"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node660
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.s.1
       description: "El correo electr\xF3nico se proteger\xE1 frente a las amenazas\
@@ -8550,7 +8592,7 @@ objects:
       implementation_groups:
       - "B\xC1SICA;MEDIA;ALTA;C;I;T;A;D"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node663
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.s.1
       description: "Se proteger\xE1 a la organizaci\xF3n frente a problemas que se\
@@ -8596,7 +8638,7 @@ objects:
       implementation_groups:
       - "B\xC1SICA;MEDIA;ALTA;C;I;T;A;D"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node667
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.s.1
       description: "Se establecer\xE1n normas de uso del correo electr\xF3nico para\
@@ -8636,7 +8678,7 @@ objects:
       ref_id: mp.s.2
       name: "Protecci\xF3n de servicios y aplicaciones web"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node671
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.s.2
       description: "Los sistemas que prestan servicios web deber\xE1n ser protegidos\
@@ -8860,7 +8902,7 @@ objects:
       ref_id: mp.s.3
       name: "Protecci\xF3n de la navegaci\xF3n web"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node680
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.s.3
       description: "El acceso de los usuarios internos a la navegaci\xF3n por internet\
@@ -9049,7 +9091,7 @@ objects:
       ref_id: mp.s.4
       name: "Protecci\xF3n frente a la denegaci\xF3n de servicio"
     - urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:node689
-      assessable: false
+      assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:esquema-nacional-de-seguridad:mp.s.4
       description: "Se establecer\xE1n medidas preventivas frente a ataques de denegaci\xF3\
