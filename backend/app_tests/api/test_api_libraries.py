@@ -99,8 +99,10 @@ class TestLibrariesAuthenticated:
                 "name": lib_detail_response["name"],
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
-                "folder": {"str": Folder.get_root_folder().name,
-                           "id": Folder.get_root_folder().id},
+                "folder": {
+                    "str": Folder.get_root_folder().name,
+                    "id": Folder.get_root_folder().id,
+                },
             },
             base_count=1,
             user_group=test.user_group,
@@ -167,8 +169,10 @@ class TestLibrariesAuthenticated:
                 "name": lib_detail_response["name"],
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
-                "folder": {"str": Folder.get_root_folder().name,
-                           "id": Folder.get_root_folder().id},
+                "folder": {
+                    "str": Folder.get_root_folder().name,
+                    "id": Folder.get_root_folder().id,
+                },
                 #                                 'json_definition': lib_detail_response  # TODO: restore this test
             },
             base_count=1,
