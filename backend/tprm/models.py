@@ -45,3 +45,45 @@ class Representative(AbstractBaseModel):
     description = models.TextField(blank=True)
     
     fields_to_check = ["name"]
+
+class Solution(NameDescriptionMixin):
+    """
+    A solution represents a product or service that is offered by an entity
+    """
+    
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        related_name="solutions",
+        verbose_name=_("Entity"),
+    )
+    ref_id = models.CharField(max_length=255, blank=True)
+    criticality = models.IntegerField(
+        default=0,
+        verbose_name=_("Criticality")
+    )
+    
+    fields_to_check = ["name"]
+    
+    class Meta:
+        verbose_name = _("Solution")
+        verbose_name_plural = _("Solutions")
+
+
+class Product(NameDescriptionMixin):
+    """
+    Product offered in a solution
+    """
+    
+    solution = models.ForeignKey(
+        Solution,
+        on_delete=models.CASCADE,
+        related_name="products",
+        verbose_name=_("Solution"),
+    )
+    
+    fields_to_check = ["name"]
+    
+    class Meta:
+        verbose_name = _("Product")
+        verbose_name_plural = _("Products")

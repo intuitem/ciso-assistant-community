@@ -268,6 +268,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_representative",
     "view_representative",
     "delete_representative",
+    "add_solution",
+    "change_solution",
+    "view_solution",
+    "delete_solution",
+    "add_product",
+    "change_product",
+    "view_product",
+    "delete_product",
 ]
 
 
