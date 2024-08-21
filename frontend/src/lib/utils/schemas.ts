@@ -1,5 +1,6 @@
 // schema for the validation of forms
 
+import { entity, evidence, maturity } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -272,6 +273,24 @@ export const EntitiesSchema = baseNamedObject({
 	
 });
 
+export const entityAssessmentsSchema = baseNamedObject({
+	version: z.string().optional().default('0.1'),
+	project: z.string(),
+	status: z.string().optional().nullable(),
+	eta: z.string().optional().nullable(),
+	due_date: z.string().optional().nullable(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	entity: z.string(),
+	compliance_assessment: z.string().optional(),
+	evidence: z.string().optional(),
+	// criticality: z.number().optional().nullable(),
+	// penetration: z.number().optional().nullable(),
+	// dependency: z.number().optional().nullable(),
+	// maturity: z.number().optional().nullable(),
+	// trust: z.number().optional().nullable()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -290,7 +309,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
-	entities: EntitiesSchema
+	entities: EntitiesSchema,
+	'entity-assessments': entityAssessmentsSchema
 };
 
 export const modelSchema = (model: string) => {

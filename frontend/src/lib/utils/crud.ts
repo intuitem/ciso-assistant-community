@@ -456,6 +456,23 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owned_folders', urlModel: 'folders' }
 		]
 	},
+	'entity-assessments': {
+		name: 'entityassessment',
+		localName: 'entityAssessment',
+		localNamePlural: 'entityAssessments',
+		verboseName: 'Entity assessment',
+		verboseNamePlural: 'Entity assessments',
+		foreignKeyFields: [
+			{ field: 'project', urlModel: 'projects' },
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'evidence', urlModel: 'evidences' },
+			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
+		],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'status' }]
+	},
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

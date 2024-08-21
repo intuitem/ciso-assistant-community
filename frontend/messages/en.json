@@ -666,5 +666,9 @@
 	"addEntity": "Add entity",
 	"referenceLink": "Reference link",
 	"mission": "Mission",
-	"ownedFolders": "Owned domains"
+	"ownedFolders": "Owned domains",
+	"thirdParty": "Third party",
+	"entityAssessment": "Entity assessment",
+	"entityAssessments": "Entity assessments",
+	"addEntityAssessment": "Add entity assessment"
 }

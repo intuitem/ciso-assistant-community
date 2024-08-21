@@ -405,5 +405,13 @@ export const listViewFields: ListViewFieldsConfig = {
 		filters: {
 			folder: DOMAIN_FILTER
 		}
+	},
+	'entity-assessments': {
+		head: ['name', 'description', 'project', 'entity'],
+		body: ['name', 'description', 'project', 'entity'],
+		filters: {
+			project: PROJECT_FILTER,
+			status: STATUS_FILTER
+		}
 	}
 };

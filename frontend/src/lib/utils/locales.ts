@@ -391,7 +391,8 @@ export function localItems(): LocalItems {
 		appliedControlNoEffort: m.appliedControlNoEffort(),
 		appliedControlNoLink: m.appliedControlNoLink(),
 		riskAcceptanceNoExpiryDate: m.riskAcceptanceNoExpiryDate(),
-		riskAcceptanceExpired: m.riskAcceptanceExpired()
+		riskAcceptanceExpired: m.riskAcceptanceExpired(),
+		thirdParty: m.thirdParty()
 	};
 	return LOCAL_ITEMS;
 }

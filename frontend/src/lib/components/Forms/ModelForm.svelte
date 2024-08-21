@@ -733,6 +733,119 @@
 			label={m.domain()}
 			hide={initialData.folder}
 		/>
+	{:else if URLModel === 'entity-assessments'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['entity'] })}
+			field="entity"
+			cacheLock={cacheLocks['entity']}
+			bind:cachedValue={formDataCache['entity']}
+			label={m.entity()}
+			hide={initialData.entity}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+			cacheLock={cacheLocks['status']}
+			bind:cachedValue={formDataCache['status']}
+		/>
+		<TextField
+			{form}
+			field="reference_link"
+			label={m.referenceLink()}
+			helpText={m.linkHelpText()}
+			cacheLock={cacheLocks['reference_link']}
+			bind:cachedValue={formDataCache['reference_link']}
+		/>
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['project'] })}
+			field="project"
+			cacheLock={cacheLocks['project']}
+			bind:cachedValue={formDataCache['project']}
+			label={m.project()}
+			hide={initialData.project}
+		/>
+		<TextField
+			{form}
+			field="version"
+			label={m.version()}
+			cacheLock={cacheLocks['version']}
+			bind:cachedValue={formDataCache['version']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
+		/>
+		<AutocompleteSelect
+				{form}
+				multiple
+				options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+				field="authors"
+				cacheLock={cacheLocks['authors']}
+				bind:cachedValue={formDataCache['authors']}
+				label={m.authors()}
+			/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+			field="reviewers"
+			cacheLock={cacheLocks['reviewers']}
+			bind:cachedValue={formDataCache['reviewers']}
+			label={m.reviewers()}
+		/>
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['compliance_assessment'], label: 'str'})}
+			field="compliance_assessment"
+			cacheLock={cacheLocks['compliance_assessment']}
+			bind:cachedValue={formDataCache['compliance_assessment']}
+			label={m.complianceAssessment()}
+		/>
+		<AutocompleteSelect
+			{form}
+			options={getOptions({
+				objects: model.foreignKeys['evidence'],
+				extra_fields: [['folder', 'str']]
+			})}
+			field="evidence"
+			cacheLock={cacheLocks['evidence']}
+			bind:cachedValue={formDataCache['evidence']}
+			label={m.evidence()}
+		/>
+	{:else if URLModel === 'frameworks'}
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['category']}
+			field="category"
+			label={m.category()}
+			cacheLock={cacheLocks['category']}
+			bind:cachedValue={formDataCache['category']}
+		/>
 	{:else if URLModel === 'users'}
 		<TextField
 			{form}
