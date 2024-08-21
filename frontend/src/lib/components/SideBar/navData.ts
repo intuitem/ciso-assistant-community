@@ -140,11 +140,6 @@ export const navData = {
 					href: '/projects'
 				},
 				{
-					name: 'entities',
-					fa_icon: 'fa-solid fa-building',
-					href: '/entities'
-				},
-				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users'
@@ -161,7 +156,36 @@ export const navData = {
 				}
 			]
 		},
-
+		{
+			name: 'Third Party',
+			items: [
+				{
+					name: 'entities',
+					fa_icon: 'fa-solid fa-building',
+					href: '/entities'
+				},
+				{
+					name: 'entityAssessments',
+					fa_icon: 'fa-solid fa-clipboard-list-check',
+					href: '/entity-assessments'
+				},
+				{
+					name: 'representatives',
+					fa_icon: 'fa-solid fa-user-tie',
+					href: '/representatives'
+				},
+				{
+					name: 'solutions',
+					fa_icon: 'fa-solid fa-box',
+					href: '/solutions'
+				},
+				{
+					name: 'products',
+					fa_icon: 'fa-solid fa-box-open',
+					href: '/products'
+				},
+			]
+		},
 		{
 			name: 'extra',
 			items: [
