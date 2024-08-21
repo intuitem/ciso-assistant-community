@@ -110,7 +110,7 @@ class TestThreatsAuthenticated:
             },
             {
                 "folder": {
-                    "id": Folder.get_root_folder().id,
+                    "id": str(Folder.get_root_folder().id),
                     "str": Folder.get_root_folder().name,
                 },
             },
