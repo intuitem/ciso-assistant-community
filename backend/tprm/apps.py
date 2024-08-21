@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class TprmConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'tprm'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "tprm"

@@ -21,7 +21,7 @@ class EntityWriteSerializer(BaseModelSerializer):
         many=True,
         required=False,
     )
-    
+
     def validate_owned_folders(self, owned_folders):
         for folder in owned_folders:
             if folder.owner.exists():
@@ -29,7 +29,7 @@ class EntityWriteSerializer(BaseModelSerializer):
                     _("Folder {} is already owned by another entity").format(folder)
                 )
         return owned_folders
-    
+
     class Meta:
         model = Entity
         exclude = []
@@ -45,7 +45,6 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
-
     class Meta:
         model = EntityAssessment
         exclude = []
