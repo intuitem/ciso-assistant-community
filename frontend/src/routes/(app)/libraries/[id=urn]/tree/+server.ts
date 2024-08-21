@@ -2,7 +2,6 @@ import { BASE_API_URL } from '$lib/utils/constants';
 
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { languageTag } from '$paraglide/runtime';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const URLModel = url.searchParams.has('loaded') ? 'loaded-libraries' : 'stored-libraries';

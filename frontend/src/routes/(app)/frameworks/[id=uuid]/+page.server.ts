@@ -1,6 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
-import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'frameworks';

@@ -1316,21 +1316,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in viewable_objects:
             response = {
-                "planned": list(),
-                "active": list(),
-                "inactive": list(),
-                "none": list(),
+                "planned": [],
+                "active": [],
+                "inactive": [],
+                "none": [],
             }
             compliance_assessment_object = self.get_object()
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments()
             )
-            applied_controls = AppliedControlReadSerializer(
-                AppliedControl.objects.filter(
+            applied_controls = [
+                {**model_to_dict(applied_control), "id": applied_control.id}
+                for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
-                ).distinct(),
-                many=True,
-            ).data
+                ).distinct()
+            ]
             for applied_control in applied_controls:
                 applied_control["requirements_count"] = (
                     RequirementAssessment.objects.filter(
@@ -1781,6 +1781,7 @@ def generate_html(
         return node_data, selected_evidences
 
     top_level_nodes = [req for req in requirement_nodes if not req.parent_urn]
+    update_translations_in_object(top_level_nodes)
     top_level_nodes_data = []
     for requirement_node in top_level_nodes:
         node_data, node_evidences = generate_data_rec(requirement_node)

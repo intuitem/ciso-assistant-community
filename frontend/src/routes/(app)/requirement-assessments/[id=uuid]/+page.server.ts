@@ -4,7 +4,6 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
-import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';

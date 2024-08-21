@@ -12,9 +12,6 @@ import { listViewFields } from '$lib/utils/table';
 import type { Library } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
-import { languageTag } from '$paraglide/runtime';
-
-// ----------------------------------------------------------- //
 
 export const load = (async ({ fetch }) => {
 	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/`;
