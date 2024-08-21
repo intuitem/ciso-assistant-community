@@ -55,7 +55,8 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
 
 class SolutionReadSerializer(BaseModelSerializer):
-    entity = FieldsRelatedField()
+    provider_entity = FieldsRelatedField()
+    recipient_entity = FieldsRelatedField()
     products = FieldsRelatedField(many=True)
 
     class Meta:
@@ -64,7 +65,11 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
-    entity = serializers.PrimaryKeyRelatedField(
+    provider_entity = serializers.PrimaryKeyRelatedField(
+        queryset=Entity.objects.all(),
+        required=True,
+    )
+    recipient_entity = serializers.PrimaryKeyRelatedField(
         queryset=Entity.objects.all(),
         required=True,
     )
