@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
+from core.models import Assessment, ComplianceAssessment, Evidence
 from iam.models import FolderMixin, PublishInRootFolderMixin
 
 
@@ -23,6 +24,49 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Meta:
         verbose_name = _("Entity")
         verbose_name_plural = _("Entities")
+
+
+class EntityAssessment(Assessment):
+    criticality = models.IntegerField(
+        default=0,
+        verbose_name=_("Criticality")
+    )
+    penetration = models.IntegerField(
+        default=0,
+        verbose_name=_("Penetration")
+    )
+    dependency = models.IntegerField(
+        default=0,
+        verbose_name=_("Dependency")
+    )
+    maturity = models.IntegerField(
+        default=0,
+        verbose_name=_("Maturity")
+    )
+    trust = models.IntegerField(
+        default=0,
+        verbose_name=_("Trust")
+    )
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+    )
+    compliance_assessment = models.ForeignKey(
+        ComplianceAssessment,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    evidence = models.ForeignKey(
+        Evidence,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    
+    class Meta:
+        verbose_name = _("Entity assessment")
+        verbose_name_plural = _("Entity assessments")
 
 
 class Representative(AbstractBaseModel):

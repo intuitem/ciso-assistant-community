@@ -1348,7 +1348,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin):
         DEPRECATED = "deprecated", _("Deprecated")
 
     project = models.ForeignKey(
-        "Project", on_delete=models.CASCADE, verbose_name=_("Project")
+        Project, on_delete=models.CASCADE, verbose_name=_("Project")
     )
     version = models.CharField(
         max_length=100,
