@@ -1,5 +1,4 @@
 // schema for the validation of forms
-import { criticality, products, provider, solution, solutions } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
