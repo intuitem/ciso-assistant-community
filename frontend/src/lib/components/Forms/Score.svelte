@@ -10,6 +10,7 @@
 	export let min_score = 0;
 	export let max_score = 100;
 	export let score_step = 1;
+	export let always_enabled = false;
 
 	interface ScoresDefinition {
 		score: number;
@@ -23,8 +24,12 @@
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$value = $value ?? min_score;
-
-	const isScored = formFieldProxy(form, 'is_scored')['value'];
+	
+	let isScored = formFieldProxy(form, 'is_scored')['value'];
+	
+	if (always_enabled) {
+		$isScored = true;
+	}
 
 	$: if (max_score === 100) score_step = 5;
 
@@ -64,14 +69,16 @@
 					disabled={!$isScored}
 				>
 					<div class="flex justify-between space-x-8 items-center">
-						<SlideToggle
-							bind:checked={$isScored}
-							class="shrink-0"
-							active="bg-primary-500"
-							name="score-slider"
-						>
-							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
-						>
+						{#if !always_enabled}
+							<SlideToggle
+								bind:checked={$isScored}
+								class="shrink-0"
+								active="bg-primary-500"
+								name="score-slider"
+							>
+								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
+							>
+						{/if}
 						{#if $isScored && scores_definition && $value !== null}
 							{#each scores_definition as definition}
 								{#if definition.score === $value}
