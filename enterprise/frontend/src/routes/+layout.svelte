@@ -82,30 +82,24 @@
   let favicon: Attachment | string = "/favicon.ico";
 
   onMount(async () => {
-    if ($page.data.featureFlags.whiteLabel === true) {
-      clientSettings = await fetch("/settings/client-settings").then((res) =>
-        res.json(),
+    clientSettings = await fetch("/settings/client-settings").then((res) =>
+      res.json(),
+    );
+    const fetchFavicon = async () => {
+      const res = await fetch(
+        `/settings/client-settings/${clientSettings.id}/favicon`,
       );
-      const fetchFavicon = async () => {
-        const res = await fetch(
-          `/settings/client-settings/${clientSettings.id}/favicon`,
-        );
-        const blob = await res.blob();
-        return { type: blob.type, url: URL.createObjectURL(blob) };
-      };
-      favicon = clientSettings.favicon ? await fetchFavicon() : favicon;
-    }
+      const blob = await res.blob();
+      return { type: blob.type, url: URL.createObjectURL(blob) };
+    };
+    favicon = clientSettings.favicon ? await fetchFavicon() : favicon;
   });
 </script>
 
 <svelte:head>
   <link
     rel="icon"
-    href={$page.data.featureFlags.whiteLabel === true &&
-    favicon &&
-    Object.hasOwn(favicon, "url")
-      ? favicon.url
-      : favicon}
+    href={favicon && Object.hasOwn(favicon, "url") ? favicon.url : favicon}
   />
 </svelte:head>
 

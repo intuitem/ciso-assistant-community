@@ -11,7 +11,7 @@
   export let data: PageData;
 </script>
 
-{#if data && data.featureFlags.whiteLabel === true && Object.hasOwn(data, "form")}
+{#if data && Object.hasOwn(data, "form")}
   <SuperForm
     dataType="form"
     enctype="multipart/form-data"
@@ -21,12 +21,12 @@
     action="/settings/client-settings?/editClientSettings"
     class="flex flex-col space-y-3"
   >
-    <HiddenInput {form} field="id" label="_id" />
+    <HiddenInput {form} field="id" />
     <TextField {form} field="name" label={m.name()} />
     <FileInput
       {form}
       field="logo"
-      label="_logo"
+      label={m.logo()}
       helpText={data.settings.logo
         ? `${m.attachmentWarningText()}: ${data.settings.logo}`
         : m.attachmentHelpText()}
@@ -34,7 +34,7 @@
     <FileInput
       {form}
       field="favicon"
-      label="_favicon"
+      label={m.favicon()}
       helpText={data.settings.favicon
         ? `${m.attachmentWarningText()}: ${data.settings.favicon}`
         : m.attachmentHelpText()}

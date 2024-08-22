@@ -16,24 +16,22 @@
   <Tab bind:group={tabSet} name="ssoSettings" value={0}
     ><i class="fa-solid fa-key" /> {m.sso()}</Tab
   >
-  {#if data.featureFlags.whiteLabel === true}
-    <Tab
-      bind:group={tabSet}
-      name="clientSettings"
-      value={1}
-      on:change={async (e) => {
-        e.preventDefault();
-        const href = "/settings/client-settings";
-        const result = await preloadData(href);
-        if (result.type === "loaded" && result.status === 200) {
-          pushState(href, { clientSettings: result.data });
-        } else {
-          // Something went wrong, try navigating
-          goto(href);
-        }
-      }}><i class="fa-solid fa-key" /> _clientsettings</Tab
-    >
-  {/if}
+  <Tab
+    bind:group={tabSet}
+    name="clientSettings"
+    value={1}
+    on:change={async (e) => {
+      e.preventDefault();
+      const href = "/settings/client-settings";
+      const result = await preloadData(href);
+      if (result.type === "loaded" && result.status === 200) {
+        pushState(href, { clientSettings: result.data });
+      } else {
+        // Something went wrong, try navigating
+        goto(href);
+      }
+    }}><i class="fa-solid fa-key" /> {m.clientSettings()}</Tab
+  >
 </TabGroup>
 {#if tabSet === 0}
   <div>

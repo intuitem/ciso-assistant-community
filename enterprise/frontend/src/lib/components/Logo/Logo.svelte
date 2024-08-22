@@ -16,23 +16,21 @@
   let logo: Attachment;
 
   onMount(async () => {
-    if ($page.data.featureFlags.whiteLabel === true) {
-      clientSettings = await fetch("/settings/client-settings")
-        .then((res) => res.json())
-        .catch((res) => console.error("Failed to fetch client settings", res));
-      const fetchLogo = async () => {
-        const res = await fetch(
-          `/settings/client-settings/${clientSettings.id}/logo`,
-        );
-        const blob = await res.blob();
-        return { type: blob.type, url: URL.createObjectURL(blob) };
-      };
-      logo = clientSettings.logo ? await fetchLogo() : undefined;
-    }
+    clientSettings = await fetch("/settings/client-settings")
+      .then((res) => res.json())
+      .catch((res) => console.error("Failed to fetch client settings", res));
+    const fetchLogo = async () => {
+      const res = await fetch(
+        `/settings/client-settings/${clientSettings.id}/logo`,
+      );
+      const blob = await res.blob();
+      return { type: blob.type, url: URL.createObjectURL(blob) };
+    };
+    logo = clientSettings.logo ? await fetchLogo() : undefined;
   });
 </script>
 
-{#if $page.data.featureFlags.whiteLabel === true && logo}
+{#if logo}
   <div class="flex flex-col">
     <img src={logo.url} alt="Ciso-assistant icon" />
     {#if clientSettings}

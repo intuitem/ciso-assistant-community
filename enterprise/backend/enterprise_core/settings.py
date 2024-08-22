@@ -387,13 +387,10 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MODULE_PATHS["serializers"] = ["enterprise_core.serializers"]
 
-FEATURE_FLAGS["whiteLabel"] = os.environ.get("FF_WHITE_LABEL", "false") == "true"
-
-if FEATURE_FLAGS["whiteLabel"]:
-    ROUTES["client-settings"] = {
-        "viewset": "enterprise_core.views.ClientSettingsViewSet",
-        "basename": "client-settings",
-    }
+ROUTES["client-settings"] = {
+    "viewset": "enterprise_core.views.ClientSettingsViewSet",
+    "basename": "client-settings",
+}
 
 logger.info(
     "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
