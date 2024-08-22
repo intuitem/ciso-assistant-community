@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from core.serializers import BaseModelSerializer
 from iam.models import Folder
 
@@ -23,10 +24,3 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
     class Meta:
         model = ClientSettings
         exclude = ["is_published", "folder"]
-
-    def update(self, instance, validated_data):
-        instance = self.instance
-        for key, value in validated_data.items():
-            setattr(instance, key, value)
-        instance.save()
-        return instance
