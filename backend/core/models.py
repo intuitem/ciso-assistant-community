@@ -1797,11 +1797,9 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    qualification = models.CharField(
-        max_length=20,
-        blank=True,
-        default="",
-        verbose_name=_("Financial"),
+    qualification = models.JSONField(
+        default=list,
+        verbose_name=_("Qualification")
     )
 
     strength_of_knowledge = models.IntegerField(
