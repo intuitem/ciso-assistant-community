@@ -1,5 +1,5 @@
 // schema for the validation of forms
-import { criticality, provider, solutions } from '$paraglide/messages';
+import { criticality, products, provider, solution, solutions } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -296,6 +296,10 @@ export const solutionSchema = baseNamedObject({
 	criticality: z.number().optional(),
 });
 
+export const productSchema = baseNamedObject({
+	solution: z.string().optional(),
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -316,7 +320,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'sso-settings': SSOSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': entityAssessmentsSchema,
-	solutions: solutionSchema
+	solutions: solutionSchema,
+	products: productSchema
 };
 
 export const modelSchema = (model: string) => {

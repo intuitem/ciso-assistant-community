@@ -679,5 +679,8 @@
 	"solution": "Solution",
 	"addSolution": "Add solution",
 	"providerEntity": "Provider entity",
-	"recipientEntity": "Recipient entity"
+	"recipientEntity": "Recipient entity",
+	"product": "Product",
+	"products": "Products",
+	"addProduct": "Add product"
 }
