@@ -670,5 +670,9 @@
 	"thirdParty": "Third party",
 	"entityAssessment": "Entity assessment",
 	"entityAssessments": "Entity assessments",
-	"addEntityAssessment": "Add entity assessment"
+	"addEntityAssessment": "Add entity assessment",
+	"criticality": "Criticality",
+	"penetration": "Penetration",
+	"dependency": "Dependency",
+	"trust": "Trust"
 }

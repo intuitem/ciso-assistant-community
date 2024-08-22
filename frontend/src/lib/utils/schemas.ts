@@ -280,12 +280,12 @@ export const entityAssessmentsSchema = baseNamedObject({
 	reviewers: z.array(z.string().optional()).optional(),
 	entity: z.string(),
 	compliance_assessment: z.string().optional(),
-	evidence: z.string().optional()
-	// criticality: z.number().optional().nullable(),
-	// penetration: z.number().optional().nullable(),
-	// dependency: z.number().optional().nullable(),
-	// maturity: z.number().optional().nullable(),
-	// trust: z.number().optional().nullable()
+	evidence: z.string().optional(),
+	criticality: z.number().optional().nullable(),
+	penetration: z.number().optional(),
+	dependency: z.number().optional(),
+	maturity: z.number().optional(),
+	trust: z.number().optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

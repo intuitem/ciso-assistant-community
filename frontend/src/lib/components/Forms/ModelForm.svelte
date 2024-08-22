@@ -23,6 +23,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { createModalCache } from '$lib/utils/stores';
+	import Score from './Score.svelte';
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
 	export let context = 'default';
@@ -829,6 +830,41 @@
 			cacheLock={cacheLocks['evidence']}
 			bind:cachedValue={formDataCache['evidence']}
 			label={m.evidence()}
+		/>
+		<Score
+			{form}
+			label={m.criticality()}
+			field="criticality"
+			always_enabled={true}
+			max_score={5}
+		/>
+		<Score
+			{form}
+			label={m.penetration()}
+			field="penetration"
+			always_enabled={true}
+			max_score={5}
+		/>
+		<Score
+			{form}
+			label={m.dependency()}
+			field="dependency"
+			always_enabled={true}
+			max_score={5}
+		/>
+		<Score
+			{form}
+			label={m.maturity()}
+			field="maturity"
+			always_enabled={true}
+			max_score={5}
+		/>
+		<Score
+			{form}
+			label={m.trust()}
+			field="trust"
+			always_enabled={true}
+			max_score={5}
 		/>
 	{:else if URLModel === 'frameworks'}
 		<TextField
