@@ -26,6 +26,7 @@ django-rest-knox = "4.2.0"
 django-allauth = "0.63.5"
 python3-saml = "^1.16"
 requests = "^2.32"
+python-magic = "^0.4.27"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"

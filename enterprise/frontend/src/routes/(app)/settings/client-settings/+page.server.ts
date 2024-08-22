@@ -40,7 +40,7 @@ export const actions: Actions = {
 		const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/`;
 
 		const fileFields: Record<string, File> = Object.fromEntries(
-			Object.entries(form.data).filter(([key, _]) => ['logo', 'favicon'].includes(key))
+			Object.entries(form.data).filter(([key]) => ['logo', 'favicon'].includes(key))
 		);
 
 		Object.keys(fileFields).forEach((key) => {
@@ -53,10 +53,10 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
+    console.log('ok?')
 
 		if (!res.ok) {
 			const response: Record<string, any> = await res.json();
-			console.error(response);
 			if (response.warning) {
 				setFlash({ type: 'warning', message: response.warning }, event);
 				return { form };
@@ -91,6 +91,9 @@ export const actions: Actions = {
 				if (response.non_field_errors) {
 					setError(form, 'non_field_errors', response.non_field_errors);
 				}
+        if (response[field]) {
+          setError(form, field, Object.hasOwn(m, response[field]) ? m[response[field]]() : response[field]);
+        }
 				return fail(400, { form: form });
 			}
 		}
