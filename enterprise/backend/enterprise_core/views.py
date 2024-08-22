@@ -96,6 +96,7 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 "image/webp",
                 "image/x-icon",
                 "image/vnd.microsoft.icon",
+                "image/svg+xml",
             ]:
                 return Response(
                     {field_name: "invalidFileType"},
