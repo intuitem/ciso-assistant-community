@@ -470,7 +470,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
-	}
+	},
+	solutions: {
+		name: 'solution',
+		localName: 'solution',
+		localNamePlural: 'solutions',
+		verboseName: 'Solution',
+		verboseNamePlural: 'Solutions',
+		foreignKeyFields: [
+			{ field: 'provider_entity', urlModel: 'entities' },
+			{ field: 'recipient_entity', urlModel: 'entities' }
+		]
+	},
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

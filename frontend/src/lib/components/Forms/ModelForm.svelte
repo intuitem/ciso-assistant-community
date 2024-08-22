@@ -836,6 +836,33 @@
 		<Score {form} label={m.dependency()} field="dependency" always_enabled={true} max_score={5} />
 		<Score {form} label={m.maturity()} field="maturity" always_enabled={true} max_score={5} />
 		<Score {form} label={m.trust()} field="trust" always_enabled={true} max_score={5} />
+	{:else if URLModel === 'solutions'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['provider_entity'] })}
+			field="provider_entity"
+			cacheLock={cacheLocks['provider_entity']}
+			bind:cachedValue={formDataCache['provider_entity']}
+			label={m.providerEntity()}
+			hide={initialData.provider_entity}
+		/>
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['recipient_entity'] })}
+			field="recipient_entity"
+			cacheLock={cacheLocks['recipient_entity']}
+			bind:cachedValue={formDataCache['recipient_entity']}
+			label={m.recipientEntity()}
+			hide={initialData.recipient_entity}
+		/>
+		<TextField
+			{form}
+			field="ref_id"
+			label={m.ref()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
 	{:else if URLModel === 'frameworks'}
 		<TextField
 			{form}

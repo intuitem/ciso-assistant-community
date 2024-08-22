@@ -674,5 +674,10 @@
 	"criticality": "Criticality",
 	"penetration": "Penetration",
 	"dependency": "Dependency",
-	"trust": "Trust"
+	"trust": "Trust",
+	"solutions": "Solutions",
+	"solution": "Solution",
+	"addSolution": "Add solution",
+	"providerEntity": "Provider entity",
+	"recipientEntity": "Recipient entity"
 }
