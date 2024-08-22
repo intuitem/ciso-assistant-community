@@ -682,5 +682,10 @@
 	"recipientEntity": "Recipient entity",
 	"product": "Product",
 	"products": "Products",
-	"addProduct": "Add product"
+	"addProduct": "Add product",
+	"representatives": "Representatives",
+	"representative": "Representative",
+	"addRepresentative": "Add representative",
+	"phone": "Phone",
+	"role": "Role"
 }

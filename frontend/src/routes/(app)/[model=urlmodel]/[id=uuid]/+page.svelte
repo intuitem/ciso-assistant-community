@@ -201,7 +201,7 @@
 								? key.replace('_', '-') + '-field-value'
 								: null}
 						>
-							{#if value !== null && value !== undefined}
+							{#if value !== null && value !== undefined && value !== ''}
 								{#if key === 'library'}
 									{@const itemHref = `/libraries/${value.urn}`}
 									<a href={itemHref} class="anchor">{value.name}</a>
