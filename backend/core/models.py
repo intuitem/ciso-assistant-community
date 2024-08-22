@@ -1688,6 +1688,7 @@ class RiskScenario(NameDescriptionMixin):
         ("Confidentiality", _("Confidentiality")),
         ("Integrity", _("Integrity")),
         ("Availability", _("Availability")),
+        ("Authenticity", _("Authenticity"))
     ]
 
     DEFAULT_SOK_OPTIONS = {
