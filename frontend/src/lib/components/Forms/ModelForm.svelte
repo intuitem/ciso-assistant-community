@@ -863,6 +863,16 @@
 			bind:cachedValue={formDataCache['ref_id']}
 		/>
 		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
+	{:else if URLModel === 'products'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['solution'] })}
+			field="solution"
+			cacheLock={cacheLocks['solution']}
+			bind:cachedValue={formDataCache['solution']}
+			label={m.solution()}
+			hide={initialData.solution}
+		/>
 	{:else if URLModel === 'frameworks'}
 		<TextField
 			{form}
