@@ -663,5 +663,6 @@
 	"size": "Size",
 	"favicon": "Favicon",
 	"logo": "Logo",
-	"clientSettings": "Client settings"
+	"clientSettings": "Client settings",
+	"invalidFileType": "Invalid file type"
 }

@@ -1630,6 +1630,17 @@ files = [
 dev = ["coverage[toml]", "coveralls (>=3.3,<4.0)", "ruff", "twine"]
 
 [[package]]
+name = "python-magic"
+version = "0.4.27"
+description = "File type identification using libmagic"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "python-magic-0.4.27.tar.gz", hash = "sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b"},
+    {file = "python_magic-0.4.27-py2.py3-none-any.whl", hash = "sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3"},
+]
+
+[[package]]
 name = "python3-saml"
 version = "1.16.0"
 description = "Saml Python Toolkit. Add SAML support to your Python software using this library"
@@ -2195,4 +2206,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "06e4089dd9b5f0f36e3f1947f69aa11fcb3dac8a26416dc14ba264fa93b00f4e"
+content-hash = "3a6fc14dd1d950f80d8d5b5040fc03b796c4a881890b15f98d197118632bd831"

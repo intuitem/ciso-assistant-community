@@ -1,4 +1,5 @@
 import mimetypes
+import magic
 
 import structlog
 from core.views import BaseModelViewSet
@@ -86,6 +87,20 @@ class ClientSettingsViewSet(BaseModelViewSet):
 
         try:
             settings = ClientSettings.objects.get(id=pk)
+            file = request.FILES["file"]
+            content_type = magic.Magic(mime=True).from_buffer(file.read())
+
+            if content_type not in [
+                "image/png",
+                "image/jpeg",
+                "image/webp",
+                "image/x-icon",
+            ]:
+                return Response(
+                    {field_name: "invalidFileType"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             setattr(settings, field_name, request.FILES["file"])
             settings.save()
             return Response(status=status.HTTP_200_OK)

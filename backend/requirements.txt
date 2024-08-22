@@ -22,3 +22,4 @@ django-allauth[socialaccount]==0.63.5
 pre-commit==3.7.1
 django-allauth[saml]==0.63.5
 django-allauth==0.63.5
+python-magic==0.4.27

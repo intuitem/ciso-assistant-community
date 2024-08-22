@@ -30,6 +30,7 @@
 			helpText={data.settings.logo
 				? `${m.attachmentWarningText()}: ${data.settings.logo}`
 				: m.attachmentHelpText()}
+			accept="image/*"
 		/>
 		<FileInput
 			{form}
@@ -38,6 +39,7 @@
 			helpText={data.settings.favicon
 				? `${m.attachmentWarningText()}: ${data.settings.favicon}`
 				: m.attachmentHelpText()}
+			accept="image/*"
 		/>
 		<button
 			class="btn variant-filled-primary font-semibold w-full"
