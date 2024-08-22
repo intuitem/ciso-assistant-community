@@ -65,6 +65,8 @@
 	};
 </script>
 
+<svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
+
 <ParaglideJsProvider>
 	<Modal components={modalRegistry} />
 	<Toast />
