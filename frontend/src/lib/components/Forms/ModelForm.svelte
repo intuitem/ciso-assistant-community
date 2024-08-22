@@ -702,13 +702,13 @@
 	{:else if URLModel === 'entities'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['folder'] })}
+			options={getOptions({ objects: model.foreignKeys['owned_folders'] })}
 			field="owned_folders"
 			multiple
-			cacheLock={cacheLocks['folder']}
-			bind:cachedValue={formDataCache['folder']}
-			label={m.ownedDomains()}
-			hide={initialData.folder}
+			cacheLock={cacheLocks['owned_folders']}
+			bind:cachedValue={formDataCache['owned_folders']}
+			label={m.ownedFolders()}
+			hide={initialData.owned_folders}
 		/>
 		<TextArea
 			{form}
