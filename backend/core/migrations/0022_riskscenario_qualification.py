@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0021_alter_framework_urn_alter_loadedlibrary_urn_and_more'),
+        ("core", "0021_alter_framework_urn_alter_loadedlibrary_urn_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='riskscenario',
-            name='qualification',
-            field=models.JSONField(default=list, verbose_name='Qualification'),
+            model_name="riskscenario",
+            name="qualification",
+            field=models.JSONField(default=list, verbose_name="Qualification"),
         ),
     ]
