@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales';
 
 	export let value: string;
@@ -47,7 +48,8 @@
 {#if !hide}
 	<div>
 		<label class="text-sm font-semibold" for={field}
-			>{m[label]()} <span class="text-xs font-normal">({selectOptions.length})</span></label
+			>{safeTranslate(label)}
+			<span class="text-xs font-normal">({selectOptions.length})</span></label
 		>
 		<div class="control" data-testid="filter-input-{field.replaceAll('_', '-')}">
 			<MultiSelect
@@ -57,11 +59,7 @@
 				{...$$restProps}
 				let:option
 			>
-				{#if translateOptions && Object.hasOwn(m, option.label)}
-					{m[toCamelCase(option.label)]()}
-				{:else}
-					{option.label}
-				{/if}
+				{safeTranslate(toCamelCase(option.label))}
 			</MultiSelect>
 		</div>
 		{#if helpText}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 
@@ -13,8 +14,8 @@
 	export let isScored: boolean;
 	export let max_score: number;
 
-	const leadResult = Object.hasOwn(m, resultI18n) ? m[resultI18n]() : (m.notAssessed() ?? '');
-	const lead = Object.hasOwn(m, statusI18n) ? m[statusI18n]() : (m.notAssessed() ?? '');
+	const leadResult = safeTranslate(resultI18n);
+	const lead = safeTranslate(statusI18n);
 
 	$: classesText = resultColor == '#000000' ? 'text-white' : '';
 </script>

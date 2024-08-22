@@ -6,8 +6,7 @@
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import { toCamelCase } from '$lib/utils/locales';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let ref_id: string;
 	export let name: string;
@@ -148,7 +147,7 @@
 								style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
 							>
 								{resultCounts[status[0]]}
-								{m[toCamelCase(status[0])]()}
+								{safeTranslate(toCamelCase(status[0]))}
 							</span>
 						{/if}
 					{/each}
