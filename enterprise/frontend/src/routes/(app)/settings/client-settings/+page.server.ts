@@ -39,15 +39,15 @@ export const actions: Actions = {
 
     const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/`;
 
-    const fileFields = Object.fromEntries(
-      Object.entries(form.data).filter(([, value]) => value instanceof File),
+    const fileFields: Record<string, File> = Object.fromEntries(
+      Object.entries(form.data).filter(([key, _]) =>
+        ["logo", "favicon"].includes(key),
+      ),
     );
 
     Object.keys(fileFields).forEach((key) => {
-      form.data[key] = undefined;
+      delete form.data[key];
     });
-
-    console.log("filefields", fileFields);
 
     const requestInitOptions: RequestInit = {
       method: "PATCH",
@@ -75,45 +75,41 @@ export const actions: Actions = {
 
     const createdObject = await res.json();
 
-    if (fileFields) {
-      for (const [field, file] of Object.entries(fileFields)) {
-        if (file.size <= 0) {
-          continue;
+    for (const [field, file] of Object.entries(fileFields)) {
+      if (!file) continue;
+      if (file.size <= 0) continue;
+      const fileUploadEndpoint = `${BASE_API_URL}/client-settings/${createdObject.id}/${field}/upload/`;
+      const fileUploadRequestInitOptions: RequestInit = {
+        headers: {
+          "Content-Disposition": `attachment; filename=${encodeURIComponent(file.name)}`,
+        },
+        method: "POST",
+        body: file,
+      };
+      const fileUploadRes = await event.fetch(
+        fileUploadEndpoint,
+        fileUploadRequestInitOptions,
+      );
+      if (!fileUploadRes.ok) {
+        const response = await fileUploadRes.json();
+        console.error(response);
+        if (response.non_field_errors) {
+          setError(form, "non_field_errors", response.non_field_errors);
         }
-        const fileUploadEndpoint = `${BASE_API_URL}/client-settings/${createdObject.id}/${field}/upload/`;
-        const fileUploadRequestInitOptions: RequestInit = {
-          headers: {
-            "Content-Disposition": `attachment; filename=${encodeURIComponent(file.name)}`,
-          },
-          method: "POST",
-          body: file,
-        };
-        const fileUploadRes = await event.fetch(
-          fileUploadEndpoint,
-          fileUploadRequestInitOptions,
-        );
-        if (!fileUploadRes.ok) {
-          const response = await fileUploadRes.json();
-          console.error(response);
-          if (response.non_field_errors) {
-            setError(form, "non_field_errors", response.non_field_errors);
-          }
-          return fail(400, { form: form });
-        }
+        return fail(400, { form: form });
       }
     }
 
-    // const modelVerboseName: string = "clientSettings"
-    //
-    // setFlash(
-    //   {
-    //     type: "success",
-    //     message: m.successfullyUpdatedObject({
-    //       object:
-    //         m[toCamelCase(modelVerboseName.toLowerCase())]().toLowerCase(),
-    //     }),
-    //   },
-    //   event,
-    // );
+    const modelVerboseName: string = "clientSettings";
+
+    return setFlash(
+      {
+        type: "success",
+        message: m.successfullyUpdatedObject({
+          object: m[modelVerboseName]().toLowerCase(),
+        }),
+      },
+      event,
+    );
   },
 };
