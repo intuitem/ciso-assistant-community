@@ -1,0 +1,739 @@
+urn: urn:protocolpaladin:risk:library:anssi-recommandations-securite-architecture-systeme-journalisation
+locale: fr
+ref_id: ANSSI-REC-JOURNALISATION
+name: "Recommandations de s\xE9curit\xE9 pour l'architecture d'un syst\xE8me de journalisation"
+description: "Cette note technique d\xE9taille les pr\xE9requis n\xE9cessaires \xE0\
+  \ la mise en \u0153uvre d\u2019un syst\xE8me de journalisation efficace et s\xE9\
+  curis\xE9 et pr\xE9sente les bonnes pratiques permettant de b\xE2tir une architecture\
+  \ de gestion de journaux p\xE9renne, quelle que soit la nature du syst\xE8me d\u2019\
+  information (SI bureautique, SI industriel, SI classifi\xE9...).\nhttps://cyber.gouv.fr/sites/default/files/2022/01/anssi-guide-recommandations_securite_architecture_systeme_journalisation.pdf"
+copyright: Licence ouverte / Open Licence v2.0 (Etalab)
+version: 1
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-recommandations-securite-architecture-systeme-journalisation
+    ref_id: ANSSI-REC-JOURNALISATION
+    name: "Recommandations de s\xE9curit\xE9 pour l'architecture d'un syst\xE8me de\
+      \ journalisation"
+    description: "Cette note technique d\xE9taille les pr\xE9requis n\xE9cessaires\
+      \ \xE0 la mise en \u0153uvre d\u2019un syst\xE8me de journalisation efficace\
+      \ et s\xE9curis\xE9 et pr\xE9sente les bonnes pratiques permettant de b\xE2\
+      tir une architecture de gestion de journaux p\xE9renne, quelle que soit la nature\
+      \ du syst\xE8me d\u2019information (SI bureautique, SI industriel, SI classifi\xE9\
+      ...)."
+    implementation_groups_definition:
+    - ref_id: R-
+      name: Recommandation alternative de premier niveau
+      description: "Cette recommandation permet de mettre en \u0153uvre une premi\xE8\
+        re alternative, d\u2019un niveau de s\xE9curit\xE9 moindre que la recommandation\
+        \ R. \n"
+    - ref_id: R
+      name: "Recommandation \xE0 l'\xE9tat de l'art"
+      description: "Cette recommandation permet de mettre en \u0153uvre un niveau\
+        \ de s\xE9curit\xE9 \xE0 l\u2019\xE9tat de l\u2019art. \n"
+    - ref_id: R+
+      name: "Recommandation renforc\xE9e compl\xE9mentaire"
+      description: "Cette recommandation compl\xE9mentaire permet de mettre en \u0153\
+        uvre un niveau de s\xE9curit\xE9 renforc\xE9. Elle est destin\xE9e aux entit\xE9\
+        s qui sont matures en s\xE9curit\xE9 des syst\xE8mes d\u2019information. \n"
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Pr\xE9requis \xE0 la mise en place d'un syst\xE8me de journalisation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2
+      ref_id: '2.1'
+      name: Fonction de journalisation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.1
+      ref_id: R1
+      name: "Utiliser des solutions disposant d\u2019une fonction de journalisation\
+        \ native"
+      description: "Il est fortement recommand\xE9 d\u2019utiliser des syst\xE8mes\
+        \ et des applications disposant nativement d\u2019une fonction de journalisation.\
+        \ Cette fonction de s\xE9curit\xE9 doit \xEAtre exig\xE9e par les responsables\
+        \ de SI en phase amont de tout projet informatique (en \xE9tant int\xE9gr\xE9\
+        e aux appels d\u2019offres) et \xEAtre sp\xE9cifi\xE9e au plus t\xF4t par\
+        \ les concepteurs de nouveaux produits informatiques (\xE9diteurs logiciels,\
+        \ industriels...)."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.1
+      ref_id: R2
+      name: "Activer la journalisation sur un nombre important d\u2019\xE9quipements\
+        \ du SI"
+      description: "La journalisation doit \xEAtre activ\xE9e et param\xE9tr\xE9e\
+        \ sur un large nombre d\u2019\xE9quipements du SI, en commen\xE7ant par ceux\
+        \ qui composent les passerelles Internet s\xE9curis\xE9es [11] et par ceux\
+        \ qui supportent les valeurs m\xE9tiers [15] les plus importantes ou qui disposent\
+        \ d\u2019un chemin de contr\xF4le permettant d\u2019acc\xE9der \xE0 ces donn\xE9\
+        es (postes d\u2019administration, serveurs de mise \xE0 jour, serveurs d\u2019\
+        annuaire, hyperviseurs, serveurs de sauvegarde...)."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2
+      ref_id: '2.2'
+      name: "Horodatage des \xE9v\xE8nements"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r3
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.2
+      ref_id: R3
+      name: "Horodater les \xE9v\xE8nements"
+      description: "L\u2019horodatage doit \xEAtre activ\xE9 pour l\u2019ensemble\
+        \ des \xE9v\xE8nements afin de permettre une meilleure exploitation des journaux."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r4
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.2
+      ref_id: R4
+      name: "Homog\xE9n\xE9iser les param\xE8tres d\u2019horodatage"
+      description: "Une attention particuli\xE8re doit \xEAtre accord\xE9e \xE0 l\u2019\
+        homog\xE9n\xE9it\xE9 de la configuration des param\xE8tres d\u2019horodatage\
+        \ (fuseau horaire de r\xE9f\xE9rence, pr\xE9cision de la date...) faute de\
+        \ quoi l\u2019agencement de \xE9v\xE8nements dans les journaux pourrait ne\
+        \ pas refl\xE9ter le d\xE9roulement chronologique r\xE9el des faits ayant\
+        \ conduit \xE0 l\u2019enregistrement de ces \xE9v\xE8nements. Une synchronisation\
+        \ des horloges avec une pr\xE9cision minimale \xE0 la seconde est recommand\xE9\
+        e."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2
+      ref_id: '2.3'
+      name: Synchronisation des horloges
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r5
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.3
+      ref_id: R5
+      name: "Synchroniser les horloges des \xE9quipements sur des sources de temps\
+        \ coh\xE9rentes entre elles"
+      description: "Les horloges des \xE9quipements doivent \xEAtre synchronis\xE9\
+        es sur plusieurs sources de temps internes coh\xE9rentes entre elles. Ces\
+        \ derni\xE8res peuvent elles-m\xEAmes \xEAtre synchronis\xE9es sur plusieurs\
+        \ sources de temps externes fiables, sauf dans le cas particulier de r\xE9\
+        seaux physiquement isol\xE9s. Si NTP est utilis\xE9, il est recommand\xE9\
+        \ d\u2019utiliser la m\xEAme version du protocole sur l\u2019ensemble du SI\
+        \ et d\u2019en assurer le maintien en condition de s\xE9curit\xE9."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2
+      ref_id: '2.4'
+      name: "Configuration des politiques de journalisation sur les \xE9quipements"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r6
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.4
+      ref_id: R6
+      name: "Identifier la granularit\xE9 de journalisation des \xE9quipements"
+      description: "Pour chaque \xE9quipement \xE0 journaliser, il est n\xE9cessaire\
+        \ de s\xE9lectionner les types d\u2019\xE9v\xE8nements devant \xEAtre stock\xE9\
+        s. Cette politique de journalisation prend notamment en compte les capacit\xE9\
+        s de stockage, de collecte et de traitement des \xE9v\xE8nements ainsi que\
+        \ les besoins de s\xE9curit\xE9 de l\u2019\xE9quipement.\L\LAttention \nIl\
+        \ convient d\u2019\xEAtre vigilant quant \xE0 l\u2019utilisation de modes\
+        \ de configuration de la journalisation qui g\xE9n\xE8rent un nombre tr\xE8\
+        s important d\u2019\xE9v\xE8nements (mode debug, mode verbose...). Outre que\
+        \ ces modes ne sont g\xE9n\xE9ralement pas recommand\xE9s en fonctionnement\
+        \ nominal, ils peuvent aussi \xEAtre potentiellement r\xE9v\xE9lateurs d\u2019\
+        informations sensibles (typiquement des secrets). \n"
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r7
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.4
+      ref_id: R7
+      name: Journaliser les empreintes des fichiers potentiellement malveillants
+      description: "Il est recommand\xE9 de configurer les solutions logicielles de\
+        \ s\xE9curit\xE9 d\xE9ploy\xE9es sur le SI pour qu\u2019elles journalisent\
+        \ les empreintes des fichiers potentiellement malveillants."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2
+      ref_id: '2.5'
+      name: "Dimensionnement des \xE9quipements"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.5
+      ref_id: 2.5.1
+      name: Espace disque
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r8
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:2.5.1
+      ref_id: R8
+      name: "Estimer l\u2019espace de stockage d\xE9di\xE9 aux journaux sur les \xE9\
+        quipements"
+      description: "Lors du dimensionnement des \xE9quipements qui g\xE9n\xE8rent\
+        \ des \xE9v\xE8nements, il est recommand\xE9 d\u2019estimer l\u2019espace\
+        \ de stockage local n\xE9cessaire \xE0 la conservation des journaux. Cette\
+        \ estimation de l\u2019espace n\xE9cessaire doit notamment prendre en compte\
+        \ l\u2019\xE9ventualit\xE9 d\u2019une indisponibilit\xE9 temporaire des serveurs\
+        \ de collecte."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "Architecture et conception d'un syst\xE8me de journalisation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      ref_id: '3.1'
+      name: Collecte et centralisation des journaux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r9
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.1
+      ref_id: R9
+      name: Centraliser les journaux
+      description: "Les journaux de l\u2019ensemble des \xE9quipements du SI doivent\
+        \ \xEAtre collect\xE9s puis transf\xE9r\xE9s sur un ou plusieurs serveurs\
+        \ centraux d\xE9di\xE9s."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r9-
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.1
+      ref_id: R9-
+      name: "Exporter les journaux vers un autre \xE9quipement"
+      description: "\xC0 d\xE9faut de mettre en \u0153uvre la centralisation des journaux,\
+        \ il est recommand\xE9 d\u2019exporter les journaux g\xE9n\xE9r\xE9s par un\
+        \ \xE9quipement vers un autre \xE9quipement."
+      implementation_groups:
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r10
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.1
+      ref_id: R10
+      name: "Construire un service r\xE9silient de collecte des journaux"
+      description: "Si le parc d\u2019\xE9quipements qui g\xE9n\xE8re des journaux\
+        \ est important, le syst\xE8me de journalisation doit \xEAtre redond\xE9 afin\
+        \ d\u2019accro\xEEtre la disponibilit\xE9 du service de collecte de journaux."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r11
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.1
+      ref_id: R11
+      name: "Hi\xE9rarchiser les serveurs constituant le syst\xE8me de journalisation"
+      description: "Si la taille ou la typologie du SI le n\xE9cessite, une approche\
+        \ hi\xE9rarchique pour l\u2019organisation des serveurs de collecte, associant\
+        \ serveurs de collecte interm\xE9diaires et centraux, doit \xEAtre retenue."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      ref_id: '3.2'
+      name: "Supervision de la cha\xEEne de collecte des \xE9v\xE8nements de s\xE9\
+        curit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r12
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.2
+      ref_id: R12
+      name: "Contr\xF4ler r\xE9guli\xE8rement la couverture de la cha\xEEne de collecte\
+        \ des \xE9v\xE8nements"
+      description: "Il est recommand\xE9 de v\xE9rifier r\xE9guli\xE8rement que tous\
+        \ les syst\xE8mes du SI sont bien journalis\xE9s (sauf exceptions d\xFBment\
+        \ identifi\xE9es) et transf\xE8rent leurs \xE9v\xE8nements \xE0 des serveurs\
+        \ de collecte des journaux. Le bon fonctionnement de ces serveurs de collecte\
+        \ (interm\xE9diaires et centraux) doit \xE9galement \xEAtre v\xE9rifi\xE9\
+        \ en continu (supervision op\xE9rationnelle et supervision de s\xE9curit\xE9\
+        )."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      ref_id: '3.3'
+      name: "Protection des donn\xE9es \xE9chang\xE9es"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.1
+      name: "Pr\xE9traitement des journaux"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r13
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.1
+      ref_id: R13
+      name: Conserver les journaux dans leur format natif avant leur transfert
+      description: "Il est recommand\xE9 de ne pas effectuer de traitement sur les\
+        \ journaux avant leur transfert vers les serveurs centraux. \n\LAttention\
+        \ \nUne attention particuli\xE8re doit \xEAtre accord\xE9e au sous-syst\xE8\
+        me de journalisation natif d\u2019un \xE9quipement quand ce sous-syst\xE8\
+        me ne stocke pas, dans un \xE9v\xE8nement, un intitul\xE9 textuel explicite\
+        \ mais un code qui sera utilis\xE9, \xE0 la r\xE9ception, pour reconstituer\
+        \ un contenu signifiant pour l\u2019administrateur. Dans ce cas, il convient\
+        \ de veiller \xE0 ce que les serveurs de journalisation centraux auront la\
+        \ capacit\xE9 \xE0 recouvrer l\u2019information pertinente par une analyse\
+        \ de ces codes ou, en alternative, de remplacer ce sous-syst\xE8me de journalisation\
+        \ natif par un sous-syst\xE8me tiers qui ne met pas en \u0153uvre cette couche\
+        \ d\u2019abstraction."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.2
+      name: "Transfert en temps diff\xE9r\xE9 ou en \xAB temps r\xE9el \xBB"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r14
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.2
+      ref_id: R14
+      name: "Privil\xE9gier un transfert des journaux en \xAB temps r\xE9el \xBB"
+      description: "Chaque fois que le contexte le permet, le transfert en \xAB temps\
+        \ r\xE9el \xBB des journaux vers les serveurs de collecte doit \xEAtre privil\xE9\
+        gi\xE9."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r14-
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.2
+      ref_id: R14-
+      name: "Adopter un transfert des journaux en temps diff\xE9r\xE9"
+      description: "\xC0 d\xE9faut de pouvoir transf\xE9rer les journaux en \xAB temps\
+        \ r\xE9el \xBB, il est recommand\xE9 d\u2019automatiser leur transfert vers\
+        \ les serveurs de collecte au plus tard quelques heures apr\xE8s leur g\xE9\
+        n\xE9ration."
+      implementation_groups:
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.3
+      name: Transfert en mode pull ou en mode push
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r15
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.3
+      ref_id: R15
+      name: "Faire une analyse de risque pour d\xE9terminer le mode de transfert des\
+        \ journaux"
+      description: "Le choix du mode de transfert des journaux (mode pull ou mode\
+        \ push) doit \xEAtre d\xE9termin\xE9 au cas par cas apr\xE8s une analyse de\
+        \ risque prenant en comptes le niveau de sensibilit\xE9 du serveur collect\xE9\
+        \ et du collecteur, ainsi que la surface d\u2019attaque induite par la solution\
+        \ technique retenue pour ce transfert."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.4
+      name: Fiabilisation du transfert des journaux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r16
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.4
+      ref_id: R16
+      name: Utiliser des protocoles fiables pour le transfert des journaux
+      description: "Il est recommand\xE9 d\u2019utiliser des protocoles d\u2019envoi\
+        \ de journaux reposant sur TCP pour fiabiliser le transfert de donn\xE9es\
+        \ entre les machines \xE9mettrices et les serveurs. \nCependant, l\u2019usage\
+        \ du protocole TCP ne suffit pas \xE0 lui seul \xE0 garantir l\u2019absence\
+        \ de perte de donn\xE9es. D\u2019autres m\xE9canismes pr\xE9sents au niveau\
+        \ applicatif permettent d\u2019am\xE9liorer encore la fiabilit\xE9 du transfert\
+        \ en ajoutant des fonctionnalit\xE9s de cache et d\u2019acquittement plus\
+        \ efficaces."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.5
+      name: "S\xE9curisation du transfert des journaux"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r17
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.5
+      ref_id: R17
+      name: "Utiliser des protocoles s\xE9curis\xE9s pour le transfert des journaux"
+      description: "Il est recommand\xE9 d\u2019assurer la confidentialit\xE9 et l\u2019\
+        int\xE9grit\xE9 des journaux transf\xE9r\xE9s, ainsi que l\u2019authentification\
+        \ des serveurs de collecte, \xE0 l\u2019aide de protocoles qui s\u2019appuient\
+        \ sur des m\xE9canismes cryptographiques robustes, en particulier lorsque\
+        \ les donn\xE9es transitent sur des r\xE9seaux non ma\xEEtris\xE9s. \n\LAttention\
+        \ \nSi les protocoles s\xE9curis\xE9s mettent en \u0153uvre des certificats\
+        \ num\xE9riques, une attention particuli\xE8re doit \xEAtre accord\xE9e \xE0\
+        \ la gestion de leur cycle de vie (expiration, r\xE9vocation ...), pour ne\
+        \ pas risquer de porter atteinte \xE0 la disponibilit\xE9 du service de journalisation."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.6
+      name: Bande passante
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r18
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.6
+      ref_id: R18
+      name: "Ma\xEEtriser le flux r\xE9seau consomm\xE9 par les transferts de journaux"
+      description: "Il est recommand\xE9 de limiter la consommation de bande passante\
+        \ des flux r\xE9seau utilis\xE9e pour transf\xE9rer les journaux d\u2019\xE9\
+        v\xE8nements. Si la limitation de bande passante ou la priorisation des flux\
+        \ n\u2019est pas possible, il est recommand\xE9 de superviser ces flux."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3
+      ref_id: 3.3.7
+      name: "S\xE9curisation des serveurs de collecte"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r19
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.7
+      ref_id: R19
+      name: "Durcir et maintenir \xE0 jour les serveurs de collecte"
+      description: "Les serveurs de collecte doivent \xEAtre durcis et une attention\
+        \ particuli\xE8re doit \xEAtre accord\xE9e \xE0 leur maintien en condition\
+        \ de s\xE9curit\xE9."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r20
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.7
+      ref_id: R20
+      name: "Cloisonner les serveurs de collecte au sein d\u2019un SI d\u2019administration"
+      description: "Lorsque le besoin de s\xE9curit\xE9 pour le traitement des journaux\
+        \ est important, celui-ci doit se faire dans une zone d\xE9di\xE9e du SI d\u2019\
+        administration; les serveurs de collecte interm\xE9diaires et centraux doivent\
+        \ \xEAtre h\xE9berg\xE9s sur ce SI d\u2019administration."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r20-
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.3.7
+      ref_id: R20-
+      name: "Cloisonner les serveurs de collecte dans une zone d\xE9di\xE9e"
+      description: "S\u2019il n\u2019existe pas de SI d\u2019administration dans l\u2019\
+        architecture pour accueillir les serveurs de collecte interm\xE9diaires et\
+        \ centraux, ils doivent \xEAtre plac\xE9s dans une zone interne d\xE9di\xE9\
+        e, non expos\xE9e directement \xE0 des r\xE9seaux qui ne sont pas de confiance\
+        \ (p. ex. Internet)."
+      implementation_groups:
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      ref_id: '3.4'
+      name: Stockage
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      ref_id: 3.4.1
+      name: "Partition d\xE9di\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r21
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.1
+      ref_id: R21
+      name: "D\xE9dier une partition disque au stockage des journaux"
+      description: "Une partition disque doit \xEAtre d\xE9di\xE9e au stockage des\
+        \ journaux d\u2019\xE9v\xE8nements sur les \xE9quipements qui les g\xE9n\xE8\
+        rent ou qui les collectent. Cette recommandation n\u2019est r\xE9ellement\
+        \ pertinente que dans le cas o\xF9 les fichiers de journalisation n\u2019\
+        ont pas des tailles maximales fix\xE9es. \n\LAttention \nDes journaux pourraient\
+        \ \xEAtre perdus si la partition d\xE9di\xE9e venait \xE0 \xEAtre satur\xE9\
+        e \xE0 son tour, ou, dans le cas o\xF9 les fichiers de journalisation ont\
+        \ une taille maximale fix\xE9e, si ces fichiers venaient \xE0 \xEAtre satur\xE9\
+        s d\u2019\xE9v\xE8nements. Pour ces raisons, l\u2019acc\xE8s en \xE9criture\
+        \ \xE0 la partition d\xE9di\xE9e doit \xEAtre r\xE9serv\xE9 aux seuls processus\
+        \ d\xFBment autoris\xE9s par l\u2019administrateur de l\u2019\xE9quipement\
+        \ et une politique ad\xE9quate de rotation et de supervision des journaux\
+        \ doit \xEAtre mise en \u0153uvre en compl\xE9ment de cette mesure (se reporter\
+        \ aux sections 3.4.4 et 3.4.2)."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      ref_id: 3.4.2
+      name: Supervision de l'espace disque
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r22
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.2
+      ref_id: R22
+      name: "Superviser l\u2019espace disque de stockage des journaux"
+      description: "L\u2019espace disque des \xE9quipements qui g\xE9n\xE8rent et\
+        \ stockent les journaux doit \xEAtre supervis\xE9."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      ref_id: 3.4.3
+      name: "Arborescence de fichiers ou base de donn\xE9es index\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r23
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.3
+      ref_id: R23
+      name: "Classer les journaux suivant leur th\xE9matique"
+      description: "Il est recommand\xE9 de stocker les journaux d\u2019\xE9v\xE8\
+        nements dans une arborescence de r\xE9pertoires class\xE9s par th\xE9matiques."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r23+
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.3
+      ref_id: R23+
+      name: "Privil\xE9gier le stockage des journaux dans une base de donn\xE9es index\xE9\
+        e"
+      description: "Quand cela est possible, il est recommand\xE9 de privil\xE9gier\
+        \ des solutions permettant le stockage des journaux dans une base de donn\xE9\
+        es index\xE9e et la conservation d\u2019une copie des journaux non transform\xE9\
+        s."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      ref_id: 3.4.4
+      name: Rotation des journaux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r24
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.4
+      ref_id: R24
+      name: "D\xE9finir et appliquer une politique de rotation des journaux"
+      description: "Une politique de rotation des journaux d\u2019\xE9v\xE8nements\
+        \ doit \xEAtre formalis\xE9e et mise en \u0153uvre sur l\u2019ensemble des\
+        \ \xE9quipements du syst\xE8me de journalisation."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      ref_id: 3.4.5
+      name: "Dur\xE9e de r\xE9tention des journaux"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r25
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.5
+      ref_id: R25
+      name: "Configurer des dur\xE9es de r\xE9tention des journaux conformes \xE0\
+        \ la r\xE9glementation"
+      description: "La dur\xE9e de conservation des fichiers de journaux \xE9tant\
+        \ soumise \xE0 des exigences r\xE9glementaires, il convient d\u2019en prendre\
+        \ connaissance pour d\xE9finir les moyens techniques n\xE9cessaire \xE0 la\
+        \ suppression des journaux. Dans la mesure du possible, il est recommand\xE9\
+        \ d\u2019automatiser cette suppression."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4
+      ref_id: 3.4.6
+      name: Protection des journaux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r26
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.6
+      ref_id: R26
+      name: "Restreindre au strict besoin op\xE9rationnel les droits d\u2019acc\xE8\
+        s en \xE9criture aux journaux"
+      description: "L\u2019acc\xE8s \xE0 chaque journal doit \xEAtre limit\xE9 en\
+        \ \xE9criture (pour l\u2019\xE9criture de nouveaux \xE9v\xE8nements) aux seuls\
+        \ comptes utilisateurs (compte de personne ou compte de service) dont le r\xF4\
+        le ou la fonction le justifie."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r26+
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.6
+      ref_id: R26+
+      name: "Restreindre au strict besoin op\xE9rationnel les droits de suppression\
+        \ des journaux"
+      description: "Si le syst\xE8me d\u2019exploitation ou l\u2019application le\
+        \ permet, il est recommand\xE9 que seuls les comptes utilisateurs d\xE9di\xE9\
+        s \xE0 l\u2019administration privil\xE9gi\xE9e des \xE9quipements disposent\
+        \ des droits de suppression des journaux."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r27
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.4.6
+      ref_id: R27
+      name: "Restreindre au strict besoin op\xE9rationnel les droits d\u2019acc\xE8\
+        s en lecture aux journaux"
+      description: "L\u2019acc\xE8s \xE0 chaque journal doit \xEAtre limit\xE9 en\
+        \ lecture (pour la consultation des \xE9v\xE8nements journalis\xE9s) aux seuls\
+        \ comptes utilisateurs (compte de personne ou compte de service) dont le r\xF4\
+        le ou la fonction le justifie."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      ref_id: '3.5'
+      name: Externalisation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5
+      ref_id: 3.5.1
+      name: Journalisation en cas d'externalisation du SI
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r28
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5.1
+      ref_id: R28
+      name: "\xC9tudier l\u2019alternative d\u2019un ou plusieurs syst\xE8mes de journalisation\
+        \ en cas d\u2019externalisation"
+      description: "Si tout ou partie du SI de l\u2019entit\xE9 est externalis\xE9\
+        , le choix de mettre en \u0153uvre un ou plusieurs syst\xE8mes de journalisation\
+        \ doit \xEAtre \xE9tudi\xE9 suivant des crit\xE8res fonctionnels et de s\xE9\
+        curit\xE9."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r29
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5.1
+      ref_id: R29
+      name: "R\xE9cup\xE9rer les journaux relatifs aux interconnexions en cas d\u2019\
+        externalisation"
+      description: "En cas d\u2019externalisation d\u2019un sous-syt\xE8me du SI de\
+        \ l\u2019entit\xE9 et de la mise en \u0153uvre d\u2019une interconnexion,\
+        \ il est recommand\xE9 de r\xE9cup\xE9rer, de pr\xE9f\xE9rence sur le syst\xE8\
+        me de journalisation interne de l\u2019entit\xE9, tous les journaux li\xE9\
+        s \xE0 cette interconnexion (p. ex. concentrateurs VPN, serveurs de f\xE9\
+        d\xE9ration d\u2019identit\xE9)."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5
+      ref_id: 3.5.2
+      name: "Externalisation du stockage des journaux et de la d\xE9tection des incidents\
+        \ de s\xE9curit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r30
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.5.2
+      ref_id: R30
+      name: "Recourir \xE0 un PDIS en cas d\u2019externalisation du stockage ou de\
+        \ la corr\xE9lation de journaux"
+      description: "En cas d\u2019externalisation du stockage ou de la corr\xE9lation\
+        \ de journaux, il est recommand\xE9 d\u2019avoir recours \xE0 un prestataire\
+        \ de d\xE9tection des incidents de s\xE9curit\xE9 qualifi\xE9 par l\u2019\
+        ANSSI."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3
+      ref_id: '3.6'
+      name: Cas particulier des postes nomades
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:r31
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-securite-architecture-systeme-journalisation:3.6
+      ref_id: R31
+      name: Collecter les journaux des postes en situation de nomadisme
+      description: "Il est recommand\xE9 de maintenir la collecte des journaux des\
+        \ postes en situation de nomadisme gr\xE2ce \xE0 un tunnel VPN."
+      implementation_groups:
+      - R
+      - R+
