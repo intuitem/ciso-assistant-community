@@ -497,7 +497,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Representative',
 		verboseNamePlural: 'Representatives',
 		foreignKeyFields: [{ field: 'entity', urlModel: 'entities' }]
-	},
+	}
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
