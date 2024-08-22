@@ -29,7 +29,7 @@
 			label={m.logo()}
 			helpText={data.settings.logo
 				? `${m.attachmentWarningText()}: ${data.settings.logo}`
-				: m.attachmentHelpText()}
+				: m.logoHelpText()}
 			accept="image/*"
 		/>
 		<FileInput
@@ -38,7 +38,7 @@
 			label={m.favicon()}
 			helpText={data.settings.favicon
 				? `${m.attachmentWarningText()}: ${data.settings.favicon}`
-				: m.attachmentHelpText()}
+				: m.faviconHelpText()}
 			accept="image/*"
 		/>
 		<button

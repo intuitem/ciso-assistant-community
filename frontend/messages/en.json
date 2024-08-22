@@ -664,5 +664,7 @@
 	"favicon": "Favicon",
 	"logo": "Logo",
 	"clientSettings": "Client settings",
-	"invalidFileType": "Invalid file type"
+	"invalidFileType": "Invalid file type",
+	"logoHelpText": "The logo will be displayed in the header of the application. Accepted formats are PNG, JPEG, WEBP, SVG.",
+	"faviconHelpText": "The favicon will be displayed in the browser tab. Accepted formats are ICO, PNG, JPEG, WEBP"
 }
