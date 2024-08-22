@@ -7,6 +7,7 @@
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { toCamelCase } from '$lib/utils/locales';
 
 	export let ref_id: string;
 	export let name: string;

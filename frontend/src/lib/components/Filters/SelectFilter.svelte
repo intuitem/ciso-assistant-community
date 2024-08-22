@@ -59,7 +59,11 @@
 				{...$$restProps}
 				let:option
 			>
-				{safeTranslate(toCamelCase(option.label))}
+				{#if translateOptions}
+					{safeTranslate(toCamelCase(option.label))}
+				{:else}
+					{option.label}
+				{/if}
 			</MultiSelect>
 		</div>
 		{#if helpText}
