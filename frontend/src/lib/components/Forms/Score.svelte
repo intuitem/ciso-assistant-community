@@ -24,9 +24,9 @@
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$value = $value ?? min_score;
-	
+
 	let isScored = formFieldProxy(form, 'is_scored')['value'];
-	
+
 	if (always_enabled) {
 		$isScored = true;
 	}
