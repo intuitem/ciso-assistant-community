@@ -421,5 +421,9 @@ export const listViewFields: ListViewFieldsConfig = {
 	products: {
 		head: ['name', 'description', 'solution'],
 		body: ['name', 'description', 'solution']
+	},
+	representatives: {
+		head: ['email', 'entity', 'role'],
+		body: ['email', 'entity', 'role']
 	}
 };

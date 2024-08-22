@@ -489,7 +489,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Product',
 		verboseNamePlural: 'Products',
 		foreignKeyFields: [{ field: 'solution', urlModel: 'solutions' }]
-	}
+	},
+	representatives: {
+		name: 'representative',
+		localName: 'representative',
+		localNamePlural: 'representatives',
+		verboseName: 'Representative',
+		verboseNamePlural: 'Representatives',
+		foreignKeyFields: [{ field: 'entity', urlModel: 'entities' }]
+	},
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

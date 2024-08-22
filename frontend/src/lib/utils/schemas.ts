@@ -299,6 +299,16 @@ export const productSchema = baseNamedObject({
 	solution: z.string().optional()
 });
 
+export const representativeSchema = z.object({
+	email: z.string().email(),
+	entity: z.string(),
+	first_name: z.string().optional(),
+	last_name: z.string().optional(),
+	phone: z.string().optional(),
+	role: z.string().optional(),
+	description: z.string().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -320,7 +330,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	entities: EntitiesSchema,
 	'entity-assessments': entityAssessmentsSchema,
 	solutions: solutionSchema,
-	products: productSchema
+	products: productSchema,
+	representatives: representativeSchema
 };
 
 export const modelSchema = (model: string) => {
