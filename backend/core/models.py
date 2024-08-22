@@ -1688,7 +1688,7 @@ class RiskScenario(NameDescriptionMixin):
         ("Confidentiality", _("Confidentiality")),
         ("Integrity", _("Integrity")),
         ("Availability", _("Availability")),
-        ("Authenticity", _("Authenticity"))
+        ("Authenticity", _("Authenticity")),
     ]
 
     DEFAULT_SOK_OPTIONS = {
@@ -1798,10 +1798,7 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    qualification = models.JSONField(
-        default=list,
-        verbose_name=_("Qualification")
-    )
+    qualification = models.JSONField(default=list, verbose_name=_("Qualification"))
 
     strength_of_knowledge = models.IntegerField(
         default=-1,
