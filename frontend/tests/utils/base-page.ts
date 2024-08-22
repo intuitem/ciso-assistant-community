@@ -29,8 +29,10 @@ export abstract class BasePage {
 	}
 
 	async hasUrl() {
+		// codacy-disable
 		const regex = `${this.url}((\\?|#).*)?`;
 		await expect(this.page).toHaveURL(new RegExp(regex));
+		// codacy-enable
 	}
 
 	async hasBreadcrumbPath(paths: (string | RegExp)[], fullPath = true, origin = 'Home') {
