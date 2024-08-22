@@ -12,7 +12,8 @@ RUN apk update
 RUN apk add --no-cache bash yaml-cpp
 RUN apk add --no-cache py3-cffi libc-dev libffi-dev gcc python3-dev glib pango cairo
 RUN apk add --no-cache musl musl-utils musl-locales tzdata lang
-RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font libmagic1
+RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font
+RUN apk add --no-cache file-dev gcc
 
 COPY . /code/
 COPY startup.sh /code/
