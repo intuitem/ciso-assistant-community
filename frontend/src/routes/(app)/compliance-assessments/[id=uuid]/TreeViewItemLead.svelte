@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
 	import { displayScoreColor } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
-
-	import * as m from '$paraglide/messages';
 
 	export let statusI18n: string;
 	export let resultI18n: string;
