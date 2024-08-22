@@ -1690,12 +1690,6 @@ class RiskScenario(NameDescriptionMixin):
         ("Availability", _("Availability")),
     ]
 
-    class Status(models.TextChoices):
-        TODO = "to_do", _("To do")
-        IN_PROGRESS = "in_progress", _("In progress")
-        IN_REVIEW = "in_review", _("In review")
-        DONE = "done", _("Done")
-
     DEFAULT_SOK_OPTIONS = {
         -1: {
             "name": _("--"),
