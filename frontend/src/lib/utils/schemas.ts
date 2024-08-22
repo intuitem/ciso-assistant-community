@@ -293,11 +293,11 @@ export const solutionSchema = baseNamedObject({
 	provider_entity: z.string().optional(),
 	recipient_entity: z.string().optional(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional(),
+	criticality: z.number().optional()
 });
 
 export const productSchema = baseNamedObject({
-	solution: z.string().optional(),
+	solution: z.string().optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

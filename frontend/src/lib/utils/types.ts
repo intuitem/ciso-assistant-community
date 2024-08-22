@@ -44,7 +44,7 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
-	'products',
+	'products'
 ] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];

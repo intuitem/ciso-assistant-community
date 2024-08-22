@@ -488,9 +488,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'products',
 		verboseName: 'Product',
 		verboseNamePlural: 'Products',
-		foreignKeyFields: [
-			{ field: 'solution', urlModel: 'solutions' },
-		]
+		foreignKeyFields: [{ field: 'solution', urlModel: 'solutions' }]
 	}
 };
 
