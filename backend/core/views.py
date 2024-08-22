@@ -757,8 +757,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         _choices = {
             i: name
             for i, name in enumerate(
-                x["name"]
-                for x in self.get_object().get_matrix()["probability"]
+                x["name"] for x in self.get_object().get_matrix()["probability"]
             )
         }
         choices = undefined | _choices
