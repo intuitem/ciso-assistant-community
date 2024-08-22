@@ -397,12 +397,12 @@ export const listViewFields: ListViewFieldsConfig = {
 		meta: ['id', 'urn']
 	},
 	libraries: {
-		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locales', 'overview']
+		head: ['provider', 'name', 'description', 'language', 'overview'],
+		body: ['provider', 'name', 'description', 'locales', 'overview']
 	},
 	'stored-libraries': {
-		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
+		head: ['provider', 'name', 'description', 'language', 'overview'],
+		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER_FOR_LIBRARIES,
@@ -411,8 +411,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'loaded-libraries': {
-		head: ['ref', 'name', 'description', 'language', 'overview'],
-		body: ['ref_id', 'name', 'description', 'locales', 'overview'],
+		head: ['provider', 'name', 'description', 'language', 'overview'],
+		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER_FOR_LIBRARIES,

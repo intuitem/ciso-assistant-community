@@ -117,7 +117,7 @@ export const AppliedControlSchema = baseNamedObject({
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable(),
+	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable()
@@ -129,7 +129,7 @@ export const PolicySchema = baseNamedObject({
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable(),
+	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable()
