@@ -660,5 +660,8 @@
 	"back": "Back",
 	"duplicate": "Duplicate",
 	"duplicateRiskAssessment": "Duplicate the risk assessment",
-	"size": "Size"
+	"size": "Size",
+	"favicon": "Favicon",
+	"logo": "Logo",
+	"clientSettings": "Client settings"
 }
