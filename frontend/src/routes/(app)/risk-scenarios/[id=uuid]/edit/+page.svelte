@@ -311,10 +311,10 @@
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<Select
+			<AutocompleteSelect
 				{form}
 				options={data.qualificationChoices}
-				blank={true}
+				multiple={true}
 				field="qualification"
 				label={m.qualification()}
 			/>

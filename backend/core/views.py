@@ -49,7 +49,6 @@ from .serializers import *
 
 User = get_user_model()
 
-
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -737,11 +736,11 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "risk_assessment__project",
         "risk_assessment__project__folder",
         "treatment",
-        "qualification",
         "threats",
         "assets",
         "applied_controls",
     ]
+
 
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
