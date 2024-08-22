@@ -413,5 +413,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			project: PROJECT_FILTER,
 			status: STATUS_FILTER
 		}
+	},
+	solutions: {
+		head: ['name', 'description', 'providerEntity', 'recipientEntity'],
+		body: ['name', 'description', 'provider_entity', 'recipient_entity'],
 	}
 };

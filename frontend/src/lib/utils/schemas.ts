@@ -1,4 +1,5 @@
 // schema for the validation of forms
+import { criticality, provider, solutions } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -288,6 +289,13 @@ export const entityAssessmentsSchema = baseNamedObject({
 	trust: z.number().optional()
 });
 
+export const solutionSchema = baseNamedObject({
+	provider_entity: z.string().optional(),
+	recipient_entity: z.string().optional(),
+	ref_id: z.string().optional(),
+	criticality: z.number().optional(),
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -307,7 +315,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	entities: EntitiesSchema,
-	'entity-assessments': entityAssessmentsSchema
+	'entity-assessments': entityAssessmentsSchema,
+	solutions: solutionSchema
 };
 
 export const modelSchema = (model: string) => {
