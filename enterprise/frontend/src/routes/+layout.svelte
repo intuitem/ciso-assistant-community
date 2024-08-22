@@ -72,7 +72,7 @@
 	}
 
 	let clientSettings: Record<string, any>;
-	let favicon: Attachment | string = '/favicon.ico';
+	let favicon: Attachment | string = '';
 
 	onMount(async () => {
 		clientSettings = await fetch('/settings/client-settings').then((res) => res.json());
