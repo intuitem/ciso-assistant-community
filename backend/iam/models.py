@@ -275,12 +275,10 @@ class UserManager(BaseUserManager):
         """create a normal user following Django convention"""
         logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
         return self._create_user(
             email=email,
             password=password,
-            mailing=True,
+            mailing=(EMAIL_HOST or EMAIL_HOST_RESCUE),
             initial_group=None,
             **extra_fields,
         )
@@ -291,13 +289,10 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        extra_fields.setdefault(
-            "mailing", not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)
-        )
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=True,
+            mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
             intial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             **extra_fields,
         )
