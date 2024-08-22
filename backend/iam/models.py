@@ -293,7 +293,7 @@ class UserManager(BaseUserManager):
             email=email,
             password=password,
             mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
-            intial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             **extra_fields,
         )
         return superuser
