@@ -1412,7 +1412,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 compliance_assessment=instance,
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
-                answer=transform_question_to_answer(requirement.question) if requirement.question else {},
+                answer=transform_question_to_answer(requirement.question)
+                if requirement.question
+                else {},
             )
             if baseline and baseline.framework == instance.framework:
                 baseline_requirement_assessment = RequirementAssessment.objects.get(

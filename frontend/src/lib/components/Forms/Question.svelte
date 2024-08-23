@@ -19,7 +19,7 @@
 </script>
 
 <div>
-    {#if label !== undefined}
+	{#if label !== undefined}
 		{#if $constraints?.required}
 			<label class="text-sm font-semibold" for={field}
 				>{label} <span class="text-red-500">*</span></label
@@ -36,36 +36,38 @@
 		</div>
 	{/if}
 	<div class="control">
-        {#each $value.questions as question}
-        <li class="flex justify-between items-center border rounded-xl p-2">
-            {question.text}
-            {#if question.type === 'multiple_choice'}
-                <RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
-                    {#each question.options as option}
-                        <RadioItem bind:group={question.answer} name="question" value={option}>{option}</RadioItem>
-                    {/each}
-                </RadioGroup>
-            {:else if question.type === 'date'}
-                <input
-                    type="date"
-                    placeholder=""
-                    class="{'input ' + _class} {classesTextField($errors)}"
-                    bind:value={question.answer}
-                    {...$constraints}
-                    {...$$restProps}
-                />
-            {:else}
-                <input
-                    type="text"
-                    placeholder=""
-                    class="{'input ' + _class} {classesTextField($errors)}"
-                    bind:value={question.answer}
-                    {...$constraints}
-                    {...$$restProps}
-                />
-            {/if}
-        </li>
-        {/each}
+		{#each $value.questions as question}
+			<li class="flex justify-between items-center border rounded-xl p-2">
+				{question.text}
+				{#if question.type === 'multiple_choice'}
+					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
+						{#each question.options as option}
+							<RadioItem bind:group={question.answer} name="question" value={option}
+								>{option}</RadioItem
+							>
+						{/each}
+					</RadioGroup>
+				{:else if question.type === 'date'}
+					<input
+						type="date"
+						placeholder=""
+						class="{'input ' + _class} {classesTextField($errors)}"
+						bind:value={question.answer}
+						{...$constraints}
+						{...$$restProps}
+					/>
+				{:else}
+					<input
+						type="text"
+						placeholder=""
+						class="{'input ' + _class} {classesTextField($errors)}"
+						bind:value={question.answer}
+						{...$constraints}
+						{...$$restProps}
+					/>
+				{/if}
+			</li>
+		{/each}
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>

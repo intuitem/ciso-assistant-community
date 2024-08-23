@@ -1023,6 +1023,7 @@ def handle(exc, context):
 
     return drf_exception_handler(exc, context)
 
+
 def transform_question_to_answer(json_data):
     """
     Used during Requirement Assessment creation to create a questionnaire base on
@@ -1034,29 +1035,29 @@ def transform_question_to_answer(json_data):
     Returns:
         json: JSON formatted for the frontend to display a form
     """
-    answers = json_data.get('answers', {})
-    questions = json_data.get('questions', [])
+    answers = json_data.get("answers", {})
+    questions = json_data.get("questions", [])
 
     form_fields = []
 
     for question in questions:
         field = {}
-        field['urn'] = question.get('urn', '')
-        field['text'] = question.get('text', '')
-        
-        answer_type = question.get('answer_type', '')
-        
+        field["urn"] = question.get("urn", "")
+        field["text"] = question.get("text", "")
+
+        answer_type = question.get("answer_type", "")
+
         if answer_type in answers:
-            field['type'] = 'multiple_choice'
-            field['options'] = answers[answer_type]
-        elif answer_type == 'date':
-            field['type'] = 'date'
+            field["type"] = "multiple_choice"
+            field["options"] = answers[answer_type]
+        elif answer_type == "date":
+            field["type"] = "date"
         else:
-            field['type'] = 'text'
-        
-        field['answer'] = ''
-        
+            field["type"] = "text"
+
+        field["answer"] = ""
+
         form_fields.append(field)
-    
-    form_json = {'questions': form_fields}
+
+    form_json = {"questions": form_fields}
     return form_json
