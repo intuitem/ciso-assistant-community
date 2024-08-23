@@ -1163,7 +1163,6 @@ erDiagram
         string      description
         string      ref_id
         int         criticality
-        string[]    products
     }
 
 
@@ -1241,11 +1240,9 @@ Typically, the main entity can use the requirement group selector to tailor the 
 
 #### Solution
 
-A solution represents what en entity provides to one another. A solution can leverage products, but this is not always the case, as a solution can consist in pure service.
+A solution represents what en entity provides to one another.
 
 The criticality of a solution is an integer representing the importance of the solution for the client of the solution in decreasing sensitivity (0: most critical). This can be determined grossly at the beginning, and revised after an entity or risk assessment. This number is used to prioritize entity assessments.
-
-An entity can contain products, that are referenced by a string. This can be e.g. the CPE of the product.
 
 #### Representative
 
@@ -1267,8 +1264,6 @@ There is no link between representatives (modeling of the ecosystem) and users o
 - add the following fields:
   - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
-Note: implementation_group_selector is not retained for MVP.
-
 #### Requirement node 
 
 - Add the following fields:
@@ -1280,8 +1275,6 @@ Note: implementation_group_selector is not retained for MVP.
 - Add a foreign key "contract" to point to a contract
 
 The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
-
-Note: this change in applied control is not retained for MVP.
 
 Note: in the future, we will use the same approach for policies.
 
@@ -1300,3 +1293,11 @@ The format for question and answer json fields will evolve over time. The initia
 ```
 
 The schema variable follows JSON Schema standard (WIP).
+
+### Simplifications for the MVP version
+
+- The main entity is automatically created and owns the global domain. The name is set to "MAIN ENTITY", and can be changed.
+- Other entities own no domain.
+- Solutions are automatically provided to the main entity.
+- The change in applied control is not retained.
+- implementation_group_selector is not retained.
