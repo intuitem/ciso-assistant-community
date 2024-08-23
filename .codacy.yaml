@@ -1,2 +1,2 @@
 exclude_paths:
-  - "frontend/tests"
+  - "frontend/tests/**"
