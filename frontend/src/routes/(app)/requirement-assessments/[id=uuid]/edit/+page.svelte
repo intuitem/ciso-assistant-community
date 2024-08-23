@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
 	import type { PageData } from '../[id=uuid]/edit/$types';
 
@@ -281,7 +282,7 @@
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
 									<span class="badge {classesText} h-fit">
-										{m[mappingInference.sourceRequirementAssessment.coverage]()}
+										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -290,7 +291,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{m[toCamelCase(mappingInference.result)]()}
+										{safeTranslate(toCamelCase(mappingInference.result))}
 									</span>
 								</p>
 								{#if mappingInference.annotation}
