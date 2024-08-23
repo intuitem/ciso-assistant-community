@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -26,7 +27,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m['add' + capitalizeFirstLetter(data.model.localName)]()
+			title: safeTranslate('add' + capitalizeFirstLetter(data.model.localName))
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -36,7 +37,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: m['add' + capitalizeFirstLetter(data.model.localName)]().toLowerCase(),
+				body: safeTranslate('add' + capitalizeFirstLetter(data.model.localName)).toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
@@ -55,7 +56,7 @@
 							data-testid="add-button"
 							on:click={modalCreateForm}
 							><i class="fa-solid fa-plus mr-2" />
-							{m['add' + capitalizeFirstLetter(data.model.localName)]()}
+							{safeTranslate('add' + capitalizeFirstLetter(data.model.localName))}
 						</button>
 					{:else if URLModel === 'risk-matrices'}
 						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
