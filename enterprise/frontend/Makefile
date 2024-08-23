@@ -54,13 +54,11 @@ copy_files:
 
 dev:
 	@if [ -z  "$$(ls -A $(FRONTEND_DIR))" ]; then \
-		echo "Please run make pre-build first."; \
-		exit 1; \
-	else \
-		$(PM) -C ${FRONTEND_DIR} run dev & \
-		$(MAKE) watch & \
-		wait; \
-	fi
+		$(MAKE) pre-build; \
+	fi; \
+	$(PM) -C ${FRONTEND_DIR} run dev & \
+	$(MAKE) watch & \
+	wait;
 
 clean:
 	$(RM) $(ARTIFACTS)
