@@ -15,7 +15,7 @@ FRONTEND_DIR := $(BUILD_DIR)/frontend
 pre-build:
 	@mkdir -p $(BUILD_DIR)
 	@rsync -av --exclude=build/ --exclude=node_modules/  $(COMMUNITY_DIR) $(BUILD_DIR)
-	@rsync -avI $(ENTERPRISE_DIR) $(BUILD_DIR)
+	@rsync -avI --exclude=Makefile --exclude=Dockerfile --exclude=README.md $(ENTERPRISE_DIR) $(BUILD_DIR)
 	@$(PM) install --frozen-lockfile -C $(FRONTEND_DIR)
 
 build-enterprise: pre-build
@@ -28,7 +28,7 @@ CHANGED_FILES =
 
 # The rule to watch the filesystem for changes
 watch:
-	@fswatch --batch-marker='EOF' -xn . ../../frontend | while read file event; do \
+	@fswatch --batch-marker='EOF' -xn ./src ../../frontend | while read file event; do \
 		if [ "$$file" = "EOF" ]; then \
 			$(MAKE) copy_files CHANGED_FILES="$$list"; \
 			list=(); \
