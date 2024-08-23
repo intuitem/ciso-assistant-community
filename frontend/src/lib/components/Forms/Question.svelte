@@ -39,7 +39,7 @@
 		{#each $value.questions as question}
 			<li class="flex justify-between items-center border rounded-xl p-2">
 				{question.text}
-				{#if question.type === 'multiple_choice'}
+				{#if question.type === 'unique_choice'}
 					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
 						{#each question.options as option}
 							<RadioItem bind:group={question.answer} name="question" value={option}

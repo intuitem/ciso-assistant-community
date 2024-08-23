@@ -1045,12 +1045,12 @@ def transform_question_to_answer(json_data):
         field["urn"] = question.get("urn", "")
         field["text"] = question.get("text", "")
 
-        answer_type = question.get("answer_type", "")
+        type = question.get("type", "")
 
-        if answer_type in answers:
-            field["type"] = "multiple_choice"
-            field["options"] = answers[answer_type]
-        elif answer_type == "date":
+        if type == "unique_choice":
+            field["type"] = "unique_choice"
+            field["options"] = answers[question["options"]]
+        elif type == "date":
             field["type"] = "date"
         else:
             field["type"] = "text"
