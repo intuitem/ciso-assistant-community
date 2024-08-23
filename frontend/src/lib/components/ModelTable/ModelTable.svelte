@@ -336,7 +336,7 @@
 								{/each}
 							{/if}
 							{#if component}
-								<svelte:component this={component} meta={row.meta ?? {}} cell={value}/>
+								<svelte:component this={component} meta={meta} cell={value}/>
 							{:else}
                 <span class="font-token whitespace-pre-line break-words">
                 {#if Array.isArray(value)}
