@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toCamelCase } from '$lib/utils/locales';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { onMount } from 'svelte';
@@ -77,11 +77,7 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{#if Object.hasOwn(m, toCamelCase(option.label))}
-						{m[toCamelCase(option.label)]()}
-					{:else}
-						{option.label}
-					{/if}
+					{safeTranslate(toCamelCase(option.label))}
 				</option>
 			{/each}
 		</select>
