@@ -18,6 +18,14 @@ const toArrayPreprocessor = (value: unknown) => {
 	}
 };
 
+// JSON schema
+const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type Literal = z.infer<typeof literalSchema>;
+type Json = Literal | { [key: string]: Json } | Json[];
+const jsonSchema: z.ZodType<Json> = z.lazy(() =>
+  z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
+);
+
 export const loginSchema = z
 	.object({
 		username: z
@@ -159,6 +167,7 @@ export const AssetSchema = baseNamedObject({
 });
 
 export const RequirementAssessmentSchema = z.object({
+	answer: jsonSchema,
 	status: z.string(),
 	result: z.string(),
 	score: z.number().optional().nullable(),

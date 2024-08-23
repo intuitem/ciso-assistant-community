@@ -915,6 +915,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
+    question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -2384,6 +2385,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     mapping_inference = models.JSONField(
         default=dict,
         verbose_name=_("Mapping inference"),
+    )
+    answer = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Answer"),
     )
 
     def __str__(self) -> str:

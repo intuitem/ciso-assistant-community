@@ -687,5 +687,6 @@
 	"representative": "Representative",
 	"addRepresentative": "Add representative",
 	"phone": "Phone",
-	"role": "Role"
+	"role": "Role",
+	"question": "Question"
 }

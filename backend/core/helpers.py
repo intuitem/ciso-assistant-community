@@ -12,6 +12,8 @@ from .utils import camel_case
 
 from typing import List, Dict, Optional
 
+import json
+
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -1020,3 +1022,41 @@ def handle(exc, context):
         exc = DRFValidationError(detail=data)
 
     return drf_exception_handler(exc, context)
+
+def transform_question_to_answer(json_data):
+    """
+    Used during Requirement Assessment creation to create a questionnaire base on
+    the Requirement Node question JSON field
+
+    Args:
+        json_data (json): JSON describing a questionnaire from a Requirement Node
+
+    Returns:
+        json: JSON formatted for the frontend to display a form
+    """
+    answers = json_data.get('answers', {})
+    questions = json_data.get('questions', [])
+
+    form_fields = []
+
+    for question in questions:
+        field = {}
+        field['urn'] = question.get('urn', '')
+        field['text'] = question.get('text', '')
+        
+        answer_type = question.get('answer_type', '')
+        
+        if answer_type in answers:
+            field['type'] = 'multiple_choice'
+            field['options'] = answers[answer_type]
+        elif answer_type == 'date':
+            field['type'] = 'date'
+        else:
+            field['type'] = 'text'
+        
+        field['answer'] = ''
+        
+        form_fields.append(field)
+    
+    form_json = {'questions': form_fields}
+    return form_json

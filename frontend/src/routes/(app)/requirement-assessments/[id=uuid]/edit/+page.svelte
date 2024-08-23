@@ -41,6 +41,7 @@
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import Question from '$lib/components/Forms/Question.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -386,6 +387,11 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
+				<Question
+					{form}
+					field="answer"
+					label={m.question()}
+				/>
 				<Select
 					{form}
 					options={data.model.selectOptions['status']}
