@@ -8,7 +8,6 @@
 	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import SankeyChart from '$lib/components/Chart/SankeyChart.svelte';
-	import WaterfallChart from '$lib/components/Chart/WaterfallChart.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -123,22 +122,20 @@
 </script>
 
 <TabGroup>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(0)} name="summary" value={0}
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
 		>{m.summary()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(0)} name="governance" value={1}
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(1)} name="governance" value={1}
 		>{m.governance()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(1)} name="risk" value={2}
-		>{m.risk()}</Tab
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(2)} name="risk" value={2}>{m.risk()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(2)} name="compliance" value={3}
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(3)} name="compliance" value={3}
 		>{m.compliance()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(3)} name="composer" value={4}
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(4)} name="composer" value={4}
 		>{m.composer()}</Tab
 	>
-	{@debug data}
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
@@ -206,7 +203,7 @@
 					<!---->
 					<div class=" col-span-2 row-span-2 h-80">
 						<HalfDonutChart
-							name="current"
+							name="current_h"
 							title="Current risks"
 							values={data.risks_count_per_level.current}
 							colors={data.risks_count_per_level.current.map((object) => object.color)}
@@ -226,7 +223,7 @@
 					/>
 					<div class=" col-span-2 row-span-2">
 						<HalfDonutChart
-							name="residual"
+							name="residual_h"
 							title="Residual risks"
 							values={data.risks_count_per_level.residual}
 							colors={data.risks_count_per_level.residual.map((object) => object.color)}

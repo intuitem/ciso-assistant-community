@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
 	// export let name: string;
 	export let s_label = '';
@@ -10,16 +8,16 @@
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
-	export let name = '';
+	export let name: string;
 
-	export let values: any[]; // Set the types for these variables later on
-	export let colors: string[] = [];
-
-	for (const index in values) {
-		if (values[index].localName) {
-			values[index].name = localItems()[values[index].localName];
-		}
+	interface riskChartData {
+		name: string;
+		value: number;
+		color: string;
 	}
+
+	export let values: riskChartData[]; // Set the types for these variables later on
+	export let colors: string[] = [];
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {

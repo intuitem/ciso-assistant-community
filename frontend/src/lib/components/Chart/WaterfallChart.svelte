@@ -1,11 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
-	import { show } from '$paraglide/messages';
-
-	// export let name: string;
-	export let s_label = '';
 
 	export let width = 'w-auto';
 	export let height = 'h-full';
@@ -13,14 +7,12 @@
 	export let title = '';
 	export let name = '';
 
-	export let values: any[]; // Set the types for these variables later on
-	export let labels: any[];
-
-	for (const index in values) {
-		if (values[index].localName) {
-			values[index].name = localItems()[values[index].localName];
-		}
+	interface waterfallData {
+		placeholder: number[];
+		progress: number[];
 	}
+
+	export let values: waterfallData; // Set the types for these variables later on
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {
