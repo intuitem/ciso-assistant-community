@@ -617,5 +617,13 @@
 	"back": "Opbrengst",
 	"duplicate": "Duplicaat",
 	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling",
-	"size": "Grootte"
+	"size": "Grootte",
+	"financial": "Financieel",
+	"legal": "Juridisch",
+	"reputation": "Reputatie",
+	"operational": "Operationeel",
+	"confidentiality": "Vertrouwelijkheid",
+	"integrity": "Integriteit",
+	"availability": "Beschikbaarheid",
+	"authenticity": "Authenticiteit"
 }

@@ -617,5 +617,13 @@
 	"back": "Ritorno",
 	"duplicate": "Duplicare",
 	"duplicateRiskAssessment": "Duplicare la valutazione del rischio",
-	"size": "Dimensione"
+	"size": "Dimensione",
+	"financial": "Finanziario",
+	"legal": "Legale",
+	"reputation": "Reputazione",
+	"operational": "Operativo",
+	"confidentiality": "Riservatezza",
+	"integrity": "Integrità",
+	"availability": "Disponibilità",
+	"authenticity": "Autenticità"
 }
