@@ -57,7 +57,6 @@ Here is an overview of CISO Assistant features and capabilities:
 
 ![overview](features.png)
 
-
 CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
@@ -87,11 +86,11 @@ and run the starter script
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images.
 
 ## End-user Documentation
 
-Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant.
+Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
 ## Supported frameworks 🐙
 
@@ -158,13 +157,12 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
 4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
+6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
 7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 8. New Zealand Information Security Manual (NZISM) 🇳🇿
-<br/>
+   <br/>
 
-> [!NOTE]
-> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
@@ -364,7 +362,7 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-9.  Run development server.
+9. Run development server.
 
 ```sh
 python manage.py runserver
@@ -398,7 +396,7 @@ npm install
 npm run dev
 ```
 
-4. Reach the frontend on http://localhost:5173
+4. Reach the frontend on <http://localhost:5173>
 
 > [!NOTE]
 > Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
@@ -407,13 +405,13 @@ npm run dev
 
 All variables in the frontend have handy default values.
 
-If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is http://localhost:8000/api.
+If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
 
-When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. http://localhost:3000).
+When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
 
 ### Managing migrations
 
-The migrations are tracked by version control, https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control
+The migrations are tracked by version control, <https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control>
 
 For the first version of the product, it is recommended to start from a clean migration.
 
@@ -449,7 +447,7 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
 
 To interact with it:
 
@@ -496,7 +494,7 @@ Set DJANGO_DEBUG=False for security reason.
 
 ## Security
 
-Great care has been taken to follow security best practices. Please report any issue to security@intuitem.com.
+Great care has been taken to follow security best practices. Please report any issue to <security@intuitem.com>.
 
 ## License
 
@@ -506,6 +504,6 @@ All the files within the top-level "enterprise" directory are released under the
 
 All the files outside the top-level "enterprise" directory are released under the [AGPLv3](https://choosealicense.com/licenses/agpl-3.0/).
 
-See [LICENSE.txt](./LICENSE.txt) for details.
+See [LICENSE.txt](./LICENSE.txt) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
 
 Unless otherwise noted, all files are © intuitem.
