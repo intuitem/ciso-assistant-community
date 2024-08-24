@@ -618,5 +618,13 @@
 	"sso": "SSO",
 	"isSso": "هل هو SSO",
 	"size": "الحجم",
-	"requirementMappingSets": "ربط الأطر"
+	"requirementMappingSets": "ربط الأطر",
+	"financial": "المالي",
+	"legal": "القانوني",
+	"reputation": "السمعة",
+	"operational": "التشغيلي",
+	"confidentiality": "السرية",
+	"integrity": "النزاهة",
+	"availability": "التوفر",
+	"authenticity": "الأصالة"
 }

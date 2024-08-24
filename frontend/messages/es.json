@@ -617,5 +617,13 @@
 	"back": "Devolver",
 	"duplicate": "Duplicar",
 	"duplicateRiskAssessment": "Duplicar la evaluación de riesgo",
-	"size": "Tamaño"
+	"size": "Tamaño",
+	"financial": "Finanzas",
+	"legal": "Jurídico",
+	"reputation": "Reputación",
+	"operational": "Operativa",
+	"confidentiality": "Confidencialidad",
+	"integrity": "Integridad",
+	"availability": "Disponibilidad",
+	"authenticity": "Autenticidad"
 }
