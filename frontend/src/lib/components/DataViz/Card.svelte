@@ -1,18 +1,8 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	export let count: string = '0';
 	export let label: string;
 	export let href: string | undefined = undefined;
 	export let help: string;
-
-	const clickHandler = () => {
-		if (href) {
-			goto(href);
-		}
-	};
-
-	$: classesHover = (href: string | undefined) => (href ? 'hover:variant-soft-secondary' : '');
 </script>
 
 <div
