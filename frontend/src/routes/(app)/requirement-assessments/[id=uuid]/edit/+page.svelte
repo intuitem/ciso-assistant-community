@@ -184,7 +184,6 @@
 	let tabSet = 0;
 </script>
 
-{@debug data}
 <div class="card space-y-2 p-4 bg-white shadow">
 	<div class="flex justify-between">
 		<span class="code left">{data.requirement.urn}</span>

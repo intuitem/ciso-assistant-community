@@ -68,7 +68,6 @@
 	}
 </script>
 
-{@debug data}
 <div class="flex flex-col h-full justify-center items-center">
 	<div
 		style="border-color: {color}"
