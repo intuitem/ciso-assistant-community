@@ -2,8 +2,8 @@ import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 
-let vars = TestContent.generateTestVars();
-let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+const vars = TestContent.generateTestVars();
+const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 test('compliance assessments scoring is working properly', async ({
 	logedPage,
