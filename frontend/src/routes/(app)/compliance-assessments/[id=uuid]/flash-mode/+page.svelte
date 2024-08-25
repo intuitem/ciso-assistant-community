@@ -68,6 +68,7 @@
 	}
 </script>
 
+{@debug data}
 <div class="flex flex-col h-full justify-center items-center">
 	<div
 		style="border-color: {color}"
@@ -90,7 +91,7 @@
 				<div class="flex flex-col items-center text-center justify-center">
 					<p class="font-semibold">{title}</p>
 				</div>
-				<div class="flex flex-col items-center justify-center">
+				<div class="flex flex-col items-center justify-center whitespace-pre-line">
 					{#if data.requirement_assessments[currentIndex].description}
 						{data.requirement_assessments[currentIndex].description}
 					{/if}
