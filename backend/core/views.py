@@ -585,6 +585,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     description=scenario.description,
                     existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
+                    qualifications=scenario.qualifications,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -745,6 +746,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
+    @action(detail=False, name="Get qualification choices")
+    def qualifications(self, request):
+        return Response(dict(RiskScenario.QUALIFICATIONS))
+
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
         undefined = {-1: "--"}
@@ -775,16 +780,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
         _sok_choices = self.get_object().get_matrix().get("strength_of_knowledge")
         if _sok_choices is not None:
             sok_choices = dict(
-                zip(
-                    list(range(0, 64)),
-                    [
-                        {
-                            "name": x["name"],
-                            "description": x.get("description"),
-                            "symbol": x.get("symbol"),
-                        }
-                        for x in _sok_choices
-                    ],
+                enumerate(
+                    {
+                        "name": x["name"],
+                        "description": x.get("description"),
+                        "symbol": x.get("symbol"),
+                    }
+                    for x in _sok_choices
                 )
             )
         else:

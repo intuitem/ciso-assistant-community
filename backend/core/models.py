@@ -1696,6 +1696,17 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
+    QUALIFICATIONS = [
+        ("Financial", _("Financial")),
+        ("Legal", _("Legal")),
+        ("Reputation", _("Reputation")),
+        ("Operational", _("Operational")),
+        ("Confidentiality", _("Confidentiality")),
+        ("Integrity", _("Integrity")),
+        ("Availability", _("Availability")),
+        ("Authenticity", _("Authenticity")),
+    ]
+
     DEFAULT_SOK_OPTIONS = {
         -1: {
             "name": _("--"),
@@ -1802,6 +1813,8 @@ class RiskScenario(NameDescriptionMixin):
         default="open",
         verbose_name=_("Treatment status"),
     )
+
+    qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
     strength_of_knowledge = models.IntegerField(
         default=-1,

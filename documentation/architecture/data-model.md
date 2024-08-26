@@ -288,6 +288,7 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
+        json   qualifications
 
         principal[] owner
     }
@@ -862,6 +863,8 @@ To analyse the risk, each scenario contains Existing Controls, current probabili
 A risk scenario contains a treatment option with the values --/open/mitigate/accept/avoid/transfer
 
 A risk scenario also contains a "strength of knowledge", within the values --/0 (Low)/1 (Medium)/2 (High). This can be used to represent a third dimension of risk, as recommended by the Society for Risk Analysis. The field "justification" can be used to expose the knowledge.
+
+A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Authenticity, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
 
 The risk evaluation is automatically done based on the selected risk matrix.
 
