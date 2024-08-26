@@ -450,8 +450,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' }
+			{ field: 'folder', urlModel: 'folders' }
 		]
 	},
 	'entity-assessments': {

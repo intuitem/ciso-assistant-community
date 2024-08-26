@@ -57,15 +57,6 @@ class Migration(migrations.Migration):
                         to="iam.folder",
                     ),
                 ),
-                (
-                    "owned_folders",
-                    models.ManyToManyField(
-                        blank=True,
-                        related_name="owner",
-                        to="iam.folder",
-                        verbose_name="Owned folders",
-                    ),
-                ),
             ],
             options={
                 "verbose_name": "Entity",

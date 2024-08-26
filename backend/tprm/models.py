@@ -12,12 +12,6 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     mission = models.TextField(blank=True)
     reference_link = models.URLField(blank=True, null=True)
-    owned_folders = models.ManyToManyField(
-        "iam.Folder",
-        related_name="owner",
-        blank=True,
-        verbose_name=_("Owned folders"),
-    )
 
     fields_to_check = ["name"]
 
