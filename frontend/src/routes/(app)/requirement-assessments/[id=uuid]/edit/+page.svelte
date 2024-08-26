@@ -186,7 +186,7 @@
 
 <div class="card space-y-2 p-4 bg-white shadow">
 	<div class="flex justify-between">
-		<span class="code left">{data.requirement.urn}</span>
+		<span class="code left h-min">{data.requirement.urn}</span>
 		<a class="text-pink-500 hover:text-pink-400" href={complianceAssessmentURL}
 			><i class="fa-solid fa-turn-up"></i></a
 		>
