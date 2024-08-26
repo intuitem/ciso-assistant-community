@@ -44,7 +44,6 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
-	'products',
 	'representatives'
 ] as const;
 

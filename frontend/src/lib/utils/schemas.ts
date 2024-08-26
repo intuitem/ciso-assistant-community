@@ -304,10 +304,6 @@ export const solutionSchema = baseNamedObject({
 	criticality: z.number().optional()
 });
 
-export const productSchema = baseNamedObject({
-	solution: z.string().optional()
-});
-
 export const representativeSchema = z.object({
 	email: z.string().email(),
 	entity: z.string(),
@@ -338,9 +334,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'sso-settings': SSOSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': entityAssessmentsSchema,
-	solutions: solutionSchema,
-	products: productSchema,
-	representatives: representativeSchema
+	representatives: representativeSchema,
+	solutions: solutionSchema
 };
 
 export const modelSchema = (model: string) => {
