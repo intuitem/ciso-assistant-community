@@ -289,6 +289,7 @@ def startup(sender: AppConfig, **kwargs):
     from django.contrib.auth.models import Permission
     from allauth.socialaccount.providers.saml.provider import SAMLProvider
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+    from tprm.models import Entity
     from global_settings.models import GlobalSettings
 
     print("startup handler: initialize database")
@@ -316,6 +317,9 @@ def startup(sender: AppConfig, **kwargs):
         Folder.objects.create(
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
+    # if main entity does not exist, then create it
+    if not Entity.objects.filter(name="Main").exists():
+        Entity.objects.create(name="Main", folder=Folder.get_root_folder())
     # update builtin roles to facilitate migrations
     reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
     reader.permissions.set(reader_permissions)
