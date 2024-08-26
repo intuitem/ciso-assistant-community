@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { safeTranslate } from '$lib/utils/i18n';
 import { ClientSettingsSchema } from '$lib/utils/client-settings';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -92,7 +93,7 @@ export const actions: Actions = {
 					setError(form, 'non_field_errors', response.non_field_errors);
 				}
         if (response[field]) {
-          setError(form, field, Object.hasOwn(m, response[field]) ? m[response[field]]() : response[field]);
+          setError(form, field, safeTranslate(response[field]));
         }
 				return fail(400, { form: form });
 			}
@@ -104,7 +105,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: m[modelVerboseName]().toLowerCase()
+					object: safeTranslate(modelVerboseName).toLowerCase()
 				})
 			},
 			event
