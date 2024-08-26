@@ -3,7 +3,6 @@ from tprm.views import (
     EntityViewSet,
     RepresentativeViewSet,
     SolutionViewSet,
-    ProductViewSet,
     EntityAssessmentViewSet,
 )
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
