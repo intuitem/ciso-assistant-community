@@ -1825,7 +1825,7 @@ class RiskScenario(NameDescriptionMixin):
     parent_project.short_description = _("Project")
 
     def get_matrix(self):
-        return self.risk_assessment.risk_matrix.parse_json()
+        return self.risk_assessment.risk_matrix.parse_json_translated()
 
     def get_current_risk(self):
         if self.current_level < 0:

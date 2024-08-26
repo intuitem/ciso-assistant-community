@@ -753,13 +753,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
-        undefined = dict([(-1, "--")])
-        _choices = dict(
-            zip(
-                list(range(0, 64)),
-                [x["name"] for x in self.get_object().get_matrix()["probability"]],
+        undefined = {-1: "--"}
+        _choices = {
+            i: name
+            for i, name in enumerate(
+                x["name"] for x in self.get_object().get_matrix()["probability"]
             )
-        )
+        }
         choices = undefined | _choices
         return Response(choices)
 
