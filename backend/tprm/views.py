@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from tprm.models import Entity, Representative, Solution, Product, EntityAssessment
+from tprm.models import Entity, Representative, Solution, EntityAssessment
 from rest_framework.decorators import action
 
 
@@ -45,11 +45,3 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-
-
-class ProductViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows products to be viewed or edited.
-    """
-
-    model = Product

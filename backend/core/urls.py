@@ -23,7 +23,6 @@ router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
-router.register(r"products", ProductViewSet, basename="products")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
 router.register(r"projects", ProjectViewSet, basename="projects")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")

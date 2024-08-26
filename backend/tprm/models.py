@@ -95,22 +95,3 @@ class Solution(NameDescriptionMixin):
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
-
-
-class Product(NameDescriptionMixin):
-    """
-    Product offered in a solution
-    """
-
-    solution = models.ForeignKey(
-        Solution,
-        on_delete=models.CASCADE,
-        related_name="products",
-        verbose_name=_("Solution"),
-    )
-
-    fields_to_check = ["name"]
-
-    class Meta:
-        verbose_name = _("Product")
-        verbose_name_plural = _("Products")

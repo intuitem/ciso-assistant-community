@@ -1,7 +1,7 @@
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 from iam.models import Folder
-from tprm.models import Entity, Representative, Solution, Product, EntityAssessment
+from tprm.models import Entity, Representative, Solution, EntityAssessment
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
@@ -93,23 +93,4 @@ class SolutionWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Solution
-        exclude = []
-
-
-class ProductReadSerializer(BaseModelSerializer):
-    solution = FieldsRelatedField()
-
-    class Meta:
-        model = Product
-        exclude = []
-
-
-class ProductWriteSerializer(BaseModelSerializer):
-    solution = serializers.PrimaryKeyRelatedField(
-        queryset=Solution.objects.all(),
-        required=True,
-    )
-
-    class Meta:
-        model = Product
         exclude = []
