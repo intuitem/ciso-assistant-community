@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=True
+    volumes:
+      - ./db:/code/db
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+
+    build: ./frontend
+    depends_on:
+      - backend
+
+  caddy:
+    container_name: caddy
+    image: caddy:2.7.6
+    environment:
+      - CISO_ASSISTANT_URL=https://localhost:8443
+    restart: unless-stopped
+    ports:
+      - 8443:8443
+    volumes:
+      - ./db:/data
+    command: |
+      sh -c 'echo $$CISO_ASSISTANT_URL "{
+      reverse_proxy /api/iam/sso/redirect/ backend:8000
+      reverse_proxy /api/accounts/saml/0/acs/ backend:8000
+      reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+      reverse_proxy /* frontend:3000
+      }" > Caddyfile && caddy run'
