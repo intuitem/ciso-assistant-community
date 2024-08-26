@@ -92,7 +92,7 @@ export const actions: Actions = {
 				if (response.non_field_errors) {
 					setError(form, 'non_field_errors', response.non_field_errors);
 				}
-        if (response[field]) {
+        if (Object.hasOwn(response, field) && response[field]) {
           setError(form, field, safeTranslate(response[field]));
         }
 				return fail(400, { form: form });
