@@ -1,0 +1,3 @@
+Usage of files in this directory and its subdirectories, and of CISO Assistant PRO and Enterprise features, is subject to the intuitem Commercial License (https://intuitem.com/license/commercial/), and conditional on having a valid license from intuitem.
+
+Access to files in this directory and its subdirectories does not constitute permission to use this code.

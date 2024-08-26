@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { PageData } from '../[id=uuid]/$types';
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { hideSuggestions, breadcrumbObject } from '$lib/utils/stores';
@@ -75,14 +76,14 @@
 			style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
 				'#d1d5db'};"
 		>
-			{m[data.requirementAssessment.status]()}
+			{safeTranslate(data.requirementAssessment.status)}
 		</span>
 		<span
 			class="badge {classesText} h-fit"
 			style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
 				'#d1d5db'};"
 		>
-			{m[data.requirementAssessment.result]()}
+			{safeTranslate(data.requirementAssessment.result)}
 		</span>
 		{#if data.requirementAssessment.is_scored}
 			<ProgressRadial
@@ -192,7 +193,7 @@
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
 									<span class="badge {classesText} h-fit">
-										{m[mappingInference.sourceRequirementAssessment.coverage]()}
+										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -201,7 +202,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{m[toCamelCase(mappingInference.result)]()}
+										{safeTranslate(toCamelCase(mappingInference.result))}
 									</span>
 								</p>
 								{#if mappingInference.annotation}

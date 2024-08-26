@@ -64,7 +64,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
 
     urn = models.CharField(
-        max_length=100, null=True, blank=True, unique=True, verbose_name=_("URN")
+        max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
     )
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
@@ -145,7 +145,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         abstract = True
         unique_together = [["urn", "locale", "version"]]
 
-    urn = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("URN"))
+    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -895,6 +895,9 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             ]
         return node_dict
 
+    def __str__(self) -> str:
+        return f"{self.provider} - {self.name}"
+
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     threats = models.ManyToManyField(
@@ -918,7 +921,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         related_name="requirement_nodes",
     )
     parent_urn = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
+        max_length=255, null=True, blank=True, verbose_name=_("Parent URN")
     )
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
     implementation_groups = models.JSONField(
@@ -2205,13 +2208,13 @@ class ComplianceAssessment(Assessment):
             requirement_assessments.append(ra_dict)
         for requirement_assessment in requirement_assessments:
             if (
-                requirement_assessment["status"] in ("compliant", "partially_compliant")
+                requirement_assessment["result"] in ("compliant", "partially_compliant")
                 and len(requirement_assessment["applied_controls"]) == 0
             ):
                 warnings_lst.append(
                     {
                         "msg": _(
-                            "{}: Requirement assessment status is compliant or partially compliant with no applied control applied"
+                            "{}: Requirement assessment result is compliant or partially compliant with no applied control applied"
                         ).format(requirement_assessment["name"]),
                         "msgid": "requirementAssessmentNoAppliedControl",
                         "link": f"requirement-assessments/{requirement_assessment['id']}",
