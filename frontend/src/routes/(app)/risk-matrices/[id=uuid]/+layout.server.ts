@@ -9,17 +9,12 @@ import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
-import { languageTag } from '$paraglide/runtime';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const URLModel: urlModel = 'risk-matrices';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
-	const res = await fetch(endpoint, {
-		headers: {
-			'Accept-Language': languageTag()
-		}
-	});
+	const res = await fetch(endpoint);
 	const data = await res.json();
 
 	const model = getModelInfo(URLModel);

@@ -21,7 +21,7 @@
                 </div>
             </div>
             {% if node.assessments.requirement.description %}
-                <div class='text-left w-full'>{{ node.assessments.requirement.description }}</div>
+                <div class='text-left w-full'>{{ node.assessments.requirement.get_description_translated }}</div>
             {% endif %}
             {% if node.assessments.observation %}
                 <div class='text-left w-full'><p class="font-semibold">{% trans "Observation:" %}<p> {{ node.assessments.observation }}</div>
