@@ -306,48 +306,4 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Solutions",
             },
         ),
-        migrations.CreateModel(
-            name="Product",
-            fields=[
-                (
-                    "id",
-                    models.UUIDField(
-                        default=uuid.uuid4,
-                        editable=False,
-                        primary_key=True,
-                        serialize=False,
-                    ),
-                ),
-                (
-                    "created_at",
-                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
-                ),
-                (
-                    "updated_at",
-                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
-                ),
-                (
-                    "is_published",
-                    models.BooleanField(default=False, verbose_name="published"),
-                ),
-                ("name", models.CharField(max_length=200, verbose_name="Name")),
-                (
-                    "description",
-                    models.TextField(blank=True, null=True, verbose_name="Description"),
-                ),
-                (
-                    "solution",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="products",
-                        to="tprm.solution",
-                        verbose_name="Solution",
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "Product",
-                "verbose_name_plural": "Products",
-            },
-        ),
     ]
