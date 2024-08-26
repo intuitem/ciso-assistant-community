@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setLanguageTag } from '$paraglide/runtime';
+import { languageTag, setLanguageTag } from '$paraglide/runtime';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
 
@@ -74,6 +74,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookie
 
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
+		request.headers.set('Accept-Language', languageTag());
 
 		const token = cookies.get('token');
 		const csrfToken = cookies.get('csrftoken');
