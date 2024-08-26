@@ -400,8 +400,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['source_framework', 'target_framework']
 	},
 	entities: {
-		head: ['name', 'description', 'domain', 'ownedFolders'],
-		body: ['name', 'description', 'folder', 'owned_folders'],
+		head: ['name', 'description', 'domain'],
+		body: ['name', 'description', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
