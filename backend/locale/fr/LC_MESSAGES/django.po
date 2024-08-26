@@ -1,0 +1,156 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-26 08:54+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: iam/models.py:67
+msgid "GLOBAL"
+msgstr ""
+
+#: iam/models.py:68
+msgid "DOMAIN"
+msgstr ""
+
+#: iam/models.py:77
+msgid "parent folder"
+msgstr ""
+
+#: iam/models.py:87
+msgid "Folder"
+msgstr ""
+
+#: iam/models.py:88
+msgid "Folders"
+msgstr ""
+
+#: iam/models.py:209
+msgid "user group"
+msgstr ""
+
+#: iam/models.py:210 iam/models.py:317
+msgid "user groups"
+msgstr ""
+
+#: iam/models.py:255
+msgid "Welcome to Ciso Assistant!"
+msgstr ""
+
+#: iam/models.py:294
+msgid "last name"
+msgstr ""
+
+#: iam/models.py:295
+msgid "first name"
+msgstr ""
+
+#: iam/models.py:300
+msgid "active"
+msgstr ""
+
+#: iam/models.py:303
+msgid ""
+"Designates whether this user should be treated as active. Unselect this "
+"instead of deleting accounts."
+msgstr ""
+
+#: iam/models.py:307
+msgid "date joined"
+msgstr ""
+
+#: iam/models.py:309
+msgid "superuser status"
+msgstr ""
+
+#: iam/models.py:312
+msgid ""
+"Designates that this user has all permissions without explicitly assigning "
+"them."
+msgstr ""
+
+#: iam/models.py:320
+msgid ""
+"The user groups this user belongs to. A user will get all permissions "
+"granted to each of their user groups."
+msgstr ""
+
+#: iam/models.py:335
+msgid "user"
+msgstr ""
+
+#: iam/models.py:336
+msgid "users"
+msgstr ""
+
+#: iam/models.py:479
+msgid "permissions"
+msgstr ""
+
+#: iam/models.py:494
+msgid "Domain"
+msgstr ""
+
+#: iam/models.py:500
+msgid "Role"
+msgstr ""
+
+#: iam/models.py:501
+msgid "sub folders are visible"
+msgstr ""
+
+#: iam/sso/models.py:61
+msgid "is enabled"
+msgstr ""
+
+#: iam/sso/models.py:66
+msgid "provider"
+msgstr ""
+
+#: iam/sso/models.py:70
+msgid "provider ID"
+msgstr ""
+
+#: iam/sso/models.py:74
+msgid "name"
+msgstr ""
+
+#: iam/sso/models.py:76
+msgid "client id"
+msgstr ""
+
+#: iam/sso/models.py:78
+msgid "App ID, or consumer key"
+msgstr ""
+
+#: iam/sso/models.py:82
+msgid "secret key"
+msgstr ""
+
+#: iam/sso/models.py:85
+msgid "API secret, client secret, or consumer secret"
+msgstr ""
+
+#: iam/sso/models.py:88
+msgid "key"
+msgstr ""
+
+#: iam/sso/models.py:88
+msgid "Key"
+msgstr ""
+
+#: iam/views.py:96
+msgid "CISO Assistant: Password Reset"
+msgstr ""
