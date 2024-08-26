@@ -110,7 +110,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		);
 
 	const treatmentChoicesEndpoint = `${BASE_API_URL}/${URLModel}/treatment/`;
-	const qualificationChoicesEndpoint = `${BASE_API_URL}/${URLModel}/qualification/`;
+	const qualificationChoicesEndpoint = `${BASE_API_URL}/${URLModel}/qualifications/`;
 
 	const [treatmentChoices, qualificationChoices] = await Promise.all(
 		[treatmentChoicesEndpoint, qualificationChoicesEndpoint].map((endpoint) =>

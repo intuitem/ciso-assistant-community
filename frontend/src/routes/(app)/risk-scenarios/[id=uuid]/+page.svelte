@@ -234,7 +234,7 @@
 			<p class="text-sm font-semibold text-gray-400">{m.qualification()}</p>
 			<p>
 				<span class="font-semibold">
-					{#each data.scenario.qualification as qualification, i}
+					{#each data.scenario.qualifications as qualification, i}
 						{#if i > 0},{/if}
 						{localItems()[toCamelCase(qualification)] || qualification || localItems()['undefined']}
 					{/each}
