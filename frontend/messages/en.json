@@ -679,14 +679,12 @@
 	"solution": "Solution",
 	"addSolution": "Add solution",
 	"providerEntity": "Provider entity",
-	"recipientEntity": "Recipient entity",
-	"product": "Product",
-	"products": "Products",
 	"addProduct": "Add product",
 	"representatives": "Representatives",
 	"representative": "Representative",
 	"addRepresentative": "Add representative",
 	"phone": "Phone",
 	"role": "Role",
-	"question": "Question"
+	"question": "Question",
+	"recipientEntity": "Recipient entity"
 }
