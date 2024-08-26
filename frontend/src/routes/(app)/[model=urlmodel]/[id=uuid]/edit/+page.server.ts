@@ -1,3 +1,4 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
@@ -94,7 +95,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: m[toCamelCase(modelVerboseName.toLowerCase())]().toLowerCase()
+					object: safeTranslate(toCamelCase(modelVerboseName.toLowerCase())).toLowerCase()
 				})
 			},
 			event

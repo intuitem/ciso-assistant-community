@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -73,7 +74,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m['add' + capitalizeFirstLetter(model.info.localName)]()
+			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
 		};
 		modalStore.trigger(modal);
 	}
@@ -188,11 +189,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{#if Object.hasOwn(m, toCamelCase(key))}
-							{m[toCamelCase(key)]()}
-						{:else}
-							{key}
-						{/if}
+						{safeTranslate(toCamelCase(key))}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -238,7 +235,7 @@
 								{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
 								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
-									{m[toCamelCase((value.str || value.name) ?? value)]()}
+									{safeTranslate(toCamelCase((value.str || value.name) ?? value))}
 								{:else}
 									{(value.str || value.name) ?? value}
 								{/if}

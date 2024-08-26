@@ -2,21 +2,20 @@
 	// Most of your app wide CSS should be put in this file
 	import '../../app.postcss';
 	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import { pageTitle } from '$lib/utils/stores';
-
-	import * as m from '$paraglide/messages.js';
 
 	let sidebarOpen = true;
 
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
 </script>
 
-<!-- App Shell -->
+'<!-- App Shell -->
 <AppShell
-	slotPageContent="p-8 bg-slate-200"
+	slotPageContent="p-8 bg-gradient-to-br from-violet-100 to-slate-200"
 	regionPage="transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
 >
 	<svelte:fragment slot="sidebarLeft">
@@ -24,12 +23,11 @@
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4">
-			<span class="text-2xl font-bold pb-1" id="page-title">
-				{#if Object.hasOwn(m, $pageTitle)}
-					{m[$pageTitle]()}
-				{:else}
-					{$pageTitle}
-				{/if}
+			<span
+				class="text-2xl font-bold pb-1 bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+				id="page-title"
+			>
+				{safeTranslate($pageTitle)}
 			</span>
 			<hr class="w-screen my-1" />
 			<Breadcrumbs />
