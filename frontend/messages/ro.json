@@ -660,5 +660,13 @@
 	"back": "Înapoi",
 	"duplicate": "Dublică",
 	"duplicateRiskAssessment": "Dublarea evaluării riscului",
-	"size": "Mărime"
+	"size": "Mărime",
+	"financial": "Finanțe",
+	"legal": "Juridic",
+	"reputation": "Reputație",
+	"operational": "Operațional",
+	"confidentiality": "Confidențialitate",
+	"integrity": "Integritate",
+	"availability": "Accesibilitate",
+	"authenticity": "Autenticitate"
 }
