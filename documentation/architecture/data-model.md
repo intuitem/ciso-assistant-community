@@ -288,7 +288,7 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
-        json   qualification
+        json   qualifications
 
         principal[] owner
     }
