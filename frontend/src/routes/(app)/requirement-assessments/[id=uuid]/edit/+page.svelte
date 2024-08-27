@@ -59,6 +59,7 @@
 		email: ''
 	});
 
+	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
 	const schema = RequirementAssessmentSchema;
 
 	const modalStore: ModalStore = getModalStore();
@@ -184,7 +185,12 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<code class="code">{data.requirement.urn}</code>
+	<div class="flex justify-between">
+		<span class="code left h-min">{data.requirement.urn}</span>
+		<a class="text-pink-500 hover:text-pink-400" href={complianceAssessmentURL}
+			><i class="fa-solid fa-turn-up"></i></a
+		>
+	</div>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line p-2 font-light text-lg">
 			👉 {data.requirement.description}
