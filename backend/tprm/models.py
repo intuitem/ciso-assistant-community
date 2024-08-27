@@ -18,6 +18,7 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         blank=True,
         verbose_name=_("Owned folders"),
     )
+    builtin = models.BooleanField(default=False)
 
     fields_to_check = ["name"]
 
