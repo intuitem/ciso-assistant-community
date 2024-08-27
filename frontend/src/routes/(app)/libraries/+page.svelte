@@ -13,6 +13,8 @@
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 	let tabSet: number = data.loadedLibrariesTable.body.length > 0 ? 0 : 1;
 	$: if (data.loadedLibrariesTable.body.length === 0) tabSet = 0;
+
+	let fileResetSignal = false;
 </script>
 
 <div class="card bg-white shadow">
@@ -69,6 +71,10 @@
 				onSubmit={() => {
 					const fileInput = document.querySelector(`input[type="file"]`);
 					fileInput.value = '';
+					fileResetSignal = true;
+					setTimeout(() => {
+						fileResetSignal = false;
+					}, 10);
 				}}
 				{...$$restProps}
 			>
@@ -77,6 +83,7 @@
 					helpText={m.libraryFileInYaml()}
 					field="file"
 					label={m.addYourLibrary()}
+					resetSignal={fileResetSignal}
 				/>
 
 				<button
