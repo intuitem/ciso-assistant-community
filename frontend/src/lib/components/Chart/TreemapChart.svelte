@@ -18,59 +18,33 @@
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 		// specify chart configuration item and data
-		function getLevelOption() {
-			return [
-				{
-					itemStyle: {
-						borderWidth: 0,
-						gapWidth: 1
-					},
-					upperLabel: {
-						show: false
-					},
-					label: {
-						rotate: 'tangential'
-					}
-				},
-				{
-					itemStyle: {
-						borderWidth: 5,
-						gapWidth: 1
-					},
-					label: {
-						rotate: 'tangential'
-					},
-					emphasis: {
-						itemStyle: {}
-					}
-				},
-				{
-					itemStyle: {
-						borderWidth: 5,
-						gapWidth: 1
-					},
-					label: {
-						rotate: 'tangential'
-					},
-					emphasis: {
-						itemStyle: {}
-					}
-				}
-			];
-		}
+
 		var option = {
+			toolbox: {
+				show: true,
+				feature: {
+					restore: { show: true }
+				}
+			},
 			title: {
 				subtext: title
 			},
+			tooltip: {
+				trigger: 'item',
+				formatter: 'Requirements: {c}'
+			},
 			series: {
-				type: 'sunburst',
+				type: 'treemap',
 				// emphasis: {
 				//     focus: 'ancestor'
 				// },
 				//upperLabel: {
 				//	show: true
 				//},
-				levels: getLevelOption(),
+				leafDepth: 1,
+				roam: false,
+				visibleMin: 1,
+				colorSaturation: [0.3, 0.4],
 				data: tree,
 				radius: [30, '95%'],
 				sort: undefined,

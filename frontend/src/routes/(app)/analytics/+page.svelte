@@ -5,9 +5,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import SunburstChart from '$lib/components/Chart/SunburstChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import SankeyChart from '$lib/components/Chart/SankeyChart.svelte';
+	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -154,7 +155,7 @@
 						help="this is interesting"
 					/>
 					<div class="h-64 col-span-3 row-span-2">
-						<SankeyChart name="sankey" values={metrics.csf_functions} />
+						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 					</div>
 					<Card count={counters.controls.to_do} label="to do" href="#" help="this is interesting" />
 					<Card
@@ -170,7 +171,7 @@
 						help="this is interesting"
 					/>
 					<div class="col-span-4 row-span-4">
-						<SunburstChart title="Compliance overview" tree={metrics.audits_tree} name="sunburst" />
+						<TreemapChart title="Compliance overview" tree={metrics.audits_tree} name="sunburst" />
 					</div>
 					<!---->
 					<Card
