@@ -3,7 +3,7 @@ version: "3.9"
 services:
   backend:
     container_name: backend
-    image: ghcr.io/intuitem/ciso-assistant-community/enterprise-backend:latest
+    image: ghcr.io/intuitem/ciso-assistant-enterprise/backend:latest
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,u24.proxmox.lan
@@ -20,7 +20,7 @@ services:
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
-    image: ghcr.io/intuitem/ciso-assistant-community/enterprise-frontend:latest
+    image: ghcr.io/intuitem/ciso-assistant-enterprise/frontend:latest
     depends_on:
       - backend
 
