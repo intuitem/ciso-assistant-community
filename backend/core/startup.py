@@ -319,7 +319,8 @@ def startup(sender: AppConfig, **kwargs):
         )
     # if main entity does not exist, then create it
     if not Entity.objects.filter(name="Main").exists():
-        Entity.objects.create(name="Main", folder=Folder.get_root_folder())
+        main = Entity.objects.create(name="Main", folder=Folder.get_root_folder())
+        main.owned_folders.add(Folder.get_root_folder())
     # update builtin roles to facilitate migrations
     reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
     reader.permissions.set(reader_permissions)
