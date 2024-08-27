@@ -387,7 +387,9 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
-				<Question {form} field="answer" label={m.question()} />
+				{#if Object.keys(data.requirementAssessment.answer).length !== 0}
+					<Question {form} field="answer" label={m.question()} />
+				{/if}
 				<Select
 					{form}
 					options={data.model.selectOptions['status']}

@@ -1035,7 +1035,8 @@ def transform_question_to_answer(json_data):
     Returns:
         json: JSON formatted for the frontend to display a form
     """
-    answers = json_data.get("answers", {})
+    question_type = json_data.get("question_type", "")
+    question_choices = json_data.get("question_choices", [])
     questions = json_data.get("questions", [])
 
     form_fields = []
@@ -1045,12 +1046,10 @@ def transform_question_to_answer(json_data):
         field["urn"] = question.get("urn", "")
         field["text"] = question.get("text", "")
 
-        type = question.get("type", "")
-
-        if type == "unique_choice":
+        if question_type == "unique_choice":
             field["type"] = "unique_choice"
-            field["options"] = answers[question["options"]]
-        elif type == "date":
+            field["options"] = question_choices
+        elif question_type == "date":
             field["type"] = "date"
         else:
             field["type"] = "text"
