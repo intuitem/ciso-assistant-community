@@ -298,7 +298,6 @@ export const entityAssessmentsSchema = baseNamedObject({
 
 export const solutionSchema = baseNamedObject({
 	provider_entity: z.string().optional(),
-	recipient_entity: z.string().optional(),
 	ref_id: z.string().optional(),
 	criticality: z.number().optional()
 });
