@@ -274,6 +274,7 @@ export const SSOSettingsSchema = z.object({
 
 export const EntitiesSchema = baseNamedObject({
 	folder: z.string(),
+	owned_folders: z.string().uuid().optional().array().optional(),
 	mission: z.string().optional(),
 	reference_link: z.string().optional()
 });

@@ -963,13 +963,30 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
 
+class FolderFilter(df.FilterSet):
+    owned = df.BooleanFilter(method="get_owned_folders", label="owned")
+
+    def get_owned_folders(self, queryset, name, value):
+        owned_folders_id = []
+        for folder in Folder.objects.all():
+            if folder.owner.all().first():
+                owned_folders_id.append(folder.id)
+        if value:
+            return queryset.filter(id__in=owned_folders_id)
+        return queryset.exclude(id__in=owned_folders_id)
+
+    class Meta:
+        model = Folder
+        fields = ["parent_folder", "content_type", "owner", "owned"]
+
+
 class FolderViewSet(BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
 
     model = Folder
-    filterset_fields = ["parent_folder", "content_type"]
+    filterset_class = FolderFilter
 
     def perform_create(self, serializer):
         """
