@@ -700,16 +700,6 @@
 		<HiddenInput {form} field="requirement" />
 		<HiddenInput {form} field="compliance_assessment" />
 	{:else if URLModel === 'entities'}
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['owned_folders'] })}
-			field="owned_folders"
-			multiple
-			cacheLock={cacheLocks['owned_folders']}
-			bind:cachedValue={formDataCache['owned_folders']}
-			label={m.ownedFolders()}
-			hide={initialData.owned_folders}
-		/>
 		<TextArea
 			{form}
 			field="mission"
