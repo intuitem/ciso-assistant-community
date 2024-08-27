@@ -76,14 +76,14 @@
 			style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
 				'#d1d5db'};"
 		>
-			{safeTranslate(data.requirementAssessment.status)}
+			{safeTranslate(toCamelCase(data.requirementAssessment.status))}
 		</span>
 		<span
 			class="badge {classesText} h-fit"
 			style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
 				'#d1d5db'};"
 		>
-			{safeTranslate(data.requirementAssessment.result)}
+			{safeTranslate(toCamelCase(data.requirementAssessment.result))}
 		</span>
 		{#if data.requirementAssessment.is_scored}
 			<ProgressRadial
@@ -193,7 +193,9 @@
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
 									<span class="badge {classesText} h-fit">
-										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
+										{safeTranslate(
+											toCamelCase(mappingInference.sourceRequirementAssessment.coverage)
+										)}
 									</span>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -254,10 +256,12 @@
 			</svelte:fragment>
 		</TabGroup>
 	</div>
-	<div class="card p-4 space-y-2">
-		<h1 class="font-semibold">{m.observation()}</h1>
-		<span class="text-sm">{data.requirementAssessment.observation}</span>
-	</div>
+	{#if data.requirementAssessment.observation}
+		<div class="card p-4 space-y-2">
+			<h1 class="font-semibold">{m.observation()}</h1>
+			<span class="text-sm">{data.requirementAssessment.observation}</span>
+		</div>
+	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" on:click={cancel}
 			>{m.back()}</button
