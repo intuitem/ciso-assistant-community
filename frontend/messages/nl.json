@@ -103,6 +103,7 @@
 	"urn": "URN",
 	"id": "ID",
 	"treatmentStatus": "Behandelstatus",
+	"qualification": "Kwalificatie",
 	"currentLevel": "Huidig niveau",
 	"residualLevel": "Restniveau",
 	"riskMatrix": "Risicomatrix",
@@ -617,5 +618,13 @@
 	"duplicate": "Duplicaat",
 	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling",
 	"size": "Grootte",
-	"objectType": "objecttype"
+	"objectType": "objecttype",
+	"financial": "Financieel",
+	"legal": "Juridisch",
+	"reputation": "Reputatie",
+	"operational": "Operationeel",
+	"confidentiality": "Vertrouwelijkheid",
+	"integrity": "Integriteit",
+	"availability": "Beschikbaarheid",
+	"authenticity": "Authenticiteit"
 }

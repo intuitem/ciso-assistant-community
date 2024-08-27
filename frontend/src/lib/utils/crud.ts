@@ -562,13 +562,10 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 
 export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
 	{
-		frameworks: async ({ fetch }, language) => {
+		frameworks: async ({ fetch }) => {
+			// ({ fetch }, language)
 			const endpoint = `${BASE_API_URL}/frameworks/`;
-			const res = await fetch(endpoint, {
-				headers: {
-					'Accept-Language': language
-				}
-			});
+			const res = await fetch(endpoint);
 			const response_data = await res.json();
 			const frameworks = response_data.results;
 

@@ -1,3 +1,4 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
@@ -162,7 +163,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: m[toCamelCase(modelVerboseName)]().toLowerCase()
+					object: safeTranslate(toCamelCase(modelVerboseName)).toLowerCase()
 				})
 			},
 			event
@@ -205,7 +206,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDeletedObject({
-						object: m[toCamelCase(toCamelCase(model))]().toLowerCase()
+						object: safeTranslate(toCamelCase(toCamelCase(model))).toLowerCase()
 					})
 				},
 				event

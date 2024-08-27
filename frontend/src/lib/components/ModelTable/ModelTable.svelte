@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
@@ -332,7 +333,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{m[heading]() ?? heading}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{safeTranslate(heading) ?? heading}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
@@ -377,17 +378,13 @@
 									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-                    {#if Object.hasOwn(m, text)}
-                      {m[text]()}
-                    {:else}
-                      {text}
-                    {/if}
+                      {safeTranslate(text)}
 										</span>
 									{/if}
 								{/each}
 							{/if}
 							{#if component}
-								<svelte:component this={component} meta={row.meta ?? {}} cell={value}/>
+								<svelte:component this={component} meta={meta} cell={value}/>
 							{:else}
                 <span class="font-token whitespace-pre-line break-words">
                 {#if Array.isArray(value)}
@@ -401,8 +398,8 @@
                             )?.urlModel
                           }/${val.id}`}
                           <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else if m[toCamelCase(val.split(':')[0])]()}
-                        	<span class="text">{m[toCamelCase(val.split(':')[0]+"Colon")]()} {val.split(':')[1]}</span>
+                        {:else if safeTranslate(toCamelCase(val.split(':')[0]))}
+                        	<span class="text">{safeTranslate(toCamelCase(val.split(':')[0]+"Colon"))} {val.split(':')[1]}</span>
 						{:else}
 						  {val ?? '-'}
                         {/if}

@@ -22,9 +22,10 @@
 	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	$value = $value ?? min_score;
-
 	const isScored = formFieldProxy(form, 'is_scored')['value'];
+	$: if ($isScored) {
+		$value = $value ?? min_score;
+	}
 
 	$: if (max_score === 100) score_step = 5;
 

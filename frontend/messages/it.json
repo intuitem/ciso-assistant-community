@@ -103,6 +103,7 @@
 	"urn": "URN",
 	"id": "ID",
 	"treatmentStatus": "Stato del trattamento",
+	"qualification": "Qualificazione",
 	"currentLevel": "Livello attuale",
 	"residualLevel": "Livello residuo",
 	"riskMatrix": "Matrice di rischio",
@@ -617,5 +618,13 @@
 	"duplicate": "Duplicare",
 	"duplicateRiskAssessment": "Duplicare la valutazione del rischio",
 	"size": "Dimensione",
-	"objectType": "Tipo di oggetto"
+	"objectType": "Tipo di oggetto",
+	"financial": "Finanziario",
+	"legal": "Legale",
+	"reputation": "Reputazione",
+	"operational": "Operativo",
+	"confidentiality": "Riservatezza",
+	"integrity": "Integrità",
+	"availability": "Disponibilità",
+	"authenticity": "Autenticità"
 }

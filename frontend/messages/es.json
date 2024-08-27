@@ -10,6 +10,7 @@
 	"italian": "Italiano",
 	"polish": "Polnish",
 	"romanian": "Rumano",
+	"romanian": "Rumano",
 	"addThreat": "Agregar amenaza",
 	"addReferenceControl": "Agregar control de referencia",
 	"addAppliedControl": "Agregar control aplicado",
@@ -103,6 +104,7 @@
 	"urn": "URN",
 	"id": "ID",
 	"treatmentStatus": "Estado del tratamiento",
+	"qualification": "Cualificación",
 	"currentLevel": "Nivel actual",
 	"residualLevel": "Nivel residual",
 	"riskMatrix": "Matriz de riesgos",
@@ -617,5 +619,13 @@
 	"duplicate": "Duplicar",
 	"duplicateRiskAssessment": "Duplicar la evaluación de riesgo",
 	"size": "Tamaño",
-	"objectType": "Tipo de objeto"
+	"objectType": "Tipo de objeto",
+	"financial": "Finanzas",
+	"legal": "Jurídico",
+	"reputation": "Reputación",
+	"operational": "Operativa",
+	"confidentiality": "Confidencialidad",
+	"integrity": "Integridad",
+	"availability": "Disponibilidad",
+	"authenticity": "Autenticidad"
 }
