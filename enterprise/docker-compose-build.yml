@@ -4,8 +4,8 @@ services:
   backend:
     container_name: backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: ./enterprise/backend/Dockerfile
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -22,7 +22,9 @@ services:
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
-    build: ./frontend
+    build:
+      context: ../
+      dockerfile: ./enterprise/frontend/Dockerfile
     depends_on:
       - backend
 
