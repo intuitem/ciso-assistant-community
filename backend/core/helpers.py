@@ -799,58 +799,57 @@ non_compliant
 
 def build_audits_tree_metrics():
     tree = list()
-    for project in Project.objects.all():
-        block_prj = {"name": project.name, "children": []}
-        children = []
-        for audit in ComplianceAssessment.objects.filter(project=project):
-            cnt_reqs = RequirementAssessment.objects.filter(
-                compliance_assessment=audit
-            ).count()
-            cnt_res = {}
-            for result in RequirementAssessment.Result.choices:
-                cnt_res[result[0]] = (
-                    RequirementAssessment.objects.filter(compliance_assessment=audit)
-                    .filter(result=result[0])
-                    .count()
-                )
-            blk_audit = {
-                "name": audit.name,
-                "value": cnt_reqs,
-                "children": [
-                    {
-                        "name": "OK",
-                        "children": [
-                            {
-                                "name": "compliant",
-                                "value": cnt_res["compliant"],
-                            },
-                            {
-                                "name": "n/a",
-                                "value": cnt_res["not_applicable"],
-                            },
-                        ],
-                    },
-                    {
-                        "name": "KO",
-                        "value": cnt_res["not_assessed"]
-                        + cnt_res["partially_compliant"]
-                        + cnt_res["non_compliant"],
-                        "children": [
-                            {
-                                "name": "partial",
-                                "value": cnt_res["partially_compliant"],
-                            },
-                            {
-                                "name": "Non compliant",
-                                "value": cnt_res["non_compliant"],
-                            },
-                        ],
-                    },
-                ],
-            }
-            children.append(blk_audit)
-        block_prj["children"] = children
-        tree.append(block_prj)
+    domain_prj_children = list()
+    for domain in Folder.objects.exclude(name="Global"):
+        block_domain = {"name": domain.name, "children": []}
+        domain_prj_children = []
+        for project in Project.objects.filter(folder=domain):
+            block_prj = {"name": project.name, "domain": domain.name, "children": []}
+            children = []
+            for audit in ComplianceAssessment.objects.filter(project=project):
+                cnt_reqs = RequirementAssessment.objects.filter(
+                    compliance_assessment=audit
+                ).count()
+                cnt_res = {}
+                for result in RequirementAssessment.Result.choices:
+                    cnt_res[result[0]] = (
+                        RequirementAssessment.objects.filter(
+                            compliance_assessment=audit
+                        )
+                        .filter(result=result[0])
+                        .count()
+                    )
+                print(cnt_res)
+                blk_audit = {
+                    "name": audit.name,
+                    "children": [
+                        {
+                            "name": "compliant",
+                            "value": cnt_res["compliant"],
+                        },
+                        {
+                            "name": "not assessed",
+                            "value": cnt_res["not_assessed"],
+                        },
+                        {
+                            "name": "Not Applicable",
+                            "value": cnt_res["not_applicable"],
+                        },
+                        {
+                            "name": "partial",
+                            "value": cnt_res["partially_compliant"],
+                        },
+                        {
+                            "name": "Non compliant",
+                            "value": cnt_res["non_compliant"],
+                        },
+                    ],
+                }
+                children.append(blk_audit)
+            block_prj["children"] = children
+            domain_prj_children.append(block_prj)
+        block_domain["children"] = domain_prj_children
+        tree.append(block_domain)
     return tree
 
 
@@ -860,17 +859,18 @@ def csf_functions():
     for choice in ReferenceControl.CSF_FUNCTION:
         cnt[choice[0]] = AppliedControl.objects.filter(csf_function=choice[0]).count()
     unset = AppliedControl.objects.filter(csf_function__isnull=True).count()
-    links = [
-        {"source": source, "target": "--", "value": unset},
-        {"source": source, "target": "Govern", "value": cnt["govern"]},
-        {"source": source, "target": "Identify", "value": cnt["identify"]},
-        {"source": source, "target": "Protect", "value": cnt["protect"]},
-        {"source": source, "target": "Detect", "value": cnt["detect"]},
-        {"source": source, "target": "Respond", "value": cnt["respond"]},
-        {"source": source, "target": "Recover", "value": cnt["recover"]},
+    data = [
+        {"name": "Govern", "value": cnt["govern"]},
+        {"name": "Identify", "value": cnt["identify"]},
+        {"name": "Protect", "value": cnt["protect"]},
+        {"name": "Detect", "value": cnt["detect"]},
+        {"name": "Respond", "value": cnt["respond"]},
+        {"name": "Recover", "value": cnt["recover"]},
     ]
+    if unset > 0:
+        data.append({"name": "(undefined)", "value": unset})
 
-    return links
+    return data
 
 
 def get_metrics():
