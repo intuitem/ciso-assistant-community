@@ -56,41 +56,24 @@ objects:
       implementation_groups:
       - L1
       question:
-        answers:
-          urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1:
-            - "Yes"
-            - "No"
-            - "N/A"
+        question_type: "unique_choice"
+        question_choices:
+          - "Yes"
+          - "No"
+          - "N/A"
         questions:
         - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:1"
           text: "[a] authorized users are identified"
-          type: "unique_choice"
-          options: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1"
         - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:2"
           text: "[b] processes acting on behalf of authorized users are identified"
-          type: "unique_choice"
-          options: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1"
         - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:3"
           text: "[c] devices (and other systems) authorized to connect to the system are identified"
-          type: "unique_choice"
-          options: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1"
         - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:4"
           text: "[d] system access is limited to authorized users"
-          type: "unique_choice"
-          options: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1"
         - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:5"
           text: "[e] system access is limited to processes acting on behalf of authorized users"
-          type: "unique_choice"
-          options: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1"
         - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:6"
           text: "[f] system access is limited to authorized devices (including other systems)"
-          type: "unique_choice"
-          options: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:answer:1"
-        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:7"
-          text: "Who is concerned with the access control?"
-        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:8"
-          text: "When is the access control implemented?"
-          type: "date"
     - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.2
       assessable: true
       depth: 2
