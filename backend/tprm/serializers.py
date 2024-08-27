@@ -16,23 +16,9 @@ class EntityReadSerializer(BaseModelSerializer):
 
 
 class EntityWriteSerializer(BaseModelSerializer):
-    owned_folders = serializers.PrimaryKeyRelatedField(
-        queryset=Folder.objects.filter(owner=None),
-        many=True,
-        required=False,
-    )
-
-    def validate_owned_folders(self, owned_folders):
-        for folder in owned_folders:
-            if folder.owner.exists():
-                raise serializers.ValidationError(
-                    _("Folder {} is already owned by another entity").format(folder)
-                )
-        return owned_folders
-
     class Meta:
         model = Entity
-        exclude = []
+        exclude = ["owned_folders"]
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
@@ -85,11 +71,7 @@ class SolutionWriteSerializer(BaseModelSerializer):
         queryset=Entity.objects.all(),
         required=True,
     )
-    recipient_entity = serializers.PrimaryKeyRelatedField(
-        queryset=Entity.objects.all(),
-        required=True,
-    )
 
     class Meta:
         model = Solution
-        exclude = []
+        exclude = ["recipient_entity"]

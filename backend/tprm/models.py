@@ -87,6 +87,7 @@ class Solution(NameDescriptionMixin):
         on_delete=models.CASCADE,
         related_name="received_solutions",
         verbose_name=_("Recipient entity"),
+        default=Entity.objects.get(builtin=True).id,
     )
     ref_id = models.CharField(max_length=255, blank=True)
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))

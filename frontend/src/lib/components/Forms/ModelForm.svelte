@@ -836,15 +836,6 @@
 			label={m.providerEntity()}
 			hide={initialData.provider_entity}
 		/>
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['recipient_entity'] })}
-			field="recipient_entity"
-			cacheLock={cacheLocks['recipient_entity']}
-			bind:cachedValue={formDataCache['recipient_entity']}
-			label={m.recipientEntity()}
-			hide={initialData.recipient_entity}
-		/>
 		<TextField
 			{form}
 			field="ref_id"
