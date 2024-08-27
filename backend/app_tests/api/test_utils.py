@@ -1,5 +1,5 @@
 from django.db import models
-from knox.auth import AuthToken
+from knox.models import AuthToken
 import pytest
 import json
 import re
