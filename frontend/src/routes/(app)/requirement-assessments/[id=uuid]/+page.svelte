@@ -7,9 +7,8 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { ProgressRadial, RadioGroup, RadioItem, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue, getSecureRedirect } from '$lib/utils/helpers';
-	import Question from '$lib/components/Forms/Question.svelte';
 
 	export let data: PageData;
 	const threats = data.requirement.threats;
