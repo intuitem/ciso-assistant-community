@@ -41,6 +41,7 @@
 					// adjust the start and end angle
 					startAngle: 180,
 					endAngle: 360,
+					minShowLabelAngle: 1,
 					data: values,
 					color: colors
 				}

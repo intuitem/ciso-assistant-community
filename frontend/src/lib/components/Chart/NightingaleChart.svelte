@@ -25,7 +25,7 @@
 			},
 			series: [
 				{
-					name: 'Function',
+					name: 'Control Function',
 					type: 'pie',
 					radius: [20, 100],
 					roseType: 'area',
