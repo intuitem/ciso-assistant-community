@@ -2434,6 +2434,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         verbose_name=_("Answer"),
     )
     review_conclusion = models.CharField(
+        max_length=10,
         choices=ReviewConclusion.choices,
         verbose_name=_("Review conclusion"),
         null=True,
