@@ -532,15 +532,16 @@
 			bind:cachedValue={formDataCache['link']}
 		/>
 	{:else if URLModel === 'compliance-assessments'}
-		<AutocompleteSelect
-			{form}
-			hide={context !== 'fromBaseline' || initialData.baseline}
-			field="baseline"
-			cacheLock={cacheLocks['baseline']}
-			bind:cachedValue={formDataCache['baseline']}
-			label={m.baseline()}
-			options={getOptions({ objects: model.foreignKeys['baseline'] })}
-		/>
+		{#if context === 'fromBaseline' && initialData.baseline}
+			<AutocompleteSelect
+				{form}
+				field="baseline"
+				cacheLock={cacheLocks['baseline']}
+				bind:cachedValue={formDataCache['baseline']}
+				label={m.baseline()}
+				options={getOptions({ objects: model.foreignKeys['baseline'] })}
+			/>
+		{/if}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({

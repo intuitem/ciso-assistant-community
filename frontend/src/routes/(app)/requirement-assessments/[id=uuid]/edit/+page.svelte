@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
 	import type { PageData } from '../[id=uuid]/edit/$types';
 
@@ -59,6 +60,7 @@
 		email: ''
 	});
 
+	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
 	const schema = RequirementAssessmentSchema;
 
 	const modalStore: ModalStore = getModalStore();
@@ -184,7 +186,12 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<code class="code">{data.requirement.urn}</code>
+	<div class="flex justify-between">
+		<span class="code left h-min">{data.requirement.urn}</span>
+		<a class="text-pink-500 hover:text-pink-400" href={complianceAssessmentURL}
+			><i class="fa-solid fa-turn-up"></i></a
+		>
+	</div>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line p-2 font-light text-lg">
 			👉 {data.requirement.description}
@@ -282,7 +289,7 @@
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
 									<span class="badge {classesText} h-fit">
-										{m[mappingInference.sourceRequirementAssessment.coverage]()}
+										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -291,7 +298,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{m[toCamelCase(mappingInference.result)]()}
+										{safeTranslate(toCamelCase(mappingInference.result))}
 									</span>
 								</p>
 								{#if mappingInference.annotation}

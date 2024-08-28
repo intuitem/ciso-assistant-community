@@ -23,6 +23,7 @@ from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django.utils import translation
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, permissions, status, viewsets
@@ -40,7 +41,12 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment, RequirementMappingSet
+from core.models import (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementMappingSet,
+    ReferentialObjectMixin,
+)
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
@@ -579,6 +585,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     description=scenario.description,
                     existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
+                    qualifications=scenario.qualifications,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
                     residual_proba=scenario.residual_proba,
@@ -739,15 +746,19 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
+    @action(detail=False, name="Get qualification choices")
+    def qualifications(self, request):
+        return Response(dict(RiskScenario.QUALIFICATIONS))
+
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
-        undefined = dict([(-1, "--")])
-        _choices = dict(
-            zip(
-                list(range(0, 64)),
-                [x["name"] for x in self.get_object().get_matrix()["probability"]],
+        undefined = {-1: "--"}
+        _choices = {
+            i: name
+            for i, name in enumerate(
+                x["name"] for x in self.get_object().get_matrix()["probability"]
             )
-        )
+        }
         choices = undefined | _choices
         return Response(choices)
 
@@ -769,16 +780,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
         _sok_choices = self.get_object().get_matrix().get("strength_of_knowledge")
         if _sok_choices is not None:
             sok_choices = dict(
-                zip(
-                    list(range(0, 64)),
-                    [
-                        {
-                            "name": x["name"],
-                            "description": x.get("description"),
-                            "symbol": x.get("symbol"),
-                        }
-                        for x in _sok_choices
-                    ],
+                enumerate(
+                    {
+                        "name": x["name"],
+                        "description": x.get("description"),
+                        "symbol": x.get("symbol"),
+                    }
+                    for x in _sok_choices
                 )
             )
         else:
@@ -1321,21 +1329,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in viewable_objects:
             response = {
-                "planned": list(),
-                "active": list(),
-                "inactive": list(),
-                "none": list(),
+                "planned": [],
+                "active": [],
+                "inactive": [],
+                "none": [],
             }
             compliance_assessment_object = self.get_object()
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments()
             )
-            applied_controls = AppliedControlReadSerializer(
-                AppliedControl.objects.filter(
+            applied_controls = [
+                {**model_to_dict(applied_control), "id": applied_control.id}
+                for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
-                ).distinct(),
-                many=True,
-            ).data
+                ).distinct()
+            ]
             for applied_control in applied_controls:
                 applied_control["requirements_count"] = (
                     RequirementAssessment.objects.filter(
@@ -1789,6 +1797,7 @@ def generate_html(
         return node_data, selected_evidences
 
     top_level_nodes = [req for req in requirement_nodes if not req.parent_urn]
+    update_translations_in_object(top_level_nodes)
     top_level_nodes_data = []
     for requirement_node in top_level_nodes:
         node_data, node_evidences = generate_data_rec(requirement_node)

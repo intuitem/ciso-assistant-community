@@ -1,5 +1,5 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { localItems } from '../../src/lib/utils/locales.js';
-import * as m from '$paraglide/messages.js';
 import { availableLanguageTags, setLanguageTag } from '../../src/paraglide/runtime.js';
 import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
 
@@ -27,8 +27,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 						continue;
 					}
 					await expect(page).toHaveURL(item.href);
-					await logedPage.hasTitle(m[item.name]());
-					await logedPage.hasBreadcrumbPath([m[item.name]()]);
+					await logedPage.hasTitle(safeTranslate(item.name));
+					await logedPage.hasBreadcrumbPath([safeTranslate(item.name)]);
 				}
 			}
 		}

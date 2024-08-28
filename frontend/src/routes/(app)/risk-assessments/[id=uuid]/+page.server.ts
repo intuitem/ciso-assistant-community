@@ -1,3 +1,4 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
 
@@ -126,7 +127,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDuplicateObject({
-						object: m[toCamelCase(modelVerboseName)]().toLowerCase()
+						object: safeTranslate(toCamelCase(modelVerboseName)).toLowerCase()
 					})
 				},
 				cookies
