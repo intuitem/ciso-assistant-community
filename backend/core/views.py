@@ -1045,7 +1045,7 @@ def get_metrics_view(request):
     """
     API endpoint that returns the counters
     """
-    return Response({"results": get_metrics()})
+    return Response({"results": get_metrics(request.user)})
 
 
 # TODO: Add all the proper docstrings for the following list of functions
