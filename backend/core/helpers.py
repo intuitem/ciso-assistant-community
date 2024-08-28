@@ -780,21 +780,7 @@ def get_counters(user: User):
                 Folder.get_root_folder(), user, Policy
             )[0]
         ),
-        "controls": {
-            "total": controls_count,
-            "to_do": 4,
-            "in_progress": 12,
-            "on_hold": 5,
-            "done": 3,
-            "expired": 1,
-        },
     }
-
-
-"""
-non_compliant
-
-"""
 
 
 def build_audits_tree_metrics(user):
