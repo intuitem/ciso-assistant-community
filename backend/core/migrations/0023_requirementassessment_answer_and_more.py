@@ -4,30 +4,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0022_riskscenario_qualifications'),
+        ("core", "0022_riskscenario_qualifications"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='requirementassessment',
-            name='answer',
-            field=models.JSONField(blank=True, null=True, verbose_name='Answer'),
+            model_name="requirementassessment",
+            name="answer",
+            field=models.JSONField(blank=True, null=True, verbose_name="Answer"),
         ),
         migrations.AddField(
-            model_name='requirementassessment',
-            name='review_conclusion',
-            field=models.CharField(blank=True, choices=[('na', 'N/A'), ('ok', 'OK'), ('warning', 'Warning'), ('blocker', 'Blocker')], null=True, verbose_name='Review conclusion'),
+            model_name="requirementassessment",
+            name="review_conclusion",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("na", "N/A"),
+                    ("ok", "OK"),
+                    ("warning", "Warning"),
+                    ("blocker", "Blocker"),
+                ],
+                null=True,
+                verbose_name="Review conclusion",
+            ),
         ),
         migrations.AddField(
-            model_name='requirementassessment',
-            name='review_observation',
-            field=models.TextField(blank=True, null=True, verbose_name='Review Observation'),
+            model_name="requirementassessment",
+            name="review_observation",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Review Observation"
+            ),
         ),
         migrations.AddField(
-            model_name='requirementnode',
-            name='question',
-            field=models.JSONField(blank=True, null=True, verbose_name='Question'),
+            model_name="requirementnode",
+            name="question",
+            field=models.JSONField(blank=True, null=True, verbose_name="Question"),
         ),
     ]

@@ -45,7 +45,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    
+
     def perform_create(self, serializer):
         serializer.save()
         solution = serializer.instance

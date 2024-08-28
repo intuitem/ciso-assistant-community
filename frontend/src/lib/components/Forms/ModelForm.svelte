@@ -744,7 +744,7 @@
 			label={m.entity()}
 			hide={initialData.entity}
 		/>
-		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />	
+		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
 		<Select
 			{form}
 			options={model.selectOptions['status']}

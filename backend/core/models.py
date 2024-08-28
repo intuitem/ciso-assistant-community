@@ -2370,7 +2370,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
-    
+
     class ReviewConclusion(models.TextChoices):
         NA = "na", _("N/A")
         OK = "ok", _("OK")
@@ -2437,9 +2437,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         choices=ReviewConclusion.choices,
         verbose_name=_("Review conclusion"),
         null=True,
-        blank=True
+        blank=True,
     )
-    review_observation = models.TextField(null=True, blank=True, verbose_name=_("Review Observation"))
+    review_observation = models.TextField(
+        null=True, blank=True, verbose_name=_("Review Observation")
+    )
 
     def __str__(self) -> str:
         return self.requirement.display_short
