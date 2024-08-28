@@ -102,6 +102,7 @@ export const RiskScenarioSchema = baseNamedObject({
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
 	treatment: z.string().optional(),
+	qualifications: z.string().optional().array().optional(),
 	strength_of_knowledge: z.number().default(-1).optional(),
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
@@ -213,7 +214,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 });
 
 export const EvidenceSchema = baseNamedObject({
-	attachment: z.instanceof(File).optional().nullable(),
+	attachment: z.any().optional().nullable(),
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),

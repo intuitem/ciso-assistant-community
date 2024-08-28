@@ -81,6 +81,10 @@ structlog.configure(
 logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
+FEATURE_FLAGS = {}
+MODULE_PATHS = {}
+ROUTES = {}
+
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
@@ -94,7 +98,7 @@ logger.info("BUILD: %s", BUILD)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -200,7 +204,7 @@ REST_FRAMEWORK = {
 }
 
 REST_KNOX = {
-    "SECURE_HASH_ALGORITHM": "cryptography.hazmat.primitives.hashes.SHA512",
+    "SECURE_HASH_ALGORITHM": "hashlib.sha512",
     "AUTH_TOKEN_CHARACTER_LENGTH": 64,
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,

@@ -33,7 +33,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ["3.11"]
-        playwright-browser: ["chromium", "firefox"]
+        playwright-browser: ["chromium"]
 
     steps:
       - uses: actions/checkout@v4

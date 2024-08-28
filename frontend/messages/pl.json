@@ -103,6 +103,7 @@
 	"urn": "URN",
 	"id": "ID",
 	"treatmentStatus": "Status leczenia",
+	"qualification": "Kwalifikacja",
 	"currentLevel": "Obecny poziom",
 	"residualLevel": "Poziom resztkowy",
 	"riskMatrix": "Macierz ryzyka",
@@ -653,5 +654,13 @@
 	"back": "Powrót",
 	"duplicate": "Duplikować",
 	"duplicateRiskAssessment": "Powielić ocenę ryzyka",
-	"size": "Rozmiar"
+	"size": "Rozmiar",
+	"financial": "Finansowy",
+	"legal": "Prawne",
+	"reputation": "Reputacja",
+	"operational": "Operacyjne",
+	"confidentiality": "Poufność",
+	"integrity": "Integralność",
+	"availability": "Dostępność",
+	"authenticity": "Autentyczność"
 }

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
+
 	import { page } from '$app/stores';
 	import { toCamelCase } from '$lib/utils/locales';
 	import { breadcrumbObject, pageTitle } from '$lib/utils/stores';
@@ -52,11 +54,7 @@
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
-				{#if Object.hasOwn(m, c.label)}
-					{m[c.label]()}
-				{:else}
-					{c.label}
-				{/if}
+				{safeTranslate(c.label)}
 			</span>
 		{:else}
 			<li class="crumb">
@@ -69,22 +67,14 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if Object.hasOwn(m, c.label)}
-							{m[c.label]()}
-						{:else}
-							{c.label}
-						{/if}
+						{safeTranslate(c.label)}
 					</a>
 				{:else}
 					<span class="text-sm text-gray-500 font-semibold antialiased" data-testid="crumb-item">
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if Object.hasOwn(m, c.label)}
-							{m[c.label]()}
-						{:else}
-							{c.label}
-						{/if}
+						{safeTranslate(c.label)}
 					</span>
 				{/if}
 			</li>
