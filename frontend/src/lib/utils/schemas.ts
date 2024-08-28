@@ -214,7 +214,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 });
 
 export const EvidenceSchema = baseNamedObject({
-	attachment: z.instanceof(File).optional().nullable(),
+	attachment: z.any().optional().nullable(),
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
