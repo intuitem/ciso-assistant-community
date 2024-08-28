@@ -2,12 +2,14 @@ from iam.sso.views import SSOSettingsViewSet
 from .views import *
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
 from iam.sso.saml.views import FinishACSView
+import importlib
 
 
 from django.urls import include, path
 from rest_framework import routers
 
 from ciso_assistant.settings import DEBUG
+from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
@@ -48,6 +50,16 @@ router.register(
     RequirementMappingSetViewSet,
     basename="requirement-mapping-sets",
 )
+
+ROUTES = settings.ROUTES
+
+for route in ROUTES:
+    view_module = importlib.import_module(ROUTES[route]["viewset"].rsplit(".", 1)[0])
+    router.register(
+        route,
+        getattr(view_module, ROUTES[route]["viewset"].rsplit(".")[-1]),
+        basename=ROUTES[route].get("basename"),
+    )
 
 urlpatterns = [
     path("", include(router.urls)),

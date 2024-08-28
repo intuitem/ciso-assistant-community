@@ -1,3 +1,4 @@
+import importlib
 from typing import Any
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
@@ -16,6 +17,40 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
+
+
+class SerializerFactory:
+    """Factory to get a serializer class from a list of modules.
+
+    Attributes:
+    modules (list): List of module names to search for the serializer.
+    """
+
+    def __init__(self, *modules: str):
+        self.modules = list(reversed(modules))  # Reverse to prioritize later modules
+
+    def get_serializer(self, base_name: str, action: str):
+        if action in ["list", "retrieve"]:
+            serializer_name = f"{base_name}ReadSerializer"
+        elif action in ["create", "update", "partial_update"]:
+            serializer_name = f"{base_name}WriteSerializer"
+        else:
+            return None
+
+        return self._get_serializer_class(serializer_name)
+
+    def _get_serializer_class(self, serializer_name: str):
+        for module_name in self.modules:
+            try:
+                serializer_module = importlib.import_module(module_name)
+                serializer_class = getattr(serializer_module, serializer_name)
+                return serializer_class
+            except (ModuleNotFoundError, AttributeError):
+                continue
+
+        raise ValueError(
+            f"Serializer {serializer_name} not found in any provided modules"
+        )
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
@@ -431,7 +466,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Folder
-        exclude = []
+        fields = "__all__"
 
 
 # Compliance Assessment

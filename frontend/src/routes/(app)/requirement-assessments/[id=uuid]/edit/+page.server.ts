@@ -5,7 +5,6 @@ import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
 import { getSecureRedirect } from '$lib/utils/helpers';
@@ -26,12 +25,7 @@ export const load = (async ({ fetch, params }) => {
 		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
 	).then((res) => res.json());
 	const requirement = await fetch(
-		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`,
-		{
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		}
+		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
 	).then((res) => res.json());
 	const parentRequirementNodeEndpoint = `${BASE_API_URL}/requirement-nodes/?urn=${requirement.parent_urn}`;
 	const parent = await fetch(parentRequirementNodeEndpoint)
@@ -347,8 +341,10 @@ export const actions: Actions = {
 
 		const endpoint = `${BASE_API_URL}/evidences/`;
 
-		const fileFields = Object.fromEntries(
-			Object.entries(form.data).filter(([, value]) => value instanceof File)
+		const model = getModelInfo(event.params.model!);
+
+		const fileFields: Record<string, File> = Object.fromEntries(
+			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
 		);
 
 		Object.keys(fileFields).forEach((key) => {
@@ -383,9 +379,8 @@ export const actions: Actions = {
 
 		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
-				if (file.size <= 0) {
-					continue;
-				}
+				if (!file) continue;
+				if (file.size <= 0) continue;
 				const fileUploadEndpoint = `${BASE_API_URL}/${'evidences'}/${createdObject.id}/upload/`;
 				const fileUploadRequestInitOptions: RequestInit = {
 					headers: {
