@@ -8,8 +8,9 @@ import { toCamelCase } from '$lib/utils/locales';
  * @param options The options to pass to the translation function.
  */
 export function safeTranslate(key: string, params = {}, options = {}): string {
-	if (Object.hasOwn(m, key)) {
-		return m[toCamelCase(key)](params, options);
+	const toCamekey = toCamelCase(key);
+	if (Object.hasOwn(m, toCamekey)) {
+		return m[toCamekey](params, options);
 	}
 	return key;
 }
