@@ -392,7 +392,15 @@ export function localItems(): LocalItems {
 		appliedControlNoLink: m.appliedControlNoLink(),
 		riskAcceptanceNoExpiryDate: m.riskAcceptanceNoExpiryDate(),
 		riskAcceptanceExpired: m.riskAcceptanceExpired(),
-		thirdParty: m.thirdParty()
+		thirdParty: m.thirdParty(),
+		financial: m.financial(),
+		legal: m.legal(),
+		reputation: m.reputation(),
+		operational: m.operational(),
+		confidentiality: m.confidentiality(),
+		integrity: m.integrity(),
+		availability: m.availability(),
+		authenticity: m.authenticity()
 	};
 	return LOCAL_ITEMS;
 }

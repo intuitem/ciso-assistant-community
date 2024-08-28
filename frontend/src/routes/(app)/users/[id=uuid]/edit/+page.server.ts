@@ -7,7 +7,6 @@ import { redirect, fail, type Actions } from '@sveltejs/kit';
 import { getModelInfo } from '$lib/utils/crud';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 import { localItems } from '$lib/utils/locales';
 import { zod } from 'sveltekit-superforms/adapters';
 

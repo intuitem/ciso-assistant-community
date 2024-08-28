@@ -103,6 +103,7 @@
 	"urn": "URN",
 	"id": "ID",
 	"treatmentStatus": "Treatment status",
+	"qualification": "Qualification",
 	"currentLevel": "Current level",
 	"residualLevel": "Residual level",
 	"riskMatrix": "Risk matrix",
@@ -686,5 +687,13 @@
 	"phone": "Phone",
 	"role": "Role",
 	"question": "Question",
-	"recipientEntity": "Recipient entity"
+	"recipientEntity": "Recipient entity",
+	"financial": "Financial",
+	"legal": "Legal",
+	"reputation": "Reputation",
+	"operational": "Operational",
+	"confidentiality": "Confidentiality",
+	"integrity": "Integrity",
+	"availability": "Availability",
+	"authenticity": "Authenticity"
 }

@@ -30,6 +30,10 @@
 	if (always_enabled) {
 		$isScored = true;
 	}
+	
+	$: if ($isScored) {
+		$value = $value ?? min_score;
+	}
 
 	$: if (max_score === 100) score_step = 5;
 
