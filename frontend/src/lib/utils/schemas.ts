@@ -179,7 +179,9 @@ export const RequirementAssessmentSchema = z.object({
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	review_conclusion: z.string().optional().nullable(),
+	review_observation: z.string().optional().nullable(),
 });
 
 export const UserEditSchema = z.object({
@@ -298,7 +300,7 @@ export const entityAssessmentsSchema = baseNamedObject({
 });
 
 export const solutionSchema = baseNamedObject({
-	provider_entity: z.string().optional(),
+	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	criticality: z.number().optional()
 });

@@ -298,7 +298,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{safeTranslate(toCamelCase(mappingInference.result))}
+										{safeTranslate(mappingInference.result)}
 									</span>
 								</p>
 								{#if mappingInference.annotation}
@@ -419,6 +419,13 @@
 				/>
 
 				<TextArea {form} field="observation" label="Observation" />
+				<Select
+					{form}
+					options={data.model.selectOptions['review_conclusion']}
+					field="review_conclusion"
+					label={m.reviewConclusion()}
+				/>
+				<TextArea {form} field="review_observation" label={m.reviewObservation()} />
 				<div class="flex flex-row justify-between space-x-4">
 					<button
 						class="btn bg-gray-400 text-white font-semibold w-full"

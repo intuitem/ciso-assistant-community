@@ -189,7 +189,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{safeTranslate(toCamelCase(key))}
+						{safeTranslate(key)}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -235,7 +235,7 @@
 								{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
 								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
-									{safeTranslate(toCamelCase((value.str || value.name) ?? value))}
+									{safeTranslate(value.str || value.name) ?? value)}
 								{:else}
 									{(value.str || value.name) ?? value}
 								{/if}

@@ -2370,6 +2370,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
+    
+    class ReviewConclusion(models.TextChoices):
+        NA = "na", _("N/A")
+        OK = "ok", _("OK")
+        WARNING = "warning", _("Warning")
+        BLOCKER = "blocker", _("Blocker")
 
     status = models.CharField(
         max_length=100,
@@ -2427,6 +2433,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         null=True,
         verbose_name=_("Answer"),
     )
+    review_conclusion = models.CharField(
+        choices=ReviewConclusion.choices,
+        verbose_name=_("Review conclusion"),
+        null=True,
+        blank=True
+    )
+    review_observation = models.TextField(null=True, blank=True, verbose_name=_("Review Observation"))
 
     def __str__(self) -> str:
         return self.requirement.display_short

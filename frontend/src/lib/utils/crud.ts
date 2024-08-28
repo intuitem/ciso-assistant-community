@@ -404,7 +404,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'requirementAssessments',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }, { field: 'result' }],
+		selectFields: [{ field: 'status' }, { field: 'result' }, { field: 'review_conclusion' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },

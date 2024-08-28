@@ -163,7 +163,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: safeTranslate(toCamelCase(modelVerboseName)).toLowerCase()
+					object: safeTranslate(modelVerboseName).toLowerCase()
 				})
 			},
 			event
@@ -206,7 +206,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDeletedObject({
-						object: safeTranslate(toCamelCase(toCamelCase(model))).toLowerCase()
+						object: safeTranslate(toCamelCase(model)).toLowerCase()
 					})
 				},
 				event

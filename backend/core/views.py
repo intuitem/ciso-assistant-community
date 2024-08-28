@@ -1675,6 +1675,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
+    
+    @action(detail=False, name="Get review conclusion choices")
+    def review_conclusion(self, request):
+        return Response(dict(RequirementAssessment.ReviewConclusion.choices))    
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
