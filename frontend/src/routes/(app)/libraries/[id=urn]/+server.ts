@@ -17,9 +17,6 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 	const data = await res.json();
 	const content = await contentRes.json();
 	data.objects = content;
-	if (!isLoaded) {
-		data.objects = JSON.parse(content);
-	}
 
 	return new Response(JSON.stringify(data), {
 		headers: {
