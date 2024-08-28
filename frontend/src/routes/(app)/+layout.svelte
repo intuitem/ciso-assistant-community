@@ -13,7 +13,7 @@
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
 </script>
 
-'<!-- App Shell -->
+<!-- App Shell -->
 <AppShell
 	slotPageContent="p-8 bg-gradient-to-br from-violet-100 to-slate-200"
 	regionPage="transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
