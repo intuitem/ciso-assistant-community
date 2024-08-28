@@ -121,7 +121,7 @@
 	] as const;
 </script>
 
-<TabGroup>
+<TabGroup class="">
 	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
 		>{m.summary()}</Tab
 	>
@@ -142,34 +142,57 @@
 				<section id="summary" class=" grid grid-cols-6 gap-4">
 					<Card
 						count={metrics.controls.total}
-						label="total controls"
+						label="total"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+						emphasis={true}
 					/>
-					<Card count={metrics.controls.done} label="active" href="#" help="this is interesting" />
+					<Card
+						count={metrics.controls.done}
+						label="active"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
 					<Card
 						count={metrics.controls.expired}
 						label="deprecated"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
 					/>
-					<div class="h-64 col-span-3 row-span-2">
+					<div class="h-64 col-span-3 row-span-2 bg-white">
 						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 					</div>
-					<Card count={counters.controls.to_do} label="to do" href="#" help="this is interesting" />
+					<Card
+						count={counters.controls.to_do}
+						label="to do"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
 					<Card
 						count={metrics.controls.in_progress}
 						label="in progress"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
 					/>
 					<Card
 						count={metrics.controls.on_hold}
 						label="on hold"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
 					/>
-					<div class="col-span-4 row-span-4">
+					<div class="col-span-4 row-span-4 bg-white">
 						<TreemapChart title="Compliance overview" tree={metrics.audits_tree} name="sunburst" />
 					</div>
 					<!---->
@@ -178,6 +201,9 @@
 						label="active audits"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
+						emphasis={true}
 					/>
 					<div></div>
 					<Card
@@ -185,23 +211,29 @@
 						label="compliant items"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
 					/>
 					<Card
 						count={metrics.compliance.non_compliant_items}
 						label="non compliant items"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
 					/>
 					<Card
 						count={metrics.compliance.evidences}
 						label="evidences"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
 					/>
 					<div class=""></div>
 					<div class=""></div>
 					<!---->
-					<div class=" col-span-2 row-span-2 h-80">
+					<div class=" col-span-2 row-span-2 h-80 bg-white">
 						<HalfDonutChart
 							name="current_h"
 							title="Current risks"
@@ -211,17 +243,22 @@
 					</div>
 					<Card
 						count={metrics.risk.assessments}
-						label="risk assessment"
+						label="assessments"
 						href="#"
 						help="this is interesting"
+						emphasis={true}
+						icon="fa-solid fa-biohazard"
+						section="risk"
 					/>
 					<Card
 						count={metrics.risk.scenarios}
 						label="scenarios"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-biohazard"
+						section="risk"
 					/>
-					<div class=" col-span-2 row-span-2">
+					<div class=" col-span-2 row-span-2 bg-white">
 						<HalfDonutChart
 							name="residual_h"
 							title="Residual risks"
@@ -234,6 +271,8 @@
 						label="mapped threats"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-biohazard"
+						section="risk"
 					/>
 					<!---->
 					<Card
@@ -241,6 +280,8 @@
 						label="risks accepted"
 						href="#"
 						help="this is interesting"
+						icon="fa-solid fa-biohazard"
+						section="risk"
 					/>
 					<div class=""></div>
 				</section>
