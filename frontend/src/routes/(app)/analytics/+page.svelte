@@ -7,7 +7,6 @@
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
 	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import SankeyChart from '$lib/components/Chart/SankeyChart.svelte';
 	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
