@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-26 08:54+0000\n"
+"POT-Creation-Date: 2024-08-28 13:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
 #: iam/models.py:67
 msgid "GLOBAL"
 msgstr ""
@@ -37,77 +38,77 @@ msgstr ""
 msgid "Folders"
 msgstr ""
 
-#: iam/models.py:209
+#: iam/models.py:212
 msgid "user group"
 msgstr ""
 
-#: iam/models.py:210 iam/models.py:317
+#: iam/models.py:213 iam/models.py:340
 msgid "user groups"
 msgstr ""
 
-#: iam/models.py:255
+#: iam/models.py:270
 msgid "Welcome to Ciso Assistant!"
 msgstr ""
 
-#: iam/models.py:294
+#: iam/models.py:317
 msgid "last name"
 msgstr ""
 
-#: iam/models.py:295
+#: iam/models.py:318
 msgid "first name"
 msgstr ""
 
-#: iam/models.py:300
+#: iam/models.py:323
 msgid "active"
 msgstr ""
 
-#: iam/models.py:303
+#: iam/models.py:326
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: iam/models.py:307
+#: iam/models.py:330
 msgid "date joined"
 msgstr ""
 
-#: iam/models.py:309
+#: iam/models.py:332
 msgid "superuser status"
 msgstr ""
 
-#: iam/models.py:312
+#: iam/models.py:335
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: iam/models.py:320
+#: iam/models.py:343
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
 msgstr ""
 
-#: iam/models.py:335
+#: iam/models.py:358
 msgid "user"
 msgstr ""
 
-#: iam/models.py:336
+#: iam/models.py:359
 msgid "users"
 msgstr ""
 
-#: iam/models.py:479
+#: iam/models.py:502
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:494
+#: iam/models.py:517
 msgid "Domain"
 msgstr ""
 
-#: iam/models.py:500
+#: iam/models.py:523
 msgid "Role"
 msgstr ""
 
-#: iam/models.py:501
+#: iam/models.py:524
 msgid "sub folders are visible"
 msgstr ""
 
@@ -153,4 +154,60 @@ msgstr ""
 
 #: iam/views.py:96
 msgid "CISO Assistant: Password Reset"
+msgstr ""
+
+#: tprm/models.py:19
+msgid "Owned folders"
+msgstr ""
+
+#: tprm/models.py:26 tprm/models.py:62
+msgid "Entity"
+msgstr ""
+
+#: tprm/models.py:27
+msgid "Entities"
+msgstr ""
+
+#: tprm/models.py:31 tprm/models.py:94
+msgid "Criticality"
+msgstr ""
+
+#: tprm/models.py:32
+msgid "Penetration"
+msgstr ""
+
+#: tprm/models.py:33
+msgid "Dependency"
+msgstr ""
+
+#: tprm/models.py:34
+msgid "Maturity"
+msgstr ""
+
+#: tprm/models.py:35
+msgid "Trust"
+msgstr ""
+
+#: tprm/models.py:48
+msgid "Entity assessment"
+msgstr ""
+
+#: tprm/models.py:49
+msgid "Entity assessments"
+msgstr ""
+
+#: tprm/models.py:83
+msgid "Provider entity"
+msgstr ""
+
+#: tprm/models.py:89
+msgid "Recipient entity"
+msgstr ""
+
+#: tprm/models.py:99
+msgid "Solution"
+msgstr ""
+
+#: tprm/models.py:100
+msgid "Solutions"
 msgstr ""

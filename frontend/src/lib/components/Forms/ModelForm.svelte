@@ -728,6 +728,15 @@
 	{:else if URLModel === 'entity-assessments'}
 		<AutocompleteSelect
 			{form}
+			options={getOptions({ objects: model.foreignKeys['project'] })}
+			field="project"
+			cacheLock={cacheLocks['project']}
+			bind:cachedValue={formDataCache['project']}
+			label={m.project()}
+			hide={initialData.project}
+		/>
+		<AutocompleteSelect
+			{form}
 			options={getOptions({ objects: model.foreignKeys['entity'] })}
 			field="entity"
 			cacheLock={cacheLocks['entity']}
@@ -735,6 +744,7 @@
 			label={m.entity()}
 			hide={initialData.entity}
 		/>
+		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />	
 		<Select
 			{form}
 			options={model.selectOptions['status']}
@@ -745,27 +755,18 @@
 		/>
 		<TextField
 			{form}
+			field="version"
+			label={m.version()}
+			cacheLock={cacheLocks['version']}
+			bind:cachedValue={formDataCache['version']}
+		/>
+		<TextField
+			{form}
 			field="reference_link"
 			label={m.referenceLink()}
 			helpText={m.linkHelpText()}
 			cacheLock={cacheLocks['reference_link']}
 			bind:cachedValue={formDataCache['reference_link']}
-		/>
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['project'] })}
-			field="project"
-			cacheLock={cacheLocks['project']}
-			bind:cachedValue={formDataCache['project']}
-			label={m.project()}
-			hide={initialData.project}
-		/>
-		<TextField
-			{form}
-			field="version"
-			label={m.version()}
-			cacheLock={cacheLocks['version']}
-			bind:cachedValue={formDataCache['version']}
 		/>
 		<TextField
 			type="date"
@@ -822,7 +823,6 @@
 			bind:cachedValue={formDataCache['evidence']}
 			label={m.evidence()}
 		/>
-		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
 		<Score {form} label={m.penetration()} field="penetration" always_enabled={true} max_score={5} />
 		<Score {form} label={m.dependency()} field="dependency" always_enabled={true} max_score={5} />
 		<Score {form} label={m.maturity()} field="maturity" always_enabled={true} max_score={5} />

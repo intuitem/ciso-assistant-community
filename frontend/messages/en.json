@@ -695,5 +695,7 @@
 	"confidentiality": "Confidentiality",
 	"integrity": "Integrity",
 	"availability": "Availability",
-	"authenticity": "Authenticity"
+	"authenticity": "Authenticity",
+	"reviewObservation": "Review observation",
+	"reviewConclusion": "Review conclusion"
 }

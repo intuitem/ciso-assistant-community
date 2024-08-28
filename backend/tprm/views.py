@@ -45,3 +45,9 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
+    
+    def perform_create(self, serializer):
+        serializer.save()
+        solution = serializer.instance
+        solution.recipient_entity = Entity.objects.get(builtin=True)
+        solution.save()
