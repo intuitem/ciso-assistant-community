@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
