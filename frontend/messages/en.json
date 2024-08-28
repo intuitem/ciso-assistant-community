@@ -697,5 +697,10 @@
 	"availability": "Availability",
 	"authenticity": "Authenticity",
 	"reviewObservation": "Review observation",
-	"reviewConclusion": "Review conclusion"
+	"reviewObservationSemiColon": "Review observation:",
+	"reviewConclusion": "Review conclusion",
+	"reviewConclusionSemiColon": "Review conclusion:",
+	"review": "Review",
+	"conclusionSemiColon": "Conclusion:",
+	"observationSemiColon": "Observation:"
 }

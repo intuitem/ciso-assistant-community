@@ -7,8 +7,9 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, RadioGroup, RadioItem, Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue, getSecureRedirect } from '$lib/utils/helpers';
+	import Question from '$lib/components/Forms/Question.svelte';
 
 	export let data: PageData;
 	const threats = data.requirement.threats;
@@ -256,10 +257,34 @@
 			</svelte:fragment>
 		</TabGroup>
 	</div>
+	{#if Object.keys(data.requirementAssessment.answer).length !== 0}
+		<h1 class="font-semibold text-sm">{m.question()}</h1>
+		{#each data.requirementAssessment.answer.questions as question}
+			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
+				{question.text}
+				{#if question.answer}
+					<p class="text-sm font-semibold text-primary-500">{question.answer}</p>
+				{:else}
+					{m.undefined()}
+				{/if}
+			</li>
+		{/each}
+	{/if}
 	{#if data.requirementAssessment.observation}
-		<div class="card p-4 space-y-2">
-			<h1 class="font-semibold">{m.observation()}</h1>
+		<div class="card p-4 space-y-2 variant-glass-primary">
+			<h1 class="font-semibold text-sm">{m.observation()}</h1>
 			<span class="text-sm">{data.requirementAssessment.observation}</span>
+		</div>
+	{/if}
+	{#if data.requirementAssessment.review_conclusion || data.requirementAssessment.review_observation}
+		<div class="card p-4 space-y-2 variant-glass-primary">
+			<h1 class="font-semibold text-sm">{m.review()}</h1>
+			<p class="text-sm">
+				{m.conclusionSemiColon()} <span>{data.requirementAssessment.review_conclusion}</span>
+			</p>
+			<p class="text-sm">
+				{m.observationSemiColon()} <span>{data.requirementAssessment.review_observation}</span>
+			</p>
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
