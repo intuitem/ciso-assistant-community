@@ -169,7 +169,7 @@
 						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 					</div>
 					<Card
-						count={counters.controls.to_do}
+						count={metrics.controls.to_do}
 						label="to do"
 						href="#"
 						help="this is interesting"

@@ -66,4 +66,12 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+{#if tree.length === 0}
+	<div class="flex flex-col justify-center items-center h-full">
+		<span class="text-center text-gray-600"
+			>No enough compliance data for now. Refresh once you have more content.</span
+		>
+	</div>
+{:else}
+	<div id={chart_id} class="{width} {height} {classesContainer}" />
+{/if}
