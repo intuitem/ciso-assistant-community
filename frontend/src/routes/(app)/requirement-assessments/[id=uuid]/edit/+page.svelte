@@ -35,7 +35,7 @@
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
-	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
+	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import * as m from '$paraglide/messages';
 	import { hideSuggestions } from '$lib/utils/stores';
