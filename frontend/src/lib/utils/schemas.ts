@@ -181,7 +181,7 @@ export const RequirementAssessmentSchema = z.object({
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	review_conclusion: z.string().optional().nullable(),
-	review_observation: z.string().optional().nullable(),
+	review_observation: z.string().optional().nullable()
 });
 
 export const UserEditSchema = z.object({

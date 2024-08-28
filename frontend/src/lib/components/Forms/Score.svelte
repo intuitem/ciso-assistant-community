@@ -30,7 +30,7 @@
 	if (always_enabled) {
 		$isScored = true;
 	}
-	
+
 	$: if ($isScored) {
 		$value = $value ?? min_score;
 	}
