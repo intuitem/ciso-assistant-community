@@ -291,7 +291,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: model })
+				message: m.successfullyCreatedObject({ object: model.verboseName.toLowerCase() })
 			},
 			event
 		);
