@@ -60,7 +60,7 @@
 				let:option
 			>
 				{#if translateOptions}
-					{safeTranslate(toCamelCase(option.label))}
+					{safeTranslate(option.label)}
 				{:else}
 					{option.label}
 				{/if}

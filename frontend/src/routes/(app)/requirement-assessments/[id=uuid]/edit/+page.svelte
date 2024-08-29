@@ -297,7 +297,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{safeTranslate(toCamelCase(mappingInference.result))}
+										{safeTranslate(mappingInference.result)}
 									</span>
 								</p>
 								{#if mappingInference.annotation}

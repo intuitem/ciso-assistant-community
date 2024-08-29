@@ -76,14 +76,14 @@
 			style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
 				'#d1d5db'};"
 		>
-			{safeTranslate(toCamelCase(data.requirementAssessment.status))}
+			{safeTranslate(data.requirementAssessment.status)}
 		</span>
 		<span
 			class="badge {classesText} h-fit"
 			style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
 				'#d1d5db'};"
 		>
-			{safeTranslate(toCamelCase(data.requirementAssessment.result))}
+			{safeTranslate(data.requirementAssessment.result)}
 		</span>
 		{#if data.requirementAssessment.is_scored}
 			<ProgressRadial
@@ -204,7 +204,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{safeTranslate(toCamelCase(mappingInference.result))}
+										{safeTranslate(mappingInference.result)}
 									</span>
 								</p>
 								{#if mappingInference.annotation}
