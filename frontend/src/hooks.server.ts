@@ -7,8 +7,6 @@ import { languageTag, setLanguageTag } from '$paraglide/runtime';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
 
-import { loadFeatureFlags } from '$lib/feature-flags';
-
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
 	if (!csrfToken) {
