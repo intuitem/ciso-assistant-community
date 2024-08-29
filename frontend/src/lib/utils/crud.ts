@@ -1,5 +1,6 @@
 // define the content of forms
 
+import * as m from '$paraglide/messages';
 import type { urlModel } from './types';
 import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
@@ -537,10 +538,12 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		name: {
 			key: 'status',
 			values: {
-				Planned: { text: 'planned', cssClasses: 'badge bg-blue-200' },
-				Active: { text: 'active', cssClasses: 'badge bg-green-200' },
-				Inactive: { text: 'inactive', cssClasses: 'badge bg-red-300' },
-				null: { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
+				in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
+				active: { text: 'active', cssClasses: 'badge bg-green-200' },
+				on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+				deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
+				'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
 			}
 		}
 	},
