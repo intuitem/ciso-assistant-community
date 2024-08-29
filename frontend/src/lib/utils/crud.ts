@@ -127,6 +127,7 @@ export interface ModelMapEntry {
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
+	fileFields?: string[];
 	filters?: SelectField[];
 	path?: string;
 }
@@ -367,6 +368,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'evidences',
 		verboseName: 'Evidence',
 		verboseNamePlural: 'Evidences',
+		fileFields: ['attachment'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -596,7 +598,7 @@ export const urlParamModelSelectFields = (model: string): SelectField[] => {
 	return URL_MODEL_MAP[model]?.selectFields || [];
 };
 
-export const getModelInfo = (model: urlModel): ModelMapEntry => {
+export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	const map = URL_MODEL_MAP[model] || {};
 	map['urlModel'] = model;
 	return map;
