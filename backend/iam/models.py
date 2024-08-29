@@ -151,6 +151,7 @@ class Folder(NameDescriptionMixin):
             ["project", "folder"],
             ["risk_assessment", "project", "folder"],
             ["risk_scenario", "risk_assessment", "project", "folder"],
+            ["compliance_assessment", "project", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -222,23 +223,24 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
         }
 
-    @staticmethod
-    def get_user_groups(user):
-        # pragma pylint: disable=no-member
-        """get the list of user groups containing the user given in parameter"""
-        user_group_list = []
-        for user_group in UserGroup.objects.all():
-            if user in user_group.user_set.all():
-                user_group_list.append(user_group)
-        return user_group_list
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, mailing=True, **extra_fields):
+    def _create_user(
+        self,
+        email: str,
+        password: str,
+        mailing: bool,
+        initial_group: UserGroup,
+        **extra_fields,
+    ):
         """
         Create and save a user with the given email, and password.
+        If mailing is set, send a welcome mail
+        If initial_group is given, put the new user in this group
+        On mail error, raise a corresponding exception, but the user is properly created
+        TODO: find a better way to manage mailing error
         """
 
         validate_email(email)
@@ -254,7 +256,8 @@ class UserManager(BaseUserManager):
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
         user.save(using=self._db)
-
+        if initial_group:
+            initial_group.user_set.add(user)
         logger.info("user created sucessfully", user=user)
 
         if mailing:
@@ -268,24 +271,41 @@ class UserManager(BaseUserManager):
                 raise exception
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email: str, password: str = None, **extra_fields):
+        """create a normal user following Django convention"""
         logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(
+            email=email,
+            password=password,
+            mailing=(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            initial_group=None,
+            **extra_fields,
+        )
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email: str, password: str = None, **extra_fields):
+        """create a superuser following Django convention"""
         logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        extra_fields.setdefault(
-            "mailing", not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)
+        superuser = self._create_user(
+            email=email,
+            password=password,
+            mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
+            initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            **extra_fields,
         )
-        superuser = self._create_user(email, password, **extra_fields)
-        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
+
+
+class CaseInsensitiveUserManager(UserManager):
+    def get_by_natural_key(self, username):
+        """
+        By default, Django does a case-sensitive check on usernames™.
+        Overriding this method fixes it.
+        """
+        return self.get(**{self.model.USERNAME_FIELD + "__iexact": username})
 
 
 class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
@@ -295,6 +315,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
+    is_sso = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -320,7 +341,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "granted to each of their user groups."
         ),
     )
-    objects = UserManager()
+    objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
@@ -434,13 +455,8 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 raise primary_exception
 
     def get_user_groups(self):
-        # pragma pylint: disable=no-member
-        """get the list of user groups containing the user"""
-        user_group_list = []
-        for user_group in UserGroup.objects.all():
-            if self in user_group.user_set.all():
-                user_group_list.append((user_group.__str__(), user_group.builtin))
-        return user_group_list
+        """get the list of user groups containing the user in the form (group_name, builtin)"""
+        return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
 
     @property
     def has_backup_permission(self) -> bool:
@@ -537,6 +553,22 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     return True
                 f = f.parent_folder
         return False
+
+    @staticmethod
+    def is_object_readable(
+        user: AbstractBaseUser | AnonymousUser, object_type: Any, id: uuid
+    ) -> bool:
+        """
+        Determines if a user has read on an object by id
+        """
+        obj = object_type.objects.filter(id=id).first()
+        if not obj:
+            return False
+        class_name = object_type.__name__.lower()
+        permission = Permission.objects.get(codename="view_" + class_name)
+        return RoleAssignment.is_access_allowed(
+            user, permission, Folder.get_folder(obj)
+        )
 
     @staticmethod
     def get_accessible_folders(
@@ -670,14 +702,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def is_user_assigned(self, user) -> bool:
         """Determines if a user is assigned to the role assignment"""
         return user == self.user or (
-            self.user_group and self.user_group in UserGroup.get_user_groups(user)
+            self.user_group and self.user_group in user.user_groups.all()
         )
 
     @staticmethod
     def get_role_assignments(user):
         """get all role assignments attached to a user directly or indirectly"""
         assignments = list(user.roleassignment_set.all())
-        for user_group in UserGroup.get_user_groups(user):
+        for user_group in user.user_groups.all():
             assignments += list(user_group.roleassignment_set.all())
         return assignments
 

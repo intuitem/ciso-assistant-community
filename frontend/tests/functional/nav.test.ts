@@ -1,6 +1,7 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { localItems } from '../../src/lib/utils/locales.js';
-import { languageTag, setLanguageTag, availableLanguageTags } from '../../src/paraglide/runtime.js';
-import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
+import { availableLanguageTags, setLanguageTag } from '../../src/paraglide/runtime.js';
+import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	test.slow();
@@ -12,7 +13,6 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 
 	await test.step('navigation link are working properly', async () => {
-		const locals = localItems(languageTag());
 		for await (const [key, value] of sideBar.items) {
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {
@@ -27,8 +27,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 						continue;
 					}
 					await expect(page).toHaveURL(item.href);
-					await logedPage.hasTitle(locals[item.name]);
-					await logedPage.hasBreadcrumbPath([locals[item.name]]);
+					await logedPage.hasTitle(safeTranslate(item.name));
+					await logedPage.hasBreadcrumbPath([safeTranslate(item.name)]);
 				}
 			}
 		}
@@ -45,7 +45,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await logedPage.checkForUndefinedText();
 		await expect(sideBar.profileButton).toBeVisible();
 		await sideBar.profileButton.click();
-		await expect(sideBar.morePanel).toHaveAttribute('inert');
+		await expect(sideBar.morePanel).not.toBeVisible();
 		await expect(page).toHaveURL('/my-profile');
 		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
 		await logedPage.checkForUndefinedText();
@@ -60,10 +60,13 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 	await test.step('translation panel is working properly', async () => {
 		await analyticsPage.goto();
-		for await (const languageTag of availableLanguageTags.toSorted((a, b) => {
-			// English is always tested at last to ensure a clean state at the end
-			return a === 'en' ? 1 : b === 'en' ? -1 : a.localeCompare(b);
-		})) {
+		const locales = [...availableLanguageTags];
+		const index = locales.indexOf('en');
+		if (index !== -1) {
+			locales.splice(index, 1);
+			locales.push('en');
+		}
+		for (const languageTag of locales) {
 			await sideBar.moreButton.click();
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
@@ -91,7 +94,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 });
 
-test('sidebar component tests', async ({ logedPage, sideBar, page }) => {
+test('sidebar component tests', async ({ logedPage, sideBar }) => {
 	await test.step('sidebar can be collapsed and expanded', async () => {
 		sideBar.toggleButton.click();
 		await expect(sideBar.toggleButton).toHaveClass(/rotate-180/);

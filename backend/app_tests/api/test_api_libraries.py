@@ -1,6 +1,8 @@
+import json
 import pytest
 from rest_framework.test import APIClient
-from core.models import Framework
+from app_tests.test_vars import TEST_FRAMEWORK_URN, TEST_RISK_MATRIX_URN
+from core.models import Framework, StoredLibrary
 from core.models import RiskMatrix
 from iam.models import Folder
 from rest_framework import status
@@ -17,7 +19,7 @@ class TestLibrariesUnauthenticated:
     def test_get_libraries(self):
         """test to get libraries from the API without authentication"""
 
-        EndpointTestsQueries.get_object(self.client, "Libraries")
+        EndpointTestsQueries.get_object(self.client, "Stored libraries")
 
     def test_import_frameworks(self):
         """test to import libraries with the API without authentication"""
@@ -50,7 +52,7 @@ class TestLibrariesAuthenticated:
         """test to get libraries from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            test.client, "Libraries", base_count=-1, user_group=test.user_group
+            test.client, "Stored libraries", base_count=-1, user_group=test.user_group
         )
 
     def test_import_frameworks(self, test):
@@ -58,13 +60,18 @@ class TestLibrariesAuthenticated:
 
         # Uses the API endpoint to get library details with the admin client
         lib_detail_response = test.admin_client.get(
-            EndpointTestsUtils.get_object_urn("Framework")
-        ).json()["objects"]["framework"]
+            EndpointTestsUtils.get_stored_library_content(
+                test.client, TEST_FRAMEWORK_URN
+            )
+        )
+        lib_detail_response = lib_detail_response.content
+        lib_detail_response = json.loads(lib_detail_response)
+        lib_detail_response = lib_detail_response["framework"]
 
-        # Asserts that the library is not already imported
+        # Asserts that the library is not already loaded
         assert (
             Framework.objects.all().count() == 0
-        ), "libraries are already imported in the database"
+        ), "libraries are already loaded in the database"
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Frameworks",
@@ -78,12 +85,12 @@ class TestLibrariesAuthenticated:
         assert Framework.objects.all().count() == (
             1
             if not EndpointTestsUtils.expected_request_response(
-                "add", "library", str(test.folder), test.user_group
+                "add", "loadedlibrary", str(test.folder), test.user_group
             )[0]
             else 0
         ), "Frameworks are not correctly imported in the database"
 
-        # Uses the API endpoint to assert that the library was properly imported
+        # Uses the API endpoint to assert that the library was properly loaded
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Frameworks",
@@ -96,7 +103,7 @@ class TestLibrariesAuthenticated:
             base_count=1,
             user_group=test.user_group,
             fails=EndpointTestsUtils.expected_request_response(
-                "add", "library", str(test.folder), test.user_group
+                "add", "loadedlibrary", str(test.folder), test.user_group
             )[0],
         )
 
@@ -121,13 +128,18 @@ class TestLibrariesAuthenticated:
 
         # Uses the API endpoint to get library details with the admin client
         lib_detail_response = test.admin_client.get(
-            EndpointTestsUtils.get_object_urn("Risk matrix")
-        ).json()["objects"]["risk_matrix"][0]
+            EndpointTestsUtils.get_stored_library_content(
+                test.client, TEST_RISK_MATRIX_URN
+            )
+        )
+        lib_detail_response = lib_detail_response.content
+        lib_detail_response = json.loads(lib_detail_response)
+        lib_detail_response = lib_detail_response["risk_matrix"][0]
 
-        # Asserts that the library is not already imported
+        # Asserts that the library is not already loaded
         assert (
             RiskMatrix.objects.all().count() == 0
-        ), "libraries are already imported in the database"
+        ), "libraries are already loaded in the database"
         EndpointTestsQueries.Auth.get_object(
             test.client, "Risk matrices", user_group=test.user_group
         )
@@ -139,12 +151,12 @@ class TestLibrariesAuthenticated:
         assert RiskMatrix.objects.all().count() == (
             1
             if not EndpointTestsUtils.expected_request_response(
-                "add", "library", str(test.folder), test.user_group
+                "add", "loadedlibrary", str(test.folder), test.user_group
             )[0]
             else 0
         ), "Risk matrices are not correctly imported in the database"
 
-        # Uses the API endpoint to assert that the library was properly imported
+        # Uses the API endpoint to assert that the library was properly loaded
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Risk matrices",
@@ -158,7 +170,7 @@ class TestLibrariesAuthenticated:
             base_count=1,
             user_group=test.user_group,
             fails=EndpointTestsUtils.expected_request_response(
-                "add", "library", str(test.folder), test.user_group
+                "add", "loadedlibrary", str(test.folder), test.user_group
             )[0],
         )
 

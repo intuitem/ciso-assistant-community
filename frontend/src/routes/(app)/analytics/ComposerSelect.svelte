@@ -15,7 +15,11 @@
 
 	onMount(async () => {
 		const riskAssessments = await fetch('/risk-assessments').then((res) => res.json());
-		options = getOptions({ objects: riskAssessments });
+		options = getOptions({
+			objects: riskAssessments,
+			label: 'str',
+			extra_fields: [['project', 'str']]
+		});
 	});
 </script>
 

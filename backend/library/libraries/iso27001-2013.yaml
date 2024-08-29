@@ -1,0 +1,1330 @@
+urn: urn:intuitem:risk:library:iso27001-2013
+locale: en
+ref_id: ISO/IEC 27001:2013
+name: International standard ISO/IEC 27001:2013
+description: "Information security, cybersecurity and privacy protection \u2014 Information\
+  \ security management systems \u2014 Requirements"
+copyright: See https://www.iso.org/standard/27001
+version: 1
+provider: ISO/IEC
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso27001-2013
+    ref_id: ISO/IEC 27001:2013
+    name: International standard ISO/IEC 27001:2013
+    description: "Information security, cybersecurity and privacy protection \u2014\
+      \ Information security management systems \u2014 Requirements"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      name: Core
+      assessable: false
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '4'
+      name: 'Context of the organization '
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Understand the context and the organization.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: Determine interested parties and understand their requirements
+        in relation with the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.3'
+      name: Determining the scope of the information security management system
+      description: Determine the scope of the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.SCOPE
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:4
+      ref_id: '4.4'
+      name: Information security management system
+      description: Design and implement the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '5'
+      name: Leadership
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      description: Ensure top management provides adequate commitment and resources
+        for the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
+      - urn:intuitem:risk:function:doc-pol:DOC.COM
+      - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+      - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      ref_id: '5.2'
+      name: ' Policy'
+      description: Define an adequate security policy.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:5
+      ref_id: '5.3'
+      name: Organizational roles, responsibilities and authorities
+      description: Ensure roles and responsibilities are properly defined.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '6'
+      name: Planning
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      ref_id: 6.1.1
+      name: General
+      description: When planning for the ISMS, take into account risks and opportunities,
+        and actions to address them.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      ref_id: 6.1.2
+      name: Information security risk assessment requirement
+      description: Establish a proper risk assessment process.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6.1
+      ref_id: 6.1.3
+      name: Information security risk treatment
+      description: Establish a proper risk treatment process, and produce a Statement
+        of Applicability.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.RISK
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.SOA
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:6
+      ref_id: '6.2'
+      name: Information security objectives and planning to achieve them
+      description: Define and maintain relevant security objectives.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      - urn:intuitem:risk:function:doc-pol:DOC.SO_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '7'
+      name: ' Support'
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.1'
+      name: Resources
+      description: Provide adequate resources for the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
+      - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.2'
+      name: Competence
+      description: Manage competence of workforce interacting with the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.EDUC
+      - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.3'
+      name: Awareness
+      description: Manage awareness of all employees and contractors.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.EDUC
+      - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.4'
+      name: Communication
+      description: Manage communication relevant to the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.COM
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7
+      ref_id: '7.5'
+      name: Documented Information
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      ref_id: 7.5.1
+      name: General
+      description: Document adequate information relevant to the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      ref_id: 7.5.2
+      name: Creating and updating documented information
+      description: Identify properly the documents, and manage reviews and approvals.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: Ensure the ISMS documentation is available and adequately protected.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '8'
+      name: Operations
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      description: Define and implement adequate processes, and control them.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      ref_id: '8.2'
+      name: Information security risk assessment
+      description: Perform risk assessments periodically.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:8
+      ref_id: '8.3'
+      name: Information security risk treatment
+      description: Implement risk treatment plan.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '9'
+      name: Performance evaluation
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis, evaluation
+      description: Implement relevant monitoring, and evaluate performance and effectiveness
+        of the ISMS.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MONITOR
+      - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      ref_id: '9.2'
+      name: Internal audit
+      description: 'Perform regular internal audits of the ISMS.
+
+        Manage the internal audit programme appropriately.'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.AUDIT
+      - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:9
+      ref_id: '9.3'
+      name: Management review
+      description: 'Organize management reviews of the ISMS periodically.
+
+        Include appropriate data for effective management reviews.
+
+        Document the results of the management reviews.'
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:10
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:core
+      ref_id: '10'
+      name: Improvement
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:10
+      ref_id: '10.1'
+      name: Nonconformity and corrective action
+      description: Manage nonconformities appropriately.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+      - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
+      - urn:intuitem:risk:function:doc-pol:DOC.NC_LOG
+      - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
+      - urn:intuitem:risk:function:doc-pol:DOC.RACI
+      - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:10
+      ref_id: '10.2'
+      name: "Continual improvement\_"
+      description: Improve the ISMS continuously.
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAIN
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      name: Annex A
+      assessable: false
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.5
+      name: Information security policies
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5
+      ref_id: A.5.1
+      name: Management direction for information security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1
+      ref_id: A.5.1.1
+      name: Policies for information security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.5.1
+      ref_id: A.5.1.2
+      name: Review of the policies for information security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.6
+      name: Organization of information security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6
+      ref_id: A.6.1
+      name: Internal organization
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.1
+      name: Information security roles and responsibilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.2
+      name: Segregation of duties
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.3
+      name: Contact with authorities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.4
+      name: Contact with special interest groups
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.1
+      ref_id: A.6.1.5
+      name: Information security in project management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6
+      ref_id: A.6.2
+      name: Mobile devices and teleworking
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2
+      ref_id: A.6.2.1
+      name: Mobile device policy
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.6.2
+      ref_id: A.6.2.2
+      name: Teleworking
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.7
+      name: Human resource security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      ref_id: A.7.1
+      name: Prior to employment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1
+      ref_id: A.7.1.1
+      name: Screening
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.1
+      ref_id: A.7.1.2
+      name: ' Terms and conditions of employment'
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      ref_id: A.7.2
+      name: During employment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      ref_id: A.7.2.1
+      name: Management responsibilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      ref_id: A.7.2.2
+      name: Information security awareness, education and training
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.2
+      ref_id: A.7.2.3
+      name: Disciplinary process
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7
+      ref_id: A.7.3
+      name: Termination and change of employment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.7.3
+      ref_id: A.7.3.1
+      name: Termination or change of employment responsibilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.8
+      name: Asset management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      ref_id: A.8.1
+      name: Responsibility for assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.1
+      name: Inventory of assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.2
+      name: Ownership of assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.3
+      name: Acceptable use of assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.1
+      ref_id: A.8.1.4
+      name: Return of assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      ref_id: A.8.2
+      name: Information classification
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      ref_id: A.8.2.1
+      name: Classification of information
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      ref_id: A.8.2.2
+      name: Labelling of information
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.2
+      ref_id: A.8.2.3
+      name: Handling of assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8
+      ref_id: A.8.3
+      name: Media handling
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      ref_id: A.8.3.1
+      name: Management of removable media
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      ref_id: A.8.3.2
+      name: Disposal of media
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.8.3
+      ref_id: A.8.3.3
+      name: Physical media transfer
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.9
+      name: Access control
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.1
+      name: Business requirements of access control
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1
+      ref_id: A.9.1.1
+      name: Access control policy
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.1
+      ref_id: A.9.1.2
+      name: Access to networks and network services
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.2
+      name: User access management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.1
+      name: User registration and de-registration
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.2
+      name: User access provisioning
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.3
+      name: Management of privileged access rights
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.4
+      name: Management of secret authentication information of users
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.5
+      name: Review of user access rights
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.2
+      ref_id: A.9.2.6
+      name: Removal or adjustment of access rights
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.3
+      name: User responsibilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.3
+      ref_id: A.9.3.1
+      name: Use of secret authentication information
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9
+      ref_id: A.9.4
+      name: System and application access control
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.1
+      name: Information access restriction
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.2
+      name: Secure log-on procedures
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.3
+      name: Password management system
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.4
+      name: Use of privileged utility programs
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.9.4
+      ref_id: A.9.4.5
+      name: Access control to program source code
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.10
+      name: Cryptography
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10
+      ref_id: A.10.1
+      name: Cryptographic controls
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1
+      ref_id: A.10.1.1
+      name: Policy on the use of cryptographic controls
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.10.1
+      ref_id: A.10.1.2
+      name: Key management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.11
+      name: Physical and environmental security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11
+      ref_id: A.11.1
+      name: Secure areas
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.1
+      name: Physical security perimeter
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.2
+      name: Physical entry controls
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.3
+      name: Securing offices, rooms and facilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.4
+      name: Protecting against external and environmental threats
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.5
+      name: Working in secure areas
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.1
+      ref_id: A.11.1.6
+      name: Delivery and loading areas
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11
+      ref_id: A.11.2
+      name: Equipment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.1
+      name: Equipment siting and protection
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.2
+      name: Supporting utilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.3
+      name: Cabling security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.4
+      name: Equipment maintenance
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.5
+      name: Removal of assets
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.6
+      name: Security of equipment and assets off-premises
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.7
+      name: Secure disposal or reuse of equipment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.8
+      name: Unattended user equipment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.11.2
+      ref_id: A.11.2.9
+      name: Clear desk and clear screen policy
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.12
+      name: Operations security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.1
+      name: Operational procedures and responsibilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.1
+      name: Documented operating procedures
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.2
+      name: Change management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.3
+      name: Capacity management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.1
+      ref_id: A.12.1.4
+      name: Separation of development, testing and operational environments
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.2
+      name: Protection from malware
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.2
+      ref_id: A.12.2.1
+      name: Controls against malware
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.3
+      name: Backup
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.3
+      ref_id: A.12.3.1
+      name: Information backup
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.4
+      name: Logging and monitoring
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.1
+      name: Event logging
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.2
+      name: Protection of log information
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.3
+      name: Administrator and operator logs
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.4
+      ref_id: A.12.4.4
+      name: Clock synchronisation
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.5
+      name: Control of operational software
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.5
+      ref_id: A.12.5.1
+      name: Installation of software on operational systems
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.6
+      name: Technical vulnerability management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6
+      ref_id: A.12.6.1
+      name: Management of technial vulnerabilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.6
+      ref_id: A.12.6.2
+      name: Restrictions on software installation
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12
+      ref_id: A.12.7
+      name: Information systems audit considerations
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.12.7
+      ref_id: A.12.7.1
+      name: Information systems audit controls
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.13
+      name: Communications security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13
+      ref_id: A.13.1
+      name: Network security management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      ref_id: A.13.1.1
+      name: Network controls
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      ref_id: A.13.1.2
+      name: Security of network services
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.1
+      ref_id: A.13.1.3
+      name: Segregation in networks
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13
+      ref_id: A.13.2
+      name: Information transfer
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.1
+      name: Information transfer policies and procedures
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.2
+      name: Agreements on information transfer
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.3
+      name: Electronic messaging
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.13.2
+      ref_id: A.13.2.4
+      name: Confidentiality or non-disclosure agreements
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.14
+      name: System acquisition, development and maintenance
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      ref_id: A.14.1
+      name: Security requirements of information systems
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      ref_id: A.14.1.1
+      name: Information security requirements analysis and specification
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      ref_id: A.14.1.2
+      name: Securing application services on public networks
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.1
+      ref_id: A.14.1.3
+      name: Protecting application services transactions
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      ref_id: A.14.2
+      name: Security in development and support processes
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.1
+      name: ' Secure development policy'
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.2
+      name: System change control procedures
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.3
+      name: Technical review of applications after operating platform changes
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.4
+      name: Restrictions on changes to software packages
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.5
+      name: Secure system engineering principles
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.6
+      name: Secure development environment
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.7
+      name: Outsourced development
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.8
+      name: System security testing
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.2
+      ref_id: A.14.2.9
+      name: System acceptance testing
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14
+      ref_id: A.14.3
+      name: Test data
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.14.3
+      ref_id: A.14.3.1
+      name: Protection of test data
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.15
+      name: Supplier relationships
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15
+      ref_id: A.15.1
+      name: Information security in supplier relationships
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      ref_id: A.15.1.1
+      name: Information security policy for supplier relationships
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      ref_id: A.15.1.2
+      name: Addressing security within supplier agreements
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.1
+      ref_id: A.15.1.3
+      name: Information and communication technology supply chain
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15
+      ref_id: A.15.2
+      name: Supplier service delivery management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2
+      ref_id: A.15.2.1
+      name: ' Monitoring and review of supplier services'
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.15.2
+      ref_id: A.15.2.2
+      name: Managing changes to supplier services
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.16
+      name: Information security incident management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16
+      ref_id: A.16.1
+      name: Management of information security incidents and improvements
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.1
+      name: Responsibilities and procedures
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.2
+      name: Reporting information security events
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.3
+      name: Reporting information security weaknesses
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.4
+      name: Assessment of and decision on information security events
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.5
+      name: Response to information security incidents
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.6
+      name: Learning from information security incidents
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.16.1
+      ref_id: A.16.1.7
+      name: Collection of evidence
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.17
+      name: Information security aspects of business continuity management
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17
+      ref_id: A.17.1
+      name: Information security continuity
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      ref_id: A.17.1.1
+      name: Planning information security continuity
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      ref_id: A.17.1.2
+      name: Implementing information security continuity
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.1
+      ref_id: A.17.1.3
+      name: Verify, review and evaluate information security continuity
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17
+      ref_id: A.17.2
+      name: Redundancies
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.17.2
+      ref_id: A.17.2.1
+      name: Availability of information processing facilities
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18
+      assessable: false
+      depth: 1
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:annex-a
+      ref_id: A.18
+      name: Compliance
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18
+      ref_id: A.18.1
+      name: Compliance with legal and contractual requirements
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.1
+      name: Identification of applicable legislation and contractual requirements
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.2
+      name: Intellectual property rights
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.3
+      name: Protection of records
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.4
+      name: Privacy and protection of personally identifiable information
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.1
+      ref_id: A.18.1.5
+      name: Regulation of cryptographic controls
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18
+      ref_id: A.18.2
+      name: Information security reviews
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      ref_id: A.18.2.1
+      name: Independent review of information security
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      ref_id: A.18.2.2
+      name: Compliance with security policies and standards
+    - urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2013:a.18.2
+      ref_id: A.18.2.3
+      name: Technical compliance review

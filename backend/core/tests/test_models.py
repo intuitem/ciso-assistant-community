@@ -6,6 +6,8 @@ from ciso_assistant.settings import BASE_DIR
 from core.models import (
     Policy,
     Project,
+    RequirementMapping,
+    RequirementMappingSet,
     RiskAssessment,
     ComplianceAssessment,
     RiskScenario,
@@ -16,15 +18,15 @@ from core.models import (
     Evidence,
     RiskAcceptance,
     Asset,
+    StoredLibrary,
     Threat,
     RiskMatrix,
-    Library,
+    LoadedLibrary,
     Framework,
 )
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from iam.models import Folder
-from library.utils import import_library_view, get_library
 
 User = get_user_model()
 
@@ -42,9 +44,25 @@ def domain_project_fixture():
 
 @pytest.fixture
 def risk_matrix_fixture():
-    library = get_library("urn:intuitem:risk:library:critical_risk_matrix_5x5")
+    library = StoredLibrary.objects.filter(
+        urn="urn:intuitem:risk:library:critical_risk_matrix_5x5"
+    ).last()
     assert library is not None
-    import_library_view(library)
+    library.load()
+
+
+@pytest.fixture
+def iso27001_csf1_1_frameworks_fixture():
+    iso27001_library = StoredLibrary.objects.get(
+        urn="urn:intuitem:risk:library:iso27001-2022", locale="en"
+    )
+    assert iso27001_library is not None
+    iso27001_library.load()
+    csf_1_1_library = StoredLibrary.objects.get(
+        urn="urn:intuitem:risk:library:nist-csf-1.1", locale="en"
+    )
+    assert csf_1_1_library is not None
+    csf_1_1_library.load()
 
 
 @pytest.mark.django_db
@@ -648,16 +666,20 @@ class TestAppliedControl:
         assert measure1.folder == root_folder
         assert measure2.folder == folder
 
-    def test_measure_category_inherited_from_function(self):
+    def test_applied_control_inherited_from_reference_control(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
-        function = ReferenceControl.objects.create(
-            name="Function", folder=root_folder, category="technical"
+        reference_control = ReferenceControl.objects.create(
+            name="Function",
+            folder=root_folder,
+            category="technical",
+            csf_function="identify",
         )
-        measure = AppliedControl.objects.create(
-            name="Measure", folder=folder, reference_control=function
+        applied_control = AppliedControl.objects.create(
+            name="Measure", folder=folder, reference_control=reference_control
         )
-        assert measure.category == "technical"
+        assert applied_control.category == "technical"
+        assert applied_control.csf_function == "identify"
 
 
 @pytest.mark.django_db
@@ -863,12 +885,13 @@ class TestLibrary:
     pytestmark = pytest.mark.django_db
 
     def test_library_creation(self):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         assert library.name == "Library"
         assert library.description == "Library description"
@@ -877,12 +900,13 @@ class TestLibrary:
         assert library.folder == Folder.get_root_folder()
 
     def test_library_reference_count_zero_if_unused(self):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         assert library.reference_count == 0
 
@@ -890,12 +914,13 @@ class TestLibrary:
     def test_library_reference_count_incremented_when_framework_is_referenced_by_compliance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         framework = Framework.objects.create(
             name="Framework",
@@ -923,12 +948,13 @@ class TestLibrary:
     def test_library_reference_count_incremented_when_reference_control_is_referenced_by_complance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         framework = Framework.objects.create(
             name="Framework",
@@ -983,7 +1009,7 @@ class TestLibrary:
         domain = Folder.objects.create(name="Domain", description="Domain description")
         project = Project.objects.create(name="Project", folder=domain)
 
-        library = Library.objects.get()
+        library = LoadedLibrary.objects.get()
         risk_matrix = RiskMatrix.objects.get()
 
         assert library.reference_count == 0
@@ -1010,12 +1036,13 @@ class TestLibrary:
 
         risk_matrix = RiskMatrix.objects.get()
 
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         threat = Threat.objects.create(
             name="Threat",
@@ -1055,12 +1082,13 @@ class TestLibrary:
 
         risk_matrix = RiskMatrix.objects.get()
 
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         reference_control = ReferenceControl.objects.create(
             name="ReferenceControl",
@@ -1101,12 +1129,13 @@ class TestLibrary:
     def test_library_reference_count_must_be_zero_for_library_deletion(
         self,
     ):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         framework = Framework.objects.create(
             name="Framework",
@@ -1130,33 +1159,121 @@ class TestLibrary:
 
         assert library.reference_count == 0
 
-        library.delete()
+        try:  # wrapping in try/except to avoid raising exception due to StoredLibrary not existing
+            library.delete()
+        except:
+            None
 
-        assert Library.objects.count() == 0
+        assert LoadedLibrary.objects.count() == 0
 
     @pytest.mark.usefixtures("domain_project_fixture")
     def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
-        dependency_library = Library.objects.create(
+        dependency_library = LoadedLibrary.objects.create(
             name="Dependency Library",
             description="Dependency Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
+            objects_meta={},
         )
         library.dependencies.add(dependency_library)
 
         with pytest.raises(ValueError):
             dependency_library.delete()
 
-        library.delete()
-        assert Library.objects.count() == 1
+        try:  # wrapping in try/except to avoid raising exception due to StoredLibrary not existing
+            library.delete()
+        except:
+            None
 
-        dependency_library.delete()
-        assert Library.objects.count() == 0
+        assert LoadedLibrary.objects.count() == 1
+
+        try:  # wrapping in try/except to avoid raising exception due to StoredLibrary not existing
+            dependency_library.delete()
+        except:
+            None
+        assert LoadedLibrary.objects.count() == 0
+
+
+@pytest.mark.django_db
+class TestRequirementMapping:
+    pytestmark = pytest.mark.django_db
+
+    @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
+    def test_requirement_mapping_creation(self):
+        target_framework = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:iso27001-2022"
+        )
+        source_framework = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:nist-csf-1.1"
+        )
+        mapping_set = RequirementMappingSet.objects.create(
+            source_framework=source_framework,
+            target_framework=target_framework,
+        )
+
+        target_requirement = RequirementNode.objects.filter(
+            urn="urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1"
+        ).last()
+        source_requirement = RequirementNode.objects.get(
+            urn="urn:intuitem:risk:req_node:iso27001-2022:a.5.15"
+        )
+
+        mapping = RequirementMapping.objects.create(
+            target_requirement=target_requirement,
+            source_requirement=source_requirement,
+            relationship=RequirementMapping.Relationship.INTERSECT,
+            mapping_set=mapping_set,
+        )
+
+        assert mapping.target_requirement == target_requirement
+        assert mapping.relationship == RequirementMapping.Relationship.INTERSECT
+        assert mapping.source_requirement == source_requirement
+
+
+@pytest.mark.django_db
+class TestRequirementMappingSet:
+    pytestmark = pytest.mark.django_db
+
+    @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
+    def test_requirement_mapping_set_creation(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        iso27001 = Framework.objects.get(
+            urn="urn:intuitem:risk:framework:iso27001-2022"
+        )
+        csf1_1 = Framework.objects.get(urn="urn:intuitem:risk:framework:nist-csf-1.1")
+        requirement_mapping_set = RequirementMappingSet.objects.create(
+            name="Requirement Mapping Set",
+            description="Requirement Mapping Set description",
+            source_framework=csf1_1,
+            target_framework=iso27001,
+        )
+        assert requirement_mapping_set.name == "Requirement Mapping Set"
+        assert (
+            requirement_mapping_set.description == "Requirement Mapping Set description"
+        )
+        assert requirement_mapping_set.folder == root_folder
+        assert requirement_mapping_set.target_framework == iso27001
+        assert requirement_mapping_set.source_framework == csf1_1
+        assert requirement_mapping_set.mappings.count() == 0
+
+    @pytest.mark.usefixtures("iso27001_csf1_1_frameworks_fixture")
+    def test_requirement_mapping_set_source_and_target_frameworks_must_be_distinct(
+        self,
+    ):
+        csf1_1 = Framework.objects.get(urn="urn:intuitem:risk:framework:nist-csf-1.1")
+        with pytest.raises(ValidationError):
+            RequirementMappingSet.objects.create(
+                name="Requirement Mapping Set",
+                description="Requirement Mapping Set description",
+                source_framework=csf1_1,
+                target_framework=csf1_1,
+            )

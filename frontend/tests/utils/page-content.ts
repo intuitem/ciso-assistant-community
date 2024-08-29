@@ -45,7 +45,7 @@ export class PageContent extends BasePage {
 			await this.page.goto('/libraries');
 			await this.page.waitForURL('/libraries');
 
-			await this.importLibrary(dependency.ref || dependency.name, dependency.urn);
+			await this.importLibrary(dependency.name, dependency.urn);
 			await this.goto();
 		}
 
@@ -69,25 +69,32 @@ export class PageContent extends BasePage {
 		}
 	}
 
-	async importLibrary(ref: string, urn?: string, language: string = 'English') {
+	async importLibrary(name: string, urn?: string, language = 'English') {
 		if (
-			(await this.tab('Imported libraries').isVisible()) &&
-			(await this.tab('Imported libraries').getAttribute('aria-selected')) === 'true'
+			(await this.tab('Loaded libraries').isVisible()) &&
+			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
 		) {
-			if (await this.getRow(ref).isHidden()) {
+			if (await this.getRow(name).isHidden()) {
 				await this.tab('Libraries store').click();
 				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 			} else {
 				return;
 			}
 		}
-		await this.importItemButton(ref, language === 'any' ? undefined : language).click();
-		await this.isToastVisible(`The library object has been successfully imported.+`, undefined, {
+		// If the library is not visible, it might have already been loaded
+		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
+			await this.tab('Loaded libraries').click();
+			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+			expect(this.getRow(name)).toBeVisible();
+			return;
+		}
+		await this.importItemButton(name, language === 'any' ? undefined : language).click();
+		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
-		await this.tab('Imported libraries').click();
-		expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
-		expect(this.getRow(ref)).toBeVisible();
+		await this.tab('Loaded libraries').click();
+		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+		expect(this.getRow(name)).toBeVisible();
 	}
 
 	async viewItemDetail(value?: string) {

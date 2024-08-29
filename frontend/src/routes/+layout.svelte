@@ -15,7 +15,8 @@
 
 	initializeStores();
 
-	import { Modal, Toast } from '@skeletonlabs/skeleton';
+	import Toast from '$lib/components/Toast/Toast.svelte';
+	import Modal from '$lib/components/Modals/Modal.svelte';
 	import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton';
 
 	import { getFlash } from 'sveltekit-flash-message';
@@ -40,10 +41,10 @@
 				$flash.type == 'success'
 					? 'variant-filled-success'
 					: $flash.type === 'error'
-					? 'variant-filled-error'
-					: $flash.type == 'warning'
-					? 'variant-filled-warning'
-					: 'variant-filled-primary'
+						? 'variant-filled-error'
+						: $flash.type == 'warning'
+							? 'variant-filled-warning'
+							: 'variant-filled-primary'
 		});
 
 		// Clearing the flash message could sometimes
@@ -63,6 +64,8 @@
 		deleteConfirmModal: { ref: DeleteConfirmModal }
 	};
 </script>
+
+<svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
 
 <ParaglideJsProvider>
 	<Modal components={modalRegistry} />

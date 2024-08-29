@@ -1,0 +1,21 @@
+{% load i18n core_extras %}
+
+<div class="w-full flex flex-col justify-start">
+    <h3 class="flex font-semibold p-2 m-2 text-md">{% trans "Risk levels" %}</h3>
+    <div class="flex justify-start mx-2">
+        <table class="w-3/4 border-separate">
+            {% for risk in risk_matrix.parse_json_translated.risk %}
+                <tr class="row">
+                    <td class="w-12 h-12 text-left border-4 border-white" style="background-color: {{ risk.hexcolor }}">
+                    </td>
+                    <td class="col font-medium">
+                        {{ risk.name }}
+                    </td>
+                    <td class="col italic">
+                        {{ risk.description|linebreaksbr }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>

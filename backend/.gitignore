@@ -5,7 +5,6 @@ __pycache__
 *~$*
 staticfiles/*
 static/
-*.mo
 .env
 .vscode
 *.sqlite3
@@ -18,3 +17,4 @@ db/pg_password.txt
 ./db/
 .coverage
 pytest-report.html
+enterprise/

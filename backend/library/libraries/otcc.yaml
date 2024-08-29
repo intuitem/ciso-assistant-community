@@ -1,0 +1,2579 @@
+urn: urn:intuitem:risk:library:otcc
+locale: en
+ref_id: OTCC
+name: Operational Technology Cybersecurity Controls
+description: 'The NCA publishes the Operational Technology Cybersecurity Controls
+  (OTCC-1:2022). These controls are aligned with related international cybersecurity
+  standards, frameworks, controls, and best practices.
+
+  https://www.nca.gov.sa/otcc_en.pdf'
+copyright: "Sharing Notice: White \nDocument Classification: Public "
+version: 1
+provider: Saudi Arabia's National Cybersecurity Authority
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:otcc
+    ref_id: OTCC
+    name: Operational Technology Cybersecurity Controls
+    description: 'The NCA publishes the Operational Technology Cybersecurity Controls
+      (OTCC-1:2022). These controls are aligned with related international cybersecurity
+      standards, frameworks, controls, and best practices.
+
+      https://www.nca.gov.sa/otcc_en.pdf'
+    implementation_groups_definition:
+    - ref_id: L1
+      name: 'Control Level 1 '
+      description: The criticality level of the facility is high and have severe ad-
+        verse effects, consequences, and/or impacts to operations, cat- strophic or
+        assets, resources, or Health, Safety, and Environ- ment (HSE) of the organization.
+    - ref_id: L2
+      name: 'Control Level 2 '
+      description: The criticality level of the facility is moderate and have sig-
+        nificant effects, consequences, and/or impacts to operations, assets, resources,
+        or Health, Safety, and Environment (HSE) of the organization.
+    - ref_id: L3
+      name: 'Control Level 3 '
+      description: The criticality level of the facility is low and have moderate
+        adverse effects, consequences, and/or impacts to operations, assets, resources,
+        or Health, Safety, and Environment (HSE) of the organization.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:otcc:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Cybersecurity Governance
+    - urn: urn:intuitem:risk:req_node:otcc:1-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-1
+      name: Cybersecurity Policies and Procedures
+    - urn: urn:intuitem:risk:req_node:otcc:node4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-1
+      name: Objective
+      description: To ensure that OT/ICS cybersecurity requirements are documented,
+        communicated, and complied with by the organization as per related laws and
+        regulations, and orga- nizational requirements.
+    - urn: urn:intuitem:risk:req_node:otcc:node5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-1
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:node5
+      ref_id: 1-1-1
+      description: With reference to the ECC controls 1-3-1 and 1-3-2, the organization
+        must document, approve, and implement a customized set of cybersecurity policies
+        and procedures for OT/ICS systems or assets.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:node5
+      ref_id: 1-1-2
+      description: With reference to the ECC control 1-3-3, the cybersecurity OT/
+        ICS policies and procedures must be supported by cybersecurity requirements
+        such as vendor recommendations, implementation guidelines, and configuration
+        management guidelines.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:node5
+      ref_id: 1-1-3
+      description: With reference to the ECC control 1-3-4, OT/ICS cybersecurity policies
+        and procedures must be reviewed periodically and/ or when there is a change
+        in the risks landscape, organizational structure, and/or process changes.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-2
+      name: Cybersecurity Roles and Responsibilities
+    - urn: urn:intuitem:risk:req_node:otcc:node10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-2
+      name: Objective
+      description: To ensure that roles and responsibilities are defined for all parties
+        participating in implementing the operational technology cybersecurity controls
+        (OTCC) within the organization.
+    - urn: urn:intuitem:risk:req_node:otcc:node11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-2
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-2
+      ref_id: 1-2-1
+      description: 'In addition to the ECC subdomain 1-4, cybersecurity requirements
+        for Cybersecurity Roles and Responsibilities in OT/ICS must include, at a
+        minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:1-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-2-1
+      ref_id: 1-2-1-1
+      description: Cybersecurity roles and responsibilities (RACI) assignment for
+        all stakeholders of the OT/ICS assets must be defined, documented, communicated
+        and approved by the Authorizing Official while ensuring there is no conflict
+        of interest.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-2-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-2-1
+      ref_id: 1-2-1-2
+      description: Cybersecurity roles and responsibilities related to OT/ ICS assets
+        must be assigned to the cybersecurity function in the organization.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-3
+      name: Cybersecurity Risk Management
+    - urn: urn:intuitem:risk:req_node:otcc:node16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3
+      name: Objective
+      description: "To ensure managing cybersecurity risks in a methodological approach\
+        \ in order to protect the organization\u2019s OT/ICS assets as per organizational\
+        \ policies and procedures, and related laws and regulations"
+    - urn: urn:intuitem:risk:req_node:otcc:node17
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3
+      ref_id: 1-3-1
+      description: 'In addition to the ECC subdomain 1-5, cybersecurity requirements
+        for cybersecurity risk management in OT/ICS must include, at a minimum, the
+        following:'
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-1
+      description: "OT/ICS cybersecurity risk management methodology must be included\
+        \ as part of the organization\u2019s risk management and safety risk management\
+        \ methodologies."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-2
+      description: Cybersecurity risk assessment for OT/ICS assets must be conducted
+        periodically while ensuring to include risks associ- ated with signing contracts
+        and agreements with OT/ICS related third-party organizations and/or upon changes
+        in related regula- tory requirements as part of the assessment.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-3
+      description: "Risk register for OT/ICS cybersecurity risks must be included\
+        \ as part of the organization\u2019s risk register."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-4
+      description: Appropriate level assignment to facilities which include (OT/ICS)
+        must be conducted based on approved methodology.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-5
+      description: Include a qualitative analysis of cybersecurity risks within the
+        Process Hazard Analysis (PHA) which is applied with any change in operations
+        and/or procedures in Plants.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-6
+      description: In the event that cybersecurity requirements cannot be implemented
+        within the OT/ICS environment, the specific justifications for not applying
+        those requirements must be documented and approved by the respective cybersecurity
+        function and the Authorizing Official.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-3-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-3-1
+      ref_id: 1-3-1-7
+      description: In the event of risk acceptance, alternative cybersecurity controls
+        must be clearly defined, documented, approved by the Authorizing Official,
+        and implemented effectively for a defined period of time while reassessing
+        the risk continuously.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-4
+      name: Cybersecurity in Industrial Control System Project Management
+    - urn: urn:intuitem:risk:req_node:otcc:node27
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4
+      name: Objective
+      description: To ensure that cybersecurity requirements are included in project
+        management met odology and procedures in order to maintain safe operations,
+        confidentiality, integrity, and availability of OT/ICS assets as per organization
+        policies and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:otcc:node28
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-4-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4
+      ref_id: 1-4-1
+      description: 'In addition to the ECC controls 1-6-2 and 1-6-3, cybersecurity
+        requirements in OT/ICS project management must include, at a minimum, the
+        following:'
+    - urn: urn:intuitem:risk:req_node:otcc:1-4-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4-1
+      ref_id: 1-4-1-1
+      description: "Cybersecurity requirements must be part of OT/ICS project\u2019\
+        s lifecycle."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-4-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4-1
+      ref_id: 1-4-1-2
+      description: "Cybersecurity requirements must be included as part of any functional\
+        \ and acceptance testing and evaluation process (such as Factory Acceptance\
+        \ Testing \u201CFAT\u201D , Site Acceptance Test- ing \u201CSAT\u201D, Commissioning\
+        \ Testing, Change Testing, Integration Testing and Source Code Review)."
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-4-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4-1
+      ref_id: 1-4-1-3
+      description: Secure-by-design principles must be included as part of security
+        architectural designs for OT/ICS environments.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-4-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4-1
+      ref_id: 1-4-1-4
+      description: System development environments including testing environment and
+        integration platforms must be protected.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-4
+      ref_id: 1-4-2
+      description: "Cybersecurity requirements within the organization\u2019s OT/ICS\
+        \ project management must be reviewed, and their implementation effectiveness\
+        \ is measured and evaluated periodically."
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-5
+      name: Cybersecurity in Change Management
+    - urn: urn:intuitem:risk:req_node:otcc:node36
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5
+      name: Objective
+      description: To ensure that cybersecurity requirements are included in change
+        management meth- odology and procedures in order to maintain safe implementation
+        of change requests in OT/ICS environment by exercising due diligence analysis
+        and control of the changes.
+    - urn: urn:intuitem:risk:req_node:otcc:node37
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5
+      ref_id: 1-5-1
+      description: "Cybersecurity requirements within the organization\u2019s OT/ICS\
+        \ change management must be defined, documented, and approved. The cybersecurity\
+        \ requirements must be a key part of the overall requirements of OT/ICS change\
+        \ management."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5
+      ref_id: 1-5-2
+      description: "Cybersecurity requirements within the organization\u2019s OT/ICS\
+        \ change management lifecycle must be implemented."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5
+      ref_id: 1-5-3
+      description: 'In addition to the ECC controls 1-6-2 and 1-6-3, cybersecurity
+        requirements in OT/ICS change management must include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-3-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5-3
+      ref_id: 1-5-3-1
+      description: Cybersecurity requirements are part of the change management lifecycle.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-3-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5-3
+      ref_id: 1-5-3-2
+      description: Changes are validated in a separate environment prior to implementing
+        the changes on the production environment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-3-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5-3
+      ref_id: 1-5-3-3
+      description: In the event that OT/ICS devices are replaced with differ- ent,
+        but functionally equivalent devices, whether in design, testing, or operation
+        environments, the cybersecurity of the replacement device must be validated
+        prior to being utilized in operational environment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-3-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5-3
+      ref_id: 1-5-3-4
+      description: Restricted processes for exceptional changes must be implemented.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-3-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5-3
+      ref_id: 1-5-3-5
+      description: Automated configuration and asset change detection mechanisms must
+        be implemented.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-5-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-5
+      ref_id: 1-5-4
+      description: "Cybersecurity requirements within the organization\u2019s OT/ICS\
+        \ change management requirements must be reviewed, and their implementation\
+        \ effectiveness is measured and evaluated periodically."
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-6
+      name: Periodical Cybersecurity Review and Audit
+    - urn: urn:intuitem:risk:req_node:otcc:node48
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-6
+      name: Objective
+      description: To ensure that OT/ICS cybersecurity controls are implemented and
+        in compliance with organizational policies and procedures, as well as related
+        national and international laws, regulations and agreements.
+    - urn: urn:intuitem:risk:req_node:otcc:node49
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-6
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-6
+      ref_id: 1-6-1
+      description: "With reference to ECC control 1-8-1, the organization\u2019s cybersecu-\
+        \ rity function must review the implementation of (OTCC-1:2022) controls at\
+        \ least annually."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-6
+      ref_id: 1-6-2
+      description: With reference to ECC control 1-8-2, the implementation of (OTCC-1:2022)
+        controls must be reviewed by independent parties within the organization,
+        outside the cybersecurity function at least once every three years.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-7
+      name: Cybersecurity in Human Resources
+    - urn: urn:intuitem:risk:req_node:otcc:node53
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-7
+      name: Objective
+      description: To ensure that cybersecurity risks and requirements related to
+        OT/ICS personnel (employees and third party personnel) are managed efficiently
+        prior to employment, during employment, after termination/separation as per
+        organizational policies and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:otcc:node54
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-7
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-7
+      ref_id: 1-7-1
+      description: In addition to subcontrols in the ECC control 1-9-3, cybersecurity
+        requirements related to human resources for OT/ICS environment must include,
+        at a minimum, screening or vetting of all personnel (including employees,
+        contractors and subcontractors) who have access or can utilize OT/ICS assets
+        prior to granting them access.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-7
+      ref_id: 1-7-2
+      description: With reference to the ECC control 1-9-6, the cybersecurity re-
+        quirements for cybersecurity in human resources in OT/ICS must be reviewed,
+        and their implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:1
+      ref_id: 1-8
+      name: Cybersecurity Awareness and Training Program
+    - urn: urn:intuitem:risk:req_node:otcc:node58
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-8
+      name: Objective
+      description: "To ensure that personnel are aware of their cybersecurity responsibilities\
+        \ and have the required cybersecurity awareness. It is also to ensure that\
+        \ personnel is provided with the required cybersecurity training, skills,\
+        \ and credentials needed to accomplish their cybersecurity responsibilities\
+        \ and to protect the organization\u2019s OT/ICS assets."
+    - urn: urn:intuitem:risk:req_node:otcc:node59
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-8
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:1-8-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-8
+      ref_id: 1-8-1
+      description: In addition to subcontrols in the ECC control 1-10-3, the cybersecurity
+        awareness program must include a secure and safe interaction with the OT/ICS
+        assets or systems.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:1-8-2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-8
+      ref_id: 1-8-2
+      description: 'In addition to subcontrols in the ECC control 1-10-4, cybersecurity
+        requirements in OT/ICS cybersecurity awareness and training program must include,
+        at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:1-8-2-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-8-2
+      ref_id: 1-8-2-1
+      description: Customized training, qualifications, knowledge, and professional
+        skillsets must be provided to all personnel with access to the OT/ICS assets.
+        The organization is encouraged to utilize the reference material provided
+        in the Saudi Cybersecurity Workforce Framework (SCyWF).
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:1-8-2-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:1-8-2
+      ref_id: 1-8-2-2
+      description: Participation in OT/ICS authorized and/or specialized organizations
+        and groups must be encouraged to stay up-to-date on common cybersecurity practices.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Cybersecurity Defense
+    - urn: urn:intuitem:risk:req_node:otcc:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: '2.1'
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:otcc:node66
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2.1
+      name: Objective
+      description: "To ensure that the organization has an accurate and detailed inventory\
+        \ of OT/ICS assets in order to support the organization\u2019s cybersecurity\
+        \ and operational requirements to maintain the production uptime, safe operations,\
+        \ confidentiality, integrity, and availability of OT/ICS assets."
+    - urn: urn:intuitem:risk:req_node:otcc:node67
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2.1
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2.1
+      ref_id: 2-1-1
+      description: 'In addition to the controls in ECC subdomain 2-1, cybersecurity
+        requirements for asset management in OT/ICS environment must include, at a
+        minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-1-1
+      ref_id: 2-1-1-1
+      description: OT/ICS assets inventory must be developed in electronic format
+        for all OT/ICS assets, and reviewed periodically.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-1-1
+      ref_id: 2-1-1-2
+      description: Automated solution to collect asset inventory information must
+        be utilized.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-1-1
+      ref_id: 2-1-1-3
+      description: OT/ICS asset inventory must be stored securely.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-1-1
+      ref_id: 2-1-1-4
+      description: Asset owners for all OT/ICS assets must be identified and involved
+        throughout the relevant asset inventory management lifecycle.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-1-1
+      ref_id: 2-1-1-5
+      description: Criticality rating for all assets must be assigned, documented,
+        and approved by asset owners.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2.1
+      ref_id: 2-1-2
+      description: With reference to the ECC control 2-1-6, the cybersecurity requirements
+        for managing OT/ICS assets must be reviewed, and their implementation effectiveness
+        is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-2
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:otcc:node76
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2
+      name: Objective
+      description: To ensure secure and restricted logical access to OT/ICS assets
+        in order to prevent unauthorized access and allow only authorized access for
+        users, which are necessary to accomplish assigned tasks.
+    - urn: urn:intuitem:risk:req_node:otcc:node77
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2
+      ref_id: 2-2-1
+      description: 'In addition to subcontrols in ECC control 2-2-3, cybersecurity
+        requirements for identity and access management in OT/ICS environment must
+        include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-1
+      description: Identity and access management lifecycle for OT/ICS is separated
+        and independent from Information Technology (IT) including centrally managed
+        identity and access management solutions.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-2
+      description: Service accounts must be managed securely for OT/ICS services,
+        applications, systems, and devices that are separated and disconnected from
+        interactive users account logins.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-3
+      description: Default credentials for all OT/ICS assets must be changed, disabled,
+        or removed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-4
+      description: Sessions must be managed securely, including session authenticity,
+        session lockout, and session timeout termination.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-5
+      description: Automatic disabling/removing of service accounts, programs, or
+        accounts related to (OT/ICS) assets must be prevented, except for monitoring
+        systems.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-6
+      description: Dual approval and explicit privilege escalation mechanisms for
+        sensitive actions within the OT/ICS environment must be employed.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-7
+      description: Remote access to the OT/ICS networks must be restricted and exceptionally
+        enabled when necessary and justified. A cybersecurity risk assessment must
+        be conducted prior to granting a remote access and its associated risks are
+        monitored and managed. The granted access must be through trusted multi-factor
+        authenticated and encrypted channel for a defined period of time and with
+        limited access privilege. The remote access session must be monitored and
+        recorded while its time duration and granted user's privilege must be in accordance
+        with the cybersecurity risk assessment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-8
+      description: Secure and complex password standards must be implemented.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-9
+      description: "Secure mechanisms to store OT/ICS assets\u2019 passwords must\
+        \ be used."
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-10
+      description: "With reference to the ECC subcontrol 2-2-3-5, users\u2019 identities\
+        \ and access rights must be reviewed in response to cybersecurity incidents,\
+        \ personnel roles changes, or whenever there is a change in OT/ICS system\
+        \ architecture."
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-1-11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2-1
+      ref_id: 2-2-1-11
+      description: Access shall be immediately revoked when no longer needed.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-2
+      ref_id: 2-2-2
+      description: With reference to the ECC control 2-2-4, the cybersecurity requirements
+        for identity and access management in OT/ICS environment must be reviewed,
+        and its implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-3
+      name: System and Processing Facilities Protection
+    - urn: urn:intuitem:risk:req_node:otcc:node92
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3
+      name: Objective
+      description: "To ensure the protection of OT/ICS systems and processing facilities\
+        \ (including workstations, servers and Safety Instrumented Systems \u201C\
+        SIS\u201D) against cyber risks."
+    - urn: urn:intuitem:risk:req_node:otcc:node93
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3
+      ref_id: 2-3-1
+      description: 'In addition to subcontrols in the ECC control 2-3-3, cybersecurity
+        requirements for system and processing facility protection in OT/ ICS environment
+        must include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-1
+      description: Advanced, up-to-date protection mechanisms and techniques must
+        be utilized and securely managed to block and protect from malware, Advanced
+        Persistent Threats (APT), malicious files, and activities.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-2
+      description: "Periodic security configurations\u2019 review and hardening must\
+        \ be conducted in alignment with the vendor implementation guidance or recommendations\
+        \ with respect to cybersecurity and organization\u2019s formal change management\
+        \ mechanisms."
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-3
+      description: "Periodic security patches and upgrades must be implemented in\
+        \ alignment with vendor implementation guidance or recommendations with respect\
+        \ to cybersecurity and organization\u2019s formal change management mechanisms."
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-4
+      description: Principles of least privilege and least functionality must be applied.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-5
+      description: Safety Instrumented Systems (SIS) controllers must be configured
+        in appropriate modes at all times, which prevent any unauthorized changes,
+        and changes to improper modes are limited to exceptional cases with a specific
+        period of time.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-6
+      description: Application whitelisting techniques or other similar techniques
+        must be deployed to limit the applications that are allowed to run in OT/ICS
+        environment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-7
+      description: OT/ICS assets must be managed through dedicated, segmented and
+        hardened Engineering Workstation (EWS) and Human-Machine Interface (HMI) for
+        management purposes and maintenance.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-8
+      description: External storage media is scanned and analyzed against malware
+        and APT. The scan must be executed in an isolated and secure environment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-9
+      description: Usage of external storage media in the production en- vironment
+        must be restricted unless secure mechanisms for data transfer are developed
+        and properly implemented.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-10
+      description: "Systems\u2019 logs and critical files must be protected from unauthorized\
+        \ access, tampering, illegitimate modification and/or deletion."
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-11
+      description: Unauthorized applications, scripts, tasks, and changes must be
+        detected and analyzed.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-12
+      description: New communications sessions and commands execution must be detected
+        and analyzed.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-1-13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3-1
+      ref_id: 2-3-1-13
+      description: Direct communications between the OT/ICS environment and external
+        hosts must be detected and analyzed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-3
+      ref_id: 2-3-2
+      description: With reference to the ECC control 2-3-4, the cybersecurity requirements
+        for system and processing facilities protection in OT/ ICS environment must
+        be reviewed, and their implementation effectiveness is measured and evaluated
+        periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-4
+      name: Networks Security Management
+    - urn: urn:intuitem:risk:req_node:otcc:node110
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4
+      name: Objective
+      description: "To ensure the protection of the organization\u2019s OT/ICS networks\
+        \ from cyber risks."
+    - urn: urn:intuitem:risk:req_node:otcc:node111
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4
+      ref_id: 2-4-1
+      description: 'In addition to subcontrols in ECC control 2-5-3, cybersecurity
+        requirements for network security management in OT/ICS environment must cover,
+        at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-1
+      description: OT/ICS environment must be segmented logically or physically from
+        other environments or networks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-2
+      description: "Different zones within the OT/ICS environment must be segmented\
+        \ logically or physically in accordance with the zone\u2019s ap- propriate\
+        \ level that isolates data flows and directs traffic to \"Choke Points\u201D\
+        ."
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-3
+      description: Safety Instrumented Systems (SIS) must be segmented logically or
+        physically from other OT/ICS networks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-4
+      description: Wireless technologies (such as Wi-Fi, Bluetooth, cellular, satellite,
+        etc.) must be restricted, and to only be used when the technology meets specific
+        business requirements and is properly secured.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-5
+      description: Wireless technologies must be segmented logically or physically
+        from other OT/ICS networks.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-6
+      description: Network communications, services, and connection points between
+        different zones must be limited to the minimum to meet operational, maintenance,
+        and safety requirements.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-7
+      description: Direct exposure of common remote authentication and access management
+        services on external-facing hosts must be prevented.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-8
+      description: Only authorized business-critical services are accessible from
+        the internal OT/ICS networks, and accessibility to services with known vulnerabilities
+        must be limited to the greatest extent possible.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-9
+      description: Direct communications between corporate zone and OT/ ICS zones
+        must be prevented, and direct all the required connections through dedicated,
+        secured, and hardened jump host/solution in the DMZ zone.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-10
+      description: Remote access point in the DMZ zone must not be connected to the
+        OT/ICS networks unless needed, while ensuring that the session is multi-factor
+        authenticated, recorded, and established for a defined period of time only.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-11
+      description: Proxies must be employed between the corporate and OT/ICS zones
+        for all machine-to-machine traffic.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-12
+      description: Dedicated gateways must be used to segment OT/ICS networks from
+        corporate zone.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-13
+      description: Dedicated DMZ zone must be used to reside any system that needs
+        services provided by corporate zone.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-14
+      description: Strict limitation on enabling/usage of industrial protocols and
+        ports to the minimum to meet operational, maintenance, and safety requirements.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-15
+      description: Periodic patches and upgrades for production assets must be certified
+        by respective vendor and tested in a separate environment prior to implementation.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-1-16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4-1
+      ref_id: 2-4-1-16
+      description: Details related to network architecture and topology, zones, network
+        data flows, connectivity, and interdependencies must be documented, updated,
+        and maintained.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-4
+      ref_id: 2-4-2
+      description: With reference to the ECC control 2-5-4, the cybersecurity requirements
+        for network security management in OT/ICS environment must be reviewed, and
+        their implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-5
+      name: Mobile Devices Security
+    - urn: urn:intuitem:risk:req_node:otcc:node131
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5
+      name: Objective
+      description: "To ensure the protection of mobile devices (including laptops,\
+        \ handheld configuration devices, network test devices, etc.) from cyber risks\
+        \ and to ensure the secure handling of sensitive data and the organization\u2019\
+        s information."
+    - urn: urn:intuitem:risk:req_node:otcc:node132
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5
+      ref_id: 2-5-1
+      description: In addition to subcontrols in the ECC control 2-6-3, cybersecurity
+        requirements for mobile device security in OT/ICS must cover, at a minimum,
+        the following
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5-1
+      ref_id: 2-5-1-1
+      description: "Usage of mobile devices for OT/ICS must be restricted unless specifically\
+        \ required. A cybersecurity risk assessment must be conducted where risks\
+        \ must be defined and managed. A management approval must be granted by respective\
+        \ cybersecurity function for a defined period of time only in alignment with\
+        \ organization\u2019s formal access management mechanisms."
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5-1
+      ref_id: 2-5-1-2
+      description: Mobile devices must only be used for their intended purposes and
+        in compliance with cybersecurity requirements of its respective zones prior
+        to being connected to OT/ICS environment, and are hardened and updated with
+        the latest security patches and scanned against malware and APT.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5-1
+      ref_id: 2-5-1-3
+      description: Limited and approved list of mobile devices must be defined while
+        ensuring that only these mobile devices can be connected to OT/ICS environment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5-1
+      ref_id: 2-5-1-4
+      description: Centralized management of mobile devices must be deployed.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5-1
+      ref_id: 2-5-1-5
+      description: Encryptions mechanisms must be used for mobile devices authorized
+        to access the OT/ICS assets.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-5
+      ref_id: 2-5-2
+      description: With reference to the ECC control 2-6-4, the cybersecurity requirements
+        for mobile devices security in OT/ICS environment must be reviewed, and their
+        implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-6
+      name: Data and Information Protection
+    - urn: urn:intuitem:risk:req_node:otcc:node141
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6
+      name: Objective
+      description: "To ensure the confidentiality, integrity, and availability of\
+        \ organization\u2019s data and information as per organizational policies\
+        \ and procedures, and related laws and regulations."
+    - urn: urn:intuitem:risk:req_node:otcc:node142
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-6-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6
+      ref_id: 2-6-1
+      description: 'In addition to subcontrols in the ECC control 2-7-3, cybersecurity
+        requirements for data and information protection in OT/ICS must include, at
+        a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-6-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6-1
+      ref_id: 2-6-1-1
+      description: Electronic and physical data (at rest and in transit) must be protected
+        at a level consistent with its classification.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-6-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6-1
+      ref_id: 2-6-1-2
+      description: Data Leakage Prevention (DLP) mechanisms must be used to protect
+        the classified data and information.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-6-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6-1
+      ref_id: 2-6-1-3
+      description: Secure wiping mechanisms for configuration details and stored data
+        from OT/ICS assets prior to decommissioning must be implemented.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-6-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6-1
+      ref_id: 2-6-1-4
+      description: "Transfer or usage of OT systems\u2019 data in any environment\
+        \ other than production environment must be limited, except after applying\
+        \ strict controls for protecting that data."
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-6
+      ref_id: 2-6-2
+      description: With reference to the ECC control 2-7-4, the cybersecurity requirements
+        for data and information protection in OT/ICS environment must be reviewed,
+        and their implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-7
+      name: Cryptography
+    - urn: urn:intuitem:risk:req_node:otcc:node150
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-7
+      name: Objective
+      description: To ensure the proper and efficient use of cryptography to protect
+        information assets as per organizational policies and procedures, and related
+        laws and regulations.
+    - urn: urn:intuitem:risk:req_node:otcc:node151
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-7
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-7
+      ref_id: 2-7-1
+      description: In addition to subcontrols in the ECC control 2-8-3, the organization
+        must ensure that cryptographic technologies used in OT/ICS environment are
+        aligned with the NCA National Cryptographic Standard (NCS1:2020).
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-7
+      ref_id: 2-7-2
+      description: With reference to the ECC control 2-8-4, the cybersecurity requirements
+        for cryptography in OT/ICS environment must be re- viewed, and their implementation
+        effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-8
+      name: Backup and Recovery Management
+    - urn: urn:intuitem:risk:req_node:otcc:node155
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8
+      name: Objective
+      description: "To ensure the protection of organization\u2019s data and information,\
+        \ including information systems and software configurations from cyber risks\
+        \ as per organizational policies and procedures, and related laws and regulations."
+    - urn: urn:intuitem:risk:req_node:otcc:node156
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-8-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8
+      ref_id: 2-8-1
+      description: 'In addition to subcontrols in the ECC control 2-9-3, cybersecurity
+        requirements for backup and recovery management in OT/ICS must include, at
+        a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-8-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8-1
+      ref_id: 2-8-1-1
+      description: Backups for all OT/ICS assets must be covered and stored in centralized
+        and offline locations.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-8-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8-1
+      ref_id: 2-8-1-2
+      description: "OT/ICS assets\u2019 critical configuration files and engineering\
+        \ files must be included in the backup\u2019s scope."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-8-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8-1
+      ref_id: 2-8-1-3
+      description: Backups must be performed periodically as per the defined OT/ICS
+        assets classification and their associated risks.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-8-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8-1
+      ref_id: 2-8-1-4
+      description: Access, storage, and transfer of backups and their mediums must
+        be secured to ensure their protection against damage, change, or unauthorized
+        access.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-8
+      ref_id: 2-8-2
+      description: With reference to the ECC control 2-9-4, the cybersecurity requirements
+        for backup and recovery management in OT/ICS envi- ronment must be reviewed,
+        and their implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-9
+      name: Vulnerabilities Management
+    - urn: urn:intuitem:risk:req_node:otcc:node164
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9
+      name: Objective
+      description: To ensure timely detection and effective remediation of technical
+        vulnerabilities to prevent or minimize the probability of exploiting these
+        vulnerabilities to launch cyber-attacks against the organization.
+    - urn: urn:intuitem:risk:req_node:otcc:node165
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-9-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9
+      ref_id: 2-9-1
+      description: 'In addition to subcontrols in the ECC control 2-10-3, cybersecurity
+        requirements for vulnerability management in OT/ICS must cover, at a minimum,
+        the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-9-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9-1
+      ref_id: 2-9-1-1
+      description: "Scope and activities of vulnerability assessments must be defined\
+        \ for OT/ICS environment as part of organization\u2019s formal vulnerability\
+        \ management while ensuring limited or no impact on the production environment."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-9-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9-1
+      ref_id: 2-9-1-2
+      description: With reference to the ECC subcontrol 2-10-3-3, remediation of newly
+        discovered critical vulnerabilities presenting significant risks to the OT/ICS
+        environment must be performed in a timely manner.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-9-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9-1
+      ref_id: 2-9-1-3
+      description: 'With reference to the ECC subcontrol 2-10-3-1, vulnerability assessment
+        for OT/ICS systems must be conducted periodically.
+
+        Level 1 : 3 Months / Level 2 : 6 Months / Level 3 : 12 Months'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-9-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-9
+      ref_id: 2-9-2
+      description: With reference to the ECC control 2-10-4, the cybersecurity requirements
+        for vulnerability management in OT/ICS environment must be reviewed, and their
+        implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-10
+      name: Penetration Testing
+    - urn: urn:intuitem:risk:req_node:otcc:node172
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10
+      name: Objective
+      description: "To assess and evaluate the efficiency of the organization\u2019\
+        s cybersecurity defense capabilities through simulated cyber-attacks to discover\
+        \ unknown weaknesses within the technical infrastructure that may lead to\
+        \ a cyber-breach."
+    - urn: urn:intuitem:risk:req_node:otcc:node173
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-10-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10
+      ref_id: 2-10-1
+      description: 'In addition to the subcontrols in the ECC control 2-11-3, cybersecurity
+        requirements for penetration testing in OT/ICS must cover, at a minimum, the
+        following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-10-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10-1
+      ref_id: 2-10-1-1
+      description: With reference to the ECC subcontrol 2-11-3-1, scope and activities
+        of penetration testing must be defined to ensure the coverage of OT/ICS environment
+        and networks connected to the operational network by qualified team.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-10-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10-1
+      ref_id: 2-10-1-2
+      description: With reference to the ECC subcontrol 2-11-3-2, penetration testing
+        must only be conducted with limited or no impact on the production environment,
+        or on an identical separate environment.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-10-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10-1
+      ref_id: 2-10-1-3
+      description: 'With reference to the ECC subcontrol 2-11-3-2, penetration testing
+        for OT/ICS systems must be conducted periodically.
+
+        Level 1 : 3 Months / Level 2 : 6 Months / Level 3 : 12 Months'
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-10-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10-1
+      ref_id: 2-10-1-4
+      description: Alternative testing methods (such as passive testing mechanisms)
+        must be defined and Implemented to collect relevant information when a potential
+        impact to operational production environment may occur.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-10
+      ref_id: 2-10-2
+      description: With reference to the ECC control 2-11-4, the cybersecurity requirements
+        for penetration testing in OT/ICS environment must be reviewed, and their
+        implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-11
+      name: Cybersecurity Event Logs and Monitoring Management
+    - urn: urn:intuitem:risk:req_node:otcc:node181
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11
+      name: Objective
+      description: "To ensure timely collection, analysis, and monitoring of cybersecurity\
+        \ events for early detection of potential cyber-attacks in order to prevent\
+        \ or minimize the negative impacts on the organization\u2019s operations."
+    - urn: urn:intuitem:risk:req_node:otcc:node182
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11
+      ref_id: 2-11-1
+      description: 'In addition to subcontrols in the ECC control 2-12-3, cybersecurity
+        requirements for cybersecurity event logs and monitoring management in OT/ICS
+        must include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-1
+      description: Cybersecurity event logs and audit trails must be activated for
+        all OT/ICS assets.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-2
+      description: "Failure attempts in accessing the organization\u2019s monitor-\
+        \ ing systems must be detected and logged."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-3
+      description: Continuous, in-depth cybersecurity log review and monitoring, covering
+        all logs and audit trails must be conducted.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-4
+      description: Monitoring, detecting, and analyzing User Behaviors Analytics (UBA)
+        must be performed.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-5
+      description: 'Upload or download activities of OT/ICS assets including Safety
+        Instrumented Systems (SIS) must be detected. '
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-6
+      description: 'All remote access sessions must be monitored. '
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-7
+      description: Malicious events must be detected and analyzed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-8
+      description: Logging and monitoring of new alerts when new or unauthorized devices
+        are connected to the OT/ICS networks must be performed.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-9
+      description: OT/ICS Threat Intelligence must be used and incorporated to regularly
+        tune and refresh alerts of Security Information and Event Management (SIEM)
+        technologies.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-1-10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11-1
+      ref_id: 2-11-1-10
+      description: All access control points between the network security boundaries
+        and external connections must be monitored.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-11-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-11
+      ref_id: 2-11-2
+      description: With reference to the ECC control 2-12-4, the cybersecurity requirements
+        for cybersecurity event logs and monitoring management in OT/ICS environment
+        must be reviewed, and their implementation effectiveness is measured and evaluated
+        periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-12
+      name: Cybersecurity Incident and Threat Management
+    - urn: urn:intuitem:risk:req_node:otcc:node196
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12
+      name: Objective
+      description: "To ensure timely identification, detection, effective management,\
+        \ and handling of cybersecurity incidents and threats to prevent or minimize\
+        \ negative impacts on organization\u2019s OT/ICS operation."
+    - urn: urn:intuitem:risk:req_node:otcc:node197
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12
+      ref_id: 2-12-1
+      description: 'In addition to subcontrols in the ECC Control 2-13-3, cybersecurity
+        requirements for cybersecurity incident and threat management in OT/ICS must
+        include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-1
+      description: OT/ICS cybersecurity incident response plans must be integrated
+        and aligned with organizational plans and its proce- dures such as IT incident
+        response plans, crisis management, and Business Continuity Plan (BCP).
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-2
+      description: Formal incident response and root cause analysis for any detected
+        cybersecurity incidents must be conducted.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-3
+      description: Sequence of incident response activities necessary to restore normal
+        operations must be defined.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-4
+      description: Incident communications plan must be established.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-5
+      description: OT/ICS including Safety Instrumented Systems (SIS) recovery procedures
+        must be included in the incident response, system recovery plans, and business
+        continuity plans.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-6
+      description: "Trainings and skillsets for the organization\u2019s personnel\
+        \ (including employees, contractors and subcontractors) to respond to OT/ICS\
+        \ cybersecurity incidents must be provided."
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-7
+      description: Cybersecurity incident response capabilities, readiness, and plan
+        must be periodically tested by performing cyber-attack simulations exercises.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12-1
+      ref_id: 2-12-1-8
+      description: Threat Intelligence information must be used to identify Tactics,
+        Techniques, and Procedures (TTPs) of activity groups targeting OT/ICS systems.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-12-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-12
+      ref_id: 2-12-2
+      description: With reference to the ECC control 2-13-4, the cybersecurity requirements
+        for cybersecurity incident and threat management in OT/ICS environment must
+        be reviewed, and their implementation effectiveness is measured and evaluated
+        periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:2
+      ref_id: 2-13
+      name: Physical Security
+    - urn: urn:intuitem:risk:req_node:otcc:node209
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13
+      name: Objective
+      description: To ensure the protection of OT/ICS assets from unauthorized physical
+        access, loss, theft, and damage.
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13
+      ref_id: 2-13-1
+      description: 'In addition to subcontrols in the ECC Control 2-14-3, cybersecurity
+        requirements for physical security in OT/ICS environment must include, at
+        a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-1
+      description: List of personnel with authorized access to facilities and sensitive
+        locations where OT/ICS assets reside must be maintained.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-2
+      description: Real-time physical intrusion detection alarms and surveillance
+        equipment, and proper mechanisms must be implemented to recognize potential
+        intrusions and apply the approved response actions.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-3
+      description: Physical access points and perimeter to sensitive OT/ICS areas
+        shall be protected and ensure continuous monitoring.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-4
+      description: Safeguards, such as locks on cabinets containing control systems
+        or sensitive assets related to OT/ICS, must be utilized to prevent unauthorized
+        access to devices that could provide a mechanism to compromise the OT/ICS
+        assets.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-5
+      description: Strict limitation must be enforced on the physical access to all
+        OT/ICS assets, including Safety Instrumented Systems (SIS).
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-6
+      description: Visitor access records to restricted locations where OT/ ICS reside
+        must be maintained.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-7
+      description: Work being performed by contractor or vendor personnel must be
+        monitored.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-8
+      description: Trainings and skillsets for the organizational security guards
+        must be provided in line with roles and responsibilities with respect to OT/ICS
+        physical security.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-1-9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13-1
+      ref_id: 2-13-1-9
+      description: Physical security capabilities and readiness must be periodically
+        tested by performing simulation exercises (such as social engineering).
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:2-13-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:2-13
+      ref_id: 2-13-2
+      description: With reference to the ECC control 2-14-4, the cybersecurity requirements
+        for physical security in OT/ICS environment must be reviewed, and their implementation
+        effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Cybersecurity Resilience
+    - urn: urn:intuitem:risk:req_node:otcc:3-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:3
+      ref_id: 3-1
+      name: Cybersecurity Resilience Aspects of Business Continuity Management (BCM)
+    - urn: urn:intuitem:risk:req_node:otcc:node223
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1
+      name: Objective
+      description: "To ensure the inclusion of the cybersecurity resiliency requirements\
+        \ within the organization\u2019s business continuity management and to remediate\
+        \ and minimize the impacts on OT/ICS environment from disasters caused by\
+        \ cybersecurity incidents."
+    - urn: urn:intuitem:risk:req_node:otcc:node224
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1
+      ref_id: 3-1-1
+      description: 'In addition to subcontrols in the ECC control 3-1-3, cybersecurity
+        requirements for cybersecurity resilience aspects of business con- tinuity
+        management in OT/ICS must include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      ref_id: 3-1-1-1
+      description: Activities necessary to sustain minimum operations of the OT/ICS
+        systems must be defined.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      ref_id: 3-1-1-2
+      description: Redundant OT/ICS networks, connections, and devices must be implemented
+        in accordance to the periodic cybersecurity risk assessment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      ref_id: 3-1-1-3
+      description: OT/ICS cybersecurity requirements must be incorporated into the
+        Business Continuity Plan (BCP), Business Impact Analysis (BIA), Recovery Time
+        Objectives (RTO), and Recovery Point Objectives (RPO).
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      ref_id: 3-1-1-4
+      description: OT/ICS cybersecurity requirements must be incorporated into the
+        Disaster Recovery Plan (DRP) including cybersecurity-related disaster scenarios,
+        system failure handling procedures, and operational continuity management
+        procedures.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1-5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      ref_id: 3-1-1-5
+      description: In the event of a system failure due to a cybersecurity incident,
+        OT/ICS assets or systems must operate on an acceptable safe mode to achieve
+        a continuous operation.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-1-6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1-1
+      ref_id: 3-1-1-6
+      description: "Periodic testing and simulation exercises (e.g. tabletop exercises\
+        \ \"TTX\u201D) must be conducted to test the effectiveness of OT/ICS related\
+        \ DRP and BCP and complete incident root cause analysis."
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:3-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:3-1
+      ref_id: 3-1-2
+      description: With reference to the ECC control 3-1-4, the cybersecurity requirements
+        for cybersecurity resilience aspects of business continuity management in
+        OT/ICS environment must be reviewed, and their implementation effectiveness
+        is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Third-Party Cybersecurity
+    - urn: urn:intuitem:risk:req_node:otcc:4-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:4
+      ref_id: 4-1
+      name: Third-Party Cybersecurity
+    - urn: urn:intuitem:risk:req_node:otcc:node235
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1
+      name: Objective
+      description: To ensure the protection of organizational assets against the cybersecurity
+        risks related to third-parties, including manufactures of OT/ICS-related hardware
+        and software, vendors of OT/ICS products and suppliers of OT/ICS-related services
+        as per organizational policies and procedures, and related laws and regulations.
+    - urn: urn:intuitem:risk:req_node:otcc:node236
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1
+      name: Controls
+    - urn: urn:intuitem:risk:req_node:otcc:4-1-1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1
+      ref_id: 4-1-1
+      description: 'In addition to the ECC subcontrols within controls 4-1-2 and 4-1-
+        3, cybersecurity requirements for third-party cybersecurity in OT/ ICS must
+        include, at a minimum, the following:'
+    - urn: urn:intuitem:risk:req_node:otcc:4-1-1-1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1-1
+      ref_id: 4-1-1-1
+      description: Cybersecurity requirements are included during procurement lifecycle
+        for OT/ICS products and services.
+      implementation_groups:
+      - L1
+      - L2
+      - L3
+    - urn: urn:intuitem:risk:req_node:otcc:4-1-1-2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1-1
+      ref_id: 4-1-1-2
+      description: Cybersecurity requirements for third-party evaluation, selection,
+        and information sharing must be defined.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:4-1-1-3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1-1
+      ref_id: 4-1-1-3
+      description: Third-party contractors and vendors must use formal and documented
+        Secure Development Life Cycle (SDLC) practices for systems and components
+        designed or deployed in OT/ICS environment.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:4-1-1-4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1-1
+      ref_id: 4-1-1-4
+      description: Periodic cybersecurity assessment and audits of third-party providers
+        must be conducted to ensure the mitigation of any identified cyber threats.
+      implementation_groups:
+      - L1
+    - urn: urn:intuitem:risk:req_node:otcc:4-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:4-1
+      ref_id: 4-1-2
+      description: With reference to the ECC control 4-1-4, the cybersecurity requirements
+        for third-party cybersecurity in OT/ICS environment must be reviewed, and
+        their implementation effectiveness is measured and evaluated periodically.
+      implementation_groups:
+      - L1
+      - L2
+    - urn: urn:intuitem:risk:req_node:otcc:appendices
+      assessable: false
+      depth: 1
+      ref_id: Appendices
+    - urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendices
+      ref_id: Appendix (A)
+      name: Terms and Definitions
+    - urn: urn:intuitem:risk:req_node:otcc:node245
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Access Control
+      description: Protection of system resources against unauthorized access; a process
+        by which use of system resources is regulated according to cybersecurity policy
+        and is permitted by only authorized entities (users, programs, processes,
+        or other systems) according to that policy.
+    - urn: urn:intuitem:risk:req_node:otcc:node246
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Activity Group
+      description: A collection of "similar" intrusions and malicious activity, behaviors
+        or processes, capabilities, and infrastructure.
+    - urn: urn:intuitem:risk:req_node:otcc:node247
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: 'Applications Whitelisting
+
+        '
+      description: "It is the security practice of specifying an index of approved\
+        \ software applications that are permitted to be present and active on the\
+        \ organization\u2019s end-users machines and servers. The goal of whitelisting\
+        \ is to protect the organization\u2019s end-users machines and servers from\
+        \ potentially harmful applications."
+    - urn: urn:intuitem:risk:req_node:otcc:node248
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Availability
+      description: The management, operational, and technical controls (e.g., safeguards
+        or countermeasures) employed by an organization in lieu of the recommended
+        controls that provide equivalent or comparable protection for OT/ICS assets.
+    - urn: urn:intuitem:risk:req_node:otcc:node249
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Alternative Controls
+      description: The management, operational, and technical controls (e.g., safeguards
+        or countermeasures) employed by an organization in lieu of the recommend-
+        ed controls that provide equivalent or comparable protection for OT/ICS assets.
+    - urn: urn:intuitem:risk:req_node:otcc:node250
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Choke Point
+      description: A choke point is a single point through which all incoming and
+        outgoing network traffic is funneled.
+    - urn: urn:intuitem:risk:req_node:otcc:node251
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Communication Plan
+      description: A section of an incident response plan that includes communications
+        pro- cedures for both internal and external stakeholders in the event of an
+        incident.funneled.
+    - urn: urn:intuitem:risk:req_node:otcc:node252
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Confidentiality
+      description: Maintaining authorized restrictions on access to and disclosure
+        of information, including means of protecting information.
+    - urn: urn:intuitem:risk:req_node:otcc:node253
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Consequence
+      description: Result of an incident, usually described in terms of health and
+        safety effects, environmental impacts, loss of property, loss of information
+        (for example, intellectual property), and/or business interruption costs that
+        occur from a particular incident.
+    - urn: urn:intuitem:risk:req_node:otcc:node254
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Countermeasure
+      description: 'Action, device, procedure, or technique that reduces a threat,
+        a vulnerability, or an attack by eliminating or preventing it, by minimizing
+        the harm it can cause, or by discovering and reporting it so that
+
+        corrective action can be taken.'
+    - urn: urn:intuitem:risk:req_node:otcc:node255
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Criticality
+      description: A measure of the degree to which an organization depends on the
+        OT/ICS for the success of a mission or of a business function.
+    - urn: urn:intuitem:risk:req_node:otcc:node256
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Critical Systems
+      description: "Any system or network whose failure, unauthorized change to its\
+        \ operation, unauthorized access to it, or to the data stored or processed\
+        \ by it; may result in negative impact on the organization\u2019s businesses\
+        \ and ser- vices\u2019 availability, or cause negative economic, financial,security\
+        \ or social impacts on the national level."
+    - urn: urn:intuitem:risk:req_node:otcc:node257
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Defense in Depth
+      description: Provision of multiple cybersecurity protections, especially in
+        layers, with the intent to delay if not prevent an attack.
+    - urn: urn:intuitem:risk:req_node:otcc:node258
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Demilitarized Zone
+      description: Perimeter network segment that is logically between internal and
+        external networks.
+    - urn: urn:intuitem:risk:req_node:otcc:node259
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Factory Acceptance Test
+      description: A test of the OT/ICS equipment, conducted at the vendor facility
+        where the equipment was constructed after the completion of assembly and configuration,
+        performed to validate compliance with the functional specifications and proper
+        operation of the equipment in a location where problems can be more easily
+        identified and remediated.
+    - urn: urn:intuitem:risk:req_node:otcc:node260
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Industrial Control System
+      description: A collective term used to describe different types of control systems
+        and associated instrumentation, which includes the devices, systems, networks,
+        and controls used to operate and/or automate industrial processes.
+    - urn: urn:intuitem:risk:req_node:otcc:node261
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Industrial Internet of Things
+      description: The extension and use of the internet of things (IoT) in industrial
+        sectors and applications.
+    - urn: urn:intuitem:risk:req_node:otcc:node262
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Information Technology
+      description: The technology involving the development, maintenance, and use
+        of computer systems, software, and networks for the processing and distribution
+        of data; generally considered the business and administrative systems with-
+        in an organization.
+    - urn: urn:intuitem:risk:req_node:otcc:node263
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Integrity
+      description: Quality of a system reflecting the logical correctness and reliability
+        of the OS, the logical completeness of the hardware and software implementing
+        the protection mechanisms, and the consistency of the data structures and
+        occurrence of the stored data.
+    - urn: urn:intuitem:risk:req_node:otcc:node264
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Jump Host
+      description: A single, remote access point through which all ingress network
+        traffic must pass between a higher-level zone and a lower level zone.
+    - urn: urn:intuitem:risk:req_node:otcc:node265
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Network Segmentation
+      description: The act or practice of splitting a computer network into subnetworks,
+        each being a network segment.
+    - urn: urn:intuitem:risk:req_node:otcc:node266
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Network Segregation
+      description: The process to develop and enforce a ruleset for controlling the
+        communications between specific hosts and services.
+    - urn: urn:intuitem:risk:req_node:otcc:node267
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Operational Technology
+      description: The system of components, including network devices, computers,
+        servers, cybersecurity devices, infrastructure equipment, and applications
+        that support operations, maintenance, monitoring, and cybersecurity of the
+        OT/ ICS environment.
+    - urn: urn:intuitem:risk:req_node:otcc:node268
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Process Hazard Analysis
+      description: A set of organized and systematic assessments of the potential
+        hazards associated with an industrial process addressing known hazards with
+        the process, previous incidents, engineering and administrative controls in
+        place, consequences of the failure of those engineering and administrative
+        controls, facility siting, human factors, and a qualitative evaluation of
+        HSE effects.
+    - urn: urn:intuitem:risk:req_node:otcc:node269
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Impact
+      description: A measure of the ultimate loss or harm associated with a consequence.
+    - urn: urn:intuitem:risk:req_node:otcc:node270
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: RACI Matrix
+      description: Responsible, Accountable, Consulted, Informed Matrix. Matrix that
+        maps each player in a process, capability or function with the degree of involve-
+        ment and responsibility undertaken in the process.
+    - urn: urn:intuitem:risk:req_node:otcc:node271
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Role-Based Access Control
+      description: A method of restricting network access based on the roles of individual
+        users within an enterprise. RBAC lets employees have access rights only to
+        the information they need to do their jobs and prevent them from access- ing
+        information that does not pertain to them.
+    - urn: urn:intuitem:risk:req_node:otcc:node272
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Secure by Design
+      description: 'A methodology to systems and software development and networks
+        design that seeks to make systems, software and networks free from cybersecurity
+        vulnerabilities/weaknesses and impervious to cyber-attack as much as possible
+        through measures such as: continuous testing, authentication safeguards, and
+        adherence to best programming and design practices.'
+    - urn: urn:intuitem:risk:req_node:otcc:node273
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Site Acceptance Test
+      description: "A test of the OT/ICS equipment conducted on-site at the organization\u2019\
+        s facility after completion of the installation and configuration of the equipment\
+        \ performed to validate compliance with the functional specifications, proper\
+        \ operation of the equipment in conjunction with other components not possible\
+        \ in the factory acceptance testing (FAT) such as instrumentation and associated\
+        \ process equipment furnished and installed by others."
+    - urn: urn:intuitem:risk:req_node:otcc:node274
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Source Code Review
+      description: A process that is conducted manually/ automatically to identify
+        security-related weaknesses (flaws) in set of commands and instructions written
+        in one of programming languages.
+    - urn: urn:intuitem:risk:req_node:otcc:node275
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Tabletop Exercise
+      description: A simulated exercise designed to test the detection and response
+        capabil- ities of an organization's operational environment. The organization's
+        re- sponse teams are guided through a fictional, but realistic OT/ICS focused
+        cybersecurity event scenario in a discussion-based format. The goal of the
+        exercise is to improve an organization's IRP, BCP, and DRP, as well as provide
+        facilitated training to its response teams.
+    - urn: urn:intuitem:risk:req_node:otcc:node276
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Tactics, Techniques, and Procedures
+      description: The behavior of a cyber-adversary. A tactic is the highest-level
+        descrip- tion of the behavior and represents the "why" of a technique (e.g.
+        achieve credential access). Techniques represent "how" and adversary achieves
+        a tactical goal by performing an action (e.g. dump credentials to achieve
+        credential access). Procedures are the specific implementation the adversary
+        uses for techniques (e.g. using PowerShell to inject into lsass.exe to dump
+        credentials).
+    - urn: urn:intuitem:risk:req_node:otcc:node277
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: User Behaviors Analytics
+      description: Track, collect and analyze user data, and identify patterns of
+        user activities in order to detect harmful or unusual behaviors.
+    - urn: urn:intuitem:risk:req_node:otcc:node278
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:otcc:appendix-(a)
+      name: Zone
+      description: Grouping of logical or physical assets that share common cybersecurity
+        requirements.

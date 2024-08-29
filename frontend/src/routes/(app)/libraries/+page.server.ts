@@ -6,77 +6,73 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
-import type { Library, urlModel } from '$lib/utils/types';
+import type { Library } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
-import { languageTag } from '$paraglide/runtime';
-import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = (async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/libraries/`;
+	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/`;
+	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/`;
 
-	const res = await fetch(endpoint);
-	const libraries: Library[] = await res.json().then((res) => res.results);
+	const [stored_libraries_res, loaded_libaries_res] = await Promise.all([
+		fetch(stored_libraries_endpoint),
+		fetch(loaded_libaries_endpoint)
+	]);
 
-	function countObjects(library: Library) {
-		const result: { [key: string]: any } = new Object();
-		for (const [key, value] of Object.entries(library.objects)) {
-			if (Array.isArray(value)) {
-				const str = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
-				result[str] = value.length;
-			} else {
-				for (const [key2, value2] of Object.entries(value)) {
-					if (key2 === 'requirements') {
-						const str = key2.charAt(0).toUpperCase() + key2.slice(1);
-						result[str] = value2.length;
-					}
-				}
-			}
-		}
-		return result;
-	}
+	const storedLibraries = await stored_libraries_res.json().then((res) => res.results);
+	const loadedLibraries = await loaded_libaries_res.json().then((res) => res.results);
 
-	libraries.forEach((row) => {
+	const prepareRow = (row: Record<string, any>) => {
 		row.overview = [
-			`Provider: ${row.provider}`,
 			`Packager: ${row.packager}`,
-			...Object.entries(countObjects(row)).map(([key, value]) => `${key}: ${value}`)
+			`Version: ${row.version}`,
+			...Object.entries(row.objects_meta).map(([key, value]) => `${key}: ${value}`)
 		];
-		row.allowDeleteLibrary = row.reference_count && row.reference_count > 0 ? false : true;
-	});
+		row.allowDeleteLibrary = row.allowDeleteLibrary =
+			row.reference_count && row.reference_count > 0 ? false : true;
+	};
 
-	const headData: Record<string, string> = listViewFields['libraries' as urlModel].body.reduce(
-		(obj, key, index) => {
-			obj[key] = listViewFields['libraries' as urlModel].head[index];
+	storedLibraries.forEach(prepareRow);
+	loadedLibraries.forEach(prepareRow);
+
+	type libraryURLModel = 'stored-libraries' | 'loaded-libraries';
+
+	const makeHeadData = (URLModel: libraryURLModel) => {
+		return listViewFields[URLModel].body.reduce((obj, key, index) => {
+			obj[key] = listViewFields[URLModel].head[index];
 			return obj;
-		},
-		{}
-	);
+		}, {});
+	};
 
-	const bodyData = (libraries) =>
-		tableSourceMapper(libraries, listViewFields['libraries' as urlModel].body);
+	const makeBodyData = (libraries: Library[], URLModel: libraryURLModel) =>
+		tableSourceMapper(libraries, listViewFields[URLModel].body);
 
-	const librariesTable: TableSource = (libraries: Library[]) => {
+	const makeLibrariesTable = (libraries: Library[], URLModel: libraryURLModel) => {
 		return {
-			head: headData,
-			body: bodyData(libraries),
-			meta: libraries
+			head: makeHeadData(URLModel),
+			body: makeBodyData(libraries, URLModel),
+			meta: { urlmodel: URLModel, ...libraries }
 		};
 	};
 
-	const defaultLibrariesTable = librariesTable(
-		libraries.filter((lib) => !lib.id && lib.packager === 'intuitem')
-	);
+	const storedLibrariesTable = {
+		head: makeHeadData('stored-libraries'),
+		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
+		body: tableSourceMapper(storedLibraries, listViewFields['stored-libraries'].body)
+	};
 
-	const importedLibrariesTable = librariesTable(libraries.filter((lib) => lib.id));
+	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries, 'loaded-libraries');
 
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
 
-	return { libraries, defaultLibrariesTable, importedLibrariesTable, deleteForm };
+	return { storedLibrariesTable, loadedLibrariesTable, deleteForm };
 }) satisfies PageServerLoad;
+
+// ----------------------------------------------------------- //
 
 export const actions: Actions = {
 	upload: async (event) => {
@@ -85,12 +81,8 @@ export const actions: Actions = {
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
-
-			if (file.size <= 0) {
-				return fail(400, { form });
-			}
-
-			const endpoint = `${BASE_API_URL}/libraries/upload/`;
+			// Should i check if attachment.size > 0 ?
+			const endpoint = `${BASE_API_URL}/stored-libraries/upload/`;
 			const req = await event.fetch(endpoint, {
 				method: 'POST',
 				headers: {
@@ -102,13 +94,15 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const translate_error = localItems(languageTag())[response.error];
-				const toast_error_message = translate_error ?? m.libraryImportError();
+				const translate_error = localItems()[response.error];
+				const toast_error_message =
+					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
 
 				setFlash({ type: 'error', message: toast_error_message }, event);
+				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}
-			setFlash({ type: 'success', message: m.librarySuccessfullyImported() }, event);
+			setFlash({ type: 'success', message: m.librarySuccessfullyLoaded() }, event);
 		} else {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });
@@ -119,8 +113,10 @@ export const actions: Actions = {
 		const schema = z.object({ id: z.string().regex(URN_REGEX) });
 		const deleteForm = await superValidate(formData, zod(schema));
 
+		const URLModel = formData.get('urlmodel');
+
 		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/libraries/${id}/`;
+		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
 
 		if (!deleteForm.valid) {
 			console.error(deleteForm.errors);
@@ -141,10 +137,7 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			setFlash(
-				{ type: 'success', message: m.successfullyDeletedObject({ object: 'library' }) },
-				event
-			);
+			setFlash({ type: 'success', message: m.successfullyDeletedLibrary() }, event);
 		}
 		return { deleteForm };
 	}

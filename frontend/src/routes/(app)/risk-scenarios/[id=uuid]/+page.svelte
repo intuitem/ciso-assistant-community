@@ -9,6 +9,7 @@
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { isDark } from '$lib/utils/helpers';
 
 	export let data: PageData;
 
@@ -23,6 +24,10 @@
 	data.riskMatrix.risk.forEach((risk, i) => {
 		color_map[risk.name] = risk.hexcolor;
 	});
+
+	$: classesCellText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
+	};
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -49,8 +54,9 @@
 			>
 		{/if}
 	</div>
+
 	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg w-3/4">
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
 			<div class="flex flex-row justify-between">
 				<span>
@@ -73,32 +79,40 @@
 				</span>
 			</div>
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/4">
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
 			<h4 class="h4 font-semibold">{m.status()}</h4>
 			<div class="flex flex-row justify-between">
-				<span>
+				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 					<p class="text-sm font-semibold">
 						{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
 					</p>
-				</span>
-				<span>
+				</div>
+				<div>
+					<span class=" text-sm text-gray-400 font-semibold">Owner(s):</span>
+					<ul>
+						{#each data.scenario.owner as owner}
+							<li class="text-xs">{owner.str}</li>
+						{/each}
+					</ul>
+				</div>
+				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.treatmentStatus()}</p>
 					<p class="text-sm font-semibold">
-						{localItems(languageTag())[toCamelCase(data.scenario.treatment)]}
+						{localItems()[toCamelCase(data.scenario.treatment)]}
 					</p>
-				</span>
+				</div>
 			</div>
 		</div>
 	</div>
 	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5 max-h-96 overflow-y-scroll">
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
-			<ModelTable source={data.tables['threats']} URLModel="threats" />
+			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
 		</div>
-		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-scroll">
+		<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
-			<ModelTable source={data.tables['assets']} URLModel="assets" />
+			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 		</div>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg">
@@ -120,10 +134,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_proba]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.current_proba)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.current_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.current_proba.name)]}
+						{localItems()[toCamelCase(data.scenario.current_proba.name)]}
 					{:else}
-						{data.scenario.current_proba}
+						{data.scenario.current_proba.name}
 					{/if}
 				</span>
 			</p>
@@ -134,10 +148,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_impact]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.current_impact)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.current_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.current_impact.name)]}
+						{localItems()[toCamelCase(data.scenario.current_impact.name)]}
 					{:else}
-						{data.scenario.current_impact}
+						{data.scenario.current_impact.name}
 					{/if}
 				</span>
 			</p>
@@ -145,11 +159,13 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.currentRiskLevel()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
+					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+						data.scenario.current_level.hexcolor
+					)}"
 					style="background-color: {data.scenario.current_level.hexcolor}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.current_level.name)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.current_level.name)]}
+					{#if localItems()[toCamelCase(data.scenario.current_level.name)]}
+						{localItems()[toCamelCase(data.scenario.current_level.name)]}
 					{:else}
 						{data.scenario.current_level.name}
 					{/if}
@@ -161,7 +177,11 @@
 		<div class="flex flex-col w-1/2">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<p class="text-sm font-semibold text-gray-400">{m.appliedControls()}</p>
-			<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
+			<ModelTable
+				source={data.tables['applied-controls']}
+				hideFilters={true}
+				URLModel="applied-controls"
+			/>
 		</div>
 		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">
 			<p class="flex flex-col">
@@ -170,10 +190,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_proba]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.residual_proba)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.residual_proba)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_proba.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_proba.name)]}
 					{:else}
-						{data.scenario.residual_proba}
+						{data.scenario.residual_proba.name}
 					{/if}
 				</span>
 			</p>
@@ -184,10 +204,10 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_impact]}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.residual_impact)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.residual_impact)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_impact.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_impact.name)]}
 					{:else}
-						{data.scenario.residual_impact}
+						{data.scenario.residual_impact.name}
 					{/if}
 				</span>
 			</p>
@@ -195,11 +215,13 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.residualRiskLevel()}</span>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20"
+					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+						data.scenario.residual_level.hexcolor
+					)}"
 					style="background-color: {data.scenario.residual_level.hexcolor}"
 				>
-					{#if localItems(languageTag())[toCamelCase(data.scenario.residual_level.name)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.residual_level.name)]}
+					{#if localItems()[toCamelCase(data.scenario.residual_level.name)]}
+						{localItems()[toCamelCase(data.scenario.residual_level.name)]}
 					{:else}
 						{data.scenario.residual_level.name}
 					{/if}
@@ -209,16 +231,27 @@
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg space-y-2">
 		<div>
+			<p class="text-sm font-semibold text-gray-400">{m.qualification()}</p>
+			<p>
+				<span class="font-semibold">
+					{#each data.scenario.qualifications as qualification, i}
+						{#if i > 0},{/if}
+						{localItems()[toCamelCase(qualification)] || qualification || localItems()['undefined']}
+					{/each}
+				</span>
+			</p>
+		</div>
+		<div>
 			<p class="text-sm font-semibold text-gray-400">{m.strengthOfKnowledge()}</p>
 			<p>
 				{#if data.scenario.strength_of_knowledge.symbol}
 					{data.scenario.strength_of_knowledge.symbol}
 				{/if}
 				<span class="font-semibold">
-					{#if localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}
-						{localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}
+					{#if localItems()[toCamelCase(data.scenario.strength_of_knowledge.name)]}
+						{localItems()[toCamelCase(data.scenario.strength_of_knowledge.name)]}
 					{:else}
-						{localItems(languageTag())['undefined']}
+						{localItems()['undefined']}
 					{/if}
 				</span>
 			</p>

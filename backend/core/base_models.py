@@ -8,7 +8,7 @@ import uuid
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("UpdatedÒ at"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     is_published = models.BooleanField(_("published"), default=False)
 
     class Meta:
@@ -116,3 +116,15 @@ class NameDescriptionMixin(AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class ETADueDateMixin(models.Model):
+    """
+    Mixin for models that have an ETA and a due date.
+    """
+
+    eta = models.DateField(null=True, blank=True, verbose_name=_("ETA"))
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+
+    class Meta:
+        abstract = True

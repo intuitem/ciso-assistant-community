@@ -1,6 +1,11 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { languageTag, setLanguageTag } from '$paraglide/runtime';
+
+import { loadFeatureFlags } from '$lib/feature-flags';
 
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
@@ -43,9 +48,18 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	event.locals.featureFlags = loadFeatureFlags();
+
 	await ensureCsrfToken(event);
 
 	if (event.locals.user) return await resolve(event);
+
+	const errorId = new URL(event.request.url).searchParams.get('error');
+	if (errorId) {
+		setLanguageTag(event.cookies.get('ciso_lang') || 'en');
+		setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
+		redirect(302, '/login');
+	}
 
 	const user = await validateUserSession(event);
 	if (user) {
@@ -60,6 +74,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookie
 
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
+		request.headers.set('Accept-Language', languageTag());
 
 		const token = cookies.get('token');
 		const csrfToken = cookies.get('csrftoken');

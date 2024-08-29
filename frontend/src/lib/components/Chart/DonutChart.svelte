@@ -1,29 +1,29 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { safeTranslate } from '$lib/utils/i18n';
 
-	// export let name: string;
+	export let name: string;
 	export let s_label = '';
 
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
+	export let orientation = 'vertical';
 
 	export let values: any[]; // Set the types for these variables later on
 	export let colors: string[] = [];
 
 	for (const index in values) {
 		if (values[index].localName) {
-			values[index].name = localItems(languageTag())[values[index].localName];
+			values[index].name = safeTranslate(values[index].localName);
 		}
 	}
 
-	let chart_element: HTMLElement | null = null;
+	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(chart_element, null, { renderer: 'svg' });
+		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
 		// specify chart configuration item and data
 		let option = {
@@ -47,10 +47,9 @@
 				}
 			},
 			legend: {
-				top: 20,
-				// left: 'center',
-				right: 10,
-				orient: 'vertical'
+				top: 'bottom',
+				right: '0',
+				orient: orientation
 			},
 			series: [
 				{
@@ -70,7 +69,7 @@
 					emphasis: {
 						label: {
 							show: true,
-							fontSize: '40',
+							fontSize: '24',
 							fontWeight: 'bold'
 						}
 					},
@@ -93,4 +92,4 @@
 	});
 </script>
 
-<div class="{width} {height} {classesContainer}" bind:this={chart_element} />
+<div id={chart_id} class="{width} {height} {classesContainer}" />

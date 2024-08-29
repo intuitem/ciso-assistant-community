@@ -51,7 +51,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{localItems(languageTag())[toCamelCase(key)]}
+							{localItems()[toCamelCase(key)]}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -59,12 +59,18 @@
 							{#if value}
 								{#if key === 'library'}
 									{@const itemHref = `/libraries/${value.urn}`}
-									<a href={itemHref} class="anchor">{value.name}</a>
+									<a href={itemHref} class="anchor">{value.str}</a>
 								{:else if key === 'scores_definition'}
 									{#each Object.entries(value) as [key, definition]}
 										<div>
 											{definition.score}.
 											{definition.name}{definition.description ? `: ${definition.description}` : ''}
+										</div>
+									{/each}
+								{:else if key === 'implementation_groups_definition'}
+									{#each Object.entries(value) as [key, definition]}
+										<div>
+											{definition.ref_id}. {definition.name}
 										</div>
 									{/each}
 								{:else if Array.isArray(value)}

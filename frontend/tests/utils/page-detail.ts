@@ -10,7 +10,12 @@ export class PageDetail extends BasePage {
 	readonly statusRejectButton: Locator;
 	readonly statusRevokeButton: Locator;
 
-	constructor(public readonly page: Page, url: string, form: FormContent, item: string) {
+	constructor(
+		public readonly page: Page,
+		url: string,
+		form: FormContent,
+		item: string
+	) {
 		super(page, url, item);
 		this.form = form;
 		this.item = item;
@@ -37,11 +42,7 @@ export class PageDetail extends BasePage {
 		await this.form.fill(editedValues);
 		await this.form.saveButton.click();
 
-		await this.isToastVisible(
-			'The .+: ' +
-				({ ...buildParams, ...editedValues }.name || { ...buildParams, ...editedValues }.email) +
-				' has been successfully updated'
-		);
+		await this.isToastVisible('The .+ has been successfully updated');
 		return editedValues;
 	}
 
@@ -142,5 +143,33 @@ export class PageDetail extends BasePage {
 				}
 			}
 		}
+	}
+
+	async treeViewItem(value: string, path: string[] = []) {
+		if (path.length !== 0) {
+			const tree = [...path, value];
+			for (let i = 0; i < tree.length - 1; i++) {
+				if (
+					await this.page
+						.getByTestId('tree-item-content')
+						.getByText(tree[i + 1])
+						.isHidden()
+				) {
+					await this.page.getByTestId('tree-item-content').getByText(tree[i]).click();
+				}
+			}
+		}
+		const content = this.page
+			.getByTestId('tree-item-content')
+			.filter({ hasText: new RegExp(`^${value}\n*.*`) });
+		return {
+			content: content,
+			progressRadial: this.page
+				.getByTestId('tree-item')
+				.filter({ has: content, hasNotText: path.length != 0 ? path.at(-1) : undefined })
+				.getByTestId('tree-item-lead')
+				.getByTestId('progress-radial'),
+			default: this.page.getByTestId('tree-item').filter({ hasText: new RegExp(`^${value}\n*.*`) })
+		};
 	}
 }

@@ -1,3 +1,5 @@
+// define the content of forms
+
 import type { urlModel } from './types';
 import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
@@ -10,7 +12,9 @@ type GetOptionsParams = {
 	suggestions?: any[];
 	label?: string;
 	value?: string;
-	extra_fields: (string[] | string)[];
+	extra_fields: string[];
+	self?: Record<string, any>;
+	selfSelect?: boolean;
 };
 
 export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any) {
@@ -22,7 +26,7 @@ export function checkConstraints(constraints: { [key: string]: any }, foreignKey
 	return emptyConstraintsList;
 }
 
-function getValue(object: { [key: string]: any }, keys: string[]) {
+function getValue(object: { [key: string]: any }, keys: string | string[]) {
 	if (typeof keys === 'string') {
 		return object[keys];
 	}
@@ -45,21 +49,26 @@ export const getOptions = ({
 	label: string;
 	value: string;
 	suggested: boolean;
-	self: Record<string, any>;
-	selfSelect: boolean;
+	self?: Record<string, any>;
+	selfSelect?: boolean;
 }[] => {
+	const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 	const options = objects
 		.map((object) => {
+			const my_label =
+				label != 'auto'
+					? object[label]
+					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
 			return {
 				label:
 					extra_fields.length > 0
 						? extra_fields
-								.map((fields) => getValue(object, fields))
+								.map((field) => getValue(object, field))
 								.map((string) => `${string}`)
 								.join('/') +
-						  '/' +
-						  object[label]
-						: object[label],
+							'/' +
+							my_label
+						: my_label,
 				value: object[value],
 				suggested: false
 			};
@@ -104,10 +113,13 @@ interface Field {
 
 interface SelectField {
 	field: string;
+	detail?: boolean;
 }
 
 export interface ModelMapEntry {
 	name: string;
+	localName: string;
+	localNamePlural: string;
 	verboseName: string;
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
@@ -115,8 +127,9 @@ export interface ModelMapEntry {
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
+	fileFields?: string[];
 	filters?: SelectField[];
-	[key: string]: any;
+	path?: string;
 }
 
 type ModelMap = {
@@ -128,19 +141,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'folder',
 		localName: 'domain',
 		localNamePlural: 'domains',
-		localFrGender: 'm',
 		verboseName: 'Domain',
 		verboseNamePlural: 'Domains',
-		foreignKeyFields: [
-			{ field: 'parent_folder', urlModel: 'folders', urlParams: 'content_type=GL' }
-		],
+		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [{ field: 'folder', urlModel: 'projects' }]
 	},
 	projects: {
 		name: 'project',
 		localName: 'project',
 		localNamePlural: 'projects',
-		localFrGender: 'm',
 		verboseName: 'Project',
 		verboseNamePlural: 'Projects',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }],
@@ -155,7 +164,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskmatrix',
 		localName: 'riskMatrix',
 		localNamePlural: 'riskMatrices',
-		localFrGender: 'f',
 		verboseName: 'Risk matrix',
 		verboseNamePlural: 'Risk matrices',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
@@ -164,7 +172,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskassessment',
 		localName: 'riskAssessment',
 		localNamePlural: 'riskAssessments',
-		localFrGender: 'f',
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [
@@ -178,12 +185,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
+	'risk-assessment_duplicate': {
+		name: 'riskassessment',
+		localName: 'riskAssessment',
+		localNamePlural: 'riskAssessments',
+		verboseName: 'Risk assessment',
+		verboseNamePlural: 'Risk assessments',
+		foreignKeyFields: [{ field: 'project', urlModel: 'projects' }]
+	},
 	threats: {
-		ref_id: 'ref_id',
 		name: 'threat',
 		localName: 'threat',
 		localNamePlural: 'threats',
-		localFrGender: 'f',
 		verboseName: 'Threat',
 		verboseNamePlural: 'Threats',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
@@ -192,7 +205,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskscenario',
 		localName: 'riskScenario',
 		localNamePlural: 'riskScenarios',
-		localFrGender: 'm',
 		verboseName: 'Risk scenario',
 		verboseNamePlural: 'Risk scenarios',
 		foreignKeyFields: [
@@ -202,16 +214,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'auditor', urlModel: 'users' }
+			{ field: 'auditor', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'users' }
 		],
-		filters: [{ field: 'threats' }, { field: 'risk_assessment' }],
-		search: false
+		filters: [{ field: 'threats' }, { field: 'risk_assessment' }, { field: 'owner' }]
 	},
 	'applied-controls': {
 		name: 'appliedcontrol',
 		localName: 'appliedControl',
 		localNamePlural: 'appliedControls',
-		localFrGender: 'f',
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
 		detailViewFields: [
@@ -219,6 +230,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
@@ -234,11 +246,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
-		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'category' },
+			{ field: 'csf_function' },
+			{ field: 'effort' }
+		],
 		filters: [
 			{ field: 'reference_control' },
 			{ field: 'status' },
 			{ field: 'category' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'folder' }
 		]
@@ -247,7 +265,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'appliedcontrol',
 		localName: 'policy',
 		localNamePlural: 'policies',
-		localFrGender: 'f',
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
@@ -255,9 +272,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'effort' }],
+		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },
+			{ field: 'csf_function' },
 			{ field: 'status' },
 			{ field: 'effort' },
 			{ field: 'folder' }
@@ -267,7 +285,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'riskacceptance',
 		localName: 'riskAcceptance',
 		localNamePlural: 'riskAcceptances',
-		localFrGender: 'f',
 		verboseName: 'Risk acceptance',
 		verboseNamePlural: 'Risk acceptances',
 		foreignKeyFields: [
@@ -282,22 +299,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'risk_scenarios' }, { field: 'folder' }, { field: 'approver' }]
 	},
 	'reference-controls': {
-		ref_id: 'ref_id',
 		name: 'referencecontrol',
 		localName: 'referenceControl',
 		localNamePlural: 'referenceControls',
-		localFrGender: 'f',
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
-		selectFields: [{ field: 'category' }],
+		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]
 	},
 	assets: {
 		name: 'asset',
 		localName: 'asset',
 		localNamePlural: 'assets',
-		localFrGender: 'm',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
 		foreignKeyFields: [
@@ -311,7 +325,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'user',
 		localName: 'user',
 		localNamePlural: 'users',
-		localFrGender: 'm',
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
@@ -321,7 +334,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'usergroup',
 		localName: 'userGroup',
 		localNamePlural: 'userGroups',
-		localFrGender: 'm',
+
 		verboseName: 'User group',
 		verboseNamePlural: 'User groups',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
@@ -331,18 +344,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'roleassignment',
 		localName: 'roleAssignment',
 		localNamePlural: 'roleAssignments',
-		localFrGender: 'f',
 		verboseName: 'Role assignment',
 		verboseNamePlural: 'Role assignments',
 		foreignKeyFields: [],
 		filters: []
 	},
 	frameworks: {
-		ref_id: 'ref_id',
 		name: 'framework',
 		localName: 'framework',
 		localNamePlural: 'frameworks',
-		localFrGender: 'm',
 		verboseName: 'Framework',
 		verboseNamePlural: 'Frameworks',
 		foreignKeyFields: [
@@ -356,9 +366,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'evidence',
 		localName: 'evidence',
 		localNamePlural: 'evidences',
-		localFrGender: 'f',
 		verboseName: 'Evidence',
 		verboseNamePlural: 'Evidences',
+		fileFields: ['attachment'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -369,24 +379,22 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',
 		localNamePlural: 'complianceAssessments',
-		localFrGender: 'f',
 		verboseName: 'Compliance assessment',
 		verboseNamePlural: 'Compliance assessments',
 		foreignKeyFields: [
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' }
+			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
-		ref_id: 'ref_id',
 		name: 'requirement',
 		localName: 'requirement',
 		localNamePlural: 'requirements',
-		localFrGender: 'f',
 		verboseName: 'Requirement',
 		verboseNamePlural: 'Requirements'
 	},
@@ -394,34 +402,69 @@ export const URL_MODEL_MAP: ModelMap = {
 		name: 'requirementassessment',
 		localName: 'requirementAssessment',
 		localNamePlural: 'requirementAssessments',
-		localFrGender: 'f',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'result' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		]
 	},
-	libraries: {
-		name: 'library',
-		localName: 'library',
-		localNamePlural: 'libraries',
-		localFrGender: 'f',
-		verboseName: 'Library',
-		verboseNamePlural: 'Libraries'
+	'stored-libraries': {
+		name: 'storedlibrary',
+		localName: 'storedLibrary',
+		localNamePlural: 'storedLibraries',
+		verboseName: 'stored Library',
+		verboseNamePlural: 'stored Libraries'
+	},
+	'loaded-libraries': {
+		name: 'loadedlibrary',
+		localName: 'loadedLibrary',
+		localNamePlural: 'loadedLibraries',
+		verboseName: 'loaded Library',
+		verboseNamePlural: 'loaded Libraries'
+	},
+	'sso-settings': {
+		name: 'ssoSettings',
+		localName: 'ssoSettings',
+		localNamePlural: 'ssoSettings',
+		verboseName: 'SSO settings',
+		verboseNamePlural: 'SSO settings',
+		selectFields: [{ field: 'provider' }]
+	},
+	'requirement-mapping-sets': {
+		name: 'requirementmappingset',
+		localName: 'requirementMappingSet',
+		localNamePlural: 'requirementMappingSets',
+		verboseName: 'Requirement mapping set',
+		verboseNamePlural: 'Requirement mapping sets',
+		foreignKeyFields: [
+			{ field: 'source_framework', urlModel: 'frameworks' },
+			{ field: 'target_framework', urlModel: 'frameworks' },
+			{ field: 'library', urlModel: 'libraries' }
+		]
 	}
 };
+
+export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
 	libraries: {
-		locale: LanguageDisplay,
-		actions: LibraryActions
+		locales: LanguageDisplay,
+		[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
 	},
+	// "stored-libraries": {
+	// 	locale: LanguageDisplay,
+	// 	[CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	// },
+	// "loaded-libraries": {
+	// 	locale: LanguageDisplay
+	// 	// [CUSTOM_ACTIONS_COMPONENT]: LibraryActions
+	// },
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}
@@ -508,30 +551,40 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
 			}
 		}
-	}
-};
-
-export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any) => any } = {
-	frameworks: async ({ fetch }) => {
-		const endpoint = `${BASE_API_URL}/frameworks/`;
-		const res = await fetch(endpoint);
-		const response_data = await res.json();
-		const frameworks = response_data.results;
-
-		let compliance_assessment_req = null;
-		let compliance_assessment_data = null;
-
-		for (const framework of frameworks) {
-			compliance_assessment_req = await fetch(
-				`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
-			);
-			compliance_assessment_data = await compliance_assessment_req.json();
-			framework.compliance_assessments = compliance_assessment_data.count;
+	},
+	users: {
+		email: {
+			key: 'is_sso',
+			values: {
+				true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
+			}
 		}
-
-		return frameworks;
 	}
 };
+
+export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
+	{
+		frameworks: async ({ fetch }) => {
+			// ({ fetch }, language)
+			const endpoint = `${BASE_API_URL}/frameworks/`;
+			const res = await fetch(endpoint);
+			const response_data = await res.json();
+			const frameworks = response_data.results;
+
+			let compliance_assessment_req = null;
+			let compliance_assessment_data = null;
+
+			for (const framework of frameworks) {
+				compliance_assessment_req = await fetch(
+					`${BASE_API_URL}/compliance-assessments/?framework=${framework.id}`
+				);
+				compliance_assessment_data = await compliance_assessment_req.json();
+				framework.compliance_assessments = compliance_assessment_data.count;
+			}
+
+			return frameworks;
+		}
+	};
 
 export const urlParamModelVerboseName = (model: string): string => {
 	return URL_MODEL_MAP[model]?.verboseName || '';
@@ -545,9 +598,9 @@ export const urlParamModelSelectFields = (model: string): SelectField[] => {
 	return URL_MODEL_MAP[model]?.selectFields || [];
 };
 
-export const getModelInfo = (model: string): ModelMapEntry => {
+export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	const map = URL_MODEL_MAP[model] || {};
-	map['urlModel' as urlModel] = model;
+	map['urlModel'] = model;
 	return map;
 };
 

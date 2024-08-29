@@ -6,6 +6,8 @@ export default {
 	projectName: 'Test project',
 	riskAcceptanceName: 'Test risk acceptance',
 	riskAssessmentName: 'Test risk assessment',
+	riskAssessmentVersion: '1.4.2',
+	riskAssessmentVersion2: '1.4.3',
 	riskScenarioName: 'Test risk scenario',
 	referenceControlName: 'Test reference control',
 	appliedControlName: 'Test applied control',
@@ -72,7 +74,7 @@ export default {
 				'view_riskmatrix',
 				'view_requirementnode',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -96,7 +98,7 @@ export default {
 				'view_requirementnode',
 				'view_evidence',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -156,7 +158,7 @@ export default {
 				'delete_evidence',
 				'view_requirementnode',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -181,7 +183,7 @@ export default {
 				'view_requirementnode',
 				'view_evidence',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		}
@@ -197,8 +199,9 @@ export default {
 		urn: 'urn:intuitem:risk:library:critical_risk_matrix_5x5'
 	},
 	referenceControl: {
-		name: 'Physical security policy',
+		name: 'POL.PHYSICAL - Physical security policy',
 		category: 'policy',
+		csf_function: 'govern',
 		library: {
 			name: 'Documents and policies',
 			ref: 'doc-pol',
@@ -207,8 +210,9 @@ export default {
 		urn: 'urn:intuitem:risk:function:POL.PHYSICAL'
 	},
 	referenceControl2: {
-		name: 'Controls accountability matrix',
+		name: 'DOC.CONTROLS - Controls accountability matrix',
 		category: 'process',
+		csf_function: 'protect',
 		library: {
 			name: 'Documents and policies',
 			ref: 'doc-pol',
@@ -217,7 +221,7 @@ export default {
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
 	},
 	threat: {
-		name: 'Exfiltration Over Other Network Medium',
+		name: 'T1011 - Exfiltration Over Other Network Medium',
 		library: {
 			name: 'Mitre ATT&CK v14 - Threats and mitigations',
 			ref: 'mitre-attack',
@@ -226,7 +230,7 @@ export default {
 		urn: 'urn:intuitem:risk:threat:mitre-attack:T1011'
 	},
 	threat2: {
-		name: 'Exfiltration Over Physical Medium',
+		name: 'T1052 - Exfiltration Over Physical Medium',
 		library: {
 			name: 'Mitre ATT&CK v14 - Threats and mitigations',
 			ref: 'mitre-attack',

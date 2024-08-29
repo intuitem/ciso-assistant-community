@@ -118,6 +118,11 @@ export const navData = {
 					name: 'frameworks',
 					fa_icon: 'fa-solid fa-folder',
 					href: '/frameworks'
+				},
+				{
+					name: 'requirementMappingSets',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/requirement-mapping-sets'
 				}
 			]
 		},
@@ -126,7 +131,7 @@ export const navData = {
 			items: [
 				{
 					name: 'domains',
-					fa_icon: 'fa-solid fa-diagram-project',
+					fa_icon: 'fa-solid fa-sitemap',
 					href: '/folders'
 				},
 				{
@@ -178,12 +183,13 @@ export const navData = {
 					fa_icon: 'fa-solid fa-floppy-disk',
 					href: '/backup-restore',
 					permissions: ['backup']
+				},
+				{
+					name: 'settings',
+					fa_icon: 'fa-solid fa-cog',
+					href: '/settings',
+					permissions: ['change_globalsettings']
 				}
-				// {
-				// 	name: 'License management',
-				// 	fa_icon: 'fa-solid fa-file-invoice',
-				// 	href: '/license-management'
-				// }
 			]
 		}
 	]

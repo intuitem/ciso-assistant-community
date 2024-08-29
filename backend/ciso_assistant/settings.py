@@ -4,7 +4,7 @@ Django settings for ciso_assistant project.
 CORS are not managed by backend, so CORS library is not used
 
 if "POSTGRES_NAME" environment variable defined, the database engine is posgresql
-and the other env variables are POSGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
+and the other env variables are POSTGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
 else it is sqlite, and no env variable is required
 
 """
@@ -81,6 +81,10 @@ structlog.configure(
 logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
+FEATURE_FLAGS = {}
+MODULE_PATHS = {}
+ROUTES = {}
+
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
 logger.info("BUILD: %s", BUILD)
@@ -94,7 +98,7 @@ logger.info("BUILD: %s", BUILD)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
@@ -122,14 +126,21 @@ INSTALLED_APPS = [
     "django_structlog",
     "tailwind",
     "iam",
+    "global_settings",
     "core",
     "cal",
     "django_filters",
+    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",
     "knox",
     "drf_spectacular",
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.saml",
 ]
 
 MIDDLEWARE = [
@@ -142,15 +153,17 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = "login"
+# we leave these for the API UI tools - even if Django templates and Admin are not used anymore
+LOGIN_REDIRECT_URL = "/api"
+LOGOUT_REDIRECT_URL = "/api"
 
 AUTH_TOKEN_TTL = int(
-    os.environ.get("AUTH_TOKEN_TTL", default=60 * 15)
-)  # defaults to 15 minutes
+    os.environ.get("AUTH_TOKEN_TTL", default=60 * 60)
+)  # defaults to 60 minutes
 AUTH_TOKEN_AUTO_REFRESH = (
     os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
 )  # prevents token from expiring while user is active
@@ -187,16 +200,20 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "core.helpers.handle",
 }
 
 REST_KNOX = {
-    "SECURE_HASH_ALGORITHM": "cryptography.hazmat.primitives.hashes.SHA512",
+    "SECURE_HASH_ALGORITHM": "hashlib.sha512",
     "AUTH_TOKEN_CHARACTER_LENGTH": 64,
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
     "MIN_REFRESH_INTERVAL": 60,
 }
+
+# Empty outside of debug mode so that allauth middleware does not raise an error
+STATIC_URL = ""
 
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
@@ -210,6 +227,14 @@ if DEBUG:
     INSTALLED_APPS.append("django.contrib.staticfiles")
     STATIC_URL = "/static/"
     STATIC_ROOT = BASE_DIR / "static"
+
+    INTERNAL_IPS = [
+        "127.0.0.1",
+    ]
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    }
 
 TEMPLATES = [
     {
@@ -263,6 +288,14 @@ USE_TZ = True
 LANGUAGES = [
     ("en", "English"),
     ("fr", "French"),
+    ("es", "Spanish"),
+    ("de", "German"),
+    ("it", "Italian"),
+    ("nd", "Dutch"),
+    ("pl", "Polish"),
+    ("pt", "Portuguese"),
+    ("ar", "Arabic"),
+    ("ro", "Romanian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -280,7 +313,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # SQLIte file can be changed, useful for tests
 SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
-
+LIBRARIES_PATH = library_path = BASE_DIR / "library/libraries"
 
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
@@ -321,4 +354,32 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.7.0",
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
+}
+
+# SSO with allauth
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "iam.adapter.SocialAccountAdapter"
+
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+HEADLESS_ONLY = True
+
+HEADLESS_FRONTEND_URLS = {
+    "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    "saml": {
+        "EMAIL_AUTHENTICATION": True,
+        "VERIFIED_EMAIL": True,
+    },
 }

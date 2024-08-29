@@ -1,3 +1,5 @@
+import { getSecureRedirect } from '$lib/utils/helpers';
+
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
@@ -6,8 +8,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
-
-export const load: PageServerLoad = async ({ request, locals }) => {
+export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
 		redirect(302, '/analytics');
@@ -15,7 +16,9 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 
 	const form = await superValidate(request, zod(loginSchema));
 
-	return { form };
+	const SSOInfo = await fetch(`${BASE_API_URL}/settings/sso/info/`).then((res) => res.json());
+
+	return { form, SSOInfo };
 };
 
 export const actions: Actions = {
@@ -63,6 +66,6 @@ export const actions: Actions = {
 			secure: true
 		});
 
-		redirect(302, url.searchParams.get('next') || '/analytics');
+		redirect(302, getSecureRedirect(url.searchParams.get('next')) || '/analytics');
 	}
 };

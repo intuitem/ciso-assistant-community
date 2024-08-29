@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -25,6 +26,7 @@
 	const toastStore: ToastStore = getToastStore();
 
 	export let data;
+	$: data.relatedModels = Object.fromEntries(Object.entries(data.relatedModels).sort());
 
 	if (data.model.detailViewFields) {
 		data.data = Object.fromEntries(
@@ -72,7 +74,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]
+			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
 		};
 		modalStore.trigger(modal);
 	}
@@ -190,7 +192,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{localItems(languageTag())[toCamelCase(key)]}
+						{safeTranslate(toCamelCase(key))}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -235,8 +237,8 @@
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
-								{:else if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
-									{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+									{safeTranslate(toCamelCase((value.str || value.name) ?? value))}
 								{:else}
 									{(value.str || value.name) ?? value}
 								{/if}
@@ -263,7 +265,7 @@
 		<TabGroup justify="justify-center">
 			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-					{localItems(languageTag())[model.info.localNamePlural]}
+					{localItems()[model.info.localNamePlural]}
 					{#if model.table.body.length > 0}
 						<span class="badge variant-soft-secondary">{model.table.body.length}</span>
 					{/if}
@@ -274,9 +276,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{localItems(languageTag())[
-									'associated' + capitalizeFirstLetter(model.info.localNamePlural)
-								]}
+								{localItems()['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
 							</h4>
 						</div>
 						{#if model.table}
@@ -285,7 +285,7 @@
 									slot="addButton"
 									class="btn variant-filled-primary self-end my-auto"
 									on:click={(_) => modalCreateForm(model)}
-									><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())[
+									><i class="fa-solid fa-plus mr-2 lowercase" />{localItems()[
 										'add' + capitalizeFirstLetter(model.info.localName)
 									]}</button
 								>

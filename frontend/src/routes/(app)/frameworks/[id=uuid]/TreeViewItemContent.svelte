@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { getRequirementTitle } from '$lib/utils/helpers';
+	import { getOptions } from '$lib/utils/crud';
+
 	export let ref_id: string;
 	export let name: string;
 	export let description: string;
@@ -45,13 +47,13 @@
 </script>
 
 <div>
-	<span class="whitespace-pre-line" style="font-weight: 300};">
+	<span class="whitespace-pre-line" style="font-weight: 300;">
 		<p class="max-w-[80ch]">
 			{#if title}
 				<span style="font-weight: 600;">
 					{title}
 				</span>
-				{#if assessableNodes.length > 1}
+				{#if assessableNodes.length > 1 || (!assessable && assessableNodes.length > 0)}
 					<span class="badge variant-soft-primary">
 						{assessableNodes.length}
 					</span>
@@ -94,15 +96,10 @@
 					<p>--</p>
 				{:else}
 					<ul class="list-disc ml-4">
-						{#each reference_controls as func}
+						{#each getOptions( { objects: reference_controls, extra_fields: [['folder', 'str']], label: 'auto' } ) as func}
+							// convention for automatic label calculation
 							<li>
-								{#if func.id}
-									<a class="anchor" href="/reference-controls/{func.id}">
-										{func.name}
-									</a>
-								{:else}
-									<p>{func.name}</p>
-								{/if}
+								<p>{func.label}</p>
 							</li>
 						{/each}
 					</ul>

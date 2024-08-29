@@ -1,13 +1,38 @@
+from collections.abc import MutableMapping
 from datetime import date, timedelta
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
 
-from core.serializers import ReferenceControlReadSerializer, ThreatReadSerializer
+from library.helpers import get_referential_translation
 
 from .models import *
 from .utils import camel_case
+
+from typing import List, Dict, Optional
+
+from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError as DjValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.views import api_settings
+from rest_framework.views import exception_handler as drf_exception_handler
+
+DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
+
+
+def flatten_dict(
+    d: MutableMapping, parent_key: str = "", sep: str = "."
+) -> MutableMapping:
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "undefined": "#CCC",
@@ -25,6 +50,19 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "on_hold": "#ee6666",
     "transfer": "#91cc75",
 }
+
+
+def color_css_class(status):
+    return {
+        "not_assessed": "gray-300",
+        "compliant": "green-500",
+        "to_do": "gray-400",
+        "in_progress": "blue-500",
+        "done": "green-500",
+        "non_compliant": "red-500",
+        "partially_compliant": "yellow-400",
+        "not_applicable": "black",
+    }.get(status)
 
 
 def applied_control_priority(user: User):
@@ -67,9 +105,8 @@ def measures_to_review(user: User):
     )
     measures = (
         AppliedControl.objects.filter(id__in=object_ids_view)
-        .filter(eta__lte=date.today() + timedelta(days=30))
-        .exclude(status__iexact="done")
-        .order_by("eta")
+        .filter(expiry_date__lte=date.today() + timedelta(days=30))
+        .order_by("expiry_date")
     )
 
     return measures
@@ -192,134 +229,148 @@ def get_compliance_assessment_stats(
 
 def get_sorted_requirement_nodes(
     requirement_nodes: list,
-    requirements_assessed: list | None,
+    requirements_assessed: Optional[list] = None,
+    max_score: int = 0,
 ) -> dict:
     """
     Recursive function to build framework groups tree
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
+    max_score: the maximum score. This is an attribute of the framework
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
     """
 
-    # cope for old version not creating order_id correctly
+    # Cope for old version not creating order_id correctly
     for req in requirement_nodes:
         if req.order_id is None:
             req.order_id = req.created_at
 
-    requirement_assessment_from_requirement_id = (
-        {str(ra.requirement_id): ra for ra in requirements_assessed}
-        if requirements_assessed
-        else {}
-    )
+    requirement_assessment_from_requirement_id = {
+        str(ra.requirement_id): ra for ra in (requirements_assessed or [])
+    }
 
-    def get_sorted_requirement_nodes_rec(
-        requirement_nodes: list,
-        requirements_assessed: list,
-        start: list,
-    ) -> dict:
+    # Build a dictionary to quickly access children nodes
+    children_dict = {}
+    for node in requirement_nodes:
+        if node.parent_urn not in children_dict:
+            children_dict[node.parent_urn] = []
+        children_dict[node.parent_urn].append(node)
+
+    # Sort children nodes by order_id
+    for key in children_dict:
+        children_dict[key].sort(key=lambda x: x.order_id)
+
+    def get_sorted_requirement_nodes_rec(start: list) -> dict:
         """
         Recursive function to build framework groups tree, within get_sorted_requirements_nodes
         start: the initial list
         """
         result = {}
         for node in start:
-            children = [
-                requirement_node
-                for requirement_node in requirement_nodes
-                if requirement_node.parent_urn == node.urn
-            ]
-            req_as = (
-                requirement_assessment_from_requirement_id[str(node.id)]
-                if requirements_assessed
-                else None
-            )
-            result[str(node.id)] = {
+            req_as = requirement_assessment_from_requirement_id.get(str(node.id))
+
+            node_data = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
-                "name": node.name,
-                "ra_id": str(req_as.id) if requirements_assessed else None,
-                "status": req_as.status if requirements_assessed else None,
-                "is_scored": req_as.is_scored if requirements_assessed else None,
-                "score": req_as.score if requirements_assessed else None,
-                "max_score": req_as.compliance_assessment.framework.max_score
-                if requirements_assessed
-                else None,
-                "status_display": req_as.get_status_display()
-                if requirements_assessed
-                else None,
-                "status_i18n": camel_case(req_as.status)
-                if requirements_assessed
+                "name": get_referential_translation(node, "name"),
+                "implementation_groups": node.implementation_groups or None,
+                "ra_id": str(req_as.id) if req_as else None,
+                "status": req_as.status if req_as else None,
+                "result": req_as.result if req_as else None,
+                "is_scored": req_as.is_scored if req_as else None,
+                "score": req_as.score if req_as else None,
+                "max_score": max_score if req_as else None,
+                "mapping_inference": req_as.mapping_inference if req_as else None,
+                "status_display": req_as.get_status_display() if req_as else None,
+                "status_i18n": camel_case(req_as.status) if req_as else None,
+                "result_i18n": camel_case(req_as.result)
+                if req_as and req_as.result is not None
                 else None,
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
-                "description": node.description,
-                "children": get_sorted_requirement_nodes_rec(
-                    requirement_nodes, requirements_assessed, children
-                ),
+                "description": get_referential_translation(node, "description"),
+                "children": {},
             }
-            for req in sorted(
-                [
-                    requirement_node
-                    for requirement_node in requirement_nodes
-                    if requirement_node.parent_urn == node.urn
-                ],
-                key=lambda x: x.order_id,
-            ):
-                if requirements_assessed:
-                    req_as = requirement_assessment_from_requirement_id[str(req.id)]
-                    result[str(node.id)]["children"][str(req.id)].update(
-                        {
-                            "urn": req.urn,
-                            "ref_id": req.ref_id,
-                            "name": req.name,
-                            "description": req.description,
-                            "ra_id": str(req_as.id),
-                            "status": req_as.status,
-                            "is_scored": req_as.is_scored,
-                            "score": req_as.score,
-                            "max_score": req_as.compliance_assessment.framework.max_score,
-                            "status_display": req_as.get_status_display(),
-                            "status_i18n": camel_case(req_as.status),
-                            "style": "leaf",
-                            "threats": ThreatReadSerializer(
-                                req.threats.all(), many=True
-                            ).data,
-                            "reference_controls": ReferenceControlReadSerializer(
-                                req.reference_controls.all(), many=True
-                            ).data,
-                        }
-                    )
-                else:
-                    result[str(node.id)]["children"][str(req.id)].update(
-                        {
-                            "urn": req.urn,
-                            "ref_id": req.ref_id,
-                            "name": req.name,
-                            "description": req.description,
-                            "style": "leaf",
-                            "threats": ThreatReadSerializer(
-                                req.threats.all(), many=True
-                            ).data,
-                            "reference_controls": ReferenceControlReadSerializer(
-                                req.reference_controls.all(), many=True
-                            ).data,
-                        }
-                    )
+
+            result[str(node.id)] = node_data
+
+            # Process children nodes recursively
+            children = children_dict.get(node.urn, [])
+            child_nodes = get_sorted_requirement_nodes_rec(children)
+            result[str(node.id)]["children"] = child_nodes
+
+            # Update each child node with associated requirements
+            for child in children:
+                child_req_as = requirement_assessment_from_requirement_id.get(
+                    str(child.id)
+                )
+
+                child_data = {
+                    "urn": child.urn,
+                    "ref_id": child.ref_id,
+                    "implementation_groups": child.implementation_groups or None,
+                    "name": get_referential_translation(child, "name"),
+                    "description": get_referential_translation(child, "description"),
+                    "ra_id": str(child_req_as.id) if child_req_as else None,
+                    "status": child_req_as.status if child_req_as else None,
+                    "is_scored": child_req_as.is_scored if child_req_as else None,
+                    "score": child_req_as.score if child_req_as else None,
+                    "max_score": max_score if child_req_as else None,
+                    "mapping_inference": child_req_as.mapping_inference
+                    if child_req_as
+                    else None,
+                    "status_display": child_req_as.get_status_display()
+                    if child_req_as
+                    else None,
+                    "status_i18n": camel_case(child_req_as.status)
+                    if child_req_as
+                    else None,
+                    "result": child_req_as.result if child_req_as else None,
+                    "result_i18n": camel_case(child_req_as.result)
+                    if child_req_as and child_req_as.result is not None
+                    else None,
+                    "style": "leaf",
+                }
+
+                result[str(node.id)]["children"][str(child.id)].update(child_data)
+
         return result
 
-    tree = get_sorted_requirement_nodes_rec(
-        requirement_nodes,
-        requirements_assessed,
-        sorted(
-            [rn for rn in requirement_nodes if not rn.parent_urn],
-            key=lambda x: x.order_id,
-        ),
-    )
+    top_level_nodes = [rn for rn in requirement_nodes if not rn.parent_urn]
+    top_level_nodes.sort(key=lambda x: x.order_id)
+
+    tree = get_sorted_requirement_nodes_rec(top_level_nodes)
     return tree
+
+
+def filter_graph_by_implementation_groups(
+    graph: dict[str, dict], implementation_groups: set[str] | None
+) -> dict[str, dict]:
+    if not implementation_groups:
+        return graph
+
+    def should_include_node(node: dict) -> bool:
+        node_groups = node.get("implementation_groups")
+        if node_groups:
+            return any(group in node_groups for group in implementation_groups)
+
+        # Nodes without implementation groups but with children are included
+        return bool(node.get("children"))
+
+    filtered_graph = {}
+    for key, value in graph.items():
+        if value.get("children"):
+            value["children"] = filter_graph_by_implementation_groups(
+                value["children"], implementation_groups
+            )
+        if should_include_node(value):
+            filtered_graph[key] = value
+
+    return filtered_graph
 
 
 def get_parsed_matrices(user: User, risk_assessments: list | None = None):
@@ -529,7 +580,7 @@ def applied_control_per_cur_risk(user: User):
     for lvl in get_rating_options(user):
         cnt = (
             AppliedControl.objects.filter(id__in=object_ids_view)
-            .exclude(status="done")
+            .exclude(status="active")
             .filter(risk_scenarios__current_level=lvl[0])
             .count()
         )
@@ -592,14 +643,14 @@ def aggregate_risks_per_field(
                     .filter(residual_level=i)
                     # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this usefull ?
+                )  # What the second filter does ? Is this useful ?
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
                     # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this usefull ?
+                )  # What the second filter does ? Is this useful ?
 
             if "count" not in values[m["risk"][i][field]]:
                 values[m["risk"][i][field]]["count"] = count
@@ -697,15 +748,38 @@ def risks_per_project_groups(user: User):
 
 
 def get_counters(user: User):
+    print()
     return {
-        "domains": Folder.objects.filter(
-            content_type=Folder.ContentType.DOMAIN
-        ).count(),
-        "projects": Project.objects.all().count(),
-        "applied_controls": AppliedControl.objects.all().count(),
-        "risk_assessments": RiskAssessment.objects.all().count(),
-        "compliance_assessments": ComplianceAssessment.objects.all().count(),
-        "policies": Policy.objects.all().count(),
+        "domains": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Folder
+            )[0]
+        ),
+        "projects": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Project
+            )[0]
+        ),
+        "applied_controls": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, AppliedControl
+            )[0]
+        ),
+        "risk_assessments": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, RiskAssessment
+            )[0]
+        ),
+        "compliance_assessments": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, ComplianceAssessment
+            )[0]
+        ),
+        "policies": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Policy
+            )[0]
+        ),
     }
 
 
@@ -794,12 +868,9 @@ def acceptances_to_review(user: User):
     acceptances = (
         RiskAcceptance.objects.filter(id__in=object_ids_view)
         .filter(expiry_date__lte=date.today() + timedelta(days=30))
-        .order_by("expiry_date")
-    )
-    acceptances |= (
-        RiskAcceptance.objects.filter(id__in=object_ids_view)
         .filter(approver=user)
-        .filter(state="submitted")
+        .filter(state__in=["submitted", "accepted"])
+        .order_by("expiry_date")
     )
 
     return acceptances
@@ -903,3 +974,49 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
         },
         "colors": get_risk_color_ordered_list(user, risk_assessment_list),
     }
+
+
+def threats_count_per_name(user: User):
+    labels = list()
+    values = list()
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskScenario
+    )[0]
+
+    # expected by echarts to send the threats names in labels and the count of each threat in values
+
+    for threat in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
+        val = (
+            RiskScenario.objects.filter(threats=threat)
+            .filter(id__in=viewable_scenarios)
+            .count()
+        )
+        if val > 0:
+            labels.append({"name": threat.name})
+            values.append(val)
+    max_offset = max(values, default=0)  # we can add x later on to improve visibility
+
+    # update each label to include the max_offset
+    for label in labels:
+        label["max"] = max_offset
+
+    return {"labels": labels, "values": values}
+
+
+def handle(exc, context):
+    # translate django validation error which ...
+    # .. causes HTTP 500 status ==> DRF validation which will cause 400 HTTP status
+    if isinstance(exc, DjValidationError):
+        data = exc.message_dict
+        if DJ_NON_FIELD_ERRORS in data:
+            data[DRF_NON_FIELD_ERRORS] = data[DJ_NON_FIELD_ERRORS]
+            del data[DJ_NON_FIELD_ERRORS]
+
+        exc = DRFValidationError(detail=data)
+
+    return drf_exception_handler(exc, context)

@@ -22,9 +22,10 @@
 	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	$value = $value ?? min_score;
-
 	const isScored = formFieldProxy(form, 'is_scored')['value'];
+	$: if ($isScored) {
+		$value = $value ?? min_score;
+	}
 
 	$: if (max_score === 100) score_step = 5;
 
@@ -54,6 +55,7 @@
 			<div class="flex w-full items-center justify-center">
 				<RangeSlider
 					class="w-full"
+					data-testid="range-slider-input"
 					name="range-slider"
 					bind:value={$value}
 					min={min_score}
@@ -93,7 +95,7 @@
 			</div>
 		{:else}
 			<p class="text-sm text-gray-500">
-				You cannot score if the requirement assessment is not applicable
+				{m.notApplicableScore()}
 			</p>
 		{/if}
 	</div>

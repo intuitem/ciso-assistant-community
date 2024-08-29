@@ -1,0 +1,56 @@
+{% load i18n core_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/dezui@latest">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% trans "Audit report" %}</title>
+    <style>
+        .direct_evidences_block, .applied_controls_block{
+            list-style-position: inside;
+        }
+    </style>
+</head>
+<body class="container container-tablet">
+    <hr class="dotted">
+    <div class="flex flex-row space-x-4 justify-center items-center mb-4">
+        <h1 class='text-3xl'>{{ compliance_assessment.name }}: {{ compliance_assessment.framework }}</h1>
+        {% if compliance_assessment.get_global_score > -1 %}
+            <p class='font-semibold'>{% trans "Score:" %}</p> <span class="font-semibold">{{ compliance_assessment.get_global_score|floatformat }}</span>
+        {% endif %}
+        {% bar_graph assessments ancestors %}
+    </div>
+    <div class="flex flex-row space-x-4 mb-4">
+        <div>
+            <p class='font-semibold'>{% trans "Authors "%}</p>
+            <ul>
+                {% for author in compliance_assessment.authors.all %}
+                    <li>{{ author }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <p class='font-semibold'>{%trans "Reviewers" %}</p>
+            <ul>
+                {% for group in compliance_assessment.reviewers.all %}
+                    <li>{{ group }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            <p class='font-semibold'>{% trans "Selected implementation groups" %}</p>
+            <ul>
+                {% for group in compliance_assessment.get_selected_implementation_groups %}
+                    <li>{{ group }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    {% for node in top_level_nodes %}
+        {% include "snippets/req_node.html" with node=node %}
+    {% endfor %}
+</body>
+</html>

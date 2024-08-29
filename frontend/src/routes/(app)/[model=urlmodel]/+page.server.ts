@@ -1,3 +1,4 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
@@ -45,6 +46,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const selectOptions: Record<string, any> = {};
 
 	for (const selectField of selectFields) {
+		if (selectField.detail) continue;
 		const url = `${BASE_API_URL}/${params.model}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
@@ -82,8 +84,10 @@ export const actions: Actions = {
 
 		const endpoint = `${BASE_API_URL}/${event.params.model}/`;
 
-		const fileFields = Object.fromEntries(
-			Object.entries(form.data).filter(([, value]) => value instanceof File)
+		const model = getModelInfo(event.params.model!);
+
+		const fileFields: Record<string, File> = Object.fromEntries(
+			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
 		);
 
 		Object.keys(fileFields).forEach((key) => {
@@ -118,9 +122,8 @@ export const actions: Actions = {
 
 		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
-				if (file.size <= 0) {
-					continue;
-				}
+				if (!file) continue;
+				if (file.size <= 0) continue;
 				const fileUploadEndpoint = `${BASE_API_URL}/${event.params.model}/${createdObject.id}/upload/`;
 				const fileUploadRequestInitOptions: RequestInit = {
 					headers: {
@@ -150,7 +153,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyCreatedObject({
-						object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+						object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 					})
 				},
 				event
@@ -160,7 +163,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: safeTranslate(toCamelCase(modelVerboseName)).toLowerCase()
 				})
 			},
 			event
@@ -189,7 +192,7 @@ export const actions: Actions = {
 				const response = await res.json();
 				console.log(response);
 				if (response.error) {
-					setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
+					setFlash({ type: 'error', message: localItems()[response.error] }, event);
 					return fail(403, { form: deleteForm });
 				}
 				if (response.non_field_errors) {
@@ -203,7 +206,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDeletedObject({
-						object: localItems(languageTag())[toCamelCase(toCamelCase(model))].toLowerCase()
+						object: safeTranslate(toCamelCase(toCamelCase(model))).toLowerCase()
 					})
 				},
 				event

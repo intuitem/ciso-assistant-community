@@ -2,11 +2,11 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { UserEditSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import { redirect, fail, type Actions } from '@sveltejs/kit';
 import { getModelInfo } from '$lib/utils/crud';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 import { localItems } from '$lib/utils/locales';
 import { zod } from 'sveltekit-superforms/adapters';
 
@@ -61,7 +61,7 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.error('server response:', response);
 			if (response.error) {
-				setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
+				setFlash({ type: 'error', message: localItems()[response.error] }, event);
 				return fail(403, { form: form });
 			}
 			if (response.non_field_errors) {
@@ -73,6 +73,9 @@ export const actions: Actions = {
 			{ type: 'success', message: m.successfullyUpdatedUser({ email: form.data.email }) },
 			event
 		);
-		redirect(302, event.url.searchParams.get('next') ?? `/users/${event.params.id}`);
+		redirect(
+			302,
+			getSecureRedirect(event.url.searchParams.get('next')) ?? `/users/${event.params.id}`
+		);
 	}
 };

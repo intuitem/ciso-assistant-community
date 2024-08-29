@@ -20,25 +20,34 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`
 	).then((res) => res.json());
 
+	const headFields = [
+		'rid',
+		'name',
+		'threats',
+		'existingControls',
+		'currentLevel',
+		'appliedControls',
+		'residualLevel'
+	];
+
+	const bodyFields = [
+		'rid',
+		'name',
+		'threats',
+		'existing_controls',
+		'current_level',
+		'applied_controls',
+		'residual_level'
+	];
+
+	const headData: Record<string, string> = bodyFields.reduce((obj, key, index) => {
+		obj[key] = headFields[index];
+		return obj;
+	}, {});
+
 	const scenariosTable: TableSource = {
-		head: [
-			'rid',
-			'name',
-			'threats',
-			'existingControls',
-			'currentLevel',
-			'appliedControls',
-			'residualLevel'
-		],
-		body: tableSourceMapper(scenarios, [
-			'rid',
-			'name',
-			'threats',
-			'existing_controls',
-			'current_level',
-			'applied_controls',
-			'residual_level'
-		]),
+		head: headData,
+		body: tableSourceMapper(scenarios, bodyFields),
 		meta: scenarios
 	};
 
@@ -96,5 +105,46 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 	scenarioModel.selectOptions = selectOptions;
 
-	return { risk_assessment, scenarioModel, scenariosTable, scenarioDeleteForm, scenarioCreateForm };
+	const riskAssessmentSchema = modelSchema('risk-assessments');
+
+	const initialDataDuplicate = {
+		name: risk_assessment.name,
+		description: risk_assessment.description,
+		version: risk_assessment.version
+	};
+
+	const riskAssessmentDuplicateForm = await superValidate(
+		initialDataDuplicate,
+		zod(riskAssessmentSchema),
+		{
+			errors: false
+		}
+	);
+
+	const riskAssessmentModel = getModelInfo('risk-assessment-duplicate');
+
+	if (riskAssessmentModel.foreignKeyFields) {
+		for (const keyField of riskAssessmentModel.foreignKeyFields) {
+			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			const response = await fetch(url);
+			if (response.ok) {
+				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
+			} else {
+				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	riskAssessmentModel.foreignKeys = foreignKeys;
+
+	return {
+		risk_assessment,
+		scenarioModel,
+		scenariosTable,
+		scenarioDeleteForm,
+		scenarioCreateForm,
+		riskAssessmentDuplicateForm,
+		riskAssessmentModel
+	};
 };

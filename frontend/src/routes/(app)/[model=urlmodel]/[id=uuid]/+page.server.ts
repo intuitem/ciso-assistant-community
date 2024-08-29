@@ -1,5 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { urlParamModelVerboseName } from '$lib/utils/crud';
+import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
 import { localItems, toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
@@ -32,8 +32,10 @@ export const actions: Actions = {
 
 		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
-		const fileFields = Object.fromEntries(
-			Object.entries(form.data).filter(([, value]) => value instanceof File)
+		const model = getModelInfo(event.params.model!);
+
+		const fileFields: Record<string, File> = Object.fromEntries(
+			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
 		);
 
 		Object.keys(fileFields).forEach((key) => {
@@ -98,7 +100,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyCreatedObject({
-						object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+						object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 					})
 				},
 				event
@@ -108,7 +110,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
 				})
 			},
 			event
@@ -146,7 +148,7 @@ export const actions: Actions = {
 			return message(
 				deleteForm,
 				m.successfullyDeletedObject({
-					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
+					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
 				})
 			);
 		}
@@ -181,7 +183,7 @@ export const actions: Actions = {
 		return message(
 			rejectForm,
 			m.successfullyRejectedObject({
-				object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
 				id: id
 			})
 		);
@@ -215,7 +217,7 @@ export const actions: Actions = {
 		return message(
 			acceptForm,
 			m.successfullyValidatedObject({
-				object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
 				id: id
 			})
 		);
@@ -249,7 +251,7 @@ export const actions: Actions = {
 		return message(
 			revokeForm,
 			m.successfullyRevokedObject({
-				object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
 				id: id
 			})
 		);

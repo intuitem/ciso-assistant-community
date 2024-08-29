@@ -120,12 +120,18 @@ class TestComplianceAssessmentsAuthenticated:
                 "project": {
                     "id": str(project.id),
                     "str": project.folder.name + "/" + project.name,
+                    "folder": {
+                        "id": str(project.folder.id),
+                        "str": project.folder.name,
+                    },
                 },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "implementation_groups_definition": None,
                     "min_score": 1,
                     "max_score": 4,
+                    "ref_id": str(Framework.objects.all()[0].ref_id),
                 },
             },
             user_group=test.user_group,
@@ -153,12 +159,18 @@ class TestComplianceAssessmentsAuthenticated:
                 "project": {
                     "id": str(project.id),
                     "str": project.folder.name + "/" + project.name,
+                    "folder": {
+                        "id": str(project.folder.id),
+                        "str": project.folder.name,
+                    },
                 },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "implementation_groups_definition": None,
                     "min_score": Framework.objects.all()[0].min_score,
                     "max_score": Framework.objects.all()[0].max_score,
+                    "ref_id": str(Framework.objects.all()[0].ref_id),
                 },
             },
             user_group=test.user_group,
@@ -198,12 +210,18 @@ class TestComplianceAssessmentsAuthenticated:
                 "project": {
                     "id": str(project.id),
                     "str": project.folder.name + "/" + project.name,
+                    "folder": {
+                        "id": str(project.folder.id),
+                        "str": project.folder.name,
+                    },
                 },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "implementation_groups_definition": None,
                     "min_score": Framework.objects.all()[0].min_score,
                     "max_score": Framework.objects.all()[0].max_score,
+                    "ref_id": str(Framework.objects.all()[0].ref_id),
                 },
             },
             user_group=test.user_group,

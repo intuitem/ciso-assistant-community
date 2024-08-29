@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { URL_MODEL_MAP, getModelInfo, type ModelMapEntry } from '$lib/utils/crud';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
@@ -47,7 +47,11 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const res = await fetch(relEndpoint);
 				const revData = await res.json().then((res) => res.results);
 
-				const tableFields = listViewFields[e.urlModel];
+				const tableFieldsRef = listViewFields[e.urlModel];
+				const tableFields = {
+					head: [...tableFieldsRef.head],
+					body: [...tableFieldsRef.body]
+				};
 				const index = tableFields.body.indexOf(e.field);
 				if (index > -1) {
 					tableFields.head.splice(index, 1);
@@ -67,7 +71,16 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 				const createSchema = modelSchema(e.urlModel);
 				initialData[e.field] = data.id;
-				if (data.folder) initialData['folder'] = data.folder.id ?? data.folder;
+				if (data.folder) {
+					if (!new RegExp(UUID_REGEX).test(data.folder)) {
+						const objectEndpoint = `${endpoint}object/`;
+						const objectResponse = await fetch(objectEndpoint);
+						const objectData = await objectResponse.json();
+						initialData['folder'] = objectData.folder;
+					} else {
+						initialData['folder'] = data.folder.id ?? data.folder;
+					}
+				}
 				const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
 				const foreignKeys: Record<string, any> = {};

@@ -8,3 +8,7 @@ django_secret_key
 temp/
 db/
 .dccache
+/backend/profiles
+./backend/ciso_assistant/.meta
+caddy_data/
+**/dist/

@@ -6,8 +6,9 @@ import tempfile
 import uuid
 import zipfile
 from datetime import datetime
-from typing import Any
+from typing import Any, Tuple
 from uuid import UUID
+from datetime import date, timedelta
 
 import django_filters as df
 from ciso_assistant.settings import (
@@ -22,6 +23,7 @@ from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django.utils import translation
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, permissions, status, viewsets
@@ -39,12 +41,19 @@ from rest_framework.views import APIView
 from weasyprint import HTML
 
 from core.helpers import *
-from core.models import AppliedControl, ComplianceAssessment
+from core.models import (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementMappingSet,
+    ReferentialObjectMixin,
+)
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
 from .models import *
 from .serializers import *
+
+from django.conf import settings
 
 User = get_user_model()
 
@@ -60,29 +69,34 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     search_fields = ["name", "description"]
     model: models.Model
 
+    serializers_module = "core.serializers"
+
     def get_queryset(self):
         if not self.model:
             return None
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, self.model
-        )[0]
+        object_ids_view = None
+        if self.request.method == "GET":
+            if q := re.match("/api/[\w-]+/([0-9a-f-]+)", self.request.path):
+                """"get_queryset is called by Django even for an individual object via get_object
+                https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
+                id = UUID(q.group(1))
+                if RoleAssignment.is_object_readable(self.request.user, self.model, id):
+                    object_ids_view = [id]
+        if not object_ids_view:
+            object_ids_view = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, self.model
+            )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
 
-    def get_serializer_class(self):
-        base_name = self.model.__name__
-
-        if self.action in ["list", "retrieve"]:
-            serializer_name = f"{base_name}ReadSerializer"
-        elif self.action in ["create", "update", "partial_update"]:
-            serializer_name = f"{base_name}WriteSerializer"
-        else:
-            # Default to the parent class's implementation if action doesn't match
-            return super().get_serializer_class()
-
-        # Dynamically import the serializer module and get the serializer class
-        serializer_module = importlib.import_module("core.serializers")
-        serializer_class = getattr(serializer_module, serializer_name)
+    def get_serializer_class(self, **kwargs):
+        MODULE_PATHS = settings.MODULE_PATHS
+        serializer_factory = SerializerFactory(
+            self.serializers_module, *MODULE_PATHS.get("serializers", [])
+        )
+        serializer_class = serializer_factory.get_serializer(
+            self.model.__name__, kwargs.get("action", self.action)
+        )
 
         return serializer_class
 
@@ -124,9 +138,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk):
-        serializer_name = f"{self.model.__name__}WriteSerializer"
-        serializer_module = importlib.import_module("core.serializers")
-        serializer_class = getattr(serializer_module, serializer_name)
+        serializer_class = self.get_serializer_class(action="update")
 
         return Response(serializer_class(super().get_object()).data)
 
@@ -236,6 +248,10 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
+    @action(detail=False, name="Get threats count")
+    def threats_count(self, request):
+        return Response({"results": threats_count_per_name(request.user)})
+
 
 class AssetViewSet(BaseModelViewSet):
     """
@@ -257,12 +273,16 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
-    filterset_fields = ["folder", "category"]
+    filterset_fields = ["folder", "category", "csf_function"]
     search_fields = ["name", "description", "provider"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(ReferenceControl.CATEGORY))
+
+    @action(detail=False, name="Get function choices")
+    def csf_function(self, request):
+        return Response(dict(ReferenceControl.CSF_FUNCTION))
 
 
 class RiskMatrixViewSet(BaseModelViewSet):
@@ -279,14 +299,25 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
-        _used_matrices = RiskMatrix.objects.filter(
-            riskassessment__isnull=False
-        ).distinct()
+        viewable_matrices = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        viewable_assessments = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )[0]
+        _used_matrices = (
+            RiskMatrix.objects.filter(riskassessment__isnull=False)
+            .filter(id__in=viewable_matrices)
+            .filter(riskassessment__id__in=viewable_assessments)
+            .distinct()
+        )
         used_matrices = _used_matrices.values("id", "name")
         for i in range(len(used_matrices)):
-            used_matrices[i]["risk_assessments_count"] = _used_matrices.get(
-                id=used_matrices[i]["id"]
-            ).riskassessment_set.count()
+            used_matrices[i]["risk_assessments_count"] = (
+                RiskAssessment.objects.filter(risk_matrix=_used_matrices[i].id)
+                .filter(id__in=viewable_assessments)
+                .count()
+            )
         return Response({"results": used_matrices})
 
 
@@ -396,6 +427,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "measure_name",
                 "measure_desc",
                 "category",
+                "csf_function",
                 "reference_control",
                 "eta",
                 "effort",
@@ -421,6 +453,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.name,
                     mtg.description,
                     mtg.get_category_display(),
+                    mtg.get_csf_function_display(),
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
@@ -520,6 +553,54 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
+    @action(
+        detail=True,
+        name="Duplicate risk assessment",
+        methods=["post"],
+        serializer_class=RiskAssessmentDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            risk_assessment = self.get_object()
+            data = request.data
+            duplicate_risk_assessment = RiskAssessment.objects.create(
+                name=data["name"],
+                description=data["description"],
+                project=Project.objects.get(id=data["project"]),
+                version=data["version"],
+                risk_matrix=risk_assessment.risk_matrix,
+                eta=risk_assessment.eta,
+                due_date=risk_assessment.due_date,
+                status=risk_assessment.status,
+            )
+            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
+            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+            for scenario in risk_assessment.risk_scenarios.all():
+                duplicate_scenario = RiskScenario.objects.create(
+                    risk_assessment=duplicate_risk_assessment,
+                    name=scenario.name,
+                    description=scenario.description,
+                    existing_controls=scenario.existing_controls,
+                    treatment=scenario.treatment,
+                    qualifications=scenario.qualifications,
+                    current_proba=scenario.current_proba,
+                    current_impact=scenario.current_impact,
+                    residual_proba=scenario.residual_proba,
+                    residual_impact=scenario.residual_impact,
+                    strength_of_knowledge=scenario.strength_of_knowledge,
+                    justification=scenario.justification,
+                )
+                duplicate_scenario.threats.set(scenario.threats.all())
+                duplicate_scenario.assets.set(scenario.assets.all())
+                duplicate_scenario.owner.set(scenario.owner.all())
+                duplicate_scenario.applied_controls.set(scenario.applied_controls.all())
+                duplicate_scenario.save()
+            duplicate_risk_assessment.save()
+            return Response({"results": "risk assessment duplicated"})
+
 
 class AppliedControlViewSet(BaseModelViewSet):
     """
@@ -530,6 +611,7 @@ class AppliedControlViewSet(BaseModelViewSet):
     filterset_fields = [
         "folder",
         "category",
+        "csf_function",
         "status",
         "reference_control",
         "effort",
@@ -546,6 +628,10 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(AppliedControl.CATEGORY))
+
+    @action(detail=False, name="Get csf_function choices")
+    def csf_function(self, request):
+        return Response(dict(AppliedControl.CSF_FUNCTION))
 
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
@@ -574,7 +660,8 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         measures = sorted(
             AppliedControl.objects.filter(id__in=object_ids_view)
-            .exclude(status="done")
+            .filter(eta__lte=date.today() + timedelta(days=30))
+            .exclude(status="active")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
@@ -611,9 +698,6 @@ class AppliedControlViewSet(BaseModelViewSet):
     def to_review(self, request):
         measures = measures_to_review(request.user)
 
-        """print("ODZFFHZ")
-        print(measures[0].get_ranking_score())"""
-
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
@@ -627,6 +711,7 @@ class PolicyViewSet(AppliedControlViewSet):
     model = Policy
     filterset_fields = [
         "folder",
+        "csf_function",
         "status",
         "reference_control",
         "effort",
@@ -635,6 +720,10 @@ class PolicyViewSet(AppliedControlViewSet):
         "evidences",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
+
+    @action(detail=False, name="Get csf_function choices")
+    def csf_function(self, request):
+        return Response(dict(AppliedControl.CSF_FUNCTION))
 
 
 class RiskScenarioViewSet(BaseModelViewSet):
@@ -657,15 +746,19 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
+    @action(detail=False, name="Get qualification choices")
+    def qualifications(self, request):
+        return Response(dict(RiskScenario.QUALIFICATIONS))
+
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
-        undefined = dict([(-1, "--")])
-        _choices = dict(
-            zip(
-                list(range(0, 64)),
-                [x["name"] for x in self.get_object().get_matrix()["probability"]],
+        undefined = {-1: "--"}
+        _choices = {
+            i: name
+            for i, name in enumerate(
+                x["name"] for x in self.get_object().get_matrix()["probability"]
             )
-        )
+        }
         choices = undefined | _choices
         return Response(choices)
 
@@ -687,16 +780,13 @@ class RiskScenarioViewSet(BaseModelViewSet):
         _sok_choices = self.get_object().get_matrix().get("strength_of_knowledge")
         if _sok_choices is not None:
             sok_choices = dict(
-                zip(
-                    list(range(0, 64)),
-                    [
-                        {
-                            "name": x["name"],
-                            "description": x.get("description"),
-                            "symbol": x.get("symbol"),
-                        }
-                        for x in _sok_choices
-                    ],
+                enumerate(
+                    {
+                        "name": x["name"],
+                        "description": x.get("description"),
+                        "symbol": x.get("symbol"),
+                    }
+                    for x in _sok_choices
                 )
             )
         else:
@@ -772,7 +862,6 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
         submitted = False
-        print(risk_acceptance)
         if risk_acceptance.get("approver"):
             submitted = True
         for scenario in risk_acceptance.get("risk_scenarios"):
@@ -1043,28 +1132,58 @@ class FrameworkViewSet(BaseModelViewSet):
         uuid_list = request.query_params.getlist("id[]", [])
         queryset = Framework.objects.filter(id__in=uuid_list)
 
-        return Response({str(framework.id): framework.name for framework in queryset})
+        return Response(
+            {
+                str(framework.id): framework.get_name_translated()
+                for framework in queryset
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(), None
+                RequirementNode.objects.filter(framework=_framework).all(),
+                None,
+                _framework.max_score,
             )
         )
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
-        _used_frameworks = Framework.objects.filter(
-            complianceassessment__isnull=False
-        ).distinct()
+        viewable_framework = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Framework
+        )[0]
+        viewable_assessments = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )[0]
+        _used_frameworks = (
+            Framework.objects.filter(complianceassessment__isnull=False)
+            .filter(id__in=viewable_framework)
+            .filter(complianceassessment__id__in=viewable_assessments)
+            .distinct()
+        )
         used_frameworks = _used_frameworks.values("id", "name")
         for i in range(len(used_frameworks)):
-            used_frameworks[i]["compliance_assessments_count"] = _used_frameworks.get(
-                id=used_frameworks[i]["id"]
-            ).complianceassessment_set.count()
+            used_frameworks[i]["compliance_assessments_count"] = (
+                ComplianceAssessment.objects.filter(framework=_used_frameworks[i].id)
+                .filter(id__in=viewable_assessments)
+                .count()
+            )
         return Response({"results": used_frameworks})
+
+    @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
+    def mappings(self, request, pk):
+        framework = self.get_object()
+        available_target_frameworks_objects = [framework]
+        mappings = RequirementMappingSet.objects.filter(source_framework=framework)
+        for mapping in mappings:
+            available_target_frameworks_objects.append(mapping.target_framework)
+        available_target_frameworks = FrameworkReadSerializer(
+            available_target_frameworks_objects, many=True
+        ).data
+        return Response({"results": available_target_frameworks})
 
 
 class RequirementNodeViewSet(BaseModelViewSet):
@@ -1173,19 +1292,160 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @action(detail=True, name="Get implementation group choices")
+    def selected_implementation_groups(self, request, pk):
+        compliance_assessment = self.get_object()
+        _framework = compliance_assessment.framework
+        implementation_groups_definiition = _framework.implementation_groups_definition
+        implementation_group_choices = {
+            group["ref_id"]: group["name"]
+            for group in implementation_groups_definiition
+        }
+        return Response(implementation_group_choices)
+
+    @action(detail=True, methods=["get"], name="Get action plan data")
+    def action_plan(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=ComplianceAssessment,
+        )
+        if UUID(pk) in viewable_objects:
+            response = {
+                "planned": [],
+                "active": [],
+                "inactive": [],
+                "none": [],
+            }
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = [
+                {**model_to_dict(applied_control), "id": applied_control.id}
+                for applied_control in AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                ).distinct()
+            ]
+            for applied_control in applied_controls:
+                applied_control["requirements_count"] = (
+                    RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment_object
+                    )
+                    .filter(applied_controls=applied_control["id"])
+                    .count()
+                )
+                response[applied_control["status"].lower()].append(
+                    applied_control
+                ) if applied_control["status"] else response["none"].append(
+                    applied_control
+                )
+        return Response(response)
+
+    @action(detail=True, name="Get action plan PDF")
+    def action_plan_pdf(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            context = {
+                "planned": list(),
+                "active": list(),
+                "inactive": list(),
+                "no status": list(),
+            }
+            color_map = {
+                "planned": "#93c5fd",
+                "active": "#86efac",
+                "inactive": "#fca5a5",
+                "no status": "#e5e7eb",
+            }
+            status = AppliedControl.Status.choices
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = (
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                )
+                .distinct()
+                .order_by("eta")
+            )
+            for applied_control in applied_controls:
+                context[applied_control.status].append(
+                    applied_control
+                ) if applied_control.status else context["no status"].append(
+                    applied_control
+                )
+            data = {
+                "status_text": status,
+                "color_map": color_map,
+                "context": context,
+                "compliance_assessment": compliance_assessment_object,
+            }
+            html = render_to_string("core/action_plan_pdf.html", data)
+            pdf_file = HTML(string=html).write_pdf()
+            response = HttpResponse(pdf_file, content_type="application/pdf")
+            return response
+        else:
+            return Response({"error": "Permission denied"})
+
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
-        serializer.save()
-        instance = ComplianceAssessment.objects.get(id=serializer.data["id"])
+        baseline = serializer.validated_data.pop("baseline", None)
+        instance = serializer.save()
         requirements = RequirementNode.objects.filter(framework=instance.framework)
         for requirement in requirements:
-            RequirementAssessment.objects.create(
+            requirement_assessment = RequirementAssessment.objects.create(
                 compliance_assessment=instance,
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
             )
+            if baseline and baseline.framework == instance.framework:
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=baseline, requirement=requirement
+                )
+                requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.score = baseline_requirement_assessment.score
+                requirement_assessment.is_scored = (
+                    baseline_requirement_assessment.is_scored
+                )
+                requirement_assessment.evidences.set(
+                    baseline_requirement_assessment.evidences.all()
+                )
+                requirement_assessment.applied_controls.set(
+                    baseline_requirement_assessment.applied_controls.all()
+                )
+                requirement_assessment.save()
+        if baseline and baseline.framework != instance.framework:
+            mapping_set = RequirementMappingSet.objects.get(
+                target_framework=serializer.validated_data["framework"],
+                source_framework=baseline.framework,
+            )
+            for (
+                requirement_assessment
+            ) in instance.compute_requirement_assessments_results(
+                mapping_set, baseline
+            ):
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    id=requirement_assessment.mapping_inference[
+                        "source_requirement_assessment"
+                    ]["id"]
+                )
+                requirement_assessment.evidences.add(
+                    *[ev.id for ev in baseline_requirement_assessment.evidences.all()]
+                )
+                requirement_assessment.applied_controls.add(
+                    *[
+                        ac.id
+                        for ac in baseline_requirement_assessment.applied_controls.all()
+                    ]
+                )
+                requirement_assessment.save()
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -1214,12 +1474,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
+        score = self.get_object()
         return Response(
             {
-                "score": self.get_object().get_global_score(),
-                "max_score": self.get_object().max_score,
-                "min_score": self.get_object().min_score,
-                "scores_definition": self.get_object().scores_definition,
+                "score": score.get_global_score(),
+                "max_score": score.max_score,
+                "min_score": score.min_score,
+                "scores_definition": score.scores_definition,
             }
         )
 
@@ -1240,14 +1501,38 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = self.get_object().framework
-        return Response(
-            get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
-                RequirementAssessment.objects.filter(
-                    compliance_assessment=self.get_object()
-                ).all(),
-            )
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+            _framework.max_score,
         )
+        implementation_groups = self.get_object().selected_implementation_groups
+        return Response(
+            filter_graph_by_implementation_groups(tree, implementation_groups)
+        )
+
+    @action(detail=True, methods=["get"])
+    def flash_mode(self, request, pk):
+        """Returns the list of requirement assessments for flash mode"""
+        requirement_assessments_objects = (
+            self.get_object().get_requirement_assessments()
+        )
+        requirements_objects = RequirementNode.objects.filter(
+            framework=self.get_object().framework
+        )
+        requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments_objects, many=True
+        ).data
+        requirements = RequirementNodeReadSerializer(
+            requirements_objects, many=True
+        ).data
+        flash_mode = {
+            "requirements": requirements,
+            "requirement_assessments": requirement_assessments,
+        }
+        return Response(flash_mode, status=status.HTTP_200_OK)
 
     @action(detail=True)
     def export(self, request, pk):
@@ -1343,8 +1628,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
-        # How to add ranking_score directly in the serializer ?
-
         for i in range(len(measures)):
             measures[i]["ranking_score"] = ranking_scores[measures[i]["id"]]
 
@@ -1357,10 +1640,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get the secuity measures to review")
     def to_review(self, request):
         measures = measures_to_review(request.user)
-
-        """print("ODZFFHZ")
-        print(measures[0].get_ranking_score())"""
-
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
@@ -1372,6 +1651,16 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
+
+    @action(detail=False, name="Get result choices")
+    def result(self, request):
+        return Response(dict(RequirementAssessment.Result.choices))
+
+
+class RequirementMappingSetViewSet(BaseModelViewSet):
+    model = RequirementMappingSet
+
+    filterset_fields = ["target_framework", "source_framework"]
 
 
 @api_view(["GET"])
@@ -1407,6 +1696,18 @@ def generate_html(
         compliance_assessment=compliance_assessment,
     ).all()
 
+    implementation_groups = compliance_assessment.selected_implementation_groups
+    graph = get_sorted_requirement_nodes(
+        list(requirement_nodes),
+        list(assessments),
+        compliance_assessment.framework.max_score,
+    )
+    graph = filter_graph_by_implementation_groups(graph, implementation_groups)
+    flattened_graph = flatten_dict(graph)
+
+    requirement_nodes = requirement_nodes.filter(urn__in=flattened_graph.values())
+    assessments = assessments.filter(requirement__urn__in=flattened_graph.values())
+
     node_per_urn = {r.urn: r for r in requirement_nodes}
     ancestors = {}
     for a in assessments:
@@ -1417,201 +1718,82 @@ def generate_html(
             p = req.parent_urn
             req = None if not (p) else node_per_urn[p]
 
-    def bar_graph(node: RequirementNode):
-        """return bar graph filtered by top node (Null for all)"""
-        content = ""
-        compliance_assessments_status = []
-        candidates = [
-            c
-            for c in assessments.filter(requirement__assessable=True)
-            if not (node) or c == node or node in ancestors[c]
-        ]
-        total = len(candidates)
-        if total > 0:
-            for st in RequirementAssessment.Status:
-                count = len([c for c in candidates if c.status == st])
-                compliance_assessments_status.append((st, round(count * 100 / total)))
-        content += (
-            '<div class="flex bg-gray-300 rounded-full overflow-hidden h-4 w-2/3">'
-        )
-        for stat in reversed(compliance_assessments_status):
-            if stat[1] > 0:
-                content += '<div class="flex flex-col justify-center overflow-hidden text-xs font-semibold text-center '
-                if stat[0] == "in_progress":
-                    content += "bg-blue-500"
-                elif stat[0] == "non_compliant":
-                    content += "bg-red-500"
-                elif stat[0] == "partially_compliant":
-                    content += "bg-yellow-400"
-                elif stat[0] == "compliant":
-                    content += "bg-green-500"
-                elif stat[0] == "not_applicable":
-                    content += "bg-black text-white dark:bg-white dark:text-black"
-                content += '" style="width:' + str(stat[1]) + '%"> '
-                if stat[0] != "to_do":
-                    content += str(stat[1]) + "%"
-
-                content += "</div>"
-        content += "</div></div>"
-        return content
-
-    content = """
-    <html lang="en">
-    <head>
-    <link rel="stylesheet" href="https://unpkg.com/dezui@latest">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Compliance report</title>
-    </head>
-    <body class="container container-tablet">
-    """
-    content += '<hr class="dotted">'
-    content += '<div class="flex flex-row space-x-4 justify-center items-center mb-4">'
-    content += f"<h1 class='text-3xl'>{compliance_assessment.name}: {compliance_assessment.framework}</h1>"
-    content += bar_graph(None)
-    content += "</div>"
-    table = """
-    <thead>
-    </thead>
-    <tbody>
-    """
-    content += '<div class="flex flex-row space-x-4 mb-4">'
-
-    content += "<div>"
-    content += "<p class='font-semibold'>Authors</p>"
-    content += "<ul>"
-    for author in compliance_assessment.authors.all():
-        content += f"<li>{author}</li>"
-    content += "</ul>"
-    content += "</div>"
-
-    content += "<div>"
-    content += "<p class='font-semibold'>Reviewers</p>"
-    content += "<ul>"
-    for reviewer in compliance_assessment.reviewers.all():
-        content += f"<li>{reviewer}</li>"
-    content += "</ul>"
-    content += "</div>"
-
-    content += "</div>"
-
-    def generate_html_rec(requirement_node: RequirementNode):
+    def generate_data_rec(requirement_node: RequirementNode):
         selected_evidences = []
-        table = ""
         children_nodes = [
             req for req in requirement_nodes if req.parent_urn == requirement_node.urn
         ]
-        if not requirement_node.assessable:
-            _display = requirement_node.display_long
-            table += f'<p class="font-semibold">{_display}  </p>'
-            if children_nodes:
-                table += bar_graph(requirement_node)
-        else:
+
+        node_data = {
+            "requirement_node": requirement_node,
+            "children": [],
+            "assessments": None,
+            "bar_graph": None,
+            "direct_evidences": [],
+            "applied_controls": [],
+            "result": "",
+            "status": "",
+            "color_class": "",
+        }
+
+        node_data["bar_graph"] = True if children_nodes else False
+
+        if requirement_node.assessable:
             assessment = RequirementAssessment.objects.filter(
-                requirement__urn=requirement_node.urn
+                requirement__urn=requirement_node.urn,
+                compliance_assessment=compliance_assessment,
             ).first()
 
-            table += "<div>"
-            table += "<div class='flex flex-col shadow-md border rounded-lg px-4 py-2 m-2 ml-0 items-center "
-            match assessment.status:
-                case "compliant":
-                    table += "border-t-2 border-t-green-500 border-green-500'>"
-                case "to_do":
-                    table += "border-t-2 border-t-gray-300 border-gray-300'>"
-                case "in_progress":
-                    table += "border-t-2 border-t-blue-500 border-blue-500'>"
-                case "non_compliant":
-                    table += "border-t-2 border-t-red-500 border-red-500'>"
-                case "partially_compliant":
-                    table += "border-t-2 border-t-yellow-400 border-yellow-400'>"
-                case "not_applicable":
-                    table += "border-t-2 border-t-black border-black'>"
-            table += '<div class="flex flex-row justify-between w-full">'
-            table += f"<p class='font-semibold'>{assessment.requirement}</p>"
-            table += "<p class='text-white text-center rounded-lg whitespace-nowrap px-2 py-1 "
-            match assessment.status:
-                case "compliant":
-                    table += f"bg-green-500'>{assessment.get_status_display()}</p>"
-                case "to_do":
-                    table += f"bg-gray-300'>{assessment.get_status_display()}</p>"
-                case "in_progress":
-                    table += f"bg-blue-500'>{assessment.get_status_display()}</p>"
-                case "non_compliant":
-                    table += f"bg-red-500'>{assessment.get_status_display()}</p>"
-                case "partially_compliant":
-                    table += f"bg-yellow-400'>{assessment.get_status_display()}</p>"
-                case "not_applicable":
-                    table += (
-                        f"bg-black tewt-white'>{assessment.get_status_display()}</p>"
-                    )
-            table += "</div>"
-            table += (
-                f"<p class='text-left w-full'>{assessment.requirement.description}</p>"
-            )
-            table += "</div>"
-            if children_nodes:
-                table += bar_graph(requirement_node)
+            if assessment:
+                node_data["assessments"] = assessment
+                node_data["result"] = assessment.get_result_display()
+                node_data["status"] = assessment.get_status_display()
+                node_data["result_color_class"] = color_css_class(assessment.result)
+                node_data["status_color_class"] = color_css_class(assessment.status)
+                direct_evidences = assessment.evidences.all()
+                if direct_evidences:
+                    selected_evidences += direct_evidences
+                    node_data["direct_evidences"] = direct_evidences
 
-            direct_evidences = assessment.evidences.all()
-            if direct_evidences:
-                selected_evidences += direct_evidences
-                table += '<div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200">'
-                table += (
-                    '<div class="grid grid-cols-2 justify-items-left font-semibold">'
-                )
-                table += f'<p>{("Associated evidence")}:</p>'
-                table += "</div>"
-                for direct_evidence in direct_evidences:
-                    if direct_evidence.attachment:
-                        table += f'<li> <a class="text-indigo-700 hover:text-indigo-500" target="_blank" href="evidences/{direct_evidence.attachment}">{direct_evidence.name}</a></li>'
-                    else:
-                        table += f"<li> {direct_evidence.name}</li>"
-                table += "</div>"
+                measures = assessment.applied_controls.all()
+                if measures:
+                    applied_controls = []
+                    for measure in measures:
+                        evidences = measure.evidences.all()
+                        applied_controls.append(
+                            {
+                                "measure": measure,
+                                "evidences": evidences,
+                            }
+                        )
+                        selected_evidences += evidences
+                    node_data["applied_controls"] = applied_controls
 
-            measures = assessment.applied_controls.all()
-            if measures:
-                table += '<div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200">'
-                evidences = ""
-                table += (
-                    '<div class="grid grid-cols-2 justify-items-left font-semibold">'
-                )
-                table += f'<p>{("Applied applied controls")}:</p>'
-                table += f'<p>{("Associated evidence")}:</p>'
-                table += "</div>"
-                table += '<div class="flex flex-row">'
-                table += '<div class="flex flex-col items-left w-1/2">'
-                for measure in measures:
-                    table += f"<li> {measure.name}: {measure.get_status_display()}</li>"
-                    for evidence in measure.evidences.all():
-                        selected_evidences.append(evidence)
-                        if evidence.attachment:
-                            evidences += f'<li> <a class="text-indigo-700 hover:text-indigo-500" target="_blank" href="evidences/{evidence.attachment}">{measure.name}/{evidence.name}</a></li>'
-                        else:
-                            evidences += f"<li> {evidence.name}</li>"
-                table += "</div>"
-                table += (
-                    f'<div class="flex flex-col items-left w-1/2">{evidences}</div>'
-                )
-                table += "</div></div>"
-            table += "</div>"
         for child_node in children_nodes:
-            (table2, selected_evidences2) = generate_html_rec(child_node)
-            table += table2
-            selected_evidences += selected_evidences2
-        return (table, selected_evidences)
+            child_data, child_evidences = generate_data_rec(child_node)
+            node_data["children"].append(child_data)
+            selected_evidences += child_evidences
+
+        return node_data, selected_evidences
 
     top_level_nodes = [req for req in requirement_nodes if not req.parent_urn]
+    update_translations_in_object(top_level_nodes)
+    top_level_nodes_data = []
     for requirement_node in top_level_nodes:
-        (table2, selected_evidences2) = generate_html_rec(requirement_node)
-        table += table2
-        selected_evidences += selected_evidences2
-    table += "</tbody><br/>"
-    content += table
-    content += """
-    </body>
-    </html>
-    """
+        node_data, node_evidences = generate_data_rec(requirement_node)
+        top_level_nodes_data.append(node_data)
+        selected_evidences += node_evidences
 
-    return (content, selected_evidences)
+    data = {
+        "compliance_assessment": compliance_assessment,
+        "top_level_nodes": top_level_nodes_data,
+        "assessments": assessments,
+        "ancestors": ancestors,
+    }
+
+    return render_to_string("core/audit_report.html", data), list(
+        set(selected_evidences)
+    )
 
 
 def export_mp_csv(request):
@@ -1624,6 +1806,7 @@ def export_mp_csv(request):
         "measure_name",
         "measure_desc",
         "category",
+        "csf_function",
         "reference_control",
         "eta",
         "effort",
@@ -1644,6 +1827,7 @@ def export_mp_csv(request):
             mtg.name,
             mtg.description,
             mtg.category,
+            mtg.csf_function,
             mtg.reference_control,
             mtg.eta,
             mtg.effort,

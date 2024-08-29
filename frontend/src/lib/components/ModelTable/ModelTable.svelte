@@ -1,8 +1,14 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import { FIELD_COLORED_TAG_MAP, FIELD_COMPONENT_MAP } from '$lib/utils/crud';
+	import {
+		FIELD_COLORED_TAG_MAP,
+		FIELD_COMPONENT_MAP,
+		CUSTOM_ACTIONS_COMPONENT
+	} from '$lib/utils/crud';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { stringify } from '$lib/utils/helpers';
 
 	import { tableA11y } from './actions';
 	// Types
@@ -36,6 +42,7 @@
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
+	export let tags = true;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
@@ -72,7 +79,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
 	}
 
 	// Row Keydown Handler
@@ -84,17 +91,24 @@
 	}
 
 	export let identifierField = 'id';
-
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-
 	export let URLModel: urlModel | undefined = undefined;
-	$: model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
+	export let detailQueryParameter: string | undefined;
+	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
+
+	export let hideFilters = false;
+	$: hideFilters =
+		hideFilters ||
+		!Object.entries(filters).some(([key, filter]) => {
+			if (!filter.hide) return true;
+		});
 
 	const user = $page.data.user;
 
 	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { listViewFields } from '$lib/utils/table';
 
 	// Reactive
 	$: classesBase = `${$$props.class || 'bg-white'}`;
@@ -109,14 +123,78 @@
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
+	const columnFields = new Set(source.body.length === 0 ? [] : Object.keys(source.body[0]));
 
 	const handler = new DataHandler(data, {
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
+	$: hasRows = data.length > 0;
+	const allRows = handler.getAllRows();
+	const tableURLModel = source.meta?.urlmodel ?? URLModel;
+	const filters =
+		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
+			? listViewFields[tableURLModel].filters
+			: {};
+	const filteredFields = Object.keys(filters).filter(
+		(key) => columnFields.has(key) || filters[key].alwaysDisplay
+	);
+	const filterValues: { [key: string]: any } = {};
+	const filterProps: {
+		[key: string]: { [key: string]: any };
+	} = {};
+
+	function defaultFilterProps(rows, field: string) {
+		const getColumn = filters[field].getColumn ?? ((row) => row[field]);
+		const options = [...new Set(rows.map(getColumn))].sort();
+		return { options };
+	}
+
+	function defaultFilterFunction(entry: any, value: any[]): boolean {
+		if (!value || value.length < 1) return true;
+		value = value.map((v) => stringify(v));
+		return value.includes(stringify(entry));
+	}
+
+	$: {
+		for (const field of filteredFields) {
+			handler.filter(
+				filterValues[field] ? filterValues[field].map((v) => v.value) : [],
+				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'getColumn')
+					? filters[field].getColumn
+					: field,
+				Object.hasOwn(filters, field) && Object.hasOwn(filters[field], 'filter')
+					? filters[field].filter
+					: defaultFilterFunction
+			);
+		}
+	}
+
+	let allowOptionsUpdate = true;
+	allRows.subscribe((rows) => {
+		if (!allowOptionsUpdate) return;
+		for (const key of filteredFields) {
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
+		}
+		if (rows.length > 0) allowOptionsUpdate = false;
+	});
+
 	const rows = handler.getRows();
+	const _filters = handler.getFilters();
+
+	function getFilterCount(filters: typeof $_filters): number {
+		return Object.values(filters).reduce((acc, filter) => {
+			if (Array.isArray(filter.value) && filter.value.length > 0) {
+				return acc + 1;
+			}
+			return acc;
+		}, 0);
+	}
+
+	$: filterCount = getFilterCount($_filters);
 
 	onMount(() => {
 		if (orderBy) {
@@ -127,17 +205,61 @@
 	});
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	// const field_component_map = FIELD_MAP;
 
 	const tagMap = FIELD_COLORED_TAG_MAP[URLModel] ?? {};
 	const taggedKeys = new Set(Object.keys(tagMap));
 
-	// tagged_keys tag_map[key][value]
+	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
+
+	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
+	const preventDelete = (row: TableSource) =>
+		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+
+	import { popup } from '@skeletonlabs/skeleton';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { isDark } from '$lib/utils/helpers';
+
+	const popupFilter: PopupSettings = {
+		event: 'click',
+		target: 'popupFilter',
+		placement: 'bottom-start',
+		closeQuery: 'a[href]'
+	};
+
+	$: classesHexBackgroundText = (backgroundHexColor: string) => {
+		return isDark(backgroundHexColor) ? 'text-white' : '';
+	};
 </script>
 
 <div class="table-container {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
+		{#if filteredFields.length > 0 && hasRows && !hideFilters}
+			<button use:popup={popupFilter} class="btn variant-filled-primary self-end relative">
+				<i class="fa-solid fa-filter mr-2" />
+				{m.filters()}
+				{#if filterCount}
+					<span class="badge absolute -top-0 -right-0 z-10">{filterCount}</span>
+				{/if}
+			</button>
+			<div
+				class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+				data-popup="popupFilter"
+			>
+				{#each filteredFields as field}
+					<svelte:component
+						this={filters[field].component}
+						bind:value={filterValues[field]}
+						bind:hide={filters[field].hide}
+						{field}
+						{...filterProps[field]}
+						{...filters[field].extraProps}
+					/>
+				{/each}
+			</div>
+		{/if}
 		{#if search}
 			<Search {handler} />
 		{/if}
@@ -160,7 +282,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{localItems(languageTag())[heading]}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{safeTranslate(heading) ?? heading}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
@@ -180,7 +302,7 @@
 		<!-- Body -->
 		<tbody class="table-body {regionBody}">
 			{#each $rows as row, rowIndex}
-				{@const meta = source.meta ? source.meta[rowIndex] : source.body[rowIndex]}
+				{@const meta = row.meta ? row.meta : row}
 				<!-- Row -->
 				<!-- prettier-ignore -->
 				<tr
@@ -188,8 +310,8 @@
 					on:keydown={(e) => { onRowKeydown(e, rowIndex); }}
 					aria-rowindex={rowIndex + 1}
 				>
-					{#each Object.entries(row) as [key, value]}
-            {#if key !== 'meta'}
+				{#each Object.entries(row) as [key, value]}
+            		{#if key !== 'meta'}
 						{@const component = field_component_map[key]}
 						<!-- Cell -->
 						<!-- prettier-ignore -->
@@ -202,16 +324,16 @@
 								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
 								{#each tagList as tag}
 									{@const tagData = tag.values[meta[tag.key]]}
-									{#if tagData}
+									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-											{localItems(languageTag())[text]}
+                      {safeTranslate(text)}
 										</span>
 									{/if}
 								{/each}
 							{/if}
 							{#if component}
-								<svelte:component this={component} meta={row.meta ?? {}} cell={value}/>
+								<svelte:component this={component} meta={meta} cell={value}/>
 							{:else}
                 <span class="font-token whitespace-pre-line break-words">
                 {#if Array.isArray(value)}
@@ -225,8 +347,10 @@
                             )?.urlModel
                           }/${val.id}`}
                           <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else}
-                          {val}
+                        {:else if safeTranslate(toCamelCase(val.split(':')[0]))}
+                        	<span class="text">{safeTranslate(toCamelCase(val.split(':')[0]+"Colon"))} {val.split(':')[1]}</span>
+						{:else}
+						  {val ?? '-'}
                         {/if}
                       </li>
                     {/each}
@@ -241,12 +365,18 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(value.hexcolor)}" style="background-color: {value.hexcolor}">
+                    {#if localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
+                      {localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
+                    {:else}
+                      {value.name ?? value.str ?? '-'}
+                    {/if}
+                  </p>
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
-					{#if localItems(languageTag())[toCamelCase(value)]}
-						{localItems(languageTag())[toCamelCase(value)]}
+					{#if localItems()[toCamelCase(value)]}
+						{localItems()[toCamelCase(value)]}
 					{:else}
 						{value ?? '-'}
 					{/if}
@@ -263,17 +393,18 @@
 						>
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
-              {@const actionsComponent = field_component_map['actions']}
+              {@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
+              {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
               <TableRowActions
-                deleteForm={!row.meta.builtin ? deleteForm : undefined}
-                model={URL_MODEL_MAP[URLModel]}
-                {URLModel}
-                detailURL={`/${URLModel}/${row.meta[identifierField]}`}
-                editURL={!(row.meta.builtin || row.meta.urn) ? `/${URLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
+                deleteForm={deleteForm}
+                {model}
+                URLModel={actionsURLModel}
+                detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+                editURL={!(row.meta.builtin || row.meta.urn) ? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
-                preventDelete={(row.meta.builtin || (row.meta.urn ?? false)) && !(row.meta.allowDeleteLibrary ?? false)}
+                preventDelete={preventDelete(row)}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}
@@ -286,7 +417,7 @@
                   {/if}
                 </svelte:fragment>
                 <svelte:fragment slot="tail">
-                  <svelte:component this={actionsComponent} meta={row.meta ?? {}}/>
+                  <svelte:component this={actionsComponent} meta={row.meta ?? {}} {actionsURLModel}/>
                 </svelte:fragment>
               </TableRowActions>
             {/if}

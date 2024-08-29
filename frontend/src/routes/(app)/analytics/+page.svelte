@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -34,18 +35,28 @@
 	const rsd_rsk_label = m.residualRisk();
 
 	function localizeChartLabels(labels: string[]): string[] {
-		return labels.map((label) => localItems(languageTag())[label]);
+		return labels.map((label) => localItems()[label]);
 	}
 
 	const appliedControlTodoTable: TableSource = {
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
-			eta: 'eta'
+			eta: 'eta',
+			state: 'state'
 		},
-		body: tableSourceMapper(data.measures, ['name', 'category', 'folder', 'ranking_score', 'eta']),
+		body: tableSourceMapper(data.measures, [
+			'name',
+			'category',
+			'csf_function',
+			'folder',
+			'ranking_score',
+			'eta',
+			'state'
+		]),
 		meta: data.measures
 	};
 
@@ -53,27 +64,37 @@
 		head: {
 			name: 'name',
 			category: 'category',
+			csf_function: 'csfFunction',
 			folder: 'domain',
 			eta: 'eta',
-			expiry_date: 'expiryDate'
+			expiry_date: 'expiryDate',
+			state: 'state'
 		},
 		body: tableSourceMapper(data.measures_to_review, [
 			'name',
 			'category',
+			'csf_function',
 			'folder',
 			'eta',
-			'expiry_date'
+			'expiry_date',
+			'state'
 		]),
-		meta: data.measures
+		meta: data.measures_to_review
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
 		head: {
 			name: 'name',
 			risk_scenarios: 'riskScenarios',
-			expiry_date: 'expiryDate'
+			expiry_date: 'expiryDate',
+			state: 'state'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date']),
+		body: tableSourceMapper(data.acceptances_to_review, [
+			'name',
+			'risk_scenarios',
+			'expiry_date',
+			'state'
+		]),
 		meta: data.acceptances_to_review
 	};
 
@@ -183,15 +204,10 @@
 						/>
 						<DonutChart
 							classesContainer="flex-1 card p-4 bg-white"
+							name="riskScenariosStatus"
 							title={m.riskScenariosStatus()}
 							values={data.riskScenariosPerStatus.values}
-						/>
-						<BarChart
-							classesContainer="basis-1/3 card p-4 bg-white"
-							name="usedMatrices"
-							title={m.usedRiskMatrices()}
-							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
-							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+							orientation="horizontal"
 						/>
 					</div>
 				</section>
@@ -204,6 +220,7 @@
 						<ModelTable
 							URLModel="applied-controls"
 							source={appliedControlTodoTable}
+							hideFilters={true}
 							search={false}
 							rowsPerPage={false}
 							orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
@@ -227,6 +244,7 @@
 							<ModelTable
 								source={appliedControlWatchlistTable}
 								URLModel="applied-controls"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -236,6 +254,7 @@
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
 								URLModel="risk-acceptances"
+								hideFilters={true}
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -243,13 +262,30 @@
 					</div>
 				</section>
 			{:else if tabSet === 1}
+				<!-- Risk tab -->
+
 				<section>
+					{#if data.threats_count.results.labels.length > 0}
+						<div class=" h-96 my-2">
+							<RadarChart
+								name="threatRadar"
+								title={m.threatRadarChart()}
+								labels={data.threats_count.results.labels}
+								values={data.threats_count.results.values}
+							/>
+						</div>
+					{:else}
+						<div class="py-4 flex items-center justify-center">
+							<p class="">{m.noThreatsMapped()}</p>
+						</div>
+					{/if}
 					<div class="flex">
 						<div class="h-96 flex-1">
 							<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 							<DonutChart
 								s_label={cur_rsk_label}
+								name="current_risk_level"
 								values={data.risks_count_per_level.current}
 								colors={data.risks_count_per_level.current.map((object) => object.color)}
 							/>
@@ -259,6 +295,7 @@
 
 							<DonutChart
 								s_label={rsd_rsk_label}
+								name="residual_risk_level"
 								values={data.risks_count_per_level.residual}
 								colors={data.risks_count_per_level.residual.map((object) => object.color)}
 							/>
@@ -331,20 +368,23 @@
 									<div class="w-3/5 h-32">
 										<DonutChart
 											s_label={m.complianceAssessments()}
-											values={compliance_assessment.donut.values}
+											name={compliance_assessment.name + '_donut'}
+											values={compliance_assessment.donut.result.values}
 										/>
 									</div>
-									<div class="absolute top-0 right-0 mt-2 space-x-1">
-										<a
-											href="/compliance-assessments/{compliance_assessment.id}/export"
-											class="btn variant-filled-primary"
-											><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
-										</a>
-										<a
-											href="/compliance-assessments/{compliance_assessment.id}/edit"
-											class="btn variant-filled-primary"
-											><i class="fa-solid fa-edit mr-2" /> {m.edit()}
-										</a>
+									<div class="absolute top-2 right-4 mt-2 space-x-1">
+										<div class="flex flex-col space-y-1">
+											<a
+												href="/compliance-assessments/{compliance_assessment.id}/edit"
+												class="btn variant-filled-primary"
+												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
+											</a>
+											<a
+												href="/compliance-assessments/{compliance_assessment.id}/export"
+												class="btn variant-filled-primary"
+												><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
+											</a>
+										</div>
 									</div>
 								</div>
 							{/each}

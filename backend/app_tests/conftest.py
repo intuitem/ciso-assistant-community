@@ -4,7 +4,7 @@ from api.test_utils import EndpointTestsUtils
 from test_vars import GROUPS_PERMISSIONS
 from iam.models import User, UserGroup
 from core.apps import startup
-from knox.auth import AuthToken
+from knox.models import AuthToken
 
 
 class Test(dict):
@@ -15,7 +15,7 @@ class Test(dict):
 
 @pytest.fixture
 def app_config():
-    startup()
+    startup(sender=None, **{})
 
 
 @pytest.fixture

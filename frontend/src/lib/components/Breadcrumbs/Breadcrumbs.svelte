@@ -1,28 +1,17 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
+
 	import { page } from '$app/stores';
-	import { localItems } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
 	import { breadcrumbObject, pageTitle } from '$lib/utils/stores';
 	import { listViewFields } from '$lib/utils/table';
 	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
-
-	function capitalizeSecondWord(sentence: string) {
-		var words = sentence.split(' ');
-
-		if (words.length >= 2) {
-			words[1] = words[1].charAt(0).toUpperCase() + words[1].substring(1);
-			return words.join('');
-		} else {
-			return sentence;
-		}
-	}
 
 	$: {
 		// Remove zero-length tokens.
 		const tokens = $page.url.pathname.split('/').filter((t) => t !== '');
-		let title = '';
 
 		// Create { label, href } pairs for each token.
 		let tokenPath = '';
@@ -40,7 +29,7 @@
 				t = 'domains';
 			} else {
 				t = t.replace(/-/g, ' ');
-				t = capitalizeSecondWord(t);
+				t = toCamelCase(t);
 			}
 			return {
 				label: $page.data.label || t,
@@ -65,11 +54,7 @@
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
-				{#if localItems(languageTag())[c.label]}
-					{localItems(languageTag())[c.label]}
-				{:else}
-					{c.label}
-				{/if}
+				{safeTranslate(c.label)}
 			</span>
 		{:else}
 			<li class="crumb">
@@ -82,22 +67,14 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if localItems(languageTag())[c.label]}
-							{localItems(languageTag())[c.label]}
-						{:else}
-							{c.label}
-						{/if}
+						{safeTranslate(c.label)}
 					</a>
 				{:else}
 					<span class="text-sm text-gray-500 font-semibold antialiased" data-testid="crumb-item">
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if localItems(languageTag())[c.label]}
-							{localItems(languageTag())[c.label]}
-						{:else}
-							{c.label}
-						{/if}
+						{safeTranslate(c.label)}
 					</span>
 				{/if}
 			</li>
