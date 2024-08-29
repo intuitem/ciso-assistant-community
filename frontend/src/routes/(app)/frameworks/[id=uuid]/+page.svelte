@@ -70,7 +70,8 @@
 								{:else if key === 'implementation_groups_definition'}
 									{#each Object.entries(value) as [_, definition]}
 										<div>
-											{definition.ref_id}. {definition.name}
+											** {definition.ref_id} **
+											{definition.name}
 											{#if Object.hasOwn(definition, 'description') && definition.description}
 												: {definition.description}
 											{/if}
