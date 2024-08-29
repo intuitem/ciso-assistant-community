@@ -11,7 +11,7 @@
 
 	let tabSet = 0;
 
-	const plannedAppliedControls: TableSource = {
+	const toDoAppliedControls: TableSource = {
 		head: {
 			name: 'name',
 			category: 'category',
@@ -21,7 +21,7 @@
 			effort: 'effort',
 			requirements_count: 'matchingRequirements'
 		},
-		body: tableSourceMapper(data.actionPlan.planned, [
+		body: tableSourceMapper(data.actionPlan.to_do, [
 			'name',
 			'category',
 			'csf_function',
@@ -30,7 +30,49 @@
 			'efforts',
 			'requirements_count'
 		]),
-		meta: data.actionPlan.planned
+		meta: data.actionPlan.to_do
+	};
+	const inProgressAppliedControls: TableSource = {
+		head: {
+			name: 'name',
+			category: 'category',
+			csf_function: 'csfFunction',
+			eta: 'eta',
+			expiry_date: 'expiryDate',
+			effort: 'effort',
+			requirements_count: 'matchingRequirements'
+		},
+		body: tableSourceMapper(data.actionPlan.in_progress, [
+			'name',
+			'category',
+			'csf_function',
+			'eta',
+			'expiry_date',
+			'efforts',
+			'requirements_count'
+		]),
+		meta: data.actionPlan.to_do
+	};
+	const onHoldAppliedControls: TableSource = {
+		head: {
+			name: 'name',
+			category: 'category',
+			csf_function: 'csfFunction',
+			eta: 'eta',
+			expiry_date: 'expiryDate',
+			effort: 'effort',
+			requirements_count: 'matchingRequirements'
+		},
+		body: tableSourceMapper(data.actionPlan.on_hold, [
+			'name',
+			'category',
+			'csf_function',
+			'eta',
+			'expiry_date',
+			'efforts',
+			'requirements_count'
+		]),
+		meta: data.actionPlan.to_do
 	};
 
 	const activeAppliedControls: TableSource = {
@@ -55,7 +97,7 @@
 		meta: data.actionPlan.active
 	};
 
-	const inactiveAppliedControls: TableSource = {
+	const deprecatedAppliedControls: TableSource = {
 		head: {
 			name: 'name',
 			category: 'category',
@@ -65,7 +107,7 @@
 			effort: 'effort',
 			requirements_count: 'matchingRequirements'
 		},
-		body: tableSourceMapper(data.actionPlan.inactive, [
+		body: tableSourceMapper(data.actionPlan.deprecated, [
 			'name',
 			'category',
 			'csf_function',
@@ -74,7 +116,7 @@
 			'efforts',
 			'requirements_count'
 		]),
-		meta: data.actionPlan.inactive
+		meta: data.actionPlan.deprecated
 	};
 
 	const noneAppliedControls: TableSource = {
@@ -141,36 +183,50 @@
 				bind:group={tabSet}
 				class="border-x border-t border-gray-300"
 				active="bg-blue-200 border-b-2 border-blue-500"
-				name="planned"
-				value={0}>{m.planned()}</Tab
+				name="to_do"
+				value={0}>{m.toDo()}</Tab
+			>
+			<Tab
+				bind:group={tabSet}
+				class="border-x border-t border-gray-300"
+				active="bg-violet-400 border-b-2 border-blue-500"
+				name="in_progress"
+				value={1}>{m.inProgress()}</Tab
+			>
+			<Tab
+				bind:group={tabSet}
+				class="border-x border-t border-gray-300"
+				active="bg-orange-300 border-b-2 border-blue-500"
+				name="on_hold"
+				value={2}>{m.onHold()}</Tab
 			>
 			<Tab
 				bind:group={tabSet}
 				class="border-x border-t border-gray-300"
 				active="bg-green-200 border-b-2 border-green-500"
 				name="active"
-				value={1}>{m.active()}</Tab
+				value={3}>{m.active()}</Tab
 			>
 			<Tab
 				bind:group={tabSet}
 				class="border-x border-t border-gray-300"
 				active="bg-red-300 border-b-2 border-red-600"
-				name="inactive"
-				value={2}>{m.inactive()}</Tab
+				name="deprecated"
+				value={4}>{m.deprecated()}</Tab
 			>
 			<Tab
 				bind:group={tabSet}
 				class="border-x border-t border-gray-300"
 				active="bg-gray-300 border-b-2 border-gray-600"
 				name="noStatus"
-				value={3}>{m.noStatus()}</Tab
+				value={5}>{m.noStatus()}</Tab
 			>
 			<svelte:fragment slot="panel">
 				<div class="p-2">
 					{#if tabSet === 0}
 						<ModelTable
 							URLModel="applied-controls"
-							source={plannedAppliedControls}
+							source={toDoAppliedControls}
 							search={true}
 							rowsPerPage={true}
 							orderBy={{ identifier: 'eta', direction: 'desc' }}
@@ -180,7 +236,7 @@
 					{#if tabSet === 1}
 						<ModelTable
 							URLModel="applied-controls"
-							source={activeAppliedControls}
+							source={inProgressAppliedControls}
 							search={true}
 							rowsPerPage={true}
 							orderBy={{ identifier: 'eta', direction: 'desc' }}
@@ -190,7 +246,7 @@
 					{#if tabSet === 2}
 						<ModelTable
 							URLModel="applied-controls"
-							source={inactiveAppliedControls}
+							source={onHoldAppliedControls}
 							search={true}
 							rowsPerPage={true}
 							orderBy={{ identifier: 'eta', direction: 'desc' }}
@@ -198,6 +254,26 @@
 						/>
 					{/if}
 					{#if tabSet === 3}
+						<ModelTable
+							URLModel="applied-controls"
+							source={activeAppliedControls}
+							search={true}
+							rowsPerPage={true}
+							orderBy={{ identifier: 'eta', direction: 'desc' }}
+							tags={false}
+						/>
+					{/if}
+					{#if tabSet === 4}
+						<ModelTable
+							URLModel="applied-controls"
+							source={deprecatedAppliedControls}
+							search={true}
+							rowsPerPage={true}
+							orderBy={{ identifier: 'eta', direction: 'desc' }}
+							tags={false}
+						/>
+					{/if}
+					{#if tabSet === 5}
 						<ModelTable
 							URLModel="applied-controls"
 							source={noneAppliedControls}
