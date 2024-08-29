@@ -127,7 +127,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDuplicateObject({
-						object: safeTranslate(toCamelCase(modelVerboseName)).toLowerCase()
+						object: safeTranslate(modelVerboseName)).toLowerCase(
 					})
 				},
 				cookies

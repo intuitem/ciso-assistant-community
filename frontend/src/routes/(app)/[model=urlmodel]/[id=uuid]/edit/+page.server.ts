@@ -94,7 +94,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: safeTranslate(toCamelCase(modelVerboseName.toLowerCase())).toLowerCase()
+					object: safeTranslate(modelVerboseName).toLowerCase()
 				})
 			},
 			event

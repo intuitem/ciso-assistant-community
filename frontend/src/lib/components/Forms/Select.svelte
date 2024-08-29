@@ -79,7 +79,7 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{safeTranslate(toCamelCase(option.label))}
+					{safeTranslate(option.label)}
 				</option>
 			{/each}
 		</select>

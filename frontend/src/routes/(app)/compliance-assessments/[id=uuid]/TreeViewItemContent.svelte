@@ -148,7 +148,7 @@
 								style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
 							>
 								{resultCounts[status[0]]}
-								{safeTranslate(toCamelCase(status[0]))}
+								{safeTranslate(status[0])}
 							</span>
 						{/if}
 					{/each}
