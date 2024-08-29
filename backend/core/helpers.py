@@ -511,8 +511,8 @@ def applied_control_per_status(user: User):
         AppliedControl.Status.UNDEFINED: "#CCC",
         AppliedControl.Status.TO_DO: "#BFDBFE",
         AppliedControl.Status.ACTIVE: "#46D39A",
-        AppliedControl.Status.IN_PROGRESS: "#46D39A",
-        AppliedControl.Status.ON_HOLD: "#46D39A",
+        AppliedControl.Status.IN_PROGRESS: "#392F5A",
+        AppliedControl.Status.ON_HOLD: "#F4D06F",
         AppliedControl.Status.DEPRECATED: "#E55759",
     }
     (
@@ -523,13 +523,6 @@ def applied_control_per_status(user: User):
         Folder.get_root_folder(), user, AppliedControl
     )
     viewable_applied_controls = AppliedControl.objects.filter(id__in=object_ids_view)
-    undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
-    values.append(
-        {
-            "value": undefined_count,
-            "itemStyle": {"color": color_map[AppliedControl.Status.UNDEFINED]},
-        }
-    )
     for st in AppliedControl.Status.choices:
         count = viewable_applied_controls.filter(status=st[0]).count()
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
