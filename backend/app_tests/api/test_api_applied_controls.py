@@ -110,7 +110,7 @@ class TestAppliedControlsAuthenticated:
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "reference_control": None,
                 "category": APPLIED_CONTROL_CATEGORY[1],
-                "status": APPLIED_CONTROL_STATUS._label_,
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,
@@ -140,7 +140,7 @@ class TestAppliedControlsAuthenticated:
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "category": APPLIED_CONTROL_CATEGORY[1],
-                "status": APPLIED_CONTROL_STATUS._label_,
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,
@@ -182,7 +182,7 @@ class TestAppliedControlsAuthenticated:
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "category": APPLIED_CONTROL_CATEGORY[1],
-                "status": APPLIED_CONTROL_STATUS._label_,
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,

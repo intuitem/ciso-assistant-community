@@ -106,7 +106,7 @@ class TestPolicysAuthenticated:
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "reference_control": None,
-                "status": POLICY_STATUS._label_,
+                "status": POLICY_STATUS._value_,
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
@@ -130,7 +130,7 @@ class TestPolicysAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "status": POLICY_STATUS._label_,
+                "status": POLICY_STATUS._value_,
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
@@ -166,7 +166,7 @@ class TestPolicysAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "status": POLICY_STATUS._label_,
+                "status": POLICY_STATUS._value_,
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
