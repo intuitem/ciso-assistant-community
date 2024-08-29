@@ -508,10 +508,12 @@ def applied_control_per_status(user: User):
     labels = list()
     local_lables = list()
     color_map = {
-        "undefined": "#CCC",
-        "planned": "#BFDBFE",
-        "active": "#46D39A",
-        "inactive": "#E55759",
+        AppliedControl.Status.UNDEFINED: "#CCC",
+        AppliedControl.Status.TO_DO: "#BFDBFE",
+        AppliedControl.Status.ACTIVE: "#46D39A",
+        AppliedControl.Status.IN_PROGRESS: "#46D39A",
+        AppliedControl.Status.ON_HOLD: "#46D39A",
+        AppliedControl.Status.DEPRECATED: "#E55759",
     }
     (
         object_ids_view,
@@ -523,14 +525,16 @@ def applied_control_per_status(user: User):
     viewable_applied_controls = AppliedControl.objects.filter(id__in=object_ids_view)
     undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
     values.append(
-        {"value": undefined_count, "itemStyle": {"color": color_map["undefined"]}}
+        {
+            "value": undefined_count,
+            "itemStyle": {"color": color_map[AppliedControl.Status.UNDEFINED]},
+        }
     )
     for st in AppliedControl.Status.choices:
         count = viewable_applied_controls.filter(status=st[0]).count()
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
-    labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
 
