@@ -232,6 +232,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'category' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
+			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'name' },
