@@ -1534,8 +1534,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def flash_mode(self, request, pk):
-        """Returns the list of requirement assessments for flash mode"""
+    def requirements_list(self, request, pk):
+        """Returns the list of requirement assessments for the different audit modes"""
         requirement_assessments_objects = (
             self.get_object().get_requirement_assessments()
         )
@@ -1548,11 +1548,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
         ).data
-        flash_mode = {
+        requirements_list = {
             "requirements": requirements,
             "requirement_assessments": requirement_assessments,
         }
-        return Response(flash_mode, status=status.HTTP_200_OK)
+        return Response(requirements_list, status=status.HTTP_200_OK)
 
     @action(detail=True)
     def export(self, request, pk):

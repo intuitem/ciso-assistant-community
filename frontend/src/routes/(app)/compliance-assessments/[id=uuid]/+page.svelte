@@ -313,6 +313,11 @@
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</a
 			>
+			<a
+				href={`${$page.url.pathname}/table-mode`}
+				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-yellow-500 h-fit"
+				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</a
+			>
 			<button
 				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
 				on:click={(_) => modalCreateForm()}
