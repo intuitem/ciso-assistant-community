@@ -1190,8 +1190,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
-        ACTIVE = "active", _("Active")
         ON_HOLD = "on_hold", _("On hold")
+        ACTIVE = "active", _("Active")
         DEPRECATED = "deprecated", _("Deprecated")
         UNDEFINED = "--", _("Undefined")
 

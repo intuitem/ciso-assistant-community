@@ -13,9 +13,6 @@
 	});
 
 	let applied_control_status: AppliedControlStatus = data.applied_control_status;
-	for (const item in applied_control_status.labels) {
-		applied_control_status.labels[item] = localItems()[applied_control_status.localLables[item]];
-	}
 </script>
 
 <div class="flex flex-col space-y-4 p-2">
