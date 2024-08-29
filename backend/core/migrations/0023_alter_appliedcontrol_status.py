@@ -8,10 +8,13 @@ def update_status(apps, schema_editor):
     for control in AppliedControl.objects.all():
         if control.status == "planned":
             control.status = "to_do"
+            control.save()
         elif control.status == "inactive":
             control.status = "deprecated"
+            control.save()
         elif control.status is None:
             control.status = "--"
+            control.save()
 
 
 class Migration(migrations.Migration):
