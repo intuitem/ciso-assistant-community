@@ -121,7 +121,8 @@ export const AppliedControlSchema = baseNamedObject({
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
-	reference_control: z.string().optional().nullable()
+	reference_control: z.string().optional().nullable(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const PolicySchema = baseNamedObject({

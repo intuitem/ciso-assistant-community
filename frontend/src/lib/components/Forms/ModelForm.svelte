@@ -335,6 +335,15 @@
 			cacheLock={cacheLocks['csf_function']}
 			bind:cachedValue={formDataCache['csf_function']}
 		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+			field="owner"
+			cacheLock={cacheLocks['owner']}
+			bind:cachedValue={formDataCache['owner']}
+			label={m.owner()}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
