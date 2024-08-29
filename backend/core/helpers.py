@@ -36,9 +36,10 @@ def flatten_dict(
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "undefined": "#CCC",
-    "planned": "#BFDBFE",
+    "--": "#CCC",
+    "to_do": "#BFDBFE",
     "active": "#46D39A",
-    "inactive": "#E55759",
+    "deprecated": "#E55759",
     "in_progress": "#5470c6",
     "in_review": "#BBF7D0",
     "done": "#46D39A",
@@ -913,7 +914,7 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
 
     values = list()
     labels = list()
-
+    # WARNING: this is wrong - FIX ME because we compute the controls multiple times if used accross multiple scenarios
     for st in AppliedControl.Status.choices:
         count = (
             AppliedControl.objects.filter(status=st[0])
