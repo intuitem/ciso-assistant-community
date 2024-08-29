@@ -15,8 +15,8 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -24,21 +24,21 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
+		Tab,
+		TabGroup,
 		getModalStore,
 		getToastStore,
-		Tab,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore,
-		type ToastStore,
-		TabGroup
+		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
-	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { complianceResultColorMap } from '$lib/utils/constants';
-	import * as m from '$paraglide/messages';
+	import { capitalizeFirstLetter, localItems } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
+	import * as m from '$paraglide/messages';
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
