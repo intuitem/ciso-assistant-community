@@ -202,10 +202,14 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 
 const OWNER_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.meta.owner.length ? row.meta.owner.map((o) => o.str) : null),
+	getColumn: (row) => {
+		const owner = row?.meta?.owner;
+		return owner && owner.length ? owner.map((o) => o.str) : null;
+	},
 	extraProps: {
 		defaultOptionName: 'owner'
-	}
+	},
+	alwaysDisplay: true
 };
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
   component: CheckboxFilter,

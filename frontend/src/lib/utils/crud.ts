@@ -237,6 +237,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'eta', type: 'date' },
+			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' }
 		],
