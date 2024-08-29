@@ -6,14 +6,14 @@ export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
-	const [compliance_assessment, flashMode] = await Promise.all(
+	const [compliance_assessment, tableMode] = await Promise.all(
 		[endpoint, `${endpoint}requirements_list/`].map((endpoint) =>
 			fetch(endpoint).then((res) => res.json())
 		)
 	);
 
-	const requirement_assessments = flashMode.requirement_assessments;
-	const requirements = flashMode.requirements;
+	const requirement_assessments = tableMode.requirement_assessments;
+	const requirements = tableMode.requirements;
 
 	requirements.forEach((requirement) => {
 		if (

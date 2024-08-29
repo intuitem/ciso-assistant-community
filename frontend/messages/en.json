@@ -702,5 +702,6 @@
 	"reviewConclusionSemiColon": "Review conclusion:",
 	"review": "Review",
 	"conclusionSemiColon": "Conclusion:",
-	"observationSemiColon": "Observation:"
+	"observationSemiColon": "Observation:",
+	"tableMode": "Table mode"
 }
