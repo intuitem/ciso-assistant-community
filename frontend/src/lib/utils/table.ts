@@ -201,20 +201,31 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
-	component: CheckboxFilter,
-	getColumn: row => {
-		return !row.meta.overview.some(
-			line => line.startsWith("risk_matrix")
-		); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
-	},
-	filterProps: (rows: any[], field: string) => new Object(),
-	filter: (builtin: boolean, value: boolean): boolean => {
-		return value ? !builtin : true;
+const OWNER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const owner = row?.meta?.owner;
+		return owner && owner.length ? owner.map((o) => o.str) : null;
 	},
 	extraProps: {
-		title: "Only display matrix libraries"
-	}
+		defaultOptionName: 'owner'
+	},
+	alwaysDisplay: true
+};
+/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
+  component: CheckboxFilter,
+  getColumn: row => {
+    return !row.meta.overview.some(
+      line => line.startsWith("risk_matrix")
+    ); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
+  },
+  filterProps: (rows: any[],field: string) => new Object(),
+  filter: (builtin: boolean, value: boolean): boolean => {
+    return value ? !builtin : true;
+  },
+  extraProps: {
+    title: "Only display matrix libraries" // Make translations
+  }
 }; */
 
 const LIBRARY_TYPE_FILTER = {
@@ -309,13 +320,32 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'csfFunction', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'category', 'csf_function', 'eta', 'folder', 'reference_control'],
+		head: [
+			'name',
+			'description',
+			'category',
+			'csfFunction',
+			'eta',
+			'owner',
+			'domain',
+			'referenceControl'
+		],
+		body: [
+			'name',
+			'description',
+			'category',
+			'csf_function',
+			'eta',
+			'owner',
+			'folder',
+			'reference_control'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: STATUS_FILTER,
 			category: CATEGORY_FILTER,
-			csf_function: CSF_FUNCTION_FILTER
+			csf_function: CSF_FUNCTION_FILTER,
+			owner: OWNER_FILTER
 		}
 	},
 	policies: {

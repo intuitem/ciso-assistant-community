@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales';
 	import type { CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages';
 	import MultiSelect from 'svelte-multiselect';
@@ -74,7 +73,7 @@
 				let:option
 			>
 				{#if translateOptions}
-					{safeTranslate(toCamelCase(option.label))}
+					{safeTranslate(option.label)}
 				{:else}
 					{option.label}
 				{/if}
