@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales';
 
 	export let value: string;
 
@@ -60,7 +59,7 @@
 				let:option
 			>
 				{#if translateOptions}
-					{safeTranslate(toCamelCase(option.label))}
+					{safeTranslate(option.label)}
 				{:else}
 					{option.label}
 				{/if}

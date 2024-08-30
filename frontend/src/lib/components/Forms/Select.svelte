@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import { onMount } from 'svelte';
 
 	let _class = '';
 
@@ -79,7 +78,7 @@
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{safeTranslate(toCamelCase(option.label))}
+					{safeTranslate(option.label)}
 				</option>
 			{/each}
 		</select>

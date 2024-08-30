@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import * as m from '$paraglide/messages.js';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import { safeTranslate } from '$lib/utils/i18n.js';
+	import { toCamelCase } from '$lib/utils/locales.js';
 
 	export let data;
 
@@ -20,9 +22,9 @@
 
 	const measureStatusColorMap = (treatment: string) => {
 		const map: Record<string, string> = {
-			'--': 'bg-gray-200',
-			planned: 'bg-blue-200',
-			inactive: 'bg-red-200',
+			undefined: 'bg-gray-200',
+			to_do: 'bg-blue-200',
+			deprecated: 'bg-red-200',
 			active: 'bg-green-200'
 		};
 		if (treatment !== null) {
@@ -114,9 +116,9 @@
 							<td class="text-center"
 								><span
 									class="text-xs text-gray-900 whitespace-nowrap text-center p-1 mx-1 rounded {measureStatusColorMap(
-										measure.status ?? '--'
+										measure.status
 									)}"
-									>{measure.status ?? '--'}
+									>{safeTranslate(toCamelCase(measure.status))}
 								</span></td
 							>
 						</tr>
