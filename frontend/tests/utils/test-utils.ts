@@ -447,7 +447,7 @@ export class TestContent {
 					},
 					name: vars.appliedControlName,
 					description: vars.description,
-					status: 'Planned',
+					status: 'To do',
 					eta: '2025-01-01',
 					expiry_date: '2025-05-01',
 					link: 'https://intuitem.com/',

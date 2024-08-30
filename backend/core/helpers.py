@@ -36,9 +36,10 @@ def flatten_dict(
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "undefined": "#CCC",
-    "planned": "#BFDBFE",
+    "--": "#CCC",
+    "to_do": "#BFDBFE",
     "active": "#46D39A",
-    "inactive": "#E55759",
+    "deprecated": "#E55759",
     "in_progress": "#5470c6",
     "in_review": "#BBF7D0",
     "done": "#46D39A",
@@ -508,10 +509,12 @@ def applied_control_per_status(user: User):
     labels = list()
     local_lables = list()
     color_map = {
-        "undefined": "#CCC",
-        "planned": "#BFDBFE",
-        "active": "#46D39A",
-        "inactive": "#E55759",
+        AppliedControl.Status.UNDEFINED: "#CCC",
+        AppliedControl.Status.TO_DO: "#BFDBFE",
+        AppliedControl.Status.ACTIVE: "#46D39A",
+        AppliedControl.Status.IN_PROGRESS: "#392F5A",
+        AppliedControl.Status.ON_HOLD: "#F4D06F",
+        AppliedControl.Status.DEPRECATED: "#E55759",
     }
     (
         object_ids_view,
@@ -521,16 +524,11 @@ def applied_control_per_status(user: User):
         Folder.get_root_folder(), user, AppliedControl
     )
     viewable_applied_controls = AppliedControl.objects.filter(id__in=object_ids_view)
-    undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
-    values.append(
-        {"value": undefined_count, "itemStyle": {"color": color_map["undefined"]}}
-    )
     for st in AppliedControl.Status.choices:
         count = viewable_applied_controls.filter(status=st[0]).count()
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
-    labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
 
@@ -799,9 +797,11 @@ def risk_status(user: User, risk_assessment_list):
     }
     mtg_status_out = {
         "--": list(),
-        "planned": list(),
+        "to_do": list(),
+        "in_progress": list(),
+        "on_hold": list(),
         "active": list(),
-        "inactive": list(),
+        "deprecated": list(),
     }
 
     max_tmp = list()
@@ -916,7 +916,7 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
 
     values = list()
     labels = list()
-
+    # WARNING: this is wrong - FIX ME because we compute the controls multiple times if used accross multiple scenarios
     for st in AppliedControl.Status.choices:
         count = (
             AppliedControl.objects.filter(status=st[0])
