@@ -87,7 +87,7 @@ and run the starter script
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images. 
 
 ## End-user Documentation
 
