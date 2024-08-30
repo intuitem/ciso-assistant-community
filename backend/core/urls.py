@@ -71,6 +71,7 @@ urlpatterns = [
     path("license/", license, name="license"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
     path("get_counters/", get_counters_view, name="get_counters_view"),
+    path("get_metrics/", get_metrics_view, name="get_metrics_view"),
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
