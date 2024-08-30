@@ -312,6 +312,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
+    owner = FieldsRelatedField(many=True)
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
