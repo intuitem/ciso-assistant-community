@@ -7,7 +7,6 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 
-import { toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
 
@@ -94,7 +93,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: safeTranslate(toCamelCase(modelVerboseName.toLowerCase())).toLowerCase()
+					object: safeTranslate(modelVerboseName).toLowerCase()
 				})
 			},
 			event

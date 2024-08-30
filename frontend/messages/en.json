@@ -465,6 +465,7 @@
 	"inProgress": "In progress",
 	"inReview": "In review",
 	"deprecated": "Deprecated",
+	"onHold": "On hold",
 	"done": "Done",
 	"nonCompliant": "Non compliant",
 	"nonCompliantMinor": "Non compliant minor",

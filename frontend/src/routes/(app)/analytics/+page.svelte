@@ -5,6 +5,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
+	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
+	import NightingaleChart from '$lib/components/Chart/NightingaleChart.svelte';
+	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { localItems } from '$lib/utils/locales.js';
@@ -28,7 +32,7 @@
 	export let data: PageData;
 
 	const counters: Counters = data.get_counters;
-
+	const metrics = data.metrics;
 	const risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
@@ -117,22 +121,171 @@
 	] as const;
 </script>
 
-<TabGroup>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(0)} name="governance" value={0}
+<TabGroup class="">
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
+		>{m.summary()}</Tab
+	>
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(1)} name="governance" value={1}
 		>{m.governance()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(1)} name="risk" value={1}
-		>{m.risk()}</Tab
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(2)} name="risk" value={2}>{m.risk()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(2)} name="compliance" value={2}
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(3)} name="compliance" value={3}
 		>{m.compliance()}</Tab
 	>
-	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(3)} name="composer" value={3}
+	<Tab bind:group={tabSet} on:click={() => handleTabChange(4)} name="composer" value={4}
 		>{m.composer()}</Tab
 	>
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
+				<section id="summary" class=" grid grid-cols-6 gap-4">
+					<Card
+						count={metrics.controls.total}
+						label="total"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+						emphasis={true}
+					/>
+					<Card
+						count={metrics.controls.active}
+						label="active"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
+					<Card
+						count={metrics.controls.deprecated}
+						label="deprecated"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
+					<div class="h-64 col-span-3 row-span-2 bg-white">
+						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+					</div>
+					<Card
+						count={metrics.controls.to_do}
+						label="to do"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
+					<Card
+						count={metrics.controls.in_progress}
+						label="in progress"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
+					<Card
+						count={metrics.controls.on_hold}
+						label="on hold"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-shield-halved"
+						section="controls"
+					/>
+					<div class="col-span-4 row-span-4 bg-white">
+						<TreemapChart title="Compliance overview" tree={metrics.audits_tree} name="sunburst" />
+					</div>
+					<!---->
+					<Card
+						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
+						label="active audits"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
+						emphasis={true}
+					/>
+					<div></div>
+					<Card
+						count={metrics.compliance.compliant_items}
+						label="compliant items"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
+					/>
+					<Card
+						count={metrics.compliance.non_compliant_items}
+						label="non compliant items"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
+					/>
+					<Card
+						count={metrics.compliance.evidences}
+						label="evidences"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section="compliance"
+					/>
+					<div class=""></div>
+					<div class=""></div>
+					<!---->
+					<div class=" col-span-2 row-span-2 h-80 bg-white">
+						<HalfDonutChart
+							name="current_h"
+							title="Current risks"
+							values={data.risks_count_per_level.current}
+							colors={data.risks_count_per_level.current.map((object) => object.color)}
+						/>
+					</div>
+					<Card
+						count={metrics.risk.assessments}
+						label="assessments"
+						href="#"
+						help="this is interesting"
+						emphasis={true}
+						icon="fa-solid fa-biohazard"
+						section="risk"
+					/>
+					<Card
+						count={metrics.risk.scenarios}
+						label="scenarios"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-biohazard"
+						section="risk"
+					/>
+					<div class=" col-span-2 row-span-2 bg-white">
+						<HalfDonutChart
+							name="residual_h"
+							title="Residual risks"
+							values={data.risks_count_per_level.residual}
+							colors={data.risks_count_per_level.residual.map((object) => object.color)}
+						/>
+					</div>
+					<Card
+						count={metrics.risk.threats}
+						label="mapped threats"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-biohazard"
+						section="risk"
+					/>
+					<!---->
+					<Card
+						count={metrics.risk.acceptances}
+						label="risks accepted"
+						href="#"
+						help="this is interesting"
+						icon="fa-solid fa-biohazard"
+						section="risk"
+					/>
+					<div class=""></div>
+				</section>
+			{:else if tabSet === 1}
 				<section id="stats">
 					<span class="text-xl font-extrabold">{m.statistics()}</span>
 					<div class="flex justify-between space-x-4">
@@ -261,7 +414,7 @@
 						</div>
 					</div>
 				</section>
-			{:else if tabSet === 1}
+			{:else if tabSet === 2}
 				<!-- Risk tab -->
 
 				<section>
@@ -305,12 +458,12 @@
 						<BarChart
 							name="mtg"
 							title={m.appliedControlsStatus()}
-							labels={localizeChartLabels(data.applied_control_status.localLables)}
+							labels={data.applied_control_status.labels}
 							values={data.applied_control_status.values}
 						/>
 					</div>
 				</section>
-			{:else if tabSet === 2}
+			{:else if tabSet === 3}
 				<span class="text-xl font-extrabold">{m.overallCompliance()}</span>
 				<div class="flex flex-col space-y-2">
 					{#each data.projects as project}
@@ -391,7 +544,7 @@
 						</div>
 					{/each}
 				</div>
-			{:else if tabSet === 3}
+			{:else if tabSet === 4}
 				<div id="title" class="text-lg font-black">{m.composer()}</div>
 				<select id="composer_select" hidden>
 					{#each risk_assessments as risk_assessment}
