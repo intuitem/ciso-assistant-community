@@ -1,7 +1,7 @@
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 
-let vars = TestContent.generateTestVars();
-let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+const vars = TestContent.generateTestVars();
+const testObjectsData: Record<string, any> = TestContent.itemBuilder(vars);
 
 test('risk acceptances can be processed', async ({
 	logedPage,
