@@ -877,11 +877,11 @@ def get_metrics(user: User):
     data = {
         "controls": {
             "total": controls_count,
-            "to_do": viewable_controls.filter(status="planned").count(),
-            "in_progress": viewable_controls.filter(status="planned").count(),
-            "on_hold": viewable_controls.filter(status="planned").count(),
-            "done": viewable_controls.filter(status="active").count(),
-            "expired": viewable_controls.filter(status="inactive").count(),
+            "to_do": viewable_controls.filter(status="to_do").count(),
+            "in_progress": viewable_controls.filter(status="in_progress").count(),
+            "on_hold": viewable_controls.filter(status="on_hold").count(),
+            "active": viewable_controls.filter(status="active").count(),
+            "deprecated": viewable_controls.filter(status="deprecated").count(),
         },
         "risk": {
             "assessments": viewable_items(RiskAssessment).count(),
