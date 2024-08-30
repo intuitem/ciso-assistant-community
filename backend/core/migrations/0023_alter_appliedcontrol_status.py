@@ -31,8 +31,8 @@ class Migration(migrations.Migration):
                 choices=[
                     ("to_do", "To do"),
                     ("in_progress", "In progress"),
-                    ("active", "Active"),
                     ("on_hold", "On hold"),
+                    ("active", "Active"),
                     ("deprecated", "Deprecated"),
                     ("--", "Undefined"),
                 ],
