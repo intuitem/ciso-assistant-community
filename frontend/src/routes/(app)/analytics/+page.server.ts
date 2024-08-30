@@ -71,6 +71,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
 	const counters = await req_get_counters.json();
 
+	const req_get_metrics = await fetch(`${BASE_API_URL}/get_metrics/`);
+	const metrics = await req_get_metrics.json();
+
 	const usedRiskMatrices: { id: string; name: string; risk_assessments_count: number }[] =
 		await fetch(`${BASE_API_URL}/risk-matrices/used/`)
 			.then((res) => res.json())
@@ -231,6 +234,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		measures: ord_applied_controls.results,
 		applied_control_status: applied_control_status.results,
 		projects,
-		user: locals.user
+		user: locals.user,
+		metrics: metrics.results
 	};
 };
