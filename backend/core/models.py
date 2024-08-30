@@ -1241,6 +1241,12 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         blank=True,
         verbose_name=_("Status"),
     )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="applied_controls",
+    )
     eta = models.DateField(
         blank=True,
         null=True,

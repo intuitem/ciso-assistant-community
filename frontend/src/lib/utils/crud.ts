@@ -238,13 +238,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'eta', type: 'date' },
+			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'evidences', urlModel: 'evidences' }
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -259,7 +261,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'category' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'folder' }
+			{ field: 'folder' },
+			{ field: 'owner' }
 		]
 	},
 	policies: {
