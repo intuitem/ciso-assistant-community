@@ -150,7 +150,7 @@
 						emphasis={true}
 					/>
 					<Card
-						count={metrics.controls.done}
+						count={metrics.controls.active}
 						label="active"
 						href="#"
 						help="this is interesting"
@@ -158,7 +158,7 @@
 						section="controls"
 					/>
 					<Card
-						count={metrics.controls.expired}
+						count={metrics.controls.deprecated}
 						label="deprecated"
 						href="#"
 						help="this is interesting"
