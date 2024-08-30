@@ -1,7 +1,10 @@
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 
+type JSONVariable = null | boolean | number | string | JSONObject[] | { [key: string]: JSONObject };
+type JSONObject = { [key: string]: JSONVariable };
+
 const vars = TestContent.generateTestVars();
-const testObjectsData: Record<string, any> = TestContent.itemBuilder(vars);
+const testObjectsData: Record<string, JSONObject> = TestContent.itemBuilder(vars);
 
 test('risk acceptances can be processed', async ({
 	pages,
