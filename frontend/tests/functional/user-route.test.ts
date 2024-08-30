@@ -106,7 +106,7 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			category: 'Technical',
 			csf_function: 'protect',
-			status: 'Planned',
+			status: 'To do',
 			eta: '2025-01-01',
 			link: 'https://intuitem.com/',
 			effort: 'Large',

@@ -458,7 +458,7 @@
 						<BarChart
 							name="mtg"
 							title={m.appliedControlsStatus()}
-							labels={localizeChartLabels(data.applied_control_status.localLables)}
+							labels={data.applied_control_status.labels}
 							values={data.applied_control_status.values}
 						/>
 					</div>
