@@ -4,7 +4,6 @@ const vars = TestContent.generateTestVars();
 const testObjectsData: Record<string, any> = TestContent.itemBuilder(vars);
 
 test('risk acceptances can be processed', async ({
-	logedPage,
 	pages,
 	usersPage,
 	riskAcceptancesPage,
