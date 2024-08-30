@@ -484,7 +484,7 @@ export class TestContent {
 					name: vars.assessmentName,
 					description: vars.description,
 					project: vars.folderName + '/' + vars.projectName,
-					status: 'To do',
+					status: 'Planned',
 					// version: "1.4.2",
 					framework: vars.framework.name
 					// eta: "2025-01-01",
@@ -528,7 +528,7 @@ export class TestContent {
 					description: vars.description,
 					project: vars.folderName + '/' + vars.projectName,
 					version: vars.riskAssessmentVersion,
-					status: 'To do',
+					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
 					// eta: "2025-01-01",
 					// due_date: "2025-05-01"

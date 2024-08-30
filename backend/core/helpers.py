@@ -797,9 +797,11 @@ def risk_status(user: User, risk_assessment_list):
     }
     mtg_status_out = {
         "--": list(),
-        "planned": list(),
+        "to_do": list(),
+        "in_progress": list(),
+        "on_hold": list(),
         "active": list(),
-        "inactive": list(),
+        "deprecated": list(),
     }
 
     max_tmp = list()
