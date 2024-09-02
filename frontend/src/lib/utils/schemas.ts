@@ -121,7 +121,8 @@ export const AppliedControlSchema = baseNamedObject({
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
-	reference_control: z.string().optional().nullable()
+	reference_control: z.string().optional().nullable(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const PolicySchema = baseNamedObject({
@@ -214,7 +215,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 });
 
 export const EvidenceSchema = baseNamedObject({
-	attachment: z.instanceof(File).optional().nullable(),
+	attachment: z.any().optional().nullable(),
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
@@ -241,7 +242,7 @@ export const SSOSettingsSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	idp_entity_id: z.string().optional(),
-	metadata_url: z.string().url().optional(),
+	metadata_url: z.string().optional(),
 	sso_url: z.string().optional().nullable(),
 	slo_url: z.string().optional().nullable(),
 	x509cert: z.string().optional(),

@@ -1188,9 +1188,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
-        PLANNED = "planned", _("Planned")
+        TO_DO = "to_do", _("To do")
+        IN_PROGRESS = "in_progress", _("In progress")
+        ON_HOLD = "on_hold", _("On hold")
         ACTIVE = "active", _("Active")
-        INACTIVE = "inactive", _("Inactive")
+        DEPRECATED = "deprecated", _("Deprecated")
+        UNDEFINED = "--", _("Undefined")
 
     CATEGORY = ReferenceControl.CATEGORY
     CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
@@ -1234,9 +1237,15 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        null=True,
+        default=Status.UNDEFINED,
         blank=True,
         verbose_name=_("Status"),
+    )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="applied_controls",
     )
     eta = models.DateField(
         blank=True,

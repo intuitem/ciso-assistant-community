@@ -347,8 +347,8 @@
                             )?.urlModel
                           }/${val.id}`}
                           <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else if safeTranslate(toCamelCase(val.split(':')[0]))}
-                        	<span class="text">{safeTranslate(toCamelCase(val.split(':')[0]+"Colon"))} {val.split(':')[1]}</span>
+                        {:else if safeTranslate(val.split(':')[0])}
+                        	<span class="text">{safeTranslate(val.split(':')[0]+"Colon")} {val.split(':')[1]}</span>
 						{:else}
 						  {val ?? '-'}
                         {/if}
