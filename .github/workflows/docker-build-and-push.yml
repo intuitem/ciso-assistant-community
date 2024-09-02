@@ -3,8 +3,14 @@ name: Build and Push Docker Images
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
+    inputs:
+      isStableRelease:
+        type: boolean
+        description: "Is this a stable release? If this is true, the `latest` tag will be applied to the images."
+        required: true
+        default: false
 
 jobs:
   build-and-push:
@@ -14,54 +20,53 @@ jobs:
       packages: write
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Ensure all history and tags are fetched
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensure all history and tags are fetched
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Get version and Create .meta file
-      run: |
-        echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
-        echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Get version and Create .meta file
+        run: |
+          echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
+          echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-        echo "CISO_ASSISTANT_VERSION=$(git describe --tags --always)" > .meta
-        echo "CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)" >> .meta
+          echo "CISO_ASSISTANT_VERSION=$(git describe --tags --always)" > .meta
+          echo "CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)" >> .meta
 
-        cp .meta ./backend/
-        cp .meta ./backend/ciso_assistant/
+          cp .meta ./backend/
+          cp .meta ./backend/ciso_assistant/
 
-    - name: Build and Push Frontend Docker Image
-      uses: docker/build-push-action@v6
-      with:
-        context: ./frontend
-        file: ./frontend/Dockerfile
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
-          ghcr.io/${{ github.repository }}/frontend:latest
-        platforms: linux/amd64,linux/arm64,linux/arm64/v8
+      - name: Build and Push Frontend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
+            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/frontend:latest' || null }}
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
-    - name: Build and Push Backend Docker Image
-      uses: docker/build-push-action@v6
-      with:
-        context: ./backend
-        file: ./backend/Dockerfile
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
-          ghcr.io/${{ github.repository }}/backend:latest
-        platforms: linux/amd64,linux/arm64,linux/arm64/v8
-
+      - name: Build and Push Backend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
+            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/backend:latest' || null }}
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
