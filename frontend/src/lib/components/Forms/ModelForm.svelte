@@ -339,6 +339,7 @@
 		<Select
 			{form}
 			options={model.selectOptions['status']}
+			blank={true}
 			field="status"
 			label={m.status()}
 			cacheLock={cacheLocks['status']}
