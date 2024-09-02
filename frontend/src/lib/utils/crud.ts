@@ -1,11 +1,11 @@
 // define the content of forms
 
-import type { urlModel } from './types';
-import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
+import { BASE_API_URL } from './constants';
+import type { urlModel } from './types';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -127,6 +127,7 @@ export interface ModelMapEntry {
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
+	fileFields?: string[];
 	filters?: SelectField[];
 	path?: string;
 }
@@ -231,18 +232,21 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'category' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
+			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'eta', type: 'date' },
+			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'link' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'evidences', urlModel: 'evidences' }
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
@@ -257,7 +261,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'category' },
 			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'folder' }
+			{ field: 'folder' },
+			{ field: 'owner' }
 		]
 	},
 	policies: {
@@ -367,6 +372,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'evidences',
 		verboseName: 'Evidence',
 		verboseNamePlural: 'Evidences',
+		fileFields: ['attachment'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -535,10 +541,12 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		name: {
 			key: 'status',
 			values: {
-				Planned: { text: 'planned', cssClasses: 'badge bg-blue-200' },
-				Active: { text: 'active', cssClasses: 'badge bg-green-200' },
-				Inactive: { text: 'inactive', cssClasses: 'badge bg-red-300' },
-				null: { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
+				in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
+				active: { text: 'active', cssClasses: 'badge bg-green-200' },
+				on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+				deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
+				'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
 			}
 		}
 	},
@@ -596,7 +604,7 @@ export const urlParamModelSelectFields = (model: string): SelectField[] => {
 	return URL_MODEL_MAP[model]?.selectFields || [];
 };
 
-export const getModelInfo = (model: urlModel): ModelMapEntry => {
+export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	const map = URL_MODEL_MAP[model] || {};
 	map['urlModel'] = model;
 	return map;

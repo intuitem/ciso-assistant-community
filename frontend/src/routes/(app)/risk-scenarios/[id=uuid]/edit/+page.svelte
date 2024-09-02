@@ -169,7 +169,7 @@
 							multiple
 							options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
 							field="owner"
-							label="Owner(s)"
+							label={m.owner()}
 						/>
 					</div>
 					<div class=" w-1/4">

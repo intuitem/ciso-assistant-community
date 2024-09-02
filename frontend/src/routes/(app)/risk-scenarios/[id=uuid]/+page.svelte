@@ -89,7 +89,7 @@
 					</p>
 				</div>
 				<div>
-					<span class=" text-sm text-gray-400 font-semibold">Owner(s):</span>
+					<span class=" text-sm text-gray-400 font-semibold">{m.owner()}</span>
 					<ul>
 						{#each data.scenario.owner as owner}
 							<li class="text-xs">{owner.str}</li>

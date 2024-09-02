@@ -1041,6 +1041,15 @@ def get_counters_view(request):
     return Response({"results": get_counters(request.user)})
 
 
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_metrics_view(request):
+    """
+    API endpoint that returns the counters
+    """
+    return Response({"results": get_metrics(request.user)})
+
+
 # TODO: Add all the proper docstrings for the following list of functions
 
 
@@ -1312,10 +1321,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in viewable_objects:
             response = {
-                "planned": [],
-                "active": [],
-                "inactive": [],
                 "none": [],
+                "to_do": [],
+                "in_progress": [],
+                "on_hold": [],
+                "active": [],
+                "deprecated": [],
             }
             compliance_assessment_object = self.get_object()
             requirement_assessments_objects = (
@@ -1335,11 +1346,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     .filter(applied_controls=applied_control["id"])
                     .count()
                 )
-                response[applied_control["status"].lower()].append(
-                    applied_control
-                ) if applied_control["status"] else response["none"].append(
-                    applied_control
-                )
+                if applied_control["status"] == "--":
+                    response["none"].append(applied_control)
+                else:
+                    response[applied_control["status"].lower()].append(applied_control)
+
         return Response(response)
 
     @action(detail=True, name="Get action plan PDF")
@@ -1349,15 +1360,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         if UUID(pk) in object_ids_view:
             context = {
-                "planned": list(),
+                "to_do": list(),
+                "in_progress": list(),
+                "on_hold": list(),
                 "active": list(),
-                "inactive": list(),
+                "deprecated": list(),
                 "no status": list(),
             }
             color_map = {
-                "planned": "#93c5fd",
-                "active": "#86efac",
-                "inactive": "#fca5a5",
+                "to_do": "#FFF8F0",
+                "in_progress": "#392F5A",
+                "on_hold": "#F4D06F",
+                "active": "#9DD9D2",
+                "deprecated": "#ff8811",
                 "no status": "#e5e7eb",
             }
             status = AppliedControl.Status.choices

@@ -1,16 +1,13 @@
-import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { modelSchema } from '$lib/utils/schemas';
-import { fail, type Actions } from '@sveltejs/kit';
-import { setError, superValidate } from 'sveltekit-superforms';
-import { setFlash } from 'sveltekit-flash-message/server';
-import { urlParamModelVerboseName } from '$lib/utils/crud';
+import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
-import { redirect } from '@sveltejs/kit';
+import { safeTranslate } from '$lib/utils/i18n';
+import { modelSchema } from '$lib/utils/schemas';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 
-import { localItems, toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions: Actions = {
@@ -31,12 +28,14 @@ export const actions: Actions = {
 
 		const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/`;
 
-		const fileFields = Object.fromEntries(
-			Object.entries(form.data).filter(([, value]) => value instanceof File)
+		const model = getModelInfo(event.params.model!);
+
+		const fileFields: Record<string, File> = Object.fromEntries(
+			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
 		);
 
 		Object.keys(fileFields).forEach((key) => {
-			form.data[key] = undefined;
+			delete form.data[key];
 		});
 
 		const requestInitOptions: RequestInit = {
@@ -67,9 +66,8 @@ export const actions: Actions = {
 
 		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
-				if (file.size <= 0) {
-					continue;
-				}
+				if (!file) continue;
+				if (file.size <= 0) continue;
 				const fileUploadEndpoint = `${BASE_API_URL}/${event.params.model}/${createdObject.id}/upload/`;
 				const fileUploadRequestInitOptions: RequestInit = {
 					headers: {
@@ -95,7 +93,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyUpdatedObject({
-					object: safeTranslate(toCamelCase(modelVerboseName.toLowerCase())).toLowerCase()
+					object: safeTranslate(modelVerboseName).toLowerCase()
 				})
 			},
 			event
