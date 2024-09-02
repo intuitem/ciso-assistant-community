@@ -35,8 +35,8 @@
 	};
 
 	interface FlashMessage {
-		message: string,
-		type: "success" | "error" | "warning" | "info"
+		message: string;
+		type: 'success' | 'error' | 'warning' | 'info';
 	}
 
 	function handleToast(flash: FlashMessage | undefined) {
@@ -44,7 +44,7 @@
 
 		toast(flash.message, {
 			background:
-			flash.type == 'success'
+				flash.type == 'success'
 					? 'variant-filled-success'
 					: flash.type === 'error'
 						? 'variant-filled-error'

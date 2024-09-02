@@ -862,8 +862,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
     def waiting(self, request):
         acceptance_count = RiskAcceptance.objects.filter(
-            approver=request.user,
-            state="submitted"
+            approver=request.user, state="submitted"
         ).count()
         return Response({"count": acceptance_count})
 
