@@ -12,7 +12,10 @@ FRONTEND_DIR := $(BUILD_DIR)/frontend
 
 .DEFAULT_GOAL := build-enterprise
 
-pre-build:
+ensure-pnpm:
+	@command -v pnpm || npm install -g pnpm
+
+pre-build: ensure-pnpm
 	@mkdir -p $(BUILD_DIR)
 	@rsync -av --exclude=build/ --exclude=node_modules/  $(COMMUNITY_DIR) $(BUILD_DIR)
 	@rsync -avI --exclude=Makefile --exclude=Dockerfile --exclude=README.md $(ENTERPRISE_DIR) $(BUILD_DIR)
