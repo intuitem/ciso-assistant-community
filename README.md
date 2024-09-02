@@ -87,7 +87,7 @@ and run the starter script
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images. 
 
 ## End-user Documentation
 
@@ -150,6 +150,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 54. Part-IS ✈️🇪🇺
 55. ENS Esquema Nacional de seguridad 🇪🇸
+56. Korea ISA ISMS-P 🇰🇷
+57. Swiss ICT minimum standard 🇨🇭
 
 ### Community contributions
 
@@ -173,7 +175,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - NIST 800-82
-- Korea ISA: ISMS-P
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 

@@ -242,7 +242,7 @@ export const SSOSettingsSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	idp_entity_id: z.string().optional(),
-	metadata_url: z.string().url().optional(),
+	metadata_url: z.string().optional(),
 	sso_url: z.string().optional().nullable(),
 	slo_url: z.string().optional().nullable(),
 	x509cert: z.string().optional(),
