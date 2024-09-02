@@ -199,13 +199,13 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+          poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py createsuperuser --noinput
-          nohup python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+          poetry run python manage.py createsuperuser --noinput
+          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: npx playwright test tests/functional/startup.test.ts
@@ -242,7 +242,7 @@ jobs:
       - name: Config the Docker app
         run: |
           sleep 60 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
+          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |
