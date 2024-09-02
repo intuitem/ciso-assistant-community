@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-django = "5.0.8"
+django = "^5.1"
 weasyprint = "62.3"
 psycopg2-binary = "2.9.9"
 gunicorn = "22.0.0"
@@ -22,10 +22,10 @@ django-structlog = "8.1.0"
 structlog = "24.2.0"
 python-dotenv = "1.0.1"
 drf-spectacular = "0.27.2"
-django-rest-knox = "4.2.0"
-django-allauth = "0.63.5"
+django-rest-knox = "5.0.1"
+django-allauth = "64.0.0"
 python3-saml = "^1.16"
-requests = "^2.32"
+requests = "^2"
 python-magic = "^0.4.27"
 
 [tool.poetry.group.dev.dependencies]
