@@ -216,3 +216,42 @@ jobs:
           path: |
             ${{ env.enterprise-frontend-directory }}/tests/reports/
           retention-days: 5
+
+  enterprise-startup-docker-compose-test:
+    runs-on: ubuntu-20.04
+    env:
+      COMPOSE_TEST: True
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Install frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make pre-build
+      - name: Install Playwright Browsers
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: npx playwright install --with-deps
+      - name: Build the Docker app
+        run: docker compose -f enterprise/docker-compose-build.yml up -d
+      - name: Create backend environment variables file
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          touch .env
+          export $(grep -v '^#' .env | xargs)
+      - name: Config the Docker app
+        run: |
+          sleep 60 # give the migrations time to finish (included in the up on the previous step)
+          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
+      - name: Run tests
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
+          server_reponse='{"type":"redirect","status":302,"location":"/analytics"}'
+          if [[ "$response" == "$server_reponse" ]]; then
+            echo "Success"
+            exit 0
+          else
+            echo "Failure"
+            exit 1
+          fi
