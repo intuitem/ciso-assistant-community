@@ -165,6 +165,9 @@ jobs:
           node-version: lts/*
       - name: Install Poetry
         uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
