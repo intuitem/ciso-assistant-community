@@ -6,11 +6,34 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle, clientSideToast } from '$lib/utils/stores';
+	import { getCookie, deleteCookie } from '$lib/utils/cookies';
+	import { browser } from '$app/environment';
+	import * as m from '$paraglide/messages';
 
 	let sidebarOpen = true;
 
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
+
+	$: if (browser) {
+		const fromLogin = getCookie("from_login");
+		if (fromLogin === "true" || true) {
+			deleteCookie("from_login");
+			fetch("/api/waiting-risk-acceptances").then(async (res) => {
+				const data = await res.json();
+				const number = data.count ?? 0;
+				if (number <= 0)
+					return;
+				clientSideToast.set({
+					message: m.waitingRiskAcceptances({
+						number: number,
+						s: number > 1 ? "s" : ""
+					}),
+					type: "info"
+				});
+			});
+		}
+	}
 </script>
 
 <!-- App Shell -->
