@@ -668,5 +668,6 @@
 	"confidentiality": "Confidențialitate",
 	"integrity": "Integritate",
 	"availability": "Accesibilitate",
-	"authenticity": "Autenticitate"
+	"authenticity": "Autenticitate",
+	"waitingRiskAcceptances": "Aveți {number} de acceptări ale riscurilor în așteptare."
 }

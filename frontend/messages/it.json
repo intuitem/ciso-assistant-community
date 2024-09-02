@@ -625,5 +625,6 @@
 	"confidentiality": "Riservatezza",
 	"integrity": "Integrità",
 	"availability": "Disponibilità",
-	"authenticity": "Autenticità"
+	"authenticity": "Autenticità",
+	"waitingRiskAcceptances": "Ha 10 accettazion{itPlural} di rischio in sospeso."
 }

@@ -662,5 +662,6 @@
 	"confidentiality": "Poufność",
 	"integrity": "Integralność",
 	"availability": "Dostępność",
-	"authenticity": "Autentyczność"
+	"authenticity": "Autentyczność",
+	"waitingRiskAcceptances": "Masz {number} oczekujących akceptacji ryzyka."
 }

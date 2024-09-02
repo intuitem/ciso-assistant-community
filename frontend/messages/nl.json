@@ -625,5 +625,6 @@
 	"confidentiality": "Vertrouwelijkheid",
 	"integrity": "Integriteit",
 	"availability": "Beschikbaarheid",
-	"authenticity": "Authenticiteit"
+	"authenticity": "Authenticiteit",
+	"waitingRiskAcceptances": "Je hebt {number} wachtende Risicoacceptatie{s}."
 }
