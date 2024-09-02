@@ -17,7 +17,7 @@
 
 	$: if (browser) {
 		const fromLogin = getCookie("from_login");
-		if (fromLogin === "true" || true) {
+		if (fromLogin === "true") {
 			deleteCookie("from_login");
 			fetch("/api/waiting-risk-acceptances").then(async (res) => {
 				const data = await res.json();

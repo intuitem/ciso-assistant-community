@@ -865,7 +865,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             approver=request.user,
             state="submitted"
         ).count()
-        return Response({"count": acceptance_count and 2})
+        return Response({"count": acceptance_count})
 
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
