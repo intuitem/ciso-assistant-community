@@ -671,5 +671,6 @@
 	"integrity": "Integrity",
 	"availability": "Availability",
 	"authenticity": "Authenticity",
-	"owner": "Owner"
+	"owner": "Owner",
+	"waitingRiskAcceptances": "You have {number} waiting risk acceptance{s}."
 }

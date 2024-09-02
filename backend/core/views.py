@@ -859,6 +859,14 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
+    @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
+    def waiting(self, request):
+        acceptance_count = RiskAcceptance.objects.filter(
+            approver=request.user,
+            state="submitted"
+        ).count()
+        return Response({"count": acceptance_count and 2})
+
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
         submitted = False
