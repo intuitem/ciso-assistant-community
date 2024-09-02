@@ -16,21 +16,20 @@
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
 
 	$: if (browser) {
-		const fromLogin = getCookie("from_login");
-		if (fromLogin === "true") {
-			deleteCookie("from_login");
-			fetch("/api/waiting-risk-acceptances").then(async (res) => {
+		const fromLogin = getCookie('from_login');
+		if (fromLogin === 'true') {
+			deleteCookie('from_login');
+			fetch('/api/waiting-risk-acceptances').then(async (res) => {
 				const data = await res.json();
 				const number = data.count ?? 0;
-				if (number <= 0)
-					return;
+				if (number <= 0) return;
 				clientSideToast.set({
 					message: m.waitingRiskAcceptances({
 						number: number,
-						s: number > 1 ? "s" : "",
-						itPlural: number > 1 ? "i" : "e"
+						s: number > 1 ? 's' : '',
+						itPlural: number > 1 ? 'i' : 'e'
 					}),
-					type: "info"
+					type: 'info'
 				});
 			});
 		}

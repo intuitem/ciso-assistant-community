@@ -10,10 +10,10 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 	if (!locals.user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
 	} else {
-		const referer = request.headers.get("referer") ?? "";
+		const referer = request.headers.get('referer') ?? '';
 		const fromLogin = loginPageRegex.test(referer);
 		if (fromLogin) {
-			cookies.set("from_login", "true", {
+			cookies.set('from_login', 'true', {
 				httpOnly: false,
 				sameSite: 'lax',
 				path: '/',
