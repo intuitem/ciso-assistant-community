@@ -625,5 +625,6 @@
 	"confidentiality": "Confidencialidade",
 	"integrity": "Integridade",
 	"availability": "Acessibilidade",
-	"authenticity": "Autenticidade"
+	"authenticity": "Autenticidade",
+	"waitingRiskAcceptances": "Tem {number} aceites de risco em espera."
 }

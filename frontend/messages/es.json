@@ -626,5 +626,6 @@
 	"integrity": "Integridad",
 	"availability": "Disponibilidad",
 	"authenticity": "Autenticidad",
-	"owner": "Titular"
+	"owner": "Titular",
+	"waitingRiskAcceptances": "Tiene {number} aceptaciones de riesgo en espera."
 }

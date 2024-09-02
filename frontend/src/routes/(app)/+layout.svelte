@@ -27,7 +27,8 @@
 				clientSideToast.set({
 					message: m.waitingRiskAcceptances({
 						number: number,
-						s: number > 1 ? "s" : ""
+						s: number > 1 ? "s" : "",
+						itPlural: number > 1 ? "i" : "e"
 					}),
 					type: "info"
 				});

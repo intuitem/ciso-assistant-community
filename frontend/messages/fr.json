@@ -626,5 +626,6 @@
 	"integrity": "Intégrité",
 	"availability": "Disponibilité",
 	"authenticity": "Authenticité",
-	"owner": "Propriétaire"
+	"owner": "Propriétaire",
+	"waitingRiskAcceptances": "Vous avez {number} acceptance{s} de risque en attente."
 }

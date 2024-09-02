@@ -626,5 +626,6 @@
 	"confidentiality": "السرية",
 	"integrity": "النزاهة",
 	"availability": "التوفر",
-	"authenticity": "الأصالة"
+	"authenticity": "الأصالة",
+	"waitingRiskAcceptances": "لديك {number} قبولاً للمخاطرة في الانتظار."
 }
