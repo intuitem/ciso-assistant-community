@@ -3,12 +3,12 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { complianceResultColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultTailwindColorMap,
+		complianceStatusTailwindColorMap
+	} from '$lib/utils/constants';
 
 	export let data: PageData;
-
-	let currentIndex = 0;
-	$: currentRequirementAssessment = data.requirement_assessments[currentIndex];
 
 	breadcrumbObject.set(data.compliance_assessment);
 
@@ -53,6 +53,10 @@
 			body: JSON.stringify(formData)
 		});
 	}
+
+	function addColor(result: string, map: Record<string, string>) {
+		return map[result];
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -78,6 +82,10 @@
 									<RadioItem
 										class="h-full"
 										id={option.id}
+										active={addColor(
+											requirementAssessment.status,
+											complianceStatusTailwindColorMap
+										)}
 										value={option.id}
 										bind:group={requirementAssessment.status}
 										name="status"
@@ -93,6 +101,10 @@
 								{#each result_options as option}
 									<RadioItem
 										class="h-full"
+										active={addColor(
+											requirementAssessment.result,
+											complianceResultTailwindColorMap
+										)}
 										id={option.id}
 										value={option.id}
 										bind:group={requirementAssessment.result}
