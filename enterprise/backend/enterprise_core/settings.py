@@ -86,7 +86,7 @@ FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
 
-logger.info("Launchup CISO Assistant Enterprise")
+logger.info("Launching CISO Assistant Enterprise")
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
