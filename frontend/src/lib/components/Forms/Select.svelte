@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import { onMount } from 'svelte';
 
 	let _class = '';
 
