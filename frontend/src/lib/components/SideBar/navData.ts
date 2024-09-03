@@ -179,11 +179,6 @@ export const navData = {
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
 				},
-				{
-					name: 'products',
-					fa_icon: 'fa-solid fa-box-open',
-					href: '/products'
-				}
 			]
 		},
 		{
