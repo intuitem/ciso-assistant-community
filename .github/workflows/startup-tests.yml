@@ -215,7 +215,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: startup-functional-test-report
+          name: enterprise-startup-functional-test-report
           path: |
             ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
