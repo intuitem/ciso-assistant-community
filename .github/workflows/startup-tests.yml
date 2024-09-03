@@ -217,7 +217,7 @@ jobs:
         with:
           name: enterprise-startup-functional-test-report
           path: |
-            ${{ env.frontend-directory }}/tests/reports/
+            ${{ env.enterprise-frontend-build-directory }}/tests/reports/
           retention-days: 5
 
   enterprise-startup-docker-compose-test:
