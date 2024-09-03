@@ -625,5 +625,6 @@
 	"confidentiality": "Confidencialidad",
 	"integrity": "Integridad",
 	"availability": "Disponibilidad",
-	"authenticity": "Autenticidad"
+	"authenticity": "Autenticidad",
+	"owner": "Titular"
 }

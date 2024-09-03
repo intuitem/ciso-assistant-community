@@ -465,6 +465,7 @@
 	"inProgress": "In progress",
 	"inReview": "In review",
 	"deprecated": "Deprecated",
+	"onHold": "On hold",
 	"done": "Done",
 	"nonCompliant": "Non compliant",
 	"nonCompliantMinor": "Non compliant minor",
@@ -703,5 +704,6 @@
 	"review": "Review",
 	"conclusionSemiColon": "Conclusion:",
 	"observationSemiColon": "Observation:",
-	"tableMode": "Table mode"
+	"tableMode": "Table mode",
+	"owner": "Owner"
 }

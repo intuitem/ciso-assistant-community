@@ -1,4 +1,3 @@
-import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
@@ -6,11 +5,11 @@ import {
 	urlParamModelSelectFields,
 	urlParamModelVerboseName
 } from '$lib/utils/crud';
-import { localItems, toCamelCase } from '$lib/utils/locales';
+import { safeTranslate } from '$lib/utils/i18n';
+import { localItems } from '$lib/utils/locales';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -153,7 +152,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyCreatedObject({
-						object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
+						object: safeTranslate(modelVerboseName).toLowerCase()
 					})
 				},
 				event
@@ -206,7 +205,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyDeletedObject({
-						object: safeTranslate(toCamelCase(model)).toLowerCase()
+						object: safeTranslate(model).toLowerCase()
 					})
 				},
 				event

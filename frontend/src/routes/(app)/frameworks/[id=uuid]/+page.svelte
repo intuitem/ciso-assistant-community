@@ -68,9 +68,13 @@
 										</div>
 									{/each}
 								{:else if key === 'implementation_groups_definition'}
-									{#each Object.entries(value) as [key, definition]}
+									{#each Object.entries(value) as [_, definition]}
 										<div>
-											{definition.ref_id}. {definition.name}
+											** {definition.ref_id} **
+											{definition.name}
+											{#if Object.hasOwn(definition, 'description') && definition.description}
+												: {definition.description}
+											{/if}
 										</div>
 									{/each}
 								{:else if Array.isArray(value)}
