@@ -35,7 +35,6 @@
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { capitalizeFirstLetter, localItems } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
