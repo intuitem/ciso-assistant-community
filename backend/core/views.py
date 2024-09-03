@@ -1361,7 +1361,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
-        print("pk: ", pk)
 
         if UUID(pk) in viewable_objects:
             writer = csv.writer(response, delimiter=";")
