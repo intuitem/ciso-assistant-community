@@ -23,7 +23,7 @@
 		{ id: 'to_do', label: m.toDo() },
 		{ id: 'in_progress', label: m.inProgress() },
 		{ id: 'in_review', label: m.inReview() },
-		{ id: 'done', label: m.done() },
+		{ id: 'done', label: m.done() }
 	];
 
 	const requirementHashmap = Object.fromEntries(
@@ -56,12 +56,21 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<div class="card px-6 py-4 bg-white flex flex-col justify-between shadow-lg w-full h-full space-y-2">
+	<div
+		class="card px-6 py-4 bg-white flex flex-col justify-between shadow-lg w-full h-full space-y-2"
+	>
 		{#each data.requirement_assessments as requirementAssessment}
-			<div class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2">
+			<div
+				class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2"
+			>
 				<h1 class="font-semibold text-xl">{title(requirementAssessment)}</h1>
 				<div class="flex flex-col space-x-2 items-center justify-evenly w-full">
-					<form class="flex flex-row w-full space-x-2" id="tableModeForm-{requirementAssessment.id}" action="?/updateRequirementAssessment" method="post">
+					<form
+						class="flex flex-row w-full space-x-2"
+						id="tableModeForm-{requirementAssessment.id}"
+						action="?/updateRequirementAssessment"
+						method="post"
+					>
 						<div class="flex flex-col items-center w-1/2">
 							<p class="flex items-center font-semibold">Status</p>
 							<RadioGroup class="w-full flex-wrap items-center">
@@ -72,7 +81,8 @@
 										value={option.id}
 										bind:group={requirementAssessment.status}
 										name="status"
-										on:change={(event) => update(event, requirementAssessment, 'status')}>{option.label}</RadioItem
+										on:change={(event) => update(event, requirementAssessment, 'status')}
+										>{option.label}</RadioItem
 									>
 								{/each}
 							</RadioGroup>
@@ -87,7 +97,8 @@
 										value={option.id}
 										bind:group={requirementAssessment.result}
 										name="result"
-										on:change={(event) => update(event, requirementAssessment, 'result')}>{option.label}</RadioItem
+										on:change={(event) => update(event, requirementAssessment, 'result')}
+										>{option.label}</RadioItem
 									>
 								{/each}
 							</RadioGroup>
@@ -100,11 +111,13 @@
 						{#each requirementAssessment.answer.questions as question}
 							<li class="flex justify-between items-center border rounded-xl p-2 disabled">
 								{question.text}
-								{#if question.answer}
-									<p class="text-sm font-semibold text-primary-500">{question.answer}</p>
-								{:else}
-									{m.undefined()}
-								{/if}
+								<p class="text-sm font-semibold text-primary-500">
+									{#if question.answer}
+										{question.answer}
+									{:else}
+										{m.undefined()}
+									{/if}
+								</p>
 							</li>
 						{/each}
 					{/if}
