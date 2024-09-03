@@ -76,7 +76,7 @@ export class PageDetail extends BasePage {
 							.toHaveText(new RegExp(key.replaceAll('_', ' ').replace('lc ', ''), 'i'));
 					} else if (key === 'folder') {
 						await expect
-							.soft(this.page.getByTestId('domain'.replaceAll('_', '-') + '-field-title'))
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
 							.toHaveText(new RegExp('domain'.replaceAll('_', ' '), 'i'));
 					} else {
 						await expect
