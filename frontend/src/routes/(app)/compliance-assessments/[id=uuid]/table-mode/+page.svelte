@@ -41,12 +41,22 @@
 	}
 
 	// Function to update requirement assessments
-	function update(event, requirementAssessment, field: string) {
-		requirementAssessment[field] = event.target.value;
+	function update(event, requirementAssessment, field: string, question: string = '') {
+		let value;
+		if (question) {
+			const questionIndex = requirementAssessment.answer.questions.findIndex(
+				(q) => q.urn === question.urn
+			);
+			requirementAssessment.answer.questions[questionIndex].answer = event.target.value;
+			value = requirementAssessment.answer;
+		} else {
+			requirementAssessment[field] = event.target.value;
+			value = requirementAssessment[field];
+		}
 		const form = document.getElementById(`tableModeForm-${requirementAssessment.id}`);
 		const formData = {
 			id: requirementAssessment.id,
-			[field]: event.target.value
+			[field]: value
 		};
 		fetch(form.action, {
 			method: 'POST',
@@ -68,13 +78,13 @@
 				class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2"
 			>
 				<h1 class="font-semibold text-xl">{title(requirementAssessment)}</h1>
-				<div class="flex flex-col space-x-2 items-center justify-evenly w-full">
-					<form
-						class="flex flex-row w-full space-x-2"
-						id="tableModeForm-{requirementAssessment.id}"
-						action="?/updateRequirementAssessment"
-						method="post"
-					>
+				<form
+					class="flex flex-col space-x-2 items-center justify-evenly w-full"
+					id="tableModeForm-{requirementAssessment.id}"
+					action="?/updateRequirementAssessment"
+					method="post"
+				>
+					<div class="flex flex-row w-full space-x-2">
 						<div class="flex flex-col items-center w-1/2">
 							<p class="flex items-center font-semibold">Status</p>
 							<RadioGroup class="w-full flex-wrap items-center">
@@ -115,25 +125,36 @@
 								{/each}
 							</RadioGroup>
 						</div>
-					</form>
-				</div>
-				<div class="flex flex-col w-full">
-					{#if Object.keys(requirementAssessment.answer).length !== 0}
-						<p class="flex items-center font-semibold">Question</p>
-						{#each requirementAssessment.answer.questions as question}
-							<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-								{question.text}
-								<p class="text-sm font-semibold text-primary-500">
-									{#if question.answer}
-										{question.answer}
+					</div>
+					<div class="flex flex-col w-full">
+						{#if Object.keys(requirementAssessment.answer).length !== 0}
+							<p class="flex items-center font-semibold justify-center">Question</p>
+							{#each requirementAssessment.answer.questions as question}
+								<li class="flex justify-between items-center border rounded-xl p-2">
+									{question.text}
+									{#if question.type === 'unique_choice'}
+										<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
+											{#each question.options as option}
+												<RadioItem
+													bind:group={question.answer}
+													name="question"
+													value={option}
+													on:change={(event) =>
+														update(event, requirementAssessment, 'answer', question)}
+													>{option}</RadioItem
+												>
+											{/each}
+										</RadioGroup>
+									{:else if question.type === 'date'}
+										<input type="date" placeholder="" class="w-fit" bind:value={question.answer} />
 									{:else}
-										{m.undefined()}
+										<input type="text" placeholder="" class="w-fit" bind:value={question.answer} />
 									{/if}
-								</p>
-							</li>
-						{/each}
-					{/if}
-				</div>
+								</li>
+							{/each}
+						{/if}
+					</div>
+				</form>
 			</div>
 		{/each}
 	</div>
