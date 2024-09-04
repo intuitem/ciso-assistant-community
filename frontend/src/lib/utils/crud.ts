@@ -393,10 +393,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [
-			{ field: 'status' },
-			{ field: 'selected_implementation_groups', detail: true }
-		],
+		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {

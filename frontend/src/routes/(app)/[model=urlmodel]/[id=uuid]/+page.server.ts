@@ -143,7 +143,7 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			console.log(params)
+			console.log(params);
 			const model: string = urlParamModelVerboseName(urlmodel);
 			// TODO: reference object by name instead of id
 			return message(
