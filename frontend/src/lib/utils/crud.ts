@@ -182,7 +182,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'review_conclusion' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	'risk-assessment_duplicate': {
@@ -392,7 +392,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'selected_implementation_groups', detail: true },
+			{ field: 'review_conclusion' }
+		],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
