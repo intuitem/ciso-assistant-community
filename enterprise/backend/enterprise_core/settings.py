@@ -17,8 +17,7 @@ import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
 
-BASE_DIR_ENTERPRISE = Path(__file__).resolve().parent.parent
-BASE_DIR = BASE_DIR_ENTERPRISE.parent.parent / "backend"
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".meta")
 
@@ -207,7 +206,7 @@ REST_FRAMEWORK = {
 }
 
 REST_KNOX = {
-    "SECURE_HASH_ALGORITHM": "cryptography.hazmat.primitives.hashes.SHA512",
+    "SECURE_HASH_ALGORITHM": "hashlib.sha512",
     "AUTH_TOKEN_CHARACTER_LENGTH": 64,
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,
