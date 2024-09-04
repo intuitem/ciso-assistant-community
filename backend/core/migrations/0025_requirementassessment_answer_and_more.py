@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0024_appliedcontrol_owner'),
+        ("core", "0024_appliedcontrol_owner"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='requirementassessment',
-            name='answer',
-            field=models.JSONField(blank=True, null=True, verbose_name='Answer'),
+            model_name="requirementassessment",
+            name="answer",
+            field=models.JSONField(blank=True, null=True, verbose_name="Answer"),
         ),
         migrations.AddField(
-            model_name='requirementnode',
-            name='question',
-            field=models.JSONField(blank=True, null=True, verbose_name='Question'),
+            model_name="requirementnode",
+            name="question",
+            field=models.JSONField(blank=True, null=True, verbose_name="Question"),
         ),
     ]

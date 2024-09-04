@@ -2366,9 +2366,7 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments
 
 
-class RequirementAssessment(
-    AbstractBaseModel, FolderMixin, ETADueDateMixin
-):
+class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
