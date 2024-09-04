@@ -156,7 +156,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'lc_status' }],
 		reverseForeignKeyFields: [
 			{ field: 'project', urlModel: 'risk-assessments' },
-			{ field: 'project', urlModel: 'compliance-assessments' }
+			{ field: 'project', urlModel: 'compliance-assessments' },
+			{ field: 'project', urlModel: 'entity-assessments' }
 		],
 		filters: [{ field: 'lc_status' }, { field: 'folder' }]
 	},
@@ -458,6 +459,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'entities',
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
+		reverseForeignKeyFields: [
+			{ field: 'entity', urlModel: 'solutions' },
+			{ field: 'entity', urlModel: 'representatives' },
+			{ field: 'entity', urlModel: 'entity-assessments' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' }
