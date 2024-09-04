@@ -240,9 +240,9 @@
 	"october": "Oktober",
 	"november": "November",
 	"december": "December",
-	"errorsFound": "fout{en} gevonden",
-	"warningsFound": "waarschuwing{en} gevonden",
-	"infosFound": "info{rmatie} gevonden",
+	"errorsFound": "fout gevonden",
+	"warningsFound": "waarschuwing gevonden",
+	"infosFound": "info gevonden",
 	"remediationPlan": "Saneringsplan",
 	"treatmentPlan": "Behandelingsplan",
 	"plan": "Plan",
@@ -411,7 +411,7 @@
 	"acceptedRiskScenarios": "{count} geaccepteerde risicoscenario{s}",
 	"reviewNeeded": "Beoordeling nodig",
 	"ok": "Oké",
-	"inconsistenciesFoundComposer": "{count} inconsistentie{n} gevonden. Voor meer details, controleer",
+	"inconsistenciesFoundComposer": "{count} inconsistentie gevonden. Voor meer details, controleer",
 	"current": "Huidig",
 	"residual": "Rest",
 	"jumpToRiskAssessment": "Spring naar risicobeoordeling",
@@ -663,5 +663,6 @@
 	"conclusionSemiColon": "Conclusie:",
 	"observationSemiColon": "Observatie:",
 	"tableMode": "Tabelmodus",
-	"owner": "Eigenaar"
+	"owner": "Eigenaar",
+	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het tabblad risico."
 }

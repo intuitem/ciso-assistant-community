@@ -700,5 +700,6 @@
 	"conclusionSemiColon": "Wniosek:",
 	"observationSemiColon": "Obserwacja:",
 	"tableMode": "Tryb tabeli",
-	"owner": "Właściciel"
+	"owner": "Właściciel",
+	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko."
 }

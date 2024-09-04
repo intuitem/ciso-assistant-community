@@ -18,6 +18,7 @@
 	import Toast from '$lib/components/Toast/Toast.svelte';
 	import Modal from '$lib/components/Modals/Modal.svelte';
 	import type { ModalComponent, ToastSettings } from '@skeletonlabs/skeleton';
+	import { clientSideToast } from '$lib/utils/stores';
 
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
@@ -33,20 +34,33 @@
 		toastStore.trigger(t);
 	};
 
-	flash.subscribe(($flash) => {
-		if (!$flash) return;
+	interface FlashMessage {
+		message: string;
+		type: 'success' | 'error' | 'warning' | 'info';
+	}
 
-		toast($flash.message, {
+	function handleToast(flash: FlashMessage | undefined) {
+		if (!flash) return;
+
+		toast(flash.message, {
 			background:
-				$flash.type == 'success'
+				flash.type == 'success'
 					? 'variant-filled-success'
-					: $flash.type === 'error'
+					: flash.type === 'error'
 						? 'variant-filled-error'
-						: $flash.type == 'warning'
+						: flash.type == 'warning'
 							? 'variant-filled-warning'
 							: 'variant-filled-primary'
 		});
+	}
 
+	clientSideToast.subscribe((flash) => {
+		handleToast(flash);
+		clientSideToast.set(undefined);
+	});
+
+	flash.subscribe(($flash) => {
+		handleToast($flash);
 		// Clearing the flash message could sometimes
 		// be required here to avoid double-toasting.
 		flash.set(undefined);
