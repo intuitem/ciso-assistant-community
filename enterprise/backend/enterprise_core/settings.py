@@ -17,7 +17,7 @@ import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 
 load_dotenv(BASE_DIR / ".meta")
 
