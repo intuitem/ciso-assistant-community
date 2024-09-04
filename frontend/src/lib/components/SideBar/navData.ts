@@ -178,7 +178,7 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
-				},
+				}
 			]
 		},
 		{

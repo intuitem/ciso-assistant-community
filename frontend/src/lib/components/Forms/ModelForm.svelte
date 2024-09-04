@@ -815,7 +815,7 @@
 		/>
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['compliance_assessment'], label: 'str' })}
+			options={getOptions({ objects: model.foreignKeys['compliance_assessment'] })}
 			field="compliance_assessment"
 			cacheLock={cacheLocks['compliance_assessment']}
 			bind:cachedValue={formDataCache['compliance_assessment']}
