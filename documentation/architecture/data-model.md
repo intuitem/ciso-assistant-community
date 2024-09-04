@@ -199,8 +199,7 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
-        string  question
-        boolean no_result
+        json    question
     }
 
     REFERENCE_CONTROL {
@@ -242,6 +241,7 @@ erDiagram
         bool   selected
         string review_conclusion
         string review_observation
+        json   answer
     }
 
     EVIDENCE {
@@ -1111,6 +1111,10 @@ SSO Settings are defined in a dedicated object SSO_SETTINGS.
 
 ## TPRM evolution
 
+### Objective
+
+The goal of Third-Party Risk Management is to manage the risk incurred by a provider (vendor, partner, supplier, contractor, service provider). The point of view for the modeling is focusing on risk.
+
 ### Retained approach
 
 The following approach has been retained:
@@ -1121,31 +1125,30 @@ The following approach has been retained:
 - This compliance assessment is reviewed by the client, requirement by requirement.
 - An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
 - Review features are added to compliance assessment to enable this workflow in a generic way.
-- A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
-- A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
+- A requirement node can include a question (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
 
 ### Entity-relationship diagram
 
 ```mermaid
 erDiagram
 
-    ASSET                 }o--o{ SOLUTION              : contains
-    ENTITY2                }o--o| DOMAIN                : owns
-    VULNERABILITY         }o--o{ SOLUTION              : affects
-    SOLUTION              }o--o| ENTITY                : provided_by
+    ASSET                 }o--o{ SOLUTION              : leverages
+    ENTITY                |o--o{ DOMAIN                : owns
+    SOLUTION              }o--|| ENTITY                : is_provided_to
+    SOLUTION              }o--|| ENTITY                : is_provided_by
     CONTRACT              }o--o{ SOLUTION              : formalizes
     CONTRACT              }o--o{ EVIDENCE              : has
     APPLIED_CONTROL       }o--o| CONTRACT              : leverages
-    ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
-    ENTITY                }o--o{ PERSON                : employs
-    ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
-    ENTITY                }o--o{ ENTITY2               : is_provider_of
+    ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
+    ENTITY                ||--o{ REPRESENTATIVE        : mandates
+    ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+
     ENTITY {
         string  name
         string  description
         string  missions  
-        entity  parent_entity
         url     reference_link
     }
 
@@ -1161,10 +1164,10 @@ erDiagram
     SOLUTION {
         string      name
         string      description
-        string      solution_type
         string      ref_id
-        string      version
+        int         criticality
     }
+
 
     CONTRACT {
         string name
@@ -1173,42 +1176,83 @@ erDiagram
         date   end_date
     }
 
-    ENTITY_EVALUATION {
-        string name
-        string description
-        date   send_date
-        date   due_date
-        int    penetration
-        int    dependency
-        int    maturity
-        int    trust
+    ENTITY_ASSESSMENT {
+        string      name
+        string      description
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string[]    tags
+
+        int         criticality
+        int         penetration
+        int         dependency
+        int         maturity
+        int         trust
     }
 
-    PERSON {
-        string email
-        string first_name
-        string last_name
-        string phone
-        string role
-        string description
+    REPRESENTATIVE {
+        string      email
+        string      first_name
+        string      last_name
+        string      phone
+        string      role
+        string      description
+    }
+
+    COMPLIANCE_ASSESSMENT {
+        string      review_conclusion
+        string      review_observation
+        json        implementation_groups_selector
     }
 
 ```
 
 ```mermaid
 erDiagram
-    DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
+    PROJECT         ||--o{ ENTITY_ASSESSMENT    : contains
     DOMAIN          ||--o{ SOLUTION             : contains
-```
-```mermaid
-erDiagram
-    GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
-    GLOBAL_DOMAIN   ||--o{ PERSON          : contains
+    DOMAIN          ||--o{ ENTITY               : contains
 ```
 
-- The solution_type of a solution is a string with the following possible values: --|product|maintenance|hosting.
-- The ref_id for a solution can be null or use a formal id like CPE.
- 
+### New models
+
+#### Entity
+
+An entity represents a legal entity, a corporate body, an administrative body, an association. An entity can be:
+- the main subject for the current CISO Assistant instance ("main entity").
+- a subisdiary of another entity.
+- a provider of another entity.
+- a threat actor.
+- ...
+
+An entity can own a domain. The entity that owns the global domain is the main subject for the current CISO Assistant instance.
+
+An entity can provides a solution to another entity (see solution model). TPRM is done mainly for providers of the main entity, but nothing prevents doing an entity evaluation for any entity.
+
+#### Entity assessment
+
+An entity assessment is similar to a risk assessment, but focused on the risk incurred by the provider of a solution.
+
+An entity assessment is based on a questionnaire/compliance assessment, and/or on an existing document, stored in an evidence (variable "external_questionnaire"). This allows beginning the assessment without questionnaire, adding an existing external questionnaire if available, and starting a new integrated questionnaire later.
+
+Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
+
+#### Solution
+
+A solution represents what en entity provides to one another.
+
+The criticality of a solution is an integer representing the importance of the solution for the client of the solution in decreasing sensitivity (0: most critical). This can be determined grossly at the beginning, and revised after an entity or risk assessment. This number is used to prioritize entity assessments.
+
+#### Representative
+
+This represents a person that is linked to an entity (typically an employee), and that is relevant for the main entity, like a contact person for an assessment.
+
+There is no link between representatives (modeling of the ecosystem) and users of the solution (access control mechanism).
+
 ### Evolution of existing models
 
 #### Requirement assessment
@@ -1216,12 +1260,17 @@ erDiagram
 - add the following fields:
   - review_conclusion: --|blocker|warning|ok|N/A
   - review_observation
+  - answer: a json corresponding to the optional question of the requirement node.
+
+#### Compliance assessment
+
+- add the following fields:
+  - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
 #### Requirement node 
 
 - Add the following fields:
-  - no_result
-  - question
+  - question: a json field describing a form.
 
 #### Applied control
 
@@ -1231,3 +1280,27 @@ erDiagram
 The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
 
 Note: in the future, we will use the same approach for policies.
+
+### Question and answer format
+
+The format for question and answer json fields will evolve over time. The initial format is the following:
+
+- question:
+```json
+{
+    "question": {
+        "version": 1
+        "schema": {...}
+    }
+}
+```
+
+The schema variable follows JSON Schema standard (WIP).
+
+### Simplifications for the MVP version
+
+- The main entity is automatically created and owns the global domain. The name is set to "MAIN ENTITY", and can be changed.
+- Other entities own no domain.
+- Solutions are automatically provided to the main entity.
+- The change in applied control is not retained.
+- implementation_group_selector is not retained.
