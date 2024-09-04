@@ -71,6 +71,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
@@ -175,6 +176,11 @@ jobs:
           echo DB_HOST=localhost >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
+          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
+          echo EMAIL_HOST=localhost >> .env
+          echo EMAIL_HOST_USER=user@tests.com >> .env
+          echo EMAIL_HOST_PASSWORD=password >> .env
+          echo EMAIL_PORT=1025 >> .env
           echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
