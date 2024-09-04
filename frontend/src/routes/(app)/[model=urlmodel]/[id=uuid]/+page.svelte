@@ -262,7 +262,7 @@
 		<TabGroup justify="justify-center">
 			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-					{localItems()[model.info.localNamePlural]}
+					{safeTranslate(model.info.localNamePlural)}
 					{#if model.table.body.length > 0}
 						<span class="badge variant-soft-secondary">{model.table.body.length}</span>
 					{/if}
@@ -273,7 +273,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{localItems()['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
+								{safeTranslate('associated' + capitalizeFirstLetter(model.info.localNamePlural))}
 							</h4>
 						</div>
 						{#if model.table}
@@ -282,9 +282,9 @@
 									slot="addButton"
 									class="btn variant-filled-primary self-end my-auto"
 									on:click={(_) => modalCreateForm(model)}
-									><i class="fa-solid fa-plus mr-2 lowercase" />{localItems()[
+									><i class="fa-solid fa-plus mr-2 lowercase" />{safeTranslate(
 										'add' + capitalizeFirstLetter(model.info.localName)
-									]}</button
+									)}</button
 								>
 							</ModelTable>
 						{/if}
