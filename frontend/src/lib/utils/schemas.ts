@@ -91,9 +91,7 @@ export const RiskAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional(),
-	review_conclusion: z.string().optional().nullable(),
-	review_observation: z.string().optional().nullable()
+	reviewers: z.array(z.string().optional()).optional()
 });
 
 export const ThreatSchema = baseNamedObject({
@@ -182,9 +180,7 @@ export const RequirementAssessmentSchema = z.object({
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
-	observation: z.string().optional().nullable(),
-	review_conclusion: z.string().optional().nullable(),
-	review_observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable()
 });
 
 export const UserEditSchema = z.object({
@@ -223,9 +219,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	baseline: z.string().optional().nullable(),
-	review_conclusion: z.string().optional().nullable(),
-	review_observation: z.string().optional().nullable()
+	baseline: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({

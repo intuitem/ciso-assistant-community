@@ -344,10 +344,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(RiskAssessment.Status.choices))
 
-    @action(detail=False, name="Get review conclusion choices")
-    def review_conclusion(self, request):
-        return Response(dict(RiskAssessment.ReviewConclusion.choices))
-
     @action(detail=False, name="Get quality check")
     def quality_check(self, request):
         """
@@ -1322,10 +1318,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
-    @action(detail=False, name="Get review conclusion choices")
-    def review_conclusion(self, request):
-        return Response(dict(ComplianceAssessment.ReviewConclusion.choices))
-
     @action(detail=True, name="Get implementation group choices")
     def selected_implementation_groups(self, request, pk):
         compliance_assessment = self.get_object()
@@ -1698,10 +1690,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
-
-    @action(detail=False, name="Get review conclusion choices")
-    def review_conclusion(self, request):
-        return Response(dict(RequirementAssessment.ReviewConclusion.choices))
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):

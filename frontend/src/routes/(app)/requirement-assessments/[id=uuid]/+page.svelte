@@ -275,17 +275,6 @@
 			<span class="text-sm">{data.requirementAssessment.observation}</span>
 		</div>
 	{/if}
-	{#if data.requirementAssessment.review_conclusion || data.requirementAssessment.review_observation}
-		<div class="card p-4 space-y-2 variant-glass-primary">
-			<h1 class="font-semibold text-sm">{m.review()}</h1>
-			<p class="text-sm">
-				{m.conclusionSemiColon()} <span>{data.requirementAssessment.review_conclusion}</span>
-			</p>
-			<p class="text-sm">
-				{m.observationSemiColon()} <span>{data.requirementAssessment.review_observation}</span>
-			</p>
-		</div>
-	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" on:click={cancel}
 			>{m.back()}</button
