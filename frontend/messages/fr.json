@@ -627,5 +627,5 @@
 	"availability": "Disponibilité",
 	"authenticity": "Authenticité",
 	"owner": "Propriétaire",
-	"waitingRiskAcceptances": "Vous avez {number} acceptance{s} de risque en attente."
+	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet risque."
 }
