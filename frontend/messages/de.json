@@ -411,7 +411,7 @@
 	"acceptedRiskScenarios": "{count} akzeptierte Risikoszenario{s}",
 	"reviewNeeded": "Überprüfung erforderlich",
 	"ok": "OK",
-	"inconsistenciesFoundComposer": "{count} Inkonsistenz{en} gefunden. Für weitere Details überprüfen Sie",
+	"inconsistenciesFoundComposer": "{count} Inkonsistenz gefunden. Für weitere Details überprüfen Sie",
 	"current": "Aktuell",
 	"residual": "Restrisiko",
 	"jumpToRiskAssessment": "Zur Risikobewertung springen",
@@ -663,5 +663,6 @@
 	"conclusionSemiColon": "Abschluss:",
 	"observationSemiColon": "Beobachtung:",
 	"tableMode": "Tabellenmodus",
-	"owner": "Eigentümer"
+	"owner": "Eigentümer",
+	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie auf der Registerkarte „Risiken“."
 }

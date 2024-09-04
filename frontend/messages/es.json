@@ -663,5 +663,6 @@
 	"conclusionSemiColon": "Conclusión:",
 	"observationSemiColon": "Observación:",
 	"tableMode": "Modo de tabla",
-	"owner": "Titular"
+	"owner": "Titular",
+	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo."
 }

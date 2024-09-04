@@ -859,6 +859,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
+    @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
+    def waiting(self, request):
+        acceptance_count = RiskAcceptance.objects.filter(
+            approver=request.user, state="submitted"
+        ).count()
+        return Response({"count": acceptance_count})
+
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
         submitted = False
@@ -1369,6 +1376,53 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     response[applied_control["status"].lower()].append(applied_control)
 
         return Response(response)
+
+    @action(detail=True, name="Get compliance assessment (audit) CSV")
+    def compliance_assessment_csv(self, request, pk):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        if UUID(pk) in viewable_objects:
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "ref_id",
+                "description",
+                "compliance_result",
+                "progress",
+                "score",
+                "observations",
+            ]
+            writer.writerow(columns)
+
+            for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+                req_node = RequirementNode.objects.get(pk=req.requirement.id)
+                req_text = (
+                    req_node.get_description_translated
+                    if req_node.description
+                    else req_node.get_name_translated
+                )
+                row = [
+                    req_node.ref_id,
+                    req_text,
+                ]
+                if req_node.assessable:
+                    row += [
+                        req.result,
+                        req.status,
+                        req.score,
+                        req.observation,
+                    ]
+                writer.writerow(row)
+
+            return response
+        else:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
