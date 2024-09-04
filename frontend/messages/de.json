@@ -408,7 +408,7 @@
 	"acceptedRiskScenarios": "{count} akzeptierte Risikoszenario{s}",
 	"reviewNeeded": "Überprüfung erforderlich",
 	"ok": "OK",
-	"inconsistenciesFoundComposer": "{count} Inkonsistenz{en} gefunden. Für weitere Details überprüfen Sie",
+	"inconsistenciesFoundComposer": "{count} Inkonsistenz gefunden. Für weitere Details überprüfen Sie",
 	"current": "Aktuell",
 	"residual": "Restrisiko",
 	"jumpToRiskAssessment": "Zur Risikobewertung springen",
