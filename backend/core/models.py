@@ -58,6 +58,32 @@ def match_urn(urn_string):
 ########################### Referential objects #########################
 
 
+class ReviewMixin(models.Model):
+    """
+    Mixin for objects to review.
+    """
+
+    class ReviewConclusion(models.TextChoices):
+        NA = "na", _("N/A")
+        OK = "ok", _("OK")
+        WARNING = "warning", _("Warning")
+        BLOCKER = "blocker", _("Blocker")
+
+    review_conclusion = models.CharField(
+        max_length=10,
+        choices=ReviewConclusion.choices,
+        verbose_name=_("Review conclusion"),
+        null=True,
+        blank=True,
+    )
+    review_observation = models.TextField(
+        null=True, blank=True, verbose_name=_("Review Observation")
+    )
+
+    class Meta:
+        abstract = True
+
+
 class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
     Mixin for referential objects.
@@ -1365,7 +1391,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin, ETADueDateMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin, ReviewMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -2366,7 +2392,9 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments
 
 
-class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
+class RequirementAssessment(
+    AbstractBaseModel, FolderMixin, ETADueDateMixin, ReviewMixin
+):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -2379,12 +2407,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         NON_COMPLIANT = "non_compliant", _("Non-compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
-
-    class ReviewConclusion(models.TextChoices):
-        NA = "na", _("N/A")
-        OK = "ok", _("OK")
-        WARNING = "warning", _("Warning")
-        BLOCKER = "blocker", _("Blocker")
 
     status = models.CharField(
         max_length=100,
@@ -2441,16 +2463,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Answer"),
-    )
-    review_conclusion = models.CharField(
-        max_length=10,
-        choices=ReviewConclusion.choices,
-        verbose_name=_("Review conclusion"),
-        null=True,
-        blank=True,
-    )
-    review_observation = models.TextField(
-        null=True, blank=True, verbose_name=_("Review Observation")
     )
 
     def __str__(self) -> str:
