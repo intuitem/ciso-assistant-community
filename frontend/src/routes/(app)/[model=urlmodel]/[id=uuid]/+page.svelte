@@ -16,7 +16,7 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { localItems, toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import { toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
