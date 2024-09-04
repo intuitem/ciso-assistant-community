@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { symbol } from 'zod';
 	export let s_label = '';
 
 	export let width = 'w-auto';
@@ -10,7 +9,7 @@
 	export let name = '';
 	interface treeType {
 		name: string;
-		children: any[];
+		children: treeType[];
 	}
 	export let tree: treeType[];
 
