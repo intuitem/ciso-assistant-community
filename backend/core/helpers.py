@@ -803,12 +803,12 @@ def build_audits_tree_metrics(user):
                 for result in RequirementAssessment.Result.choices:
                     cnt_res[result[0]] = (
                         RequirementAssessment.objects.filter(
-                            compliance_assessment=audit
+                            requirement__assessable=True
                         )
+                        .filter(compliance_assessment=audit)
                         .filter(result=result[0])
                         .count()
                     )
-                print(cnt_res)
                 blk_audit = {
                     "name": audit.name,
                     "children": [
