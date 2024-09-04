@@ -671,5 +671,6 @@
 	"integrity": "Integrity",
 	"availability": "Availability",
 	"authenticity": "Authenticity",
-	"owner": "Owner"
+	"owner": "Owner",
+	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab."
 }

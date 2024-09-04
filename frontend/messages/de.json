@@ -625,5 +625,6 @@
 	"confidentiality": "Vertraulichkeit",
 	"integrity": "Integrität",
 	"availability": "Verfügbarkeit",
-	"authenticity": "Authentizität"
+	"authenticity": "Authentizität",
+	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie auf der Registerkarte „Risiken“."
 }
