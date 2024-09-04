@@ -626,5 +626,5 @@
 	"integrity": "Integrità",
 	"availability": "Disponibilità",
 	"authenticity": "Autenticità",
-	"waitingRiskAcceptances": "Ha 10 accettazion{itPlural} di rischio in sospeso."
+	"waitingRiskAcceptances": "Ciao! Al momento hai {number} rischi{s} in attesa di accettazione. Puoi trovarli nella scheda rischi."
 }

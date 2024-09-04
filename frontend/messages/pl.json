@@ -663,5 +663,5 @@
 	"integrity": "Integralność",
 	"availability": "Dostępność",
 	"authenticity": "Autentyczność",
-	"waitingRiskAcceptances": "Masz {number} oczekujących akceptacji ryzyka."
+	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko."
 }

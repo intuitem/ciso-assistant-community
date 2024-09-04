@@ -626,5 +626,5 @@
 	"integrity": "Integriteit",
 	"availability": "Beschikbaarheid",
 	"authenticity": "Authenticiteit",
-	"waitingRiskAcceptances": "Je hebt {number} wachtende Risicoacceptatie{s}."
+	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het tabblad risico."
 }
