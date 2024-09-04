@@ -625,5 +625,6 @@
 	"confidentiality": "Confidencialidade",
 	"integrity": "Integridade",
 	"availability": "Acessibilidade",
-	"authenticity": "Autenticidade"
+	"authenticity": "Autenticidade",
+	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco."
 }
