@@ -182,7 +182,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
-		selectFields: [{ field: 'status' }, { field: 'review_conclusion' }],
+		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	'risk-assessment_duplicate': {
@@ -394,8 +394,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [
 			{ field: 'status' },
-			{ field: 'selected_implementation_groups', detail: true },
-			{ field: 'review_conclusion' }
+			{ field: 'selected_implementation_groups', detail: true }
 		],
 		filters: [{ field: 'status' }]
 	},
@@ -412,7 +411,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'requirementAssessments',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }, { field: 'result' }, { field: 'review_conclusion' }],
+		selectFields: [{ field: 'status' }, { field: 'result' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },

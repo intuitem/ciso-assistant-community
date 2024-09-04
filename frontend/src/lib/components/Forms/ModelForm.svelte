@@ -1246,15 +1246,6 @@
 			{/if}
 		</Accordion>
 	{/if}
-	{#if shape.review_conclusion && shape.review_observation}
-		<Select
-			{form}
-			options={model.selectOptions['review_conclusion']}
-			field="review_conclusion"
-			label={m.reviewConclusion()}
-		/>
-		<TextArea {form} field="review_observation" label={m.reviewObservation()} />
-	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
 			<button

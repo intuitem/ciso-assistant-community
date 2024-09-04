@@ -58,32 +58,6 @@ def match_urn(urn_string):
 ########################### Referential objects #########################
 
 
-class ReviewMixin(models.Model):
-    """
-    Mixin for objects to review.
-    """
-
-    class ReviewConclusion(models.TextChoices):
-        NA = "na", _("N/A")
-        OK = "ok", _("OK")
-        WARNING = "warning", _("Warning")
-        BLOCKER = "blocker", _("Blocker")
-
-    review_conclusion = models.CharField(
-        max_length=10,
-        choices=ReviewConclusion.choices,
-        verbose_name=_("Review conclusion"),
-        null=True,
-        blank=True,
-    )
-    review_observation = models.TextField(
-        null=True, blank=True, verbose_name=_("Review Observation")
-    )
-
-    class Meta:
-        abstract = True
-
-
 class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     """
     Mixin for referential objects.
@@ -1391,7 +1365,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin, ETADueDateMixin, ReviewMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -2393,7 +2367,7 @@ class ComplianceAssessment(Assessment):
 
 
 class RequirementAssessment(
-    AbstractBaseModel, FolderMixin, ETADueDateMixin, ReviewMixin
+    AbstractBaseModel, FolderMixin, ETADueDateMixin
 ):
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
