@@ -1038,6 +1038,50 @@ class FolderViewSet(BaseModelViewSet):
             )
             ra4.perimeter_folders.add(folder)
 
+    @action(detail=False, methods=["get"])
+    def org_tree(self, request):
+        """
+        Returns the tree of domains and projects
+        """
+        tree = {"name": "Global", "children": []}
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        folders_list = list()
+        for folder in Folder.objects.exclude(content_type="GL").filter(
+            id__in=viewable_objects
+        ):
+            entry = {"name": folder.name}
+            children = []
+            for project in Project.objects.filter(folder=folder):
+                children.append(
+                    {
+                        "name": project.name,
+                        "children": [
+                            {
+                                "name": "audits",
+                                "value": ComplianceAssessment.objects.filter(
+                                    project=project
+                                ).count(),
+                            },
+                            {
+                                "name": "risk assessments",
+                                "value": RiskAssessment.objects.filter(
+                                    project=project
+                                ).count(),
+                            },
+                        ],
+                    }
+                )
+            entry.update({"children": children})
+            folders_list.append(entry)
+        tree.update({"children": folders_list})
+
+        return Response(tree)
+
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
