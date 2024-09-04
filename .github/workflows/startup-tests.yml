@@ -64,6 +64,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
@@ -189,6 +190,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
