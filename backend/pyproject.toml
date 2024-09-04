@@ -24,9 +24,7 @@ python-dotenv = "1.0.1"
 drf-spectacular = "0.27.2"
 django-rest-knox = "5.0.1"
 django-allauth = { version = "64.0.0", extras = ["socialaccount", "saml"] }
-python3-saml = "^1.16"
-requests = "^2"
-python-magic = "^0.4.27"
+python-magic = "0.4.27"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
