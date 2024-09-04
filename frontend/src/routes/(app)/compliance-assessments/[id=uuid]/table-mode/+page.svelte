@@ -86,7 +86,7 @@
 				>
 					<div class="flex flex-row w-full space-x-2">
 						<div class="flex flex-col items-center w-1/2">
-							<p class="flex items-center font-semibold">Status</p>
+							<p class="flex items-center font-semibold">{m.status()}</p>
 							<RadioGroup class="w-full flex-wrap items-center">
 								{#each status_options as option}
 									<RadioItem
@@ -106,7 +106,7 @@
 							</RadioGroup>
 						</div>
 						<div class="flex flex-col items-center w-1/2">
-							<p class="flex items-center font-semibold">Result</p>
+							<p class="flex items-center font-semibold">{m.result()}</p>
 							<RadioGroup class="w-full flex-wrap items-center">
 								{#each result_options as option}
 									<RadioItem
@@ -128,7 +128,7 @@
 					</div>
 					<div class="flex flex-col w-full">
 						{#if Object.keys(requirementAssessment.answer).length !== 0}
-							<p class="flex items-center font-semibold justify-center">Question</p>
+							<p class="flex items-center font-semibold justify-center">{m.question()}</p>
 							{#each requirementAssessment.answer.questions as question}
 								<li class="flex justify-between items-center border rounded-xl p-2">
 									{question.text}
