@@ -2,7 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-export const GET: RequestHandler = async ({ fetch, params }) => {
+export const GET: RequestHandler = async ({ fetch }) => {
 	const URLModel = 'applied-controls';
 	const endpoint = `${BASE_API_URL}/${URLModel}/export_csv/`;
 
