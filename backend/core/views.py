@@ -1421,11 +1421,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 compliance_assessment_object.get_requirement_assessments()
             )
             applied_controls = [
-                {**model_to_dict(applied_control), "id": applied_control.id}
+                {
+                    "id": applied_control.id,
+                    "name": applied_control.name,
+                    "description": applied_control.description,
+                    "status": applied_control.status,
+                    "category": applied_control.category,
+                    "csf_function": applied_control.csf_function,
+                    "eta": applied_control.eta,
+                    "expiry_date": applied_control.expiry_date,
+                    "link": applied_control.link,
+                    "effort": applied_control.effort,
+                    "owners": [
+                        {
+                            "id": owner.id,
+                            "email": owner.email,
+                        }
+                        for owner in applied_control.owner.all()
+                    ],
+                }
                 for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
                 ).distinct()
             ]
+
             for applied_control in applied_controls:
                 applied_control["requirements_count"] = (
                     RequirementAssessment.objects.filter(
