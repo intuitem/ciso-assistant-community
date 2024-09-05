@@ -76,6 +76,7 @@
 	"userGroups": "User groups",
 	"roleAssignments": "Role assignments",
 	"xRays": "X-rays",
+	"inspect": "Inspect",
 	"scoringAssistant": "Scoring assistant",
 	"scoringAssistantNoMatrixError": "Please import a risk matrix from the libraries store to get access to this page",
 	"libraries": "Libraries",
