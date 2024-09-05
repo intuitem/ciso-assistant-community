@@ -2,17 +2,17 @@
 	import { BASE_API_URL } from '$lib/utils/constants';
 	import ciso from '$lib/assets/ciso.svg';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 
 	export let height = 200;
 	export let width = 200;
 
-	let clientSettings: Record<string, any>;
+	const clientSettings = $page.data.clientSettings;
 	let logo: string;
 
 	onMount(async () => {
-		clientSettings = await fetch('/settings/client-settings').then((res) => res.json());
-		logo = clientSettings.logo
-			? `${BASE_API_URL}/client-settings/${clientSettings.id}/logo/`
+		logo = clientSettings.settings.logo
+			? `${BASE_API_URL}/client-settings/${clientSettings.settings.id}/logo/`
 			: ciso;
 	});
 </script>

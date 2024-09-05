@@ -11,6 +11,11 @@ export interface User {
 	date_joined: string;
 }
 
+export interface GlobalSettings {
+	name: string;
+	settings: Record<string, any>;
+}
+
 export interface LoginRequestBody {
 	username: string;
 	password: string;
