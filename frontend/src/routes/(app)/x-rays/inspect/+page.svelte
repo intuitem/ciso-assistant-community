@@ -4,8 +4,8 @@
 	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
 </script>
 
-<div class="card bg-white p-6 shadow flex flex-col space-y-4 w-screen">
-	<div class="w-5/6 h-96">
+<div class="bg-white p-6 shadow flex overflow-x-auto">
+	<div class="w-full h-96">
 		<TreeChart title="Organisation overview" tree={data.data} name="org_tree" />
 	</div>
 </div>
