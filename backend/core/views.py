@@ -706,6 +706,43 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         return Response({"results": measures})
 
+    @action(detail=False, name="Export controls as CSV")
+    def export_csv(self, request):
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+
+        writer = csv.writer(response, delimiter=";")
+        columns = [
+            "internal_id",
+            "name",
+            "description",
+            "category",
+            "csf_function",
+            "status",
+            "eta",
+            "owner",
+        ]
+        writer.writerow(columns)
+
+        for control in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+            row = [
+                control.id,
+                control.name,
+                control.description,
+                control.category,
+                control.csf_function,
+                control.status,
+                control.eta,
+            ]
+            if len(control.owner.all()) > 0:
+                owners = ",".join([o.email for o in control.owner.all()])
+                row += [owners]
+            writer.writerow(row)
+        return response
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
