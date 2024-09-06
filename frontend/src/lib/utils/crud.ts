@@ -275,7 +275,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'evidences', urlModel: 'evidences' }
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'owner', urlModel: 'users' }
 		],
 		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
 		filters: [

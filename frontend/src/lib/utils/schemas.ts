@@ -121,7 +121,7 @@ export const RiskScenarioSchema = baseNamedObject({
 export const AppliedControlSchema = baseNamedObject({
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
-	status: z.string().optional().nullable(),
+	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
@@ -134,7 +134,7 @@ export const AppliedControlSchema = baseNamedObject({
 
 export const PolicySchema = baseNamedObject({
 	csf_function: z.string().optional().nullable(),
-	status: z.string().optional().nullable(),
+	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),

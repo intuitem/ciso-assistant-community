@@ -104,6 +104,7 @@ export function localItems(): LocalItems {
 		userGroups: m.userGroups(),
 		roleAssignments: m.roleAssignments(),
 		xRays: m.xRays(),
+		inspect: m.inspect(),
 		scoringAssistant: m.scoringAssistant(),
 		libraries: m.libraries(),
 		backupRestore: m.backupRestore(),
