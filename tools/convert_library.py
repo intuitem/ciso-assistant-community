@@ -328,11 +328,12 @@ def get_color(wb, cell):
 def get_question(tab):
     print("processing answers")
     found_answers = {}
-    
-    header = read_header(tab[0])
-    assert "id" in header
-
-    for row in tab[1:]:
+    is_header = True
+    for row in tab:
+        if is_header:
+            header = read_header(row)
+            is_header = False
+            assert "id" in header
         if any(c.value for c in row):
             row_id = str(row[header["id"]].value).strip() if row[header["id"]].value else None
             question_type = row[header.get("question_type")].value if "question_type" in header else None
