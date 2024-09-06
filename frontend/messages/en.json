@@ -712,5 +712,7 @@
 	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab.",
 	"answer": "Answer",
 	"questionnaireMode": "Questionnaire mode",
-	"assessmentMode": "Assessment mode"
+	"assessmentMode": "Assessment mode",
+	"createAudit": "Create audit",
+	"createAuditHelpText": "Create an audit alongside the entity assessment"
 }
