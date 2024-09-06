@@ -709,5 +709,6 @@
 	"observationSemiColon": "Observation:",
 	"tableMode": "Table mode",
 	"owner": "Owner",
-	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab."
+	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab.",
+	"answer": "Answer"
 }

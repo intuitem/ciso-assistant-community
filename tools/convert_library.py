@@ -40,6 +40,7 @@ Conventions:
         tab                             | <tab_name> | implementation_groups
         tab                             | <tab_name> | risk_matrix
         tab                             | <tab_name> | mappings
+        tab                             | <tab_name> | answers
 
         variables can also have a translation in the form "variable[locale]"
         
@@ -56,6 +57,8 @@ Conventions:
             - reference_controls
             - annotation
             - typical_evidence
+            - questions
+            - answer
             - skip_count: trick for fixing a referential without changing the urns (advanced users)
         The normal tree order shall be respected
         If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
@@ -86,6 +89,11 @@ Conventions:
             - relationship(*)
             - rationale
             - stregth_of_relationship
+    For Answers:
+        The first line is a header, with the following possible fields (* for required):
+            - id(*)
+            - question_type(*)
+            - question_choices(*)
     A library has a single locale, which is the reference language. Translations are given in columns with header like "name[fr]"
     Dependencies are given as a comma or blank separated list of urns.
 """
@@ -158,6 +166,7 @@ reference_controls = []
 threat_definitions = []
 scores_definition = []
 implementation_groups_definition = []
+questions = []
 risk_matrix = {}
 requirement_mappings = []
 
@@ -316,12 +325,31 @@ def get_color(wb, cell):
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
 
+def get_question(tab):
+    print("processing answers")
+    found_answers = {}
+    
+    header = read_header(tab[0])
+    assert "id" in header
+
+    for row in tab[1:]:
+        if any(c.value for c in row):
+            row_id = str(row[header["id"]].value).strip() if row[header["id"]].value else None
+            question_type = row[header.get("question_type")].value if "question_type" in header else None
+            question_choices = (
+                row[header.get("question_choices")].value.split('\n') if "question_choices" in header and row[header["question_choices"]].value 
+                else None
+            )
+            found_answers[row_id] = {"question_type": question_type, "question_choices": question_choices}
+    
+    return found_answers
 
 ################################################################
 
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
+    answers = get_question(dataframe["answers"])
     if title.lower() == "library_content":
         print("processing library content")
         for row in tab:
@@ -413,7 +441,7 @@ for tab in dataframe:
                     print("URN duplicate:", urn)
                     exit(1)
                 urn_unicity_checker.add(urn)
-                assert type(depth) == int, f"incorrect depth for {row}"
+                assert isinstance(depth, int), f"incorrect depth for {row}"
                 if depth == current_depth + 1:
                     parent_for_depth[depth] = current_node_urn
                     parent_urn = parent_for_depth[depth]
@@ -445,6 +473,8 @@ for tab in dataframe:
                     if "reference_controls" in header
                     else None
                 )
+                questions = (row[header["questions"]].value.split('\n') if row[header["questions"]].value else [""]) if "questions" in header else None
+                answer = row[header["answer"]].value if "answer" in header else None
                 threat_urns = []
                 function_urns = []
                 if threats:
@@ -466,6 +496,12 @@ for tab in dataframe:
                             "reference_control_base_urn"
                         ][prefix]
                         function_urns.append(f"{urn_prefix}:{part_name}")
+                if answer and questions:
+                    answers[answer]["questions"] = [
+                        {"urn": f"{req_node['urn']}:question:{i + 1}", "text": question}
+                        for i, question in enumerate(questions)
+                    ]
+                    req_node["question"] = answers[answer]
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:

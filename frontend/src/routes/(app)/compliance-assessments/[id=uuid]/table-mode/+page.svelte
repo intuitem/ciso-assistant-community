@@ -126,11 +126,15 @@
 							</RadioGroup>
 						</div>
 					</div>
+					<div class="flex flex-col w-full items-center">
+						<p class="flex items-center font-semibold justify-center">{m.description()}</p>
+						{requirementAssessment.description}
+					</div>
 					<div class="flex flex-col w-full">
 						{#if Object.keys(requirementAssessment.answer).length !== 0}
-							<p class="flex items-center font-semibold justify-center">{m.question()}</p>
+							<p class="flex items-center font-semibold justify-center">{m.answer()}</p>
 							{#each requirementAssessment.answer.questions as question}
-								<li class="flex justify-between items-center border rounded-xl p-2">
+								<li class="flex justify-evenly items-center border rounded-xl p-2">
 									{question.text}
 									{#if question.type === 'unique_choice'}
 										<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
