@@ -31,7 +31,7 @@ export const actions: Actions = {
 
 		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
-		const model = getModelInfo(event.params.model!);
+		const model = getModelInfo(urlModel!);
 
 		const fileFields: Record<string, File> = Object.fromEntries(
 			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
