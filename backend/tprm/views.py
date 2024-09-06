@@ -3,6 +3,8 @@ from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from tprm.models import Entity, Representative, Solution, EntityAssessment
 from rest_framework.decorators import action
 
+from tprm.serializers import EntityAssessmentCreateSerializer
+
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
@@ -24,6 +26,11 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
     model = EntityAssessment
     filterset_fields = ["status", "project", "project__folder", "authors", "entity"]
+
+    def get_serializer_class(self, **kwargs):
+        if self.action == "create":
+            return EntityAssessmentCreateSerializer
+        return super().get_serializer_class(**kwargs)
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

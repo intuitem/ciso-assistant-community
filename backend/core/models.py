@@ -31,7 +31,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
 
@@ -936,6 +936,45 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
+
+    def format_answer(self) -> dict:
+        """
+        Used during Requirement Assessment creation to create a questionnaire based on
+        the Requirement Node question JSON field
+
+        Args:
+            json_data (json): JSON describing a questionnaire from a Requirement Node
+
+        Returns:
+            json: JSON formatted for the frontend to display a form
+        """
+        if not self.question:
+            return {}
+        json_data = self.question
+        _type = json_data.get("question_type", "")
+        choices = json_data.get("question_choices", [])
+        questions = json_data.get("questions", [])
+
+        form_fields = []
+
+        for question in questions:
+            field = {}
+            field["urn"] = question.get("urn", "")
+            field["text"] = question.get("text", "")
+
+            if _type == "unique_choice":
+                field["type"] = "unique_choice"
+                field["options"] = choices
+            elif _type == "date":
+                field["type"] = "date"
+            else:
+                field["type"] = "text"
+
+            field["answer"] = ""
+
+            form_fields.append(field)
+
+        return {"questions": form_fields}
 
 
 class RequirementMappingSet(ReferentialObjectMixin):
@@ -2000,6 +2039,38 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+
+    def create_requirement_assessments(self, baseline: Self | None = None):
+        requirements = RequirementNode.objects.filter(framework=self.framework)
+        requirement_assessments = []
+        for requirement in requirements:
+            requirement_assessment = RequirementAssessment.objects.create(
+                compliance_assessment=self,
+                requirement=requirement,
+                folder=Folder.objects.get(id=self.project.folder.id),
+                answer=transform_question_to_answer(requirement.question)
+                if requirement.question
+                else {},
+            )
+            if baseline and baseline.framework == self.framework:
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=baseline, requirement=requirement
+                )
+                requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.score = baseline_requirement_assessment.score
+                requirement_assessment.is_scored = (
+                    baseline_requirement_assessment.is_scored
+                )
+                requirement_assessment.evidences.set(
+                    baseline_requirement_assessment.evidences.all()
+                )
+                requirement_assessment.applied_controls.set(
+                    baseline_requirement_assessment.applied_controls.all()
+                )
+                requirement_assessment.save()
+            requirement_assessments.append(requirement_assessment)
+        return requirement_assessments
 
     def get_global_score(self):
         requirement_assessments_scored = (

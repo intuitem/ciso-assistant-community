@@ -1,9 +1,9 @@
+from rest_framework import serializers
+from core.models import ComplianceAssessment, Framework
+
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
-from iam.models import Folder
-from tprm.models import Entity, Representative, Solution, EntityAssessment
-from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
+from tprm.models import Entity, EntityAssessment, Representative, Solution
 
 
 class EntityReadSerializer(BaseModelSerializer):
@@ -33,6 +33,41 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = EntityAssessment
+        exclude = []
+
+
+class EntityAssessmentCreateSerializer(BaseModelSerializer):
+    create_audit = serializers.BooleanField(default=True)
+    framework = serializers.PrimaryKeyRelatedField(
+        queryset=Framework.objects.all(), required=False
+    )
+    selected_implementation_groups = serializers.ListField(
+        child=serializers.CharField(), required=False
+    )
+
+    def create(self, validated_data):
+        create_audit = validated_data.pop("create_audit")
+        _framework = validated_data.pop("framework", None)
+        _selected_implementation_groups = validated_data.pop(
+            "selected_implementation_groups", None
+        )
+        instance = super().create(validated_data)
+        if create_audit:
+            if not _framework:
+                raise serializers.ValidationError("frameworkRequiredToCreateAudit")
+            audit = ComplianceAssessment.objects.create(
+                name=validated_data["name"],
+                framework=_framework,
+                project=validated_data["project"],
+                selected_implementation_groups=_selected_implementation_groups,
+            )
+            audit.create_requirement_assessments()
+            instance.compliance_assessment = audit
+            instance.save()
+        return instance
+
     class Meta:
         model = EntityAssessment
         exclude = []

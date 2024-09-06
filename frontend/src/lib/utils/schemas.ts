@@ -280,7 +280,10 @@ export const EntitiesSchema = baseNamedObject({
 	reference_link: z.string().optional()
 });
 
-export const entityAssessmentsSchema = baseNamedObject({
+export const EntityAssessmentSchema = baseNamedObject({
+	create_audit: z.boolean().optional().default(true),
+	framework: z.string().optional(),
+	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional().nullable(),
@@ -333,7 +336,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	entities: EntitiesSchema,
-	'entity-assessments': entityAssessmentsSchema,
+	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	solutions: solutionSchema
 };

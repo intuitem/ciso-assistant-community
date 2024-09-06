@@ -50,7 +50,7 @@
 			{parent}
 			{model}
 			{closeModal}
-			{context}
+			context="create"
 			{riskAssessmentDuplication}
 			caching={true}
 			action="?/{formAction}"
