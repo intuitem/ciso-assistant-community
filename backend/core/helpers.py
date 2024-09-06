@@ -1154,39 +1154,4 @@ def handle(exc, context):
     return drf_exception_handler(exc, context)
 
 
-def transform_question_to_answer(json_data):
-    """
-    Used during Requirement Assessment creation to create a questionnaire base on
-    the Requirement Node question JSON field
 
-    Args:
-        json_data (json): JSON describing a questionnaire from a Requirement Node
-
-    Returns:
-        json: JSON formatted for the frontend to display a form
-    """
-    question_type = json_data.get("question_type", "")
-    question_choices = json_data.get("question_choices", [])
-    questions = json_data.get("questions", [])
-
-    form_fields = []
-
-    for question in questions:
-        field = {}
-        field["urn"] = question.get("urn", "")
-        field["text"] = question.get("text", "")
-
-        if question_type == "unique_choice":
-            field["type"] = "unique_choice"
-            field["options"] = question_choices
-        elif question_type == "date":
-            field["type"] = "date"
-        else:
-            field["type"] = "text"
-
-        field["answer"] = ""
-
-        form_fields.append(field)
-
-    form_json = {"questions": form_fields}
-    return form_json

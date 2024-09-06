@@ -1482,34 +1482,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
         baseline = serializer.validated_data.pop("baseline", None)
-        instance = serializer.save()
-        requirements = RequirementNode.objects.filter(framework=instance.framework)
-        for requirement in requirements:
-            requirement_assessment = RequirementAssessment.objects.create(
-                compliance_assessment=instance,
-                requirement=requirement,
-                folder=Folder.objects.get(id=instance.project.folder.id),
-                answer=transform_question_to_answer(requirement.question)
-                if requirement.question
-                else {},
-            )
-            if baseline and baseline.framework == instance.framework:
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=baseline, requirement=requirement
-                )
-                requirement_assessment.result = baseline_requirement_assessment.result
-                requirement_assessment.status = baseline_requirement_assessment.status
-                requirement_assessment.score = baseline_requirement_assessment.score
-                requirement_assessment.is_scored = (
-                    baseline_requirement_assessment.is_scored
-                )
-                requirement_assessment.evidences.set(
-                    baseline_requirement_assessment.evidences.all()
-                )
-                requirement_assessment.applied_controls.set(
-                    baseline_requirement_assessment.applied_controls.all()
-                )
-                requirement_assessment.save()
+        instance: ComplianceAssessment = serializer.save()
+        instance.create_requirement_assessments(baseline)
         if baseline and baseline.framework != instance.framework:
             mapping_set = RequirementMappingSet.objects.get(
                 target_framework=serializer.validated_data["framework"],
