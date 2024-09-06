@@ -1152,6 +1152,3 @@ def handle(exc, context):
         exc = DRFValidationError(detail=data)
 
     return drf_exception_handler(exc, context)
-
-
-
