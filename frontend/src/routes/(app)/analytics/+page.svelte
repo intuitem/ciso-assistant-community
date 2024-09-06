@@ -337,11 +337,11 @@
 							values={data.complianceAssessmentsPerStatus.values}
 						/>
 						<BarChart
-							classesContainer="basis-1/3 card p-4 bg-white"
+							classesContainer="basis-1/2 card p-4 bg-white"
 							name="usedFrameworks"
 							horizontal
 							title={m.usedFrameworks()}
-							labels={data.usedFrameworks.map((framework) => framework.name)}
+							labels={data.usedFrameworks.map((framework) => framework.name.length > 60 ? `${framework.name.substring(0,60)}...` : framework.name)}
 							values={data.usedFrameworks.map(
 								(framework) => framework.compliance_assessments_count
 							)}
