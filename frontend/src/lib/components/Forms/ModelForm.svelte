@@ -735,6 +735,15 @@
 			hidden={initialData.folder}
 		/>
 	{:else if URLModel === 'entity-assessments'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['project'] })}
+			field="project"
+			cacheLock={cacheLocks['project']}
+			bind:cachedValue={formDataCache['project']}
+			label={m.project()}
+			hidden={initialData.project}
+		/>
 		{#if context === 'create'}
 			<Checkbox
 				{form}
@@ -777,15 +786,6 @@
 				/>
 			{/if}
 		{/if}
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['project'] })}
-			field="project"
-			cacheLock={cacheLocks['project']}
-			bind:cachedValue={formDataCache['project']}
-			label={m.project()}
-			hidden={initialData.project}
-		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['entity'] })}
