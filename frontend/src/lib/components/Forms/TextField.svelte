@@ -23,6 +23,10 @@
 	// $value = cachedValue;
 	$: cachedValue = $value;
 
+	$: if ($$restProps.type === "date" && $value === "") {
+		$value = null;
+	}
+
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
