@@ -18,7 +18,7 @@
 	export let multiple = false;
 	export let nullable = false;
 
-	export let hide = false;
+	export let hidden = false;
 	export let translateOptions = true;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
@@ -82,7 +82,7 @@
 	}
 </script>
 
-<div hidden={hide}>
+<div {hidden}>
 	{#if label !== undefined}
 		{#if $constraints?.required}
 			<label class="text-sm font-semibold" for={field}

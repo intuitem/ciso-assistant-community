@@ -165,7 +165,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 		<TextField
 			{form}
@@ -193,7 +193,7 @@
 			cacheLock={cacheLocks['project']}
 			bind:cachedValue={formDataCache['project']}
 			label={m.project()}
-			hide={initialData.project}
+			hidden={initialData.project}
 		/>
 		<TextField
 			{form}
@@ -267,7 +267,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 		<TextField
 			{form}
@@ -302,7 +302,7 @@
 			cacheLock={cacheLocks['risk_assessment']}
 			bind:cachedValue={formDataCache['risk_assessment']}
 			label={m.riskAssessment()}
-			hide={initialData.risk_assessment}
+			hidden={initialData.risk_assessment}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -407,7 +407,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 	{:else if URLModel === 'risk-acceptances'}
 		<TextField
@@ -437,7 +437,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -509,7 +509,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 	{:else if URLModel === 'evidences'}
 		<HiddenInput {form} field="applied_controls" />
@@ -530,7 +530,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.applied_controls || initialData.requirement_assessments}
+			hidden={initialData.applied_controls || initialData.requirement_assessments}
 		/>
 		<TextField
 			{form}
@@ -561,7 +561,7 @@
 			cacheLock={cacheLocks['project']}
 			bind:cachedValue={formDataCache['project']}
 			label={m.project()}
-			hide={initialData.project}
+			hidden={initialData.project}
 		/>
 		<TextField
 			{form}
@@ -662,7 +662,7 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 		<Select
 			{form}
@@ -732,14 +732,20 @@
 			cacheLock={cacheLocks['folder']}
 			bind:cachedValue={formDataCache['folder']}
 			label={m.domain()}
-			hide={initialData.folder}
+			hidden={initialData.folder}
 		/>
 	{:else if URLModel === 'entity-assessments'}
 		{#if context === 'create'}
-			<Checkbox {form} field="create_audit" label="_createAudit" />
+			<Checkbox
+				{form}
+				field="create_audit"
+				label={m.createAudit()}
+				helpText={m.createAuditHelpText()}
+			/>
 			<AutocompleteSelect
 				{form}
-				disabled={object.id}
+				disabled={object.id || !data.create_audit}
+				hidden={!data.create_audit}
 				options={getOptions({ objects: model.foreignKeys['framework'] })}
 				field="framework"
 				cacheLock={cacheLocks['framework']}
@@ -778,7 +784,7 @@
 			cacheLock={cacheLocks['project']}
 			bind:cachedValue={formDataCache['project']}
 			label={m.project()}
-			hide={initialData.project}
+			hidden={initialData.project}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -787,7 +793,7 @@
 			cacheLock={cacheLocks['entity']}
 			bind:cachedValue={formDataCache['entity']}
 			label={m.entity()}
-			hide={initialData.entity}
+			hidden={initialData.entity}
 		/>
 		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
 		<Select
@@ -856,6 +862,8 @@
 			cacheLock={cacheLocks['compliance_assessment']}
 			bind:cachedValue={formDataCache['compliance_assessment']}
 			label={m.complianceAssessment()}
+			disabled={data.create_audit}
+			hidden={data.create_audit}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -880,7 +888,7 @@
 			cacheLock={cacheLocks['provider_entity']}
 			bind:cachedValue={formDataCache['provider_entity']}
 			label={m.providerEntity()}
-			hide={initialData.provider_entity}
+			hidden={initialData.provider_entity}
 		/>
 		<TextField
 			{form}
@@ -995,7 +1003,7 @@
 			<Checkbox {form} field="is_enabled" label={m.enableSSO()} />
 			<AutocompleteSelect
 				{form}
-				hide={model.selectOptions['provider'].length < 2}
+				hidden={model.selectOptions['provider'].length < 2}
 				field="provider"
 				cacheLock={cacheLocks['provider']}
 				bind:cachedValue={formDataCache['provider']}
