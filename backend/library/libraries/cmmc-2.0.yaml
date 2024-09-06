@@ -21,7 +21,7 @@ copyright: "Copyright 2020, 2021 Carnegie Mellon University and The Johns Hopkin
   \ ANY KIND WITH RESPECT TO FREEDOM FROM PATENT,\nTRADEMARK, OR COPYRIGHT INFRINGEMENT.\n\
   [DISTRIBUTION STATEMENT A] Approved for public release.\nThis work is licensed to\
   \ the public under the Creative Commons Attribution 4.0 International\nLicense."
-version: 2
+version: 3
 provider: DoD
 packager: intuitem
 objects:
