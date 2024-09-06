@@ -23,7 +23,7 @@
 	// $value = cachedValue;
 	$: cachedValue = $value;
 
-	$: if ($$restProps.type === "date" && $value === "") {
+	$: if ($$restProps.type === 'date' && $value === '') {
 		$value = null;
 	}
 
