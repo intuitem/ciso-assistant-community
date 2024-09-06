@@ -191,6 +191,12 @@ export const navData = {
 					permissions: ['view_riskassessment', 'view_assessment']
 				},
 				{
+					name: 'inspect',
+					fa_icon: 'fa-brands fa-searchengin',
+					href: '/x-rays/inspect',
+					permissions: ['view_riskassessment', 'view_assessment']
+				},
+				{
 					name: 'scoringAssistant',
 					fa_icon: 'fa-solid fa-star-half-stroke',
 					href: '/scoring-assistant',
