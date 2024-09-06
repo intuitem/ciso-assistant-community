@@ -341,7 +341,11 @@
 							name="usedFrameworks"
 							horizontal
 							title={m.usedFrameworks()}
-							labels={data.usedFrameworks.map((framework) => framework.name.length > 60 ? `${framework.name.substring(0,60)}...` : framework.name)}
+							labels={data.usedFrameworks.map((framework) =>
+								framework.name.length > 60
+									? `${framework.name.substring(0, 60)}...`
+									: framework.name
+							)}
 							values={data.usedFrameworks.map(
 								(framework) => framework.compliance_assessments_count
 							)}
