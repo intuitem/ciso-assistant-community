@@ -3,7 +3,6 @@ import json
 import sys
 from datetime import datetime
 
-from ciso_assistant.settings import VERSION
 from django.core import management
 from django.core.management.commands import dumpdata, loaddata
 from django.http import HttpResponse
@@ -12,6 +11,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ciso_assistant.settings import VERSION
 from serdes.serializers import LoadBackupSerializer
 
 
@@ -21,9 +21,9 @@ class ExportBackupView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
-        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
 
         response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
         # Here we dump th data to stdout
@@ -66,6 +66,7 @@ class LoadBackupView(APIView):
                     "contenttypes",
                     "auth.permission",
                     "sessions.session",
+                    "iam.ssosettings",
                     "knox.authtoken",
                 ],
             )
