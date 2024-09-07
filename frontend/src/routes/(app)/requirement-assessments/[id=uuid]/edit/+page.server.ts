@@ -333,15 +333,14 @@ export const actions: Actions = {
 
 		const schema = modelSchema('evidences');
 		const form = await superValidate(formData, zod(schema));
-
 		if (!form.valid) {
 			console.error(form.errors);
 			return fail(400, { form: form });
 		}
+		const urlModel = 'evidences';
+		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
-		const endpoint = `${BASE_API_URL}/evidences/`;
-
-		const model = getModelInfo(event.params.model!);
+		const model = getModelInfo(urlModel!);
 
 		const fileFields: Record<string, File> = Object.fromEntries(
 			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
