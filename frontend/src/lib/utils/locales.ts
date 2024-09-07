@@ -40,6 +40,12 @@ export const LOCALE_MAP = {
 	ro: {
 		name: 'romanian',
 		flag: '🇷🇴'
+	},
+	hi: {
+		name: 'hindi'
+	},
+	ur: {
+		name: 'urdu'
 	}
 };
 
