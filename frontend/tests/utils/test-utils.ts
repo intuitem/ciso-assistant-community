@@ -230,6 +230,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'expiry_date', type: type.DATE },
 			{ name: 'link', type: type.TEXT },
 			{ name: 'effort', type: type.SELECT },
+			{ name: 'cost', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);

@@ -94,6 +94,7 @@
 						<td class="px-2 font-semibold">{m.referenceControl()}</td>
 						<td class="px-2 font-semibold">{m.eta()}</td>
 						<td class="px-2 font-semibold">{m.effort()}</td>
+						<td class="px-2 font-semibold">{m.cost()}</td>
 						<td class="px-2 font-semibold text-center">{m.link()}</td>
 						<td class="px-2 font-semibold text-center">{m.status()}</td>
 					</tr>
@@ -112,6 +113,7 @@
 							>
 							<td class="px-2 py-3">{measure.eta ?? '--'}</td>
 							<td class="px-2 py-3">{measure.effort ?? '--'}</td>
+							<td class="px-2 py-3">{measure.cost ?? '--'}</td>
 							<td class="px-2 py-3 text-center">{measure.link ?? '--'} </td>
 							<td class="text-center"
 								><span
