@@ -5,6 +5,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 	import Select from './Select.svelte';
@@ -398,6 +399,14 @@
 			helpText={m.effortHelpText()}
 			cacheLock={cacheLocks['effort']}
 			bind:cachedValue={formDataCache['effort']}
+		/>
+		<NumberField
+			{form}
+			field="cost"
+			label={m.cost()}
+			helpText={m.costHelpText()}
+			cacheLock={cacheLocks['cost']}
+			bind:cachedValue={formDataCache['cost']}
 		/>
 		<AutocompleteSelect
 			{form}

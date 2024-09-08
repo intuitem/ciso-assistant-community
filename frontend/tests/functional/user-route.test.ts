@@ -110,6 +110,7 @@ test('user usual routine actions are working correctly', async ({
 			eta: '2025-01-01',
 			link: 'https://intuitem.com/',
 			effort: 'Large',
+			cost: 24.42,
 			folder: vars.folderName,
 			reference_control: `${vars.folderName}/${vars.referenceControlName}`
 		});
