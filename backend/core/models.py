@@ -52,6 +52,42 @@ def match_urn(urn_string):
     else:
         return None
 
+def transform_question_to_answer(json_data):
+        """
+        Used during Requirement Assessment creation to create a questionnaire base on
+        the Requirement Node question JSON field
+
+        Args:
+            json_data (json): JSON describing a questionnaire from a Requirement Node
+
+        Returns:
+            json: JSON formatted for the frontend to display a form
+        """
+        question_type = json_data.get("question_type", "")
+        question_choices = json_data.get("question_choices", [])
+        questions = json_data.get("questions", [])
+
+        form_fields = []
+
+        for question in questions:
+            field = {}
+            field["urn"] = question.get("urn", "")
+            field["text"] = question.get("text", "")
+
+            if question_type == "unique_choice":
+                field["type"] = "unique_choice"
+                field["options"] = question_choices
+            elif question_type == "date":
+                field["type"] = "date"
+            else:
+                field["type"] = "text"
+
+            field["answer"] = ""
+
+            form_fields.append(field)
+
+        form_json = {"questions": form_fields}
+        return form_json
 
 ########################### Referential objects #########################
 
@@ -488,7 +524,20 @@ class LibraryUpdater:
                             compliance_assessment=compliance_assessment,
                             requirement=new_requirement_node,
                             folder=compliance_assessment.project.folder,
+                            answer=transform_question_to_answer(new_requirement_node.question)
+                            if new_requirement_node.question
+                            else {}
                         )
+                else:
+                    for ra in RequirementAssessment.objects.filter(
+                        requirement=new_requirement_node
+                    ):
+                        ra.name = new_requirement_node.name
+                        ra.description = new_requirement_node.description
+                        ra.answer = transform_question_to_answer(
+                            new_requirement_node.question
+                        ) if new_requirement_node.question else {}
+                        ra.save()
 
                 for threat_urn in requirement_node_dict.get("threats", []):
                     thread_to_add = objects_tracked.get(threat_urn)
@@ -934,45 +983,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
-
-    def format_answer(self) -> dict:
-        """
-        Used during Requirement Assessment creation to create a questionnaire based on
-        the Requirement Node question JSON field
-
-        Args:
-            json_data (json): JSON describing a questionnaire from a Requirement Node
-
-        Returns:
-            json: JSON formatted for the frontend to display a form
-        """
-        if not self.question:
-            return {}
-        json_data = self.question
-        _type = json_data.get("question_type", "")
-        choices = json_data.get("question_choices", [])
-        questions = json_data.get("questions", [])
-
-        form_fields = []
-
-        for question in questions:
-            field = {}
-            field["urn"] = question.get("urn", "")
-            field["text"] = question.get("text", "")
-
-            if _type == "unique_choice":
-                field["type"] = "unique_choice"
-                field["options"] = choices
-            elif _type == "date":
-                field["type"] = "date"
-            else:
-                field["type"] = "text"
-
-            field["answer"] = ""
-
-            form_fields.append(field)
-
-        return {"questions": form_fields}
 
 
 class RequirementMappingSet(ReferentialObjectMixin):
@@ -2011,44 +2021,6 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
-
-
-def transform_question_to_answer(json_data):
-        """
-        Used during Requirement Assessment creation to create a questionnaire base on
-        the Requirement Node question JSON field
-
-        Args:
-            json_data (json): JSON describing a questionnaire from a Requirement Node
-
-        Returns:
-            json: JSON formatted for the frontend to display a form
-        """
-        question_type = json_data.get("question_type", "")
-        question_choices = json_data.get("question_choices", [])
-        questions = json_data.get("questions", [])
-
-        form_fields = []
-
-        for question in questions:
-            field = {}
-            field["urn"] = question.get("urn", "")
-            field["text"] = question.get("text", "")
-
-            if question_type == "unique_choice":
-                field["type"] = "unique_choice"
-                field["options"] = question_choices
-            elif question_type == "date":
-                field["type"] = "date"
-            else:
-                field["type"] = "text"
-
-            field["answer"] = ""
-
-            form_fields.append(field)
-
-        form_json = {"questions": form_fields}
-        return form_json
 
 
 class ComplianceAssessment(Assessment):

@@ -168,9 +168,11 @@
 											class="w-fit"
 											active="variant-filled-primary"
 											hover="hover:variant-soft-primary"
+											flexDirection="flex-col"
 										>
 											{#each question.options as option}
 												<RadioItem
+													class="flex justify-start"
 													bind:group={question.answer}
 													name="question"
 													value={option}
