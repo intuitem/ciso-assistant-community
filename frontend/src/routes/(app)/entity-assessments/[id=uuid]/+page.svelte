@@ -26,7 +26,7 @@
 					const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
 					const result = await preloadData(href);
 					if (result.type === 'loaded' && result.status === 200) {
-						pushState(href, { auditTableMode: result.data });
+						pushState('', { auditTableMode: result.data });
 					} else {
 						// Something went wrong, try navigating
 						goto(href);
@@ -35,7 +35,9 @@
 				><span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
 				<svelte:fragment slot="children">
 					{#if Object.hasOwn($page.state, 'auditTableMode')}
-						<AuditTableMode data={$page.state.auditTableMode} />
+						<div class="max-h-[48rem] overflow-y-scroll">
+							<AuditTableMode data={$page.state.auditTableMode} />
+						</div>
 					{/if}
 				</svelte:fragment>
 			</TreeViewItem>
