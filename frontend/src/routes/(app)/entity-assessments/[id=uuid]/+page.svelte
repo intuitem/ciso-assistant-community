@@ -1,17 +1,16 @@
 <script lang="ts">
+	import { goto, preloadData, pushState } from '$app/navigation';
+	import { page } from '$app/stores';
+	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import * as m from '$paraglide/messages';
+	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
+	import AuditTableMode from '../../compliance-assessments/[id=uuid]/table-mode/+page.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	import { breadcrumbObject } from '$lib/utils/stores';
 	breadcrumbObject.set(data.data);
-
-	import AuditTableMode from '../../compliance-assessments/[id=uuid]/table-mode/+page.svelte';
-	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
-
-	import { page } from '$app/stores';
-	import { goto, preloadData, pushState } from '$app/navigation';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -33,7 +32,7 @@
 						goto(href);
 					}
 				}}
-				>(audit table mode)
+				><span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
 				<svelte:fragment slot="children">
 					{#if Object.hasOwn($page.state, 'auditTableMode')}
 						<AuditTableMode data={$page.state.auditTableMode} />
