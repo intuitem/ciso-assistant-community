@@ -70,13 +70,13 @@ objects:
       name: essential
       description: null
     - ref_id: BK
-      name: basic - key measure
+      name: basic - key measures
       description: null
     - ref_id: IK
-      name: important - key measure
+      name: important - key measures
       description: null
     - ref_id: EK
-      name: essential - key measure
+      name: essential - key measures
       description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id
