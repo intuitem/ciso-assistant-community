@@ -29,10 +29,8 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
-from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
-from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
@@ -2015,6 +2013,44 @@ class RiskScenario(NameDescriptionMixin):
         super(RiskScenario, self).save(*args, **kwargs)
 
 
+def transform_question_to_answer(json_data):
+        """
+        Used during Requirement Assessment creation to create a questionnaire base on
+        the Requirement Node question JSON field
+
+        Args:
+            json_data (json): JSON describing a questionnaire from a Requirement Node
+
+        Returns:
+            json: JSON formatted for the frontend to display a form
+        """
+        question_type = json_data.get("question_type", "")
+        question_choices = json_data.get("question_choices", [])
+        questions = json_data.get("questions", [])
+
+        form_fields = []
+
+        for question in questions:
+            field = {}
+            field["urn"] = question.get("urn", "")
+            field["text"] = question.get("text", "")
+
+            if question_type == "unique_choice":
+                field["type"] = "unique_choice"
+                field["options"] = question_choices
+            elif question_type == "date":
+                field["type"] = "date"
+            else:
+                field["type"] = "text"
+
+            field["answer"] = ""
+
+            form_fields.append(field)
+
+        form_json = {"questions": form_fields}
+        return form_json
+
+
 class ComplianceAssessment(Assessment):
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
@@ -2039,6 +2075,8 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+    
+    
 
     def create_requirement_assessments(self, baseline: Self | None = None):
         requirements = RequirementNode.objects.filter(framework=self.framework)

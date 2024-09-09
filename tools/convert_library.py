@@ -498,11 +498,11 @@ for tab in dataframe:
                         ][prefix]
                         function_urns.append(f"{urn_prefix}:{part_name}")
                 if answer and questions:
-                    answers[answer]["questions"] = [
+                    question = {"questions": [
                         {"urn": f"{req_node['urn']}:question:{i + 1}", "text": question}
                         for i, question in enumerate(questions)
-                    ]
-                    req_node["question"] = answers[answer]
+                    ]}
+                    req_node["question"] = {**answers[answer], **question}
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:

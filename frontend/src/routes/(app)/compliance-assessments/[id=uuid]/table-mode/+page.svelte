@@ -103,7 +103,7 @@
 			>
 				<h1 class="font-semibold text-xl">{title(requirementAssessment)}</h1>
 				<form
-					class="flex flex-col space-x-2 items-center justify-evenly w-full"
+					class="flex flex-col space-x-2 space-y-2 items-center justify-evenly w-full"
 					id="tableModeForm-{requirementAssessment.id}"
 					action="?/updateRequirementAssessment"
 					method="post"
@@ -152,11 +152,13 @@
 							</div>
 						</div>
 					{/if}
+					{#if requirementAssessment.description}
 					<div class="flex flex-col w-full">
 						<p class="flex font-semibold">{m.description()}</p>
 						{requirementAssessment.description}
 					</div>
-					<div class="flex flex-col w-full">
+					{/if}
+					<div class="flex flex-col w-full space-y-2">
 						{#if Object.keys(requirementAssessment.answer).length !== 0}
 							{#each requirementAssessment.answer.questions as question}
 								<li class="flex flex-col space-y-2 rounded-xl">
@@ -178,10 +180,27 @@
 												>
 											{/each}
 										</RadioGroup>
-									{:else if question.type === 'date'}
-										<input type="date" placeholder="" class="w-fit" bind:value={question.answer} />
+										{:else if question.type === 'date'}
+										<input
+											type="date"
+											placeholder=""
+											class="input w-fit"
+											bind:value={question.answer}
+											on:change={(event) =>
+														update(event, requirementAssessment, 'answer', question)}
+											{...$$restProps}
+										/>
 									{:else}
-										<input type="text" placeholder="" class="w-fit" bind:value={question.answer} />
+										<input
+											type="text"
+											placeholder=""
+											class="input w-full"
+											bind:value={question.answer}
+											on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
+											on:change={(event) =>
+														update(event, requirementAssessment, 'answer', question)}
+											{...$$restProps}
+										/>
 									{/if}
 								</li>
 							{/each}
