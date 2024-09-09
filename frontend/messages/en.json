@@ -715,5 +715,6 @@
 	"questionnaireMode": "Questionnaire mode",
 	"assessmentMode": "Assessment mode",
 	"createAudit": "Create audit",
-	"createAuditHelpText": "Create an audit alongside the entity assessment"
+	"createAuditHelpText": "Create an audit alongside the entity assessment",
+	"questionnaire": "Questionnaire"
 }
