@@ -1,3 +1,4 @@
+import gzip
 import io
 import json
 import sys
@@ -10,7 +11,6 @@ from rest_framework import status
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import gzip, io
 
 from ciso_assistant.settings import VERSION
 from serdes.serializers import LoadBackupSerializer
@@ -22,9 +22,9 @@ class ExportBackupView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
-        )
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
 
         buffer = io.StringIO()
         buffer.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
