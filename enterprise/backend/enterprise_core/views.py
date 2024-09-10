@@ -36,28 +36,6 @@ class ClientSettingsViewSet(BaseModelViewSet):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
-    def _get_file_response(self, request, pk, file_field):
-        client = ClientSettings.objects.get(pk=pk)
-        file = getattr(client, file_field)
-
-        if not file:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if request.method != "GET":
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        filename = client.filename(
-            field=getattr(ClientSettings.FileField, file_field.upper())
-        )
-        content_type = mimetypes.guess_type(filename)[0]
-
-        return HttpResponse(
-            file,
-            content_type=content_type,
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
-            status=status.HTTP_200_OK,
-        )
-
     @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def info(self, request):
         try:
@@ -70,14 +48,28 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 {"error": "Client settings not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(methods=["get"], detail=True, permission_classes=[AllowAny])
-    def logo(self, request, pk):
-        return self._get_file_response(request, pk, "logo")
+    @action(methods=["get"], detail=False, permission_classes=[AllowAny])
+    def logo(self, request):
+        instance = ClientSettings.objects.get()
+        if not instance.logo:
+            return Response(
+                {"error": "No logo uploaded"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(
+            {"data": instance.logo_base64, "mime_type": instance.logo_mime_type}
+        )
 
     @permission_classes((AllowAny,))
-    @action(methods=["get"], detail=True)
-    def favicon(self, request, pk):
-        return self._get_file_response(request, pk, "favicon")
+    @action(methods=["get"], detail=False)
+    def favicon(self, request):
+        instance = ClientSettings.objects.get()
+        if not instance.favicon:
+            return Response(
+                {"error": "No favicon uploaded"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(
+            {"data": instance.favicon_base64, "mime_type": instance.favicon_mime_type}
+        )
 
     def handle_file_upload(self, request, pk, field_name):
         if "file" not in request.FILES:

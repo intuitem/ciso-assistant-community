@@ -54,7 +54,7 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
-    console.log('ok?')
+		console.log('ok?');
 
 		if (!res.ok) {
 			const response: Record<string, any> = await res.json();
@@ -92,9 +92,9 @@ export const actions: Actions = {
 				if (response.non_field_errors) {
 					setError(form, 'non_field_errors', response.non_field_errors);
 				}
-        if (Object.hasOwn(response, field) && response[field]) {
-          setError(form, field, safeTranslate(response[field]));
-        }
+				if (Object.hasOwn(response, field) && response[field]) {
+					setError(form, field, safeTranslate(response[field]));
+				}
 				return fail(400, { form: form });
 			}
 		}

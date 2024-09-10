@@ -21,6 +21,9 @@ class ClientSettingsWriteSerializer(BaseModelSerializer):
 
 
 class ClientSettingsReadSerializer(BaseModelSerializer):
+    logo_hash = serializers.CharField()
+    favicon_hash = serializers.CharField()
+
     class Meta:
         model = ClientSettings
         exclude = ["is_published", "folder"]
