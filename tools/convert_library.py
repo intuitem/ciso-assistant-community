@@ -350,7 +350,8 @@ def get_question(tab):
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
-    answers = get_question(dataframe["answers"])
+    if title.lower() == "answers":
+        answers = get_question(dataframe["answers"])
     if title.lower() == "library_content":
         print("processing library content")
         for row in tab:
