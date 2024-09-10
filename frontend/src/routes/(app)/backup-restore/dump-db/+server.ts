@@ -10,11 +10,11 @@ export const GET: RequestHandler = async ({ fetch }) => {
 		error(400, 'Error fetching the dump file');
 	}
 
-	const fileName = `ciso-assistant-db-${new Date().toISOString()}.json`;
+	const fileName = `ciso-assistant-db-${new Date().toISOString()}.gzip`;
 
 	return new Response(await res.blob(), {
 		headers: {
-			'Content-Type': 'application/json',
+			'Content-Type': 'application/gzip',
 			'Content-Disposition': `attachment; filename="${fileName}"`
 		}
 	});
