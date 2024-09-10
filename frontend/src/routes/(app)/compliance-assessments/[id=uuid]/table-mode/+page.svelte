@@ -1,12 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Accordion, AccordionItem, RadioGroup, RadioItem, SlideToggle } from '@skeletonlabs/skeleton';
+	import { Accordion, AccordionItem, getModalStore, RadioGroup, RadioItem, SlideToggle, type ModalComponent, type ModalSettings, type ModalStore } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { capitalizeFirstLetter } from '$lib/utils/locales';
+	import { getModelInfo } from '$lib/utils/crud';
 
 	export let data: PageData;
 
@@ -69,6 +74,46 @@
 	}
 
 	let questionnaireMode = true;
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalEvidenceCreateForm(createform): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: createform,
+				formAction: 'createEvidence',
+				model: data.evidenceModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName))
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalConfirmDelete(id: string, name: string): void {
+		const modalComponent: ModalComponent = {
+			ref: DeleteConfirmModal,
+			props: {
+				_form: data.deleteForm,
+				id: id,
+				debug: false,
+				URLModel: getModelInfo('evidences').urlModel
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.deleteModalTitle(),
+			body: `${m.deleteModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -213,7 +258,7 @@
 						>
 							<AccordionItem
 							>
-								<svelte:fragment slot="summary"><p class="flex font-semibold">{m.observation()}</p></svelte:fragment>
+								<svelte:fragment slot="summary"><p class="flex">{m.observation()}</p></svelte:fragment>
 								<svelte:fragment slot="content">
 									<textarea
 										placeholder=""
@@ -228,14 +273,26 @@
 							</AccordionItem>
 							<AccordionItem
 							>
-								<svelte:fragment slot="summary"><p class="flex font-semibold">{m.evidence()}</p></svelte:fragment>
+								<svelte:fragment slot="summary"><p class="flex">{m.evidence()} ({requirementAssessment.evidences.length})</p></svelte:fragment>
 								<svelte:fragment slot="content">
-									<span class="flex flex-row justify-start items-center">
+									<div class="flex flex-row space-x-2 items-center">
 										<button
-											class="btn variant-filled-primary self-end"
+											class="btn variant-filled-primary self-start"
+											on:click={() => modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
 											type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 										>
-									</span>
+										{#each requirementAssessment.evidences as evidence}
+											<p class="card p-2">
+												<i class="fa-solid fa-file mr-2"></i>{evidence.str}
+												<button
+												on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+												type="button"
+												>
+													<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+												</button>
+											</p>
+										{/each}
+									</div>
 								</svelte:fragment>
 							</AccordionItem>
 						</Accordion>
