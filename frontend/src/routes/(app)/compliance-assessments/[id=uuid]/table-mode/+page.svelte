@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Accordion, AccordionItem, RadioGroup, RadioItem, SlideToggle } from '@skeletonlabs/skeleton';
+	import {
+		Accordion,
+		AccordionItem,
+		RadioGroup,
+		RadioItem,
+		SlideToggle
+	} from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
@@ -10,7 +16,10 @@
 
 	export let data: PageData;
 
-	breadcrumbObject.set(data.compliance_assessment);
+	/** Is the page used for shallow routing? */
+	export let shallow = false;
+
+	if (!shallow) breadcrumbObject.set(data.compliance_assessment);
 
 	const result_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
@@ -153,10 +162,10 @@
 						</div>
 					{/if}
 					{#if requirementAssessment.description}
-					<div class="flex flex-col w-full">
-						<p class="flex font-semibold">{m.description()}</p>
-						{requirementAssessment.description}
-					</div>
+						<div class="flex flex-col w-full">
+							<p class="flex font-semibold">{m.description()}</p>
+							{requirementAssessment.description}
+						</div>
 					{/if}
 					{#if Object.keys(requirementAssessment.answer).length !== 0}
 						<div class="flex flex-col w-full space-y-2">
@@ -182,14 +191,14 @@
 												>
 											{/each}
 										</RadioGroup>
-										{:else if question.type === 'date'}
+									{:else if question.type === 'date'}
 										<input
 											type="date"
 											placeholder=""
 											class="input w-fit"
 											bind:value={question.answer}
 											on:change={(event) =>
-														update(event, requirementAssessment, 'answer', question)}
+												update(event, requirementAssessment, 'answer', question)}
 											{...$$restProps}
 										/>
 									{:else}
@@ -199,7 +208,7 @@
 											bind:value={question.answer}
 											on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
 											on:change={(event) =>
-														update(event, requirementAssessment, 'answer', question)}
+												update(event, requirementAssessment, 'answer', question)}
 											{...$$restProps}
 										/>
 									{/if}
@@ -208,32 +217,30 @@
 						</div>
 					{/if}
 					<div class="flex flex-col w-full place-items-center">
-						<Accordion
-							regionCaret="flex"
-						>
-							<AccordionItem
-							>
-								<svelte:fragment slot="summary"><p class="flex font-semibold">{m.observation()}</p></svelte:fragment>
+						<Accordion regionCaret="flex">
+							<AccordionItem>
+								<svelte:fragment slot="summary"
+									><p class="flex font-semibold">{m.observation()}</p></svelte:fragment
+								>
 								<svelte:fragment slot="content">
 									<textarea
 										placeholder=""
 										class="input w-full"
 										bind:value={requirementAssessment.observation}
 										on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-										on:change={(event) =>
-													update(event, requirementAssessment, 'observation')}
+										on:change={(event) => update(event, requirementAssessment, 'observation')}
 										{...$$restProps}
 									/>
 								</svelte:fragment>
 							</AccordionItem>
-							<AccordionItem
-							>
-								<svelte:fragment slot="summary"><p class="flex font-semibold">{m.evidence()}</p></svelte:fragment>
+							<AccordionItem>
+								<svelte:fragment slot="summary"
+									><p class="flex font-semibold">{m.evidence()}</p></svelte:fragment
+								>
 								<svelte:fragment slot="content">
 									<span class="flex flex-row justify-start items-center">
-										<button
-											class="btn variant-filled-primary self-end"
-											type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+										<button class="btn variant-filled-primary self-end" type="button"
+											><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 										>
 									</span>
 								</svelte:fragment>
