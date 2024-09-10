@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages';
 
-	const authorizedExtensions = ['.json'];
+	const authorizedExtensions = ['.json', '.gzip'];
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 
 	const modalStore = getModalStore();
