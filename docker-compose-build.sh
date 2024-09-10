@@ -36,8 +36,8 @@ prepare_meta_file() {
 
 # Check if the database already exists
 if [ -f db/ciso-assistant.sqlite3 ]; then
-	echo "The database seems already created."
-	echo "You should launch 'docker compose up -d'."
+    echo "The database seems already created."
+    echo "You should launch 'docker compose -f docker-compose-build.yml up -d'."
 else
 	prepare_meta_file
 

@@ -40,6 +40,12 @@ export const LOCALE_MAP = {
 	ro: {
 		name: 'romanian',
 		flag: '🇷🇴'
+	},
+	hi: {
+		name: 'hindi'
+	},
+	ur: {
+		name: 'urdu'
 	}
 };
 
@@ -104,6 +110,7 @@ export function localItems(): LocalItems {
 		userGroups: m.userGroups(),
 		roleAssignments: m.roleAssignments(),
 		xRays: m.xRays(),
+		inspect: m.inspect(),
 		scoringAssistant: m.scoringAssistant(),
 		libraries: m.libraries(),
 		backupRestore: m.backupRestore(),

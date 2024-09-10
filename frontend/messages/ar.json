@@ -10,6 +10,8 @@
 	"italian": "الإيطالية",
 	"polish": "البولندية",
 	"romanian": "الرومانية",
+	"hindi": "هندية",
+	"urdu": "أردية",
 	"addThreat": "أضف تهديدًا",
 	"addReferenceControl": "أضف تحكمًا مرجعيًا",
 	"addAppliedControl": "أضف تحكمًا مطبقًا",
@@ -617,8 +619,8 @@
 	"ssoSettingsDescription": "قم بتكوين إعدادات تسجيل الدخول الموحد هنا.",
 	"sso": "SSO",
 	"isSso": "هل هو SSO",
-	"size": "الحجم",
 	"requirementMappingSets": "ربط الأطر",
+	"size": "الحجم",
 	"financial": "المالي",
 	"legal": "القانوني",
 	"reputation": "السمعة",
@@ -626,5 +628,6 @@
 	"confidentiality": "السرية",
 	"integrity": "النزاهة",
 	"availability": "التوفر",
-	"authenticity": "الأصالة"
+	"authenticity": "الأصالة",
+	"waitingRiskAcceptances": "مرحبًا! لديك حاليًا {number} مخاطرة معلقة .يمكنك العثور عليها في علامة التبويب المخاطر."
 }

@@ -10,6 +10,8 @@
 	"italian": "Italien",
 	"polish": "Polonais",
 	"romanian": "Roumain",
+	"hindi": "Hindi",
+	"urdu": "Ourdou",
 	"addThreat": "Ajouter une menace",
 	"addReferenceControl": "Ajouter une mesure de référence",
 	"addAppliedControl": "Ajouter une mesure appliquée",
@@ -626,5 +628,6 @@
 	"integrity": "Intégrité",
 	"availability": "Disponibilité",
 	"authenticity": "Authenticité",
-	"owner": "Propriétaire"
+	"owner": "Propriétaire",
+	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet risque."
 }
