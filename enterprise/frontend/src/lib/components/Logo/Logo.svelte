@@ -1,9 +1,21 @@
 <script lang="ts">
-	import { BASE_API_URL } from '$lib/utils/constants';
 	import ciso from '$lib/assets/ciso.svg';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { persisted } from 'svelte-persisted-store';
 
+	const logoB64 = persisted('logo', {
+		data: '',
+		hash: '',
+		mimeType: ''
+	});
+
+	async function digestMessage(message) {
+		const encoder = new TextEncoder();
+		const data = encoder.encode(message);
+		const hash = await window.crypto.subtle.digest('SHA-256', data);
+		return hash;
+	}
 	export let height = 200;
 	export let width = 200;
 
@@ -11,8 +23,14 @@
 	let logo: string;
 
 	onMount(async () => {
+		const logoHash = clientSettings.settings.logo_hash;
+		if (logoHash !== $logoB64.hash) {
+			console.log('Logo changed, fetching new logo...');
+			const newLogo = await fetch(`/settings/client-settings/logo`).then((res) => res.json());
+			logoB64.set({ data: newLogo.data, hash: logoHash, mimeType: newLogo.mime_type });
+		}
 		logo = clientSettings.settings.logo
-			? `${BASE_API_URL}/client-settings/${clientSettings.settings.id}/logo/`
+			? `data:${$logoB64.mimeType}charset=utf-8;base64, ${$logoB64.data}`
 			: ciso;
 	});
 </script>

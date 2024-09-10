@@ -71,17 +71,34 @@
 		url: string;
 	}
 
-	let clientSettings: Record<string, any>;
 	let favicon: Attachment | string = '';
 
+	import { persisted } from 'svelte-persisted-store';
+
+	const faviconB64 = persisted('favicon', {
+		data: '',
+		hash: '',
+		mimeType: ''
+	});
+
+	async function digestMessage(message) {
+		const encoder = new TextEncoder();
+		const data = encoder.encode(message);
+		const hash = await window.crypto.subtle.digest('SHA-256', data);
+		return hash;
+	}
+	const clientSettings = $page.data.clientSettings;
+
 	onMount(async () => {
-		clientSettings = await fetch('/settings/client-settings').then((res) => res.json());
-		const fetchFavicon = async () => {
-			const res = await fetch(`/settings/client-settings/${clientSettings.id}/favicon`);
-			const blob = await res.blob();
-			return { type: blob.type, url: URL.createObjectURL(blob) };
-		};
-		favicon = clientSettings.favicon ? await fetchFavicon() : favicon;
+		const faviconHash = clientSettings.settings.favicon_hash;
+		if (faviconHash !== $faviconB64.hash) {
+			console.log('favicon changed, fetching new favicon...');
+			const newfavicon = await fetch(`/settings/client-settings/favicon`).then((res) => res.json());
+			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
+		}
+		favicon = clientSettings.settings.favicon
+			? `data:${$faviconB64.mimeType}charset=utf-8;base64, ${$faviconB64.data}`
+			: favicon;
 	});
 </script>
 
