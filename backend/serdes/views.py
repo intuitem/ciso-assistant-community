@@ -3,7 +3,6 @@ import json
 import sys
 from datetime import datetime
 
-from ciso_assistant.settings import VERSION
 from django.core import management
 from django.core.management.commands import dumpdata, loaddata
 from django.http import HttpResponse
@@ -12,6 +11,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ciso_assistant.settings import VERSION
 from serdes.serializers import LoadBackupSerializer
 
 
@@ -66,6 +66,7 @@ class LoadBackupView(APIView):
                     "contenttypes",
                     "auth.permission",
                     "sessions.session",
+                    "iam.ssosettings",
                     "knox.authtoken",
                 ],
             )

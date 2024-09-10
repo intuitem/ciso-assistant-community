@@ -31,7 +31,7 @@
 			},
 			tooltip: {
 				trigger: 'item',
-				formatter: 'Requirements: {c}'
+				formatter: '{b}/requirements: {c}'
 			},
 			series: {
 				type: 'treemap',

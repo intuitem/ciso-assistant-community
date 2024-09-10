@@ -5,7 +5,7 @@ name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
 copyright: See https://www.iso.org/standard/27001
-version: 3
+version: 4
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -328,7 +328,7 @@ objects:
           name: Communication
           description: "G\xE9rer la communication interne et externe."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.5'
@@ -458,7 +458,7 @@ objects:
           description: "Mettre en \u0153uvre un suivi pertinent et \xE9valuer les\
             \ performances et l'efficacit\xE9 du SMSI."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.2'
@@ -495,7 +495,7 @@ objects:
           description: "G\xE9rer le programme d'audit interne de mani\xE8re appropri\xE9\
             e."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.3'
