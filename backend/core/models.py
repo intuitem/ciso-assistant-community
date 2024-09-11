@@ -52,42 +52,44 @@ def match_urn(urn_string):
     else:
         return None
 
+
 def transform_question_to_answer(json_data):
-        """
-        Used during Requirement Assessment creation to create a questionnaire base on
-        the Requirement Node question JSON field
+    """
+    Used during Requirement Assessment creation to create a questionnaire base on
+    the Requirement Node question JSON field
 
-        Args:
-            json_data (json): JSON describing a questionnaire from a Requirement Node
+    Args:
+        json_data (json): JSON describing a questionnaire from a Requirement Node
 
-        Returns:
-            json: JSON formatted for the frontend to display a form
-        """
-        question_type = json_data.get("question_type", "")
-        question_choices = json_data.get("question_choices", [])
-        questions = json_data.get("questions", [])
+    Returns:
+        json: JSON formatted for the frontend to display a form
+    """
+    question_type = json_data.get("question_type", "")
+    question_choices = json_data.get("question_choices", [])
+    questions = json_data.get("questions", [])
 
-        form_fields = []
+    form_fields = []
 
-        for question in questions:
-            field = {}
-            field["urn"] = question.get("urn", "")
-            field["text"] = question.get("text", "")
+    for question in questions:
+        field = {}
+        field["urn"] = question.get("urn", "")
+        field["text"] = question.get("text", "")
 
-            if question_type == "unique_choice":
-                field["type"] = "unique_choice"
-                field["options"] = question_choices
-            elif question_type == "date":
-                field["type"] = "date"
-            else:
-                field["type"] = "text"
+        if question_type == "unique_choice":
+            field["type"] = "unique_choice"
+            field["options"] = question_choices
+        elif question_type == "date":
+            field["type"] = "date"
+        else:
+            field["type"] = "text"
 
-            field["answer"] = ""
+        field["answer"] = ""
 
-            form_fields.append(field)
+        form_fields.append(field)
 
-        form_json = {"questions": form_fields}
-        return form_json
+    form_json = {"questions": form_fields}
+    return form_json
+
 
 ########################### Referential objects #########################
 
@@ -524,9 +526,11 @@ class LibraryUpdater:
                             compliance_assessment=compliance_assessment,
                             requirement=new_requirement_node,
                             folder=compliance_assessment.project.folder,
-                            answer=transform_question_to_answer(new_requirement_node.question)
+                            answer=transform_question_to_answer(
+                                new_requirement_node.question
+                            )
                             if new_requirement_node.question
-                            else {}
+                            else {},
                         )
                 else:
                     for ra in RequirementAssessment.objects.filter(
@@ -534,9 +538,11 @@ class LibraryUpdater:
                     ):
                         ra.name = new_requirement_node.name
                         ra.description = new_requirement_node.description
-                        ra.answer = transform_question_to_answer(
-                            new_requirement_node.question
-                        ) if new_requirement_node.question else {}
+                        ra.answer = (
+                            transform_question_to_answer(new_requirement_node.question)
+                            if new_requirement_node.question
+                            else {}
+                        )
                         ra.save()
 
                 for threat_urn in requirement_node_dict.get("threats", []):
@@ -2047,8 +2053,6 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
-    
-    
 
     def create_requirement_assessments(self, baseline: Self | None = None):
         requirements = RequirementNode.objects.filter(framework=self.framework)
