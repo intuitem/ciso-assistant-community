@@ -37,19 +37,25 @@
 	};
 
 	const APPLIED_CONTROL_FIELDS = [
-		"name", "description", "category", "csf_function", "reference_control", "eta", "effort", "link", "status"
+		'name',
+		'description',
+		'category',
+		'csf_function',
+		'reference_control',
+		'eta',
+		'effort',
+		'link',
+		'status'
 	];
 	function makeSourceFromScenario(appliedControls): TableSource {
 		const fields = APPLIED_CONTROL_FIELDS;
-		const head = Object.fromEntries(fields.map((field) => [
-			field, toCamelCase(field)
-		]));
+		const head = Object.fromEntries(fields.map((field) => [field, toCamelCase(field)]));
 
 		return {
 			head: head,
-			body: appliedControls.map((appliedControl) => Object.fromEntries(
-				fields.map((field) => [field, appliedControl[field]])
-			)),
+			body: appliedControls.map((appliedControl) =>
+				Object.fromEntries(fields.map((field) => [field, appliedControl[field]]))
+			),
 			meta: appliedControls
 		};
 	}
@@ -98,7 +104,10 @@
 			</tr>
 		{/if}
 		{#if scenario.applied_controls.length > 0}
-			<ModelTable source={makeSourceFromScenario(scenario.applied_controls)} URLModel="applied-controls"/>
+			<ModelTable
+				source={makeSourceFromScenario(scenario.applied_controls)}
+				URLModel="applied-controls"
+			/>
 		{/if}
 		{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 			<tr>
