@@ -24,19 +24,23 @@ export const load = (async ({ fetch, params }) => {
 	const evidenceCreateSchema = modelSchema('evidences');
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
-		  const evidenceInitialData = {
-			requirement_assessments: [requirementAssessment.id],
-			folder: requirementAssessment.folder.id
-		  };
-		  const evidenceCreateForm = await superValidate(evidenceInitialData, zod(evidenceCreateSchema), {
-			errors: false
-		  });
-		  return {
-			...requirementAssessment,
-			evidenceCreateForm
-		  };
+			const evidenceInitialData = {
+				requirement_assessments: [requirementAssessment.id],
+				folder: requirementAssessment.folder.id
+			};
+			const evidenceCreateForm = await superValidate(
+				evidenceInitialData,
+				zod(evidenceCreateSchema),
+				{
+					errors: false
+				}
+			);
+			return {
+				...requirementAssessment,
+				evidenceCreateForm
+			};
 		})
-	  );
+	);
 	const requirements = tableMode.requirements;
 
 	requirements.forEach((requirement) => {
