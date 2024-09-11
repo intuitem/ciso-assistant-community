@@ -3,18 +3,19 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/serdes/dump-db/`;
+	const URLModel = 'applied-controls';
+	const endpoint = `${BASE_API_URL}/${URLModel}/export_csv/`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching the dump file');
+		error(400, 'Error fetching the CSV file');
 	}
 
-	const fileName = `ciso-assistant-db-${new Date().toISOString()}.json.gz`;
+	const fileName = `applied-controls-${new Date().toISOString()}.csv`;
 
 	return new Response(await res.blob(), {
 		headers: {
-			'Content-Type': 'application/gzip',
+			'Content-Type': 'text/csv',
 			'Content-Disposition': `attachment; filename="${fileName}"`
 		}
 	});

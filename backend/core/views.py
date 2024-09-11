@@ -706,6 +706,43 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         return Response({"results": measures})
 
+    @action(detail=False, name="Export controls as CSV")
+    def export_csv(self, request):
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+
+        writer = csv.writer(response, delimiter=";")
+        columns = [
+            "internal_id",
+            "name",
+            "description",
+            "category",
+            "csf_function",
+            "status",
+            "eta",
+            "owner",
+        ]
+        writer.writerow(columns)
+
+        for control in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+            row = [
+                control.id,
+                control.name,
+                control.description,
+                control.category,
+                control.csf_function,
+                control.status,
+                control.eta,
+            ]
+            if len(control.owner.all()) > 0:
+                owners = ",".join([o.email for o in control.owner.all()])
+                row += [owners]
+            writer.writerow(row)
+        return response
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
@@ -858,6 +895,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         if request.user == self.get_object().approver:
             self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
+
+    @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
+    def waiting(self, request):
+        acceptance_count = RiskAcceptance.objects.filter(
+            approver=request.user, state="submitted"
+        ).count()
+        return Response({"count": acceptance_count})
 
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
@@ -1030,6 +1074,50 @@ class FolderViewSet(BaseModelViewSet):
                 is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
+
+    @action(detail=False, methods=["get"])
+    def org_tree(self, request):
+        """
+        Returns the tree of domains and projects
+        """
+        tree = {"name": "Global", "children": []}
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        folders_list = list()
+        for folder in Folder.objects.exclude(content_type="GL").filter(
+            id__in=viewable_objects
+        ):
+            entry = {"name": folder.name}
+            children = []
+            for project in Project.objects.filter(folder=folder):
+                children.append(
+                    {
+                        "name": project.name,
+                        "children": [
+                            {
+                                "name": "audits",
+                                "value": ComplianceAssessment.objects.filter(
+                                    project=project
+                                ).count(),
+                            },
+                            {
+                                "name": "risk assessments",
+                                "value": RiskAssessment.objects.filter(
+                                    project=project
+                                ).count(),
+                            },
+                        ],
+                    }
+                )
+            entry.update({"children": children})
+            folders_list.append(entry)
+        tree.update({"children": folders_list})
+
+        return Response(tree)
 
 
 @api_view(["GET"])
@@ -1333,11 +1421,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 compliance_assessment_object.get_requirement_assessments()
             )
             applied_controls = [
-                {**model_to_dict(applied_control), "id": applied_control.id}
+                {
+                    "id": applied_control.id,
+                    "name": applied_control.name,
+                    "description": applied_control.description,
+                    "status": applied_control.status,
+                    "category": applied_control.category,
+                    "csf_function": applied_control.csf_function,
+                    "eta": applied_control.eta,
+                    "expiry_date": applied_control.expiry_date,
+                    "link": applied_control.link,
+                    "effort": applied_control.effort,
+                    "owners": [
+                        {
+                            "id": owner.id,
+                            "email": owner.email,
+                        }
+                        for owner in applied_control.owner.all()
+                    ],
+                }
                 for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
                 ).distinct()
             ]
+
             for applied_control in applied_controls:
                 applied_control["requirements_count"] = (
                     RequirementAssessment.objects.filter(
@@ -1352,6 +1459,53 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     response[applied_control["status"].lower()].append(applied_control)
 
         return Response(response)
+
+    @action(detail=True, name="Get compliance assessment (audit) CSV")
+    def compliance_assessment_csv(self, request, pk):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        if UUID(pk) in viewable_objects:
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "ref_id",
+                "description",
+                "compliance_result",
+                "progress",
+                "score",
+                "observations",
+            ]
+            writer.writerow(columns)
+
+            for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+                req_node = RequirementNode.objects.get(pk=req.requirement.id)
+                req_text = (
+                    req_node.get_description_translated
+                    if req_node.description
+                    else req_node.get_name_translated
+                )
+                row = [
+                    req_node.ref_id,
+                    req_text,
+                ]
+                if req_node.assessable:
+                    row += [
+                        req.result,
+                        req.status,
+                        req.score,
+                        req.observation,
+                    ]
+                writer.writerow(row)
+
+            return response
+        else:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):

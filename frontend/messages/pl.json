@@ -10,6 +10,8 @@
 	"italian": "Włoski",
 	"polish": "Polski",
 	"romanian": "Rumuński",
+	"hindi": "Hinduski",
+	"urdu": "Urdu",
 	"addThreat": "Dodaj zagrożenie",
 	"addReferenceControl": "Dodaj kontrolę referencyjną",
 	"addAppliedControl": "Dodaj zastosowaną kontrolę",
@@ -663,5 +665,6 @@
 	"confidentiality": "Poufność",
 	"integrity": "Integralność",
 	"availability": "Dostępność",
-	"authenticity": "Autentyczność"
+	"authenticity": "Autentyczność",
+	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko."
 }

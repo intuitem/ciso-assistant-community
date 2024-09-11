@@ -10,6 +10,8 @@
 	"italian": "Italienisch",
 	"polish": "Polnish",
 	"romanian": "Rumänisch",
+	"hindi": "Hindi",
+	"urdu": "Urdu",
 	"addThreat": "Bedrohung hinzufügen",
 	"addReferenceControl": "Referenzkontrolle hinzufügen",
 	"addAppliedControl": "Angewendete Kontrolle hinzufügen",
@@ -408,7 +410,7 @@
 	"acceptedRiskScenarios": "{count} akzeptierte Risikoszenario{s}",
 	"reviewNeeded": "Überprüfung erforderlich",
 	"ok": "OK",
-	"inconsistenciesFoundComposer": "{count} Inkonsistenz{en} gefunden. Für weitere Details überprüfen Sie",
+	"inconsistenciesFoundComposer": "{count} Inkonsistenz gefunden. Für weitere Details überprüfen Sie",
 	"current": "Aktuell",
 	"residual": "Restrisiko",
 	"jumpToRiskAssessment": "Zur Risikobewertung springen",
@@ -626,5 +628,6 @@
 	"confidentiality": "Vertraulichkeit",
 	"integrity": "Integrität",
 	"availability": "Verfügbarkeit",
-	"authenticity": "Authentizität"
+	"authenticity": "Authentizität",
+	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie auf der Registerkarte „Risiken“."
 }
