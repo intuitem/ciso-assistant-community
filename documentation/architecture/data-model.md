@@ -58,6 +58,8 @@ erDiagram
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
 
     DOMAIN {
         string name
@@ -89,7 +91,7 @@ erDiagram
     COMPLIANCE_ASSESSMENT_REVIEW }o--|| COMPLIANCE_ASSESSMENT : reviews
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
-    PROJECT                      ||--o{ COMPLIANCE_ASSESSMENT : contains
+    PROJECT                      |o--o{ COMPLIANCE_ASSESSMENT : contains
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
     REQUIREMENT_ASSESSMENT       }o--o{ APPLIED_CONTROL       : is_answered_by
@@ -99,7 +101,7 @@ erDiagram
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
-    PROJECT                      ||--o{ RISK_ASSESSMENT       : contains
+    PROJECT                      |o--o{ RISK_ASSESSMENT       : contains
     RISK_ASSESSMENT              ||--o{ RISK_SCENARIO         : contains
     RISK_SCENARIO                }o--o{ APPLIED_CONTROL       : is_mitigated_by
     RISK_SCENARIO                }o--o{ THREAT                : derives_from
@@ -1144,6 +1146,7 @@ erDiagram
     ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
     ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+    PROJECT               |o--o{ ENTITY_ASSESSMENT     : contains
 
     ENTITY {
         string  name
@@ -1213,9 +1216,12 @@ erDiagram
 
 ```mermaid
 erDiagram
-    PROJECT         ||--o{ ENTITY_ASSESSMENT    : contains
-    DOMAIN          ||--o{ SOLUTION             : contains
-    DOMAIN          ||--o{ ENTITY               : contains
+    DOMAIN          ||--o{ ENTITY_ASSESSMENT     : contains
+    DOMAIN          ||--o{ SOLUTION              : contains
+    DOMAIN          ||--o{ ENTITY                : contains
+    DOMAIN          ||--o{ ENCLAVE               : contains
+    ENCLAVE         ||--o{ COMPLIANCE_ASSESSMENT : contains
+    ENCLAVE         ||--o{ EVIDENCE              : contains
 ```
 
 ### New models
@@ -1241,6 +1247,9 @@ An entity assessment is based on a questionnaire/compliance assessment, and/or o
 
 Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
 
+An entity assessment has the following specific fields:
+  - conclusion: --|blocker|warning|ok|N/A
+
 #### Solution
 
 A solution represents what en entity provides to one another.
@@ -1255,11 +1264,13 @@ There is no link between representatives (modeling of the ecosystem) and users o
 
 ### Evolution of existing models
 
+## Assessments (risk/compliance/entity)
+
+- add field observation
+
 #### Requirement assessment
 
 - add the following fields:
-  - review_conclusion: --|blocker|warning|ok|N/A
-  - review_observation
   - answer: a json corresponding to the optional question of the requirement node.
 
 #### Compliance assessment
@@ -1296,6 +1307,10 @@ The format for question and answer json fields will evolve over time. The initia
 ```
 
 The schema variable follows JSON Schema standard (WIP).
+
+### Enclave security approach
+
+The objects manipulated by the third party (compliance assessment and evidences) are put in a dedicated folder called an "enclave". This folder is a subfolder of the domain. Enclaves are not shown in the UI, they are only used for security implementation.
 
 ### Simplifications for the MVP version
 
