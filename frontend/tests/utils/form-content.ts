@@ -7,7 +7,8 @@ export enum FormFieldType {
 	SELECT = 'select',
 	SELECT_AUTOCOMPLETE = 'select-autocomplete',
 	SELECT_MULTIPLE_AUTOCOMPLETE = 'select-multi-autocomplete',
-	TEXT = 'text'
+	TEXT = 'text',
+	NUMBER = 'number'
 }
 
 type FormField = {
