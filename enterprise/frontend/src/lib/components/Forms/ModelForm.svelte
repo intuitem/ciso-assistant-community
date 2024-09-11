@@ -188,7 +188,7 @@
 			field="parent_folder"
 			cacheLock={cacheLocks['parent_folder']}
 			bind:cachedValue={formDataCache['parent_folder']}
-			label="_parent folder"
+			label={m.parentDomain()}
 			hide={initialData.parent_folder}
 		/>
 	{:else if URLModel === 'risk-assessments' || URLModel === 'risk-assessment-duplicate'}
