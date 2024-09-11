@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import * as m from '$paraglide/messages.js';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { safeTranslate } from '$lib/utils/i18n.js';
@@ -20,20 +19,6 @@
 			transfer: 'bg-violet-200'
 		};
 		return map[status.toLowerCase()] ?? 'bg-gray-200';
-	};
-
-	const measureStatusColorMap = (treatment: string) => {
-		const map: Record<string, string> = {
-			undefined: 'bg-gray-200',
-			to_do: 'bg-blue-200',
-			deprecated: 'bg-red-200',
-			active: 'bg-green-200'
-		};
-		if (treatment !== null) {
-			return map[treatment.toLowerCase()];
-		} else {
-			return 'bg-gray-200';
-		}
 	};
 
 	const APPLIED_CONTROL_FIELDS = [
