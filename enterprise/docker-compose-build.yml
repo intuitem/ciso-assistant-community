@@ -9,6 +9,7 @@ services:
       - ALLOWED_HOSTS=backend,localhost
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
+      - DJANGO_SETTINGS_MODULE=enterprise_core.settings
     volumes:
       - ./db:/code/db
 
