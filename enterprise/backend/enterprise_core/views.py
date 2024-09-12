@@ -8,10 +8,13 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
     action,
+    api_view,
     permission_classes,
 )
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
+
+from django.conf import settings
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -126,3 +129,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
     )
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
+
+
+@api_view(["GET"])
+def get_build(request):
+    """
+    API endpoint that returns the build version of the application.
+    """
+    VERSION = settings.VERSION
+    BUILD = settings.BUILD
+    LICENSE_SEATS = settings.LICENSE_SEATS
+    LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
+    return Response(
+        {
+            "version": VERSION,
+            "build": BUILD,
+            "license_seats": LICENSE_SEATS,
+            "license_expiration": LICENSE_EXPIRATION,
+        }
+    )
