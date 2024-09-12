@@ -26,6 +26,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
+	import { invalidate } from '$app/navigation';
 
 	export let data: PageData;
 
@@ -90,12 +91,17 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	export let actionPath: string = '';
+
+	import { page } from '$app/stores';
+
 	function modalEvidenceCreateForm(createform): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
 				form: createform,
-				formAction: 'createEvidence',
+				formAction: `${actionPath}?/createEvidence`,
+				invalidateAll: false,
 				model: data.evidenceModel,
 				debug: false
 			}
@@ -103,7 +109,12 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName))
+			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName)),
+			response: (r) => {
+				if (r===true) {
+					invalidate($page.url.pathname);
+				}
+			}
 		};
 		modalStore.trigger(modal);
 	}
@@ -113,6 +124,7 @@
 			ref: DeleteConfirmModal,
 			props: {
 				_form: data.deleteForm,
+				formAction: `${actionPath}?/deleteEvidence`,
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel
@@ -163,7 +175,7 @@
 				<form
 					class="flex flex-col space-y-2 items-center justify-evenly w-full"
 					id="tableModeForm-{requirementAssessment.id}"
-					action="?/updateRequirementAssessment"
+					action="{actionPath}?/updateRequirementAssessment"
 					method="post"
 				>
 					{#if !questionnaireMode}

@@ -25,6 +25,7 @@
 	import { createModalCache } from '$lib/utils/stores';
 	import Score from './Score.svelte';
 	export let form: SuperValidated<AnyZodObject>;
+	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let model: ModelInfo;
 	export let context = 'default';
 	export let caching: boolean = false;
@@ -92,6 +93,7 @@
 	dataType={shape.attachment ? 'form' : 'json'}
 	enctype={shape.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded'}
 	data={form}
+	{invalidateAll}
 	let:form
 	let:data
 	let:initialData

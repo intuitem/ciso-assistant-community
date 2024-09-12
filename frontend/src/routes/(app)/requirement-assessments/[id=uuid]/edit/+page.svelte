@@ -71,7 +71,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.measureCreateForm,
-				formAction: 'createAppliedControl',
+				formAction: '?/createAppliedControl',
 				model: data.measureModel,
 				debug: false,
 				suggestions: { reference_control: reference_controls }
@@ -91,7 +91,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.evidenceCreateForm,
-				formAction: 'createEvidence',
+				formAction: '?/createEvidence',
 				model: data.evidenceModel,
 				debug: false
 			}
