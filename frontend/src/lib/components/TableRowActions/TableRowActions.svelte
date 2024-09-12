@@ -28,7 +28,10 @@
 		event.stopPropagation();
 	}
 
-	function modalConfirmDelete(id: string, row: { [key: string]: any }): void {
+	function modalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
 			props: {
@@ -93,7 +96,7 @@
 					modalConfirmDelete(row.meta[identifierField], row);
 					stopPropagation(_);
 				}}
-				on:keydown={(_) => modalConfirmDelete(row.meta.id, row)}
+				on:keydown={() => modalConfirmDelete(row.meta.id, row)}
 				class="cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
 			>
