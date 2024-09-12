@@ -510,11 +510,11 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		name: {
 			key: 'treatment',
 			values: {
-				Open: { text: 'open', cssClasses: 'badge bg-green-300' },
-				Mitigate: { text: 'mitigate', cssClasses: 'badge bg-lime-200' },
-				Accept: { text: 'accept', cssClasses: 'badge bg-green-200' },
-				Avoid: { text: 'avoid', cssClasses: 'badge bg-red-200' },
-				Transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' }
+				open: { text: 'open', cssClasses: 'badge bg-green-300' },
+				mitigate: { text: 'mitigate', cssClasses: 'badge bg-lime-200' },
+				accept: { text: 'accept', cssClasses: 'badge bg-green-200' },
+				avoid: { text: 'avoid', cssClasses: 'badge bg-red-200' },
+				transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' }
 			}
 		}
 	},
