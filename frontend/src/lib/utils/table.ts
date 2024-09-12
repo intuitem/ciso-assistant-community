@@ -445,8 +445,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	solutions: {
-		head: ['name', 'description', 'providerEntity', 'recipientEntity'],
-		body: ['name', 'description', 'provider_entity', 'recipient_entity']
+		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
+		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality']
 	},
 	representatives: {
 		head: ['email', 'entity', 'role'],

@@ -3,9 +3,17 @@
 	import {
 		Accordion,
 		AccordionItem,
+		getModalStore,
 		RadioGroup,
 		RadioItem,
-		SlideToggle
+		SlideToggle,
+
+		type ModalComponent,
+
+		type ModalSettings,
+
+		type ModalStore
+
 	} from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
