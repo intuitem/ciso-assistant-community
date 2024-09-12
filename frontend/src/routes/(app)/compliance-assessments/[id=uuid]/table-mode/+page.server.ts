@@ -35,23 +35,15 @@ export const load = (async ({ fetch, params }) => {
 					errors: false
 				}
 			);
+			const observationBuffer = requirementAssessment.observation;
 			return {
 				...requirementAssessment,
-				evidenceCreateForm
+				evidenceCreateForm,
+				observationBuffer
 			};
 		})
 	);
 	const requirements = tableMode.requirements;
-
-	requirements.forEach((requirement) => {
-		if (
-			requirement.name &&
-			requirement.name.indexOf("Compréhension de l'organisation et de son contexte") >= 0 &&
-			requirement.description
-		) {
-			console.log(requirement);
-		}
-	});
 
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
