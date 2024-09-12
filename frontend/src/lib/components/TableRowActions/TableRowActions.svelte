@@ -28,7 +28,7 @@
 		event.stopPropagation();
 	}
 
-	function modalConfirmDelete(id: string, name: string): void {
+	function modalConfirmDelete(id: string, row: {[key: string]: any}): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
 			props: {
@@ -38,12 +38,18 @@
 				URLModel: URLModel
 			}
 		};
+		const name = URLModel === "users" && row.first_name ?
+			`${row.first_name} ${row.last_name} (${row.email})`
+				: row.name ?? Object.values(row)[0];
+		const body = URLModel === "users" ?
+			m.deleteUserMessage({ name: name })
+				: m.deleteModalMessage({ name: name });
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
 			title: m.deleteModalTitle(),
-			body: `${m.deleteModalMessage()}: ${name}?`
+			body: body
 		};
 		modalStore.trigger(modal);
 	}
@@ -82,10 +88,10 @@
 		{#if displayDelete}
 			<button
 				on:click={(_) => {
-					modalConfirmDelete(row.meta[identifierField], row.name ?? Object.values(row)[0]);
+					modalConfirmDelete(row.meta[identifierField], row);
 					stopPropagation(_);
 				}}
-				on:keydown={(_) => modalConfirmDelete(row.meta.id, row.name ?? Object.values(row)[0])}
+				on:keydown={(_) => modalConfirmDelete(row.meta.id, row)}
 				class="cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
 			>
