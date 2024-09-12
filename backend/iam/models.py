@@ -64,7 +64,10 @@ class Folder(NameDescriptionMixin):
     @staticmethod
     def get_root_folder_id() -> uuid.UUID:
         """class function for general use"""
-        return Folder.get_root_folder().id
+        try:
+            return uuid.UUID(_get_root_folder().id)
+        except:
+            return _get_root_folder()
 
     class ContentType(models.TextChoices):
         """content type for a folder"""
