@@ -63,17 +63,13 @@
 	}
 
 	// Function to update requirement assessments
-	function update(event, requirementAssessment, field: string, question: string = '') {
-		let value;
+	function update(requirementAssessment, field: string, value: string, question: string = '') {
 		if (question) {
 			const questionIndex = requirementAssessment.answer.questions.findIndex(
 				(q) => q.urn === question.urn
 			);
-			requirementAssessment.answer.questions[questionIndex].answer = event.target.value;
+			requirementAssessment.answer.questions[questionIndex].answer = value;
 			value = requirementAssessment.answer;
-		} else {
-			requirementAssessment[field] = event.target.value;
-			value = requirementAssessment[field];
 		}
 		const form = document.getElementById(`tableModeForm-${requirementAssessment.id}`);
 		const formData = {
@@ -186,7 +182,7 @@
 											value={option.id}
 											bind:group={requirementAssessment.status}
 											name="status"
-											on:change={(event) => update(event, requirementAssessment, 'status')}
+											on:change={(event) => update(requirementAssessment, 'status', option.id)}
 											>{option.label}</RadioItem
 										>
 									{/each}
@@ -206,7 +202,7 @@
 											value={option.id}
 											bind:group={requirementAssessment.result}
 											name="result"
-											on:change={(event) => update(event, requirementAssessment, 'result')}
+											on:change={(event) => update(requirementAssessment, 'result', option.id)}
 											>{option.label}</RadioItem
 										>
 									{/each}
@@ -239,7 +235,7 @@
 													name="question"
 													value={option}
 													on:change={(event) =>
-														update(event, requirementAssessment, 'answer', question)}
+														update(requirementAssessment, 'answer', option, question)}
 													>{option}</RadioItem
 												>
 											{/each}
@@ -251,7 +247,7 @@
 											class="input w-fit"
 											bind:value={question.answer}
 											on:change={(event) =>
-												update(event, requirementAssessment, 'answer', question)}
+												update(requirementAssessment, 'answer', question.answer, question)}
 											{...$$restProps}
 										/>
 									{:else}
@@ -261,7 +257,7 @@
 											bind:value={question.answer}
 											on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
 											on:change={(event) =>
-												update(event, requirementAssessment, 'answer', question)}
+												update(requirementAssessment, 'answer', question.answer, question)}
 											{...$$restProps}
 										/>
 									{/if}
@@ -273,17 +269,33 @@
 						<Accordion regionCaret="flex">
 							<AccordionItem>
 								<svelte:fragment slot="summary"
-									><p class="flex font-semibold">{m.observation()}</p></svelte:fragment
+									><p class="flex">{m.observation()}</p></svelte:fragment
 								>
 								<svelte:fragment slot="content">
-									<textarea
-										placeholder=""
-										class="input w-full"
-										bind:value={requirementAssessment.observation}
-										on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-										on:change={(event) => update(event, requirementAssessment, 'observation')}
-										{...$$restProps}
-									/>
+									<div>
+										<textarea
+											placeholder=""
+											class="input w-full"
+											bind:value={requirementAssessment.observation}
+											on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
+										/>
+										{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
+											<button
+												class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
+												on:click={(event) => {update(requirementAssessment, 'observation', requirementAssessment.observation); requirementAssessment.observationBuffer = requirementAssessment.observation}}
+												type="button"
+											>
+											<i class="fa-solid fa-check opacity-70"></i>
+											</button>
+											<button
+												class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
+												on:click={() => (requirementAssessment.observation = requirementAssessment.observationBuffer)}
+												type="button"
+											>
+											<i class="fa-solid fa-xmark opacity-70"></i>
+											</button>
+										{/if}
+									</div>
 								</svelte:fragment>
 							</AccordionItem>
 							<AccordionItem>
