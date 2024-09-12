@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	// Props
 	/** Exposes parent props to this component. */
 	// export let parent: any;
@@ -23,7 +24,7 @@
 		{#if body}
 			{#each Object.entries(JSON.parse(body)) as [key, value]}
 				<div>
-					<div class="font-bold capitalize">{key}:</div>
+					<div class="font-bold">{safeTranslate(key)}:</div>
 					<div>{value}</div>
 				</div>
 			{/each}
