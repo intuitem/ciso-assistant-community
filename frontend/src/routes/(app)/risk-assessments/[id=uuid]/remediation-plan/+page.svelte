@@ -18,7 +18,7 @@
 			avoid: 'bg-red-200',
 			transfer: 'bg-violet-200'
 		};
-		return map[status.toLowerCase()] ?? 'bg-gray-200';
+		return map[status] ?? 'bg-gray-200';
 	};
 
 	const APPLIED_CONTROL_FIELDS = [
