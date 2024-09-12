@@ -61,6 +61,11 @@ class Folder(NameDescriptionMixin):
         """class function for general use"""
         return _get_root_folder()
 
+    @staticmethod
+    def get_root_folder_id() -> uuid.UUID:
+        """class function for general use"""
+        return Folder.get_root_folder().id
+
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
@@ -173,7 +178,7 @@ class FolderMixin(models.Model):
         Folder,
         on_delete=models.CASCADE,
         related_name="%(class)s_folder",
-        default=Folder.get_root_folder,
+        default=Folder.get_root_folder_id,
     )
 
     class Meta:
