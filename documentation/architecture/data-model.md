@@ -145,6 +145,8 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
+
         string[]    selected_implementation_groups
         int     min_score
         int     max_score
@@ -162,6 +164,7 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
 
         string      risk_assessment_method
     }
@@ -705,7 +708,10 @@ Projects are fundamental context objects defined by the entity using CISO Assist
 
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
 
-Note: the IAM model is based on folders. A domain is a type of folder (the other one being the root folder).
+Note: the IAM model is based on folders. A folder has a type among:
+- ROOT: the root folder, which is also called "global domain".
+- DOMAIN: a user-defined domain.
+- ENCLAVE: a invisible folder used to confine the actions of a third party.
 
 Projects have the following fields:
 - Name
@@ -1068,15 +1074,15 @@ Currently, the folder organization is as follows:
 
 To simplify access control, we use a RBAC model.
 
-Role               | Permissions
--------------------|------------
-Administrator      | full access (except approval), and specifically management of domains, users and users rights
-referential_manager| capacity to manage referentials in the root folder
-Domain manager     | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects
-Analyst            | readwrite acces to selected projects/domains. Read access to global and domain objects
-Reader             | read access to selected projects/domains
-Risk approver      | like reader, but with additional capability to approve risk acceptances
-Reviewer           | like reader, but with additional capability to review assessments.
+| Role                | Permissions                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Administrator       | full access (except approval), and specifically management of domains, users and users rights                                     |
+| referential_manager | capacity to manage referentials in the root folder                                                                                |
+| Domain manager      | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects |
+| Analyst             | readwrite acces to selected projects/domains. Read access to global and domain objects                                            |
+| Reader              | read access to selected projects/domains                                                                                          |
+| Risk approver       | like reader, but with additional capability to approve risk acceptances                                                           |
+| Reviewer            | like reader, but with additional capability to review assessments.                                                                |
 
 
 Note: a DJANGO superuser is given administrator rights automatically on startup.
@@ -1189,7 +1195,9 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
 
+        string      conclusion
         int         criticality
         int         penetration
         int         dependency
@@ -1249,6 +1257,10 @@ Typically, the main entity can use the requirement group selector to tailor the 
 
 An entity assessment has the following specific fields:
   - conclusion: --|blocker|warning|ok|N/A
+  - penetration: as defined by ebios RM
+  - dependency: as defined by ebios RM
+  - maturity: as defined by ebios RM
+  - trust: as defined by ebios RM
 
 #### Solution
 
@@ -1314,8 +1326,9 @@ The objects manipulated by the third party (compliance assessment and evidences)
 
 ### Simplifications for the MVP version
 
-- The main entity is automatically created and owns the global domain. The name is set to "MAIN ENTITY", and can be changed.
+- The main entity is automatically created and owns the global domain. The name is set to "Main", and can be changed.
 - Other entities own no domain.
 - Solutions are automatically provided to the main entity.
 - The change in applied control is not retained.
 - implementation_group_selector is not retained.
+- ebios-RM parameters are not retained.
