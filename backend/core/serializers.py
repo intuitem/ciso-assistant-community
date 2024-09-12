@@ -275,7 +275,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
 
-    treatment = serializers.CharField(source="get_treatment_display")
+    treatment = serializers.CharField()
 
     current_proba = serializers.JSONField(source="get_current_proba")
     current_impact = serializers.JSONField(source="get_current_impact")
