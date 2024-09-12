@@ -123,6 +123,7 @@ export interface ModelMapEntry {
 	verboseName: string;
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
+	listViewUrlParams?: string;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
@@ -143,6 +144,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'domains',
 		verboseName: 'Domain',
 		verboseNamePlural: 'Domains',
+		listViewUrlParams: '?content_type=DO&content_type=GL',
 		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
 		reverseForeignKeyFields: [{ field: 'folder', urlModel: 'projects' }]
 	},
