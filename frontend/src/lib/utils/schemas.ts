@@ -222,7 +222,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	baseline: z.string().optional().nullable(),
-	observation: z.string().optional().nullable(),
+	observation: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({
@@ -304,7 +304,7 @@ export const EntityAssessmentSchema = baseNamedObject({
 	dependency: z.number().optional(),
 	maturity: z.number().optional(),
 	trust: z.number().optional(),
-	observation: z.string().optional().nullable(),
+	observation: z.string().optional().nullable()
 });
 
 export const solutionSchema = baseNamedObject({

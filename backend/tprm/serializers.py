@@ -35,7 +35,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = EntityAssessment
-        exclude = ['penetration', 'dependency', 'maturity', 'trust']
+        exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
@@ -48,14 +48,16 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def update(self, instance, validated_data):
-        for author in validated_data.get('authors', []):
+        for author in validated_data.get("authors", []):
             if author not in instance.authors.all():
                 author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_("CISO Assistant: A questionnaire has been assigned to you"),
-                        object='entity-assessments',
-                        object_id=instance.id,
-                    )
+                    email_template_name="tprm/third_party_email.html",
+                    subject=_(
+                        "CISO Assistant: A questionnaire has been assigned to you"
+                    ),
+                    object="entity-assessments",
+                    object_id=instance.id,
+                )
         _audit = instance.compliance_assessment
         if not _audit:
             create_audit = validated_data.pop("create_audit")
@@ -66,7 +68,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             instance = super().update(instance, validated_data)
             if create_audit:
                 if not _framework:
-                    raise serializers.ValidationError({ 'framework': [ _('Framework required') ] })
+                    raise serializers.ValidationError(
+                        {"framework": [_("Framework required")]}
+                    )
                 audit = ComplianceAssessment.objects.create(
                     name=validated_data["name"],
                     framework=_framework,
@@ -80,7 +84,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = EntityAssessment
-        exclude = ['penetration', 'dependency', 'maturity', 'trust']
+        exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
 class EntityAssessmentCreateSerializer(BaseModelSerializer):
@@ -101,7 +105,9 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
         instance = super().create(validated_data)
         if create_audit:
             if not _framework:
-                raise serializers.ValidationError({ 'framework': [ _('Framework required') ] })
+                raise serializers.ValidationError(
+                    {"framework": [_("Framework required")]}
+                )
             enclave = Folder.objects.create(
                 content_type=Folder.ContentType.ENCLAVE,
                 name=f"{instance.project.name}/{instance.name}",
@@ -120,11 +126,13 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
         if instance.authors:
             for author in instance.authors.all():
                 author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_("CISO Assistant: A questionnaire has been assigned to you"),
-                        object='entity-assessments',
-                        object_id=instance.id,
-                    )
+                    email_template_name="tprm/third_party_email.html",
+                    subject=_(
+                        "CISO Assistant: A questionnaire has been assigned to you"
+                    ),
+                    object="entity-assessments",
+                    object_id=instance.id,
+                )
         return instance
 
     class Meta:

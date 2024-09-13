@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0007_alter_folder_content_type'),
+        ("iam", "0007_alter_folder_content_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_third_party',
+            model_name="user",
+            name="is_third_party",
             field=models.BooleanField(default=False),
         ),
     ]

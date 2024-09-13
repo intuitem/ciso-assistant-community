@@ -34,7 +34,7 @@ class EntityAssessment(Assessment):
         WARNING = "warning", _("Warning")
         OK = "ok", _("Ok")
         NA = "not_applicable", _("Not applicable")
-    
+
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     penetration = models.IntegerField(default=0, verbose_name=_("Penetration"))
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))

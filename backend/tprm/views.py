@@ -9,8 +9,6 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-
-
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
 
@@ -45,11 +43,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             if folder.content_type == Folder.ContentType.ENCLAVE:
                 folder.delete()
             else:
-                logger.warning(
-                    "Compliance assessment folder is not an Enclave",
-                    folder
-                )
-            
+                logger.warning("Compliance assessment folder is not an Enclave", folder)
+
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, name="Get status choices")
