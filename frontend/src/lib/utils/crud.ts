@@ -175,6 +175,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users' },
@@ -387,6 +388,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Compliance assessment',
 		verboseNamePlural: 'Compliance assessments',
 		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
