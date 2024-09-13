@@ -188,6 +188,7 @@ class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -275,7 +276,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
 
-    treatment = serializers.CharField(source="get_treatment_display")
+    treatment = serializers.CharField()
 
     current_proba = serializers.JSONField(source="get_current_proba")
     current_impact = serializers.JSONField(source="get_current_impact")
@@ -535,6 +536,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
     framework = FieldsRelatedField(
         ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
     )

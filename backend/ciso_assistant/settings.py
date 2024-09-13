@@ -297,6 +297,8 @@ LANGUAGES = [
     ("pt", "Portuguese"),
     ("ar", "Arabic"),
     ("ro", "Romanian"),
+    ("hi", "Hindi"),
+    ("ur", "Urdu"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
