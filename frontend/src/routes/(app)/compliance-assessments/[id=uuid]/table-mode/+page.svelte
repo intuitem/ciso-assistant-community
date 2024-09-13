@@ -27,11 +27,16 @@
 	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	export let data: PageData;
 
 	/** Is the page used for shallow routing? */
 	export let shallow = false;
+
+	export let actionPath: string = '';
+	export let questionnaireOnly: boolean = false;
+	export let assessmentOnly: boolean = false;
 
 	if (!shallow) breadcrumbObject.set(data.compliance_assessment);
 
@@ -87,13 +92,9 @@
 		return map[result];
 	}
 
-	let questionnaireMode = true;
+	let questionnaireMode = questionnaireOnly ? true : assessmentOnly ? false : true;
 
 	const modalStore: ModalStore = getModalStore();
-
-	export let actionPath: string = '';
-
-	import { page } from '$app/stores';
 
 	function modalEvidenceCreateForm(createform): void {
 		const modalComponent: ModalComponent = {
@@ -146,28 +147,29 @@
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-between shadow-lg w-full h-full space-y-2"
 	>
-		<div class="flex items-center justify-center space-x-4">
-			{#if questionnaireMode}
-				<p class="font-bold text-sm">{m.assessmentMode()}</p>
-			{:else}
-				<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
-			{/if}
-			<SlideToggle
-				name="questionnaireToggle"
-				class="flex flex-row items-center justify-center"
-				active="bg-primary-500"
-				background="bg-green-500"
-				bind:checked={questionnaireMode}
-				on:click={() => (questionnaireMode = !questionnaireMode)}
-			>
+		{#if !(questionnaireOnly ? !assessmentOnly : assessmentOnly)}
+			<div class="flex items-center justify-center space-x-4">
 				{#if questionnaireMode}
-					<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+					<p class="font-bold text-sm">{m.assessmentMode()}</p>
 				{:else}
-					<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+					<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
 				{/if}
-			</SlideToggle>
-		</div>
-
+				<SlideToggle
+					name="questionnaireToggle"
+					class="flex flex-row items-center justify-center"
+					active="bg-primary-500"
+					background="bg-green-500"
+					bind:checked={questionnaireMode}
+					on:click={() => (questionnaireMode = !questionnaireMode)}
+				>
+					{#if questionnaireMode}
+						<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+					{:else}
+						<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+					{/if}
+				</SlideToggle>
+			</div>
+		{/if}
 		{#each data.requirement_assessments as requirementAssessment}
 			<div
 				class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2"
