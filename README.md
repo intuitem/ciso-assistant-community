@@ -481,6 +481,8 @@ Set DJANGO_DEBUG=False for security reason.
 - IT: Italian
 - PL: Polish
 - RO: Romanian
+- HI: Hindi
+- UR: Urdu
 
 ## Built With 💜
 
