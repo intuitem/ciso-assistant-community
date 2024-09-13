@@ -56,6 +56,10 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(EntityAssessment.Status.choices))
 
+    @action(detail=False, name="Get conclusion choices")
+    def conclusion(self, request):
+        return Response(dict(EntityAssessment.Conclusion.choices))
+
 
 class RepresentativeViewSet(BaseModelViewSet):
     """

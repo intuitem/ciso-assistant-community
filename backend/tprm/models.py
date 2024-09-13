@@ -29,6 +29,12 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
 
 class EntityAssessment(Assessment):
+    class Conclusion(models.TextChoices):
+        BLOCKER = "blocker", _("Blocker")
+        WARNING = "warning", _("Warning")
+        OK = "ok", _("Ok")
+        NA = "not_applicable", _("Not applicable")
+    
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     penetration = models.IntegerField(default=0, verbose_name=_("Penetration"))
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))
@@ -49,6 +55,12 @@ class EntityAssessment(Assessment):
     )
     evidence = models.ForeignKey(
         Evidence, on_delete=models.SET_NULL, blank=True, null=True
+    )
+    conclusion = models.CharField(
+        choices=Conclusion.choices,
+        verbose_name=_("Conclusion"),
+        blank=True,
+        null=True,
     )
 
     class Meta:

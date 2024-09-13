@@ -5,6 +5,7 @@ from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 from iam.models import Folder
 from tprm.models import Entity, EntityAssessment, Representative, Solution
+from django.utils.translation import gettext_lazy as _
 
 
 class EntityReadSerializer(BaseModelSerializer):
@@ -57,7 +58,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             instance = super().update(instance, validated_data)
             if create_audit:
                 if not _framework:
-                    raise serializers.ValidationError("frameworkRequiredToCreateAudit")
+                    raise serializers.ValidationError({ 'framework': [ _('Framework required') ] })
                 audit = ComplianceAssessment.objects.create(
                     name=validated_data["name"],
                     framework=_framework,
@@ -92,7 +93,7 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
         instance = super().create(validated_data)
         if create_audit:
             if not _framework:
-                raise serializers.ValidationError("frameworkRequiredToCreateAudit")
+                raise serializers.ValidationError({ 'framework': [ _('Framework required') ] })
             enclave = Folder.objects.create(
                 content_type=Folder.ContentType.ENCLAVE,
                 name=f"{instance.project.name}/{instance.name}",
