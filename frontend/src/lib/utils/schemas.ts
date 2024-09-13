@@ -120,7 +120,7 @@ export const AppliedControlSchema = baseNamedObject({
 	expiry_date: z.string().optional().nullable(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
-	cost: z.number().optional().nullable(),
+	cost: z.number().multipleOf(0.000001).optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional()
