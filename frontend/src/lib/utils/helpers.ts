@@ -23,23 +23,39 @@ export function getRequirementTitle(ref_id: string, name: string) {
 	return title;
 }
 
-export function displayScoreColor(value: number, max_score: number) {
+export function displayScoreColor(value: number, max_score: number, inversedColors = false) {
 	value = (value * 100) / max_score;
-	if (value < 25) {
-		return 'stroke-red-400';
-	}
-	if (value < 50) {
-		return 'stroke-orange-400';
-	}
-	if (value < 75) {
-		return 'stroke-yellow-300';
-	}
-	return 'stroke-green-300';
+	if (inversedColors) {
+        if (value < 35) {
+            return 'stroke-green-300';
+        }
+        if (value < 60) {
+            return 'stroke-yellow-300';
+        }
+        if (value < 80) {
+            return 'stroke-orange-400';
+        }
+        return 'stroke-red-400';
+    } else {
+        if (value < 25) {
+            return 'stroke-red-400';
+        }
+        if (value < 50) {
+            return 'stroke-orange-400';
+        }
+        if (value < 75) {
+            return 'stroke-yellow-300';
+        }
+        return 'stroke-green-300';
+    }
 }
 
-export function formatScoreValue(value: number, max_score: number) {
+export function formatScoreValue(value: number, max_score: number, fullDonut = false) {
 	if (value === null) {
 		return 0;
+	}
+	else if (fullDonut) {
+		return 100;
 	}
 	return (value * 100) / max_score;
 }
