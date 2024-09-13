@@ -6,6 +6,7 @@ from django.db.models.signals import post_migrate
 from structlog import get_logger
 
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from core.utils import RoleCodename
 
 logger = get_logger(__name__)
 
@@ -279,6 +280,16 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_entityassessment",
 ]
 
+THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
+    "view_complianceassessment",
+    "view_requirementassessment",
+    "change_requirementassessment",
+    "view_evidence",
+    "add_evidence",
+    "change_evidence",
+    "delete_evidence",
+]
+
 
 def startup(sender: AppConfig, **kwargs):
     """
@@ -290,7 +301,6 @@ def startup(sender: AppConfig, **kwargs):
 
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
-    from global_settings.models import GlobalSettings
 
     print("startup handler: initialize database")
 
@@ -383,6 +393,14 @@ def startup(sender: AppConfig, **kwargs):
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_approvers.folder)
+
+    third_party_respondent_permissions = Permission.objects.filter(
+        codename__in=THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST
+    )
+    third_party_respondent, created = Role.objects.get_or_create(
+        name=RoleCodename.THIRD_PARTY_RESPONDENT.value, builtin=True
+    )
+    third_party_respondent.permissions.set(third_party_respondent_permissions)
 
     # if superuser defined and does not exist, then create it
     if (
