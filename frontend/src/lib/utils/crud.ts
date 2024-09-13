@@ -478,6 +478,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users' },

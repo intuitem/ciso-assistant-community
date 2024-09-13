@@ -37,6 +37,12 @@ class EntityAssessment(Assessment):
         Entity,
         on_delete=models.CASCADE,
     )
+    solutions = models.ManyToManyField(
+        "tprm.Solution",
+        related_name="entity_assessments",
+        blank=True,
+        verbose_name=_("Solutions"),
+    )
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment, on_delete=models.SET_NULL, blank=True, null=True
     )
