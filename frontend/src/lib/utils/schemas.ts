@@ -292,6 +292,7 @@ export const EntityAssessmentSchema = baseNamedObject({
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	entity: z.string(),
+	solutions: z.array(z.string().optional()).optional(),
 	compliance_assessment: z.string().optional(),
 	evidence: z.string().optional(),
 	criticality: z.number().optional().nullable(),

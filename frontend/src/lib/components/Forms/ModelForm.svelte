@@ -797,6 +797,15 @@
 			label={m.entity()}
 			hidden={initialData.entity}
 		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['solutions'] })}
+			field="solutions"
+			cacheLock={cacheLocks['solutions']}
+			bind:cachedValue={formDataCache['solutions']}
+			label={m.solutions()}
+		/>
 		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
 		<Select
 			{form}

@@ -26,6 +26,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     evidence = FieldsRelatedField()
     project = FieldsRelatedField()
     entity = FieldsRelatedField()
+    solutions = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
 
