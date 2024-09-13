@@ -3,10 +3,15 @@ from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
-from iam.models import Folder
+from core.utils import RoleCodename, UserGroupCodename
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from django.utils.translation import gettext_lazy as _
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class EntityReadSerializer(BaseModelSerializer):
@@ -87,6 +92,26 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             instance.compliance_assessment = audit
             instance.save()
 
+    def _assign_third_party_respondents(
+        self, instance: EntityAssessment, third_party_users: set[User]
+    ):
+        enclave = instance.compliance_assessment.folder
+        respondents, _ = UserGroup.objects.get_or_create(
+            name=UserGroupCodename.THIRD_PARTY_RESPONDENT, folder=enclave, builtin=True
+        )
+        role_assignment, _ = RoleAssignment.objects.get_or_create(
+            user_group=respondents,
+            role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
+            builtin=True,
+            folder=enclave,
+            is_recursive=True,
+        )
+        role_assignment.perimeter_folders.add(enclave)
+        for user in third_party_users:
+            if not user.is_third_party:
+                logger.warning("User is not a third-party", user=user)
+            user.user_groups.add(respondents)
+
     def _send_author_emails(self, instance, authors_to_email: set):
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             for author in authors_to_email:
@@ -106,6 +131,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         audit_data = self._extract_audit_data(validated_data)
         instance = super().create(validated_data)
         self._create_or_update_audit(instance, audit_data)
+        self._assign_third_party_respondents(instance, set(instance.authors.all()))
         self._send_author_emails(instance, set(instance.authors.all()))
         return instance
 
@@ -119,6 +145,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         if not instance.compliance_assessment:
             self._create_or_update_audit(instance, audit_data)
 
+        self._assign_third_party_respondents(instance, new_authors)
         self._send_author_emails(instance, new_authors)
         return instance
 
