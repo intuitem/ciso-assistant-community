@@ -55,7 +55,7 @@
 			context="create"
 			{riskAssessmentDuplication}
 			caching={true}
-			action="{formAction}"
+			action={formAction}
 			{debug}
 		/>
 	</div>

@@ -31,7 +31,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         if self.action == "create":
             return EntityAssessmentCreateSerializer
         return super().get_serializer_class(**kwargs)
-    
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.compliance_assessment:

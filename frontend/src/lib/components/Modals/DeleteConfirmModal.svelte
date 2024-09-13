@@ -15,12 +15,12 @@
 
 	export let _form;
 	export let URLModel: urlModel;
-	export let formAction: string = '?/delete'
+	export let formAction: string = '?/delete';
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let id: string;
 	import { superForm } from 'sveltekit-superforms';
 
-	const { form /*, message*/, enhance } = superForm(_form, {invalidateAll});
+	const { form /*, message*/, enhance } = superForm(_form, { invalidateAll });
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
