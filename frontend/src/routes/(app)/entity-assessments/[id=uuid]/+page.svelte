@@ -5,9 +5,10 @@
 	import * as m from '$paraglide/messages';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
 	import AuditTableMode from '../../compliance-assessments/[id=uuid]/table-mode/+page.svelte';
-	import type { PageData } from './$types';
+	import type { PageData, Actions } from './$types';
 
 	export let data: PageData;
+	export let form: Actions;
 
 	import { breadcrumbObject } from '$lib/utils/stores';
 	breadcrumbObject.set(data.data);
@@ -38,10 +39,12 @@
 						{#if Object.hasOwn($page.state, 'auditTableMode')}
 							<div class="max-h-[48rem] overflow-y-scroll">
 								<AuditTableMode
+									form={form}
 									data={$page.state.auditTableMode}
 									actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
 									shallow
 									questionnaireOnly
+									invalidateAll={false}
 								/>
 							</div>
 						{/if}
