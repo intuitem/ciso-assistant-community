@@ -453,7 +453,6 @@
 	"requirementAssessments": "Evaluări ale cerințelor",
 	"deleteModalTitle": "Ștergeți",
 	"deleteModalMessage": "Sunteți sigur că doriți să ștergeți următorul obiect: {name} ?",
-	"deleteUserMessage": "Sunteți sigur că doriți să ștergeți următorul utilizator: {name} ?",
 	"download": "Descărcați",
 	"loading": "Se încarcă",
 	"open": "Deschis",

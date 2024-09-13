@@ -455,7 +455,6 @@
 	"requirementAssessments": "आवश्यकता आकलन",
 	"deleteModalTitle": "हटाएं",
 	"deleteModalMessage": "क्या आप सुनिश्चित हैं कि आप निम्न वस्तु को हटाना चाहते हैं: {name} ?",
-	"deleteUserMessage": "क्या आप वाकई निम्नलिखित उपयोगकर्ता को हटाना चाहते हैं: {name} ?",
 	"download": "डाउनलोड करें",
 	"loading": "लोड हो रहा है",
 	"open": "खुला",
