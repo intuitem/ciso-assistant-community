@@ -390,10 +390,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_short_name(self) -> str:
         """get user's short name (i.e. first_name or email before @))"""
-        try:
-            return self.first_name if self.first_name else self.email.split("@")[0]
-        except:
-            return ""
+        return self.first_name if self.first_name else self.email.split("@")[0]
 
     def mailing(self, email_template_name, subject, pk=False):
         """
