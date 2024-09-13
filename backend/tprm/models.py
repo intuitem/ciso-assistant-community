@@ -76,7 +76,7 @@ class Representative(AbstractBaseModel):
     description = models.TextField(blank=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["email"]
 
 
 class Solution(NameDescriptionMixin):
