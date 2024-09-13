@@ -86,7 +86,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             return object_created
         except Exception as e:
             logger.error(e)
-            raise serializers.ValidationError(e.args[0])
+            raise serializers.ValidationError()
 
     class Meta:
         model: models.Model
@@ -311,6 +311,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    cost = serializers.FloatField()
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)

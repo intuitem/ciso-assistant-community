@@ -431,6 +431,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "reference_control",
                 "eta",
                 "effort",
+                "cost",
                 "link",
                 "status",
             ]
@@ -457,6 +458,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
+                    mtg.cost,
                     mtg.link,
                     mtg.status,
                 ]
@@ -615,6 +617,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "status",
         "reference_control",
         "effort",
+        "cost",
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
@@ -670,7 +673,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort", "cost", "name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -1452,6 +1455,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "expiry_date": applied_control.expiry_date,
                     "link": applied_control.link,
                     "effort": applied_control.effort,
+                    "cost": applied_control.cost,
                     "owners": [
                         {
                             "id": owner.id,
@@ -1781,7 +1785,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort","cost","name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -1976,6 +1980,7 @@ def export_mp_csv(request):
         "reference_control",
         "eta",
         "effort",
+        "cost",
         "link",
         "status",
     ]
@@ -1997,6 +2002,7 @@ def export_mp_csv(request):
             mtg.reference_control,
             mtg.eta,
             mtg.effort,
+            mtg.cost,
             mtg.link,
             mtg.status,
         ]

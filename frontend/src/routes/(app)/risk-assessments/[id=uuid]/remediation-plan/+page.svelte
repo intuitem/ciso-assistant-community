@@ -29,10 +29,11 @@
 		'reference_control',
 		'eta',
 		'effort',
+		'cost',
 		'link',
 		'status'
 	];
-	function makeSourceFromScenario(appliedControls): TableSource {
+	function makeSourceFromAppliedControls(appliedControls): TableSource {
 		const fields = APPLIED_CONTROL_FIELDS;
 		const head = Object.fromEntries(fields.map((field) => [field, toCamelCase(field)]));
 
@@ -90,7 +91,7 @@
 		{/if}
 		{#if scenario.applied_controls.length > 0}
 			<ModelTable
-				source={makeSourceFromScenario(scenario.applied_controls)}
+				source={makeSourceFromAppliedControls(scenario.applied_controls)}
 				URLModel="applied-controls"
 			/>
 		{/if}
