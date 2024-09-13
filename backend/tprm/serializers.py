@@ -43,7 +43,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     selected_implementation_groups = serializers.ListField(
         child=serializers.CharField(), required=False
     )
-    
+
     def update(self, instance, validated_data):
         _audit = instance.compliance_assessment
         if not _audit:

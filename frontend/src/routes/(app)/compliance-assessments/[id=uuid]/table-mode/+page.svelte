@@ -7,13 +7,9 @@
 		RadioGroup,
 		RadioItem,
 		SlideToggle,
-
 		type ModalComponent,
-
 		type ModalSettings,
-
 		type ModalStore
-
 	} from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
@@ -112,7 +108,7 @@
 			component: modalComponent,
 			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName)),
 			response: (r) => {
-				if (r===true) {
+				if (r === true) {
 					invalidate($page.url.pathname);
 				}
 			}
@@ -297,17 +293,27 @@
 										{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
 											<button
 												class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-												on:click={(event) => {update(requirementAssessment, 'observation', requirementAssessment.observation); requirementAssessment.observationBuffer = requirementAssessment.observation}}
+												on:click={(event) => {
+													update(
+														requirementAssessment,
+														'observation',
+														requirementAssessment.observation
+													);
+													requirementAssessment.observationBuffer =
+														requirementAssessment.observation;
+												}}
 												type="button"
 											>
-											<i class="fa-solid fa-check opacity-70"></i>
+												<i class="fa-solid fa-check opacity-70"></i>
 											</button>
 											<button
 												class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
-												on:click={() => (requirementAssessment.observation = requirementAssessment.observationBuffer)}
+												on:click={() =>
+													(requirementAssessment.observation =
+														requirementAssessment.observationBuffer)}
 												type="button"
 											>
-											<i class="fa-solid fa-xmark opacity-70"></i>
+												<i class="fa-solid fa-xmark opacity-70"></i>
 											</button>
 										{/if}
 									</div>

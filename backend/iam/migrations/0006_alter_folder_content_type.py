@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0005_alter_user_managers'),
+        ("iam", "0005_alter_user_managers"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='folder',
-            name='content_type',
-            field=models.CharField(choices=[('GL', 'GLOBAL'), ('DO', 'DOMAIN'), ('EN', 'ENCLAVE')], default='DO', max_length=2),
+            model_name="folder",
+            name="content_type",
+            field=models.CharField(
+                choices=[("GL", "GLOBAL"), ("DO", "DOMAIN"), ("EN", "ENCLAVE")],
+                default="DO",
+                max_length=2,
+            ),
         ),
     ]
