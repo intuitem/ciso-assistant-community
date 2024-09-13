@@ -116,6 +116,7 @@ export class FormContent {
 					await field.locator.clear();
 				case FormFieldType.NUMBER:
 					await field?.locator.fill(values[key].toString(), { force: true });
+					break;
 				default:
 					await field?.locator.fill(values[key]);
 					break;
