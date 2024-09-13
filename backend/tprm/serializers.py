@@ -48,6 +48,14 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def update(self, instance, validated_data):
+        for author in validated_data.get('authors', []):
+            if author not in instance.authors.all():
+                author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_("CISO Assistant: A questionnaire has been assigned to you"),
+                        object='entity-assessments',
+                        object_id=instance.id,
+                    )
         _audit = instance.compliance_assessment
         if not _audit:
             create_audit = validated_data.pop("create_audit")
@@ -109,6 +117,14 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
             audit.create_requirement_assessments()
             instance.compliance_assessment = audit
             instance.save()
+        if instance.authors:
+            for author in instance.authors.all():
+                author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_("CISO Assistant: A questionnaire has been assigned to you"),
+                        object='entity-assessments',
+                        object_id=instance.id,
+                    )
         return instance
 
     class Meta:

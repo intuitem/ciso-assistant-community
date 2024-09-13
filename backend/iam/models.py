@@ -397,7 +397,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """get user's short name (i.e. first_name or email before @))"""
         return self.first_name if self.first_name else self.email.split("@")[0]
 
-    def mailing(self, email_template_name, subject, pk=False):
+    def mailing(self, email_template_name, subject, object='', object_id='', pk=False):
         """
         Sending a mail to a user for password resetting or creation
         """
@@ -409,6 +409,8 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "token": default_token_generator.make_token(self),
             "protocol": "https",
             "pk": str(pk) if pk else None,
+            "object": object,
+            "object_id": object_id,
         }
         email = render_to_string(email_template_name, header)
         try:
