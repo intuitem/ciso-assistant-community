@@ -37,7 +37,12 @@
 					<svelte:fragment slot="children">
 						{#if Object.hasOwn($page.state, 'auditTableMode')}
 							<div class="max-h-[48rem] overflow-y-scroll">
-								<AuditTableMode data={$page.state.auditTableMode} actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`} shallow />
+								<AuditTableMode 
+								data={$page.state.auditTableMode}
+								actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
+								shallow
+								questionnaireOnly
+								/>
 							</div>
 						{/if}
 					</svelte:fragment>
