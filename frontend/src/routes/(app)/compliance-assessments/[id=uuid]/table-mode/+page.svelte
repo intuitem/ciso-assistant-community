@@ -126,6 +126,7 @@
 				_form: data.deleteForm,
 				formAction: `${actionPath}?/deleteEvidence`,
 				id: id,
+				invalidateAll: false,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel
 			}
