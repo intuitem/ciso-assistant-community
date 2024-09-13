@@ -91,7 +91,8 @@ export const RiskAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const ThreatSchema = baseNamedObject({
@@ -219,7 +220,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	baseline: z.string().optional().nullable()
+	baseline: z.string().optional().nullable(),
+	observation: z.string().optional().nullable(),
 });
 
 export const EvidenceSchema = baseNamedObject({
@@ -282,7 +284,7 @@ export const EntitiesSchema = baseNamedObject({
 
 export const EntityAssessmentSchema = baseNamedObject({
 	create_audit: z.boolean().optional().default(true),
-	framework: z.string(),
+	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
@@ -296,10 +298,12 @@ export const EntityAssessmentSchema = baseNamedObject({
 	compliance_assessment: z.string().optional(),
 	evidence: z.string().optional(),
 	criticality: z.number().optional().nullable(),
+	conclusion: z.string().optional().nullable(),
 	penetration: z.number().optional(),
 	dependency: z.number().optional(),
 	maturity: z.number().optional(),
-	trust: z.number().optional()
+	trust: z.number().optional(),
+	observation: z.string().optional().nullable(),
 });
 
 export const solutionSchema = baseNamedObject({

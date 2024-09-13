@@ -17,6 +17,7 @@
 	export let form;
 	export let multiple = false;
 	export let nullable = false;
+	export let mandatory = false;
 
 	export let hidden = false;
 	export let translateOptions = true;
@@ -84,7 +85,7 @@
 
 <div {hidden}>
 	{#if label !== undefined}
-		{#if $constraints?.required}
+		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
 				>{label} <span class="text-red-500">*</span></label
 			>

@@ -260,6 +260,13 @@
 				cacheLock={cacheLocks['due_date']}
 				bind:cachedValue={formDataCache['due_date']}
 			/>
+			<TextArea
+				{form}
+				field="observation"
+				label={m.observation()}
+				cacheLock={cacheLocks['observation']}
+				bind:cachedValue={formDataCache['observation']}
+			/>
 		{/if}
 	{:else if URLModel === 'threats'}
 		<AutocompleteSelect
@@ -653,6 +660,13 @@
 			cacheLock={cacheLocks['due_date']}
 			bind:cachedValue={formDataCache['due_date']}
 		/>
+		<TextArea
+			{form}
+			field="observation"
+			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
+		/>
 	{:else if URLModel === 'assets'}
 		<TextArea
 			{form}
@@ -760,6 +774,7 @@
 			<AutocompleteSelect
 				{form}
 				disabled={!data.create_audit}
+				mandatory
 				hidden={!data.create_audit}
 				options={getOptions({ objects: model.foreignKeys['framework'] })}
 				field="framework"
@@ -890,6 +905,21 @@
 			cacheLock={cacheLocks['evidence']}
 			bind:cachedValue={formDataCache['evidence']}
 			label={m.evidence()}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['conclusion']}
+			field="conclusion"
+			label={m.conclusion()}
+			cacheLock={cacheLocks['conclusion']}
+			bind:cachedValue={formDataCache['conclusion']}
+		/>
+		<TextArea
+			{form}
+			field="observation"
+			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
 		/>
 		<!-- <Score {form} label={m.penetration()} field="penetration" always_enabled={true} inversedColors fullDonut max_score={5} />
 		<Score {form} label={m.dependency()} field="dependency" always_enabled={true} inversedColors fullDonut max_score={5} />

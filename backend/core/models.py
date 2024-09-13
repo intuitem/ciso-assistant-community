@@ -1458,6 +1458,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
     )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name", "version"]
 
