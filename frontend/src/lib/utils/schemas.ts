@@ -282,7 +282,7 @@ export const EntitiesSchema = baseNamedObject({
 
 export const EntityAssessmentSchema = baseNamedObject({
 	create_audit: z.boolean().optional().default(true),
-	framework: z.string().optional(),
+	framework: z.string(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
