@@ -1274,6 +1274,11 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
         verbose_name=_("Effort"),
     )
+    cost = models.FloatField(
+        null=True,
+        help_text=_("Cost of the measure (using globally-chosen currency)"),
+        verbose_name=_("Cost"),
+    )
 
     fields_to_check = ["name"]
 
@@ -1627,6 +1632,19 @@ class RiskAssessment(Assessment):
                             "{} does not have an estimated effort. This will help you for prioritization"
                         ).format(mtg["name"]),
                         "msgid": "appliedControlNoEffort",
+                        "link": f"applied-controls/{mtg['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                    }
+                )
+
+            if not mtg["cost"]:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{} does not have an estimated cost. This will help you for prioritization"
+                        ).format(mtg["name"]),
+                        "msgid": "appliedControlNoCost",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},

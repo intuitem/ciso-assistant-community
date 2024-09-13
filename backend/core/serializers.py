@@ -311,6 +311,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    cost = serializers.FloatField()
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
