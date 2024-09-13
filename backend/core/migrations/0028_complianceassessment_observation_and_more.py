@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0027_requirementassessment_answer_and_more'),
+        ("core", "0027_requirementassessment_answer_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='complianceassessment',
-            name='observation',
-            field=models.TextField(blank=True, null=True, verbose_name='Observation'),
+            model_name="complianceassessment",
+            name="observation",
+            field=models.TextField(blank=True, null=True, verbose_name="Observation"),
         ),
         migrations.AddField(
-            model_name='riskassessment',
-            name='observation',
-            field=models.TextField(blank=True, null=True, verbose_name='Observation'),
+            model_name="riskassessment",
+            name="observation",
+            field=models.TextField(blank=True, null=True, verbose_name="Observation"),
         ),
     ]

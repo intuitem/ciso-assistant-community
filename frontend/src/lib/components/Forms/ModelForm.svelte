@@ -834,7 +834,16 @@
 			bind:cachedValue={formDataCache['solutions']}
 			label={m.solutions()}
 		/>
-		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} inversedColors fullDonut min_score={1} max_score={4}/>
+		<Score
+			{form}
+			label={m.criticality()}
+			field="criticality"
+			always_enabled={true}
+			inversedColors
+			fullDonut
+			min_score={1}
+			max_score={4}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
@@ -951,7 +960,16 @@
 			cacheLock={cacheLocks['ref_id']}
 			bind:cachedValue={formDataCache['ref_id']}
 		/>
-		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} inversedColors fullDonut min_score={1} max_score={4}/>
+		<Score
+			{form}
+			label={m.criticality()}
+			field="criticality"
+			always_enabled={true}
+			inversedColors
+			fullDonut
+			min_score={1}
+			max_score={4}
+		/>
 	{:else if URLModel === 'representatives'}
 		<TextField
 			{form}

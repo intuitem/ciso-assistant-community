@@ -488,7 +488,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }, { field: 'conclusion' }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'selected_implementation_groups', detail: true },
+			{ field: 'conclusion' }
+		],
 		filters: [{ field: 'status' }]
 	},
 	solutions: {

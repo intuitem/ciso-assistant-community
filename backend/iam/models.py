@@ -397,7 +397,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """get user's short name (i.e. first_name or email before @))"""
         return self.first_name if self.first_name else self.email.split("@")[0]
 
-    def mailing(self, email_template_name, subject, object='', object_id='', pk=False):
+    def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
         Sending a mail to a user for password resetting or creation
         """

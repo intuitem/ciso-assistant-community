@@ -39,7 +39,7 @@
 						{#if Object.hasOwn($page.state, 'auditTableMode')}
 							<div class="max-h-[48rem] overflow-y-scroll">
 								<AuditTableMode
-									form={form}
+									{form}
 									data={$page.state.auditTableMode}
 									actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
 									shallow

@@ -108,24 +108,26 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName)),
+			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName))
 		};
 		modalStore.trigger(modal);
 	}
 
 	let addeddEvidence = 0;
 
-	
 	$: if (createdEvidence && shallow) {
-			data.requirement_assessments.find(
-				(requirementAssessment) => requirementAssessment.id === createdEvidence.requirement_assessments[0]
-			).evidences.push({
+		data.requirement_assessments
+			.find(
+				(requirementAssessment) =>
+					requirementAssessment.id === createdEvidence.requirement_assessments[0]
+			)
+			.evidences.push({
 				str: createdEvidence.name,
 				id: createdEvidence.id
 			});
-			createdEvidence = undefined;
-			addeddEvidence =+ 1;
-		}
+		createdEvidence = undefined;
+		addeddEvidence = +1;
+	}
 
 	function modalConfirmDelete(id: string, name: string): void {
 		const modalComponent: ModalComponent = {
@@ -147,8 +149,10 @@
 			body: `${m.deleteModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
-		data.requirement_assessments.forEach(requirementAssessment => {
-			requirementAssessment.evidences = requirementAssessment.evidences.filter(evidence => evidence.id !== id);
+		data.requirement_assessments.forEach((requirementAssessment) => {
+			requirementAssessment.evidences = requirementAssessment.evidences.filter(
+				(evidence) => evidence.id !== id
+			);
 		});
 	}
 </script>
@@ -333,40 +337,42 @@
 									</div>
 								</svelte:fragment>
 							</AccordionItem>
-								<AccordionItem>
-									<svelte:fragment slot="summary"
-										><p class="flex items-center space-x-2">
-											<span>{m.evidence()}</span>
-											{#key addeddEvidence}
-												<span class="badge variant-soft-primary">{requirementAssessment.evidences.length}</span>
-											{/key}
-										</p></svelte:fragment
-									>
-									<svelte:fragment slot="content">
-										<div class="flex flex-row space-x-2 items-center">
-											<button
-												class="btn variant-filled-primary self-start"
-												on:click={() =>
-													modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-												type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+							<AccordionItem>
+								<svelte:fragment slot="summary"
+									><p class="flex items-center space-x-2">
+										<span>{m.evidence()}</span>
+										{#key addeddEvidence}
+											<span class="badge variant-soft-primary"
+												>{requirementAssessment.evidences.length}</span
 											>
-											{#key addeddEvidence}
-												{#each requirementAssessment.evidences as evidence}
-													<p class="card p-2">
-														<i class="fa-solid fa-file mr-2"></i>{evidence.str}
-														<button
-															class="cursor-pointer"
-															on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-															type="button"
-														>
-															<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-														</button>
-													</p>
-												{/each}
-											{/key}
-										</div>
-									</svelte:fragment>
-								</AccordionItem>
+										{/key}
+									</p></svelte:fragment
+								>
+								<svelte:fragment slot="content">
+									<div class="flex flex-row space-x-2 items-center">
+										<button
+											class="btn variant-filled-primary self-start"
+											on:click={() =>
+												modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+											type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+										>
+										{#key addeddEvidence}
+											{#each requirementAssessment.evidences as evidence}
+												<p class="card p-2">
+													<i class="fa-solid fa-file mr-2"></i>{evidence.str}
+													<button
+														class="cursor-pointer"
+														on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+														type="button"
+													>
+														<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+													</button>
+												</p>
+											{/each}
+										{/key}
+									</div>
+								</svelte:fragment>
+							</AccordionItem>
 						</Accordion>
 					</div>
 				</form>
