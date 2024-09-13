@@ -57,6 +57,7 @@ class EntityAssessment(Assessment):
         Evidence, on_delete=models.SET_NULL, blank=True, null=True
     )
     conclusion = models.CharField(
+        max_length=14,
         choices=Conclusion.choices,
         verbose_name=_("Conclusion"),
         blank=True,
