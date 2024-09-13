@@ -1,9 +1,14 @@
 from rest_framework.response import Response
+from iam.models import Folder
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from tprm.models import Entity, Representative, Solution, EntityAssessment
 from rest_framework.decorators import action
-
 from tprm.serializers import EntityAssessmentCreateSerializer
+import structlog
+
+logger = structlog.get_logger(__name__)
+
+
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -35,7 +40,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.compliance_assessment:
+            folder = instance.compliance_assessment.folder
             instance.compliance_assessment.delete()
+            if folder.content_type == Folder.ContentType.ENCLAVE:
+                folder.delete()
+            else:
+                logger.warning(
+                    "Compliance assessment folder is not an Enclave",
+                    folder
+                )
+            
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, name="Get status choices")
