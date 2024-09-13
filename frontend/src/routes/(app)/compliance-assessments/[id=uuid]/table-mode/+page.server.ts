@@ -124,13 +124,13 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
-		const createdObject = await res.json();
+		const createdEvidence = await res.json();
 
 		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
 				if (!file) continue;
 				if (file.size <= 0) continue;
-				const fileUploadEndpoint = `${BASE_API_URL}/${'evidences'}/${createdObject.id}/upload/`;
+				const fileUploadEndpoint = `${BASE_API_URL}/${'evidences'}/${createdEvidence.id}/upload/`;
 				const fileUploadRequestInitOptions: RequestInit = {
 					headers: {
 						'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
@@ -159,7 +159,7 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { createForm: form };
+		return { createForm: form, createdEvidence };
 	},
 	deleteEvidence: async (event) => {
 		const formData = await event.request.formData();

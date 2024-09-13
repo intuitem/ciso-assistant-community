@@ -38,7 +38,7 @@
 		</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 		<!-- Enable for debugging: -->
-		<form method="POST" action={formAction} class="modal-form {cForm}">
+		<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" data-testid="delete-cancel-button" on:click={parent.onClose}>{m.cancel()}</button>
