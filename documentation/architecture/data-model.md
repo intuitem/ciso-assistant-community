@@ -46,7 +46,6 @@ erDiagram
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
-    ROOT_FOLDER           ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ USER                        : contains
@@ -54,6 +53,7 @@ erDiagram
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
