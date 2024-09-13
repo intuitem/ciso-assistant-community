@@ -109,6 +109,7 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
 
 class RepresentativeReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
+    user = FieldsRelatedField()
 
     class Meta:
         model = Representative
@@ -116,10 +117,7 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 
 
 class RepresentativeWriteSerializer(BaseModelSerializer):
-    entity = serializers.PrimaryKeyRelatedField(
-        queryset=Entity.objects.all(),
-        required=True,
-    )
+    create_user = serializers.BooleanField(default=False, read_only=True)
 
     class Meta:
         model = Representative
@@ -136,11 +134,6 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
-    provider_entity = serializers.PrimaryKeyRelatedField(
-        queryset=Entity.objects.all(),
-        required=True,
-    )
-
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
