@@ -2061,7 +2061,7 @@ class ComplianceAssessment(Assessment):
             requirement_assessment = RequirementAssessment.objects.create(
                 compliance_assessment=self,
                 requirement=requirement,
-                folder=Folder.objects.get(id=self.project.folder.id),
+                folder=Folder.objects.get(id=self.folder.id),
                 answer=transform_question_to_answer(requirement.question)
                 if requirement.question
                 else {},
