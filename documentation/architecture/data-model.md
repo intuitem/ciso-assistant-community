@@ -232,6 +232,7 @@ erDiagram
         date     expiration
         url      link
         string   effort
+        float    cost
         string[] tags
     }
 
@@ -603,6 +604,7 @@ namespace DomainObjects {
         +DateField expiry_date
         +CharField link
         +CharField effort
+        +Decimal   cost
 
         +RiskScenario[] risk_scenarios()
         +RiskAssessments[] risk_assessments()
@@ -785,10 +787,13 @@ A applied  control has the following specific fields:
 - an Estimated Time of Arrival date
 - a validity date (expiration field)
 - an effort (--/S/M/L/XL)
+- a cost (--/float value)
 - a url link
 - a list of user-defined tags
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
+
+Costs are measured in a global currency/multiple that is defined in global settings.
 
 ## Compliance and risk assessments
 
