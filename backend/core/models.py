@@ -31,7 +31,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
 
@@ -1364,7 +1364,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin, ETADueDateMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1408,6 +1408,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin):
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.folder or self.folder == Folder.get_root_folder():
+            self.folder = self.project.folder
+        return super().save(*args, **kwargs)
 
 
 class RiskAssessment(Assessment):
