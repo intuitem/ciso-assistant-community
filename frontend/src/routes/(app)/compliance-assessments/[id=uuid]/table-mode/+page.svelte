@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, Actions } from './$types';
 	import {
 		Accordion,
 		AccordionItem,
@@ -22,10 +22,9 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { invalidate } from '$app/navigation';
-	import { page } from '$app/stores';
 
 	export let data: PageData;
+	export let form: Actions;
 
 	/** Is the page used for shallow routing? */
 	export let shallow = false;
@@ -33,6 +32,7 @@
 	export let actionPath: string = '';
 	export let questionnaireOnly: boolean = false;
 	export let assessmentOnly: boolean = false;
+	export let invalidateAll: boolean = true;
 
 	if (!shallow) breadcrumbObject.set(data.compliance_assessment);
 
@@ -53,6 +53,8 @@
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
+
+	$: createdEvidence = form?.createdEvidence;
 
 	function title(requirementAssessment) {
 		const requirement = requirementHashmap[requirementAssessment.requirement];
@@ -98,7 +100,7 @@
 			props: {
 				form: createform,
 				formAction: `${actionPath}?/createEvidence`,
-				invalidateAll: false,
+				invalidateAll: invalidateAll,
 				model: data.evidenceModel,
 				debug: false
 			}
@@ -107,14 +109,23 @@
 			type: 'component',
 			component: modalComponent,
 			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName)),
-			response: (r) => {
-				if (r === true) {
-					invalidate($page.url.pathname);
-				}
-			}
 		};
 		modalStore.trigger(modal);
 	}
+
+	let addeddEvidence = 0;
+
+	
+	$: if (createdEvidence && shallow) {
+			data.requirement_assessments.find(
+				(requirementAssessment) => requirementAssessment.id === createdEvidence.requirement_assessments[0]
+			).evidences.push({
+				str: createdEvidence.name,
+				id: createdEvidence.id
+			});
+			createdEvidence = undefined;
+			addeddEvidence =+ 1;
+		}
 
 	function modalConfirmDelete(id: string, name: string): void {
 		const modalComponent: ModalComponent = {
@@ -123,7 +134,7 @@
 				_form: data.deleteForm,
 				formAction: `${actionPath}?/deleteEvidence`,
 				id: id,
-				invalidateAll: false,
+				invalidateAll: invalidateAll,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel
 			}
@@ -136,6 +147,9 @@
 			body: `${m.deleteModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
+		data.requirement_assessments.forEach(requirementAssessment => {
+			requirementAssessment.evidences = requirementAssessment.evidences.filter(evidence => evidence.id !== id);
+		});
 	}
 </script>
 
@@ -193,7 +207,7 @@
 											value={option.id}
 											bind:group={requirementAssessment.status}
 											name="status"
-											on:change={(event) => update(requirementAssessment, 'status', option.id)}
+											on:change={() => update(requirementAssessment, 'status', option.id)}
 											>{option.label}</RadioItem
 										>
 									{/each}
@@ -213,7 +227,7 @@
 											value={option.id}
 											bind:group={requirementAssessment.result}
 											name="result"
-											on:change={(event) => update(requirementAssessment, 'result', option.id)}
+											on:change={() => update(requirementAssessment, 'result', option.id)}
 											>{option.label}</RadioItem
 										>
 									{/each}
@@ -245,7 +259,7 @@
 													bind:group={question.answer}
 													name="question"
 													value={option}
-													on:change={(event) =>
+													on:change={() =>
 														update(requirementAssessment, 'answer', option, question)}
 													>{option}</RadioItem
 												>
@@ -257,7 +271,7 @@
 											placeholder=""
 											class="input w-fit"
 											bind:value={question.answer}
-											on:change={(event) =>
+											on:change={() =>
 												update(requirementAssessment, 'answer', question.answer, question)}
 											{...$$restProps}
 										/>
@@ -267,7 +281,7 @@
 											class="input w-full"
 											bind:value={question.answer}
 											on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-											on:change={(event) =>
+											on:change={() =>
 												update(requirementAssessment, 'answer', question.answer, question)}
 											{...$$restProps}
 										/>
@@ -293,7 +307,7 @@
 										{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
 											<button
 												class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-												on:click={(event) => {
+												on:click={() => {
 													update(
 														requirementAssessment,
 														'observation',
@@ -319,34 +333,40 @@
 									</div>
 								</svelte:fragment>
 							</AccordionItem>
-							<AccordionItem>
-								<svelte:fragment slot="summary"
-									><p class="flex">
-										{m.evidence()} ({requirementAssessment.evidences.length})
-									</p></svelte:fragment
-								>
-								<svelte:fragment slot="content">
-									<div class="flex flex-row space-x-2 items-center">
-										<button
-											class="btn variant-filled-primary self-start"
-											on:click={() =>
-												modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-											type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
-										>
-										{#each requirementAssessment.evidences as evidence}
-											<p class="card p-2">
-												<i class="fa-solid fa-file mr-2"></i>{evidence.str}
-												<button
-													on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-													type="button"
-												>
-													<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-												</button>
-											</p>
-										{/each}
-									</div>
-								</svelte:fragment>
-							</AccordionItem>
+								<AccordionItem>
+									<svelte:fragment slot="summary"
+										><p class="flex items-center space-x-2">
+											<span>{m.evidence()}</span>
+											{#key addeddEvidence}
+												<span class="badge variant-soft-primary">{requirementAssessment.evidences.length}</span>
+											{/key}
+										</p></svelte:fragment
+									>
+									<svelte:fragment slot="content">
+										<div class="flex flex-row space-x-2 items-center">
+											<button
+												class="btn variant-filled-primary self-start"
+												on:click={() =>
+													modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+												type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+											>
+											{#key addeddEvidence}
+												{#each requirementAssessment.evidences as evidence}
+													<p class="card p-2">
+														<i class="fa-solid fa-file mr-2"></i>{evidence.str}
+														<button
+															class="cursor-pointer"
+															on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+															type="button"
+														>
+															<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+														</button>
+													</p>
+												{/each}
+											{/key}
+										</div>
+									</svelte:fragment>
+								</AccordionItem>
 						</Accordion>
 					</div>
 				</form>
