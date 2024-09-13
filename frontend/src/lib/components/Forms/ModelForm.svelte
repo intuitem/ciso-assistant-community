@@ -746,7 +746,7 @@
 			label={m.project()}
 			hidden={initialData.project}
 		/>
-		{#if context === 'create'}
+		{#if !data.compliance_assessment}
 			<Checkbox
 				{form}
 				field="create_audit"
@@ -755,7 +755,7 @@
 			/>
 			<AutocompleteSelect
 				{form}
-				disabled={object.id || !data.create_audit}
+				disabled={!data.create_audit}
 				hidden={!data.create_audit}
 				options={getOptions({ objects: model.foreignKeys['framework'] })}
 				field="framework"
