@@ -50,7 +50,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         for author in validated_data.get("authors", []):
-            if (author not in instance.authors.all()) and (EMAIL_HOST or EMAIL_HOST_RESCUE):
+            if (author not in instance.authors.all()) and (
+                EMAIL_HOST or EMAIL_HOST_RESCUE
+            ):
                 try:
                     author.mailing(
                         email_template_name="tprm/third_party_email.html",
