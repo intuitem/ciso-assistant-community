@@ -343,6 +343,7 @@ class UserReadSerializer(BaseModelSerializer):
             "date_joined",
             "user_groups",
             "is_sso",
+            "is_third_party",
         ]
 
 
@@ -357,6 +358,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "is_third_party",
         ]
 
     def validate_email(self, email):
