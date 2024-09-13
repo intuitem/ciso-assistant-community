@@ -810,7 +810,7 @@
 			bind:cachedValue={formDataCache['solutions']}
 			label={m.solutions()}
 		/>
-		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
+		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} inversedColors fullDonut min_score={1} max_score={4}/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
@@ -891,10 +891,10 @@
 			bind:cachedValue={formDataCache['evidence']}
 			label={m.evidence()}
 		/>
-		<Score {form} label={m.penetration()} field="penetration" always_enabled={true} max_score={5} />
-		<Score {form} label={m.dependency()} field="dependency" always_enabled={true} max_score={5} />
-		<Score {form} label={m.maturity()} field="maturity" always_enabled={true} max_score={5} />
-		<Score {form} label={m.trust()} field="trust" always_enabled={true} max_score={5} />
+		<!-- <Score {form} label={m.penetration()} field="penetration" always_enabled={true} inversedColors fullDonut max_score={5} />
+		<Score {form} label={m.dependency()} field="dependency" always_enabled={true} inversedColors fullDonut max_score={5} />
+		<Score {form} label={m.maturity()} field="maturity" always_enabled={true} inversedColors fullDonut max_score={5} />
+		<Score {form} label={m.trust()} field="trust" always_enabled={true} inversedColors fullDonut max_score={5} /> -->
 	{:else if URLModel === 'solutions'}
 		<AutocompleteSelect
 			{form}
@@ -912,7 +912,7 @@
 			cacheLock={cacheLocks['ref_id']}
 			bind:cachedValue={formDataCache['ref_id']}
 		/>
-		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} max_score={5} />
+		<Score {form} label={m.criticality()} field="criticality" always_enabled={true} inversedColors fullDonut min_score={1} max_score={4}/>
 	{:else if URLModel === 'representatives'}
 		<TextField
 			{form}

@@ -34,7 +34,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = EntityAssessment
-        exclude = []
+        exclude = ['penetration', 'dependency', 'maturity', 'trust']
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
@@ -71,7 +71,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = EntityAssessment
-        exclude = []
+        exclude = ['penetration', 'dependency', 'maturity', 'trust']
 
 
 class EntityAssessmentCreateSerializer(BaseModelSerializer):

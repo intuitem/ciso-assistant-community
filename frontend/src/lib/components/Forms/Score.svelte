@@ -6,11 +6,14 @@
 
 	export let label: string | undefined = undefined;
 	export let field: string;
+	export let fullDonut: boolean = false;
+	export let inversedColors: boolean = false;
 
 	export let min_score = 0;
 	export let max_score = 100;
 	export let score_step = 1;
 	export let always_enabled = false;
+	export let helpText: string | undefined = undefined;
 
 	interface ScoresDefinition {
 		score: number;
@@ -94,8 +97,8 @@
 						{/if}
 						<ProgressRadial
 							stroke={100}
-							meter={displayScoreColor($value, max_score)}
-							value={$isScored ? formatScoreValue($value, max_score) : 0}
+							meter={displayScoreColor($value, max_score, inversedColors)}
+							value={$isScored ? formatScoreValue($value, max_score, fullDonut) : 0}
 							font={150}
 							class="shrink-0"
 							width={'w-12'}>{$isScored ? $value : '--'}</ProgressRadial
@@ -109,4 +112,7 @@
 			</p>
 		{/if}
 	</div>
+	{#if helpText}
+		<p class="text-sm text-gray-500">{helpText}</p>
+	{/if}
 </div>
