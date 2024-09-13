@@ -15,7 +15,7 @@
 
 	export let _form;
 	export let URLModel: urlModel;
-	export let formAction: string = '?delete'
+	export let formAction: string = '?/delete'
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let id: string;
 	import { superForm } from 'sveltekit-superforms';
@@ -38,7 +38,7 @@
 		</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 		<!-- Enable for debugging: -->
-		<form method="POST" action={formAction} class="modal-form {cForm}" use:enhance>
+		<form method="POST" action={formAction} class="modal-form {cForm}">
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" data-testid="delete-cancel-button" on:click={parent.onClose}>{m.cancel()}</button>
