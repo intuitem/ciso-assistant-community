@@ -86,7 +86,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             return object_created
         except Exception as e:
             logger.error(e)
-            raise serializers.ValidationError(e.args[0])
+            raise serializers.ValidationError()
 
     class Meta:
         model: models.Model
