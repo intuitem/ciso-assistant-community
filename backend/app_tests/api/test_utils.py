@@ -494,7 +494,6 @@ class EndpointTestsQueries:
                             json.loads(response_item[key]) == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                     else:
-                        print("coucou", type(value))
                         assert (
                             response_item[key] == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
