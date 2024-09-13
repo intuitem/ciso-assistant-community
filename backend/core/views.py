@@ -1017,6 +1017,9 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
 class FolderFilter(df.FilterSet):
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
+    content_type = df.MultipleChoiceFilter(
+        choices=Folder.ContentType, lookup_expr="icontains"
+    )
 
     def get_owned_folders(self, queryset, name, value):
         owned_folders_id = []
