@@ -6,6 +6,7 @@ from core.serializers import BaseModelSerializer
 from iam.models import Folder
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from django.utils.translation import gettext_lazy as _
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 
 class EntityReadSerializer(BaseModelSerializer):
@@ -49,15 +50,18 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         for author in validated_data.get("authors", []):
-            if author not in instance.authors.all():
-                author.mailing(
-                    email_template_name="tprm/third_party_email.html",
-                    subject=_(
-                        "CISO Assistant: A questionnaire has been assigned to you"
-                    ),
-                    object="entity-assessments",
-                    object_id=instance.id,
-                )
+            if (author not in instance.authors.all()) and (EMAIL_HOST or EMAIL_HOST_RESCUE):
+                try:
+                    author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="entity-assessments",
+                        object_id=instance.id,
+                    )
+                except Exception as e:
+                    print(e)
         _audit = instance.compliance_assessment
         if not _audit:
             create_audit = validated_data.pop("create_audit")
@@ -123,16 +127,19 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
             audit.create_requirement_assessments()
             instance.compliance_assessment = audit
             instance.save()
-        if instance.authors:
+        if instance.authors and (EMAIL_HOST or EMAIL_HOST_RESCUE):
             for author in instance.authors.all():
-                author.mailing(
-                    email_template_name="tprm/third_party_email.html",
-                    subject=_(
-                        "CISO Assistant: A questionnaire has been assigned to you"
-                    ),
-                    object="entity-assessments",
-                    object_id=instance.id,
-                )
+                try:
+                    author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="entity-assessments",
+                        object_id=instance.id,
+                    )
+                except Exception as e:
+                    print(e)
         return instance
 
     class Meta:
