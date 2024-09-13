@@ -50,7 +50,7 @@
 		{#key URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
-					{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments', 'applied-controls'].includes(URLModel)}
+					{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(URLModel)}
 						<button
 							class="btn variant-filled-primary self-end"
 							data-testid="add-button"
@@ -58,20 +58,14 @@
 							><i class="fa-solid fa-plus mr-2" />
 							{safeTranslate('add' + capitalizeFirstLetter(data.model.localName))}
 						</button>
-					{:else if URLModel === 'applied-controls'}
-						<button
-							class="btn variant-filled-primary self-end"
-							data-testid="add-button"
-							on:click={modalCreateForm}
-							><i class="fa-solid fa-plus mr-2" />
-							{safeTranslate('add')}
-						</button>
-						<a
-							href="{URLModel}/export/"
-							class="btn variant-filled-surface"
-							data-testid="export-button"
-							><i class="fa-solid fa-download mr-2" />{m.exportButton()}</a
-						>
+						{#if URLModel === 'applied-controls'}
+							<a
+								href="{URLModel}/export/"
+								class="btn variant-filled-surface"
+								data-testid="export-button"
+								><i class="fa-solid fa-download mr-2" />{m.exportButton()}</a
+							>
+						{/if}
 					{:else if URLModel === 'risk-matrices'}
 						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
 							><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a

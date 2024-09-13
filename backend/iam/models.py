@@ -61,6 +61,14 @@ class Folder(NameDescriptionMixin):
         """class function for general use"""
         return _get_root_folder()
 
+    @staticmethod
+    def get_root_folder_id() -> uuid.UUID:
+        """class function for general use"""
+        try:
+            return uuid.UUID(_get_root_folder().id)
+        except:
+            return _get_root_folder()
+
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
@@ -173,7 +181,7 @@ class FolderMixin(models.Model):
         Folder,
         on_delete=models.CASCADE,
         related_name="%(class)s_folder",
-        default=Folder.get_root_folder,
+        default=Folder.get_root_folder_id,
     )
 
     class Meta:
@@ -382,10 +390,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_short_name(self) -> str:
         """get user's short name (i.e. first_name or email before @))"""
-        try:
-            return self.first_name if self.first_name else self.email.split("@")[0]
-        except:
-            return ""
+        return self.first_name if self.first_name else self.email.split("@")[0]
 
     def mailing(self, email_template_name, subject, pk=False):
         """

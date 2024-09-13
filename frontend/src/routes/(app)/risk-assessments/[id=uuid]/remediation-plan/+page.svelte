@@ -17,7 +17,7 @@
 			avoid: 'bg-red-200',
 			transfer: 'bg-violet-200'
 		};
-		return map[status.toLowerCase()] ?? 'bg-gray-200';
+		return map[status] ?? 'bg-gray-200';
 	};
 
 	const measureStatusColorMap = (treatment: string) => {
@@ -68,7 +68,7 @@
 							href="/risk-scenarios/{scenario.id}">{scenario.name}</a
 						>
 						<span class="badge {scenarioTreatmentColorMap(scenario.treatment)}"
-							>{scenario.treatment}</span
+							>{safeTranslate(scenario.treatment)}</span
 						>
 					</td>
 				</tr>
