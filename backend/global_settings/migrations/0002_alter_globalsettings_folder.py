@@ -6,16 +6,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('global_settings', '0001_initial'),
-        ('iam', '0006_alter_role_folder_alter_roleassignment_folder_and_more'),
+        ("global_settings", "0001_initial"),
+        ("iam", "0006_alter_role_folder_alter_roleassignment_folder_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='globalsettings',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="globalsettings",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
     ]
