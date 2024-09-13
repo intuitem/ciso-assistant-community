@@ -18,29 +18,31 @@
 		{data}
 		exclude={['criticality', 'penetration', 'dependency', 'maturity', 'trust', 'evidence']}
 	/>
-	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
-		<TreeView>
-			<TreeViewItem
-				on:toggle={async (e) => {
-					e.preventDefault();
-					const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
-					const result = await preloadData(href);
-					if (result.type === 'loaded' && result.status === 200) {
-						pushState('', { auditTableMode: result.data });
-					} else {
-						// Something went wrong, try navigating
-						goto(href);
-					}
-				}}
-				><span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
-				<svelte:fragment slot="children">
-					{#if Object.hasOwn($page.state, 'auditTableMode')}
-						<div class="max-h-[48rem] overflow-y-scroll">
-							<AuditTableMode data={$page.state.auditTableMode} actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`} shallow />
-						</div>
-					{/if}
-				</svelte:fragment>
-			</TreeViewItem>
-		</TreeView>
-	</div>
+	{#if data.data.compliance_assessment}
+		<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
+			<TreeView>
+				<TreeViewItem
+					on:toggle={async (e) => {
+						e.preventDefault();
+						const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
+						const result = await preloadData(href);
+						if (result.type === 'loaded' && result.status === 200) {
+							pushState('', { auditTableMode: result.data });
+						} else {
+							// Something went wrong, try navigating
+							goto(href);
+						}
+					}}
+					><span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
+					<svelte:fragment slot="children">
+						{#if Object.hasOwn($page.state, 'auditTableMode')}
+							<div class="max-h-[48rem] overflow-y-scroll">
+								<AuditTableMode data={$page.state.auditTableMode} actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`} shallow />
+							</div>
+						{/if}
+					</svelte:fragment>
+				</TreeViewItem>
+			</TreeView>
+		</div>
+	{/if}
 </div>
