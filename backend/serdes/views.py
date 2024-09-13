@@ -1,17 +1,18 @@
+import gzip
 import io
 import json
 import sys
 from datetime import datetime
 
-from ciso_assistant.settings import VERSION
 from django.core import management
 from django.core.management.commands import dumpdata, loaddata
 from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.parsers import JSONParser
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ciso_assistant.settings import VERSION
 from serdes.serializers import LoadBackupSerializer
 
 
@@ -25,7 +26,8 @@ class ExportBackupView(APIView):
             "Content-Disposition"
         ] = f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
 
-        response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
+        buffer = io.StringIO()
+        buffer.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
         # Here we dump th data to stdout
         # NOTE: We will not be able to dump selected folders with this method.
         management.call_command(
@@ -38,22 +40,34 @@ class ExportBackupView(APIView):
                 "knox.authtoken",
             ],
             indent=4,
-            stdout=response,
+            stdout=buffer,
             natural_foreign=True,
         )
-        response.write("]")
+        buffer.write("]")
+        buffer.seek(0)
+        buffer_data = gzip.compress(buffer.getvalue().encode())
+        response.write(buffer_data)
         return response
 
 
 class LoadBackupView(APIView):
-    parser_classes = (JSONParser,)
+    parser_classes = (FileUploadParser,)
     serializer_class = LoadBackupSerializer
 
     def post(self, request, *args, **kwargs):
         if not request.user.has_backup_permission:
             return Response(status=status.HTTP_403_FORBIDDEN)
         if request.data:
-            sys.stdin = io.StringIO(json.dumps(request.data[1]))
+            backup_file = request.data["file"]
+            is_json = backup_file.name.split(".")[-1].lower() == "json"
+            data = backup_file.read()
+            decompressed_data = data if is_json else gzip.decompress(data)
+            # Performances could be improved (by avoiding the json.loads + json.dumps calls with a direct raw manipulation on the JSON body)
+            # But performances of the backup loading is not that much important.
+            decompressed_data = json.loads(decompressed_data)[1]
+            decompressed_data = json.dumps(decompressed_data)
+
+            sys.stdin = io.StringIO(decompressed_data)
             request.session.flush()
             management.call_command("flush", interactive=False)
             # Here we load the data from stdin
@@ -66,6 +80,7 @@ class LoadBackupView(APIView):
                     "contenttypes",
                     "auth.permission",
                     "sessions.session",
+                    "iam.ssosettings",
                     "knox.authtoken",
                 ],
             )

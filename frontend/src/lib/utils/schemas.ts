@@ -315,7 +315,8 @@ export const representativeSchema = z.object({
 	last_name: z.string().optional(),
 	phone: z.string().optional(),
 	role: z.string().optional(),
-	description: z.string().optional()
+	description: z.string().optional(),
+	create_user: z.boolean().optional().default(false)
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

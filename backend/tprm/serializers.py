@@ -3,6 +3,7 @@ from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
+from iam.models import Folder
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 
 
@@ -91,7 +92,13 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
         if create_audit:
             if not _framework:
                 raise serializers.ValidationError("frameworkRequiredToCreateAudit")
+            enclave = Folder.objects.create(
+                content_type=Folder.ContentType.ENCLAVE,
+                name=f"{instance.project.name}/{instance.name}",
+                parent_folder=instance.folder,
+            )
             audit = ComplianceAssessment.objects.create(
+                folder=enclave,
                 name=validated_data["name"],
                 framework=_framework,
                 project=validated_data["project"],
@@ -109,6 +116,7 @@ class EntityAssessmentCreateSerializer(BaseModelSerializer):
 
 class RepresentativeReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
+    user = FieldsRelatedField()
 
     class Meta:
         model = Representative
@@ -116,10 +124,7 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 
 
 class RepresentativeWriteSerializer(BaseModelSerializer):
-    entity = serializers.PrimaryKeyRelatedField(
-        queryset=Entity.objects.all(),
-        required=True,
-    )
+    create_user = serializers.BooleanField(default=False, read_only=True)
 
     class Meta:
         model = Representative
@@ -136,11 +141,6 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
-    provider_entity = serializers.PrimaryKeyRelatedField(
-        queryset=Entity.objects.all(),
-        required=True,
-    )
-
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]

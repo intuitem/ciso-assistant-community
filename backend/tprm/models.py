@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.models import Assessment, ComplianceAssessment, Evidence
 from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.views import User
 
 
 class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -73,8 +74,9 @@ class Representative(AbstractBaseModel):
     phone = models.CharField(max_length=255, blank=True)
     role = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["email"]
 
 
 class Solution(NameDescriptionMixin):
