@@ -3,9 +3,15 @@ from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
-from iam.models import Folder
+from core.utils import RoleCodename, UserGroupCodename
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from django.utils.translation import gettext_lazy as _
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class EntityReadSerializer(BaseModelSerializer):
@@ -47,92 +53,100 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         child=serializers.CharField(), required=False
     )
 
-    def update(self, instance, validated_data):
-        for author in validated_data.get("authors", []):
-            if author not in instance.authors.all():
-                author.mailing(
-                    email_template_name="tprm/third_party_email.html",
-                    subject=_(
-                        "CISO Assistant: A questionnaire has been assigned to you"
-                    ),
-                    object="entity-assessments",
-                    object_id=instance.id,
-                )
-        _audit = instance.compliance_assessment
-        if not _audit:
-            create_audit = validated_data.pop("create_audit")
-            _framework = validated_data.pop("framework", None)
-            _selected_implementation_groups = validated_data.pop(
+    def _extract_audit_data(self, validated_data):
+        audit_data = {
+            "create_audit": validated_data.pop("create_audit", False),
+            "framework": validated_data.pop("framework", None),
+            "selected_implementation_groups": validated_data.pop(
                 "selected_implementation_groups", None
-            )
-            instance = super().update(instance, validated_data)
-            if create_audit:
-                if not _framework:
-                    raise serializers.ValidationError(
-                        {"framework": [_("Framework required")]}
-                    )
-                audit = ComplianceAssessment.objects.create(
-                    name=validated_data["name"],
-                    framework=_framework,
-                    project=validated_data["project"],
-                    selected_implementation_groups=_selected_implementation_groups,
-                )
-                audit.create_requirement_assessments()
-                instance.compliance_assessment = audit
-                instance.save()
-        return instance
+            ),
+        }
+        return audit_data
 
-    class Meta:
-        model = EntityAssessment
-        exclude = ["penetration", "dependency", "maturity", "trust"]
-
-
-class EntityAssessmentCreateSerializer(BaseModelSerializer):
-    create_audit = serializers.BooleanField(default=True)
-    framework = serializers.PrimaryKeyRelatedField(
-        queryset=Framework.objects.all(), required=False
-    )
-    selected_implementation_groups = serializers.ListField(
-        child=serializers.CharField(), required=False
-    )
-
-    def create(self, validated_data):
-        create_audit = validated_data.pop("create_audit")
-        _framework = validated_data.pop("framework", None)
-        _selected_implementation_groups = validated_data.pop(
-            "selected_implementation_groups", None
-        )
-        instance = super().create(validated_data)
-        if create_audit:
-            if not _framework:
+    def _create_or_update_audit(self, instance, audit_data):
+        if audit_data["create_audit"]:
+            if not audit_data["framework"]:
                 raise serializers.ValidationError(
                     {"framework": [_("Framework required")]}
                 )
-            enclave = Folder.objects.create(
-                content_type=Folder.ContentType.ENCLAVE,
-                name=f"{instance.project.name}/{instance.name}",
-                parent_folder=instance.folder,
-            )
+
             audit = ComplianceAssessment.objects.create(
-                folder=enclave,
-                name=validated_data["name"],
-                framework=_framework,
-                project=validated_data["project"],
-                selected_implementation_groups=_selected_implementation_groups,
+                name=instance.name,
+                framework=audit_data["framework"],
+                project=instance.project,
+                selected_implementation_groups=audit_data[
+                    "selected_implementation_groups"
+                ],
             )
+
+            if not instance.compliance_assessment:
+                enclave = Folder.objects.create(
+                    content_type=Folder.ContentType.ENCLAVE,
+                    name=f"{instance.project.name}/{instance.name}",
+                    parent_folder=instance.folder,
+                )
+                audit.folder = enclave
+                audit.save()
+
             audit.create_requirement_assessments()
             instance.compliance_assessment = audit
             instance.save()
-        if instance.authors:
-            for author in instance.authors.all():
-                author.mailing(
-                    email_template_name="tprm/third_party_email.html",
-                    subject=_(
-                        "CISO Assistant: A questionnaire has been assigned to you"
-                    ),
-                    object="entity-assessments",
-                    object_id=instance.id,
-                )
+
+    def _assign_third_party_respondents(
+        self, instance: EntityAssessment, third_party_users: set[User]
+    ):
+        enclave = instance.compliance_assessment.folder
+        respondents, _ = UserGroup.objects.get_or_create(
+            name=UserGroupCodename.THIRD_PARTY_RESPONDENT, folder=enclave, builtin=True
+        )
+        role_assignment, _ = RoleAssignment.objects.get_or_create(
+            user_group=respondents,
+            role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
+            builtin=True,
+            folder=enclave,
+            is_recursive=True,
+        )
+        role_assignment.perimeter_folders.add(enclave)
+        for user in third_party_users:
+            if not user.is_third_party:
+                logger.warning("User is not a third-party", user=user)
+            user.user_groups.add(respondents)
+
+    def _send_author_emails(self, instance, authors_to_email: set):
+        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+            for author in authors_to_email:
+                try:
+                    author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="entity-assessments",
+                        object_id=instance.id,
+                    )
+                except Exception as e:
+                    print(f"Failed to send email to {author}: {e}")
+
+    def create(self, validated_data):
+        audit_data = self._extract_audit_data(validated_data)
+        instance = super().create(validated_data)
+        self._create_or_update_audit(instance, audit_data)
+        self._assign_third_party_respondents(instance, set(instance.authors.all()))
+        self._send_author_emails(instance, set(instance.authors.all()))
+        return instance
+
+    def update(self, instance: EntityAssessment, validated_data):
+        audit_data = self._extract_audit_data(validated_data)
+        new_authors = set(validated_data.get("authors", [])) - set(
+            instance.authors.all()
+        )
+        instance = super().update(instance, validated_data)
+
+        if not instance.compliance_assessment:
+            self._create_or_update_audit(instance, audit_data)
+
+        self._assign_third_party_respondents(instance, new_authors)
+        self._send_author_emails(instance, new_authors)
         return instance
 
     class Meta:

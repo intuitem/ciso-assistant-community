@@ -169,7 +169,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'riskMatrices',
 		verboseName: 'Risk matrix',
 		verboseNamePlural: 'Risk matrices',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
 	},
 	'risk-assessments': {
 		name: 'riskassessment',
@@ -181,7 +183,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
 		],
@@ -203,7 +205,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'threats',
 		verboseName: 'Threat',
 		verboseNamePlural: 'Threats',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
 	},
 	'risk-scenarios': {
 		name: 'riskscenario',
@@ -249,7 +253,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
-			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
@@ -278,7 +282,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
-			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
@@ -303,7 +307,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'risk-scenarios',
 				urlParams: '/acceptable'
 			},
-			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' }
 		],
 		filters: [{ field: 'risk_scenarios' }, { field: 'folder' }, { field: 'approver' }]
@@ -314,7 +318,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'referenceControls',
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
 		selectFields: [{ field: 'category' }, { field: 'csf_function' }],
 		filters: [{ field: 'folder' }]
 	},
@@ -326,7 +332,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Assets',
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
-			{ field: 'folder', urlModel: 'folders' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [{ field: 'parent_assets' }, { field: 'folder' }, { field: 'type' }]
@@ -347,7 +353,9 @@ export const URL_MODEL_MAP: ModelMap = {
 
 		verboseName: 'User group',
 		verboseNamePlural: 'User groups',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
 		filters: []
 	},
 	'role-assignments': {
@@ -366,10 +374,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Framework',
 		verboseNamePlural: 'Frameworks',
 		foreignKeyFields: [
-			{
-				field: 'folder',
-				urlModel: 'folders'
-			}
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		]
 	},
 	evidences: {
@@ -380,7 +385,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Evidences',
 		fileFields: ['attachment'],
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		]
@@ -396,7 +401,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
@@ -468,7 +473,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entity-assessments' }
 		],
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' }
 		]
 	},
@@ -483,8 +488,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'framework', urlModel: 'frameworks' },
-			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users' },
+			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=true' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		],

@@ -940,7 +940,14 @@ class UserFilter(df.FilterSet):
 
     class Meta:
         model = User
-        fields = ["email", "first_name", "last_name", "is_active", "is_approver"]
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_approver",
+            "is_third_party",
+        ]
 
 
 class UserViewSet(BaseModelViewSet):
