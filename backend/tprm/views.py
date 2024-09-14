@@ -3,7 +3,6 @@ from iam.models import Folder
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from tprm.models import Entity, Representative, Solution, EntityAssessment
 from rest_framework.decorators import action
-from tprm.serializers import EntityAssessmentCreateSerializer
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -29,11 +28,6 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
     model = EntityAssessment
     filterset_fields = ["status", "project", "project__folder", "authors", "entity"]
-
-    def get_serializer_class(self, **kwargs):
-        if self.action == "create":
-            return EntityAssessmentCreateSerializer
-        return super().get_serializer_class(**kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
