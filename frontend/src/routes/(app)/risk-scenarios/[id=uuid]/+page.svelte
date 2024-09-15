@@ -89,7 +89,7 @@
 					</p>
 				</div>
 				<div>
-					<span class=" text-sm text-gray-400 font-semibold">Owner(s):</span>
+					<span class=" text-sm text-gray-400 font-semibold">{m.owner()}</span>
 					<ul>
 						{#each data.scenario.owner as owner}
 							<li class="text-xs">{owner.str}</li>
@@ -230,6 +230,17 @@
 		</div>
 	</div>
 	<div class="card px-4 py-2 bg-white shadow-lg space-y-2">
+		<div>
+			<p class="text-sm font-semibold text-gray-400">{m.qualification()}</p>
+			<p>
+				<span class="font-semibold">
+					{#each data.scenario.qualifications as qualification, i}
+						{#if i > 0},{/if}
+						{localItems()[toCamelCase(qualification)] || qualification || localItems()['undefined']}
+					{/each}
+				</span>
+			</p>
+		</div>
 		<div>
 			<p class="text-sm font-semibold text-gray-400">{m.strengthOfKnowledge()}</p>
 			<p>

@@ -135,14 +135,14 @@ class FinishACSView(SAMLViewMixin, View):
             email = auth._nameid
             user = User.objects.get(email=email)
             idp_first_name = auth._attributes.get(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", [""]
             )[0]
             idp_last_name = auth._attributes.get(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", [""]
             )[0]
-            if user.first_name != idp_first_name:
+            if idp_first_name and user.first_name != idp_first_name:
                 user.first_name = idp_first_name
-            if user.last_name != idp_last_name:
+            if idp_last_name and user.last_name != idp_last_name:
                 user.last_name = idp_last_name
             user.is_sso = True
             user.save()

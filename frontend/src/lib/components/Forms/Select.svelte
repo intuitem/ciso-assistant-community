@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { toCamelCase } from '$lib/utils/locales';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
-	import { onMount } from 'svelte';
 
 	let _class = '';
 
@@ -12,6 +11,7 @@
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 	export let cachedValue: string | undefined = undefined;
+	export let blank: boolean = false;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
@@ -73,15 +73,12 @@
 			{...$$restProps}
 		>
 			{#if !$constraints?.required && !options.find( (o) => new Set( ['--', 'undefined'] ).has(o.label.toLowerCase()) )}
-				<option value={null} selected>--</option>
+				{@const defaultValue = blank ? '' : null}
+				<option value={defaultValue} selected>--</option>
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
-					{#if Object.hasOwn(m, toCamelCase(option.label))}
-						{m[toCamelCase(option.label)]()}
-					{:else}
-						{option.label}
-					{/if}
+					{safeTranslate(option.label)}
 				</option>
 			{/each}
 		</select>

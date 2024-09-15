@@ -5,6 +5,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 	import Select from './Select.svelte';
@@ -335,6 +336,15 @@
 			cacheLock={cacheLocks['csf_function']}
 			bind:cachedValue={formDataCache['csf_function']}
 		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+			field="owner"
+			cacheLock={cacheLocks['owner']}
+			bind:cachedValue={formDataCache['owner']}
+			label={m.owner()}
+		/>
 		<Select
 			{form}
 			options={model.selectOptions['status']}
@@ -389,6 +399,14 @@
 			helpText={m.effortHelpText()}
 			cacheLock={cacheLocks['effort']}
 			bind:cachedValue={formDataCache['effort']}
+		/>
+		<NumberField
+			{form}
+			field="cost"
+			label={m.cost()}
+			helpText={m.costHelpText()}
+			cacheLock={cacheLocks['cost']}
+			bind:cachedValue={formDataCache['cost']}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -531,15 +549,16 @@
 			bind:cachedValue={formDataCache['link']}
 		/>
 	{:else if URLModel === 'compliance-assessments'}
-		<AutocompleteSelect
-			{form}
-			hide={context !== 'fromBaseline' || initialData.baseline}
-			field="baseline"
-			cacheLock={cacheLocks['baseline']}
-			bind:cachedValue={formDataCache['baseline']}
-			label={m.baseline()}
-			options={getOptions({ objects: model.foreignKeys['baseline'] })}
-		/>
+		{#if context === 'fromBaseline' && initialData.baseline}
+			<AutocompleteSelect
+				{form}
+				field="baseline"
+				cacheLock={cacheLocks['baseline']}
+				bind:cachedValue={formDataCache['baseline']}
+				label={m.baseline()}
+				options={getOptions({ objects: model.foreignKeys['baseline'] })}
+			/>
+		{/if}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
@@ -817,17 +836,22 @@
 							cacheLock={cacheLocks['idp_entity_id']}
 							bind:cachedValue={formDataCache['idp_entity_id']}
 						/>
+						<p class="text-gray-600 text-sm">Option 1: Fill the metadata url</p>
 						<TextField
 							{form}
 							field="metadata_url"
 							label={m.metadataURL()}
-							required={data.provider === 'saml'}
 							disabled={!data.is_enabled}
 							cacheLock={cacheLocks['metadata_url']}
 							bind:cachedValue={formDataCache['metadata_url']}
 						/>
+						<div class="flex items-center justify-center w-full space-x-2">
+							<hr class="w-1/2 items-center bg-gray-200 border-0" />
+							<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+							<hr class="w-1/2 items-center bg-gray-200 border-0" />
+						</div>
+						<p class="text-gray-600 text-sm">Option 2: Fill the SSO URL, SLO URL and x509cert</p>
 						<TextField
-							hidden
 							{form}
 							field="sso_url"
 							label={m.SSOURL()}
@@ -836,7 +860,6 @@
 							bind:cachedValue={formDataCache['sso_url']}
 						/>
 						<TextField
-							hidden
 							{form}
 							field="slo_url"
 							label={m.SLOURL()}
@@ -845,7 +868,6 @@
 							bind:cachedValue={formDataCache['slo_url']}
 						/>
 						<TextArea
-							hidden
 							{form}
 							field="x509cert"
 							label={m.x509Cert()}

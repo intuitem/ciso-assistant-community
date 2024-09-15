@@ -106,10 +106,11 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			category: 'Technical',
 			csf_function: 'protect',
-			status: 'Planned',
+			status: 'To do',
 			eta: '2025-01-01',
 			link: 'https://intuitem.com/',
 			effort: 'Large',
+			cost: 24.42,
 			folder: vars.folderName,
 			reference_control: `${vars.folderName}/${vars.referenceControlName}`
 		});

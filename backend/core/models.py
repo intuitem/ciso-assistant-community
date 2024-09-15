@@ -9,6 +9,19 @@ import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
+from django.utils.translation import get_language
+from library.helpers import (
+    update_translations_in_object,
+    update_translations_as_string,
+    update_translations,
+    get_referential_translation,
+)
+
+import os
+import json
+import yaml
+import re
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models, transaction
@@ -18,7 +31,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
 
@@ -774,6 +787,9 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
+    def parse_json_translated(self) -> dict:
+        return update_translations_in_object(json.loads(self.json_definition))
+
     @property
     def grid(self) -> list:
         risk_matrix = self.parse_json()
@@ -811,7 +827,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations(self.json_definition, "fr")
+        return update_translations_as_string(self.json_definition, "fr")
 
     def __str__(self) -> str:
         return self.get_name_translated
@@ -1172,9 +1188,12 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
-        PLANNED = "planned", _("Planned")
+        TO_DO = "to_do", _("To do")
+        IN_PROGRESS = "in_progress", _("In progress")
+        ON_HOLD = "on_hold", _("On hold")
         ACTIVE = "active", _("Active")
-        INACTIVE = "inactive", _("Inactive")
+        DEPRECATED = "deprecated", _("Deprecated")
+        UNDEFINED = "--", _("Undefined")
 
     CATEGORY = ReferenceControl.CATEGORY
     CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
@@ -1218,9 +1237,15 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        null=True,
+        default=Status.UNDEFINED,
         blank=True,
         verbose_name=_("Status"),
+    )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="applied_controls",
     )
     eta = models.DateField(
         blank=True,
@@ -1248,6 +1273,11 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         choices=EFFORT,
         help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
         verbose_name=_("Effort"),
+    )
+    cost = models.FloatField(
+        null=True,
+        help_text=_("Cost of the measure (using globally-chosen currency)"),
+        verbose_name=_("Cost"),
     )
 
     fields_to_check = ["name"]
@@ -1339,7 +1369,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin, ETADueDateMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1383,6 +1413,11 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin):
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.folder or self.folder == Folder.get_root_folder():
+            self.folder = self.project.folder
+        return super().save(*args, **kwargs)
 
 
 class RiskAssessment(Assessment):
@@ -1603,6 +1638,19 @@ class RiskAssessment(Assessment):
                     }
                 )
 
+            if not mtg["cost"]:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{} does not have an estimated cost. This will help you for prioritization"
+                        ).format(mtg["name"]),
+                        "msgid": "appliedControlNoCost",
+                        "link": f"applied-controls/{mtg['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                    }
+                )
+
             if not mtg["link"]:
                 info_lst.append(
                     {
@@ -1678,6 +1726,17 @@ class RiskScenario(NameDescriptionMixin):
         ("accept", _("Accept")),
         ("avoid", _("Avoid")),
         ("transfer", _("Transfer")),
+    ]
+
+    QUALIFICATIONS = [
+        ("Financial", _("Financial")),
+        ("Legal", _("Legal")),
+        ("Reputation", _("Reputation")),
+        ("Operational", _("Operational")),
+        ("Confidentiality", _("Confidentiality")),
+        ("Integrity", _("Integrity")),
+        ("Availability", _("Availability")),
+        ("Authenticity", _("Authenticity")),
     ]
 
     DEFAULT_SOK_OPTIONS = {
@@ -1787,6 +1846,8 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
+    qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
+
     strength_of_knowledge = models.IntegerField(
         default=-1,
         verbose_name=_("Strength of Knowledge"),
@@ -1812,7 +1873,7 @@ class RiskScenario(NameDescriptionMixin):
     parent_project.short_description = _("Project")
 
     def get_matrix(self):
-        return self.risk_assessment.risk_matrix.parse_json()
+        return self.risk_assessment.risk_matrix.parse_json_translated()
 
     def get_current_risk(self):
         if self.current_level < 0:
@@ -1824,7 +1885,12 @@ class RiskScenario(NameDescriptionMixin):
                 "value": -1,
             }
         risk_matrix = self.get_matrix()
-        return {**risk_matrix["risk"][self.current_level], "value": self.current_level}
+        current_risk = {
+            **risk_matrix["risk"][self.current_level],
+            "value": self.current_level,
+        }
+        update_translations_in_object(current_risk)
+        return current_risk
 
     def get_current_impact(self):
         if self.current_impact < 0:
@@ -1864,10 +1930,12 @@ class RiskScenario(NameDescriptionMixin):
                 "value": -1,
             }
         risk_matrix = self.get_matrix()
-        return {
+        residual_risk = {
             **risk_matrix["risk"][self.residual_level],
             "value": self.residual_level,
         }
+        update_translations_in_object(residual_risk)
+        return residual_risk
 
     def get_residual_impact(self):
         if self.residual_impact < 0:
@@ -2390,7 +2458,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return self.requirement.display_short
 
     def get_requirement_description(self) -> str:
-        return self.requirement.description
+        return get_referential_translation(
+            {
+                "description": self.requirement.description,
+                "translations": self.requirement.translations,
+            },
+            "description",
+        )
 
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
