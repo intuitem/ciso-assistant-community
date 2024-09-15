@@ -10,12 +10,14 @@ APPLIED_CONTROL_NAME = "Test Applied Control"
 APPLIED_CONTROL_DESCRIPTION = "Test Description"
 APPLIED_CONTROL_CATEGORY = ("technical", "Technical")
 APPLIED_CONTROL_CATEGORY2 = ("process", "Process")
-APPLIED_CONTROL_STATUS = ("planned", "Planned")
-APPLIED_CONTROL_STATUS2 = ("active", "Active")
+APPLIED_CONTROL_STATUS = AppliedControl.Status.IN_PROGRESS
+APPLIED_CONTROL_STATUS2 = AppliedControl.Status.ACTIVE
 APPLIED_CONTROL_EFFORT = ("L", "Large")
 APPLIED_CONTROL_EFFORT2 = ("M", "Medium")
 APPLIED_CONTROL_LINK = "https://example.com"
 APPLIED_CONTROL_ETA = "2024-01-01"
+APPLIED_CONTROL_COST = 24.42
+APPLIED_CONTROL_COST2 = 25.43
 
 
 @pytest.mark.django_db
@@ -100,17 +102,18 @@ class TestAppliedControlsAuthenticated:
                 "name": APPLIED_CONTROL_NAME,
                 "description": APPLIED_CONTROL_DESCRIPTION,
                 "category": APPLIED_CONTROL_CATEGORY[0],
-                "status": APPLIED_CONTROL_STATUS[0],
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "link": APPLIED_CONTROL_LINK,
                 "eta": APPLIED_CONTROL_ETA,
                 "effort": APPLIED_CONTROL_EFFORT[0],
+                "cost": APPLIED_CONTROL_COST,
                 "folder": test.folder,
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "reference_control": None,
                 "category": APPLIED_CONTROL_CATEGORY[1],
-                "status": APPLIED_CONTROL_STATUS[1],
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,
@@ -131,16 +134,17 @@ class TestAppliedControlsAuthenticated:
                 "name": APPLIED_CONTROL_NAME,
                 "description": APPLIED_CONTROL_DESCRIPTION,
                 "category": APPLIED_CONTROL_CATEGORY[0],
-                "status": APPLIED_CONTROL_STATUS[0],
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "link": APPLIED_CONTROL_LINK,
                 "eta": APPLIED_CONTROL_ETA,
                 "effort": APPLIED_CONTROL_EFFORT[0],
+                "cost": APPLIED_CONTROL_COST,
                 "folder": str(test.folder.id),
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "category": APPLIED_CONTROL_CATEGORY[1],
-                "status": APPLIED_CONTROL_STATUS[1],
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,
@@ -163,26 +167,28 @@ class TestAppliedControlsAuthenticated:
                 "name": APPLIED_CONTROL_NAME,
                 "description": APPLIED_CONTROL_DESCRIPTION,
                 "category": APPLIED_CONTROL_CATEGORY[0],
-                "status": APPLIED_CONTROL_STATUS[0],
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "link": APPLIED_CONTROL_LINK,
                 "eta": APPLIED_CONTROL_ETA,
                 "effort": APPLIED_CONTROL_EFFORT[0],
+                "cost": APPLIED_CONTROL_COST,
                 "folder": test.folder,
             },
             {
                 "name": "new " + APPLIED_CONTROL_NAME,
                 "description": "new " + APPLIED_CONTROL_DESCRIPTION,
                 "category": APPLIED_CONTROL_CATEGORY2[0],
-                "status": APPLIED_CONTROL_STATUS2[0],
+                "status": APPLIED_CONTROL_STATUS2._value_,
                 "link": "new " + APPLIED_CONTROL_LINK,
                 "eta": "2025-01-01",
                 "effort": APPLIED_CONTROL_EFFORT2[0],
+                "cost": APPLIED_CONTROL_COST2,
                 "folder": str(folder.id),
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "category": APPLIED_CONTROL_CATEGORY[1],
-                "status": APPLIED_CONTROL_STATUS[1],
+                "status": APPLIED_CONTROL_STATUS._value_,
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,

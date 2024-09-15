@@ -87,7 +87,7 @@ and run the starter script
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images. 
 
 ## End-user Documentation
 
@@ -149,6 +149,9 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 52. NCSC Cyber Essentials 🇬🇧
 53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 54. Part-IS ✈️🇪🇺
+55. ENS Esquema Nacional de seguridad 🇪🇸
+56. Korea ISA ISMS-P 🇰🇷
+57. Swiss ICT minimum standard 🇨🇭
 
 ### Community contributions
 
@@ -159,7 +162,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
 6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
 7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
-8. New Zealand Information Security Manual (NZISM) ɴᴢ
+8. New Zealand Information Security Manual (NZISM) 🇳🇿
 <br/>
 
 > [!NOTE]
@@ -171,9 +174,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- ENS Esquema Nacional de seguridad (español)
 - NIST 800-82
-- Korea ISA: ISMS-P
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -480,6 +481,8 @@ Set DJANGO_DEBUG=False for security reason.
 - IT: Italian
 - PL: Polish
 - RO: Romanian
+- HI: Hindi
+- UR: Urdu
 
 ## Built With 💜
 
@@ -500,4 +503,12 @@ Great care has been taken to follow security best practices. Please report any i
 
 ## License
 
-[AGPLv3](https://choosealicense.com/licenses/agpl-3.0/)
+This repository contains the source code for both the Open Source edition of CISO Assistant (Community Edition), released under the AGPL v3, as well as the commercial edition of CISO Assistant (Pro and Enterprise Editions), released under the intuitem Commercial Software License. This mono-repository approach is adopted for simplicity.
+
+All the files within the top-level "enterprise" directory are released under the intuitem Commercial Software License.
+
+All the files outside the top-level "enterprise" directory are released under the [AGPLv3](https://choosealicense.com/licenses/agpl-3.0/).
+
+See [LICENSE.txt](./LICENSE.txt) for details.
+
+Unless otherwise noted, all files are © intuitem.

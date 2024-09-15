@@ -12,25 +12,14 @@ import { listViewFields } from '$lib/utils/table';
 import type { Library } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
-import { languageTag } from '$paraglide/runtime';
-
-// ----------------------------------------------------------- //
 
 export const load = (async ({ fetch }) => {
 	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/`;
 	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/`;
 
 	const [stored_libraries_res, loaded_libaries_res] = await Promise.all([
-		fetch(stored_libraries_endpoint, {
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		}),
-		fetch(loaded_libaries_endpoint, {
-			headers: {
-				'Accept-Language': languageTag()
-			}
-		})
+		fetch(stored_libraries_endpoint),
+		fetch(loaded_libaries_endpoint)
 	]);
 
 	const storedLibraries = await stored_libraries_res.json().then((res) => res.results);
