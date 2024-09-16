@@ -95,22 +95,25 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     def _assign_third_party_respondents(
         self, instance: EntityAssessment, third_party_users: set[User]
     ):
-        enclave = instance.compliance_assessment.folder
-        respondents, _ = UserGroup.objects.get_or_create(
-            name=UserGroupCodename.THIRD_PARTY_RESPONDENT, folder=enclave, builtin=True
-        )
-        role_assignment, _ = RoleAssignment.objects.get_or_create(
-            user_group=respondents,
-            role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
-            builtin=True,
-            folder=enclave,
-            is_recursive=True,
-        )
-        role_assignment.perimeter_folders.add(enclave)
-        for user in third_party_users:
-            if not user.is_third_party:
-                logger.warning("User is not a third-party", user=user)
-            user.user_groups.add(respondents)
+        if instance.compliance_assessment:
+            enclave = instance.compliance_assessment.folder
+            respondents, _ = UserGroup.objects.get_or_create(
+                name=UserGroupCodename.THIRD_PARTY_RESPONDENT,
+                folder=enclave,
+                builtin=True,
+            )
+            role_assignment, _ = RoleAssignment.objects.get_or_create(
+                user_group=respondents,
+                role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
+                builtin=True,
+                folder=enclave,
+                is_recursive=True,
+            )
+            role_assignment.perimeter_folders.add(enclave)
+            for user in third_party_users:
+                if not user.is_third_party:
+                    logger.warning("User is not a third-party", user=user)
+                user.user_groups.add(respondents)
 
     def _send_author_emails(self, instance, authors_to_email: set):
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
