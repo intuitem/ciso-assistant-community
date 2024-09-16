@@ -89,6 +89,8 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit.save()
 
             audit.create_requirement_assessments()
+            audit.authors.set(instance.authors.all())
+            audit.reviewers.set(instance.reviewers.all())
             instance.compliance_assessment = audit
             instance.save()
 
@@ -124,8 +126,8 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                         subject=_(
                             "CISO Assistant: A questionnaire has been assigned to you"
                         ),
-                        object="entity-assessments",
-                        object_id=instance.id,
+                        object="compliance-assessments",
+                        object_id=instance.compliance_assessment.id,
                     )
                 except Exception as e:
                     print(f"Failed to send email to {author}: {e}")

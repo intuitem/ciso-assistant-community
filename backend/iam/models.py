@@ -655,7 +655,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in [
             x
             for x in RoleAssignment.get_role_assignments(user)
-            if ref_permission in x.role.permissions.all()
+            if ref_permission in x.role.permissions.all() or user.is_third_party
         ]:
             ra_permissions = ra.role.permissions.all()
             for my_folder in perimeter & set(ra.perimeter_folders.all()):

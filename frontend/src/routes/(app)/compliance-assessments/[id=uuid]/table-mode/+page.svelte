@@ -22,6 +22,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
+	import { page } from '$app/stores';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -30,7 +31,7 @@
 	export let shallow = false;
 
 	export let actionPath: string = '';
-	export let questionnaireOnly: boolean = false;
+	export let questionnaireOnly: boolean = $page.data.user.is_third_party;
 	export let assessmentOnly: boolean = false;
 	export let invalidateAll: boolean = true;
 
