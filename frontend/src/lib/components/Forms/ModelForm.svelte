@@ -979,6 +979,14 @@
 			bind:cachedValue={formDataCache['email']}
 			data-focusindex="2"
 		/>
+		{#if !data.user}
+			<Checkbox
+				{form}
+				field="create_user"
+				label={m.createUser()}
+				helpText={m.createUserHelpText()}
+			/>
+		{/if}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['entity'] })}

@@ -314,6 +314,7 @@ export const solutionSchema = baseNamedObject({
 });
 
 export const representativeSchema = z.object({
+	create_user: z.boolean().optional().default(false),
 	email: z.string().email(),
 	entity: z.string(),
 	first_name: z.string().optional(),

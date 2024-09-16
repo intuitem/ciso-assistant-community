@@ -723,5 +723,7 @@
 	"createAuditHelpText": "Create an audit alongside the entity assessment",
 	"questionnaire": "Questionnaire",
 	"conclusion": "Conclusion",
-	"blocker": "Blocker"
+	"blocker": "Blocker",
+	"createUser": "Create user",
+	"createUserHelpText": "Create or link a third party user to the representative based on the email"
 }
