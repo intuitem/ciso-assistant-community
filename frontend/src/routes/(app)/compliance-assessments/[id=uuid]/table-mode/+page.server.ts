@@ -36,14 +36,27 @@ export const load = (async ({ fetch, params }) => {
 				}
 			);
 			const observationBuffer = requirementAssessment.observation;
+			const assessable = true;
 			return {
 				...requirementAssessment,
 				evidenceCreateForm,
-				observationBuffer
+				observationBuffer,
+				assessable
 			};
 		})
 	);
-	const requirements = tableMode.requirements;
+
+	const requirementAssessmentsById = requirement_assessments.reduce((acc, requirementAssessment) => {
+	acc[requirementAssessment.requirement] = requirementAssessment;
+	return acc;
+	}, {});
+
+	const requirements = tableMode.requirements.map(requirement => {
+	if (requirementAssessmentsById[requirement.id]) {
+		return requirementAssessmentsById[requirement.id]
+	}
+	return requirement;
+	});
 
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
