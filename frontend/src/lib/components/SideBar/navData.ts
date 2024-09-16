@@ -34,7 +34,6 @@ export const navData = {
 						'view_appliedcontrol',
 						'view_riskacceptance',
 						'view_riskassessment',
-						'view_complianceassessment'
 					]
 				}
 			]
