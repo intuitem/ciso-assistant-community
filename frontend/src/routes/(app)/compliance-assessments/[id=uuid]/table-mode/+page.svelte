@@ -110,7 +110,7 @@
 		modalStore.trigger(modal);
 	}
 
-	let addeddEvidence = 0;
+	let addedEvidence = 0;
 
 	$: if (createdEvidence && shallow) {
 		data.requirements
@@ -120,7 +120,7 @@
 				id: createdEvidence.id
 			});
 		createdEvidence = undefined;
-		addeddEvidence = +1;
+		addedEvidence = +1;
 	}
 
 	function modalConfirmDelete(id: string, name: string): void {
@@ -144,6 +144,7 @@
 		};
 		modalStore.trigger(modal);
 		data.requirements.forEach((requirementAssessment) => {
+			console.log(requirementAssessment.evidences);
 			requirementAssessment.evidences = requirementAssessment.evidences.filter(
 				(evidence) => evidence.id !== id
 			);
@@ -296,37 +297,45 @@
 									>
 									<svelte:fragment slot="content">
 										<div>
-											<textarea
-												placeholder=""
-												class="input w-full"
-												bind:value={requirementAssessment.observation}
-												on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
-											/>
-											{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
-												<button
-													class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
-													on:click={() => {
-														update(
-															requirementAssessment,
-															'observation',
-															requirementAssessment.observation
-														);
-														requirementAssessment.observationBuffer =
-															requirementAssessment.observation;
-													}}
-													type="button"
-												>
-													<i class="fa-solid fa-check opacity-70"></i>
-												</button>
-												<button
-													class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
-													on:click={() =>
-														(requirementAssessment.observation =
-															requirementAssessment.observationBuffer)}
-													type="button"
-												>
-													<i class="fa-solid fa-xmark opacity-70"></i>
-												</button>
+											{#if shallow}
+												{#if requirementAssessment.observation}
+													<p>{requirementAssessment.observation}</p>
+												{:else}
+													<p class="text-gray-400 italic">{m.noObservation()}</p>
+												{/if}
+											{:else}
+												<textarea
+													placeholder=""
+													class="input w-full"
+													bind:value={requirementAssessment.observation}
+													on:keydown={(event) => event.key === 'Enter' && event.preventDefault()}
+												/>
+												{#if requirementAssessment.observationBuffer !== requirementAssessment.observation}
+													<button
+														class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"
+														on:click={() => {
+															update(
+																requirementAssessment,
+																'observation',
+																requirementAssessment.observation
+															);
+															requirementAssessment.observationBuffer =
+																requirementAssessment.observation;
+														}}
+														type="button"
+													>
+														<i class="fa-solid fa-check opacity-70"></i>
+													</button>
+													<button
+														class="rounded-md w-8 h-8 border shadow-lg hover:bg-red-300 hover:text-red-500 duration-300"
+														on:click={() =>
+															(requirementAssessment.observation =
+																requirementAssessment.observationBuffer)}
+														type="button"
+													>
+														<i class="fa-solid fa-xmark opacity-70"></i>
+													</button>
+												{/if}
 											{/if}
 										</div>
 									</svelte:fragment>
@@ -335,7 +344,7 @@
 									<svelte:fragment slot="summary"
 										><p class="flex items-center space-x-2">
 											<span>{m.evidence()}</span>
-											{#key addeddEvidence}
+											{#key addedEvidence}
 												<span class="badge variant-soft-primary"
 													>{requirementAssessment.evidences.length}</span
 												>
@@ -344,23 +353,29 @@
 									>
 									<svelte:fragment slot="content">
 										<div class="flex flex-row space-x-2 items-center">
-											<button
-												class="btn variant-filled-primary self-start"
-												on:click={() =>
-													modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-												type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
-											>
-											{#key addeddEvidence}
+											{#if !shallow}
+												<button
+													class="btn variant-filled-primary self-start"
+													on:click={() =>
+														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+													type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
+												>
+											{/if}
+											{#key addedEvidence}
 												{#each requirementAssessment.evidences as evidence}
 													<p class="card p-2">
-														<i class="fa-solid fa-file mr-2"></i>{evidence.str}
-														<button
-															class="cursor-pointer"
-															on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
-															type="button"
+														<a class="hover:text-primary-500" href="/evidences/{evidence.id}"
+															><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
 														>
-															<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
-														</button>
+														{#if !shallow}
+															<button
+																class="cursor-pointer"
+																on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+																type="button"
+															>
+																<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
+															</button>
+														{/if}
 													</p>
 												{/each}
 											{/key}
