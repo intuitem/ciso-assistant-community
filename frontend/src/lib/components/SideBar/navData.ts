@@ -30,11 +30,7 @@ export const navData = {
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
-					permissions: [
-						'view_appliedcontrol',
-						'view_riskacceptance',
-						'view_riskassessment',
-					]
+					permissions: ['view_appliedcontrol', 'view_riskacceptance', 'view_riskassessment']
 				}
 			]
 		},
