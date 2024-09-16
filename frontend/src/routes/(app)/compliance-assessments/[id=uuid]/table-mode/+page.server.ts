@@ -134,6 +134,9 @@ export const actions: Actions = {
 				setFlash({ type: 'error', message: response.error }, event);
 				return { createForm: form };
 			}
+			if (response[0]) {
+				setError(form, 'non_field_errors', m.nameDuplicate());
+			}
 			Object.entries(response).forEach(([key, value]) => {
 				setError(form, key, value);
 			});
