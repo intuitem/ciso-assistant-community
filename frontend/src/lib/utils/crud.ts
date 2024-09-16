@@ -146,7 +146,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Domains',
 		listViewUrlParams: '?content_type=DO&content_type=GL',
 		foreignKeyFields: [{ field: 'parent_folder', urlModel: 'folders' }],
-		reverseForeignKeyFields: [{ field: 'folder', urlModel: 'projects' }]
+		reverseForeignKeyFields: [{ field: 'folder', urlModel: 'projects' }, { field: 'folder', urlModel: 'entities' }]
 	},
 	projects: {
 		name: 'project',

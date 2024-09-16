@@ -19,6 +19,7 @@ class EntityViewSet(BaseModelViewSet):
     """
 
     model = Entity
+    filterset_fields = ["folder"]
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):
