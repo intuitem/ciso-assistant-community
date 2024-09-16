@@ -46,16 +46,19 @@ export const load = (async ({ fetch, params }) => {
 		})
 	);
 
-	const requirementAssessmentsById = requirement_assessments.reduce((acc, requirementAssessment) => {
-	acc[requirementAssessment.requirement] = requirementAssessment;
-	return acc;
-	}, {});
+	const requirementAssessmentsById = requirement_assessments.reduce(
+		(acc, requirementAssessment) => {
+			acc[requirementAssessment.requirement] = requirementAssessment;
+			return acc;
+		},
+		{}
+	);
 
-	const requirements = tableMode.requirements.map(requirement => {
-	if (requirementAssessmentsById[requirement.id]) {
-		return requirementAssessmentsById[requirement.id]
-	}
-	return requirement;
+	const requirements = tableMode.requirements.map((requirement) => {
+		if (requirementAssessmentsById[requirement.id]) {
+			return requirementAssessmentsById[requirement.id];
+		}
+		return requirement;
 	});
 
 	const schema = z.object({ id: z.string().uuid() });
