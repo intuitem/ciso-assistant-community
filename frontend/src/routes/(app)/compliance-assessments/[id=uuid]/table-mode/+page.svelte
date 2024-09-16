@@ -371,6 +371,7 @@
 															<button
 																class="cursor-pointer"
 																on:click={(_) => modalConfirmDelete(evidence.id, evidence.str)}
+																
 																type="button"
 															>
 																<i class="fa-solid fa-xmark ml-2 text-red-500"></i>
