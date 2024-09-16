@@ -167,7 +167,32 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 
 
 class RepresentativeWriteSerializer(BaseModelSerializer):
-    create_user = serializers.BooleanField(default=False, read_only=True)
+    create_user = serializers.BooleanField(default=False)
+
+    def _create_or_update_user(self, instance, user):
+        if not user:
+            return
+        user, created = User.objects.get_or_create(
+            email=instance.email,
+        )
+        user.first_name = instance.first_name
+        user.last_name = instance.last_name
+        user.is_third_party = True
+        user.save()
+        instance.user = user
+        instance.save()
+
+    def create(self, validated_data):
+        user = validated_data.pop("create_user", False)
+        instance = super().create(validated_data)
+        self._create_or_update_user(instance, user)
+        return instance
+
+    def update(self, instance, validated_data):
+        user = validated_data.pop("create_user", False)
+        instance = super().update(instance, validated_data)
+        self._create_or_update_user(instance, user)
+        return instance
 
     class Meta:
         model = Representative
