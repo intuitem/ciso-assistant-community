@@ -1207,7 +1207,7 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     link = models.URLField(
         blank=True,
         null=True,
-        max_length=1000,
+        max_length=2048,
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
@@ -1318,7 +1318,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     link = models.CharField(
         null=True,
         blank=True,
-        max_length=1000,
+        max_length=2048,
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
