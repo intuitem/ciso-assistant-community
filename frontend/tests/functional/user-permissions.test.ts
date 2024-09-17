@@ -17,8 +17,8 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 	test.describe(`${userGroupData.name} user has the right permissions`, async () => {
 		test.describe.configure({ mode: 'serial' });
 
-		let vars = TestContent.generateTestVars();
-		let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+		const vars = TestContent.generateTestVars();
+		const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 		test.beforeEach(async ({ page }) => {
 			setHttpResponsesListener(page);
@@ -212,6 +212,10 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 		});
 
 		test.afterAll('cleanup', async ({ browser }) => {
+			if (process.env.CI) {
+				// Don't cleanup in CI
+				return true;
+			}
 			const page = await browser.newPage();
 			const loginPage = new LoginPage(page);
 			const usersPage = new PageContent(page, '/users', 'Users');
