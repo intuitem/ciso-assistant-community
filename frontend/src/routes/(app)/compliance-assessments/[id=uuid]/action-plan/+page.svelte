@@ -11,133 +11,55 @@
 
 	let tabSet = 0;
 
+	const appliedControlsHead = {
+		name: 'name',
+		category: 'category',
+		csf_function: 'csfFunction',
+		eta: 'eta',
+		expiry_date: 'expiryDate',
+		effort: 'effort',
+		cost: 'cost',
+		requirements_count: 'matchingRequirements'
+	};
+	const appliedControlsColums = [
+		'name',
+		'category',
+		'csf_function',
+		'eta',
+		'expiry_date',
+		'effort',
+		'cost',
+		'requirements_count'
+	];
+
 	const toDoAppliedControls: TableSource = {
-		head: {
-			name: 'name',
-			category: 'category',
-			csf_function: 'csfFunction',
-			eta: 'eta',
-			expiry_date: 'expiryDate',
-			effort: 'effort',
-			requirements_count: 'matchingRequirements'
-		},
-		body: tableSourceMapper(data.actionPlan.to_do, [
-			'name',
-			'category',
-			'csf_function',
-			'eta',
-			'expiry_date',
-			'efforts',
-			'requirements_count'
-		]),
+		head: appliedControlsHead,
+		body: tableSourceMapper(data.actionPlan.to_do, appliedControlsColums),
 		meta: data.actionPlan.to_do
 	};
 	const inProgressAppliedControls: TableSource = {
-		head: {
-			name: 'name',
-			category: 'category',
-			csf_function: 'csfFunction',
-			eta: 'eta',
-			expiry_date: 'expiryDate',
-			effort: 'effort',
-			requirements_count: 'matchingRequirements'
-		},
-		body: tableSourceMapper(data.actionPlan.in_progress, [
-			'name',
-			'category',
-			'csf_function',
-			'eta',
-			'expiry_date',
-			'efforts',
-			'requirements_count'
-		]),
+		head: appliedControlsHead,
+		body: tableSourceMapper(data.actionPlan.in_progress, appliedControlsColums),
 		meta: data.actionPlan.to_do
 	};
 	const onHoldAppliedControls: TableSource = {
-		head: {
-			name: 'name',
-			category: 'category',
-			csf_function: 'csfFunction',
-			eta: 'eta',
-			expiry_date: 'expiryDate',
-			effort: 'effort',
-			requirements_count: 'matchingRequirements'
-		},
-		body: tableSourceMapper(data.actionPlan.on_hold, [
-			'name',
-			'category',
-			'csf_function',
-			'eta',
-			'expiry_date',
-			'efforts',
-			'requirements_count'
-		]),
+		head: appliedControlsHead,
+		body: tableSourceMapper(data.actionPlan.on_hold, appliedControlsColums),
 		meta: data.actionPlan.to_do
 	};
-
 	const activeAppliedControls: TableSource = {
-		head: {
-			name: 'name',
-			category: 'category',
-			csf_function: 'csfFunction',
-			eta: 'eta',
-			expiry_date: 'expiryDate',
-			effort: 'effort',
-			requirements_count: 'matchingRequirements'
-		},
-		body: tableSourceMapper(data.actionPlan.active, [
-			'name',
-			'category',
-			'csf_function',
-			'eta',
-			'expiry_date',
-			'efforts',
-			'requirements_count'
-		]),
+		head: appliedControlsHead,
+		body: tableSourceMapper(data.actionPlan.active, appliedControlsColums),
 		meta: data.actionPlan.active
 	};
-
 	const deprecatedAppliedControls: TableSource = {
-		head: {
-			name: 'name',
-			category: 'category',
-			csf_function: 'csfFunction',
-			eta: 'eta',
-			expiry_date: 'expiryDate',
-			effort: 'effort',
-			requirements_count: 'matchingRequirements'
-		},
-		body: tableSourceMapper(data.actionPlan.deprecated, [
-			'name',
-			'category',
-			'csf_function',
-			'eta',
-			'expiry_date',
-			'efforts',
-			'requirements_count'
-		]),
+		head: appliedControlsHead,
+		body: tableSourceMapper(data.actionPlan.deprecated, appliedControlsColums),
 		meta: data.actionPlan.deprecated
 	};
-
 	const noneAppliedControls: TableSource = {
-		head: {
-			name: 'name',
-			category: 'category',
-			csf_function: 'csfFunction',
-			eta: 'eta',
-			expiry_date: 'expiryDate',
-			effort: 'effort',
-			requirements_count: 'matchingRequirements'
-		},
-		body: tableSourceMapper(data.actionPlan.none, [
-			'name',
-			'category',
-			'csf_function',
-			'eta',
-			'expiry_date',
-			'efforts',
-			'requirements_count'
-		]),
+		head: appliedControlsHead,
+		body: tableSourceMapper(data.actionPlan.none, appliedControlsColums),
 		meta: data.actionPlan.none
 	};
 </script>

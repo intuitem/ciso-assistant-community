@@ -3,7 +3,7 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { complianceResultColorMap } from '$lib/utils/constants';
+	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
 
 	export let data: PageData;
 
@@ -21,7 +21,7 @@
 	let currentIndex = 0;
 	$: currentRequirementAssessment = data.requirement_assessments[currentIndex];
 
-	$: color = complianceResultColorMap[currentRequirementAssessment.result];
+	$: color = complianceResultTailwindColorMap[currentRequirementAssessment.result];
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement) => [requirement.id, requirement])
@@ -108,6 +108,7 @@
 								{#each possible_options as option}
 									<RadioItem
 										class="h-full"
+										active={color}
 										id={option.id}
 										value={option.id}
 										bind:group={result}
