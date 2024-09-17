@@ -4,7 +4,8 @@ from core.models import ComplianceAssessment, Framework
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
-from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+from iam.models import Folder, Role, RoleAssignment, UserGroup
+from django.contrib.auth import get_user_model
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from django.utils.translation import gettext_lazy as _
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
@@ -12,6 +13,8 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+User = get_user_model()
 
 
 class EntityReadSerializer(BaseModelSerializer):
@@ -174,12 +177,16 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
     def _create_or_update_user(self, instance, user):
         if not user:
             return
-        user, created = User.objects.get_or_create(
+        user = User.objects.filter(
             email=instance.email,
-        )
-        user.first_name = instance.first_name
-        user.last_name = instance.last_name
-        user.is_third_party = True
+        ).first()
+        if not user:
+            user = User.objects.create_user(
+                email=instance.email,
+                first_name=instance.first_name,
+                last_name=instance.last_name,
+            )
+            user.is_third_party = True
         user.save()
         instance.user = user
         instance.save()
