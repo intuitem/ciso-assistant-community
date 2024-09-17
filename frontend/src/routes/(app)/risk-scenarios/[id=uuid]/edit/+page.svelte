@@ -63,7 +63,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.measureCreateForm,
-				formAction: 'createAppliedControl',
+				formAction: '?/createAppliedControl',
 				model: data.measureModel,
 				debug: false
 			}

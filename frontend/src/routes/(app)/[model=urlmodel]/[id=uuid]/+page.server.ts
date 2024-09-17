@@ -10,6 +10,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const actions: Actions = {
 	create: async (event) => {
@@ -99,7 +100,7 @@ export const actions: Actions = {
 				{
 					type: 'success',
 					message: m.successfullyCreatedObject({
-						object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
+						object: safeTranslate(modelVerboseName).toLowerCase()
 					})
 				},
 				event
@@ -109,7 +110,7 @@ export const actions: Actions = {
 			{
 				type: 'success',
 				message: m.successfullyCreatedObject({
-					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
+					object: safeTranslate(modelVerboseName).toLowerCase()
 				})
 			},
 			event
@@ -142,12 +143,13 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			const model: string = urlParamModelVerboseName(params.model!);
+			console.log(params);
+			const model: string = urlParamModelVerboseName(urlmodel);
 			// TODO: reference object by name instead of id
 			return message(
 				deleteForm,
 				m.successfullyDeletedObject({
-					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
+					object: safeTranslate(model).toLowerCase()
 				})
 			);
 		}
