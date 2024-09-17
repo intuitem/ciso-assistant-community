@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
-	import { darkenColor, displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 
 	export let ref_id: string;

@@ -428,5 +428,28 @@ export const listViewFields: ListViewFieldsConfig = {
 	'requirement-mapping-sets': {
 		head: ['sourceFramework', 'targetFramework'],
 		body: ['source_framework', 'target_framework']
+	},
+	entities: {
+		head: ['name', 'description', 'domain', 'ownedFolders'],
+		body: ['name', 'description', 'folder', 'owned_folders'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'entity-assessments': {
+		head: ['name', 'description', 'project', 'entity'],
+		body: ['name', 'description', 'project', 'entity'],
+		filters: {
+			project: PROJECT_FILTER,
+			status: STATUS_FILTER
+		}
+	},
+	solutions: {
+		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
+		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality']
+	},
+	representatives: {
+		head: ['email', 'entity', 'role'],
+		body: ['email', 'entity', 'role']
 	}
 };

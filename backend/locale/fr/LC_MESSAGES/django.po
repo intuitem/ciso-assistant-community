@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-26 08:54+0000\n"
+"POT-Creation-Date: 2024-09-13 19:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,140 +17,229 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-#: iam/models.py:67
+
+#: iam/models.py:75
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:68
+#: iam/models.py:76
 msgid "DOMAIN"
 msgstr ""
 
 #: iam/models.py:77
+msgid "ENCLAVE"
+msgstr ""
+
+#: iam/models.py:86
 msgid "parent folder"
 msgstr ""
 
-#: iam/models.py:87
+#: iam/models.py:96
 msgid "Folder"
 msgstr ""
 
-#: iam/models.py:88
+#: iam/models.py:97
 msgid "Folders"
 msgstr ""
 
-#: iam/models.py:209
+#: iam/models.py:221
 msgid "user group"
 msgstr ""
 
-#: iam/models.py:210 iam/models.py:317
+#: iam/models.py:222 iam/models.py:350
 msgid "user groups"
 msgstr ""
 
-#: iam/models.py:255
+#: iam/models.py:279
 msgid "Welcome to Ciso Assistant!"
 msgstr ""
 
-#: iam/models.py:294
+#: iam/models.py:326
 msgid "last name"
 msgstr ""
 
-#: iam/models.py:295
+#: iam/models.py:327
 msgid "first name"
 msgstr ""
 
-#: iam/models.py:300
+#: iam/models.py:333
 msgid "active"
 msgstr ""
 
-#: iam/models.py:303
+#: iam/models.py:336
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: iam/models.py:307
+#: iam/models.py:340
 msgid "date joined"
 msgstr ""
 
-#: iam/models.py:309
+#: iam/models.py:342
 msgid "superuser status"
 msgstr ""
 
-#: iam/models.py:312
+#: iam/models.py:345
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: iam/models.py:320
+#: iam/models.py:353
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
 msgstr ""
 
-#: iam/models.py:335
+#: iam/models.py:368
 msgid "user"
 msgstr ""
 
-#: iam/models.py:336
+#: iam/models.py:369
 msgid "users"
 msgstr ""
 
-#: iam/models.py:479
+#: iam/models.py:511
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:494
+#: iam/models.py:526
 msgid "Domain"
 msgstr ""
 
-#: iam/models.py:500
+#: iam/models.py:532
 msgid "Role"
 msgstr ""
 
-#: iam/models.py:501
+#: iam/models.py:533
 msgid "sub folders are visible"
 msgstr ""
 
-#: iam/sso/models.py:61
+#: iam/sso/models.py:73
 msgid "is enabled"
 msgstr ""
 
-#: iam/sso/models.py:66
+#: iam/sso/models.py:78
 msgid "provider"
 msgstr ""
 
-#: iam/sso/models.py:70
+#: iam/sso/models.py:82
 msgid "provider ID"
 msgstr ""
 
-#: iam/sso/models.py:74
+#: iam/sso/models.py:86
 msgid "name"
 msgstr ""
 
-#: iam/sso/models.py:76
+#: iam/sso/models.py:88
 msgid "client id"
 msgstr ""
 
-#: iam/sso/models.py:78
+#: iam/sso/models.py:90
 msgid "App ID, or consumer key"
 msgstr ""
 
-#: iam/sso/models.py:82
+#: iam/sso/models.py:94
 msgid "secret key"
 msgstr ""
 
-#: iam/sso/models.py:85
+#: iam/sso/models.py:97
 msgid "API secret, client secret, or consumer secret"
 msgstr ""
 
-#: iam/sso/models.py:88
+#: iam/sso/models.py:100
 msgid "key"
 msgstr ""
 
-#: iam/sso/models.py:88
+#: iam/sso/models.py:100
 msgid "Key"
 msgstr ""
 
 #: iam/views.py:96
 msgid "CISO Assistant: Password Reset"
 msgstr ""
+
+#: tprm/models.py:20
+msgid "Owned folders"
+msgstr ""
+
+#: tprm/models.py:27 tprm/models.py:82
+msgid "Entity"
+msgstr ""
+
+#: tprm/models.py:28
+msgid "Entities"
+msgstr ""
+
+#: tprm/models.py:33
+msgid "Blocker"
+msgstr ""
+
+#: tprm/models.py:34
+msgid "Warning"
+msgstr ""
+
+#: tprm/models.py:35
+msgid "Ok"
+msgstr ""
+
+#: tprm/models.py:36
+msgid "Not applicable"
+msgstr ""
+
+#: tprm/models.py:38 tprm/models.py:115
+msgid "Criticality"
+msgstr ""
+
+#: tprm/models.py:39
+msgid "Penetration"
+msgstr ""
+
+#: tprm/models.py:40
+msgid "Dependency"
+msgstr ""
+
+#: tprm/models.py:41
+msgid "Maturity"
+msgstr ""
+
+#: tprm/models.py:42
+msgid "Trust"
+msgstr ""
+
+#: tprm/models.py:51 tprm/models.py:121
+msgid "Solutions"
+msgstr ""
+
+#: tprm/models.py:62
+msgid "Conclusion"
+msgstr ""
+
+#: tprm/models.py:68
+msgid "Entity assessment"
+msgstr ""
+
+#: tprm/models.py:69
+msgid "Entity assessments"
+msgstr ""
+
+#: tprm/models.py:104
+msgid "Provider entity"
+msgstr ""
+
+#: tprm/models.py:110
+msgid "Recipient entity"
+msgstr ""
+
+#: tprm/models.py:120
+msgid "Solution"
+msgstr ""
+
+#: tprm/serializers.py:61 tprm/serializers.py:96
+msgid "Framework required"
+msgstr ""
+
+#: tprm/serializers.py:116
+msgid "CISO Assistant: A questionnaire has been assigned to you"
+msgstr "CISO Assistant: Un questionnaire vous a été assigné"

@@ -940,7 +940,14 @@ class UserFilter(df.FilterSet):
 
     class Meta:
         model = User
-        fields = ["email", "first_name", "last_name", "is_active", "is_approver"]
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_approver",
+            "is_third_party",
+        ]
 
 
 class UserViewSet(BaseModelViewSet):
@@ -1018,13 +1025,33 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
 
+class FolderFilter(df.FilterSet):
+    owned = df.BooleanFilter(method="get_owned_folders", label="owned")
+    content_type = df.MultipleChoiceFilter(
+        choices=Folder.ContentType, lookup_expr="icontains"
+    )
+
+    def get_owned_folders(self, queryset, name, value):
+        owned_folders_id = []
+        for folder in Folder.objects.all():
+            if folder.owner.all().first():
+                owned_folders_id.append(folder.id)
+        if value:
+            return queryset.filter(id__in=owned_folders_id)
+        return queryset.exclude(id__in=owned_folders_id)
+
+    class Meta:
+        model = Folder
+        fields = ["parent_folder", "content_type", "owner", "owned"]
+
+
 class FolderViewSet(BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
 
     model = Folder
-    filterset_fields = ["parent_folder", "content_type"]
+    filterset_class = FolderFilter
 
     def perform_create(self, serializer):
         """
@@ -1569,31 +1596,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
         baseline = serializer.validated_data.pop("baseline", None)
-        instance = serializer.save()
-        requirements = RequirementNode.objects.filter(framework=instance.framework)
-        for requirement in requirements:
-            requirement_assessment = RequirementAssessment.objects.create(
-                compliance_assessment=instance,
-                requirement=requirement,
-                folder=Folder.objects.get(id=instance.project.folder.id),
-            )
-            if baseline and baseline.framework == instance.framework:
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=baseline, requirement=requirement
-                )
-                requirement_assessment.result = baseline_requirement_assessment.result
-                requirement_assessment.status = baseline_requirement_assessment.status
-                requirement_assessment.score = baseline_requirement_assessment.score
-                requirement_assessment.is_scored = (
-                    baseline_requirement_assessment.is_scored
-                )
-                requirement_assessment.evidences.set(
-                    baseline_requirement_assessment.evidences.all()
-                )
-                requirement_assessment.applied_controls.set(
-                    baseline_requirement_assessment.applied_controls.all()
-                )
-                requirement_assessment.save()
+        instance: ComplianceAssessment = serializer.save()
+        instance.create_requirement_assessments(baseline)
         if baseline and baseline.framework != instance.framework:
             mapping_set = RequirementMappingSet.objects.get(
                 target_framework=serializer.validated_data["framework"],
@@ -1687,8 +1691,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def flash_mode(self, request, pk):
-        """Returns the list of requirement assessments for flash mode"""
+    def requirements_list(self, request, pk):
+        """Returns the list of requirement assessments for the different audit modes"""
         requirement_assessments_objects = (
             self.get_object().get_requirement_assessments()
         )
@@ -1701,11 +1705,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
         ).data
-        flash_mode = {
+        requirements_list = {
             "requirements": requirements,
             "requirement_assessments": requirement_assessments,
         }
-        return Response(flash_mode, status=status.HTTP_200_OK)
+        return Response(requirements_list, status=status.HTTP_200_OK)
 
     @action(detail=True)
     def export(self, request, pk):

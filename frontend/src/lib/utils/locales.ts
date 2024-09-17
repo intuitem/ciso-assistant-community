@@ -401,6 +401,7 @@ export function localItems(): LocalItems {
 		appliedControlNoLink: m.appliedControlNoLink(),
 		riskAcceptanceNoExpiryDate: m.riskAcceptanceNoExpiryDate(),
 		riskAcceptanceExpired: m.riskAcceptanceExpired(),
+		thirdParty: m.thirdParty(),
 		financial: m.financial(),
 		legal: m.legal(),
 		reputation: m.reputation(),
