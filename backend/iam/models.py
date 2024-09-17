@@ -61,6 +61,14 @@ class Folder(NameDescriptionMixin):
         """class function for general use"""
         return _get_root_folder()
 
+    @staticmethod
+    def get_root_folder_id() -> uuid.UUID:
+        """class function for general use"""
+        try:
+            return uuid.UUID(_get_root_folder().id)
+        except:
+            return _get_root_folder()
+
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
@@ -173,7 +181,7 @@ class FolderMixin(models.Model):
         Folder,
         on_delete=models.CASCADE,
         related_name="%(class)s_folder",
-        default=Folder.get_root_folder,
+        default=Folder.get_root_folder_id,
     )
 
     class Meta:
@@ -227,9 +235,20 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(self, email, password, mailing=True, **extra_fields):
+    def _create_user(
+        self,
+        email: str,
+        password: str,
+        mailing: bool,
+        initial_group: UserGroup,
+        **extra_fields,
+    ):
         """
         Create and save a user with the given email, and password.
+        If mailing is set, send a welcome mail
+        If initial_group is given, put the new user in this group
+        On mail error, raise a corresponding exception, but the user is properly created
+        TODO: find a better way to manage mailing error
         """
 
         validate_email(email)
@@ -245,7 +264,8 @@ class UserManager(BaseUserManager):
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
         user.save(using=self._db)
-
+        if initial_group:
+            initial_group.user_set.add(user)
         logger.info("user created sucessfully", user=user)
 
         if mailing:
@@ -259,23 +279,31 @@ class UserManager(BaseUserManager):
                 raise exception
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email: str, password: str = None, **extra_fields):
+        """create a normal user following Django convention"""
         logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(
+            email=email,
+            password=password,
+            mailing=(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            initial_group=None,
+            **extra_fields,
+        )
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email: str, password: str = None, **extra_fields):
+        """create a superuser following Django convention"""
         logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        extra_fields.setdefault(
-            "mailing", not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)
+        superuser = self._create_user(
+            email=email,
+            password=password,
+            mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
+            initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            **extra_fields,
         )
-        superuser = self._create_user(email, password, **extra_fields)
-        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
 
 
@@ -362,10 +390,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_short_name(self) -> str:
         """get user's short name (i.e. first_name or email before @))"""
-        try:
-            return self.first_name if self.first_name else self.email.split("@")[0]
-        except:
-            return ""
+        return self.first_name if self.first_name else self.email.split("@")[0]
 
     def mailing(self, email_template_name, subject, pk=False):
         """

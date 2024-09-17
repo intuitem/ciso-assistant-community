@@ -169,7 +169,7 @@
 							multiple
 							options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
 							field="owner"
-							label="Owner(s)"
+							label={m.owner()}
 						/>
 					</div>
 					<div class=" w-1/4">
@@ -311,6 +311,13 @@
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
+			<AutocompleteSelect
+				{form}
+				options={data.qualificationChoices}
+				multiple={true}
+				field="qualifications"
+				label={m.qualification()}
+			/>
 			<Select
 				{form}
 				options={strengthOfKnowledgeFormChoices}

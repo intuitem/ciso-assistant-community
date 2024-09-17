@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -73,7 +74,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m['add' + capitalizeFirstLetter(model.info.localName)]()
+			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
 		};
 		modalStore.trigger(modal);
 	}
@@ -130,7 +131,7 @@
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Submitted' && $page.data.user.id === data.data.approver.id}
+	{#if data.data.state === m.submitted() && $page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
 		>
@@ -158,7 +159,7 @@
 				>
 			</div>
 		</div>
-	{:else if data.data.state === 'Accepted'}
+	{:else if data.data.state === m.accept()}
 		<div
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
@@ -188,11 +189,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{#if Object.hasOwn(m, toCamelCase(key))}
-							{m[toCamelCase(key)]()}
-						{:else}
-							{key}
-						{/if}
+						{safeTranslate(key)}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -238,7 +235,7 @@
 								{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
 								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
-									{m[toCamelCase((value.str || value.name) ?? value)]()}
+									{safeTranslate((value.str || value.name) ?? value)}
 								{:else}
 									{(value.str || value.name) ?? value}
 								{/if}

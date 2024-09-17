@@ -287,6 +287,10 @@
 					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
 
 					<a
+						href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+					>
+					<a
 						href="/compliance-assessments/{data.compliance_assessment.id}/export"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
 					>

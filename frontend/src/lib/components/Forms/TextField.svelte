@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
+	import type { CacheLock } from '$lib/utils/types';
 
 	let _class = '';
 
@@ -22,6 +23,10 @@
 	// $: value.set(cachedValue);
 	// $value = cachedValue;
 	$: cachedValue = $value;
+
+	$: if ($$restProps.type === 'date' && $value === '') {
+		$value = null;
+	}
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;

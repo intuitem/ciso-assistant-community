@@ -17,6 +17,10 @@ export const actions: Actions = {
 		const endpoint = `${BASE_API_URL}/serdes/load-backup/`;
 		const response = await fetch(endpoint, {
 			method: 'POST',
+			headers: {
+				'Content-Disposition': `attachment; filename="${file.name}"`,
+				'Content-Type': file.type
+			},
 			body: file
 		});
 		const data = await response.text();

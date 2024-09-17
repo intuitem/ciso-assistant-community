@@ -230,6 +230,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'expiry_date', type: type.DATE },
 			{ name: 'link', type: type.TEXT },
 			{ name: 'effort', type: type.SELECT },
+			{ name: 'cost', type: type.NUMBER },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
@@ -447,7 +448,7 @@ export class TestContent {
 					},
 					name: vars.appliedControlName,
 					description: vars.description,
-					status: 'Planned',
+					status: 'To do',
 					eta: '2025-01-01',
 					expiry_date: '2025-05-01',
 					link: 'https://intuitem.com/',

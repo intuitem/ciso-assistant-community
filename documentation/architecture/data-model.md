@@ -46,7 +46,6 @@ erDiagram
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
-    ROOT_FOLDER           ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ USER                        : contains
@@ -54,10 +53,13 @@ erDiagram
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
 
     DOMAIN {
         string name
@@ -89,7 +91,7 @@ erDiagram
     COMPLIANCE_ASSESSMENT_REVIEW }o--|| COMPLIANCE_ASSESSMENT : reviews
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
-    PROJECT                      ||--o{ COMPLIANCE_ASSESSMENT : contains
+    PROJECT                      |o--o{ COMPLIANCE_ASSESSMENT : contains
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
     REQUIREMENT_ASSESSMENT       }o--o{ APPLIED_CONTROL       : is_answered_by
@@ -99,7 +101,7 @@ erDiagram
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
-    PROJECT                      ||--o{ RISK_ASSESSMENT       : contains
+    PROJECT                      |o--o{ RISK_ASSESSMENT       : contains
     RISK_ASSESSMENT              ||--o{ RISK_SCENARIO         : contains
     RISK_SCENARIO                }o--o{ APPLIED_CONTROL       : is_mitigated_by
     RISK_SCENARIO                }o--o{ THREAT                : derives_from
@@ -143,6 +145,8 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
+
         string[]    selected_implementation_groups
         int     min_score
         int     max_score
@@ -160,6 +164,7 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
 
         string      risk_assessment_method
     }
@@ -199,8 +204,7 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
-        string  question
-        boolean no_result
+        json    question
     }
 
     REFERENCE_CONTROL {
@@ -228,6 +232,7 @@ erDiagram
         date     expiration
         url      link
         string   effort
+        float    cost
         string[] tags
     }
 
@@ -242,6 +247,7 @@ erDiagram
         bool   selected
         string review_conclusion
         string review_observation
+        json   answer
     }
 
     EVIDENCE {
@@ -288,6 +294,7 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
+        json   qualifications
 
         principal[] owner
     }
@@ -597,6 +604,7 @@ namespace DomainObjects {
         +DateField expiry_date
         +CharField link
         +CharField effort
+        +Decimal   cost
 
         +RiskScenario[] risk_scenarios()
         +RiskAssessments[] risk_assessments()
@@ -702,7 +710,10 @@ Projects are fundamental context objects defined by the entity using CISO Assist
 
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
 
-Note: the IAM model is based on folders. A domain is a type of folder (the other one being the root folder).
+Note: the IAM model is based on folders. A folder has a type among:
+- ROOT: the root folder, which is also called "global domain".
+- DOMAIN: a user-defined domain.
+- ENCLAVE: a invisible folder used to confine the actions of a third party.
 
 Projects have the following fields:
 - Name
@@ -776,10 +787,13 @@ A applied  control has the following specific fields:
 - an Estimated Time of Arrival date
 - a validity date (expiration field)
 - an effort (--/S/M/L/XL)
+- a cost (--/float value)
 - a url link
 - a list of user-defined tags
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
+
+Costs are measured in a global currency/multiple that is defined in global settings.
 
 ## Compliance and risk assessments
 
@@ -862,6 +876,8 @@ To analyse the risk, each scenario contains Existing Controls, current probabili
 A risk scenario contains a treatment option with the values --/open/mitigate/accept/avoid/transfer
 
 A risk scenario also contains a "strength of knowledge", within the values --/0 (Low)/1 (Medium)/2 (High). This can be used to represent a third dimension of risk, as recommended by the Society for Risk Analysis. The field "justification" can be used to expose the knowledge.
+
+A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Authenticity, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
 
 The risk evaluation is automatically done based on the selected risk matrix.
 
@@ -1063,15 +1079,15 @@ Currently, the folder organization is as follows:
 
 To simplify access control, we use a RBAC model.
 
-Role               | Permissions
--------------------|------------
-Administrator      | full access (except approval), and specifically management of domains, users and users rights
-referential_manager| capacity to manage referentials in the root folder
-Domain manager     | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects
-Analyst            | readwrite acces to selected projects/domains. Read access to global and domain objects
-Reader             | read access to selected projects/domains
-Risk approver      | like reader, but with additional capability to approve risk acceptances
-Reviewer           | like reader, but with additional capability to review assessments.
+| Role                | Permissions                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Administrator       | full access (except approval), and specifically management of domains, users and users rights                                     |
+| referential_manager | capacity to manage referentials in the root folder                                                                                |
+| Domain manager      | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects |
+| Analyst             | readwrite acces to selected projects/domains. Read access to global and domain objects                                            |
+| Reader              | read access to selected projects/domains                                                                                          |
+| Risk approver       | like reader, but with additional capability to approve risk acceptances                                                           |
+| Reviewer            | like reader, but with additional capability to review assessments.                                                                |
 
 
 Note: a DJANGO superuser is given administrator rights automatically on startup.
@@ -1108,6 +1124,10 @@ SSO Settings are defined in a dedicated object SSO_SETTINGS.
 
 ## TPRM evolution
 
+### Objective
+
+The goal of Third-Party Risk Management is to manage the risk incurred by a provider (vendor, partner, supplier, contractor, service provider). The point of view for the modeling is focusing on risk.
+
 ### Retained approach
 
 The following approach has been retained:
@@ -1118,31 +1138,31 @@ The following approach has been retained:
 - This compliance assessment is reviewed by the client, requirement by requirement.
 - An import/export functionality for compliance assessments shall be available to transmit a filled questionnaire from the third-party to the client.
 - Review features are added to compliance assessment to enable this workflow in a generic way.
-- A requirement node can include a question (which is a generic improvement, as many frameworks have questions).
-- A requirement node has a boolean named "no_result" to indicate that no result is waited for the assessment (e.g. "what is your annual turnover?")
+- A requirement node can include a question (which is a generic improvement, as many frameworks have questions), as a JSON form. This will correspond to a JSON answer in the corresponding requirement assessment.
 
 ### Entity-relationship diagram
 
 ```mermaid
 erDiagram
 
-    ASSET                 }o--o{ SOLUTION              : contains
-    ENTITY2                }o--o| DOMAIN                : owns
-    VULNERABILITY         }o--o{ SOLUTION              : affects
-    SOLUTION              }o--o| ENTITY                : provided_by
+    ASSET                 }o--o{ SOLUTION              : leverages
+    ENTITY                |o--o{ DOMAIN                : owns
+    SOLUTION              }o--|| ENTITY                : is_provided_to
+    SOLUTION              }o--|| ENTITY                : is_provided_by
     CONTRACT              }o--o{ SOLUTION              : formalizes
     CONTRACT              }o--o{ EVIDENCE              : has
     APPLIED_CONTROL       }o--o| CONTRACT              : leverages
-    ENTITY_EVALUATION     }o--|| ENTITY                : evaluates
-    ENTITY                }o--o{ PERSON                : employs
-    ENTITY_EVALUATION     }o--|| COMPLIANCE_ASSESSMENT : leverages
-    ENTITY                }o--o{ ENTITY2               : is_provider_of
+    ENTITY_ASSESSMENT     }o--|| ENTITY                : evaluates
+    ENTITY                ||--o{ REPRESENTATIVE        : mandates
+    ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
+    ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+    PROJECT               |o--o{ ENTITY_ASSESSMENT     : contains
+
     ENTITY {
         string  name
         string  description
         string  missions  
-        entity  parent_entity
         url     reference_link
     }
 
@@ -1158,10 +1178,10 @@ erDiagram
     SOLUTION {
         string      name
         string      description
-        string      solution_type
         string      ref_id
-        string      version
+        int         criticality
     }
+
 
     CONTRACT {
         string name
@@ -1170,55 +1190,115 @@ erDiagram
         date   end_date
     }
 
-    ENTITY_EVALUATION {
-        string name
-        string description
-        date   send_date
-        date   due_date
-        int    penetration
-        int    dependency
-        int    maturity
-        int    trust
+    ENTITY_ASSESSMENT {
+        string      name
+        string      description
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string[]    tags
+        string      observation
+
+        string      conclusion
+        int         criticality
+        int         penetration
+        int         dependency
+        int         maturity
+        int         trust
     }
 
-    PERSON {
-        string email
-        string first_name
-        string last_name
-        string phone
-        string role
-        string description
+    REPRESENTATIVE {
+        string      email
+        string      first_name
+        string      last_name
+        string      phone
+        string      role
+        string      description
+    }
+
+    COMPLIANCE_ASSESSMENT {
+        string      review_conclusion
+        string      review_observation
+        json        implementation_groups_selector
     }
 
 ```
 
 ```mermaid
 erDiagram
-    DOMAIN          ||--o{ ENTITY_EVALUATION    : contains
-    DOMAIN          ||--o{ SOLUTION             : contains
-```
-```mermaid
-erDiagram
-    GLOBAL_DOMAIN   ||--o{ ENTITY          : contains
-    GLOBAL_DOMAIN   ||--o{ PERSON          : contains
+    DOMAIN          ||--o{ ENTITY_ASSESSMENT     : contains
+    DOMAIN          ||--o{ SOLUTION              : contains
+    DOMAIN          ||--o{ ENTITY                : contains
+    DOMAIN          ||--o{ ENCLAVE               : contains
+    ENCLAVE         ||--o{ COMPLIANCE_ASSESSMENT : contains
+    ENCLAVE         ||--o{ EVIDENCE              : contains
 ```
 
-- The solution_type of a solution is a string with the following possible values: --|product|maintenance|hosting.
-- The ref_id for a solution can be null or use a formal id like CPE.
- 
+### New models
+
+#### Entity
+
+An entity represents a legal entity, a corporate body, an administrative body, an association. An entity can be:
+- the main subject for the current CISO Assistant instance ("main entity").
+- a subisdiary of another entity.
+- a provider of another entity.
+- a threat actor.
+- ...
+
+An entity can own a domain. The entity that owns the global domain is the main subject for the current CISO Assistant instance.
+
+An entity can provides a solution to another entity (see solution model). TPRM is done mainly for providers of the main entity, but nothing prevents doing an entity evaluation for any entity.
+
+#### Entity assessment
+
+An entity assessment is similar to a risk assessment, but focused on the risk incurred by the provider of a solution.
+
+An entity assessment is based on a questionnaire/compliance assessment, and/or on an existing document, stored in an evidence (variable "external_questionnaire"). This allows beginning the assessment without questionnaire, adding an existing external questionnaire if available, and starting a new integrated questionnaire later.
+
+Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
+
+An entity assessment has the following specific fields:
+  - conclusion: --|blocker|warning|ok|N/A
+  - penetration: as defined by ebios RM
+  - dependency: as defined by ebios RM
+  - maturity: as defined by ebios RM
+  - trust: as defined by ebios RM
+
+#### Solution
+
+A solution represents what en entity provides to one another.
+
+The criticality of a solution is an integer representing the importance of the solution for the client of the solution in decreasing sensitivity (0: most critical). This can be determined grossly at the beginning, and revised after an entity or risk assessment. This number is used to prioritize entity assessments.
+
+#### Representative
+
+This represents a person that is linked to an entity (typically an employee), and that is relevant for the main entity, like a contact person for an assessment.
+
+There is no link between representatives (modeling of the ecosystem) and users of the solution (access control mechanism).
+
 ### Evolution of existing models
+
+## Assessments (risk/compliance/entity)
+
+- add field observation
 
 #### Requirement assessment
 
 - add the following fields:
-  - review_conclusion: --|blocker|warning|ok|N/A
-  - review_observation
+  - answer: a json corresponding to the optional question of the requirement node.
+
+#### Compliance assessment
+
+- add the following fields:
+  - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
 #### Requirement node 
 
 - Add the following fields:
-  - no_result
-  - question
+  - question: a json field describing a form.
 
 #### Applied control
 
@@ -1228,3 +1308,32 @@ erDiagram
 The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
 
 Note: in the future, we will use the same approach for policies.
+
+### Question and answer format
+
+The format for question and answer json fields will evolve over time. The initial format is the following:
+
+- question:
+```json
+{
+    "question": {
+        "version": 1
+        "schema": {...}
+    }
+}
+```
+
+The schema variable follows JSON Schema standard (WIP).
+
+### Enclave security approach
+
+The objects manipulated by the third party (compliance assessment and evidences) are put in a dedicated folder called an "enclave". This folder is a subfolder of the domain. Enclaves are not shown in the UI, they are only used for security implementation.
+
+### Simplifications for the MVP version
+
+- The main entity is automatically created and owns the global domain. The name is set to "Main", and can be changed.
+- Other entities own no domain.
+- Solutions are automatically provided to the main entity.
+- The change in applied control is not retained.
+- implementation_group_selector is not retained.
+- ebios-RM parameters are not retained.

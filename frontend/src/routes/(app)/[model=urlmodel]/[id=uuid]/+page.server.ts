@@ -1,9 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { urlParamModelVerboseName } from '$lib/utils/crud';
+import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
 import { localItems, toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
-import { languageTag } from '$paraglide/runtime';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
@@ -32,8 +31,10 @@ export const actions: Actions = {
 
 		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
-		const fileFields = Object.fromEntries(
-			Object.entries(form.data).filter(([, value]) => value instanceof File)
+		const model = getModelInfo(urlModel!);
+
+		const fileFields: Record<string, File> = Object.fromEntries(
+			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
 		);
 
 		Object.keys(fileFields).forEach((key) => {
