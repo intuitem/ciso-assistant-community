@@ -65,7 +65,7 @@ class Folder(NameDescriptionMixin):
     def get_root_folder_id() -> uuid.UUID:
         """class function for general use"""
         try:
-            return uuid.UUID(_get_root_folder().id)
+            return _get_root_folder().id
         except:
             return _get_root_folder()
 
