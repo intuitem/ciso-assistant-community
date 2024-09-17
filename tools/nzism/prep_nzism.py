@@ -71,13 +71,18 @@ parser.add_argument(
     "folderpath", help="path to the NZISM XML File, also used for output"
 )
 parser.add_argument("version", help="version of NZISM")
-parser.add_argument("packager", help="name of packager entity", default="DEFEND Ltd")
+parser.add_argument("packager", help="name of packager entity", default="DEFEND")
 
 args = parser.parse_args()
 folder_path = args.folderpath
 input_file_name = f"{folder_path}/{args.filename}"
-major_version = args.version.split('.')[0]
-minor_version = args.version.split('.')[1]
+
+if "." in args.version:
+    major_version = args.version.split('.')[0]
+    minor_version = args.version.split('.')[1]
+else:
+    major_version = args.version
+
 packager = args.packager
 output_file_name = f"{folder_path}/nzism-{major_version}.xlsx"
 
@@ -121,7 +126,7 @@ wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
 ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:nzism-v{major_version}"])
-ws.append(["library_version", minor_version])
+ws.append(["library_version", 1])
 ws.append(["library_locale", "en"])
 ws.append(["library_ref_id", f"NSIZM-v{major_version}"])
 ws.append(["library_name", f"NZISM v{major_version}"])
