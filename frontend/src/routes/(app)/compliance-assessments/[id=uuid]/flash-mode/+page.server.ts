@@ -7,7 +7,7 @@ export const load = (async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
 	const [compliance_assessment, flashMode] = await Promise.all(
-		[endpoint, `${endpoint}flash_mode/`].map((endpoint) =>
+		[endpoint, `${endpoint}requirements_list/`].map((endpoint) =>
 			fetch(endpoint).then((res) => res.json())
 		)
 	);

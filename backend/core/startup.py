@@ -6,6 +6,7 @@ from django.db.models.signals import post_migrate
 from structlog import get_logger
 
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from core.utils import RoleCodename
 
 logger = get_logger(__name__)
 
@@ -261,6 +262,32 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_globalsettings",
     "view_requirementmappingset",
     "view_requirementmapping",
+    "add_entity",
+    "change_entity",
+    "view_entity",
+    "delete_entity",
+    "add_representative",
+    "change_representative",
+    "view_representative",
+    "delete_representative",
+    "add_solution",
+    "change_solution",
+    "view_solution",
+    "delete_solution",
+    "add_entityassessment",
+    "change_entityassessment",
+    "view_entityassessment",
+    "delete_entityassessment",
+]
+
+THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
+    "view_complianceassessment",
+    "view_requirementassessment",
+    "change_requirementassessment",
+    "view_evidence",
+    "add_evidence",
+    "change_evidence",
+    "delete_evidence",
 ]
 
 
@@ -273,6 +300,7 @@ def startup(sender: AppConfig, **kwargs):
     from django.contrib.auth.models import Permission
 
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+    from tprm.models import Entity
 
     print("startup handler: initialize database")
 
@@ -299,6 +327,12 @@ def startup(sender: AppConfig, **kwargs):
         Folder.objects.create(
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
+    # if main entity does not exist, then create it
+    if not Entity.objects.filter(name="Main").exists():
+        main = Entity.objects.create(
+            name="Main", folder=Folder.get_root_folder(), builtin=True
+        )
+        main.owned_folders.add(Folder.get_root_folder())
     # update builtin roles to facilitate migrations
     reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
     reader.permissions.set(reader_permissions)
@@ -359,6 +393,14 @@ def startup(sender: AppConfig, **kwargs):
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_approvers.folder)
+
+    third_party_respondent_permissions = Permission.objects.filter(
+        codename__in=THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST
+    )
+    third_party_respondent, created = Role.objects.get_or_create(
+        name=RoleCodename.THIRD_PARTY_RESPONDENT.value, builtin=True
+    )
+    third_party_respondent.permissions.set(third_party_respondent_permissions)
 
     # if superuser defined and does not exist, then create it
     if (
