@@ -65,7 +65,7 @@ class Folder(NameDescriptionMixin):
     def get_root_folder_id() -> uuid.UUID:
         """class function for general use"""
         try:
-            return uuid.UUID(_get_root_folder().id)
+            return _get_root_folder().id
         except:
             return _get_root_folder()
 
@@ -74,6 +74,7 @@ class Folder(NameDescriptionMixin):
 
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
+        ENCLAVE = "EN", _("ENCLAVE")
 
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
@@ -157,6 +158,9 @@ class Folder(NameDescriptionMixin):
             ["folder"],
             ["parent_folder"],
             ["project", "folder"],
+            ["entity", "folder"],
+            ["provider_entity", "folder"],
+            ["solution", "provider_entity", "folder"],
             ["risk_assessment", "project", "folder"],
             ["risk_scenario", "risk_assessment", "project", "folder"],
             ["compliance_assessment", "project", "folder"],
@@ -324,6 +328,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     is_sso = models.BooleanField(default=False)
+    is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
         default=True,
@@ -392,7 +397,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """get user's short name (i.e. first_name or email before @))"""
         return self.first_name if self.first_name else self.email.split("@")[0]
 
-    def mailing(self, email_template_name, subject, pk=False):
+    def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
         Sending a mail to a user for password resetting or creation
         """
@@ -404,6 +409,8 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "token": default_token_generator.make_token(self),
             "protocol": "https",
             "pk": str(pk) if pk else None,
+            "object": object,
+            "object_id": object_id,
         }
         email = render_to_string(email_template_name, header)
         try:
@@ -648,7 +655,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in [
             x
             for x in RoleAssignment.get_role_assignments(user)
-            if ref_permission in x.role.permissions.all()
+            if ref_permission in x.role.permissions.all() or user.is_third_party
         ]:
             ra_permissions = ra.role.permissions.all()
             for my_folder in perimeter & set(ra.perimeter_folders.all()):
