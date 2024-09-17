@@ -56,6 +56,13 @@ class RepresentativeViewSet(BaseModelViewSet):
     API endpoint that allows representatives to be viewed or edited.
     """
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user:
+            instance.user.delete()
+
+        return super().destroy(request, *args, **kwargs)
+
     model = Representative
     filterset_fields = ["entity"]
 
