@@ -90,7 +90,7 @@ objects:
       description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:cisa-scrm:1
-      assessable: false
+      assessable: true
       depth: 1
       ref_id: '1'
       name: Qualifying Questions
