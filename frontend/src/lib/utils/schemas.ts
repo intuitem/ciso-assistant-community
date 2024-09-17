@@ -1,5 +1,4 @@
 // schema for the validation of forms
-
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -18,6 +17,14 @@ const toArrayPreprocessor = (value: unknown) => {
 			return value; // could not coerce, return the original and face the consequences during validation
 	}
 };
+
+// JSON schema
+const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type Literal = z.infer<typeof literalSchema>;
+type Json = Literal | { [key: string]: Json } | Json[];
+const jsonSchema: z.ZodType<Json> = z.lazy(() =>
+	z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
+);
 
 export const loginSchema = z
 	.object({
@@ -84,7 +91,8 @@ export const RiskAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const ThreatSchema = baseNamedObject({
@@ -120,6 +128,7 @@ export const AppliedControlSchema = baseNamedObject({
 	expiry_date: z.string().optional().nullable(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
+	cost: z.number().multipleOf(0.000001).optional().nullable(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional()
@@ -162,6 +171,7 @@ export const AssetSchema = baseNamedObject({
 });
 
 export const RequirementAssessmentSchema = z.object({
+	answer: jsonSchema,
 	status: z.string(),
 	result: z.string(),
 	score: z.number().optional().nullable(),
@@ -211,7 +221,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	baseline: z.string().optional().nullable()
+	baseline: z.string().optional().nullable(),
+	observation: z.string().optional().nullable()
 });
 
 export const EvidenceSchema = baseNamedObject({
@@ -266,6 +277,53 @@ export const SSOSettingsSchema = z.object({
 	want_name_id_encrypted: z.boolean().optional().nullable()
 });
 
+export const EntitiesSchema = baseNamedObject({
+	folder: z.string(),
+	mission: z.string().optional(),
+	reference_link: z.string().optional()
+});
+
+export const EntityAssessmentSchema = baseNamedObject({
+	create_audit: z.boolean().optional().default(true),
+	framework: z.string().optional(),
+	selected_implementation_groups: z.array(z.string().optional()).optional(),
+	version: z.string().optional().default('0.1'),
+	project: z.string(),
+	status: z.string().optional().nullable(),
+	eta: z.string().optional().nullable(),
+	due_date: z.string().optional().nullable(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	entity: z.string(),
+	solutions: z.array(z.string().optional()).optional(),
+	compliance_assessment: z.string().optional(),
+	evidence: z.string().optional(),
+	criticality: z.number().optional().nullable(),
+	conclusion: z.string().optional().nullable(),
+	penetration: z.number().optional(),
+	dependency: z.number().optional(),
+	maturity: z.number().optional(),
+	trust: z.number().optional(),
+	observation: z.string().optional().nullable()
+});
+
+export const solutionSchema = baseNamedObject({
+	provider_entity: z.string(),
+	ref_id: z.string().optional(),
+	criticality: z.number().optional()
+});
+
+export const representativeSchema = z.object({
+	create_user: z.boolean().optional().default(false),
+	email: z.string().email(),
+	entity: z.string(),
+	first_name: z.string().optional(),
+	last_name: z.string().optional(),
+	phone: z.string().optional(),
+	role: z.string().optional(),
+	description: z.string().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -283,7 +341,11 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
-	'sso-settings': SSOSettingsSchema
+	'sso-settings': SSOSettingsSchema,
+	entities: EntitiesSchema,
+	'entity-assessments': EntityAssessmentSchema,
+	representatives: representativeSchema,
+	solutions: solutionSchema
 };
 
 export const modelSchema = (model: string) => {

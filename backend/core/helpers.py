@@ -12,6 +12,8 @@ from .utils import camel_case
 
 from typing import List, Dict, Optional
 
+import json
+
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
 from rest_framework.exceptions import ValidationError as DRFValidationError

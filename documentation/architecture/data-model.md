@@ -46,7 +46,6 @@ erDiagram
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
-    ROOT_FOLDER           ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ USER                        : contains
@@ -54,10 +53,13 @@ erDiagram
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
 
     DOMAIN {
         string name
@@ -89,7 +91,7 @@ erDiagram
     COMPLIANCE_ASSESSMENT_REVIEW }o--|| COMPLIANCE_ASSESSMENT : reviews
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
-    PROJECT                      ||--o{ COMPLIANCE_ASSESSMENT : contains
+    PROJECT                      |o--o{ COMPLIANCE_ASSESSMENT : contains
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
     REQUIREMENT_ASSESSMENT       }o--o{ APPLIED_CONTROL       : is_answered_by
@@ -99,7 +101,7 @@ erDiagram
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
-    PROJECT                      ||--o{ RISK_ASSESSMENT       : contains
+    PROJECT                      |o--o{ RISK_ASSESSMENT       : contains
     RISK_ASSESSMENT              ||--o{ RISK_SCENARIO         : contains
     RISK_SCENARIO                }o--o{ APPLIED_CONTROL       : is_mitigated_by
     RISK_SCENARIO                }o--o{ THREAT                : derives_from
@@ -143,6 +145,8 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
+
         string[]    selected_implementation_groups
         int     min_score
         int     max_score
@@ -160,6 +164,7 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
 
         string      risk_assessment_method
     }
@@ -227,6 +232,7 @@ erDiagram
         date     expiration
         url      link
         string   effort
+        float    cost
         string[] tags
     }
 
@@ -598,6 +604,7 @@ namespace DomainObjects {
         +DateField expiry_date
         +CharField link
         +CharField effort
+        +Decimal   cost
 
         +RiskScenario[] risk_scenarios()
         +RiskAssessments[] risk_assessments()
@@ -703,7 +710,10 @@ Projects are fundamental context objects defined by the entity using CISO Assist
 
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
 
-Note: the IAM model is based on folders. A domain is a type of folder (the other one being the root folder).
+Note: the IAM model is based on folders. A folder has a type among:
+- ROOT: the root folder, which is also called "global domain".
+- DOMAIN: a user-defined domain.
+- ENCLAVE: a invisible folder used to confine the actions of a third party.
 
 Projects have the following fields:
 - Name
@@ -777,10 +787,13 @@ A applied  control has the following specific fields:
 - an Estimated Time of Arrival date
 - a validity date (expiration field)
 - an effort (--/S/M/L/XL)
+- a cost (--/float value)
 - a url link
 - a list of user-defined tags
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
+
+Costs are measured in a global currency/multiple that is defined in global settings.
 
 ## Compliance and risk assessments
 
@@ -1066,15 +1079,15 @@ Currently, the folder organization is as follows:
 
 To simplify access control, we use a RBAC model.
 
-Role               | Permissions
--------------------|------------
-Administrator      | full access (except approval), and specifically management of domains, users and users rights
-referential_manager| capacity to manage referentials in the root folder
-Domain manager     | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects
-Analyst            | readwrite acces to selected projects/domains. Read access to global and domain objects
-Reader             | read access to selected projects/domains
-Risk approver      | like reader, but with additional capability to approve risk acceptances
-Reviewer           | like reader, but with additional capability to review assessments.
+| Role                | Permissions                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Administrator       | full access (except approval), and specifically management of domains, users and users rights                                     |
+| referential_manager | capacity to manage referentials in the root folder                                                                                |
+| Domain manager      | full access to selected domains (except approval), in particular managing rights for these domains. Read access to global objects |
+| Analyst             | readwrite acces to selected projects/domains. Read access to global and domain objects                                            |
+| Reader              | read access to selected projects/domains                                                                                          |
+| Risk approver       | like reader, but with additional capability to approve risk acceptances                                                           |
+| Reviewer            | like reader, but with additional capability to review assessments.                                                                |
 
 
 Note: a DJANGO superuser is given administrator rights automatically on startup.
@@ -1144,6 +1157,7 @@ erDiagram
     ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
     ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
+    PROJECT               |o--o{ ENTITY_ASSESSMENT     : contains
 
     ENTITY {
         string  name
@@ -1186,7 +1200,9 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string      observation
 
+        string      conclusion
         int         criticality
         int         penetration
         int         dependency
@@ -1213,9 +1229,12 @@ erDiagram
 
 ```mermaid
 erDiagram
-    PROJECT         ||--o{ ENTITY_ASSESSMENT    : contains
-    DOMAIN          ||--o{ SOLUTION             : contains
-    DOMAIN          ||--o{ ENTITY               : contains
+    DOMAIN          ||--o{ ENTITY_ASSESSMENT     : contains
+    DOMAIN          ||--o{ SOLUTION              : contains
+    DOMAIN          ||--o{ ENTITY                : contains
+    DOMAIN          ||--o{ ENCLAVE               : contains
+    ENCLAVE         ||--o{ COMPLIANCE_ASSESSMENT : contains
+    ENCLAVE         ||--o{ EVIDENCE              : contains
 ```
 
 ### New models
@@ -1241,6 +1260,13 @@ An entity assessment is based on a questionnaire/compliance assessment, and/or o
 
 Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
 
+An entity assessment has the following specific fields:
+  - conclusion: --|blocker|warning|ok|N/A
+  - penetration: as defined by ebios RM
+  - dependency: as defined by ebios RM
+  - maturity: as defined by ebios RM
+  - trust: as defined by ebios RM
+
 #### Solution
 
 A solution represents what en entity provides to one another.
@@ -1255,11 +1281,13 @@ There is no link between representatives (modeling of the ecosystem) and users o
 
 ### Evolution of existing models
 
+## Assessments (risk/compliance/entity)
+
+- add field observation
+
 #### Requirement assessment
 
 - add the following fields:
-  - review_conclusion: --|blocker|warning|ok|N/A
-  - review_observation
   - answer: a json corresponding to the optional question of the requirement node.
 
 #### Compliance assessment
@@ -1297,10 +1325,15 @@ The format for question and answer json fields will evolve over time. The initia
 
 The schema variable follows JSON Schema standard (WIP).
 
+### Enclave security approach
+
+The objects manipulated by the third party (compliance assessment and evidences) are put in a dedicated folder called an "enclave". This folder is a subfolder of the domain. Enclaves are not shown in the UI, they are only used for security implementation.
+
 ### Simplifications for the MVP version
 
-- The main entity is automatically created and owns the global domain. The name is set to "MAIN ENTITY", and can be changed.
+- The main entity is automatically created and owns the global domain. The name is set to "Main", and can be changed.
 - Other entities own no domain.
 - Solutions are automatically provided to the main entity.
 - The change in applied control is not retained.
 - implementation_group_selector is not retained.
+- ebios-RM parameters are not retained.

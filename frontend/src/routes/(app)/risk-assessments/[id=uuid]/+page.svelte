@@ -104,7 +104,7 @@
 				model: data.riskAssessmentModel,
 				debug: false,
 				riskAssessmentDuplication: true,
-				formAction: 'duplicate'
+				formAction: '?/duplicate'
 			}
 		};
 		const modal: ModalSettings = {

@@ -400,6 +400,14 @@
 			cacheLock={cacheLocks['effort']}
 			bind:cachedValue={formDataCache['effort']}
 		/>
+		<Select
+			{form}
+			field="cost"
+			label={m.cost()}
+			helpText={m.costHelpText()}
+			cacheLock={cacheLocks['cost']}
+			bind:cachedValue={formDataCache['cost']}
+		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['folder'] })}

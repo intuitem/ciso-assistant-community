@@ -86,7 +86,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             return object_created
         except Exception as e:
             logger.error(e)
-            raise serializers.ValidationError(e.args[0])
+            raise serializers.ValidationError()
 
     class Meta:
         model: models.Model
@@ -188,6 +188,7 @@ class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -275,7 +276,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
 
-    treatment = serializers.CharField(source="get_treatment_display")
+    treatment = serializers.CharField()
 
     current_proba = serializers.JSONField(source="get_current_proba")
     current_impact = serializers.JSONField(source="get_current_impact")
@@ -310,6 +311,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
+    cost = serializers.FloatField()
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
@@ -341,6 +343,7 @@ class UserReadSerializer(BaseModelSerializer):
             "date_joined",
             "user_groups",
             "is_sso",
+            "is_third_party",
         ]
 
 
@@ -355,6 +358,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "is_active",
             "date_joined",
             "user_groups",
+            "is_third_party",
         ]
 
     def validate_email(self, email):
@@ -535,6 +539,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
+    folder = FieldsRelatedField()
     framework = FieldsRelatedField(
         ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
     )
@@ -566,6 +571,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
+    evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
 
