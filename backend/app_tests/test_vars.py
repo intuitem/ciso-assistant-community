@@ -1,5 +1,5 @@
 from typing import Any
-from core.apps import (
+from core.startup import (
     READER_PERMISSIONS_LIST,
     APPROVER_PERMISSIONS_LIST,
     ANALYST_PERMISSIONS_LIST,

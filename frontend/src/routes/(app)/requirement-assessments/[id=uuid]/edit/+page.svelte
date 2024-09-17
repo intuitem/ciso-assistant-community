@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
 	import type { PageData } from '../[id=uuid]/edit/$types';
 
@@ -14,8 +15,8 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -23,21 +24,21 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
+		Tab,
+		TabGroup,
 		getModalStore,
 		getToastStore,
-		Tab,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore,
-		type ToastStore,
-		TabGroup
+		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
-	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { complianceResultColorMap } from '$lib/utils/constants';
-	import * as m from '$paraglide/messages';
+	import { capitalizeFirstLetter, localItems } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
+	import * as m from '$paraglide/messages';
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -58,6 +59,7 @@
 		email: ''
 	});
 
+	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
 	const schema = RequirementAssessmentSchema;
 
 	const modalStore: ModalStore = getModalStore();
@@ -183,7 +185,12 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<code class="code">{data.requirement.urn}</code>
+	<div class="flex justify-between">
+		<span class="code left h-min">{data.requirement.urn}</span>
+		<a class="text-pink-500 hover:text-pink-400" href={complianceAssessmentURL}
+			><i class="fa-solid fa-turn-up"></i></a
+		>
+	</div>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line p-2 font-light text-lg">
 			👉 {data.requirement.description}
@@ -281,7 +288,7 @@
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
 									<span class="badge {classesText} h-fit">
-										{m[mappingInference.sourceRequirementAssessment.coverage]()}
+										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
 								<p class="whitespace-pre-line py-1">
@@ -290,7 +297,7 @@
 										class="badge {classesText} h-fit"
 										style="background-color: {complianceResultColorMap[mappingInference.result]};"
 									>
-										{m[toCamelCase(mappingInference.result)]()}
+										{safeTranslate(mappingInference.result)}
 									</span>
 								</p>
 								{#if mappingInference.annotation}
