@@ -42,6 +42,7 @@
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import Question from '$lib/components/Forms/Question.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -70,7 +71,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.measureCreateForm,
-				formAction: 'createAppliedControl',
+				formAction: '?/createAppliedControl',
 				model: data.measureModel,
 				debug: false,
 				suggestions: { reference_control: reference_controls }
@@ -90,7 +91,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.evidenceCreateForm,
-				formAction: 'createEvidence',
+				formAction: '?/createEvidence',
 				model: data.evidenceModel,
 				debug: false
 			}
@@ -393,6 +394,9 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
+				{#if Object.keys(data.requirementAssessment.answer).length !== 0}
+					<Question {form} field="answer" label={m.question()} />
+				{/if}
 				<Select
 					{form}
 					options={data.model.selectOptions['status']}

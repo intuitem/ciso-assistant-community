@@ -256,9 +256,22 @@
 			</svelte:fragment>
 		</TabGroup>
 	</div>
+	{#if Object.keys(data.requirementAssessment.answer).length !== 0}
+		<h1 class="font-semibold text-sm">{m.question()}</h1>
+		{#each data.requirementAssessment.answer.questions as question}
+			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
+				{question.text}
+				{#if question.answer}
+					<p class="text-sm font-semibold text-primary-500">{question.answer}</p>
+				{:else}
+					{m.undefined()}
+				{/if}
+			</li>
+		{/each}
+	{/if}
 	{#if data.requirementAssessment.observation}
-		<div class="card p-4 space-y-2">
-			<h1 class="font-semibold">{m.observation()}</h1>
+		<div class="card p-4 space-y-2 variant-glass-primary">
+			<h1 class="font-semibold text-sm">{m.observation()}</h1>
 			<span class="text-sm">{data.requirementAssessment.observation}</span>
 		</div>
 	{/if}

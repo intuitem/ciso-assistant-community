@@ -21,7 +21,7 @@ copyright: "Copyright 2020, 2021 Carnegie Mellon University and The Johns Hopkin
   \ ANY KIND WITH RESPECT TO FREEDOM FROM PATENT,\nTRADEMARK, OR COPYRIGHT INFRINGEMENT.\n\
   [DISTRIBUTION STATEMENT A] Approved for public release.\nThis work is licensed to\
   \ the public under the Creative Commons Attribution 4.0 International\nLicense."
-version: 2
+version: 3
 provider: DoD
 packager: intuitem
 objects:
@@ -53,22 +53,27 @@ objects:
         \ acting on behalf of authorized users, or devices (including other information\
         \ systems).\n\u2022 FAR Clause 52.204-21 b.1.i\n\u2022 NIST SP 800-171 Rev\
         \ 2 3.1.1"
-      annotation: 'Determine if:
-
-        [a] authorized users are identified;
-
-        [b] processes acting on behalf of authorized users are identified;
-
-        [c] devices (and other systems) authorized to connect to the system are identified;
-
-        [d] system access is limited to authorized users;
-
-        [e] system access is limited to processes acting on behalf of authorized users;
-        and
-
-        [f] system access is limited to authorized devices (including other systems).'
       implementation_groups:
       - L1
+      question:
+        question_type: "unique_choice"
+        question_choices:
+          - "Yes"
+          - "No"
+          - "N/A"
+        questions:
+        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:1"
+          text: "[a] authorized users are identified"
+        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:2"
+          text: "[b] processes acting on behalf of authorized users are identified"
+        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:3"
+          text: "[c] devices (and other systems) authorized to connect to the system are identified"
+        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:4"
+          text: "[d] system access is limited to authorized users"
+        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:5"
+          text: "[e] system access is limited to processes acting on behalf of authorized users"
+        - urn: "urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.1:question:6"
+          text: "[f] system access is limited to authorized devices (including other systems)"
     - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l1-3.1.2
       assessable: true
       depth: 2
