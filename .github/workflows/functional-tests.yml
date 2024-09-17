@@ -100,6 +100,8 @@ jobs:
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
         run: npx playwright test --project=${{ matrix.playwright-browser }}
+        env:
+          CI: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -196,6 +198,8 @@ jobs:
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: npx playwright test --project=${{ matrix.playwright-browser }}
+        env:
+          CI: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
