@@ -132,7 +132,6 @@ INSTALLED_APPS = [
     "core",
     "cal",
     "django_filters",
-    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",
