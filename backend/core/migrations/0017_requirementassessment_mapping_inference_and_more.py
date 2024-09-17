@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
                 (
                     "folder",
                     models.ForeignKey(
-                        default=iam.models.Folder.get_root_folder,
+                        default=iam.models.Folder.get_root_folder_id,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="%(class)s_folder",
                         to="iam.folder",

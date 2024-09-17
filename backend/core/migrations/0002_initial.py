@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             model_name="asset",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             model_name="evidence",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
             model_name="framework",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
             model_name="library",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -114,7 +114,7 @@ class Migration(migrations.Migration):
             model_name="project",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -153,7 +153,7 @@ class Migration(migrations.Migration):
             model_name="requirementassessment",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -163,7 +163,7 @@ class Migration(migrations.Migration):
             model_name="requirementlevel",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -184,7 +184,7 @@ class Migration(migrations.Migration):
             model_name="requirementnode",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -227,7 +227,7 @@ class Migration(migrations.Migration):
             model_name="riskacceptance",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -266,7 +266,7 @@ class Migration(migrations.Migration):
             model_name="riskmatrix",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -327,7 +327,7 @@ class Migration(migrations.Migration):
             model_name="securityfunction",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -368,7 +368,7 @@ class Migration(migrations.Migration):
             model_name="securitymeasure",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
@@ -421,7 +421,7 @@ class Migration(migrations.Migration):
             model_name="threat",
             name="folder",
             field=models.ForeignKey(
-                default=iam.models.Folder.get_root_folder,
+                default=iam.models.Folder.get_root_folder_id,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="%(class)s_folder",
                 to="iam.folder",
