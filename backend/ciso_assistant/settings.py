@@ -127,6 +127,7 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "tprm",
     "core",
     "cal",
     "django_filters",
