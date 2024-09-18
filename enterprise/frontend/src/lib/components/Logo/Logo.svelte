@@ -23,6 +23,9 @@
 	let logo: string;
 
 	onMount(async () => {
+		if (!clientSettings.settings.logo) {
+			return;
+		}
 		const logoHash = clientSettings.settings.logo_hash;
 		if (logoHash !== $logoB64.hash) {
 			console.log('Logo changed, fetching new logo...');
