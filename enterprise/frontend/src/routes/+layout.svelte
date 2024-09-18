@@ -90,6 +90,9 @@
 	const clientSettings = $page.data.clientSettings;
 
 	onMount(async () => {
+		if (!clientSettings.settings.favicon) {
+			return;
+		}
 		const faviconHash = clientSettings.settings.favicon_hash;
 		if (faviconHash !== $faviconB64.hash) {
 			console.log('favicon changed, fetching new favicon...');
