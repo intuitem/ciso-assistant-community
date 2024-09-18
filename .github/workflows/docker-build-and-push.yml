@@ -70,3 +70,25 @@ jobs:
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
             ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/backend:latest' || null }}
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
+
+      - name: Build and Push Enterprise Frontend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./enterprise/frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/enterprise-frontend:${{ env.VERSION }}
+            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/enterprise-frontend:latest' || null }}
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
+
+      - name: Build and Push Enterprise Backend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./enterprise/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/enterprise-backend:${{ env.VERSION }}
+            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/enterprise-backend:latest' || null }}
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
