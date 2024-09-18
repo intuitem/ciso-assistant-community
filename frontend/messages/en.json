@@ -454,7 +454,7 @@
 	"requirementAssessment": "Requirement assessment",
 	"requirementAssessments": "Requirement assessments",
 	"deleteModalTitle": "Delete",
-	"deleteModalMessage": "Are you sure you want to delete the following object: {name} ?",
+	"deleteModalMessage": "Are you sure you want to delete the following object: {name}?",
 	"deleteUserMessage": "Are you sure you want to delete the following user: {name}?",
 	"download": "Download",
 	"loading": "Loading",
