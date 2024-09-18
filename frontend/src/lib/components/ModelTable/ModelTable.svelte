@@ -321,13 +321,15 @@
 						>
 							{#if taggedKeys.has(key)}
 								{@const _tagList = tagMap[key]}
-								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
+								{@const tagList = Object.keys(_tagList.keys).map((key) => ({ key: { [key]: _tagList.keys[key] } }))}
 								{#each tagList as tag}
-									{@const tagData = tag.values[meta[tag.key]]}
+									{@const tagKey = tag.key && Object.keys(tag.key)[0]}
+									{@const tagValue = meta[tagKey]}
+									{@const tagData = tag.key?.[tagKey]?.[tagValue]}
 									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-                      {safeTranslate(text)}
+											{safeTranslate(text)}
 										</span>
 									{/if}
 								{/each}
