@@ -186,8 +186,6 @@ ws2.append(
 ws3 = wb_output.create_sheet("implementation_groups")
 implementation_classification_groups = [
     "All Classifications",
-    "Unclassified",
-    "In-Confidence",
     "Restricted/Sensitive",
     "Confidential",
     "Secret",
