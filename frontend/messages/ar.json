@@ -443,7 +443,7 @@
 	"requirementAssessment": "تقييم المتطلبات",
 	"requirementAssessments": "تقييمات المتطلبات",
 	"deleteModalTitle": "حذف",
-	"deleteModalMessage": "هل أنت متأكد أنك تريد حذف الكائن التالي : {name} ?",
+	"deleteModalMessage": "؟{name} :هل أنت متأكد أنك تريد حذف الكائن التالي",
 	"deleteUserMessage": "؟{name} :هل أنت متأكد أنك تريد حذف المستخدم التالي",
 	"download": "تنزيل",
 	"loading": "جارٍ التحميل",
