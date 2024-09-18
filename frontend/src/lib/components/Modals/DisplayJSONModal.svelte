@@ -22,13 +22,13 @@
 		</header>
 		{#if body}
 			<div data-testid="key-value">
-			{#each Object.entries(JSON.parse(body)) as [key, value]}
-				<div>
-					<div data-testid="{key}-key" class="font-bold capitalize">{key}:</div>
-					<div data-testid="{key}-value">{value}</div>
-				</div>
-			{/each}
-		</div>
+				{#each Object.entries(JSON.parse(body)) as [key, value]}
+					<div>
+						<div data-testid="{key}-key" class="font-bold capitalize">{key}:</div>
+						<div data-testid="{key}-value">{value}</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 {/if}
