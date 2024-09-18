@@ -40,12 +40,12 @@
 	const inProgressAppliedControls: TableSource = {
 		head: appliedControlsHead,
 		body: tableSourceMapper(data.actionPlan.in_progress, appliedControlsColums),
-		meta: data.actionPlan.to_do
+		meta: data.actionPlan.in_progress
 	};
 	const onHoldAppliedControls: TableSource = {
 		head: appliedControlsHead,
 		body: tableSourceMapper(data.actionPlan.on_hold, appliedControlsColums),
-		meta: data.actionPlan.to_do
+		meta: data.actionPlan.on_hold
 	};
 	const activeAppliedControls: TableSource = {
 		head: appliedControlsHead,
