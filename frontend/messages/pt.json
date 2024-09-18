@@ -454,6 +454,7 @@
 	"requirementAssessments": "Avaliações de requisitos",
 	"deleteModalTitle": "Excluir",
 	"deleteModalMessage": "Você tem certeza de que deseja excluir objeto a seguir: {name} ?",
+	"deleteUserMessage": "Tem certeza de que deseja excluir o seguinte usuário: {name} ?",
 	"download": "Baixar",
 	"loading": "Carregando",
 	"open": "Aberto",
