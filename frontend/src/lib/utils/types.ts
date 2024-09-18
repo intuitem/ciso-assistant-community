@@ -47,10 +47,7 @@ export const URL_MODEL = [
 	'representatives'
 ] as const;
 
-export const THIRD_PARTY_URL_MODEL = [
-	'compliance-assessments',
-	'evidences',
-] as const;
+export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
 

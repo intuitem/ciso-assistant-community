@@ -553,12 +553,12 @@ interface TagConfig {
 	text: string;
 	cssClasses: string;
 }
-  
+
 interface FieldColoredTagMap {
 	[key: string]: {
 		[key: string]: {
-		keys: { [key: string]: { [key: string]: TagConfig } };
-		values?: { [key: string]: TagConfig };
+			keys: { [key: string]: { [key: string]: TagConfig } };
+			values?: { [key: string]: TagConfig };
 		};
 	};
 }
@@ -630,7 +630,7 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		name: {
 			keys: {
 				lc_status: {
-				Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
+					Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
 				}
 			}
 		}
@@ -642,13 +642,12 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
 				},
 				is_third_party: {
-					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' },
+					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' }
 				}
 			}
 		}
 	}
 };
-  
 
 export const CUSTOM_MODEL_FETCH_MAP: { [key: string]: (load_data: any, language: string) => any } =
 	{
