@@ -245,7 +245,13 @@
 								{#each requirementAssessment.answer.questions as question}
 									<li class="flex flex-col space-y-2 rounded-xl">
 										<p>{question.text}</p>
-										{#if question.type === 'unique_choice'}
+										{#if shallow}
+											{#if question.answer}
+												<p class="text-primary-500 font-semibold">{question.answer}</p>
+											{:else}
+												<p class="text-gray-400 italic">{m.noAnswer()}</p>
+											{/if}
+										{:else if question.type === 'unique_choice'}
 											<RadioGroup
 												class="w-fit"
 												active="variant-filled-primary"
@@ -299,7 +305,7 @@
 										<div>
 											{#if shallow}
 												{#if requirementAssessment.observation}
-													<p>{requirementAssessment.observation}</p>
+													<p class="text-primary-500">{requirementAssessment.observation}</p>
 												{:else}
 													<p class="text-gray-400 italic">{m.noObservation()}</p>
 												{/if}
