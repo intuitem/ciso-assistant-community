@@ -12,7 +12,7 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
 
     mission = models.TextField(blank=True)
-    reference_link = models.URLField(blank=True, null=True)
+    reference_link = models.URLField(blank=True, null=True, max_length=2048)
     owned_folders = models.ManyToManyField(
         "iam.Folder",
         related_name="owner",
