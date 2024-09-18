@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PageData, Actions } from './$types';
+	import type { PageData, Actions } from '../../table-mode/$types';
 	import {
 		Accordion,
 		AccordionItem,
