@@ -212,10 +212,6 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 		});
 
 		test.afterAll('cleanup', async ({ browser }) => {
-			if (process.env.CI) {
-				// Don't cleanup in CI
-				return true;
-			}
 			const page = await browser.newPage();
 			const loginPage = new LoginPage(page);
 			const usersPage = new PageContent(page, '/users', 'Users');
