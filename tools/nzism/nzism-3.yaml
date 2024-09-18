@@ -47,30 +47,6 @@ objects:
     - ref_id: All Classifications - SHOULD NOT
       name: All Classifications - SHOULD NOT
       description: null
-    - ref_id: Unclassified - MUST
-      name: Unclassified - MUST
-      description: null
-    - ref_id: Unclassified - MUST NOT
-      name: Unclassified - MUST NOT
-      description: null
-    - ref_id: Unclassified - SHOULD
-      name: Unclassified - SHOULD
-      description: null
-    - ref_id: Unclassified - SHOULD NOT
-      name: Unclassified - SHOULD NOT
-      description: null
-    - ref_id: In-Confidence - MUST
-      name: In-Confidence - MUST
-      description: null
-    - ref_id: In-Confidence - MUST NOT
-      name: In-Confidence - MUST NOT
-      description: null
-    - ref_id: In-Confidence - SHOULD
-      name: In-Confidence - SHOULD
-      description: null
-    - ref_id: In-Confidence - SHOULD NOT
-      name: In-Confidence - SHOULD NOT
-      description: null
     - ref_id: Restricted/Sensitive - MUST
       name: Restricted/Sensitive - MUST
       description: null
