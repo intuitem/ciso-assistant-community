@@ -642,7 +642,7 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
 				},
 				is_third_party: {
-					true: { text: 'Third party', cssClasses: 'badge bg-green-200' },
+					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' },
 				}
 			}
 		}
