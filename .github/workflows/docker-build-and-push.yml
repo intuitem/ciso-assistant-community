@@ -5,6 +5,12 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      isStableRelease:
+        type: boolean
+        description: "Is this a stable release? If this is true, the `latest` tag will be applied to the images."
+        required: true
+        default: false
 
 jobs:
   build-and-push:
@@ -51,7 +57,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
-            ghcr.io/${{ github.repository }}/frontend:latest
+            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/frontend:latest' || null }}
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
       - name: Build and Push Backend Docker Image
@@ -62,27 +68,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
-            ghcr.io/${{ github.repository }}/backend:latest
-          platforms: linux/amd64,linux/arm64,linux/arm64/v8
-
-      - name: Build and Push Enterprise Frontend Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./enterprise/frontend/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/ciso-assistant-enterprise/frontend:${{ env.VERSION }}
-            ghcr.io/ciso-assistant-enterprise/frontend:latest
-          platforms: linux/amd64,linux/arm64,linux/arm64/v8
-
-      - name: Build and Push Enterprise Backend Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./enterprise/backend/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/ciso-assistant-enterprise/backend:${{ env.VERSION }}
-            ghcr.io/ciso-assistant-enterprise/backend:latest
+            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/${{ github.repository }}/backend:latest' || null }}
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
