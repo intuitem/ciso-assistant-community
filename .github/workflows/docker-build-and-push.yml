@@ -5,12 +5,6 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
-      isStableRelease:
-        type: boolean
-        description: "Is this a stable release? If this is true, the `latest` tag will be applied to the images."
-        required: true
-        default: false
 
 jobs:
   build-and-push:
@@ -49,22 +43,22 @@ jobs:
           cp .meta ./backend/
           cp .meta ./backend/ciso_assistant/
 
-      - name: Build and Push Enterprise Frontend Docker Image
+      - name: Build and Push Frontend Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./enterprise/frontend/Dockerfile
+          context: ./frontend
+          file: ./frontend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
             ghcr.io/${{ github.repository }}/frontend:latest
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
-      - name: Build and Push Enterprise Backend Docker Image
+      - name: Build and Push Backend Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./enterprise/backend/Dockerfile
+          context: ./backend
+          file: ./backend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
