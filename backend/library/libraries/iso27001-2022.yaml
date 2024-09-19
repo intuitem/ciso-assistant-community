@@ -5,7 +5,7 @@ name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
 copyright: See https://www.iso.org/standard/27001
-version: 4
+version: 5
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -18,6 +18,760 @@ translations:
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.1
+    ref_id: A.5.1
+    name: Policies for information security
+    category: policy
+    translations:
+      fr:
+        name: "Politiques de s\xE9curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.2
+    ref_id: A.5.2
+    name: Information security roles and responsibilities
+    category: process
+    translations:
+      fr:
+        name: "Fonctions et responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 de\
+          \ l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.3
+    ref_id: A.5.3
+    name: Segregation of duties
+    category: process
+    translations:
+      fr:
+        name: "S\xE9paration des t\xE2ches"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.4
+    ref_id: A.5.4
+    name: Management responsibilities
+    category: process
+    translations:
+      fr:
+        name: "Responsabilit\xE9s de la direction"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.5
+    ref_id: A.5.5
+    name: Contact with authorities
+    category: process
+    translations:
+      fr:
+        name: "Contact avec les autorit\xE9s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.6
+    ref_id: A.5.6
+    name: Contact with special interest groups
+    category: process
+    translations:
+      fr:
+        name: "Contact avec des groupes d'int\xE9r\xEAt sp\xE9cifiques"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.7
+    ref_id: A.5.7
+    name: Threat intelligence
+    category: process
+    translations:
+      fr:
+        name: Renseignements sur les menaces
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.8
+    ref_id: A.5.8
+    name: Information security in project management
+    category: process
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.9
+    ref_id: A.5.9
+    name: Inventory of information and other associated assets
+    category: process
+    translations:
+      fr:
+        name: "Inventaire des informations et autres actifs associ\xE9s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.10
+    ref_id: A.5.10
+    name: Acceptable use of information and other associated assets
+    category: process
+    translations:
+      fr:
+        name: "Utilisation correcte des informations et autres actifs associ\xE9s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.11
+    ref_id: A.5.11
+    name: Return of assets
+    category: process
+    translations:
+      fr:
+        name: Restitution des actifs
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.12
+    ref_id: A.5.12
+    name: Classification of information
+    category: process
+    translations:
+      fr:
+        name: Classification des informations
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.13
+    ref_id: A.5.13
+    name: Labelling of information
+    category: process
+    translations:
+      fr:
+        name: Marquage des informations
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.14
+    ref_id: A.5.14
+    name: Information transfer
+    category: process
+    translations:
+      fr:
+        name: Transfert des informations
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.15
+    ref_id: A.5.15
+    name: Access control
+    category: process
+    translations:
+      fr:
+        name: "Contr\xF4le d'acc\xE8s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.16
+    ref_id: A.5.16
+    name: Identity management
+    category: process
+    translations:
+      fr:
+        name: "Gestion des identit\xE9s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.17
+    ref_id: A.5.17
+    name: Authentication information
+    category: process
+    translations:
+      fr:
+        name: Informations d'authentification
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.18
+    ref_id: A.5.18
+    name: Access rights
+    category: process
+    translations:
+      fr:
+        name: "Droits d'acc\xE8s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.19
+    ref_id: A.5.19
+    name: Information security in supplier relationships
+    category: process
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 de l'information dans les relations avec les fournisseurs"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.20
+    ref_id: A.5.20
+    name: Addressing information security within supplier agreements
+    category: process
+    translations:
+      fr:
+        name: "La s\xE9curit\xE9 de l'information dans les accords conclus avec les\
+          \ fournisseurs"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.21
+    ref_id: A.5.21
+    name: Managing information security in the ICT supply chain
+    category: process
+    translations:
+      fr:
+        name: "Gestion de la s\xE9curit\xE9 de l'information dans la cha\xEEne d'approvisionnement\
+          \ des technologies de l'information et de la communication (TIC)"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.22
+    ref_id: A.5.22
+    name: Monitor, review and change management of supplier services
+    category: process
+    translations:
+      fr:
+        name: "Surveillance, r\xE9vision et gestion des changements des services fournisseurs"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.23
+    ref_id: A.5.23
+    name: Information security for use of cloud services
+    category: process
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 de l'information dans l'utilisation de services en nuage"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.24
+    ref_id: A.5.24
+    name: Information security incident management planning and preparation
+    category: process
+    translations:
+      fr:
+        name: "Planification et pr\xE9paration de la gestion des incidents de s\xE9\
+          curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.25
+    ref_id: A.5.25
+    name: Assessment and decision on information security events
+    category: process
+    translations:
+      fr:
+        name: "\xC9valuation des \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
+          \ et prise de d\xE9cision"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.26
+    ref_id: A.5.26
+    name: Response to information security incidents
+    category: process
+    translations:
+      fr:
+        name: "R\xE9ponse aux incidents de s\xE9curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.27
+    ref_id: A.5.27
+    name: Learning from information security incidents
+    category: process
+    translations:
+      fr:
+        name: "Tirer des enseignements des incidents de s\xE9curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.28
+    ref_id: A.5.28
+    name: Collection of evidence
+    category: process
+    translations:
+      fr:
+        name: Collecte de preuves
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.29
+    ref_id: A.5.29
+    name: Information security during disruption
+    category: process
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 de l'information pendant une perturbation"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.30
+    ref_id: A.5.30
+    name: ICT readiness for business continuity
+    category: process
+    translations:
+      fr:
+        name: "Pr\xE9paration des TIC la continuit\xE9 d'activit\xE9"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.31
+    ref_id: A.5.31
+    name: Legal, statutory, regulatory and contractual requirements
+    category: process
+    translations:
+      fr:
+        name: "Exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.32
+    ref_id: A.5.32
+    name: ' Intellectual property rights'
+    category: process
+    translations:
+      fr:
+        name: " Droits de propri\xE9t\xE9 intellectuelle"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.33
+    ref_id: A.5.33
+    name: Protection of records
+    category: process
+    translations:
+      fr:
+        name: Protection des enregistrements
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.34
+    ref_id: A.5.34
+    name: Privacy and protection of PII
+    category: process
+    translations:
+      fr:
+        name: "Protection de la vie priv\xE9e et des donn\xE9es \xE0 caract\xE8re\
+          \ personnel (DCP)"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.35
+    ref_id: A.5.35
+    name: Independent review of information security
+    category: process
+    translations:
+      fr:
+        name: "R\xE9vision ind\xE9pendante de la s\xE9curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.36
+    ref_id: A.5.36
+    name: Compliance with policies, rules and standards for information security
+    category: process
+    translations:
+      fr:
+        name: "Conformit\xE9 aux politiques, r\xE8gles et normes de s\xE9curit\xE9\
+          \ de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.5.37
+    ref_id: A.5.37
+    name: Documented operating procedures
+    category: process
+    translations:
+      fr:
+        name: "Proc\xE9dures d'exploitation document\xE9es"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.1
+    ref_id: A.6.1
+    name: Screening
+    category: process
+    translations:
+      fr:
+        name: "S\xE9lection des candidats"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.2
+    ref_id: A.6.2
+    name: Terms and conditions of employment
+    category: process
+    translations:
+      fr:
+        name: Termes et conditions du contrat de travail
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.3
+    ref_id: A.6.3
+    name: Information security awareness, education and training
+    category: process
+    translations:
+      fr:
+        name: "Sensibilisation, enseignement et formation en s\xE9curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.4
+    ref_id: A.6.4
+    name: Disciplinary process
+    category: process
+    translations:
+      fr:
+        name: "Proc\xE9dure disciplinaire"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.5
+    ref_id: A.6.5
+    name: Responsibilities after termination or change of employment
+    category: process
+    translations:
+      fr:
+        name: "Responsabilit\xE9s apr\xE8s la fin ou le changement d'emploi"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.6
+    ref_id: A.6.6
+    name: Confidentiality or non-disclosure agreements
+    category: process
+    translations:
+      fr:
+        name: "Accords de confidentialit\xE9 ou de non-divulgation"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.7
+    ref_id: A.6.7
+    name: Remote working
+    category: process
+    translations:
+      fr:
+        name: "Travail \xE0 distance"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.6.8
+    ref_id: A.6.8
+    name: Information security event reporting
+    category: process
+    translations:
+      fr:
+        name: "D\xE9claration des \xE9v\xE9nements de s\xE9curit\xE9 de l'information"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.1
+    ref_id: A.7.1
+    name: Physical security perimeters
+    category: physical
+    translations:
+      fr:
+        name: "P\xE9rim\xE8tres de s\xE9curit\xE9 physique"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.2
+    ref_id: A.7.2
+    name: Physical entry
+    category: physical
+    translations:
+      fr:
+        name: "Les entr\xE9es physiques"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.3
+    ref_id: A.7.3
+    name: Securing offices, rooms and facilities
+    category: physical
+    translations:
+      fr:
+        name: "S\xE9curisation des bureaux, des salles et des installations"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.4
+    ref_id: A.7.4
+    name: Physical security monitoring
+    category: physical
+    translations:
+      fr:
+        name: "Surveillance de la s\xE9curit\xE9 physique"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.5
+    ref_id: A.7.5
+    name: Protecting against physical and environmental threats
+    category: physical
+    translations:
+      fr:
+        name: Protection contre les menaces physiques et environnementales
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.6
+    ref_id: A.7.6
+    name: Working In secure areas
+    category: physical
+    translations:
+      fr:
+        name: "Travail dans les zones s\xE9curis\xE9es"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.7
+    ref_id: A.7.7
+    name: Clear desk and clear screen
+    category: physical
+    translations:
+      fr:
+        name: "Bureau propre et \xE9cran vide"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.8
+    ref_id: A.7.8
+    name: Equipment siting and protection
+    category: physical
+    translations:
+      fr:
+        name: "Emplacement et protection du mat\xE9riel"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.9
+    ref_id: A.7.9
+    name: Security of assets off-premises
+    category: physical
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 des actifs hors des locaux"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.10
+    ref_id: A.7.10
+    name: Storage media
+    category: physical
+    translations:
+      fr:
+        name: Supports de stockage
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.11
+    ref_id: A.7.11
+    name: Supporting utilities
+    category: physical
+    translations:
+      fr:
+        name: Services supports
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.12
+    ref_id: A.7.12
+    name: Cabling security
+    category: physical
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 du c\xE2blage"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.13
+    ref_id: A.7.13
+    name: Equipment maintenance
+    category: physical
+    translations:
+      fr:
+        name: "Maintenance du mat\xE9riel"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.7.14
+    ref_id: A.7.14
+    name: Secure disposal or re-use of equipment
+    category: physical
+    translations:
+      fr:
+        name: "\xC9limination ou recyclage s\xE9curis\xE9(e) du mat\xE9riel"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.1
+    ref_id: A.8.1
+    name: User end point devices
+    category: technical
+    translations:
+      fr:
+        name: Terminaux finaux des utilisateurs
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.2
+    ref_id: A.8.2
+    name: Privileged access rights
+    category: technical
+    translations:
+      fr:
+        name: "Droits d'acc\xE8s privil\xE9gi\xE9s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.3
+    ref_id: A.8.3
+    name: Information access restriction
+    category: technical
+    translations:
+      fr:
+        name: "Restriction d'acc\xE8s aux informations"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.4
+    ref_id: A.8.4
+    name: Access to source code
+    category: technical
+    translations:
+      fr:
+        name: "Acc\xE8s aux codes source"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.5
+    ref_id: A.8.5
+    name: Secure authentication
+    category: technical
+    translations:
+      fr:
+        name: "Authentification s\xE9curis\xE9e"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.6
+    ref_id: A.8.6
+    name: Capacity management
+    category: technical
+    translations:
+      fr:
+        name: Dimensionnement
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.7
+    ref_id: A.8.7
+    name: Protection against malware
+    category: technical
+    translations:
+      fr:
+        name: Protection contre les programmes malveillants (malware)
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.8
+    ref_id: A.8.8
+    name: Management of technical vulnerabilities
+    category: technical
+    translations:
+      fr:
+        name: "Gestion des vuln\xE9rabilit\xE9s techniques"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.9
+    ref_id: A.8.9
+    name: Configuration management
+    category: technical
+    translations:
+      fr:
+        name: Gestion des configurations
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.10
+    ref_id: A.8.10
+    name: Information deletion
+    category: technical
+    translations:
+      fr:
+        name: Suppression des informations
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.11
+    ref_id: A.8.11
+    name: Data masking
+    category: technical
+    translations:
+      fr:
+        name: "Masquage des donn\xE9es"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.12
+    ref_id: A.8.12
+    name: Data leakage prevention
+    category: technical
+    translations:
+      fr:
+        name: "Pr\xE9vention de la fuite de donn\xE9es"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.13
+    ref_id: A.8.13
+    name: Information backup
+    category: technical
+    translations:
+      fr:
+        name: Sauvegarde des informations
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.14
+    ref_id: A.8.14
+    name: Redundancy of information processing facilities
+    category: technical
+    translations:
+      fr:
+        name: Redondance des moyens de traitement de l'information
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.15
+    ref_id: A.8.15
+    name: Logging
+    category: technical
+    translations:
+      fr:
+        name: Journalisation
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.16
+    ref_id: A.8.16
+    name: Monitoring activities
+    category: technical
+    translations:
+      fr:
+        name: "Activit\xE9s de surveillance"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.17
+    ref_id: A.8.17
+    name: Clock synchronization
+    category: technical
+    translations:
+      fr:
+        name: Synchronisation des horloges
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.18
+    ref_id: A.8.18
+    name: Use of privileged utility programs
+    category: technical
+    translations:
+      fr:
+        name: "Utilisation de programmes utilitaires \xE0 privil\xE8ges"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.19
+    ref_id: A.8.19
+    name: Installation of software on operational systems
+    category: technical
+    translations:
+      fr:
+        name: "Installation de logiciels sur des syst\xE8mes op\xE9rationnels"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.20
+    ref_id: A.8.20
+    name: Networks security
+    category: technical
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 des r\xE9seaux"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.21
+    ref_id: A.8.21
+    name: Security of network services
+    category: technical
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 des services r\xE9seau"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.22
+    ref_id: A.8.22
+    name: Segregation of networks
+    category: technical
+    translations:
+      fr:
+        name: "Cloisonnement des r\xE9seaux"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.23
+    ref_id: A.8.23
+    name: 'Web filtering '
+    category: technical
+    translations:
+      fr:
+        name: 'Filtrage web '
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.24
+    ref_id: A.8.24
+    name: Use of cryptography
+    category: technical
+    translations:
+      fr:
+        name: Utilisation de la cryptographie
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.25
+    ref_id: A.8.25
+    name: Secure development life cycle
+    category: technical
+    translations:
+      fr:
+        name: "Cycle de vie de d\xE9veloppement s\xE9curis\xE9"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.26
+    ref_id: A.8.26
+    name: Application security requirements
+    category: technical
+    translations:
+      fr:
+        name: "Exigences de s\xE9curit\xE9 des applications"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.27
+    ref_id: A.8.27
+    name: Secure system architecture and engineering principles
+    category: technical
+    translations:
+      fr:
+        name: "Principes d'ing\xE9nierie et d'architecture des syst\xE8mes s\xE9curis\xE9\
+          s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.28
+    ref_id: A.8.28
+    name: Secure coding
+    category: technical
+    translations:
+      fr:
+        name: "Codage s\xE9curis\xE9"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.29
+    ref_id: A.8.29
+    name: Security testing in development and acceptance
+    category: technical
+    translations:
+      fr:
+        name: "Tests de s\xE9curit\xE9 dans le d\xE9veloppement et l'acceptation"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.30
+    ref_id: A.8.30
+    name: 'Outsourced development '
+    category: technical
+    translations:
+      fr:
+        name: "D\xE9veloppement externalis\xE9 "
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.31
+    ref_id: A.8.31
+    name: Separation of development, test and production environments
+    category: technical
+    translations:
+      fr:
+        name: "S\xE9paration des environnements de d\xE9veloppement, de test et op\xE9\
+          rationnels"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.32
+    ref_id: A.8.32
+    name: Change management
+    category: technical
+    translations:
+      fr:
+        name: Gestion des changements
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.33
+    ref_id: A.8.33
+    name: Test information
+    category: technical
+    translations:
+      fr:
+        name: Informations de test
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:a.8.34
+    ref_id: A.8.34
+    name: Protection of information systems during audit testing
+    category: technical
+    translations:
+      fr:
+        name: "Protection des syst\xE8mes d'information pendant les tests d'audit"
+        description: null
   framework:
     urn: urn:intuitem:risk:framework:iso27001-2022
     ref_id: ISO/IEC 27001:2022
@@ -30,11 +784,21 @@ objects:
         description: "S\xE9curit\xE9 de l'information, cybers\xE9curit\xE9 et protection\
           \ de la vie priv\xE9e \u2014 Information syst\xE8me de management de la\
           \ s\xE9curit\xE9 \u2014 Exigences"
+    implementation_groups_definition:
+    - ref_id: Clauses
+      name: Clauses
+      description: null
+    - ref_id: SoA
+      name: Statement of Applicability
+      description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:iso27001-2022:core
       assessable: false
       depth: 1
+      ref_id: core
       name: Clauses
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Clauses
@@ -45,6 +809,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '4'
       name: 'Context of the organization '
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Contexte de l'organisation
@@ -56,6 +822,8 @@ objects:
       ref_id: '4.1'
       name: Understanding the organization and its context
       description: Understand the context and the organization.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
       translations:
@@ -70,6 +838,8 @@ objects:
       name: Understanding the needs and expectations of interested parties
       description: Determine interested parties and understand their requirements
         in relation with the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
       translations:
@@ -85,6 +855,8 @@ objects:
       ref_id: '4.3'
       name: Determining the scope of the information security management system
       description: Determine the scope of the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.SCOPE
       translations:
@@ -99,6 +871,8 @@ objects:
       ref_id: '4.4'
       name: Information security management system
       description: Design and implement the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
       translations:
@@ -111,6 +885,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '5'
       name: Leadership
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Leadership
@@ -123,6 +899,8 @@ objects:
       name: Leadership and commitment
       description: Ensure top management provides adequate commitment and resources
         for the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
       - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
@@ -142,6 +920,8 @@ objects:
       ref_id: '5.2'
       name: ' Policy'
       description: Define an adequate security policy.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       translations:
@@ -155,6 +935,8 @@ objects:
       ref_id: '5.3'
       name: Organizational roles, responsibilities and authorities
       description: Ensure roles and responsibilities are properly defined.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       translations:
@@ -168,6 +950,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '6'
       name: Planning
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Planification
@@ -178,6 +962,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6
       ref_id: '6.1'
       name: Actions to address risks and opportunities
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: "Actions \xE0 mettre en oeuvre face aux risques et opportunit\xE9s"
@@ -190,6 +976,8 @@ objects:
       name: General
       description: When planning for the ISMS, take into account risks and opportunities,
         and actions to address them.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
@@ -206,6 +994,8 @@ objects:
       ref_id: 6.1.2
       name: Information security risk assessment requirement
       description: Establish a proper risk assessment process.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
@@ -222,6 +1012,8 @@ objects:
       name: Information security risk treatment
       description: Establish a proper risk treatment process, and produce a Statement
         of Applicability.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
@@ -238,6 +1030,8 @@ objects:
       ref_id: '6.2'
       name: Information security objectives and planning to achieve them
       description: Define and maintain relevant security objectives.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       - urn:intuitem:risk:function:doc-pol:DOC.SO_REGISTER
@@ -254,6 +1048,8 @@ objects:
       ref_id: '6.3'
       name: Planning for changes
       description: Plan the changes to the ISMS
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAINTENANCE
       translations:
@@ -266,6 +1062,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '7'
       name: ' Support'
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: ' Supports'
@@ -277,6 +1075,8 @@ objects:
       ref_id: '7.1'
       name: Resources
       description: Provide adequate resources for the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
@@ -292,6 +1092,8 @@ objects:
       ref_id: '7.2'
       name: Competence
       description: Manage competence of workforce interacting with the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
@@ -307,6 +1109,8 @@ objects:
       ref_id: '7.3'
       name: Awareness
       description: Manage awareness of all employees and contractors.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
@@ -321,6 +1125,8 @@ objects:
       ref_id: '7.4'
       name: Communication
       description: Manage communication relevant to the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.COM
       translations:
@@ -333,6 +1139,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:7
       ref_id: '7.5'
       name: Documented Information
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: "Informations document\xE9es"
@@ -344,6 +1152,8 @@ objects:
       ref_id: 7.5.1
       name: General
       description: Document adequate information relevant to the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
       translations:
@@ -357,6 +1167,8 @@ objects:
       ref_id: 7.5.2
       name: Creating and Updating documented information
       description: Identify properly the documents, and manage reviews and approvals.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
       translations:
@@ -371,6 +1183,8 @@ objects:
       ref_id: 7.5.3
       name: Control of documented information
       description: Ensure the ISMS documentation is available and adequately protected.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
       translations:
@@ -384,6 +1198,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '8'
       name: Operations
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Fonctionnement
@@ -395,6 +1211,8 @@ objects:
       ref_id: '8.1'
       name: Operational planning and control
       description: Define and implement adequate processes, and control them.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
@@ -410,6 +1228,8 @@ objects:
       ref_id: '8.2'
       name: Information security risk assessment
       description: Perform risk assessments periodically.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
@@ -424,6 +1244,8 @@ objects:
       ref_id: '8.3'
       name: Information security risk treatment
       description: Implement risk treatment plan.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
@@ -437,6 +1259,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '9'
       name: Performance evaluation
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: "\xC9valuation de la performance"
@@ -449,6 +1273,8 @@ objects:
       name: Monitoring, measurement, analysis, evaluation
       description: Implement relevant monitoring, and evaluate performance and effectiveness
         of the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MONITOR
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
@@ -463,6 +1289,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.2'
       name: Internal audit
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Audit interne
@@ -474,6 +1302,8 @@ objects:
       ref_id: 9.2.1
       name: General
       description: Perform regular internal audits of the ISMS.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.AUDIT
       translations:
@@ -487,6 +1317,8 @@ objects:
       ref_id: 9.2.2
       name: Internal audit programme
       description: Manage the internal audit programme appropriately.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
       translations:
@@ -500,6 +1332,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:9
       ref_id: '9.3'
       name: Management review
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: Revue de la direction
@@ -511,6 +1345,8 @@ objects:
       ref_id: 9.3.1
       name: General
       description: Organize management reviews of the ISMS periodically.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       translations:
@@ -524,6 +1360,8 @@ objects:
       ref_id: 9.3.2
       name: Management review inputs
       description: Include appropriate data for effective management reviews.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
       translations:
@@ -538,6 +1376,8 @@ objects:
       ref_id: 9.3.3
       name: Management review results
       description: Document the results of the management reviews.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
       translations:
@@ -550,6 +1390,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:core
       ref_id: '10'
       name: Improvement
+      implementation_groups:
+      - Clauses
       translations:
         fr:
           name: "Am\xE9lioration"
@@ -561,6 +1403,8 @@ objects:
       ref_id: '10.1'
       name: "Continual improvement\_"
       description: Improve the ISMS continuously.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       translations:
@@ -574,6 +1418,8 @@ objects:
       ref_id: '10.2'
       name: Nonconformity and corrective action
       description: Manage nonconformities appropriately.
+      implementation_groups:
+      - Clauses
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
@@ -589,7 +1435,10 @@ objects:
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
+      ref_id: annex-a
       name: Statement of Applicability
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "D\xE9claration d'applicabilit\xE9"
@@ -600,6 +1449,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.5
       name: Organisational controls
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Mesure de s\xE9curit\xE9 organisationnelles"
@@ -610,6 +1461,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.1
       name: Policies for information security
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Politiques de s\xE9curit\xE9 de l'information"
@@ -620,6 +1473,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.2
       name: Information security roles and responsibilities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Fonctions et responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 de\
@@ -631,6 +1486,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.3
       name: Segregation of duties
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9paration des t\xE2ches"
@@ -641,6 +1498,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.4
       name: Management responsibilities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Responsabilit\xE9s de la direction"
@@ -651,6 +1510,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.5
       name: Contact with authorities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Contact avec les autorit\xE9s"
@@ -661,6 +1522,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.6
       name: Contact with special interest groups
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Contact avec des groupes d'int\xE9r\xEAt sp\xE9cifiques"
@@ -671,6 +1534,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.7
       name: Threat intelligence
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Renseignements sur les menaces
@@ -681,6 +1546,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.8
       name: Information security in project management
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
@@ -691,6 +1558,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.9
       name: Inventory of information and other associated assets
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Inventaire des informations et autres actifs associ\xE9s"
@@ -701,6 +1570,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.10
       name: Acceptable use of information and other associated assets
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Utilisation correcte des informations et autres actifs associ\xE9\
@@ -712,6 +1583,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.11
       name: Return of assets
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Restitution des actifs
@@ -722,6 +1595,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.12
       name: Classification of information
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Classification des informations
@@ -732,6 +1607,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.13
       name: Labelling of information
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Marquage des informations
@@ -742,6 +1619,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.14
       name: Information transfer
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Transfert des informations
@@ -752,6 +1631,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.15
       name: Access control
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Contr\xF4le d'acc\xE8s"
@@ -762,6 +1643,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.16
       name: Identity management
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Gestion des identit\xE9s"
@@ -772,6 +1655,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.17
       name: Authentication information
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Informations d'authentification
@@ -782,6 +1667,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.18
       name: Access rights
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Droits d'acc\xE8s"
@@ -792,6 +1679,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.19
       name: Information security in supplier relationships
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans les relations avec les fournisseurs"
@@ -802,6 +1691,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.20
       name: Addressing information security within supplier agreements
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "La s\xE9curit\xE9 de l'information dans les accords conclus avec\
@@ -813,6 +1704,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.21
       name: Managing information security in the ICT supply chain
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Gestion de la s\xE9curit\xE9 de l'information dans la cha\xEEne d'approvisionnement\
@@ -824,6 +1717,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.22
       name: Monitor, review and change management of supplier services
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Surveillance, r\xE9vision et gestion des changements des services\
@@ -835,6 +1730,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.23
       name: Information security for use of cloud services
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information dans l'utilisation de services en\
@@ -846,6 +1743,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.24
       name: Information security incident management planning and preparation
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Planification et pr\xE9paration de la gestion des incidents de s\xE9\
@@ -857,6 +1756,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.25
       name: Assessment and decision on information security events
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "\xC9valuation des \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
@@ -868,6 +1769,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.26
       name: Response to information security incidents
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "R\xE9ponse aux incidents de s\xE9curit\xE9 de l'information"
@@ -878,6 +1781,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.27
       name: Learning from information security incidents
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Tirer des enseignements des incidents de s\xE9curit\xE9 de l'information"
@@ -888,6 +1793,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.28
       name: Collection of evidence
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Collecte de preuves
@@ -898,6 +1805,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.29
       name: Information security during disruption
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 de l'information pendant une perturbation"
@@ -908,6 +1817,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.30
       name: ICT readiness for business continuity
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Pr\xE9paration des TIC la continuit\xE9 d'activit\xE9"
@@ -918,6 +1829,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.31
       name: Legal, statutory, regulatory and contractual requirements
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles"
@@ -928,6 +1841,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.32
       name: ' Intellectual property rights'
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: " Droits de propri\xE9t\xE9 intellectuelle"
@@ -938,6 +1853,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.33
       name: Protection of records
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Protection des enregistrements
@@ -948,6 +1865,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.34
       name: Privacy and protection of PII
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Protection de la vie priv\xE9e et des donn\xE9es \xE0 caract\xE8\
@@ -959,6 +1878,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.35
       name: Independent review of information security
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "R\xE9vision ind\xE9pendante de la s\xE9curit\xE9 de l'information"
@@ -969,6 +1890,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.36
       name: Compliance with policies, rules and standards for information security
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Conformit\xE9 aux politiques, r\xE8gles et normes de s\xE9curit\xE9\
@@ -980,6 +1903,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       ref_id: A.5.37
       name: Documented operating procedures
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Proc\xE9dures d'exploitation document\xE9es"
@@ -990,6 +1915,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.6
       name: People controls
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Mesures de s\xE9curit\xE9 applicables aux personnes"
@@ -1000,6 +1927,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.1
       name: Screening
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9lection des candidats"
@@ -1010,6 +1939,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.2
       name: Terms and conditions of employment
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Termes et conditions du contrat de travail
@@ -1020,6 +1951,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.3
       name: Information security awareness, education and training
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Sensibilisation, enseignement et formation en s\xE9curit\xE9 de l'information"
@@ -1030,6 +1963,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.4
       name: Disciplinary process
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Proc\xE9dure disciplinaire"
@@ -1040,6 +1975,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.5
       name: Responsibilities after termination or change of employment
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Responsabilit\xE9s apr\xE8s la fin ou le changement d'emploi"
@@ -1050,6 +1987,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.6
       name: Confidentiality or non-disclosure agreements
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Accords de confidentialit\xE9 ou de non-divulgation"
@@ -1060,6 +1999,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.7
       name: Remote working
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Travail \xE0 distance"
@@ -1070,6 +2011,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       ref_id: A.6.8
       name: Information security event reporting
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "D\xE9claration des \xE9v\xE9nements de s\xE9curit\xE9 de l'information"
@@ -1080,6 +2023,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.7
       name: Physical controls
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Mesures de s\xE9curit\xE9 physique"
@@ -1090,6 +2035,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.1
       name: Physical security perimeters
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "P\xE9rim\xE8tres de s\xE9curit\xE9 physique"
@@ -1100,6 +2047,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.2
       name: Physical entry
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Les entr\xE9es physiques"
@@ -1110,6 +2059,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.3
       name: Securing offices, rooms and facilities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curisation des bureaux, des salles et des installations"
@@ -1120,6 +2071,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.4
       name: Physical security monitoring
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Surveillance de la s\xE9curit\xE9 physique"
@@ -1130,6 +2083,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.5
       name: Protecting against physical and environmental threats
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Protection contre les menaces physiques et environnementales
@@ -1140,6 +2095,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.6
       name: Working In secure areas
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Travail dans les zones s\xE9curis\xE9es"
@@ -1150,6 +2107,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.7
       name: Clear desk and clear screen
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Bureau propre et \xE9cran vide"
@@ -1160,6 +2119,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.8
       name: Equipment siting and protection
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Emplacement et protection du mat\xE9riel"
@@ -1170,6 +2131,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.9
       name: Security of assets off-premises
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 des actifs hors des locaux"
@@ -1180,6 +2143,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.10
       name: Storage media
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Supports de stockage
@@ -1190,6 +2155,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.11
       name: Supporting utilities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Services supports
@@ -1200,6 +2167,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.12
       name: Cabling security
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 du c\xE2blage"
@@ -1210,6 +2179,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.13
       name: Equipment maintenance
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Maintenance du mat\xE9riel"
@@ -1220,6 +2191,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       ref_id: A.7.14
       name: Secure disposal or re-use of equipment
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "\xC9limination ou recyclage s\xE9curis\xE9(e) du mat\xE9riel"
@@ -1230,6 +2203,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       ref_id: A.8
       name: Technological controls
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Mesures de s\xE9curit\xE9 technologiques"
@@ -1240,6 +2215,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.1
       name: User end point devices
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Terminaux finaux des utilisateurs
@@ -1250,6 +2227,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.2
       name: Privileged access rights
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Droits d'acc\xE8s privil\xE9gi\xE9s"
@@ -1260,6 +2239,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.3
       name: Information access restriction
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Restriction d'acc\xE8s aux informations"
@@ -1270,6 +2251,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.4
       name: Access to source code
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Acc\xE8s aux codes source"
@@ -1280,6 +2263,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.5
       name: Secure authentication
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Authentification s\xE9curis\xE9e"
@@ -1290,6 +2275,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.6
       name: Capacity management
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Dimensionnement
@@ -1300,6 +2287,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.7
       name: Protection against malware
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Protection contre les programmes malveillants (malware)
@@ -1310,6 +2299,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.8
       name: Management of technical vulnerabilities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Gestion des vuln\xE9rabilit\xE9s techniques"
@@ -1320,6 +2311,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.9
       name: Configuration management
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Gestion des configurations
@@ -1330,6 +2323,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.10
       name: Information deletion
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Suppression des informations
@@ -1340,6 +2335,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.11
       name: Data masking
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Masquage des donn\xE9es"
@@ -1350,6 +2347,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.12
       name: Data leakage prevention
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Pr\xE9vention de la fuite de donn\xE9es"
@@ -1360,6 +2359,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.13
       name: Information backup
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Sauvegarde des informations
@@ -1370,6 +2371,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.14
       name: Redundancy of information processing facilities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Redondance des moyens de traitement de l'information
@@ -1380,6 +2383,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.15
       name: Logging
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Journalisation
@@ -1390,6 +2395,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.16
       name: Monitoring activities
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Activit\xE9s de surveillance"
@@ -1400,6 +2407,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.17
       name: Clock synchronization
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Synchronisation des horloges
@@ -1410,6 +2419,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.18
       name: Use of privileged utility programs
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Utilisation de programmes utilitaires \xE0 privil\xE8ges"
@@ -1420,6 +2431,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.19
       name: Installation of software on operational systems
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Installation de logiciels sur des syst\xE8mes op\xE9rationnels"
@@ -1430,6 +2443,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.20
       name: Networks security
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 des r\xE9seaux"
@@ -1440,6 +2455,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.21
       name: Security of network services
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9curit\xE9 des services r\xE9seau"
@@ -1450,6 +2467,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.22
       name: Segregation of networks
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Cloisonnement des r\xE9seaux"
@@ -1460,6 +2479,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.23
       name: 'Web filtering '
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: 'Filtrage web '
@@ -1470,6 +2491,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.24
       name: Use of cryptography
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Utilisation de la cryptographie
@@ -1480,6 +2503,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.25
       name: Secure development life cycle
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Cycle de vie de d\xE9veloppement s\xE9curis\xE9"
@@ -1490,6 +2515,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.26
       name: Application security requirements
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Exigences de s\xE9curit\xE9 des applications"
@@ -1500,6 +2527,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.27
       name: Secure system architecture and engineering principles
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Principes d'ing\xE9nierie et d'architecture des syst\xE8mes s\xE9\
@@ -1511,6 +2540,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.28
       name: Secure coding
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Codage s\xE9curis\xE9"
@@ -1521,6 +2552,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.29
       name: Security testing in development and acceptance
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Tests de s\xE9curit\xE9 dans le d\xE9veloppement et l'acceptation"
@@ -1531,6 +2564,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.30
       name: 'Outsourced development '
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "D\xE9veloppement externalis\xE9 "
@@ -1541,6 +2576,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.31
       name: Separation of development, test and production environments
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "S\xE9paration des environnements de d\xE9veloppement, de test et\
@@ -1552,6 +2589,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.32
       name: Change management
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Gestion des changements
@@ -1562,6 +2601,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.33
       name: Test information
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: Informations de test
@@ -1572,6 +2613,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       ref_id: A.8.34
       name: Protection of information systems during audit testing
+      implementation_groups:
+      - SoA
       translations:
         fr:
           name: "Protection des syst\xE8mes d'information pendant les tests d'audit"
