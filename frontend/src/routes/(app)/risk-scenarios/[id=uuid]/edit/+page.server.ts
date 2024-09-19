@@ -51,7 +51,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		if (response.ok) {
 			const data = await response.json().then((data) => data.results);
 
-			const metaData = tableSourceMapper(data, ['id']);
+			const metaData = tableSourceMapper(data, ['id', 'status']);
 
 			const bodyData = tableSourceMapper(data, listViewFields[key].body);
 
