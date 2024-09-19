@@ -64,3 +64,25 @@ jobs:
             ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
             ghcr.io/${{ github.repository }}/backend:latest
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
+
+      - name: Build and Push Enterprise Frontend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./enterprise/frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ env.VERSION }}
+            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
+
+      - name: Build and Push Enterprise Backend Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./enterprise/backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ env.VERSION }}
+            ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest
+          platforms: linux/amd64,linux/arm64,linux/arm64/v8
