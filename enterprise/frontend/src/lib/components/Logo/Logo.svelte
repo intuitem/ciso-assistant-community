@@ -24,6 +24,7 @@
 
 	onMount(async () => {
 		if (!clientSettings.settings.logo) {
+			logo = ciso;
 			return;
 		}
 		const logoHash = clientSettings.settings.logo_hash;
