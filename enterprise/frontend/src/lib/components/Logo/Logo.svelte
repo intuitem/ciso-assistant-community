@@ -10,12 +10,6 @@
 		mimeType: ''
 	});
 
-	async function digestMessage(message) {
-		const encoder = new TextEncoder();
-		const data = encoder.encode(message);
-		const hash = await window.crypto.subtle.digest('SHA-256', data);
-		return hash;
-	}
 	export let height = 200;
 	export let width = 200;
 

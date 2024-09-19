@@ -81,12 +81,6 @@
 		mimeType: ''
 	});
 
-	async function digestMessage(message) {
-		const encoder = new TextEncoder();
-		const data = encoder.encode(message);
-		const hash = await window.crypto.subtle.digest('SHA-256', data);
-		return hash;
-	}
 	const clientSettings = $page.data.clientSettings;
 
 	onMount(async () => {
