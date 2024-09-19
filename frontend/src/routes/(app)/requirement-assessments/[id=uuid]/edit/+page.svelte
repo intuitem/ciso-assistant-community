@@ -394,7 +394,7 @@
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col my-8 space-y-6">
-				{#if Object.keys(data.requirementAssessment.answer).length !== 0}
+				{#if data.requirementAssessment.answer != null && Object.keys(data.requirementAssessment.answer).length !== 0}
 					<Question {form} field="answer" label={m.question()} />
 				{/if}
 				<Select
