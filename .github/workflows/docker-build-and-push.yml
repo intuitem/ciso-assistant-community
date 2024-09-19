@@ -56,8 +56,8 @@ jobs:
           file: ./enterprise/frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ env.VERSION }}
-            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest' || null }}
+            ghcr.io/${{ github.repository }}/frontend:${{ env.VERSION }}
+            ghcr.io/${{ github.repository }}/frontend:latest
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
 
       - name: Build and Push Enterprise Backend Docker Image
@@ -67,6 +67,6 @@ jobs:
           file: ./enterprise/backend/Dockerfile
           push: true
           tags: |
-            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ env.VERSION }}
-            ${{ fromJSON(inputs.isStableRelease) && 'ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest' || null }}
+            ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
+            ghcr.io/${{ github.repository }}/backend:latest
           platforms: linux/amd64,linux/arm64,linux/arm64/v8
