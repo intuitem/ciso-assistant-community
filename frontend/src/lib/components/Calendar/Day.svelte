@@ -42,7 +42,7 @@
 				</div>
 			{/if}
 		</div>
-	{:else if (day < today.getDate() && month == today.getMonth() + 1) || (month < today.getMonth() + 1 && year == today.getFullYear()) || year < today.getFullYear()}
+	{:else if (day < today.getDate() && month == today.getMonth() + 1  && year == today.getFullYear() ) || (month < today.getMonth() + 1 && year == today.getFullYear()) || year < today.getFullYear()}
 		<div
 			in:fly={{ delay: 100, duration: 300 }}
 			class="flex flex-col border p-2 bg-gray-300 text-gray-500 rounded-lg text-sm"
