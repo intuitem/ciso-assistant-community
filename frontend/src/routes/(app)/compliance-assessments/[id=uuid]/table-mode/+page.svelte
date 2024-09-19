@@ -240,7 +240,7 @@
 								</div>
 							</div>
 						{/if}
-						{#if Object.keys(requirementAssessment.answer).length !== 0}
+						{#if requirementAssessment.answer != null && Object.keys(requirementAssessment.answer).length !== 0}
 							<div class="flex flex-col w-full space-y-2">
 								{#each requirementAssessment.answer.questions as question}
 									<li class="flex flex-col space-y-2 rounded-xl">
