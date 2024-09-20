@@ -54,7 +54,6 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
-		console.log('ok?');
 
 		if (!res.ok) {
 			const response: Record<string, any> = await res.json();
