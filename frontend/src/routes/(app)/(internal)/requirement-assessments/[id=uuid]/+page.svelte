@@ -256,7 +256,7 @@
 			</svelte:fragment>
 		</TabGroup>
 	</div>
-	{#if Object.keys(data.requirementAssessment.answer).length !== 0}
+	{#if data.requirementAssessment.answer != null && Object.keys(data.requirementAssessment.answer).length !== 0}
 		<h1 class="font-semibold text-sm">{m.question()}</h1>
 		{#each data.requirementAssessment.answer.questions as question}
 			<li class="flex justify-between items-center border rounded-xl p-2 disabled">

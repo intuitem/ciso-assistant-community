@@ -151,7 +151,7 @@ class FinishACSView(SAMLViewMixin, View):
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
-            login._accept_login()
+            login._accept_login(request)
             record_authentication(request, login)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
