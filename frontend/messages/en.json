@@ -737,5 +737,6 @@
 	"createUser": "Create user",
 	"createUserHelpText": "Create or link a third party user to the representative based on the email",
 	"nameDuplicate": "Name already exists",
-	"noAnswer": "No answer"
+	"noAnswer": "No answer",
+	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page."
 }

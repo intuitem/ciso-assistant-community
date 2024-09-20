@@ -24,7 +24,7 @@
 			const href = '/settings/client-settings';
 			const result = await preloadData(href);
 			if (result.type === 'loaded' && result.status === 200) {
-				pushState(href, { clientSettings: result.data });
+				pushState('', { clientSettings: result.data });
 			} else {
 				// Something went wrong, try navigating
 				goto(href);

@@ -103,9 +103,7 @@ export const actions: Actions = {
 		return setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({
-					object: safeTranslate(modelVerboseName).toLowerCase()
-				})
+				message: m.successfullyUpdatedClientSettings()
 			},
 			event
 		);
