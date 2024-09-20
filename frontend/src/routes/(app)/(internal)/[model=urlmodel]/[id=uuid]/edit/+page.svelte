@@ -5,7 +5,7 @@
 
 	export let data: PageData;
 
-	breadcrumbObject.set(data.data);
+	breadcrumbObject.set(data.object);
 </script>
 
 <ModelForm
