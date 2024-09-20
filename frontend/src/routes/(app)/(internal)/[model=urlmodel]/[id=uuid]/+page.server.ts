@@ -77,7 +77,7 @@ export const actions: Actions = {
 
 		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
-				if (file.size <= 0) {
+				if (!file || file.size <= 0) {
 					continue;
 				}
 				const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${createdObject.id}/upload/`;
