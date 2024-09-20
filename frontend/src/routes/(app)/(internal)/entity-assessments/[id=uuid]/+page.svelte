@@ -4,7 +4,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import * as m from '$paraglide/messages';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
-	import AuditTableMode from '../../compliance-assessments/[id=uuid]/table-mode/+page.svelte';
+	import AuditTableMode from '../../../(third-party)/compliance-assessments/[id=uuid]/table-mode/+page.svelte';
 	import type { PageData, Actions } from './$types';
 
 	export let data: PageData;

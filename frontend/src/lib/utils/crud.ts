@@ -550,92 +550,100 @@ export const FIELD_COMPONENT_MAP = {
 // Il faut afficher le tag "draft" pour la column name !
 
 interface TagConfig {
-	key: string;
-	values: {
-		[key: string]: {
-			text: string;
-			cssClasses: string;
-		};
-	};
+	text: string;
+	cssClasses: string;
 }
 
 interface FieldColoredTagMap {
 	[key: string]: {
-		[key: string]: TagConfig[] | TagConfig;
+		[key: string]: {
+			keys: { [key: string]: { [key: string]: TagConfig } };
+			values?: { [key: string]: TagConfig };
+		};
 	};
 }
 
 export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	'risk-assessments': {
 		name: {
-			key: 'status',
-			values: {
-				planned: { text: 'planned', cssClasses: 'badge bg-indigo-300' },
-				in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
-				in_review: { text: 'inReview', cssClasses: 'badge bg-cyan-300' },
-				done: { text: 'done', cssClasses: 'badge bg-lime-300' },
-				deprecated: { text: 'deprecated', cssClasses: 'badge bg-orange-300' }
+			keys: {
+				status: {
+					planned: { text: 'planned', cssClasses: 'badge bg-indigo-300' },
+					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
+					in_review: { text: 'inReview', cssClasses: 'badge bg-cyan-300' },
+					done: { text: 'done', cssClasses: 'badge bg-lime-300' },
+					deprecated: { text: 'deprecated', cssClasses: 'badge bg-orange-300' }
+				}
 			}
 		}
 	},
 	'risk-scenarios': {
 		name: {
-			key: 'treatment',
-			values: {
-				open: { text: 'open', cssClasses: 'badge bg-green-300' },
-				mitigate: { text: 'mitigate', cssClasses: 'badge bg-lime-200' },
-				accept: { text: 'accept', cssClasses: 'badge bg-green-200' },
-				avoid: { text: 'avoid', cssClasses: 'badge bg-red-200' },
-				transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' }
+			keys: {
+				treatment: {
+					open: { text: 'open', cssClasses: 'badge bg-green-300' },
+					mitigate: { text: 'mitigate', cssClasses: 'badge bg-lime-200' },
+					accept: { text: 'accept', cssClasses: 'badge bg-green-200' },
+					avoid: { text: 'avoid', cssClasses: 'badge bg-red-200' },
+					transfer: { text: 'transfer', cssClasses: 'badge bg-yellow-300' }
+				}
 			}
 		}
 	},
 	'compliance-assessments': {
 		name: {
-			key: 'status',
-			values: {
-				planned: { text: 'planned', cssClasses: 'badge bg-indigo-300' },
-				in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
-				in_review: { text: 'inReview', cssClasses: 'badge bg-cyan-300' },
-				done: { text: 'done', cssClasses: 'badge bg-lime-300' },
-				deprecated: { text: 'deprecated', cssClasses: 'badge bg-orange-300' }
+			keys: {
+				status: {
+					planned: { text: 'planned', cssClasses: 'badge bg-indigo-300' },
+					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
+					in_review: { text: 'inReview', cssClasses: 'badge bg-cyan-300' },
+					done: { text: 'done', cssClasses: 'badge bg-lime-300' },
+					deprecated: { text: 'deprecated', cssClasses: 'badge bg-orange-300' }
+				}
 			}
 		}
 	},
 	assets: {
 		name: {
-			key: 'type',
-			values: {
-				Primary: { text: 'primary', cssClasses: 'badge bg-blue-200' }
+			keys: {
+				type: {
+					Primary: { text: 'primary', cssClasses: 'badge bg-blue-200' }
+				}
 			}
 		}
 	},
 	'applied-controls': {
 		name: {
-			key: 'status',
-			values: {
-				to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
-				in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
-				active: { text: 'active', cssClasses: 'badge bg-green-200' },
-				on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
-				deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
-				'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+			keys: {
+				status: {
+					to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
+					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
+					active: { text: 'active', cssClasses: 'badge bg-green-200' },
+					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
+					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				}
 			}
 		}
 	},
 	projects: {
 		name: {
-			key: 'lc_status',
-			values: {
-				Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
+			keys: {
+				lc_status: {
+					Dropped: { text: 'dropped', cssClasses: 'badge bg-red-200' }
+				}
 			}
 		}
 	},
 	users: {
 		email: {
-			key: 'is_sso',
-			values: {
-				true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
+			keys: {
+				is_sso: {
+					true: { text: 'SSO', cssClasses: 'badge bg-violet-200' }
+				},
+				is_third_party: {
+					true: { text: 'Third party', cssClasses: 'badge bg-stone-200' }
+				}
 			}
 		}
 	}
