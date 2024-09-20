@@ -890,6 +890,7 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
 			field="authors"
+			helpText={m.entityAssessmentAuthorHelpText()}
 			cacheLock={cacheLocks['authors']}
 			bind:cachedValue={formDataCache['authors']}
 			label={m.authors()}
