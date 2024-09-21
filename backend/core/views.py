@@ -1829,6 +1829,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "evidences"]
     search_fields = ["name", "description"]
 
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        cache.clear()
+        return response
+
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
         (_, object_ids_change, _) = RoleAssignment.get_accessible_object_ids(
