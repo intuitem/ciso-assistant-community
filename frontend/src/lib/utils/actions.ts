@@ -5,12 +5,48 @@ import * as m from '$paraglide/messages';
 
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
-import { RequestEvent, fail } from '@sveltejs/kit';
+import { type RequestEvent, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
-export async function defaultCreateFormAction(event: RequestEvent, urlModel: string) {
+type FormAction = 'create' | 'edit';
+
+function getHTTPMethod({
+	action,
+	fileFields
+}: {
+	urlModel: string;
+	action: FormAction;
+	fileFields: Record<string, File>;
+}) {
+	if (action === 'create') return 'POST';
+	return Object.keys(fileFields).length > 0 ? 'PATCH' : 'PUT';
+}
+
+function getSuccessMessage({ action, urlModel }: { action: FormAction; urlModel: string }) {
+	const modelVerboseName: string = urlModel ? urlParamModelVerboseName(urlModel) : '';
+	if (action === 'create') {
+		return m.successfullyCreatedObject({
+			object: safeTranslate(modelVerboseName).toLowerCase()
+		});
+	}
+	if (action === 'edit') {
+		return m.successfullyUpdatedObject({
+			object: safeTranslate(modelVerboseName).toLowerCase()
+		});
+	}
+}
+
+export async function defaultWriteFormAction({
+	event,
+	urlModel,
+	action
+}: {
+	event: RequestEvent;
+	urlModel: string;
+	action: FormAction;
+}) {
 	const formData = await event.request.formData();
 
 	if (!formData) {
@@ -37,7 +73,7 @@ export async function defaultCreateFormAction(event: RequestEvent, urlModel: str
 	});
 
 	const requestInitOptions: RequestInit = {
-		method: 'POST',
+		method: getHTTPMethod({ action, fileFields }),
 		body: JSON.stringify(form.data)
 	};
 
@@ -86,14 +122,10 @@ export async function defaultCreateFormAction(event: RequestEvent, urlModel: str
 		}
 	}
 
-	const modelVerboseName: string = urlModel ? urlParamModelVerboseName(urlModel) : '';
-
 	setFlash(
 		{
 			type: 'success',
-			message: m.successfullyCreatedObject({
-				object: safeTranslate(modelVerboseName).toLowerCase()
-			})
+			message: getSuccessMessage({ urlModel, action })
 		},
 		event
 	);
