@@ -669,5 +669,6 @@
 	"observationSemiColon": "Observation:",
 	"tableMode": "Mode tableau",
 	"owner": "Propriétaire",
-	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet risque."
+	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet risque.",
+	"xRaysEmptyMessage": "Vous devez créer au moins un projet pour utiliser X-rays."
 }
