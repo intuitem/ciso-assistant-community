@@ -11,6 +11,7 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
+import { defaultWriteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'risk-scenarios';
@@ -197,47 +198,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	updateRiskScenario: async (event) => {
-		const URLModel = 'risk-scenarios';
-		const schema = modelSchema(URLModel);
-		const endpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/`;
-		const form = await superValidate(event.request, zod(schema));
-
-		if (!form.valid) {
-			console.log(form.errors);
-			return fail(400, { form: form });
-		}
-
-		const requestInitOptions: RequestInit = {
-			method: 'PUT',
-			body: JSON.stringify(form.data)
-		};
-
-		const res = await event.fetch(endpoint, requestInitOptions);
-
-		if (!res.ok) {
-			const response: Record<string, any> = await res.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			Object.entries(response).forEach(([key, value]) => {
-				setError(form, key, value);
-			});
-			return fail(400, { form: form });
-		}
-
-		const modelVerboseName: string = urlParamModelVerboseName(URLModel);
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyUpdatedObject({ object: modelVerboseName })
-			},
-			event
-		);
-		redirect(
-			302,
-			event.url.searchParams.get('/updateRiskScenario') ?? `/risk-scenarios/${event.params.id}`
-		);
+		return defaultWriteFormAction({ event, urlModel: event.params.model!, action: 'edit' });
 	},
 	createAppliedControl: async (event) => {
 		const URLModel = 'applied-controls';
