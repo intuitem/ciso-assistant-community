@@ -21,14 +21,14 @@ with open("cli_config.yaml", "r") as yfile:
 
 try:
     API_URL = cli_cfg["rest"]["url"]
-except:
+except KeyError:
     print("Missing API URL. Check the yaml file")
     sys.exit(1)
 
 try:
     USERNAME = cli_cfg["credentials"]["username"]
     PASSWORD = cli_cfg["credentials"]["password"]
-except:
+except KeyError:
     print(
         "Missing credentials in the config file. You need to pass them to the CLI in this case."
     )
@@ -77,7 +77,6 @@ def _get_folders():
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers)
-    # TODO: should we handle pagination for this one?
     if res.status_code == 200:
         output = res.json()
         for folder in output["results"]:
