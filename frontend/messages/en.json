@@ -730,5 +730,9 @@
 	"createUserHelpText": "Create or link a third party user to the representative based on the email",
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
-	"entityAssessmentAuthorHelpText": "The representative who is responsible for questionnaire completion"
+	"entityAssessmentAuthorHelpText": "The representative who is responsible for questionnaire completion",
+	"sendQuestionnaire": "Send questionnaire",
+	"sureToSendMail": "Are you sure you want to send the mail?",
+	"mailSuccessfullySent": "The mail has been successfully sent",
+	"mailFailedToSend": "The mail failed to be sent"
 }

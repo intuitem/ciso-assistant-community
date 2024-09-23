@@ -11,10 +11,7 @@ from uuid import UUID
 from datetime import date, timedelta
 
 import django_filters as df
-from ciso_assistant.settings import (
-    BUILD,
-    VERSION,
-)
+from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 from django.contrib.auth.models import Permission
 from django.core.files.storage import default_storage
 from django.db import models
@@ -27,6 +24,7 @@ from django.utils import translation
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, permissions, status, viewsets
+from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
     api_view,
@@ -1590,6 +1588,29 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Send compliance assessment by mail to authors",
+    )
+    def mailing(self, request, pk):
+        instance = self.get_object()
+        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+            for author in instance.authors.all():
+                try:
+                    author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="compliance-assessments",
+                        object_id=instance.id,
+                    )
+                except Exception as e:
+                    print(f"Failed to send email to {author}: {e}")
+            return Response({"results": "mail sent"})
+        return Response({"results": "mail not sent"})
 
     def perform_create(self, serializer):
         """
