@@ -120,27 +120,11 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.add(respondents)
 
-    def _send_author_emails(self, instance, authors_to_email: set):
-        if EMAIL_HOST or EMAIL_HOST_RESCUE:
-            for author in authors_to_email:
-                try:
-                    author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_(
-                            "CISO Assistant: A questionnaire has been assigned to you"
-                        ),
-                        object="compliance-assessments",
-                        object_id=instance.compliance_assessment.id,
-                    )
-                except Exception as e:
-                    print(f"Failed to send email to {author}: {e}")
-
     def create(self, validated_data):
         audit_data = self._extract_audit_data(validated_data)
         instance = super().create(validated_data)
         self._create_or_update_audit(instance, audit_data)
         self._assign_third_party_respondents(instance, set(instance.authors.all()))
-        self._send_author_emails(instance, set(instance.authors.all()))
         return instance
 
     def update(self, instance: EntityAssessment, validated_data):
@@ -154,7 +138,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             self._create_or_update_audit(instance, audit_data)
 
         self._assign_third_party_respondents(instance, new_authors)
-        self._send_author_emails(instance, new_authors)
         return instance
 
     class Meta:

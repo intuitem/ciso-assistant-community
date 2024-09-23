@@ -12,11 +12,14 @@
 
 	import { breadcrumbObject } from '$lib/utils/stores';
 	breadcrumbObject.set(data.data);
+
+	const mailing = Boolean(data.data.compliance_assessment) && Boolean(data.data.authors.length);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<DetailView
 		{data}
+		{mailing}
 		exclude={['criticality', 'penetration', 'dependency', 'maturity', 'trust', 'evidence']}
 	/>
 	{#if data.data.compliance_assessment}
@@ -34,7 +37,8 @@
 							goto(href);
 						}
 					}}
-					><span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
+				>
+					<span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
 					<svelte:fragment slot="children">
 						{#if Object.hasOwn($page.state, 'auditTableMode')}
 							<div class="max-h-[48rem] overflow-y-scroll">
