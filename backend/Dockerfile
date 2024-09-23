@@ -5,6 +5,11 @@ FROM python:3.11-alpine
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
 WORKDIR /code
 
 # Configure locales
@@ -13,13 +18,18 @@ RUN apk add --no-cache bash yaml-cpp
 RUN apk add --no-cache py3-cffi libc-dev libffi-dev gcc python3-dev glib pango cairo
 RUN apk add --no-cache musl musl-utils musl-locales tzdata lang
 RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font
+RUN apk add --no-cache file-dev gcc
 
 COPY . /code/
+COPY pyproject.toml /code/
+COPY poetry.lock /code/
 COPY startup.sh /code/
 
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install poetry==1.8.3
+RUN poetry install
+RUN rm -rf $POETRY_CACHE_DIR
 
 
-ENTRYPOINT ["bash", "startup.sh"]
+ENTRYPOINT ["poetry", "run",  "bash", "startup.sh"]
 EXPOSE 8000

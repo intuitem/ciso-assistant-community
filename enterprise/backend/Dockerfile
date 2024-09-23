@@ -11,7 +11,6 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
 ENV DJANGO_SETTINGS_MODULE=enterprise_core.settings
-ENV SQLITE_FILE=/code/db/ciso-assistant.sqlite3
 
 WORKDIR /code
 
@@ -21,9 +20,10 @@ RUN apk add --no-cache bash yaml-cpp
 RUN apk add --no-cache py3-cffi libc-dev libffi-dev gcc python3-dev glib pango cairo
 RUN apk add --no-cache musl musl-utils musl-locales tzdata lang
 RUN apk add --no-cache gettext fontconfig ttf-freefont font-noto terminus-font
+RUN apk add --no-cache file-dev gcc
 
 COPY backend /code/
-COPY enterprise/backend /code/enterprise
+COPY enterprise/backend/enterprise_core /code/enterprise_core
 COPY backend/startup.sh /code/
 COPY backend/pyproject.toml /code/
 COPY backend/poetry.lock /code/
@@ -31,9 +31,8 @@ COPY backend/poetry.lock /code/
 RUN pip install --upgrade pip && \
     pip install poetry==1.8.3
 
-RUN poetry install --without dev
-RUN poetry add enterprise/
+RUN poetry install
 RUN rm -rf $POETRY_CACHE_DIR
 
-ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
+ENTRYPOINT ["poetry", "run",  "bash", "startup.sh"]
 EXPOSE 8000

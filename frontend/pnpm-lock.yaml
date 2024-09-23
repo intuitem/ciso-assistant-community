@@ -27,7 +27,7 @@ importers:
         specifier: ^5.5.1
         version: 5.5.1
       svelte-multiselect:
-        specifier: ^10.3.0
+        specifier: ^10.2.0
         version: 10.3.0
       svelte-persisted-store:
         specifier: ^0.11.0

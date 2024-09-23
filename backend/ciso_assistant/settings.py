@@ -84,6 +84,7 @@ logger = structlog.getLogger(__name__)
 FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
+MODULES = {}
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
@@ -131,7 +132,6 @@ INSTALLED_APPS = [
     "core",
     "cal",
     "django_filters",
-    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",

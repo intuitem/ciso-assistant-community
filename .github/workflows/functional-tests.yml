@@ -8,13 +8,16 @@ on:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  backend-directory: ./backend
+  frontend-directory: ./frontend
+  enterprise-backend-directory: ./enterprise/backend
+  enterprise-frontend-directory: ./enterprise/frontend
+  enterprise-frontend-build-directory: ./enterprise/frontend/.build/frontend
+  enterprise-backend-settings-module: enterprise_core.settings
 
 jobs:
   functional-tests:
     runs-on: ubuntu-20.04
-    env:
-      backend-directory: ./backend
-      working-directory: ./frontend
 
     services:
       postgres:
@@ -51,15 +54,15 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Install dependencies
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: |
           npm install -g pnpm
           pnpm i --frozen-lockfile
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: npx playwright install --with-deps ${{ matrix.playwright-browser }}
       - name: Create frontend environment variables file
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: |
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
@@ -68,6 +71,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
@@ -94,13 +98,113 @@ jobs:
           python manage.py createsuperuser --noinput
           nohup python manage.py runserver &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: npx playwright test --project=${{ matrix.playwright-browser }}
+        env:
+          CI: true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: functional-tests-report-${{ matrix.playwright-browser }}
           path: |
-            ${{ env.working-directory }}/tests/results/
-            ${{ env.working-directory }}/tests/reports/
+            ${{ env.frontend-directory }}/tests/results/
+            ${{ env.frontend-directory }}/tests/reports/
+          retention-days: 5
+
+  enterprise-functional-tests:
+    runs-on: ubuntu-20.04
+
+    services:
+      postgres:
+        image: postgres:14.12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      mailhog:
+        image: mailhog/mailhog
+        ports: ["1025:1025", "8025:8025"]
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.11"]
+        playwright-browser: ["chromium"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Install enterprise backend
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: poetry install
+      - name: Install frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make pre-build
+      - name: Install Playwright Browsers
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: npx playwright install --with-deps
+      - name: Create frontend environment variables file
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          touch .env
+          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
+      - name: Create backend environment variables file
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          touch .env
+          echo DJANGO_DEBUG=True >> .env
+          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
+          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
+          echo POSTGRES_NAME=postgres >> .env
+          echo POSTGRES_USER=postgres >> .env
+          echo POSTGRES_PASSWORD=postgres >> .env
+          echo DB_HOST=localhost >> .env
+          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
+          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
+          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
+          echo EMAIL_HOST=localhost >> .env
+          echo EMAIL_HOST_USER=user@tests.com >> .env
+          echo EMAIL_HOST_PASSWORD=password >> .env
+          echo EMAIL_PORT=1025 >> .env
+          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
+      - name: Run migrations
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+      - name: Start test server
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          poetry run python manage.py createsuperuser --noinput
+          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+      - name: Run tests with browser ${{ matrix.playwright-browser }}
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: npx playwright test --project=${{ matrix.playwright-browser }}
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: enterprise-functional-tests-report-${{ matrix.playwright-browser }}
+          path: |
+            ${{ env.enterprise-frontend-build-directory }}/tests/results/
+            ${{ env.enterprise-frontend-build-directory }}/tests/reports/
           retention-days: 5
