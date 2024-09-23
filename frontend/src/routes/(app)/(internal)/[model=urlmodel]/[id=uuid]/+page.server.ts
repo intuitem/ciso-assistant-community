@@ -9,14 +9,11 @@ import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { safeTranslate } from '$lib/utils/i18n';
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { nestedWriteFormAction } from '$lib/utils/actions';
 
 export const actions: Actions = {
 	create: async (event) => {
-		const request = event.request.clone();
-		const formData = await request.formData();
-		const urlModel = formData.get('urlmodel') as string;
-		return defaultWriteFormAction({ event, urlModel, action: 'create' });
+		return nestedWriteFormAction({ event, action: 'create' });
 	},
 	delete: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
