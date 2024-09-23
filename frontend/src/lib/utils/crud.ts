@@ -389,8 +389,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		fileFields: ['attachment'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		]
 	},
 	'compliance-assessments': {

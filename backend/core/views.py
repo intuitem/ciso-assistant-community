@@ -1,5 +1,4 @@
 import csv
-import importlib
 import mimetypes
 import re
 import tempfile
@@ -12,7 +11,14 @@ from datetime import date, timedelta
 
 import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from django.core.cache import cache
+
 from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
 from django.core.files.storage import default_storage
 from django.db import models
 from django.forms import ValidationError
@@ -20,9 +26,8 @@ from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
-from django.utils import translation
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, RoleAssignment, User, UserGroup
+from iam.models import Folder, RoleAssignment, UserGroup
 from rest_framework import filters, permissions, status, viewsets
 from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
@@ -43,7 +48,6 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
-    ReferentialObjectMixin,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
@@ -54,6 +58,10 @@ from .serializers import *
 from django.conf import settings
 
 User = get_user_model()
+
+SHORT_CACHE_TTL = 2  # mn
+MED_CACHE_TTL = 5  # mn
+LONG_CACHE_TTL = 60  # mn
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -130,6 +138,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args, **kwargs) -> Response:
+        self._process_request_data(request)
+        return super().destroy(request, *args, **kwargs)
 
     class Meta:
         abstract = True
@@ -246,6 +258,12 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
@@ -274,10 +292,12 @@ class ReferenceControlViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "category", "csf_function"]
     search_fields = ["name", "description", "provider"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(ReferenceControl.CATEGORY))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get function choices")
     def csf_function(self, request):
         return Response(dict(ReferenceControl.CSF_FUNCTION))
@@ -338,6 +358,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         data = assessment_per_status(request.user, RiskAssessment)
         return Response({"results": data})
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RiskAssessment.Status.choices))
@@ -622,18 +643,22 @@ class AppliedControlViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(AppliedControl.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(AppliedControl.CATEGORY))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
         return Response(dict(AppliedControl.EFFORT))
@@ -759,6 +784,7 @@ class PolicyViewSet(AppliedControlViewSet):
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
@@ -780,14 +806,17 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "applied_controls",
     ]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
         undefined = {-1: "--"}
@@ -800,6 +829,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get impact choices")
     def impact(self, request, pk):
         undefined = dict([(-1, "--")])
@@ -812,6 +842,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get strength of knowledge choices")
     def strength_of_knowledge(self, request, pk):
         undefined = {-1: RiskScenario.DEFAULT_SOK_OPTIONS[-1]}
@@ -1102,7 +1133,16 @@ class FolderViewSet(BaseModelViewSet):
                 is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
+            # Clear the cache after a new folder is created - purposely clearing everything
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
@@ -1148,6 +1188,8 @@ class FolderViewSet(BaseModelViewSet):
         return Response(tree)
 
 
+@cache_page(60 * SHORT_CACHE_TTL)
+@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_counters_view(request):
@@ -1157,6 +1199,8 @@ def get_counters_view(request):
     return Response({"results": get_counters(request.user)})
 
 
+@cache_page(60 * SHORT_CACHE_TTL)
+@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_metrics_view(request):
@@ -1169,6 +1213,8 @@ def get_metrics_view(request):
 # TODO: Add all the proper docstrings for the following list of functions
 
 
+@cache_page(60 * SHORT_CACHE_TTL)
+@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_agg_data(request):
@@ -1252,6 +1298,8 @@ class FrameworkViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
     def names(self, request):
         uuid_list = request.query_params.getlist("id[]", [])
@@ -1263,6 +1311,12 @@ class FrameworkViewSet(BaseModelViewSet):
                 for framework in queryset
             }
         )
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -1320,6 +1374,9 @@ class RequirementNodeViewSet(BaseModelViewSet):
     filterset_fields = ["framework", "urn"]
     search_fields = ["name", "description"]
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class RequirementViewSet(BaseModelViewSet):
     """
@@ -1329,6 +1386,9 @@ class RequirementViewSet(BaseModelViewSet):
     model = RequirementNode
     filterset_fields = ["framework", "urn"]
     search_fields = ["name"]
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class EvidenceViewSet(BaseModelViewSet):
@@ -1413,10 +1473,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, name="Get implementation group choices")
     def selected_implementation_groups(self, request, pk):
         compliance_assessment = self.get_object()
@@ -1669,6 +1732,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
+    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
@@ -1766,6 +1831,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
+    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
@@ -1780,6 +1847,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     model = RequirementAssessment
     filterset_fields = ["folder", "evidences"]
     search_fields = ["name", "description"]
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        cache.clear()
+        return response
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -1846,10 +1918,12 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         return Response({"results": measures})
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
