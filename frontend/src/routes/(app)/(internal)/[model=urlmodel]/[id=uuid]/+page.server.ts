@@ -12,6 +12,13 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { safeTranslate } from '$lib/utils/i18n';
 
+import { loadDetail } from '$lib/utils/load';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async (event) => {
+	return await loadDetail({ event, model: getModelInfo(event.params.model), id: event.params.id });
+};
+
 export const actions: Actions = {
 	create: async (event) => {
 		const formData = await event.request.formData();
@@ -70,7 +77,7 @@ export const actions: Actions = {
 
 		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
-				if (file.size <= 0) {
+				if (!file || file.size <= 0) {
 					continue;
 				}
 				const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${createdObject.id}/upload/`;
