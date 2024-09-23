@@ -17,7 +17,6 @@ function getHTTPMethod({
 	action,
 	fileFields
 }: {
-	urlModel: string;
 	action: FormAction;
 	fileFields: Record<string, File>;
 }) {
@@ -58,11 +57,13 @@ function getEndpoint({
 export async function defaultWriteFormAction({
 	event,
 	urlModel,
-	action
+	action,
+	doRedirect = true
 }: {
 	event: RequestEvent;
 	urlModel: string;
 	action: FormAction;
+	doRedirect?: boolean;
 }) {
 	const formData = await event.request.formData();
 
@@ -97,7 +98,7 @@ export async function defaultWriteFormAction({
 	const res = await event.fetch(endpoint, requestInitOptions);
 
 	if (!res.ok) {
-		const response: Record<string, any> = await res.json();
+		const response: Record<string, string> = await res.json();
 		console.error(response);
 		if (response.warning) {
 			setFlash({ type: 'warning', message: response.warning }, event);
@@ -148,7 +149,20 @@ export async function defaultWriteFormAction({
 	);
 
 	const next = getSecureRedirect(event.url.searchParams.get('next'));
-	if (next) redirect(302, next);
+	if (next && doRedirect) redirect(302, next);
 
 	return { createForm: form };
+}
+
+export async function nestedWriteFormAction({
+	event,
+	action
+}: {
+	event: RequestEvent;
+	action: FormAction;
+}) {
+	const request = event.request.clone();
+	const formData = await request.formData();
+	const urlModel = formData.get('urlmodel') as string;
+	return defaultWriteFormAction({ event, urlModel, action, doRedirect: false });
 }
