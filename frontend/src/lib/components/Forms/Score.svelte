@@ -40,8 +40,8 @@
 
 	$: if (max_score === 100) score_step = 5;
 
-	const status = formFieldProxy(form, 'status')['value'];
-	$: isApplicable = $status === 'not_applicable' ? false : true;
+	const result = formFieldProxy(form, 'result')['value'];
+	$: isApplicable = $result === 'not_applicable' ? false : true;
 </script>
 
 <div>
