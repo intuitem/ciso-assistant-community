@@ -671,5 +671,6 @@
 	"tableMode": "Mode tableau",
 	"owner": "Propriétaire",
 	"waitingRiskAcceptances": "Bonjour ! Vous avez actuellement {number} risque{s} en attente d'acceptation. Vous pouvez les retrouver dans l'onglet risque.",
+	"successfullyUpdatedClientSettings": "Paramètres du client mis à jour avec succès. Vous pouvez rafrachir la page.",
 	"xRaysEmptyMessage": "Vous devez créer au moins un projet pour utiliser X-rays."
 }
