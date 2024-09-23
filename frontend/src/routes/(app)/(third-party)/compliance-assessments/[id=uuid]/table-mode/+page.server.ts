@@ -9,6 +9,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { z } from 'zod';
 import { safeTranslate } from '$lib/utils/i18n';
+import { nestedWriteFormAction } from '$lib/utils/actions';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -90,95 +91,7 @@ export const actions: Actions = {
 		return { status: res.status, body: await res.json() };
 	},
 	createEvidence: async (event) => {
-		const formData = await event.request.formData();
-
-		if (!formData) {
-			return fail(400, { form: null });
-		}
-
-		const schema = modelSchema('evidences');
-		const form = await superValidate(formData, zod(schema));
-
-		if (!form.valid) {
-			console.error(form.errors);
-			return fail(400, { form: form });
-		}
-
-		const endpoint = `${BASE_API_URL}/evidences/`;
-
-		const model = getModelInfo('evidences');
-
-		const fileFields: Record<string, File> = Object.fromEntries(
-			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
-		);
-
-		Object.keys(fileFields).forEach((key) => {
-			form.data[key] = undefined;
-		});
-
-		const requestInitOptions: RequestInit = {
-			method: 'POST',
-			body: JSON.stringify(form.data)
-		};
-
-		const res = await event.fetch(endpoint, requestInitOptions);
-
-		if (!res.ok) {
-			const response: Record<string, any> = await res.json();
-			console.error(response);
-			if (response.warning) {
-				setFlash({ type: 'warning', message: response.warning }, event);
-				return { createForm: form };
-			}
-			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
-				return { createForm: form };
-			}
-			if (response[0]) {
-				setError(form, 'non_field_errors', m.nameDuplicate());
-			}
-			Object.entries(response).forEach(([key, value]) => {
-				setError(form, key, value);
-			});
-			return fail(400, { form: form });
-		}
-
-		const createdEvidence = await res.json();
-
-		if (fileFields) {
-			for (const [, file] of Object.entries(fileFields)) {
-				if (!file) continue;
-				if (file.size <= 0) continue;
-				const fileUploadEndpoint = `${BASE_API_URL}/${'evidences'}/${createdEvidence.id}/upload/`;
-				const fileUploadRequestInitOptions: RequestInit = {
-					headers: {
-						'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
-					},
-					method: 'POST',
-					body: file
-				};
-				const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-				if (!fileUploadRes.ok) {
-					const response = await fileUploadRes.json();
-					console.error(response);
-					if (response.non_field_errors) {
-						setError(form, 'non_field_errors', response.non_field_errors);
-					}
-					return fail(400, { form: form });
-				}
-			}
-		}
-
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyCreatedObject({
-					object: m.evidence().toLowerCase()
-				})
-			},
-			event
-		);
-		return { createForm: form, createdEvidence };
+		return nestedWriteFormAction({ event, action: 'create' });
 	},
 	deleteEvidence: async (event) => {
 		const formData = await event.request.formData();
