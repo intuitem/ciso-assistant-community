@@ -738,5 +738,6 @@
 	"createUserHelpText": "Create or link a third party user to the representative based on the email",
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
-	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page."
+	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page.",
+	"xRaysEmptyMessage": "You have to create at least one project to use X-rays."
 }
