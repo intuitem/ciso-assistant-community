@@ -198,7 +198,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	updateRiskScenario: async (event) => {
-		return defaultWriteFormAction({ event, urlModel: event.params.model!, action: 'edit' });
+		return defaultWriteFormAction({ event, urlModel: 'risk-scenarios', action: 'edit' });
 	},
 	createAppliedControl: async (event) => {
 		const URLModel = 'applied-controls';
