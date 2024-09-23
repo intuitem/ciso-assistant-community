@@ -1,57 +1,22 @@
-import { safeTranslate } from '$lib/utils/i18n';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
+import { safeTranslate } from '$lib/utils/i18n';
 
 import * as m from '$paraglide/messages';
-import { localItems, toCamelCase } from '$lib/utils/locales';
 
+import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
-import { message, setError, superValidate } from 'sveltekit-superforms';
-import { z } from 'zod';
-import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { nestedWriteFormAction } from '$lib/utils/actions';
+import { setError, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions: Actions = {
 	create: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
-	delete: async ({ request, fetch, params }) => {
-		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const deleteForm = await superValidate(formData, zod(schema));
-
-		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/risk-scenarios/${id}/`;
-
-		if (!deleteForm.valid) {
-			return fail(400, { form: deleteForm });
-		}
-
-		if (formData.has('delete')) {
-			const requestInitOptions: RequestInit = {
-				method: 'DELETE'
-			};
-			const res = await fetch(endpoint, requestInitOptions);
-			if (!res.ok) {
-				const response = await res.json();
-				console.log(response);
-				if (response.non_field_errors) {
-					setError(deleteForm, 'non_field_errors', response.non_field_errors);
-				}
-				return fail(400, { form: deleteForm });
-			}
-			const model: string = urlParamModelVerboseName(params.model!);
-			// TODO: reference object by name instead of id
-			return message(
-				deleteForm,
-				m.successfullyDeletedObject({
-					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
-				})
-			);
-		}
-		return { deleteForm };
+	delete: async (event) => {
+		return nestedDeleteFormAction({ event });
 	},
 	duplicate: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
