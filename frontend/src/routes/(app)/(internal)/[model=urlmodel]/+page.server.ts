@@ -16,7 +16,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { defaultWriteFormAction } from '$lib/utils/actions';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -71,47 +71,6 @@ export const actions: Actions = {
 		return defaultWriteFormAction({ event, urlModel: event.params.model!, action: 'create' });
 	},
 	delete: async (event) => {
-		const formData = await event.request.formData();
-		const schema = z.object({ id: z.string().uuid() });
-		const deleteForm = await superValidate(formData, zod(schema));
-
-		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/${event.params.model}/${id}/`;
-
-		if (!deleteForm.valid) {
-			console.log(deleteForm.errors);
-			return fail(400, { form: deleteForm });
-		}
-
-		if (formData.has('delete')) {
-			const requestInitOptions: RequestInit = {
-				method: 'DELETE'
-			};
-			const res = await event.fetch(endpoint, requestInitOptions);
-			if (!res.ok) {
-				const response = await res.json();
-				console.log(response);
-				if (response.error) {
-					setFlash({ type: 'error', message: localItems()[response.error] }, event);
-					return fail(403, { form: deleteForm });
-				}
-				if (response.non_field_errors) {
-					setError(deleteForm, 'non_field_errors', response.non_field_errors);
-				}
-				return fail(400, { form: deleteForm });
-			}
-			const model: string = urlParamModelVerboseName(event.params.model!);
-			// TODO: reference object by name instead of id
-			setFlash(
-				{
-					type: 'success',
-					message: m.successfullyDeletedObject({
-						object: safeTranslate(model).toLowerCase()
-					})
-				},
-				event
-			);
-		}
-		return { deleteForm };
+		return defaultDeleteFormAction({ event, urlModel: event.params.model! });
 	}
 };
