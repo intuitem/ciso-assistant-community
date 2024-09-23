@@ -41,6 +41,9 @@
 </script>
 
 <div class="card bg-white p-6 shadow flex flex-col space-y-4">
+	{#if projects.length == 0}
+		<span class="text-2xl">{m.xRaysEmptyMessage()}</span>
+	{/if}
 	{#each projects as project, index}
 		{@const compliance_assessments = Object.values(project.compliance_assessments.objects)}
 		{@const risk_assessments = Object.values(project.risk_assessments.objects)}
