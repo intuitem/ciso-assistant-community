@@ -5,10 +5,11 @@ import * as m from '$paraglide/messages';
 
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
-import { type RequestEvent, fail } from '@sveltejs/kit';
+import { type RequestEvent, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import { getSecureRedirect } from './helpers';
 
 type FormAction = 'create' | 'edit';
 
@@ -38,6 +39,22 @@ function getSuccessMessage({ action, urlModel }: { action: FormAction; urlModel:
 	}
 }
 
+function getEndpoint({
+	action,
+	urlModel,
+	event
+}: {
+	action: FormAction;
+	urlModel: string;
+	event: RequestEvent;
+}) {
+	if (action === 'create') {
+		return `${BASE_API_URL}/${urlModel}/`;
+	}
+	const id = event.params.id;
+	return `${BASE_API_URL}/${urlModel}/${id}/`;
+}
+
 export async function defaultWriteFormAction({
 	event,
 	urlModel,
@@ -61,7 +78,7 @@ export async function defaultWriteFormAction({
 		return fail(400, { form: form });
 	}
 
-	const endpoint = `${BASE_API_URL}/${urlModel}/`;
+	const endpoint = getEndpoint({ action, urlModel, event });
 	const model = getModelInfo(urlModel!);
 
 	const fileFields: Record<string, File> = Object.fromEntries(
@@ -125,10 +142,13 @@ export async function defaultWriteFormAction({
 	setFlash(
 		{
 			type: 'success',
-			message: getSuccessMessage({ urlModel, action })
+			message: getSuccessMessage({ urlModel, action }) as string
 		},
 		event
 	);
+
+	const next = getSecureRedirect(event.url.searchParams.get('next'));
+	if (next) redirect(302, next);
 
 	return { createForm: form };
 }
