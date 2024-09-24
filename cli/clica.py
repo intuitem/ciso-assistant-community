@@ -49,7 +49,7 @@ TOKEN = check_auth()
 
 @click.group()
 def cli():
-    """A CLI tool to interact with CISO Assistant REST API."""
+    """CLICA is the CLI tool to interact with CISO Assistant REST API."""
     pass
 
 
@@ -57,20 +57,29 @@ def cli():
 @click.option("--email", required=False)
 @click.option("--password", required=False)
 def auth(email, password):
-    """Authenticate to get a temp token"""
+    """Authenticate to get a temp token. Pass the email and password or set them on the config file"""
     url = f"{API_URL}/iam/login/"
     if email and password:
         data = {"username": email, "password": password}
     else:
         print("trying credentials from the config file")
-        data = {"username": USERNAME, "password": PASSWORD}
+        if USERNAME and PASSWORD:
+            data = {"username": USERNAME, "password": PASSWORD}
+        else:
+            print("Could not find any usable credentials.")
+            sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
     res = requests.post(url, data, headers)
     print(res.status_code)
-    with open(".tmp.yaml", "w") as yfile:
-        yaml.safe_dump(res.json(), yfile)
-        print("Looks good, you can move to other commands.")
+    if res.status_code == 200:
+        with open(".tmp.yaml", "w") as yfile:
+            yaml.safe_dump(res.json(), yfile)
+            print("Looks good, you can move to other commands.")
+    else:
+        print(
+            "Check your credentials again. You can set them on the config file or on the command line."
+        )
 
 
 def _get_folders():
