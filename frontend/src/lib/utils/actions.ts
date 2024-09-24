@@ -7,7 +7,7 @@ import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
 import { type RequestEvent, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms';
+import { setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { getSecureRedirect } from './helpers';
 import { z } from 'zod';
@@ -55,6 +55,31 @@ function getEndpoint({
 	return `${BASE_API_URL}/${urlModel}/${id}/`;
 }
 
+export async function handleErrorResponse({
+	event,
+	response,
+	form
+}: {
+	event: RequestEvent;
+	response: Response;
+	form: SuperValidated;
+}) {
+	const res: Record<string, string> = await response.json();
+	console.error(res);
+	if (res.warning) {
+		setFlash({ type: 'warning', message: res.warning }, event);
+		return { form };
+	}
+	if (res.error) {
+		setFlash({ type: 'error', message: res.error }, event);
+		return { form };
+	}
+	Object.entries(res).forEach(([key, value]) => {
+		setError(form, key, value);
+	});
+	return fail(400, { form });
+}
+
 export async function defaultWriteFormAction({
 	event,
 	urlModel,
@@ -98,22 +123,7 @@ export async function defaultWriteFormAction({
 
 	const res = await event.fetch(endpoint, requestInitOptions);
 
-	if (!res.ok) {
-		const response: Record<string, string> = await res.json();
-		console.error(response);
-		if (response.warning) {
-			setFlash({ type: 'warning', message: response.warning }, event);
-			return { createForm: form };
-		}
-		if (response.error) {
-			setFlash({ type: 'error', message: response.error }, event);
-			return { createForm: form };
-		}
-		Object.entries(response).forEach(([key, value]) => {
-			setError(form, key, value);
-		});
-		return fail(400, { form: form });
-	}
+	if (!res.ok) return await handleErrorResponse({ event, response: res, form });
 
 	const createdObject = await res.json();
 
