@@ -1,13 +1,13 @@
+import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
-import { localItems, toCamelCase } from '$lib/utils/locales';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
-import { getSecureRedirect } from '$lib/utils/helpers';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -195,14 +195,6 @@ export const load = (async ({ fetch, params }) => {
 				continue;
 			}
 			evidenceForeignKeys[keyField.field] = [];
-			// const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			// const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			// const response = await fetch(url);
-			// if (response.ok) {
-			// 	evidenceForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-			// } else {
-			// 	console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			// }
 		}
 	}
 
@@ -241,20 +233,11 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		const res = await event.fetch(endpoint, requestInitOptions);
+		const response = await event.fetch(endpoint, requestInitOptions);
 
-		if (!res.ok) {
-			const response = await res.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			if (response.score) {
-				setError(form, 'score', response.score);
-			}
-			return fail(400, { form: form });
-		}
-		const object = await res.json();
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const object = await response.json();
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		redirect(
@@ -279,18 +262,11 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		const res = await event.fetch(endpoint, requestInitOptions);
+		const response = await event.fetch(endpoint, requestInitOptions);
 
-		if (!res.ok) {
-			const response = await res.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: form });
-		}
+		if (!response.ok) return handleErrorResponse({ event, response, form });
 
-		const measure = await res.json();
+		const measure = await response.json();
 
 		const requirementAssessmentEndpoint = `${BASE_API_URL}/requirement-assessments/${event.params.id}/`;
 		const requirementAssessment = await event
@@ -305,14 +281,7 @@ export const actions: Actions = {
 		};
 
 		const patchRes = await event.fetch(requirementAssessmentEndpoint, patchRequestInitOptions);
-		if (!patchRes.ok) {
-			const response = await patchRes.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: form });
-		}
+		if (!patchRes.ok) return handleErrorResponse({ event, response: patchRes, form });
 
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash(
@@ -325,92 +294,6 @@ export const actions: Actions = {
 		return { form };
 	},
 	createEvidence: async (event) => {
-		const formData = await event.request.formData();
-
-		if (!formData) {
-			return fail(400, { form: null });
-		}
-
-		const schema = modelSchema('evidences');
-		const form = await superValidate(formData, zod(schema));
-		if (!form.valid) {
-			console.error(form.errors);
-			return fail(400, { form: form });
-		}
-		const urlModel = 'evidences';
-		const endpoint = `${BASE_API_URL}/${urlModel}/`;
-
-		const model = getModelInfo(urlModel!);
-
-		const fileFields: Record<string, File> = Object.fromEntries(
-			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
-		);
-
-		Object.keys(fileFields).forEach((key) => {
-			form.data[key] = undefined;
-		});
-
-		const requestInitOptions: RequestInit = {
-			method: 'POST',
-			body: JSON.stringify(form.data)
-		};
-
-		const res = await event.fetch(endpoint, requestInitOptions);
-
-		if (!res.ok) {
-			const response: Record<string, any> = await res.json();
-			console.error(response);
-			if (response.warning) {
-				setFlash({ type: 'warning', message: response.warning }, event);
-				return { createForm: form };
-			}
-			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
-				return { createForm: form };
-			}
-			Object.entries(response).forEach(([key, value]) => {
-				setError(form, key, value);
-			});
-			return fail(400, { form: form });
-		}
-
-		const createdObject = await res.json();
-
-		if (fileFields) {
-			for (const [, file] of Object.entries(fileFields)) {
-				if (!file) continue;
-				if (file.size <= 0) continue;
-				const fileUploadEndpoint = `${BASE_API_URL}/${'evidences'}/${createdObject.id}/upload/`;
-				const fileUploadRequestInitOptions: RequestInit = {
-					headers: {
-						'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
-					},
-					method: 'POST',
-					body: file
-				};
-				const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-				if (!fileUploadRes.ok) {
-					const response = await fileUploadRes.json();
-					console.error(response);
-					if (response.non_field_errors) {
-						setError(form, 'non_field_errors', response.non_field_errors);
-					}
-					return fail(400, { form: form });
-				}
-			}
-		}
-
-		const modelVerboseName = 'evidences';
-		// TODO: reference newly created object
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyCreatedObject({
-					object: localItems()[toCamelCase(modelVerboseName)].toLowerCase()
-				})
-			},
-			event
-		);
-		return { createForm: form };
+		return nestedWriteFormAction({ event, action: 'create' });
 	}
 };
