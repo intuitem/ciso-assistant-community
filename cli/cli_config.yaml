@@ -1,5 +1,5 @@
 rest:
   url: http://localhost:8000/api # don't put a trailing slash
 credentials:
-  username: (some username)
-  password: (some password)
+  username:
+  password:
