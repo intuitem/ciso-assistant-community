@@ -1,11 +1,12 @@
 #! python3
+import sys
+from pathlib import Path
+
 import click
+import pandas as pd
 import requests
 import yaml
 from rich import print
-import sys, os
-import pandas as pd
-from pathlib import Path
 
 cli_cfg = dict()
 auth_data = dict()
