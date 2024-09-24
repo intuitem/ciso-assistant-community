@@ -4,13 +4,11 @@ import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { localItems, toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
 
-import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { safeTranslate } from '$lib/utils/i18n';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
 
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
@@ -21,146 +19,10 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const formData = await event.request.formData();
-
-		if (!formData) {
-			return fail(400, { form: null });
-		}
-
-		const schema = modelSchema(formData.get('urlmodel') as string);
-		const urlModel = formData.get('urlmodel');
-
-		const form = await superValidate(formData, zod(schema));
-
-		if (!form.valid) {
-			console.log(form.errors);
-			return fail(400, { form });
-		}
-
-		const endpoint = `${BASE_API_URL}/${urlModel}/`;
-
-		const model = getModelInfo(urlModel!);
-
-		const fileFields: Record<string, File> = Object.fromEntries(
-			Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
-		);
-
-		Object.keys(fileFields).forEach((key) => {
-			form.data[key] = undefined;
-		});
-
-		const requestInitOptions: RequestInit = {
-			method: 'POST',
-			body: JSON.stringify(form.data)
-		};
-
-		const res = await event.fetch(endpoint, requestInitOptions);
-
-		if (!res.ok) {
-			const response: Record<string, any> = await res.json();
-			console.error(response);
-			if (response.warning) {
-				setFlash({ type: 'warning', message: response.warning }, event);
-				return { createForm: form };
-			}
-			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
-				return { createForm: form };
-			}
-			Object.entries(response).forEach(([key, value]) => {
-				setError(form, key, value);
-			});
-			return fail(400, { form: form });
-		}
-
-		const createdObject = await res.json();
-
-		if (fileFields) {
-			for (const [, file] of Object.entries(fileFields)) {
-				if (!file || file.size <= 0) {
-					continue;
-				}
-				const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${createdObject.id}/upload/`;
-				const fileUploadRequestInitOptions: RequestInit = {
-					headers: {
-						'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
-					},
-					method: 'POST',
-					body: file
-				};
-				const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-				if (!fileUploadRes.ok) {
-					const response = await fileUploadRes.json();
-					console.error(response);
-					if (response.non_field_errors) {
-						setError(form, 'non_field_errors', response.non_field_errors);
-					}
-					return fail(400, { form: form });
-				}
-			}
-		}
-
-		const modelVerboseName: string = urlParamModelVerboseName(urlModel);
-
-		if (modelVerboseName === 'User') {
-			setFlash(
-				{
-					type: 'success',
-					message: m.successfullyCreatedObject({
-						object: safeTranslate(modelVerboseName).toLowerCase()
-					})
-				},
-				event
-			);
-		}
-		setFlash(
-			{
-				type: 'success',
-				message: m.successfullyCreatedObject({
-					object: safeTranslate(modelVerboseName).toLowerCase()
-				})
-			},
-			event
-		);
-		return { createForm: form };
+		return nestedWriteFormAction({ event, action: 'create' });
 	},
-	delete: async ({ request, fetch, params }) => {
-		const formData = await request.formData();
-		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const deleteForm = await superValidate(formData, zod(schema));
-
-		const urlmodel = deleteForm.data.urlmodel;
-		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/`;
-
-		if (!deleteForm.valid) {
-			return fail(400, { form: deleteForm });
-		}
-
-		if (formData.has('delete')) {
-			const requestInitOptions: RequestInit = {
-				method: 'DELETE'
-			};
-			const res = await fetch(endpoint, requestInitOptions);
-			if (!res.ok) {
-				const response = await res.json();
-				console.log(response);
-				if (response.non_field_errors) {
-					setError(deleteForm, 'non_field_errors', response.non_field_errors);
-				}
-				return fail(400, { form: deleteForm });
-			}
-			console.log(params);
-			const model: string = urlParamModelVerboseName(urlmodel);
-			// TODO: reference object by name instead of id
-			return message(
-				deleteForm,
-				m.successfullyDeletedObject({
-					object: safeTranslate(model).toLowerCase()
-				})
-			);
-		}
-		return { deleteForm };
+	delete: async (event) => {
+		return nestedDeleteFormAction({ event });
 	},
 	reject: async ({ request, fetch, params }) => {
 		const formData = await request.formData();

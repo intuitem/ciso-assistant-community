@@ -1,14 +1,15 @@
+import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { z } from 'zod';
-import { setError, superValidate } from 'sveltekit-superforms';
-import { setFlash } from 'sveltekit-flash-message/server';
-import type { PageServerLoad } from './$types';
-import type { urlModel } from '$lib/utils/types';
 import { listViewFields } from '$lib/utils/table';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import type { urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
+import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
 	const URLModel = 'evidences';
@@ -49,29 +50,23 @@ export const actions: Actions = {
 	deleteAttachment: async (event) => {
 		const formData = await event.request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const deleteAttachmentForm = await superValidate(formData, zod(schema));
+		const form = await superValidate(formData, zod(schema));
 
-		const urlmodel = deleteAttachmentForm.data.urlmodel;
-		const id = deleteAttachmentForm.data.id;
+		const urlmodel = form.data.urlmodel;
+		const id = form.data.id;
 		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/delete_attachment/`;
 
-		if (!deleteAttachmentForm.valid) {
-			return fail(400, { form: deleteAttachmentForm });
+		if (!form.valid) {
+			return fail(400, { form: form });
 		}
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST'
 		};
-		const res = await event.fetch(endpoint, requestInitOptions);
-		if (!res.ok) {
-			const response = await res.json();
-			if (response.non_field_errors) {
-				setError(deleteAttachmentForm, 'non_field_errors', response.non_field_errors);
-			}
-			setFlash({ type: 'error', message: m.anErrorOccurred() }, event);
-			return fail(400, { form: deleteAttachmentForm });
-		}
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+		if (!response.ok) return handleErrorResponse({ event, response, form });
 		setFlash({ type: 'success', message: m.attachmentDeleted() }, event);
-		throw redirect(302, `/${urlmodel}/${id}`);
+		return redirect(302, `/${urlmodel}/${id}`);
 	}
 };

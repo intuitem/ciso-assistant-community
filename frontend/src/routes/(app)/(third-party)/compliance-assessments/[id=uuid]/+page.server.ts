@@ -1,12 +1,11 @@
+import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { ComplianceAssessmentSchema, modelSchema } from '$lib/utils/schemas';
-import { message, setError, superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
+import { getModelInfo } from '$lib/utils/crud';
+import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
+import { type Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
-import { fail, type Actions } from '@sveltejs/kit';
-import * as m from '$paraglide/messages';
-import { localItems, toCamelCase } from '$lib/utils/locales';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -56,10 +55,7 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const mappingSetsEndpoint = `${BASE_API_URL}/requirement-mapping-sets/?reference_framework=${compliance_assessment.framework.id}`;
-	const mappingSets: Record<string, any>[] = await fetch(mappingSetsEndpoint)
-		.then((res) => res.json())
-		.then((data) => data.results);
-	const mappingSetIds = mappingSets.map((mappingSet) => mappingSet.id);
+
 	auditModel.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};
@@ -96,44 +92,7 @@ export const load = (async ({ fetch, params }) => {
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	create: async ({ request, fetch }) => {
-		const formData = await request.formData();
-
-		const schema = modelSchema(formData.get('urlmodel') as string);
-		const urlModel = formData.get('urlmodel');
-
-		const createForm = await superValidate(formData, zod(schema));
-
-		const endpoint = `${BASE_API_URL}/${urlModel}/`;
-
-		if (!createForm.valid) {
-			console.log(createForm.errors);
-			return fail(400, { form: createForm });
-		}
-
-		if (formData) {
-			const requestInitOptions: RequestInit = {
-				method: 'POST',
-				body: JSON.stringify(createForm.data)
-			};
-			const res = await fetch(endpoint, requestInitOptions);
-			if (!res.ok) {
-				const response = await res.json();
-				console.log(response);
-				if (response.non_field_errors) {
-					setError(createForm, 'non_field_errors', response.non_field_errors);
-				}
-				return fail(400, { form: createForm });
-			}
-			const model: string = urlParamModelVerboseName(urlModel);
-			// TODO: reference newly created object
-			return message(
-				createForm,
-				m.successfullyCreatedObject({
-					object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase()
-				})
-			);
-		}
-		return { createForm };
+	create: async (event) => {
+		return nestedWriteFormAction({ event, action: 'create' });
 	}
 };
