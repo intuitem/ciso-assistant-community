@@ -13,31 +13,29 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
-{#if model.urlModel === 'solutions'}
-	<AutocompleteSelect
-		{form}
-		options={getOptions({ objects: model.foreignKeys['provider_entity'] })}
-		field="provider_entity"
-		cacheLock={cacheLocks['provider_entity']}
-		bind:cachedValue={formDataCache['provider_entity']}
-		label={m.providerEntity()}
-		hidden={initialData.provider_entity}
-	/>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.ref()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
-	<Score
-		{form}
-		label={m.criticality()}
-		field="criticality"
-		always_enabled={true}
-		inversedColors
-		fullDonut
-		min_score={1}
-		max_score={4}
-	/>
-{/if}
+<AutocompleteSelect
+	{form}
+	options={getOptions({ objects: model.foreignKeys['provider_entity'] })}
+	field="provider_entity"
+	cacheLock={cacheLocks['provider_entity']}
+	bind:cachedValue={formDataCache['provider_entity']}
+	label={m.providerEntity()}
+	hidden={initialData.provider_entity}
+/>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.ref()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<Score
+	{form}
+	label={m.criticality()}
+	field="criticality"
+	always_enabled={true}
+	inversedColors
+	fullDonut
+	min_score={1}
+	max_score={4}
+/>

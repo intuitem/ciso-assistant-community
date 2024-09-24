@@ -16,37 +16,35 @@
 	export let object: any = {};
 </script>
 
-{#if model.urlModel === 'evidences'}
-	<HiddenInput {form} field="applied_controls" />
-	<HiddenInput {form} field="requirement_assessments" />
-	<FileInput
+<HiddenInput {form} field="applied_controls" />
+<HiddenInput {form} field="requirement_assessments" />
+<FileInput
+	{form}
+	allowPaste={true}
+	helpText={object.attachment
+		? `${m.attachmentWarningText()}: ${object.attachment}`
+		: m.attachmentHelpText()}
+	field="attachment"
+	label={m.attachment()}
+/>
+{#if !(initialData.applied_controls || initialData.requirement_assessments)}
+	<AutocompleteSelect
 		{form}
-		allowPaste={true}
-		helpText={object.attachment
-			? `${m.attachmentWarningText()}: ${object.attachment}`
-			: m.attachmentHelpText()}
-		field="attachment"
-		label={m.attachment()}
+		options={getOptions({ objects: model.foreignKeys['folder'] })}
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.domain()}
+		hidden={initialData.applied_controls || initialData.requirement_assessments}
 	/>
-	{#if !(initialData.applied_controls || initialData.requirement_assessments)}
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['folder'] })}
-			field="folder"
-			cacheLock={cacheLocks['folder']}
-			bind:cachedValue={formDataCache['folder']}
-			label={m.domain()}
-			hidden={initialData.applied_controls || initialData.requirement_assessments}
-		/>
-	{:else}
-		<HiddenInput {form} field="folder" />
-	{/if}
-	<TextField
-		{form}
-		field="link"
-		label={m.link()}
-		helpText={m.linkHelpText()}
-		cacheLock={cacheLocks['link']}
-		bind:cachedValue={formDataCache['link']}
-	/>
+{:else}
+	<HiddenInput {form} field="folder" />
 {/if}
+<TextField
+	{form}
+	field="link"
+	label={m.link()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['link']}
+	bind:cachedValue={formDataCache['link']}
+/>

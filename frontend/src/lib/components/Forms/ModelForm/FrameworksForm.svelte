@@ -10,20 +10,18 @@
 	export let formDataCache: Record<string, any> = {};
 </script>
 
-{#if model.urlModel === 'frameworks'}
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.ref()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
-	<Select
-		{form}
-		options={model.selectOptions['category']}
-		field="category"
-		label={m.category()}
-		cacheLock={cacheLocks['category']}
-		bind:cachedValue={formDataCache['category']}
-	/>
-{/if}
+<TextField
+	{form}
+	field="ref_id"
+	label={m.ref()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<Select
+	{form}
+	options={model.selectOptions['category']}
+	field="category"
+	label={m.category()}
+	cacheLock={cacheLocks['category']}
+	bind:cachedValue={formDataCache['category']}
+/>

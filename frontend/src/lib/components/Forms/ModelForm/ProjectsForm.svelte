@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -12,17 +12,8 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
-	export let object: any = {};
-	export let data: any = {};
 </script>
 
-<TextArea
-	{form}
-	field="business_value"
-	label={m.businessValue()}
-	cacheLock={cacheLocks['business_value']}
-	bind:cachedValue={formDataCache['business_value']}
-/>
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -32,21 +23,18 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
+<TextField
+	{form}
+	field="internal_reference"
+	label={m.internalReference()}
+	cacheLock={cacheLocks['internal_reference']}
+	bind:cachedValue={formDataCache['internal_reference']}
+/>
 <Select
 	{form}
-	options={model.selectOptions['type']}
-	field="type"
-	label="Type"
-	cacheLock={cacheLocks['type']}
-	bind:cachedValue={formDataCache['type']}
-/>
-<AutocompleteSelect
-	disabled={data.type === 'PR'}
-	multiple
-	{form}
-	options={getOptions({ objects: model.foreignKeys['parent_assets'], self: object })}
-	field="parent_assets"
-	cacheLock={cacheLocks['parent_assets']}
-	bind:cachedValue={formDataCache['parent_assets']}
-	label={m.parentAssets()}
+	options={model.selectOptions['lc_status']}
+	field="lc_status"
+	label={m.lcStatus()}
+	cacheLock={cacheLocks['lc_status']}
+	bind:cachedValue={formDataCache['lc_status']}
 />

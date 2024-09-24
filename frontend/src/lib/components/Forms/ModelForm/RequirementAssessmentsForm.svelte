@@ -12,31 +12,29 @@
 	export let formDataCache: Record<string, any> = {};
 </script>
 
-{#if model.urlModel === 'requirement-assessments'}
-	<Select
-		{form}
-		options={model.selectOptions['status']}
-		field="status"
-		label={m.status()}
-		cacheLock={cacheLocks['status']}
-		bind:cachedValue={formDataCache['status']}
-	/>
-	<Select
-		{form}
-		options={model.selectOptions['result']}
-		field="result"
-		label={m.result()}
-		cacheLock={cacheLocks['result']}
-		bind:cachedValue={formDataCache['result']}
-	/>
-	<TextArea
-		{form}
-		field="observation"
-		label={m.observation()}
-		cacheLock={cacheLocks['observation']}
-		bind:cachedValue={formDataCache['observation']}
-	/>
-	<HiddenInput {form} field="folder" />
-	<HiddenInput {form} field="requirement" />
-	<HiddenInput {form} field="compliance_assessment" />
-{/if}
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
+<Select
+	{form}
+	options={model.selectOptions['result']}
+	field="result"
+	label={m.result()}
+	cacheLock={cacheLocks['result']}
+	bind:cachedValue={formDataCache['result']}
+/>
+<TextArea
+	{form}
+	field="observation"
+	label={m.observation()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
+<HiddenInput {form} field="folder" />
+<HiddenInput {form} field="requirement" />
+<HiddenInput {form} field="compliance_assessment" />
