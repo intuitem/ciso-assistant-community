@@ -14,35 +14,33 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
-{#if model.urlModel === 'threats'}
-	<AutocompleteSelect
-		{form}
-		options={getOptions({ objects: model.foreignKeys['folder'] })}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-		hidden={initialData.folder}
-	/>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.ref()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
-	<TextArea
-		{form}
-		field="annotation"
-		label={m.annotation()}
-		cacheLock={cacheLocks['annotation']}
-		bind:cachedValue={formDataCache['annotation']}
-	/>
-	<TextField
-		{form}
-		field="provider"
-		label={m.provider()}
-		cacheLock={cacheLocks['provider']}
-		bind:cachedValue={formDataCache['provider']}
-	/>
-{/if}
+<AutocompleteSelect
+	{form}
+	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	hidden={initialData.folder}
+/>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.ref()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<TextArea
+	{form}
+	field="annotation"
+	label={m.annotation()}
+	cacheLock={cacheLocks['annotation']}
+	bind:cachedValue={formDataCache['annotation']}
+/>
+<TextField
+	{form}
+	field="provider"
+	label={m.provider()}
+	cacheLock={cacheLocks['provider']}
+	bind:cachedValue={formDataCache['provider']}
+/>

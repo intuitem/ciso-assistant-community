@@ -5,8 +5,8 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
-	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
-	import ProjectForm from './ModelForm/ProjectForm.svelte';
+	import RiskAssessmentForm from './ModelForm/RiskAssessmentsForm.svelte';
+	import ProjectForm from './ModelForm/ProjectsForm.svelte';
 	import ThreatForm from './ModelForm/ThreatsForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenariosForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlsPoliciesForm.svelte';

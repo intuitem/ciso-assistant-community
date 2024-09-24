@@ -14,29 +14,27 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
-{#if model.urlModel === 'entities'}
-	<TextArea
-		{form}
-		field="mission"
-		label={m.mission()}
-		cacheLock={cacheLocks['mission']}
-		bind:cachedValue={formDataCache['mission']}
-	/>
-	<TextField
-		{form}
-		field="reference_link"
-		label={m.referenceLink()}
-		helpText={m.linkHelpText()}
-		cacheLock={cacheLocks['reference_link']}
-		bind:cachedValue={formDataCache['reference_link']}
-	/>
-	<AutocompleteSelect
-		{form}
-		options={getOptions({ objects: model.foreignKeys['folder'] })}
-		field="folder"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-		hidden={initialData.folder}
-	/>
-{/if}
+<TextArea
+	{form}
+	field="mission"
+	label={m.mission()}
+	cacheLock={cacheLocks['mission']}
+	bind:cachedValue={formDataCache['mission']}
+/>
+<TextField
+	{form}
+	field="reference_link"
+	label={m.referenceLink()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['reference_link']}
+	bind:cachedValue={formDataCache['reference_link']}
+/>
+<AutocompleteSelect
+	{form}
+	options={getOptions({ objects: model.foreignKeys['folder'] })}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	hidden={initialData.folder}
+/>
