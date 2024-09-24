@@ -159,7 +159,10 @@ export default {
 				'view_requirementnode',
 				'view_framework',
 				'view_loadedlibrary',
-				'view_user'
+				'view_user',
+				'view_referencecontrol',
+				'change_referencecontrol',
+				'delete_referencecontrol'
 			]
 		},
 		approver: {
