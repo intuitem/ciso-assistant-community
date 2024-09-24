@@ -12,3 +12,4 @@ db/
 ./backend/ciso_assistant/.meta
 caddy_data/
 **/dist/
+**/.meta

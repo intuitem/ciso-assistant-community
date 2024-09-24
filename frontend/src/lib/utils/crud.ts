@@ -563,6 +563,20 @@ interface FieldColoredTagMap {
 }
 
 export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
+	policies: {
+		name: {
+			keys: {
+				status: {
+					to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
+					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
+					active: { text: 'active', cssClasses: 'badge bg-green-200' },
+					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
+					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				}
+			}
+		}
+	},
 	'risk-assessments': {
 		name: {
 			keys: {
