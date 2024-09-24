@@ -5,12 +5,12 @@ import * as m from '$paraglide/messages';
 
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
-import { type RequestEvent, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { getSecureRedirect } from './helpers';
 import { z } from 'zod';
+import { getSecureRedirect } from './helpers';
 
 type FormAction = 'create' | 'edit';
 
@@ -108,9 +108,9 @@ export async function defaultWriteFormAction({
 	const endpoint = getEndpoint({ action, urlModel, event });
 	const model = getModelInfo(urlModel!);
 
-	const fileFields: Record<string, File> = Object.fromEntries(
+	const fileFields = Object.fromEntries(
 		Object.entries(form.data).filter(([key]) => model.fileFields?.includes(key) ?? false)
-	);
+	) as Record<string, File>;
 
 	Object.keys(fileFields).forEach((key) => {
 		form.data[key] = undefined;
@@ -125,13 +125,13 @@ export async function defaultWriteFormAction({
 
 	if (!res.ok) return await handleErrorResponse({ event, response: res, form });
 
-	const createdObject = await res.json();
+	const writtenObject = await res.json();
 
 	if (fileFields) {
 		for (const [, file] of Object.entries(fileFields)) {
 			if (!file) continue;
 			if (file.size <= 0) continue;
-			const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${createdObject.id}/upload/`;
+			const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${writtenObject.id}/upload/`;
 			const fileUploadRequestInitOptions: RequestInit = {
 				headers: {
 					'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
@@ -140,14 +140,7 @@ export async function defaultWriteFormAction({
 				body: file
 			};
 			const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-			if (!fileUploadRes.ok) {
-				const response = await fileUploadRes.json();
-				console.error(response);
-				if (response.non_field_errors) {
-					setError(form, 'non_field_errors', response.non_field_errors);
-				}
-				return fail(400, { form: form });
-			}
+			if (!fileUploadRes.ok) return handleErrorResponse({ event, response: fileUploadRes, form });
 		}
 	}
 
@@ -162,7 +155,7 @@ export async function defaultWriteFormAction({
 	const next = getSecureRedirect(event.url.searchParams.get('next'));
 	if (next && doRedirect) redirect(302, next);
 
-	return { createForm: form };
+	return { form };
 }
 
 export async function nestedWriteFormAction({
