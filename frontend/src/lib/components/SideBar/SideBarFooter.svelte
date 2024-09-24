@@ -58,13 +58,12 @@
 	};
 
 	async function modalBuildInfo() {
-		const res = await fetch('/api/build');
-		const { version, build } = await res.json();
+		const res = await fetch('/api/build').then((res) => res.json());
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'displayJSONModal',
 			title: 'About CISO Assistant',
-			body: JSON.stringify({ version, build })
+			body: JSON.stringify(res)
 		};
 		modalStore.trigger(modal);
 	}
