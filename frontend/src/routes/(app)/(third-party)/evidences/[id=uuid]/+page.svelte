@@ -182,6 +182,10 @@
 					<img src={attachment.url} alt="attachment" />
 				{:else if attachment.type === 'application/pdf'}
 					<embed src={attachment.url} type="application/pdf" width="100%" height="600px" />
+				{:else}
+					<div class="flex items-center justify-center space-x-4">
+						<p class="font-bold text-sm">{m.NoPreviewMessage()}</p>
+					</div>
 				{/if}
 			{:else}
 				<span data-testid="loading-field">
