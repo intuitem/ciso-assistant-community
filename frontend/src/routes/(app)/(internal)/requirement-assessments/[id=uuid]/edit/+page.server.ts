@@ -1,4 +1,4 @@
-import { nestedWriteFormAction } from '$lib/utils/actions';
+import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
@@ -233,20 +233,11 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		const res = await event.fetch(endpoint, requestInitOptions);
+		const response = await event.fetch(endpoint, requestInitOptions);
 
-		if (!res.ok) {
-			const response = await res.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			if (response.score) {
-				setError(form, 'score', response.score);
-			}
-			return fail(400, { form: form });
-		}
-		const object = await res.json();
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const object = await response.json();
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		redirect(
@@ -271,18 +262,11 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		const res = await event.fetch(endpoint, requestInitOptions);
+		const response = await event.fetch(endpoint, requestInitOptions);
 
-		if (!res.ok) {
-			const response = await res.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: form });
-		}
+		if (!response.ok) return handleErrorResponse({ event, response, form });
 
-		const measure = await res.json();
+		const measure = await response.json();
 
 		const requirementAssessmentEndpoint = `${BASE_API_URL}/requirement-assessments/${event.params.id}/`;
 		const requirementAssessment = await event
@@ -297,14 +281,7 @@ export const actions: Actions = {
 		};
 
 		const patchRes = await event.fetch(requirementAssessmentEndpoint, patchRequestInitOptions);
-		if (!patchRes.ok) {
-			const response = await patchRes.json();
-			console.error('server response:', response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
-			}
-			return fail(400, { form: form });
-		}
+		if (!patchRes.ok) return handleErrorResponse({ event, response: patchRes, form });
 
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash(
