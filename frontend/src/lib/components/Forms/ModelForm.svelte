@@ -5,24 +5,24 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
-	import RiskAssessmentForm from './ModelForm/RiskAssessmentsForm.svelte';
-	import ProjectForm from './ModelForm/ProjectsForm.svelte';
-	import ThreatForm from './ModelForm/ThreatsForm.svelte';
-	import RiskScenarioForm from './ModelForm/RiskScenariosForm.svelte';
-	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlsPoliciesForm.svelte';
-	import RiskAcceptancesForm from './ModelForm/RiskAcceptancesForm.svelte';
-	import ReferenceControlsForm from './ModelForm/ReferenceControlsForm.svelte';
-	import EvidencesForm from './ModelForm/EvidencesForm.svelte';
-	import ComplianceAssessmentsForm from './ModelForm/ComplianceAssessmentsForm.svelte';
-	import AssetsForm from './ModelForm/AssetsForm.svelte';
-	import RequirementAssessmentsForm from './ModelForm/RequirementAssessmentsForm.svelte';
-	import EntitiesForm from './ModelForm/EntitiesForm.svelte';
-	import EntityAssessmentForm from './ModelForm/EntityAssessmentsForm.svelte';
-	import SolutionsForm from './ModelForm/SolutionsForm.svelte';
-	import RepresentativesForm from './ModelForm/RepresentativesForm.svelte';
-	import FrameworksForm from './ModelForm/FrameworksForm.svelte';
-	import UsersForm from './ModelForm/UsersForm.svelte';
-	import SsoSettingsForm from './ModelForm/SsoSettingsForm.svelte';
+	import RiskAssessmentForm from './ModelForm/RiskAssessmentForm.svelte';
+	import ProjectForm from './ModelForm/ProjectForm.svelte';
+	import ThreatForm from './ModelForm/ThreatForm.svelte';
+	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
+	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
+	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
+	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
+	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
+	import ComplianceAssessmentsForm from './ModelForm/ComplianceAssessmentForm.svelte';
+	import AssetsForm from './ModelForm/AssetForm.svelte';
+	import RequirementAssessmentsForm from './ModelForm/RequirementAssessmentForm.svelte';
+	import EntitiesForm from './ModelForm/EntityForm.svelte';
+	import EntityAssessmentForm from './ModelForm/EntityAssessmentForm.svelte';
+	import SolutionsForm from './ModelForm/SolutionForm.svelte';
+	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
+	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
+	import UsersForm from './ModelForm/UserForm.svelte';
+	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
