@@ -1,22 +1,17 @@
+import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
 	urlParamModelForeignKeyFields,
-	urlParamModelSelectFields,
-	urlParamModelVerboseName
+	urlParamModelSelectFields
 } from '$lib/utils/crud';
-import { safeTranslate } from '$lib/utils/i18n';
-import { localItems } from '$lib/utils/locales';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
-import * as m from '$paraglide/messages';
-import { fail, type Actions } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms';
+import { type Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
