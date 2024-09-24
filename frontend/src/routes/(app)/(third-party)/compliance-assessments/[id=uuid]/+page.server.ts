@@ -1,13 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { ComplianceAssessmentSchema, modelSchema } from '$lib/utils/schemas';
-import { message, setError, superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
-import { zod } from 'sveltekit-superforms/adapters';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
-import { fail, type Actions } from '@sveltejs/kit';
-import * as m from '$paraglide/messages';
-import { localItems, toCamelCase } from '$lib/utils/locales';
 import { nestedWriteFormAction } from '$lib/utils/actions';
+import { BASE_API_URL } from '$lib/utils/constants';
+import { getModelInfo } from '$lib/utils/crud';
+import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
+import { type Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -57,10 +55,7 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const mappingSetsEndpoint = `${BASE_API_URL}/requirement-mapping-sets/?reference_framework=${compliance_assessment.framework.id}`;
-	const mappingSets: Record<string, any>[] = await fetch(mappingSetsEndpoint)
-		.then((res) => res.json())
-		.then((data) => data.results);
-	const mappingSetIds = mappingSets.map((mappingSet) => mappingSet.id);
+
 	auditModel.foreignKeys = foreignKeys;
 
 	const selectOptions: Record<string, any> = {};

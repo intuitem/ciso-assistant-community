@@ -1,19 +1,18 @@
+import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
-import { localItems, toCamelCase } from '$lib/utils/locales';
+import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
-import { getSecureRedirect } from '$lib/utils/helpers';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import { nestedWriteFormAction } from '$lib/utils/actions';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';
@@ -196,14 +195,6 @@ export const load = (async ({ fetch, params }) => {
 				continue;
 			}
 			evidenceForeignKeys[keyField.field] = [];
-			// const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			// const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			// const response = await fetch(url);
-			// if (response.ok) {
-			// 	evidenceForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-			// } else {
-			// 	console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			// }
 		}
 	}
 
