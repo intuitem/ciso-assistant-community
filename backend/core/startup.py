@@ -176,9 +176,9 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_user",
     "view_requirementmappingset",
     "view_requirementmapping",
-    "view_appliedcontrol",
-    "change_appliedcontrol",
-    "delete_appliedcontrol",
+    "view_referencecontrol",
+    "change_referencecontrol",
+    "delete_referencecontrol",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
