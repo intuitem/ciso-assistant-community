@@ -563,7 +563,7 @@ interface FieldColoredTagMap {
 }
 
 export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
-	'policies': {
+	policies: {
 		name: {
 			keys: {
 				status: {
