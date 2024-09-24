@@ -10,7 +10,7 @@
 		ToastStore,
 		TreeViewNode
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
+	import { getModalStore, getToastStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -174,6 +174,7 @@
 		};
 		modalStore.trigger(modal);
 	}
+	let assessableNode = true;
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -353,11 +354,37 @@
 					{assessableNodesCount(treeViewNodes)}
 				</span>
 			</h4>
+
+			<div class="flex items-center justify-center space-x-4">
+				{#if assessableNode}
+					<p class="font-bold text-sm">{m.ShowAllNodesMessage()}</p>
+				{:else}
+					<p class="font-bold text-sm text-green-500">{m.ShowAllNodesMessage()}</p>
+				{/if}
+				<SlideToggle
+					name="questionnaireToggle"
+					class="flex flex-row items-center justify-center"
+					active="bg-primary-500"
+					background="bg-green-500"
+					bind:checked={assessableNode}
+					on:click={() => (assessableNode = !assessableNode)}
+				>
+					{#if assessableNode}
+						<p class="font-bold text-sm text-primary-500">{m.ShowOnlyAssessable()}</p>
+					{:else}
+						<p class="font-bold text-sm">{m.ShowOnlyAssessable()}</p>
+					{/if}
+				</SlideToggle>
+			</div>
 			<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
 				<i class="fa-solid fa-diagram-project" />
 				<p>{m.mappingInferenceTip()}</p>
 			</div>
-			<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
+			{#if assessableNode}
+				<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
+			{:else}
+				<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes trhover="hover:bg-initial" />
+			{/if}
 		</div>
 	{/if}
 </div>
