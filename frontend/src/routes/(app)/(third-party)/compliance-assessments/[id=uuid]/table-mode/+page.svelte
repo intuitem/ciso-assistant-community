@@ -31,7 +31,7 @@
 	export let shallow = false;
 
 	export let actionPath: string = '';
-	export let questionnaireOnly: boolean = $page.data.user.is_third_party;
+	export let questionnaireOnly: boolean = false;
 	export let assessmentOnly: boolean = false;
 	export let invalidateAll: boolean = true;
 
