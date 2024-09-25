@@ -90,6 +90,10 @@ urlpatterns = [
     ),  # NOTE: This has to be placed before the allauth urls, otherwise our ACS implementation will not be used
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
+    path(
+        "requirement-assessments/<uuid:pk>/suggestions/applied-controls/",
+        RequirementAssessmentViewSet.create_suggested_applied_controls,
+    ),
 ]
 
 # Additional modules take precedence over the default modules

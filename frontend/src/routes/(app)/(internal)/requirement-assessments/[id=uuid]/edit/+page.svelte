@@ -43,6 +43,7 @@
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -124,6 +125,25 @@
 			};
 			toastStore.trigger(toast);
 		}
+	}
+
+	async function createAppliedControlsFromSuggestions() {
+		const response = await fetch(
+			`/requirement-assessments/${data.requirementAssessment.id}/suggestions/applied-controls`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			}
+		);
+		toastStore.trigger({
+			message: response.ok
+				? m.createAppliedControlsFromSuggestionsSuccess()
+				: m.createAppliedControlsFromSuggestionsError(),
+			background: response.ok ? 'variant-filled-success' : 'variant-filled-error'
+		});
+		invalidateAll();
 	}
 
 	let { form: measureCreateForm, message: measureCreateMessage } = {
@@ -339,7 +359,18 @@
 							<div
 								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 							>
-								<span class="flex flex-row justify-end items-center">
+								<span class="flex flex-row justify-end items-center space-x-2">
+									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
+										<button
+											class="btn text-gray-100 bg-gradient-to-l from-pink-500 to-tertiary-500 h-fit whitespace-normal"
+											on:click={(e) => {
+												e.preventDefault();
+												createAppliedControlsFromSuggestions();
+											}}
+											><i class="fa-solid fa-fire-extinguisher mr-2" />
+											{m.createAppliedControlsFromSuggestions()}
+										</button>
+									{/if}
 									<button
 										class="btn variant-filled-primary self-end"
 										on:click={modalMeasureCreateForm}
