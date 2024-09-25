@@ -2587,18 +2587,25 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             try:
                 # TODO: handle name unicity in scope
                 _name = reference_control.name or reference_control.ref_id
-                applied_control = AppliedControl.objects.create(
+                applied_control, created = AppliedControl.objects.get_or_create(
                     name=_name,
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
                     description=reference_control.description,
                 )
-                logger.info(
-                    "Successfully created applied control from reference_control",
-                    applied_control=applied_control,
-                    reference_control=reference_control,
-                )
+                if created:
+                    logger.info(
+                        "Successfully created applied control from reference_control",
+                        applied_control=applied_control,
+                        reference_control=reference_control,
+                    )
+                else:
+                    logger.info(
+                        "Applied control already exists, skipping creation and using existing one",
+                        applied_control=applied_control,
+                        reference_control=reference_control,
+                    )
                 applied_controls.append(applied_control)
             except Exception as e:
                 logger.error(
