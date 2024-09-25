@@ -84,9 +84,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
         try:
             object_created = super().create(validated_data)
             return object_created
-        except Exception as e:
+        except ValidationError as e:
             logger.error(e)
-            raise serializers.ValidationError()
+            raise serializers.ValidationError(e.args[0])
 
     class Meta:
         model: models.Model
