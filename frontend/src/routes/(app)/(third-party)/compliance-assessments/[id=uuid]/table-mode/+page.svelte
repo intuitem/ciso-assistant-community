@@ -128,7 +128,7 @@
 			ref: DeleteConfirmModal,
 			props: {
 				_form: data.deleteForm,
-				formAction: `${actionPath}?/deleteEvidence`,
+				formAction: `/evidences?/delete`,
 				id: id,
 				invalidateAll: invalidateAll,
 				debug: false,
@@ -140,7 +140,7 @@
 			component: modalComponent,
 			// Data
 			title: m.deleteModalTitle(),
-			body: `${m.deleteModalMessage()}: ${name}?`
+			body: `${m.deleteModalMessage({ name })}`
 		};
 		modalStore.trigger(modal);
 		data.requirements.forEach((requirementAssessment) => {

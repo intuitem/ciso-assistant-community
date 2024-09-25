@@ -674,6 +674,12 @@
 	"duplicate": "Duplicate",
 	"duplicateRiskAssessment": "Duplicate the risk assessment",
 	"size": "Size",
+	"favicon": "Favicon",
+	"logo": "Logo",
+	"clientSettings": "Client settings",
+	"invalidFileType": "Invalid file type",
+	"logoHelpText": "The logo will be displayed in the header of the application. Accepted formats are PNG, JPEG, WEBP, SVG.",
+	"faviconHelpText": "The favicon will be displayed in the browser tab. Accepted formats are ICO, PNG, JPEG, WEBP",
 	"entity": "Entity",
 	"entities": "Entities",
 	"addEntity": "Add entity",
@@ -718,6 +724,8 @@
 	"tableMode": "Table mode",
 	"owner": "Owner",
 	"waitingRiskAcceptances": "Hello! You currently have {number} risk acceptance{s} pending. You can find them in the risk tab.",
+	"licenseSeats": "License seats",
+	"licenseExpiration": "License expiration",
 	"answer": "Answer",
 	"questionnaireMode": "Questionnaire mode",
 	"assessmentMode": "Assessment mode",
@@ -735,5 +743,8 @@
 	"sureToSendMail": "Are you sure you want to send the mail?",
 	"mailSuccessfullySent": "The mail has been successfully sent",
 	"mailFailedToSend": "The mail failed to be sent",
-	"questionOrQuestions": "Question(s)"
+	"questionOrQuestions": "Question(s)",
+	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page.",
+	"xRaysEmptyMessage": "You have to create at least one project to use X-rays.",
+	"NoPreviewMessage": "No preview available."
 }

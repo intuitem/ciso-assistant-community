@@ -7,7 +7,7 @@ if [ -f db/ciso-assistant.sqlite3 ] ; then
 else
     docker rmi ghcr.io/intuitem/ciso-assistant-community/backend:latest ghcr.io/intuitem/ciso-assistant-community/frontend:latest 2> /dev/null
     docker compose -f docker-compose-remote.yml up -d
-    echo "Giving sometime for the database to be ready, please wait ..."
+    echo "Giving some time for the database to be ready, please wait ..."
     sleep 20
     echo "initialize your superuser account..."
     docker compose exec backend python manage.py createsuperuser
