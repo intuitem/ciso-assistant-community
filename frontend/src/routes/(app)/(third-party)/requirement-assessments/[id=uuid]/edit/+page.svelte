@@ -182,7 +182,7 @@
 	$: classesText =
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : '';
 
-	let tabSet = $page.data.user.is_third_party ? 1: 0;
+	let tabSet = $page.data.user.is_third_party ? 1 : 0;
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">

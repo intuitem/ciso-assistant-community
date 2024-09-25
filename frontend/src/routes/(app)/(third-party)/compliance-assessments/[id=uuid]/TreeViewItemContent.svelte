@@ -154,8 +154,9 @@
 					{/each}
 				{/if}
 				{#if node.question.questions}
-					<span class="badge"
-					style="background-color: pink; color: {darkenColor("#FFC0CB", 0.5)}">{node.question.questions.length} {m.questionOrQuestions()}</span>
+					<span class="badge" style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+						>{node.question.questions.length} {m.questionOrQuestions()}</span
+					>
 				{/if}
 			</div>
 		</div>
