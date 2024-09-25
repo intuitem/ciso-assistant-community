@@ -7,6 +7,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
+	import * as m from '$paraglide/messages';
 
 	export let ref_id: string;
 	export let name: string;
@@ -151,6 +152,10 @@
 							</span>
 						{/if}
 					{/each}
+				{/if}
+				{#if node.question.questions}
+					<span class="badge"
+					style="background-color: pink; color: {darkenColor("#FFC0CB", 0.5)}">{node.question.questions.length} {m.questionOrQuestions()}</span>
 				{/if}
 			</div>
 		</div>
