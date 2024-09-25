@@ -289,6 +289,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
+		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },
