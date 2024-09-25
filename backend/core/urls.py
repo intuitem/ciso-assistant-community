@@ -62,6 +62,7 @@ router.register(
 )
 
 ROUTES = settings.ROUTES
+MODULES = settings.MODULES.values()
 
 for route in ROUTES:
     view_module = importlib.import_module(ROUTES[route]["viewset"].rsplit(".", 1)[0])
@@ -78,7 +79,6 @@ urlpatterns = [
     path("settings/", include("global_settings.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
-    path("license/", license, name="license"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
@@ -91,6 +91,10 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
 ]
+
+# Additional modules take precedence over the default modules
+for index, module in enumerate(MODULES):
+    urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
 if DEBUG:
     # Browsable API is only available in DEBUG mode

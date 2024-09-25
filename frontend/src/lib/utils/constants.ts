@@ -1,13 +1,13 @@
 import { env } from '$env/dynamic/public';
 
 export const BASE_API_URL = `${
-	env.hasOwnProperty('PUBLIC_BACKEND_API_URL')
+	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
 		? env.PUBLIC_BACKEND_API_URL
 		: 'http://localhost:8000/api'
 }`;
 
 export const BACKEND_API_EXPOSED_URL = `${
-	env.hasOwnProperty('PUBLIC_BACKEND_API_EXPOSED_URL')
+	Object.hasOwn(env, 'PUBLIC_BACKEND_API_EXPOSED_URL')
 		? env.PUBLIC_BACKEND_API_EXPOSED_URL
 		: BASE_API_URL
 }`;
