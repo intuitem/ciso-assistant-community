@@ -559,6 +559,9 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         required=False,
         allow_null=True,
     )
+    create_applied_controls_from_suggestions = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
 
     def create(self, validated_data: Any):
         return super().create(validated_data)
