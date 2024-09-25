@@ -1825,6 +1825,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="create_appliedcontrol"),
+            folder=compliance_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         for requirement_assessment in requirement_assessments:
             requirement_assessment.create_applied_controls_from_suggestions()
@@ -1924,11 +1930,15 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @api_view(["POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
-        if request.method == "POST":
-            requirement_assessment = RequirementAssessment.objects.get(id=pk)
-            requirement_assessment.create_applied_controls_from_suggestions()
-            return Response(status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        requirement_assessment = RequirementAssessment.objects.get(id=pk)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="create_appliedcontrol"),
+            folder=requirement_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(status=status.HTTP_200_OK)
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
