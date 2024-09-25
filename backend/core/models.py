@@ -2581,6 +2581,33 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 return (RequirementAssessment.Result.NON_COMPLIANT, None)
         return (None, None)
 
+    def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
+        applied_controls: list[AppliedControl] = []
+        for reference_control in self.requirement.reference_controls.all():
+            try:
+                # TODO: handle name unicity in scope
+                _name = reference_control.name or reference_control.ref_id
+                applied_control = AppliedControl.objects.create(
+                    name=_name,
+                    folder=self.folder,
+                    reference_control=reference_control,
+                    category=reference_control.category,
+                    description=reference_control.description,
+                )
+                logger.info(
+                    "Successfully created applied control from reference_control",
+                    applied_control=applied_control,
+                    reference_control=reference_control,
+                )
+                applied_controls.append(applied_control)
+            except Exception as e:
+                logger.error(
+                    "An error occurred while creating applied control from reference control",
+                    reference_control=reference_control,
+                    exc_info=e,
+                )
+        return applied_controls
+
     class Meta:
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
