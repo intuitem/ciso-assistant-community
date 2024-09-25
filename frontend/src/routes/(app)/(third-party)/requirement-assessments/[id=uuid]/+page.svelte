@@ -9,6 +9,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ProgressRadial, Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import { displayScoreColor, formatScoreValue, getSecureRedirect } from '$lib/utils/helpers';
+	import { page } from '$app/stores';
 
 	export let data: PageData;
 	const threats = data.requirement.threats;
@@ -65,7 +66,7 @@
 	const max_score = data.complianceAssessmentScore.max_score;
 	const value = data.requirementAssessment.score;
 
-	let tabSet = 0;
+	let tabSet = $page.data.user.is_third_party ? 1: 0;
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
@@ -222,12 +223,14 @@
 	{/if}
 	<div>
 		<TabGroup>
-			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
-				>{m.appliedControls()}
-			</Tab>
+			{#if !$page.data.user.is_third_party}
+				<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
+					>{m.appliedControls()}
+				</Tab>
+			{/if}
 			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
 			<svelte:fragment slot="panel">
-				{#if tabSet === 0}
+				{#if tabSet === 0 && !$page.data.user.is_third_party}
 					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 						<i class="fa-solid fa-info-circle" />
 						<p>{m.requirementAppliedControlHelpText()}</p>

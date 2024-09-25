@@ -734,5 +734,6 @@
 	"sendQuestionnaire": "Send questionnaire",
 	"sureToSendMail": "Are you sure you want to send the mail?",
 	"mailSuccessfullySent": "The mail has been successfully sent",
-	"mailFailedToSend": "The mail failed to be sent"
+	"mailFailedToSend": "The mail failed to be sent",
+	"questionOrQuestions": "Question(s)"
 }
