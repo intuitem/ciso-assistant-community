@@ -2,6 +2,8 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import { assessableNode } from './store.ts';
+
 	import type {
 		ModalComponent,
 		ModalSettings,
@@ -70,10 +72,17 @@
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
+			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+			const hidden = !(!$assessableNode || node.assessable || hasAssessableChildren);
+
 			return {
 				id: id,
 				content: TreeViewItemContent,
-				contentProps: { ...node, canEditRequirementAssessment },
+				contentProps: {
+					...node,
+					canEditRequirementAssessment,
+					hidden
+				},
 				lead: TreeViewItemLead,
 				leadProps: {
 					statusI18n: node.status_i18n,
@@ -89,7 +98,7 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
+	const treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -174,7 +183,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-	let assessableNode = true;
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -356,7 +364,7 @@
 			</h4>
 
 			<div class="flex items-center justify-center space-x-4">
-				{#if assessableNode}
+				{#if $assessableNode}
 					<p class="font-bold text-sm">{m.ShowAllNodesMessage()}</p>
 				{:else}
 					<p class="font-bold text-sm text-green-500">{m.ShowAllNodesMessage()}</p>
@@ -366,10 +374,10 @@
 					class="flex flex-row items-center justify-center"
 					active="bg-primary-500"
 					background="bg-green-500"
-					bind:checked={assessableNode}
-					on:click={() => (assessableNode = !assessableNode)}
+					bind:checked={$assessableNode}
+					on:click={() => ($assessableNode = !$assessableNode)}
 				>
-					{#if assessableNode}
+					{#if $assessableNode}
 						<p class="font-bold text-sm text-primary-500">{m.ShowOnlyAssessable()}</p>
 					{:else}
 						<p class="font-bold text-sm">{m.ShowOnlyAssessable()}</p>
@@ -380,11 +388,13 @@
 				<i class="fa-solid fa-diagram-project" />
 				<p>{m.mappingInferenceTip()}</p>
 			</div>
-			{#if assessableNode}
-				<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
-			{:else}
-				<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes trhover="hover:bg-initial" />
-			{/if}
+			{#key $assessableNode}
+				<RecursiveTreeView
+					nodes={transformToTreeView(Object.entries(tree))}
+					bind:expandedNodes
+					hover="hover:bg-initial"
+				/>
+			{/key}
 		</div>
 	{/if}
 </div>
