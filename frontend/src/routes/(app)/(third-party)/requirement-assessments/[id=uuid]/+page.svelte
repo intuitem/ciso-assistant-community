@@ -66,7 +66,7 @@
 	const max_score = data.complianceAssessmentScore.max_score;
 	const value = data.requirementAssessment.score;
 
-	let tabSet = $page.data.user.is_third_party ? 1: 0;
+	let tabSet = $page.data.user.is_third_party ? 1 : 0;
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
