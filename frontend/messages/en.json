@@ -743,5 +743,6 @@
 	"createAppliedControlsFromSuggestions": "Create applied controls from suggestions",
 	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls",
 	"createAppliedControlsFromSuggestionsSuccess": "Applied controls successfully created from the suggested reference controls",
-	"createAppliedControlsFromSuggestionsError": "An error occured while creating applied controls from the suggested reference controls"
+	"createAppliedControlsFromSuggestionsError": "An error occured while creating applied controls from the suggested reference controls",
+	"NoPreviewMessage": "No preview available."
 }
