@@ -131,11 +131,13 @@
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
 />
-<Checkbox
-	{form}
-	field="create_applied_controls_from_suggestions"
-	label={m.createAppliedControlsFromSuggestions()}
-	helpText={m.createAppliedControlsFromSuggestionsHelpText()}
-	cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
-	bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
-/>
+{#if context === 'create'}
+	<Checkbox
+		{form}
+		field="create_applied_controls_from_suggestions"
+		label={m.createAppliedControlsFromSuggestions()}
+		helpText={m.createAppliedControlsFromSuggestionsHelpText()}
+		cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
+		bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+	/>
+{/if}
