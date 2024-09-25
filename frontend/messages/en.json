@@ -739,5 +739,6 @@
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
 	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page.",
-	"xRaysEmptyMessage": "You have to create at least one project to use X-rays."
+	"xRaysEmptyMessage": "You have to create at least one project to use X-rays.",
+	"NoPreviewMessage": "No preview available."
 }
