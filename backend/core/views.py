@@ -1661,6 +1661,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
         baseline = serializer.validated_data.pop("baseline", None)
+        create_applied_controls = serializer.validated_data.pop(
+            "create_applied_controls_from_suggestions", False
+        )
         instance: ComplianceAssessment = serializer.save()
         instance.create_requirement_assessments(baseline)
         if baseline and baseline.framework != instance.framework:
@@ -1688,6 +1691,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ]
                 )
                 requirement_assessment.save()
+        if create_applied_controls:
+            for requirement_assessment in instance.requirement_assessments.all():
+                requirement_assessment.create_applied_controls_from_suggestions()
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
