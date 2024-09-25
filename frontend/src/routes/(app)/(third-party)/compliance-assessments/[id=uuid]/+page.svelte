@@ -174,6 +174,25 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	async function createAppliedControlsFromSuggestions() {
+		const response = await fetch(
+			`/compliance-assessments/${data.compliance_assessment.id}/suggestions/applied-controls`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			}
+		);
+		toastStore.trigger({
+			message: response.ok
+				? m.createAppliedControlsFromSuggestionsSuccess()
+				: m.createAppliedControlsFromSuggestionsError(),
+			background: response.ok ? 'variant-filled-success' : 'variant-filled-error'
+		});
+		return;
+	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -341,6 +360,14 @@
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
 					on:click={(_) => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
+				</button>
+			{/if}
+			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
+				<button
+					class="btn text-gray-100 bg-gradient-to-l from-pink-500 to-tertiary-500 h-fit whitespace-normal"
+					on:click={(_) => createAppliedControlsFromSuggestions()}
+					><i class="fa-solid fa-fire-extinguisher mr-2" />
+					{m.createAppliedControlsFromSuggestions()}
 				</button>
 			{/if}
 		</div>

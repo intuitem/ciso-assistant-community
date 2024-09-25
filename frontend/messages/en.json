@@ -741,5 +741,7 @@
 	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page.",
 	"xRaysEmptyMessage": "You have to create at least one project to use X-rays.",
 	"createAppliedControlsFromSuggestions": "Create applied controls from suggestions",
-	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls"
+	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls",
+	"createAppliedControlsFromSuggestionsSuccess": "Applied controls successfully created from the suggested reference controls",
+	"createAppliedControlsFromSuggestionsError": "An error occured while creating applied controls from the suggested reference controls"
 }
