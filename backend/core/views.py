@@ -1820,13 +1820,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
 
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="suggestions/applied-controls",
-    )
-    def create_suggested_applied_controls(self, request, pk):
-        compliance_assessment = self.get_object()
+    @staticmethod
+    @api_view(["POST"])
+    @renderer_classes([JSONRenderer])
+    def create_suggested_applied_controls(request, pk):
+        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         for requirement_assessment in requirement_assessments:
             requirement_assessment.create_applied_controls_from_suggestions()
