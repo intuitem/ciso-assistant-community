@@ -360,7 +360,7 @@
 								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 							>
 								<span class="flex flex-row justify-end items-center space-x-2">
-									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
+									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 										<button
 											class="btn text-gray-100 bg-gradient-to-l from-tertiary-400 to-orange-600 h-fit whitespace-normal"
 											on:click={(e) => {
