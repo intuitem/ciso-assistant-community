@@ -2080,7 +2080,9 @@ class ComplianceAssessment(Assessment):
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
 
-    def create_requirement_assessments(self, baseline: Self | None = None):
+    def create_requirement_assessments(
+        self, baseline: Self | None = None
+    ) -> list["RequirementAssessment"]:
         requirements = RequirementNode.objects.filter(framework=self.framework)
         requirement_assessments = []
         for requirement in requirements:
