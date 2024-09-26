@@ -17,7 +17,7 @@ TOKEN = ""
 USERNAME = ""
 PASSWORD = ""
 
-with open("cli_config.yaml", "r") as yfile:
+with open("config.yaml", "r") as yfile:
     cli_cfg = yaml.safe_load(yfile)
 
 try:
@@ -103,68 +103,99 @@ def get_folders():
 
 
 @click.command()
-@click.option("--ifile", required=True, help="Path of the csv file with assets")
-def import_assets(ifile):
+@click.option("--file", required=True, help="Path of the csv file with assets")
+def import_assets(file):
     """import assets from a csv"""
     GLOBAL_FOLDER_ID = _get_folders()
-    df = pd.read_csv(ifile)
+    df = pd.read_csv(file)
     url = f"{API_URL}/assets/"
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
-    for _, row in df.iterrows():
-        asset_type = "SP"
-        name = row["name"]
-        if row["type"].lower() == "primary":
-            asset_type = "PR"
-        else:
+    if click.confirm(f"I'm about to create {len(df)} assets. Are you sure?"):
+        for _, row in df.iterrows():
             asset_type = "SP"
+            name = row["name"]
+            if row["type"].lower() == "primary":
+                asset_type = "PR"
+            else:
+                asset_type = "SP"
 
-        data = {
-            "name": name,
-            "folder": GLOBAL_FOLDER_ID,
-            "type": asset_type,
-        }
-        res = requests.post(url, json=data, headers=headers)
-        if res.status_code != 201:
-            click.echo("❌ something went wrong")
-            print(res.json())
-        else:
-            print(f"✅ {name} created")
+            data = {
+                "name": name,
+                "folder": GLOBAL_FOLDER_ID,
+                "type": asset_type,
+            }
+            res = requests.post(url, json=data, headers=headers)
+            if res.status_code != 201:
+                click.echo("❌ something went wrong")
+                print(res.json())
+            else:
+                print(f"✅ {name} created")
 
 
 @click.command()
 @click.option(
-    "--ifile", required=True, help="Path of the csv file with applied controls"
+    "--file", required=True, help="Path of the csv file with applied controls"
 )
-def import_controls(ifile):
+def import_controls(file):
     """import applied controls"""
-    df = pd.read_csv(ifile)
+    df = pd.read_csv(file)
     GLOBAL_FOLDER_ID = _get_folders()
     url = f"{API_URL}/applied-controls/"
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
-    print(GLOBAL_FOLDER_ID)
-    for _, row in df.iterrows():
-        name = row["name"]
-        description = row["description"]
-        csf_function = row["csf_function"]
-        category = row["category"]
+    if click.confirm(f"I'm about to create {len(df)} applied controls. Are you sure?"):
+        for _, row in df.iterrows():
+            name = row["name"]
+            description = row["description"]
+            csf_function = row["csf_function"]
+            category = row["category"]
 
-        data = {
-            "name": name,
-            "folder": GLOBAL_FOLDER_ID,
-            "description": description,
-            "csf_function": csf_function.lower(),
-            "category": category.lower(),
-        }
-        res = requests.post(url, json=data, headers=headers)
-        if res.status_code != 201:
-            click.echo("❌ something went wrong")
-            print(res.json())
-        else:
-            print(f"✅ {name} created")
+            data = {
+                "name": name,
+                "folder": GLOBAL_FOLDER_ID,
+                "description": description,
+                "csf_function": csf_function.lower(),
+                "category": category.lower(),
+            }
+            res = requests.post(url, json=data, headers=headers)
+            if res.status_code != 201:
+                click.echo("❌ something went wrong")
+                print(res.json())
+            else:
+                print(f"✅ {name} created")
+
+
+@click.command()
+@click.option(
+    "--file", required=True, help="Path of the csv file with the list of evidences"
+)
+def evidences_templates(file):
+    """Create evidences templates"""
+    df = pd.read_csv(file)
+    GLOBAL_FOLDER_ID = _get_folders()
+
+    url = f"{API_URL}/evidences/"
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+    if click.confirm(f"I'm about to create {len(df)} evidences. Are you sure?"):
+        for _, row in df.iterrows():
+            data = {
+                "name": row["name"],
+                "description": row["description"],
+                "folder": GLOBAL_FOLDER_ID,
+                "applied_controls": [],
+                "requirement_assessments": [],
+            }
+            res = requests.post(url, json=data, headers=headers)
+            if res.status_code != 201:
+                click.echo("❌ something went wrong")
+                print(res.json())
+            else:
+                print(f"✅ {row['name']} created")
 
 
 # Add commands to the CLI group
@@ -172,6 +203,7 @@ cli.add_command(get_folders)
 cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
+cli.add_command(evidences_templates)
 
 if __name__ == "__main__":
     cli()
