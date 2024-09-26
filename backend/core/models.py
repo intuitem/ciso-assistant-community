@@ -2587,7 +2587,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         applied_controls: list[AppliedControl] = []
         for reference_control in self.requirement.reference_controls.all():
             try:
-                # TODO: handle name unicity in scope
                 _name = reference_control.name or reference_control.ref_id
                 applied_control, created = AppliedControl.objects.get_or_create(
                     name=_name,
