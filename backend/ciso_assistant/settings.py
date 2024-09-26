@@ -84,6 +84,7 @@ logger = structlog.getLogger(__name__)
 FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
+MODULES = {}
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
@@ -127,10 +128,10 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "tprm",
     "core",
     "cal",
     "django_filters",
-    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",
@@ -296,6 +297,8 @@ LANGUAGES = [
     ("pt", "Portuguese"),
     ("ar", "Arabic"),
     ("ro", "Romanian"),
+    ("hi", "Hindi"),
+    ("ur", "Urdu"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

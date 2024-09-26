@@ -1,11 +1,12 @@
-from django.apps import AppConfig
-from django.db.models.signals import post_migrate
 import os
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from django.apps import AppConfig
 from django.core.management import call_command
-
+from django.db.models.signals import post_migrate
 from structlog import get_logger
+
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from core.utils import RoleCodename
 
 logger = get_logger(__name__)
 
@@ -261,6 +262,32 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_globalsettings",
     "view_requirementmappingset",
     "view_requirementmapping",
+    "add_entity",
+    "change_entity",
+    "view_entity",
+    "delete_entity",
+    "add_representative",
+    "change_representative",
+    "view_representative",
+    "delete_representative",
+    "add_solution",
+    "change_solution",
+    "view_solution",
+    "delete_solution",
+    "add_entityassessment",
+    "change_entityassessment",
+    "view_entityassessment",
+    "delete_entityassessment",
+]
+
+THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
+    "view_complianceassessment",
+    "view_requirementassessment",
+    "change_requirementassessment",
+    "view_evidence",
+    "add_evidence",
+    "change_evidence",
+    "delete_evidence",
 ]
 
 
@@ -271,9 +298,9 @@ def startup(sender: AppConfig, **kwargs):
     Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
     """
     from django.contrib.auth.models import Permission
-    from allauth.socialaccount.providers.saml.provider import SAMLProvider
+
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-    from global_settings.models import GlobalSettings
+    from tprm.models import Entity
 
     print("startup handler: initialize database")
 
@@ -300,6 +327,12 @@ def startup(sender: AppConfig, **kwargs):
         Folder.objects.create(
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
+    # if main entity does not exist, then create it
+    if not Entity.objects.filter(name="Main").exists():
+        main = Entity.objects.create(
+            name="Main", folder=Folder.get_root_folder(), builtin=True
+        )
+        main.owned_folders.add(Folder.get_root_folder())
     # update builtin roles to facilitate migrations
     reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
     reader.permissions.set(reader_permissions)
@@ -361,6 +394,14 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra2.perimeter_folders.add(global_approvers.folder)
 
+    third_party_respondent_permissions = Permission.objects.filter(
+        codename__in=THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST
+    )
+    third_party_respondent, created = Role.objects.get_or_create(
+        name=RoleCodename.THIRD_PARTY_RESPONDENT.value, builtin=True
+    )
+    third_party_respondent.permissions.set(third_party_respondent_permissions)
+
     # if superuser defined and does not exist, then create it
     if (
         CISO_ASSISTANT_SUPERUSER_EMAIL
@@ -372,53 +413,6 @@ def startup(sender: AppConfig, **kwargs):
             )
         except Exception as e:
             print(e)  # NOTE: Add this exception in the logger
-
-    default_attribute_mapping = SAMLProvider.default_attribute_mapping
-
-    settings = {
-        "attribute_mapping": {
-            "uid": default_attribute_mapping["uid"],
-            "email_verified": default_attribute_mapping["email_verified"],
-            "email": default_attribute_mapping["email"],
-        },
-        "idp": {
-            "entity_id": "",
-            "metadata_url": "",
-            "sso_url": "",
-            "slo_url": "",
-            "x509cert": "",
-        },
-        "sp": {
-            "entity_id": "ciso-assistant",
-        },
-        "advanced": {
-            "allow_repeat_attribute_name": True,
-            "allow_single_label_domains": False,
-            "authn_request_signed": False,
-            "digest_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-            "logout_request_signed": False,
-            "logout_response_signed": False,
-            "metadata_signed": False,
-            "name_id_encrypted": False,
-            "reject_deprecated_algorithm": True,
-            "reject_idp_initiated_sso": True,
-            "signature_algorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-            "want_assertion_encrypted": False,
-            "want_assertion_signed": False,
-            "want_attribute_statement": True,
-            "want_message_signed": False,
-            "want_name_id": False,
-            "want_name_id_encrypted": False,
-        },
-    }
-
-    if not GlobalSettings.objects.filter(name=GlobalSettings.Names.SSO).exists():
-        logger.info("SSO settings not found, creating default settings")
-        sso_settings = GlobalSettings.objects.create(
-            name=GlobalSettings.Names.SSO,
-            value={"client_id": "0", "settings": settings},
-        )
-        logger.info("SSO settings created", settings=sso_settings.value)
 
     call_command("storelibraries")
 

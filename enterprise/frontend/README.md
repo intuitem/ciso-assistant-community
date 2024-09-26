@@ -13,13 +13,7 @@ OR
 export PUBLIC_BACKEND_API_URL=http://127.0.0.1:8000/api
 ```
 
-3. Move community and enterprise code to a single directory and install dependencies
-
-```bash
-make pre-build
-```
-
-4. Start a development server (ensure that the django app is running)
+3. Start a development server (make sure that the backend is running)
 
 ```bash
 make dev
@@ -31,13 +25,4 @@ To create a production version of your app:
 
 ```bash
 make
-```
-
-# Running a white label instance
-
-This can be done by running the development server with the `FF_WHITE_LABEL` environment variable set to `true`.
-
-```bash
-export FF_WHITE_LABEL=true
-make dev
 ```

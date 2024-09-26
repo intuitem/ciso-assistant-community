@@ -25,6 +25,7 @@ class RoleCodename(Enum):
     ANALYST = "BI-RL-ANA"
     APPROVER = "BI-RL-APP"
     READER = "BI-RL-AUD"
+    THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
 
     def __str__(self) -> str:
         return self.value
@@ -38,6 +39,7 @@ class UserGroupCodename(Enum):
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
     READER = "BI-UG-AUD"
+    THIRD_PARTY_RESPONDENT = "BI-UG-TPR"
 
     def __str__(self) -> str:
         return self.value
@@ -49,6 +51,7 @@ BUILTIN_ROLE_CODENAMES = {
     str(RoleCodename.ANALYST): _("Analyst"),
     str(RoleCodename.APPROVER): _("Approver"),
     str(RoleCodename.READER): _("Reader"),
+    str(RoleCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
 }
 
 BUILTIN_USERGROUP_CODENAMES = {
@@ -59,6 +62,7 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ANALYST): _("Analyst"),
     str(UserGroupCodename.APPROVER): _("Approver"),
     str(UserGroupCodename.READER): _("Reader"),
+    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
 }
 
 COUNTRY_FLAGS = {

@@ -21,12 +21,14 @@
 			{$modalStore[0].title ?? '(title missing)'}
 		</header>
 		{#if body}
-			{#each Object.entries(JSON.parse(body)) as [key, value]}
-				<div>
-					<div class="font-bold capitalize">{key}:</div>
-					<div>{value}</div>
-				</div>
-			{/each}
+			<div data-testid="key-value">
+				{#each Object.entries(JSON.parse(body)) as [key, value]}
+					<div>
+						<div data-testid="{key}-key" class="font-bold capitalize">{key}:</div>
+						<div data-testid="{key}-value">{value}</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 {/if}

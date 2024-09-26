@@ -17,8 +17,7 @@ import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
 
-BASE_DIR_ENTERPRISE = Path(__file__).resolve().parent.parent
-BASE_DIR = BASE_DIR_ENTERPRISE.parent.parent / "backend"
+BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 
 load_dotenv(BASE_DIR / ".meta")
 
@@ -85,8 +84,9 @@ logger = structlog.getLogger(__name__)
 FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
+MODULES = {}
 
-logger.info("Launchup CISO Assistant Enterprise")
+logger.info("Launching CISO Assistant Enterprise")
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
@@ -130,10 +130,10 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "tprm",
     "core",
     "cal",
     "django_filters",
-    # "debug_toolbar",
     "library",
     "serdes",
     "rest_framework",
@@ -207,7 +207,7 @@ REST_FRAMEWORK = {
 }
 
 REST_KNOX = {
-    "SECURE_HASH_ALGORITHM": "cryptography.hazmat.primitives.hashes.SHA512",
+    "SECURE_HASH_ALGORITHM": "hashlib.sha512",
     "AUTH_TOKEN_CHARACTER_LENGTH": 64,
     "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
     "TOKEN_LIMIT_PER_USER": None,
@@ -387,16 +387,21 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MODULE_PATHS["serializers"] = ["enterprise_core.serializers"]
 
-FEATURE_FLAGS["whiteLabel"] = os.environ.get("FF_WHITE_LABEL", "false") == "true"
+ROUTES["client-settings"] = {
+    "viewset": "enterprise_core.views.ClientSettingsViewSet",
+    "basename": "client-settings",
+}
 
-if FEATURE_FLAGS["whiteLabel"]:
-    ROUTES["client-settings"] = {
-        "viewset": "enterprise_core.views.ClientSettingsViewSet",
-        "basename": "client-settings",
-    }
+MODULES["enterprise_core"] = {
+    "path": "",
+    "module": "enterprise_core.urls",
+}
 
 logger.info(
     "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
 )
+
+LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 0))
+LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 
 INSTALLED_APPS.append("enterprise_core")
