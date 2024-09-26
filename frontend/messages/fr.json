@@ -674,5 +674,6 @@
 	"successfullyUpdatedClientSettings": "Paramètres du client mis à jour avec succès. Vous pouvez rafrachir la page.",
 	"xRaysEmptyMessage": "Vous devez créer au moins un projet pour utiliser X-rays.",
 	"ShowAllNodesMessage": "Tous les noeuds",
-	"ShowOnlyAssessable": "uniquement les nœuds évaluables"
+	"ShowOnlyAssessable": "uniquement les nœuds évaluables",
+	"NoPreviewMessage": "Aucun aperçu disponible."
 }
