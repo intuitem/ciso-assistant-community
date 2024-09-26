@@ -37,9 +37,9 @@ class TestRequirementAssessment:
             project=Project.objects.first(),
         )
 
-        requirement_assessments: list[
-            RequirementAssessment
-        ] = compliance_assessment.create_requirement_assessments()
+        requirement_assessments: list[RequirementAssessment] = (
+            compliance_assessment.create_requirement_assessments()
+        )
         assert requirement_assessments is not None
         assert len(requirement_assessments) > 0
 
