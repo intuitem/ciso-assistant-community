@@ -175,7 +175,10 @@
 		modalStore.trigger(modal);
 	}
 
+	$: createAppliedControlsLoading = false;
+
 	async function createAppliedControlsFromSuggestions() {
+		createAppliedControlsLoading = true;
 		const response = await fetch(
 			`/compliance-assessments/${data.compliance_assessment.id}/suggestions/applied-controls`,
 			{
@@ -185,6 +188,7 @@
 				}
 			}
 		);
+		createAppliedControlsLoading = false;
 		toastStore.trigger({
 			message: response.ok
 				? m.createAppliedControlsFromSuggestionsSuccess()
@@ -366,7 +370,14 @@
 				<button
 					class="btn text-gray-100 bg-gradient-to-l from-tertiary-400 to-orange-600 h-fit whitespace-normal"
 					on:click={(_) => createAppliedControlsFromSuggestions()}
-					><i class="fa-solid fa-fire-extinguisher mr-2" />
+				>
+					<span class="mr-2">
+						{#if createAppliedControlsLoading}
+							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+						{:else}
+							<i class="fa-solid fa-fire-extinguisher" />
+						{/if}
+					</span>
 					{m.createAppliedControlsFromSuggestions()}
 				</button>
 			{/if}

@@ -31,7 +31,8 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore,
-		type ToastStore
+		type ToastStore,
+		ProgressRadial
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
@@ -127,7 +128,10 @@
 		}
 	}
 
+	$: createAppliedControlsLoading = false;
+
 	async function createAppliedControlsFromSuggestions() {
+		createAppliedControlsLoading = true;
 		const response = await fetch(
 			`/requirement-assessments/${data.requirementAssessment.id}/suggestions/applied-controls`,
 			{
@@ -137,6 +141,7 @@
 				}
 			}
 		);
+		createAppliedControlsLoading = false;
 		toastStore.trigger({
 			message: response.ok
 				? m.createAppliedControlsFromSuggestionsSuccess()
@@ -367,7 +372,19 @@
 												e.preventDefault();
 												createAppliedControlsFromSuggestions();
 											}}
-											><i class="fa-solid fa-fire-extinguisher mr-2" />
+										>
+											<span class="mr-2">
+												{#if createAppliedControlsLoading}
+													<ProgressRadial
+														class="-ml-2"
+														width="w-6"
+														meter="stroke-white"
+														stroke={80}
+													/>
+												{:else}
+													<i class="fa-solid fa-fire-extinguisher" />
+												{/if}
+											</span>
 											{m.createAppliedControlsFromSuggestions()}
 										</button>
 									{/if}
