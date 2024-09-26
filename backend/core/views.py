@@ -1827,7 +1827,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(codename="create_appliedcontrol"),
+            perm=Permission.objects.get(codename="add_appliedcontrol"),
             folder=compliance_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -1933,7 +1933,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         requirement_assessment = RequirementAssessment.objects.get(id=pk)
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(codename="create_appliedcontrol"),
+            perm=Permission.objects.get(codename="add_appliedcontrol"),
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
