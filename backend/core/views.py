@@ -15,6 +15,12 @@ from ciso_assistant.settings import (
     BUILD,
     VERSION,
 )
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
+from django.core.cache import cache
+
 from django.contrib.auth.models import Permission
 from django.core.files.storage import default_storage
 from django.db import models
@@ -56,6 +62,10 @@ from .serializers import *
 from django.conf import settings
 
 User = get_user_model()
+
+SHORT_CACHE_TTL = 2  # mn
+MED_CACHE_TTL = 5  # mn
+LONG_CACHE_TTL = 60  # mn
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -132,6 +142,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request: Request, *args, **kwargs) -> Response:
+        self._process_request_data(request)
+        return super().destroy(request, *args, **kwargs)
 
     class Meta:
         abstract = True
@@ -248,6 +262,12 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
@@ -276,10 +296,12 @@ class ReferenceControlViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "category", "csf_function"]
     search_fields = ["name", "description", "provider"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(ReferenceControl.CATEGORY))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get function choices")
     def csf_function(self, request):
         return Response(dict(ReferenceControl.CSF_FUNCTION))
@@ -340,6 +362,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         data = assessment_per_status(request.user, RiskAssessment)
         return Response({"results": data})
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RiskAssessment.Status.choices))
@@ -431,6 +454,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "reference_control",
                 "eta",
                 "effort",
+                "cost",
                 "link",
                 "status",
             ]
@@ -457,6 +481,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
+                    mtg.cost,
                     mtg.link,
                     mtg.status,
                 ]
@@ -615,24 +640,29 @@ class AppliedControlViewSet(BaseModelViewSet):
         "status",
         "reference_control",
         "effort",
+        "cost",
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(AppliedControl.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(AppliedControl.CATEGORY))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
         return Response(dict(AppliedControl.EFFORT))
@@ -670,7 +700,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort", "cost", "name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -706,6 +736,43 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         return Response({"results": measures})
 
+    @action(detail=False, name="Export controls as CSV")
+    def export_csv(self, request):
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+
+        writer = csv.writer(response, delimiter=";")
+        columns = [
+            "internal_id",
+            "name",
+            "description",
+            "category",
+            "csf_function",
+            "status",
+            "eta",
+            "owner",
+        ]
+        writer.writerow(columns)
+
+        for control in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+            row = [
+                control.id,
+                control.name,
+                control.description,
+                control.category,
+                control.csf_function,
+                control.status,
+                control.eta,
+            ]
+            if len(control.owner.all()) > 0:
+                owners = ",".join([o.email for o in control.owner.all()])
+                row += [owners]
+            writer.writerow(row)
+        return response
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
@@ -721,6 +788,7 @@ class PolicyViewSet(AppliedControlViewSet):
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
@@ -742,14 +810,17 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "applied_controls",
     ]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get qualification choices")
     def qualifications(self, request):
         return Response(dict(RiskScenario.QUALIFICATIONS))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
         undefined = {-1: "--"}
@@ -762,6 +833,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get impact choices")
     def impact(self, request, pk):
         undefined = dict([(-1, "--")])
@@ -774,6 +846,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get strength of knowledge choices")
     def strength_of_knowledge(self, request, pk):
         undefined = {-1: RiskScenario.DEFAULT_SOK_OPTIONS[-1]}
@@ -859,6 +932,13 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             self.get_object().set_state("revoked")
         return Response({"results": "state updated to revoked"})
 
+    @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
+    def waiting(self, request):
+        acceptance_count = RiskAcceptance.objects.filter(
+            approver=request.user, state="submitted"
+        ).count()
+        return Response({"count": acceptance_count})
+
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
         submitted = False
@@ -893,7 +973,14 @@ class UserFilter(df.FilterSet):
 
     class Meta:
         model = User
-        fields = ["email", "first_name", "last_name", "is_active", "is_approver"]
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_approver",
+            "is_third_party",
+        ]
 
 
 class UserViewSet(BaseModelViewSet):
@@ -971,13 +1058,33 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
 
+class FolderFilter(df.FilterSet):
+    owned = df.BooleanFilter(method="get_owned_folders", label="owned")
+    content_type = df.MultipleChoiceFilter(
+        choices=Folder.ContentType, lookup_expr="icontains"
+    )
+
+    def get_owned_folders(self, queryset, name, value):
+        owned_folders_id = []
+        for folder in Folder.objects.all():
+            if folder.owner.all().first():
+                owned_folders_id.append(folder.id)
+        if value:
+            return queryset.filter(id__in=owned_folders_id)
+        return queryset.exclude(id__in=owned_folders_id)
+
+    class Meta:
+        model = Folder
+        fields = ["parent_folder", "content_type", "owner", "owned"]
+
+
 class FolderViewSet(BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
 
     model = Folder
-    filterset_fields = ["parent_folder", "content_type"]
+    filterset_class = FolderFilter
 
     def perform_create(self, serializer):
         """
@@ -1030,8 +1137,63 @@ class FolderViewSet(BaseModelViewSet):
                 is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
+            # Clear the cache after a new folder is created - purposely clearing everything
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
+    @action(detail=False, methods=["get"])
+    def org_tree(self, request):
+        """
+        Returns the tree of domains and projects
+        """
+        tree = {"name": "Global", "children": []}
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        folders_list = list()
+        for folder in Folder.objects.exclude(content_type="GL").filter(
+            id__in=viewable_objects
+        ):
+            entry = {"name": folder.name}
+            children = []
+            for project in Project.objects.filter(folder=folder):
+                children.append(
+                    {
+                        "name": project.name,
+                        "children": [
+                            {
+                                "name": "audits",
+                                "value": ComplianceAssessment.objects.filter(
+                                    project=project
+                                ).count(),
+                            },
+                            {
+                                "name": "risk assessments",
+                                "value": RiskAssessment.objects.filter(
+                                    project=project
+                                ).count(),
+                            },
+                        ],
+                    }
+                )
+            entry.update({"children": children})
+            folders_list.append(entry)
+        tree.update({"children": folders_list})
+
+        return Response(tree)
 
 
+@cache_page(60 * SHORT_CACHE_TTL)
+@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_counters_view(request):
@@ -1041,6 +1203,8 @@ def get_counters_view(request):
     return Response({"results": get_counters(request.user)})
 
 
+@cache_page(60 * SHORT_CACHE_TTL)
+@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_metrics_view(request):
@@ -1053,6 +1217,8 @@ def get_metrics_view(request):
 # TODO: Add all the proper docstrings for the following list of functions
 
 
+@cache_page(60 * SHORT_CACHE_TTL)
+@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_agg_data(request):
@@ -1136,6 +1302,8 @@ class FrameworkViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
     def names(self, request):
         uuid_list = request.query_params.getlist("id[]", [])
@@ -1147,6 +1315,12 @@ class FrameworkViewSet(BaseModelViewSet):
                 for framework in queryset
             }
         )
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -1204,6 +1378,9 @@ class RequirementNodeViewSet(BaseModelViewSet):
     filterset_fields = ["framework", "urn"]
     search_fields = ["name", "description"]
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class RequirementViewSet(BaseModelViewSet):
     """
@@ -1213,6 +1390,9 @@ class RequirementViewSet(BaseModelViewSet):
     model = RequirementNode
     filterset_fields = ["framework", "urn"]
     search_fields = ["name"]
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class EvidenceViewSet(BaseModelViewSet):
@@ -1297,10 +1477,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * MED_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, name="Get implementation group choices")
     def selected_implementation_groups(self, request, pk):
         compliance_assessment = self.get_object()
@@ -1333,11 +1516,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 compliance_assessment_object.get_requirement_assessments()
             )
             applied_controls = [
-                {**model_to_dict(applied_control), "id": applied_control.id}
+                {
+                    "id": applied_control.id,
+                    "name": applied_control.name,
+                    "description": applied_control.description,
+                    "status": applied_control.status,
+                    "category": applied_control.category,
+                    "csf_function": applied_control.csf_function,
+                    "eta": applied_control.eta,
+                    "expiry_date": applied_control.expiry_date,
+                    "link": applied_control.link,
+                    "effort": applied_control.effort,
+                    "cost": applied_control.cost,
+                    "owners": [
+                        {
+                            "id": owner.id,
+                            "email": owner.email,
+                        }
+                        for owner in applied_control.owner.all()
+                    ],
+                }
                 for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
                 ).distinct()
             ]
+
             for applied_control in applied_controls:
                 applied_control["requirements_count"] = (
                     RequirementAssessment.objects.filter(
@@ -1352,6 +1555,53 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     response[applied_control["status"].lower()].append(applied_control)
 
         return Response(response)
+
+    @action(detail=True, name="Get compliance assessment (audit) CSV")
+    def compliance_assessment_csv(self, request, pk):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        if UUID(pk) in viewable_objects:
+            writer = csv.writer(response, delimiter=";")
+            columns = [
+                "ref_id",
+                "description",
+                "compliance_result",
+                "progress",
+                "score",
+                "observations",
+            ]
+            writer.writerow(columns)
+
+            for req in RequirementAssessment.objects.filter(compliance_assessment=pk):
+                req_node = RequirementNode.objects.get(pk=req.requirement.id)
+                req_text = (
+                    req_node.get_description_translated
+                    if req_node.description
+                    else req_node.get_name_translated
+                )
+                row = [
+                    req_node.ref_id,
+                    req_text,
+                ]
+                if req_node.assessable:
+                    row += [
+                        req.result,
+                        req.status,
+                        req.score,
+                        req.observation,
+                    ]
+                writer.writerow(row)
+
+            return response
+        else:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
@@ -1411,31 +1661,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
         baseline = serializer.validated_data.pop("baseline", None)
-        instance = serializer.save()
-        requirements = RequirementNode.objects.filter(framework=instance.framework)
-        for requirement in requirements:
-            requirement_assessment = RequirementAssessment.objects.create(
-                compliance_assessment=instance,
-                requirement=requirement,
-                folder=Folder.objects.get(id=instance.project.folder.id),
-            )
-            if baseline and baseline.framework == instance.framework:
-                baseline_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=baseline, requirement=requirement
-                )
-                requirement_assessment.result = baseline_requirement_assessment.result
-                requirement_assessment.status = baseline_requirement_assessment.status
-                requirement_assessment.score = baseline_requirement_assessment.score
-                requirement_assessment.is_scored = (
-                    baseline_requirement_assessment.is_scored
-                )
-                requirement_assessment.evidences.set(
-                    baseline_requirement_assessment.evidences.all()
-                )
-                requirement_assessment.applied_controls.set(
-                    baseline_requirement_assessment.applied_controls.all()
-                )
-                requirement_assessment.save()
+        instance: ComplianceAssessment = serializer.save()
+        instance.create_requirement_assessments(baseline)
         if baseline and baseline.framework != instance.framework:
             mapping_set = RequirementMappingSet.objects.get(
                 target_framework=serializer.validated_data["framework"],
@@ -1486,6 +1713,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
+    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
@@ -1529,8 +1758,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["get"])
-    def flash_mode(self, request, pk):
-        """Returns the list of requirement assessments for flash mode"""
+    def requirements_list(self, request, pk):
+        """Returns the list of requirement assessments for the different audit modes"""
         requirement_assessments_objects = (
             self.get_object().get_requirement_assessments()
         )
@@ -1543,11 +1772,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements = RequirementNodeReadSerializer(
             requirements_objects, many=True
         ).data
-        flash_mode = {
+        requirements_list = {
             "requirements": requirements,
             "requirement_assessments": requirement_assessments,
         }
-        return Response(flash_mode, status=status.HTTP_200_OK)
+        return Response(requirements_list, status=status.HTTP_200_OK)
 
     @action(detail=True)
     def export(self, request, pk):
@@ -1583,6 +1812,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         else:
             return Response({"error": "Permission denied"})
 
+    @method_decorator(cache_page(60 * SHORT_CACHE_TTL))
+    @method_decorator(vary_on_cookie)
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
@@ -1597,6 +1828,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     model = RequirementAssessment
     filterset_fields = ["folder", "evidences"]
     search_fields = ["name", "description"]
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        cache.clear()
+        return response
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
@@ -1630,7 +1866,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort","cost","name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -1663,10 +1899,12 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         return Response({"results": measures})
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
@@ -1825,6 +2063,7 @@ def export_mp_csv(request):
         "reference_control",
         "eta",
         "effort",
+        "cost",
         "link",
         "status",
     ]
@@ -1846,6 +2085,7 @@ def export_mp_csv(request):
             mtg.reference_control,
             mtg.eta,
             mtg.effort,
+            mtg.cost,
             mtg.link,
             mtg.status,
         ]

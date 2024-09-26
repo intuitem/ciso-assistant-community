@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-Django = "5.0.8"
+django = "^5.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"

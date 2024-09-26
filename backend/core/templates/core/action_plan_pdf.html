@@ -46,6 +46,7 @@
                             <th class="text-md p-2 text-center">{% trans "ETA" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Expiry date" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Effort" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "Cost" %}</th>
                             <th class="text-md p-2 text-center">{% trans "Matching requirements" %}</th>
                         </tr>
                     </thead>
@@ -59,6 +60,7 @@
                             <td class="text-md p-2 text-center">{{ applied_control.eta|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.expiry_date|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_effort_display|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.cost|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{% get_requirements_count applied_control compliance_assessment %}</td>
                         </tr>
                         {% empty %}

@@ -7,7 +7,11 @@ on:
 env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
-  working-directory: ./frontend
+  frontend-directory: ./frontend
+  enterprise-backend-directory: ./enterprise/backend
+  enterprise-frontend-directory: ./enterprise/frontend
+  enterprise-frontend-build-directory: ./enterprise/frontend/.build/frontend
+  enterprise-backend-settings-module: enterprise_core.settings
 
 jobs:
   startup-functional-test:
@@ -38,21 +42,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install requirements
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Install dependencies
-        working-directory: ${{ env.working-directory }}
+        run: poetry install
+      - name: Install frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
         run: |
           npm install -g pnpm
           pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: npx playwright install --with-deps
       - name: Create frontend environment variables file
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: |
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
@@ -60,6 +67,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
@@ -72,23 +80,24 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py migrate
+          poetry run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py createsuperuser --noinput
-          nohup python manage.py runserver &
+          poetry run python manage.py createsuperuser --noinput
+          nohup poetry run python manage.py runserver &
       - name: Run tests
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: npx playwright test tests/functional/startup.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: startup-functional-test-report
           path: |
-            ${{ env.working-directory }}/tests/reports/
+            ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
+
   startup-docker-compose-test:
     runs-on: ubuntu-20.04
     env:
@@ -98,13 +107,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-      - name: Install dependencies
-        working-directory: ${{ env.working-directory }}
+      - name: Install frontend dependencies
+        working-directory: ${{ env.frontend-directory }}
         run: |
           npm install -g pnpm
           pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
         run: npx playwright install --with-deps
       - name: Build the Docker app
         run: docker compose -f docker-compose-build.yml up -d
@@ -116,9 +125,134 @@ jobs:
       - name: Config the Docker app
         run: |
           sleep 60 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
+          docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
-        working-directory: ${{ env.working-directory }}
+        working-directory: ${{ env.frontend-directory }}
+        run: |
+          response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
+          server_reponse='{"type":"redirect","status":302,"location":"/analytics"}'
+          if [[ "$response" == "$server_reponse" ]]; then
+            echo "Success"
+            exit 0
+          else
+            echo "Failure"
+            exit 1
+          fi
+
+  enterprise-startup-functional-test:
+    runs-on: ubuntu-20.04
+
+    services:
+      postgres:
+        image: postgres:14.12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Install enterprise backend
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: poetry install
+      - name: Install frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make pre-build
+      - name: Install Playwright Browsers
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: npx playwright install --with-deps
+      - name: Create frontend environment variables file
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: |
+          touch .env
+          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
+      - name: Create backend environment variables file
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          touch .env
+          echo DJANGO_DEBUG=True >> .env
+          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
+          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
+          echo POSTGRES_NAME=postgres >> .env
+          echo POSTGRES_USER=postgres >> .env
+          echo POSTGRES_PASSWORD=postgres >> .env
+          echo DB_HOST=localhost >> .env
+          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
+          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
+          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
+      - name: Run migrations
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+      - name: Start test server
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          poetry run python manage.py createsuperuser --noinput
+          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+      - name: Run tests
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: npx playwright test tests/functional/startup.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: enterprise-startup-functional-test-report
+          path: |
+            ${{ env.enterprise-frontend-build-directory }}/tests/reports/
+          retention-days: 5
+
+  enterprise-startup-docker-compose-test:
+    runs-on: ubuntu-20.04
+    env:
+      COMPOSE_TEST: True
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Install frontend dependencies
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make pre-build
+      - name: Install Playwright Browsers
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: npx playwright install --with-deps
+      - name: Build the Docker app
+        run: docker compose -f enterprise/docker-compose-build.yml up -d
+      - name: Create backend environment variables file
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          touch .env
+          export $(grep -v '^#' .env | xargs)
+      - name: Config the Docker app
+        run: |
+          sleep 60 # give the migrations time to finish (included in the up on the previous step)
+          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
+      - name: Run tests
+        working-directory: ${{ env.frontend-directory }}
         run: |
           response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
           server_reponse='{"type":"redirect","status":302,"location":"/analytics"}'

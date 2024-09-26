@@ -1,4 +1,5 @@
 import mimetypes
+import magic
 
 import structlog
 from core.views import BaseModelViewSet
@@ -7,10 +8,13 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
     action,
+    api_view,
     permission_classes,
 )
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
+
+from django.conf import settings
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -35,28 +39,6 @@ class ClientSettingsViewSet(BaseModelViewSet):
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
-    def _get_file_response(self, request, pk, file_field):
-        client = ClientSettings.objects.get(pk=pk)
-        file = getattr(client, file_field)
-
-        if not file:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if request.method != "GET":
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-        filename = client.filename(
-            field=getattr(ClientSettings.FileField, file_field.upper())
-        )
-        content_type = mimetypes.guess_type(filename)[0]
-
-        return HttpResponse(
-            file,
-            content_type=content_type,
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
-            status=status.HTTP_200_OK,
-        )
-
     @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def info(self, request):
         try:
@@ -69,14 +51,28 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 {"error": "Client settings not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(methods=["get"], detail=True, permission_classes=[AllowAny])
-    def logo(self, request, pk):
-        return self._get_file_response(request, pk, "logo")
+    @action(methods=["get"], detail=False, permission_classes=[AllowAny])
+    def logo(self, request):
+        instance = ClientSettings.objects.get()
+        if not instance.logo:
+            return Response(
+                {"error": "No logo uploaded"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(
+            {"data": instance.logo_base64, "mime_type": instance.logo_mime_type}
+        )
 
     @permission_classes((AllowAny,))
-    @action(methods=["get"], detail=True)
-    def favicon(self, request, pk):
-        return self._get_file_response(request, pk, "favicon")
+    @action(methods=["get"], detail=False)
+    def favicon(self, request):
+        instance = ClientSettings.objects.get()
+        if not instance.favicon:
+            return Response(
+                {"error": "No favicon uploaded"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(
+            {"data": instance.favicon_base64, "mime_type": instance.favicon_mime_type}
+        )
 
     def handle_file_upload(self, request, pk, field_name):
         if "file" not in request.FILES:
@@ -86,6 +82,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
 
         try:
             settings = ClientSettings.objects.get(id=pk)
+            file = request.FILES["file"]
+            content_type = magic.Magic(mime=True).from_buffer(file.read())
+
+            if content_type not in [
+                "image/png",
+                "image/jpeg",
+                "image/webp",
+                "image/x-icon",
+                "image/vnd.microsoft.icon",
+                "image/svg+xml",
+            ]:
+                return Response(
+                    {field_name: "invalidFileType"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             setattr(settings, field_name, request.FILES["file"])
             settings.save()
             return Response(status=status.HTTP_200_OK)
@@ -117,3 +129,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
     )
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
+
+
+@api_view(["GET"])
+def get_build(request):
+    """
+    API endpoint that returns the build version of the application.
+    """
+    VERSION = settings.VERSION
+    BUILD = settings.BUILD
+    LICENSE_SEATS = settings.LICENSE_SEATS
+    LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
+    return Response(
+        {
+            "version": VERSION,
+            "build": BUILD,
+            "license_seats": LICENSE_SEATS,
+            "license_expiration": LICENSE_EXPIRATION,
+        }
+    )

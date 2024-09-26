@@ -12,6 +12,8 @@ from .utils import camel_case
 
 from typing import List, Dict, Optional
 
+import json
+
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -803,12 +805,12 @@ def build_audits_tree_metrics(user):
                 for result in RequirementAssessment.Result.choices:
                     cnt_res[result[0]] = (
                         RequirementAssessment.objects.filter(
-                            compliance_assessment=audit
+                            requirement__assessable=True
                         )
+                        .filter(compliance_assessment=audit)
                         .filter(result=result[0])
                         .count()
                     )
-                print(cnt_res)
                 blk_audit = {
                     "name": audit.name,
                     "children": [

@@ -4,11 +4,11 @@
 	import { loginSchema } from '$lib/utils/schemas';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import Typewriter from 'svelte-typewriter';
 
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { redirectToProvider } from '$lib/allauth.js';
+	import Greetings from './Greetings.svelte';
 
 	export let data: PageData;
 </script>
@@ -21,21 +21,7 @@
 	</div>
 	<div class="absolute top-1/2 left-1/2 w-full transform -translate-x-1/2 -translate-y-1/2">
 		<div class="flex flex-row w-full pr-8">
-			<div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-gray-900">
-				<Typewriter mode="loopOnce" cursor={false} interval={50}>
-					<div class="text-2xl unstyled text-center pb-4">
-						<span class="text-2xl text-center">{m.helloThere()} </span>
-						<span> {m.thisIsCisoAssistant()} </span>
-					</div>
-				</Typewriter>
-				<Typewriter mode="cascade" cursor={false} interval={45} delay={5000}>
-					<div class="text-2xl unstyled text-center">
-						<span> {m.yourStreamlined()} </span>
-						<span class="font-black"> {m.oneStopShop()} </span>
-						<span> {m.forComplianceRiskManagement()} </span>
-					</div>
-				</Typewriter>
-			</div>
+			<Greetings />
 			<div class="flex justify-center pr-5 items-center space-y-4 w-2/5">
 				<div class="flex flex-col w-3/4 p-10 rounded-lg shadow-lg bg-white bg-opacity-[.90]">
 					<div data-testid="login" class="flex flex-col w-full items-center space-y-4">

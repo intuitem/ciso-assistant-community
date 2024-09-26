@@ -71,14 +71,20 @@ parser.add_argument(
     "folderpath", help="path to the NZISM XML File, also used for output"
 )
 parser.add_argument("version", help="version of NZISM")
-parser.add_argument("packager", help="name of packager entity", default="DEFEND Ltd")
+parser.add_argument("packager", help="name of packager entity", default="DEFEND")
 
 args = parser.parse_args()
 folder_path = args.folderpath
 input_file_name = f"{folder_path}/{args.filename}"
-version = args.version
+
+if "." in args.version:
+    major_version = args.version.split('.')[0]
+    minor_version = args.version.split('.')[1]
+else:
+    major_version = args.version
+
 packager = args.packager
-output_file_name = f"{folder_path}/nzism-{version}.xlsx"
+output_file_name = f"{folder_path}/nzism-{major_version}.xlsx"
 
 print("parsing", input_file_name)
 
@@ -119,13 +125,13 @@ print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
-ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:nzism-v{version}"])
-ws.append(["library_version", "3"])
+ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:nzism-v{major_version}"])
+ws.append(["library_version", 1])
 ws.append(["library_locale", "en"])
-ws.append(["library_ref_id", f"NSIZM-v{version}"])
-ws.append(["library_name", f"NZISM v{version}"])
+ws.append(["library_ref_id", f"NSIZM-v{major_version}"])
+ws.append(["library_name", f"NZISM v{major_version}"])
 ws.append(
-    ["library_description", f"New Zealand Information Security Manual v{version}"]
+    ["library_description", f"New Zealand Information Security Manual v{major_version}"]
 )
 ws.append(
     [
@@ -143,11 +149,11 @@ The NZISM is licensed under the Creative Commons Attribution 4.0 New Zealand lic
 )
 ws.append(["library_provider", "New Zealand Government Communications Security Bureau"])
 ws.append(["library_packager", packager])
-ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:nzism-v{version}"])
-ws.append(["framework_ref_id", f"NSIZM-v{version}"])
-ws.append(["framework_name", f"NZISM v{version}"])
+ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:nzism-v{major_version}"])
+ws.append(["framework_ref_id", f"NSIZM-v{major_version}"])
+ws.append(["framework_name", f"NZISM v{major_version}"])
 ws.append(
-    ["framework_description", f"New Zealand Information Security Manual v{version}"]
+    ["framework_description", f"New Zealand Information Security Manual v{major_version}"]
 )
 ws.append(["tab", "requirements", "requirements"])
 ws.append(["tab", "scores", "scores"])
@@ -180,8 +186,6 @@ ws2.append(
 ws3 = wb_output.create_sheet("implementation_groups")
 implementation_classification_groups = [
     "All Classifications",
-    "Unclassified",
-    "In-Confidence",
     "Restricted/Sensitive",
     "Confidential",
     "Secret",

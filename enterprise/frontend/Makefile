@@ -12,10 +12,13 @@ FRONTEND_DIR := $(BUILD_DIR)/frontend
 
 .DEFAULT_GOAL := build-enterprise
 
-pre-build:
+ensure-pnpm:
+	@command -v pnpm || npm install -g pnpm
+
+pre-build: ensure-pnpm
 	@mkdir -p $(BUILD_DIR)
-	@rsync -av --exclude=build/ --exclude=node_modules/  $(COMMUNITY_DIR) $(BUILD_DIR)
-	@rsync -avI $(ENTERPRISE_DIR) $(BUILD_DIR)
+	@rsync -av --exclude=$(COMMUNITY_DIR)/build/ --exclude=node_modules/  $(COMMUNITY_DIR) $(BUILD_DIR)
+	@rsync -avI --exclude=Makefile --exclude=Dockerfile --exclude=README.md $(ENTERPRISE_DIR) $(BUILD_DIR)
 	@$(PM) install --frozen-lockfile -C $(FRONTEND_DIR)
 
 build-enterprise: pre-build
@@ -28,7 +31,7 @@ CHANGED_FILES =
 
 # The rule to watch the filesystem for changes
 watch:
-	@fswatch --batch-marker='EOF' -xn . ../../frontend | while read file event; do \
+	@fswatch --batch-marker='EOF' -xn ./src ../../frontend | while read file event; do \
 		if [ "$$file" = "EOF" ]; then \
 			$(MAKE) copy_files CHANGED_FILES="$$list"; \
 			list=(); \
@@ -54,13 +57,11 @@ copy_files:
 
 dev:
 	@if [ -z  "$$(ls -A $(FRONTEND_DIR))" ]; then \
-		echo "Please run make pre-build first."; \
-		exit 1; \
-	else \
-		$(PM) -C ${FRONTEND_DIR} run dev & \
-		$(MAKE) watch & \
-		wait; \
-	fi
+		$(MAKE) pre-build; \
+	fi; \
+	$(PM) -C ${FRONTEND_DIR} run dev & \
+	$(MAKE) watch & \
+	wait;
 
 clean:
 	$(RM) $(ARTIFACTS)

@@ -255,7 +255,8 @@
 		regionBody,
 		regionFooter,
 		// ---
-		onClose
+		onClose,
+		onConfirm
 	};
 </script>
 

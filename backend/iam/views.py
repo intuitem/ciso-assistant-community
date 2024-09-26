@@ -76,6 +76,7 @@ class CurrentUserView(views.APIView):
             "date_joined": request.user.date_joined,
             "user_groups": request.user.get_user_groups(),
             "permissions": request.user.permissions,
+            "is_third_party": request.user.is_third_party,
         }
         return Response(res_data, status=HTTP_200_OK)
 

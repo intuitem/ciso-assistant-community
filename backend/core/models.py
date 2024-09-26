@@ -29,9 +29,8 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
-from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
 
@@ -53,6 +52,44 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
+
+
+def transform_question_to_answer(json_data):
+    """
+    Used during Requirement Assessment creation to create a questionnaire base on
+    the Requirement Node question JSON field
+
+    Args:
+        json_data (json): JSON describing a questionnaire from a Requirement Node
+
+    Returns:
+        json: JSON formatted for the frontend to display a form
+    """
+    question_type = json_data.get("question_type", "")
+    question_choices = json_data.get("question_choices", [])
+    questions = json_data.get("questions", [])
+
+    form_fields = []
+
+    for question in questions:
+        field = {}
+        field["urn"] = question.get("urn", "")
+        field["text"] = question.get("text", "")
+
+        if question_type == "unique_choice":
+            field["type"] = "unique_choice"
+            field["options"] = question_choices
+        elif question_type == "date":
+            field["type"] = "date"
+        else:
+            field["type"] = "text"
+
+        field["answer"] = ""
+
+        form_fields.append(field)
+
+    form_json = {"questions": form_fields}
+    return form_json
 
 
 ########################### Referential objects #########################
@@ -490,7 +527,24 @@ class LibraryUpdater:
                             compliance_assessment=compliance_assessment,
                             requirement=new_requirement_node,
                             folder=compliance_assessment.project.folder,
+                            answer=transform_question_to_answer(
+                                new_requirement_node.question
+                            )
+                            if new_requirement_node.question
+                            else {},
                         )
+                else:
+                    for ra in RequirementAssessment.objects.filter(
+                        requirement=new_requirement_node
+                    ):
+                        ra.name = new_requirement_node.name
+                        ra.description = new_requirement_node.description
+                        ra.answer = (
+                            transform_question_to_answer(new_requirement_node.question)
+                            if new_requirement_node.question
+                            else {}
+                        )
+                        ra.save()
 
                 for threat_urn in requirement_node_dict.get("threats", []):
                     thread_to_add = objects_tracked.get(threat_urn)
@@ -931,6 +985,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
+    question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -1152,6 +1207,7 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     link = models.URLField(
         blank=True,
         null=True,
+        max_length=2048,
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
@@ -1262,7 +1318,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     link = models.CharField(
         null=True,
         blank=True,
-        max_length=1000,
+        max_length=2048,
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
@@ -1273,6 +1329,11 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         choices=EFFORT,
         help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
         verbose_name=_("Effort"),
+    )
+    cost = models.FloatField(
+        null=True,
+        help_text=_("Cost of the measure (using globally-chosen currency)"),
+        verbose_name=_("Cost"),
     )
 
     fields_to_check = ["name"]
@@ -1364,7 +1425,7 @@ class Policy(AppliedControl):
 ########################### Secondary objects #########################
 
 
-class Assessment(NameDescriptionMixin, ETADueDateMixin):
+class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1373,7 +1434,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin):
         DEPRECATED = "deprecated", _("Deprecated")
 
     project = models.ForeignKey(
-        "Project", on_delete=models.CASCADE, verbose_name=_("Project")
+        Project, on_delete=models.CASCADE, verbose_name=_("Project")
     )
     version = models.CharField(
         max_length=100,
@@ -1403,11 +1464,17 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin):
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
     )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name", "version"]
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.folder or self.folder == Folder.get_root_folder():
+            self.folder = self.project.folder
+        return super().save(*args, **kwargs)
 
 
 class RiskAssessment(Assessment):
@@ -1622,6 +1689,19 @@ class RiskAssessment(Assessment):
                             "{} does not have an estimated effort. This will help you for prioritization"
                         ).format(mtg["name"]),
                         "msgid": "appliedControlNoEffort",
+                        "link": f"applied-controls/{mtg['id']}",
+                        "obj_type": "appliedcontrol",
+                        "object": {"name": mtg["name"], "id": mtg["id"]},
+                    }
+                )
+
+            if not mtg["cost"]:
+                warnings_lst.append(
+                    {
+                        "msg": _(
+                            "{} does not have an estimated cost. This will help you for prioritization"
+                        ).format(mtg["name"]),
+                        "msgid": "appliedControlNoCost",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
@@ -1999,6 +2079,38 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+
+    def create_requirement_assessments(self, baseline: Self | None = None):
+        requirements = RequirementNode.objects.filter(framework=self.framework)
+        requirement_assessments = []
+        for requirement in requirements:
+            requirement_assessment = RequirementAssessment.objects.create(
+                compliance_assessment=self,
+                requirement=requirement,
+                folder=Folder.objects.get(id=self.folder.id),
+                answer=transform_question_to_answer(requirement.question)
+                if requirement.question
+                else {},
+            )
+            if baseline and baseline.framework == self.framework:
+                baseline_requirement_assessment = RequirementAssessment.objects.get(
+                    compliance_assessment=baseline, requirement=requirement
+                )
+                requirement_assessment.result = baseline_requirement_assessment.result
+                requirement_assessment.status = baseline_requirement_assessment.status
+                requirement_assessment.score = baseline_requirement_assessment.score
+                requirement_assessment.is_scored = (
+                    baseline_requirement_assessment.is_scored
+                )
+                requirement_assessment.evidences.set(
+                    baseline_requirement_assessment.evidences.all()
+                )
+                requirement_assessment.applied_controls.set(
+                    baseline_requirement_assessment.applied_controls.all()
+                )
+                requirement_assessment.save()
+            requirement_assessments.append(requirement_assessment)
+        return requirement_assessments
 
     def get_global_score(self):
         requirement_assessments_scored = (
@@ -2429,6 +2541,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     mapping_inference = models.JSONField(
         default=dict,
         verbose_name=_("Mapping inference"),
+    )
+    answer = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Answer"),
     )
 
     def __str__(self) -> str:

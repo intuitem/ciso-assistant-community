@@ -61,6 +61,7 @@
                 <td class="px-2 font-semibold">{% trans "Reference control" %}</td>
                 <td class="px-2 font-semibold">{% trans "ETA" %}</td>
                 <td class="px-2 font-semibold">{% trans "Effort" %}</td>
+                <td class="px-2 font-semibold">{% trans "Cost" %}</td>
                 <td class="px-2 font-semibold text-center">{% trans "Link" %}</td>
                 <td class="px-2 font-semibold text-center">{% trans "Status" %}</td>
             </tr>
@@ -74,6 +75,7 @@
                 <td class="px-2 py-3">{% if appliedcontrol.reference_control %}{{ appliedcontrol.reference_control }}{% else %}--{% endif %}</td>
                 <td class="px-2 py-3">{% if appliedcontrol.eta %}{{ appliedcontrol.eta }}{% else %}--{%endif%}</td>
                 <td class="px-2 py-3">{% if appliedcontrol.effort %}{{ appliedcontrol.effort }}{% else %}--{%endif%}</td>
+                <td class="px-2 py-3">{% if appliedcontrol.cost %}{{ appliedcontrol.cost }}{% else %}--{%endif%}</td>
                 <td class="px-2 py-3 text-center">{% if appliedcontrol.link %}<a onclick="event.stopPropagation();" href="{{ appliedcontrol.link }}"
                                                                    class="hover:text-blue-400"><i
                         class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}

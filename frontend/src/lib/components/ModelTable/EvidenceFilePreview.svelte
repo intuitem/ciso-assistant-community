@@ -41,6 +41,8 @@
 			<img src={attachment.url} alt="attachment" class="h-24" />
 		{:else if attachment.type === 'application/pdf'}
 			<embed src={attachment.url} type="application/pdf" class="h-24" />
+		{:else}
+			<p>{m.NoPreviewMessage()}</p>
 		{/if}
 	{:else}
 		<span data-testid="loading-field">

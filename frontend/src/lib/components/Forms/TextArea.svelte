@@ -30,9 +30,10 @@
 	});
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
+	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
 </script>
 
-<div class={regionContainer}>
+<div class={classesDisabled($$props.disabled)}>
 	{#if label !== undefined && !$$props.hidden}
 		{#if $constraints?.required}
 			<label class="text-sm font-semibold" for={field}

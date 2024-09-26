@@ -7,7 +7,7 @@ description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework
   https://ccb.belgium.be'
 copyright: All texts, layouts, designs and other elements of any nature in this document
   are subject to copyright law.
-version: 3
+version: 4
 provider: CCB
 packager: intuitem
 objects:
@@ -68,6 +68,15 @@ objects:
       description: null
     - ref_id: E
       name: essential
+      description: null
+    - ref_id: BK
+      name: basic - key measures
+      description: null
+    - ref_id: IK
+      name: important - key measures
+      description: null
+    - ref_id: EK
+      name: essential - key measures
       description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id
@@ -385,10 +394,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-6
       ref_id: IMPORTANT_ID.AM-6.1
-      description: Information security and cybersecurity roles, responsibilities
+      description: '[KEY MEASURE] Information security and cybersecurity roles, responsibilities
         and authorities within the organization shall be documented, reviewed, authorized,
-        and updated and alignment with organization-internal roles and external partners.  Key
-        Measure
+        and updated and alignment with organization-internal roles and external partners.'
       annotation: "It should be considered to:\n\u2022\tDescribe security roles, responsibilities,\
         \ and authorities: who in your organization should be consulted, informed,\
         \ and held accountable for all or part of your assets.\n\u2022\tProvide security\
@@ -400,6 +408,8 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-6.2
       assessable: true
       depth: 4
@@ -1016,11 +1026,11 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3
       ref_id: ID.SC-3.2
-      description: "Contractual information security and cybersecurity\u2019 requirements\
-        \ for suppliers and third-party partners shall be implemented to ensure a\
-        \ verifiable flaw remediation process, and to ensure the correction of flaws\
-        \ identified during \u2018information security and cybersecurity\u2019 testing\
-        \ and evaluation."
+      description: "[KEY MEASURE] Contractual information security and cybersecurity\u2019\
+        \ requirements for suppliers and third-party partners shall be implemented\
+        \ to ensure a verifiable flaw remediation process, and to ensure the correction\
+        \ of flaws identified during \u2018information security and cybersecurity\u2019\
+        \ testing and evaluation."
       annotation: "\u2022\tInformation systems containing software (or firmware) affected\
         \ by recently announced software flaws (and potential vulnerabilities resulting\
         \ from those flaws) should be identified.\n\u2022\tNewly released security\
@@ -1033,17 +1043,19 @@ objects:
         \ into configuration management as an emergency change."
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3
       ref_id: ID.SC-3.3
-      description: "The organization shall establish contractual requirements permitting\
-        \ the organization to review the \u2018information security and cybersecurity\u2019\
-        \ programs implemented by suppliers and third-party partners."
+      description: "[KEY MEASURE] The organization shall establish contractual requirements\
+        \ permitting the organization to review the \u2018information security and\
+        \ cybersecurity\u2019 programs implemented by suppliers and third-party partners."
       annotation: No additional guidance on this topic.
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-4
       assessable: false
       depth: 3
@@ -1135,8 +1147,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1
       ref_id: BASIC_PR.AC-1.1
-      description: Identities and credentials for authorized devices and users shall
-        be managed.
+      description: '[KEY MEASURE] Identities and credentials for authorized devices
+        and users shall be managed.'
       annotation: "Identities and credentials for authorized devices and users could\
         \ be managed through a password policy. A password policy is a set of rules\
         \ designed to enhance ICT/OT security by encouraging organization\u2019s to:\n\
@@ -1153,6 +1165,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-1.2
       assessable: true
       depth: 4
@@ -1308,22 +1323,25 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-3
       ref_id: BASIC_PR.AC-3.2
-      description: The organization's networks when accessed remotely shall be secured,
-        including through multi-factor authentication (MFA).
+      description: '[KEY MEASURE] The organization''s networks when accessed remotely
+        shall be secured, including through multi-factor authentication (MFA).'
       annotation: Enforce MFA (e.g. 2FA) on Internet-facing systems, such as email,
         remote desktop, and Virtual Private Network (VPNs).
       implementation_groups:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-3.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-3
       ref_id: IMPORTANT_PR.AC-3.3
-      description: "Usage restrictions, connection requirements, implementation guidance,\
-        \ and authorizations for remote access to the organization\u2019s critical\
-        \ systems environment shall be identified, documented and implemented. "
+      description: "[KEY MEASURE] Usage restrictions, connection requirements, implementation\
+        \ guidance, and authorizations for remote access to the organization\u2019\
+        s critical systems environment shall be identified, documented and implemented. "
       annotation: "Consider the following:\n\u2022\tRemote access methods include,\
         \ for example, wireless, broadband, Virtual Private Network (VPN) connections,\
         \ mobile device connections, and communications through external networks.\n\
@@ -1335,6 +1353,8 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.4
       assessable: true
       depth: 4
@@ -1369,8 +1389,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       ref_id: BASIC_PR.AC-4.1
-      description: "Access permissions for users to the organization\u2019s systems\
-        \ shall be defined and managed."
+      description: "[KEY MEASURE] Access permissions for users to the organization\u2019\
+        s systems shall be defined and managed."
       annotation: "The following should be considered:\n\u2022\tDraw up and review\
         \ regularly access lists per system (files, servers, software, databases,\
         \ etc.), possibly through analysis of the Active Directory in Windows-based\
@@ -1389,27 +1409,34 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.2
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       ref_id: BASIC_PR.AC-4.2
-      description: It shall be identified who should have access to the organization's
-        business's critical information and technology and the means to get access.
+      description: '[KEY MEASURE] It shall be identified who should have access to
+        the organization''s business''s critical information and technology and the
+        means to get access.'
       annotation: 'Means to get access may include: a key, password, code, or administrative
         privilege.'
       implementation_groups:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       ref_id: BASIC_PR.AC-4.3
-      description: Employee access to data and information shall be limited to the
-        systems and specific information they need to do their jobs (the principle
-        of Least Privilege).
+      description: '[KEY MEASURE] Employee access to data and information shall be
+        limited to the systems and specific information they need to do their jobs
+        (the principle of Least Privilege).'
       annotation: "The principle of Least Privilege should be understood as the principle\
         \ that a security architecture should be designed so that each employee is\
         \ granted the minimum system resources and authorizations that the employee\
@@ -1424,12 +1451,16 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.4
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       ref_id: BASIC_PR.AC-4.4
-      description: Nobody shall have administrator privileges for daily tasks.
+      description: '[KEY MEASURE] Nobody shall have administrator privileges for daily
+        tasks.'
       annotation: "Consider the following:\n\u2022\tSeparate administrator accounts\
         \ from user accounts.\n\u2022\tDo not privilege user accounts to effectuate\
         \ administration tasks.\n\u2022\tCreate unique local administrator passwords\
@@ -1439,6 +1470,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.5
       assessable: true
       depth: 4
@@ -1512,8 +1546,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5
       ref_id: BASIC_PR.AC-5.1
-      description: Firewalls shall be installed and activated on all the organization's
-        networks.
+      description: '[KEY MEASURE] Firewalls shall be installed and activated on all
+        the organization''s networks.'
       annotation: "Consider the following:\n\u2022\tInstall and operate a firewall\
         \ between your internal network and the Internet. This may be a function of\
         \ a (wireless) access point/router, or it may be a function of a router provided\
@@ -1532,13 +1566,17 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-5.2
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5
       ref_id: BASIC_PR.AC-5.2
-      description: Where appropriate, network integrity of the organization's critical
-        systems shall be protected by incorporating network segmentation and segregation.
+      description: '[KEY MEASURE] Where appropriate, network integrity of the organization''s
+        critical systems shall be protected by incorporating network segmentation
+        and segregation.'
       annotation: "\u2022\tConsider creating different security zones in the network\
         \ (e.g. Basic network segmentation through VLAN\u2019s or other network access\
         \ control mechanisms) and control/monitor the traffic between these zones.\n\
@@ -1548,13 +1586,16 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5
       ref_id: IMPORTANT_PR.AC-5.3
-      description: 'Where appropriate, network integrity of the organization''s critical
-        systems shall be protected by
+      description: '[KEY MEASURE] Where appropriate, network integrity of the organization''s
+        critical systems shall be protected by
 
         (1) Identifying, documenting, and controlling connections between system components.
 
@@ -1565,14 +1606,17 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.4
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5
       ref_id: IMPORTANT_PR.AC-5.4
-      description: 'The organization shall monitor and control connections and communications
-        at the external boundary and at key internal boundaries within the organization''s
-        critical systems by implementing boundary protection devices where appropriate. '
+      description: '[KEY MEASURE] The organization shall monitor and control connections
+        and communications at the external boundary and at key internal boundaries
+        within the organization''s critical systems by implementing boundary protection
+        devices where appropriate. '
       annotation: "Consider implementing the following recommendations:\n\u2022\t\
         Separate your public WIFI network from your business network.\n\u2022\tProtect\
         \ your business WIFI with state-of-the-art encryption.\n\u2022\tImplement\
@@ -1585,6 +1629,8 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.5
       assessable: true
       depth: 4
@@ -1650,16 +1696,17 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-7
       ref_id: IMPORTANT_PR.AC-7.1
-      description: "The organization shall perform a documented risk assessment on\
-        \ organization's critical system transactions and authenticate users, devices,\
-        \ and other assets (e.g., single-factor, multi-factor) commensurate with the\
-        \ risk of the transaction (e.g., individuals\u2019 security and privacy risks\
-        \ and other organizational risks)."
+      description: "[KEY MEASURE for ESSENTIAL] The organization shall perform a documented\
+        \ risk assessment on organization's critical system transactions and authenticate\
+        \ users, devices, and other assets (e.g., single-factor, multi-factor) commensurate\
+        \ with the risk of the transaction (e.g., individuals\u2019 security and privacy\
+        \ risks and other organizational risks)."
       annotation: Consider a security-by-design approach for new systems; For existing
         systems a separate risk assessment should be used.
       implementation_groups:
       - I
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at
       assessable: false
       depth: 2
@@ -2012,10 +2059,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-5
       ref_id: IMPORTANT_PR.DS-5.1
-      description: The organization shall take appropriate actions resulting in the
-        monitoring of its critical systems at external borders and critical internal
-        points when unauthorized access and activities, including data leakage, is
-        detected.
+      description: '[KEY MEASURE] The organization shall take appropriate actions
+        resulting in the monitoring of its critical systems at external borders and
+        critical internal points when unauthorized access and activities, including
+        data leakage, is detected.'
       annotation: "\u2022\tConsider implementing dedicated protection measures (restricted\
         \ access rights, daily backups, data encryption, installation of firewalls,\
         \ etc.) for the most sensitive data.\n\u2022\tConsider frequent audit of the\
@@ -2024,6 +2071,8 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6
       assessable: false
       depth: 3
@@ -2149,8 +2198,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1
       ref_id: IMPORTANT_PR.IP-1.1
-      description: 'The organization shall develop, document, and maintain a baseline
-        configuration for the its business critical systems. '
+      description: '[KEY MEASURE] The organization shall develop, document, and maintain
+        a baseline configuration for the its business critical systems. '
       annotation: "\u2022\tThis control includes the concept of least functionality.\n\
         \u2022\tBaseline configurations include for example, information about organization's\
         \ business critical systems, current version numbers and patch information\
@@ -2162,6 +2211,8 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1.2
       assessable: true
       depth: 4
@@ -2253,9 +2304,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4
       ref_id: BASIC_PR.IP-4.1
-      description: Backups for organization's business critical data shall be conducted
-        and stored on a system different from the device on which the original data
-        resides
+      description: '[KEY MEASURE] Backups for organization''s business critical data
+        shall be conducted and stored on a system different from the device on which
+        the original data resides'
       annotation: "\u2022\tOrganization's business critical system's data includes\
         \ for example software, configurations and settings, documentation, system\
         \ configuration data including computer configuration backups, application\
@@ -2269,6 +2320,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.2
       assessable: true
       depth: 4
@@ -2592,8 +2646,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1
       ref_id: BASIC_PR.MA-1.1
-      description: Patches and security updates for Operating Systems and critical
-        system components shall be installed.
+      description: '[KEY MEASURE] Patches and security updates for Operating Systems
+        and critical system components shall be installed.'
       annotation: "The following should be considered:\n\u2022\tLimit yourself to\
         \ only install those applications (operating systems, firmware, or plugins\
         \ ) that you need to run your business and patch/update them regularly.\n\u2022\
@@ -2608,6 +2662,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.2
       assessable: true
       depth: 4
@@ -2655,33 +2712,38 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1
       ref_id: PR.MA-1.5
-      description: The organization shall prevent the unauthorized removal of maintenance
-        equipment containing organization's critical system information.
+      description: '[KEY MEASURE] The organization shall prevent the unauthorized
+        removal of maintenance equipment containing organization''s critical system
+        information.'
       annotation: This requirement maily focuses mainly on OT/ICS environments.
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.6
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1
       ref_id: PR.MA-1.6
-      description: 'Maintenance tools and portable storage devices shall be inspected
-        when  brought into the facility and shall be protected by anti-malware solutions
-        so that they are scanned for malicious code before they are used on organization''s
-        systems. '
+      description: '[KEY MEASURE] Maintenance tools and portable storage devices shall
+        be inspected when  brought into the facility and shall be protected by anti-malware
+        solutions so that they are scanned for malicious code before they are used
+        on organization''s systems. '
       annotation: No additional guidance on this topic.
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.7
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1
       ref_id: PR.MA-1.7
-      description: The organization shall verify security controls following hardware
-        and software maintenance or repairs/patching and take action as appropriate.
+      description: '[KEY MEASURE] The organization shall verify security controls
+        following hardware and software maintenance or repairs/patching and take action
+        as appropriate.'
       annotation: No additional guidance on this topic.
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-2
       assessable: false
       depth: 3
@@ -2745,7 +2807,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1
       ref_id: BASIC_PR.PT-1.1
-      description: ' Logs shall be maintained, documented, and reviewed.'
+      description: '[KEY MEASURE]  Logs shall be maintained, documented, and reviewed.'
       annotation: "\u2022\tEnsure the activity logging functionality of protection\
         \ / detection hardware or software (e.g. firewalls, anti-virus) is enabled.\n\
         \u2022\tLogs should be backed up and saved for a predefined period.\n\u2022\
@@ -2757,6 +2819,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-1.2
       assessable: true
       depth: 4
@@ -2825,13 +2890,14 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-2
       ref_id: PR.PT-2.3
-      description: Portable storage devices containing system data shall be controlled
-        and protected while in transit and in storage.
+      description: '[KEY MEASURE] Portable storage devices containing system data
+        shall be controlled and protected while in transit and in storage.'
       annotation: Protection and control should include the scanning of all portable
         storage devices for malicious code before they are used on organization's
         systems.
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3
       assessable: false
       depth: 3
@@ -2949,9 +3015,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-1
       ref_id: DE.AE-1.1
-      description: The organization shall ensure that a baseline of network operations
-        and expected data flows for its critical systems is developed, documented
-        and maintained to track events.
+      description: '[KEY MEASURE] The organization shall ensure that a baseline of
+        network operations and expected data flows for its critical systems is developed,
+        documented and maintained to track events.'
       annotation: "\u2022\tConsider enabling local logging on all your systems and\
         \ network devices and keep them for a certain period, for example up to 6\
         \ months.\n\u2022\tEnsure that your logs contain enough information (source,\
@@ -2961,6 +3027,7 @@ objects:
         \ facilitate the correlation and analysis of your data."
       implementation_groups:
       - E
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-2
       assessable: false
       depth: 3
@@ -3001,9 +3068,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-3
       ref_id: BASIC_DE.AE-3.1
-      description: "The activity logging functionality of protection / detection hardware\
-        \ or software \n(e.g. firewalls, anti-virus) shall be enabled, backed-up and\
-        \ reviewed."
+      description: "[KEY MEASURE] The activity logging functionality of protection\
+        \ / detection hardware or software \n(e.g. firewalls, anti-virus) shall be\
+        \ enabled, backed-up and reviewed."
       annotation: "\u2022\tLogs should be backed up and saved for a predefined period.\n\
         \u2022\tThe logs should be reviewed for any unusual or unwanted trends, such\
         \ as a large use of social media websites or an unusual number of viruses\
@@ -3014,6 +3081,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-3.2
       assessable: true
       depth: 4
@@ -3118,9 +3188,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-1
       ref_id: IMPORTANT_DE.CM-1.2
-      description: The organization shall monitor and identify unauthorized use of
-        its business critical systems through the detection of unauthorized local
-        connections, network connections and remote connections.
+      description: '[KEY MEASURE] The organization shall monitor and identify unauthorized
+        use of its business critical systems through the detection of unauthorized
+        local connections, network connections and remote connections.'
       annotation: "\u2022\tMonitoring of network communications should happen at the\
         \ external boundary of the organization's business critical systems and at\
         \ key internal boundaries within the systems.\n\u2022\tWhen hosting internet\
@@ -3129,6 +3199,8 @@ objects:
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-1.3
       assessable: true
       depth: 4
@@ -3233,8 +3305,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-4
       ref_id: BASIC_DE.CM-4.1
-      description: Anti-virus, -spyware, and other -malware programs shall be installed
-        and updated.
+      description: '[KEY MEASURE] Anti-virus, -spyware, and other -malware programs
+        shall be installed and updated.'
       annotation: "\u2022\tMalware includes viruses, spyware, and ransomware and should\
         \ be countered by installing, using, and regularly updating anti-virus and\
         \ anti-spyware software on every device used in company\u2019s business (including\
@@ -3248,6 +3320,9 @@ objects:
       - B
       - I
       - E
+      - BK
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-4.2
       assessable: true
       depth: 4
@@ -3781,14 +3856,16 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-5
       ref_id: IMPORTANT_RS.AN-5.1
-      description: 'The organization shall implement vulnerability management processes
-        and procedures that include processing, analyzing and remedying vulnerabilities
-        from internal and external sources. '
+      description: '[KEY MEASURE] The organization shall implement vulnerability management
+        processes and procedures that include processing, analyzing and remedying
+        vulnerabilities from internal and external sources. '
       annotation: Internal and external sources could be e.g. internal testing, security
         bulletins, or security researchers.
       implementation_groups:
       - I
       - E
+      - IK
+      - EK
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-5.2
       assessable: true
       depth: 4

@@ -110,8 +110,8 @@ RISK_SCENARIO_RESIDUAL_LEVEL2 = {
     "description": "acceptable risk",
     "hexcolor": "#00FF00",
 }
-RISK_SCENARIO_TREATMENT_STATUS = ("accept", "Accept")
-RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "Mitigate")
+RISK_SCENARIO_TREATMENT_STATUS = ("accept", "accept")
+RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "mitigate")
 RISK_SCENARIO_JUSTIFICATION = "Test justification"
 
 

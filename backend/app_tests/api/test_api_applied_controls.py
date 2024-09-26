@@ -16,6 +16,8 @@ APPLIED_CONTROL_EFFORT = ("L", "Large")
 APPLIED_CONTROL_EFFORT2 = ("M", "Medium")
 APPLIED_CONTROL_LINK = "https://example.com"
 APPLIED_CONTROL_ETA = "2024-01-01"
+APPLIED_CONTROL_COST = 24.42
+APPLIED_CONTROL_COST2 = 25.43
 
 
 @pytest.mark.django_db
@@ -104,6 +106,7 @@ class TestAppliedControlsAuthenticated:
                 "link": APPLIED_CONTROL_LINK,
                 "eta": APPLIED_CONTROL_ETA,
                 "effort": APPLIED_CONTROL_EFFORT[0],
+                "cost": APPLIED_CONTROL_COST,
                 "folder": test.folder,
             },
             {
@@ -135,6 +138,7 @@ class TestAppliedControlsAuthenticated:
                 "link": APPLIED_CONTROL_LINK,
                 "eta": APPLIED_CONTROL_ETA,
                 "effort": APPLIED_CONTROL_EFFORT[0],
+                "cost": APPLIED_CONTROL_COST,
                 "folder": str(test.folder.id),
             },
             {
@@ -167,6 +171,7 @@ class TestAppliedControlsAuthenticated:
                 "link": APPLIED_CONTROL_LINK,
                 "eta": APPLIED_CONTROL_ETA,
                 "effort": APPLIED_CONTROL_EFFORT[0],
+                "cost": APPLIED_CONTROL_COST,
                 "folder": test.folder,
             },
             {
@@ -177,6 +182,7 @@ class TestAppliedControlsAuthenticated:
                 "link": "new " + APPLIED_CONTROL_LINK,
                 "eta": "2025-01-01",
                 "effort": APPLIED_CONTROL_EFFORT2[0],
+                "cost": APPLIED_CONTROL_COST2,
                 "folder": str(folder.id),
             },
             {

@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching buld info');
+		error(400, 'Error fetching build info');
 	}
 
 	const build: BuildInfo = await res.json();

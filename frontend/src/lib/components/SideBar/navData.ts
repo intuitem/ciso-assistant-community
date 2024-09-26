@@ -30,12 +30,7 @@ export const navData = {
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
-					permissions: [
-						'view_appliedcontrol',
-						'view_riskacceptance',
-						'view_riskassessment',
-						'view_complianceassessment'
-					]
+					permissions: ['view_appliedcontrol', 'view_riskacceptance', 'view_riskassessment']
 				}
 			]
 		},
@@ -156,7 +151,31 @@ export const navData = {
 				}
 			]
 		},
-
+		{
+			name: 'thirdParty',
+			items: [
+				{
+					name: 'entities',
+					fa_icon: 'fa-solid fa-building',
+					href: '/entities'
+				},
+				{
+					name: 'entityAssessments',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/entity-assessments'
+				},
+				{
+					name: 'representatives',
+					fa_icon: 'fa-solid fa-user-tie',
+					href: '/representatives'
+				},
+				{
+					name: 'solutions',
+					fa_icon: 'fa-solid fa-box',
+					href: '/solutions'
+				}
+			]
+		},
 		{
 			name: 'extra',
 			items: [
@@ -164,6 +183,12 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
+					permissions: ['view_riskassessment', 'view_assessment']
+				},
+				{
+					name: 'inspect',
+					fa_icon: 'fa-brands fa-searchengin',
+					href: '/x-rays/inspect',
 					permissions: ['view_riskassessment', 'view_assessment']
 				},
 				{
