@@ -362,7 +362,7 @@
 								<span class="flex flex-row justify-end items-center space-x-2">
 									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
 										<button
-											class="btn text-gray-100 bg-gradient-to-l from-pink-500 to-tertiary-500 h-fit whitespace-normal"
+											class="btn text-gray-100 bg-gradient-to-l from-tertiary-400 to-orange-600 h-fit whitespace-normal"
 											on:click={(e) => {
 												e.preventDefault();
 												createAppliedControlsFromSuggestions();
