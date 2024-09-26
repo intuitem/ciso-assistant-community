@@ -13,7 +13,7 @@ if (Test-Path "db/ciso-assistant.sqlite3") {
     Write-Output "Giving some time for the database to be ready, please wait ..."
     Start-Sleep -Seconds 20
     Write-Output "Initialize your superuser account..."
-    docker-compose exec backend python manage.py createsuperuser
+    docker-compose exec backend poetry run python manage.py createsuperuser
     Write-Output "Connect to CISO Assistant on https://localhost:8443"
     Write-Output "For successive runs, you can now use docker-compose up."
 }
