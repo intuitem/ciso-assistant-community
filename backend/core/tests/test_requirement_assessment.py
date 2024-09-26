@@ -45,11 +45,27 @@ class TestRequirementAssessment:
 
         for requirement_assessment in requirement_assessments:
             requirement_assessment.create_applied_controls_from_suggestions()
-            if len(requirement_assessment.requirement.reference_controls.all()) > 0:
-                assert requirement_assessment.applied_controls.all() is not None
-                assert len(requirement_assessment.applied_controls.all()) > 0
-                for control in requirement_assessment.applied_controls.all():
-                    assert (
-                        control.reference_control
-                        in requirement_assessment.requirement.reference_controls.all()
-                    )
+
+            if len(requirement_assessment.requirement.reference_controls.all()) == 0:
+                assert requirement_assessment.applied_controls.all().count() == 0
+                return
+
+            assert requirement_assessment.applied_controls.all() is not None
+            assert len(requirement_assessment.applied_controls.all()) > 0
+            for control in requirement_assessment.applied_controls.all():
+                assert (
+                    control.reference_control
+                    in requirement_assessment.requirement.reference_controls.all()
+                )
+
+            # NOTE: running create_applied_controls_from_suggestions agani MUST not create
+            # any new applied control.
+
+            applied_controls_count: int = (
+                requirement_assessment.applied_controls.all().count()
+            )
+            requirement_assessment.create_applied_controls_from_suggestions()
+            assert (
+                requirement_assessment.applied_controls.all().count()
+                == applied_controls_count
+            )
