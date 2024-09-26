@@ -1,7 +1,11 @@
-from iam.sso.views import SSOSettingsViewSet
 from .views import *
+from tprm.views import (
+    EntityViewSet,
+    RepresentativeViewSet,
+    SolutionViewSet,
+    EntityAssessmentViewSet,
+)
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
-from iam.sso.saml.views import FinishACSView
 import importlib
 
 
@@ -13,6 +17,12 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(r"entities", EntityViewSet, basename="entities")
+router.register(
+    r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
+)
+router.register(r"solutions", SolutionViewSet, basename="solutions")
+router.register(r"representatives", RepresentativeViewSet, basename="representatives")
 router.register(r"projects", ProjectViewSet, basename="projects")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
@@ -52,6 +62,7 @@ router.register(
 )
 
 ROUTES = settings.ROUTES
+MODULES = settings.MODULES.values()
 
 for route in ROUTES:
     view_module = importlib.import_module(ROUTES[route]["viewset"].rsplit(".", 1)[0])
@@ -68,7 +79,6 @@ urlpatterns = [
     path("settings/", include("global_settings.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
-    path("license/", license, name="license"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
@@ -81,6 +91,10 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
 ]
+
+# Additional modules take precedence over the default modules
+for index, module in enumerate(MODULES):
+    urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
 if DEBUG:
     # Browsable API is only available in DEBUG mode

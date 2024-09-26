@@ -18,7 +18,9 @@
 		dutch: m.dutch(),
 		italian: m.italian(),
 		polish: m.polish(),
-		romanian: m.romanian()
+		romanian: m.romanian(),
+		hindi: m.hindi(),
+		urdu: m.urdu()
 	};
 
 	const modalStore = getModalStore();
@@ -33,7 +35,9 @@
 		de: 'Deutsch',
 		it: 'Italiano',
 		pl: 'Polski',
-		ro: 'Română'
+		ro: 'Română',
+		hi: 'हिंदी',
+		ur: 'اردو'
 	};
 
 	let value = languageTag();
@@ -54,13 +58,12 @@
 	};
 
 	async function modalBuildInfo() {
-		const res = await fetch('/api/build');
-		const { version, build } = await res.json();
+		const res = await fetch('/api/build').then((res) => res.json());
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'displayJSONModal',
 			title: 'About CISO Assistant',
-			body: JSON.stringify({ version, build })
+			body: JSON.stringify(res)
 		};
 		modalStore.trigger(modal);
 	}

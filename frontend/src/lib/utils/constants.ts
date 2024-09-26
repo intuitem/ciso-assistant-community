@@ -1,13 +1,13 @@
 import { env } from '$env/dynamic/public';
 
 export const BASE_API_URL = `${
-	env.hasOwnProperty('PUBLIC_BACKEND_API_URL')
+	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
 		? env.PUBLIC_BACKEND_API_URL
 		: 'http://localhost:8000/api'
 }`;
 
 export const BACKEND_API_EXPOSED_URL = `${
-	env.hasOwnProperty('PUBLIC_BACKEND_API_EXPOSED_URL')
+	Object.hasOwn(env, 'PUBLIC_BACKEND_API_EXPOSED_URL')
 		? env.PUBLIC_BACKEND_API_EXPOSED_URL
 		: BASE_API_URL
 }`;
@@ -22,11 +22,26 @@ export const complianceResultColorMap: { [key: string]: string } = {
 	compliant: '#86efac'
 };
 
+export const complianceResultTailwindColorMap: { [key: string]: string } = {
+	not_assessed: 'bg-gray-300',
+	partially_compliant: 'bg-yellow-300',
+	non_compliant: 'bg-red-300',
+	not_applicable: 'bg-black text-white',
+	compliant: 'bg-green-300'
+};
+
 export const complianceStatusColorMap = {
 	to_do: '#9ca3af',
 	in_progress: '#f59e0b',
 	in_review: '#3b82f6',
 	done: '#86efac'
+};
+
+export const complianceStatusTailwindColorMap = {
+	to_do: 'bg-gray-400',
+	in_progress: 'bg-amber-500',
+	in_review: 'bg-blue-500',
+	done: 'bg-green-300'
 };
 
 export const MONTH_LIST = [
