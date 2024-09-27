@@ -135,7 +135,7 @@
 	<Checkbox
 		{form}
 		field="create_applied_controls_from_suggestions"
-		label={m.createAppliedControlsFromSuggestions()}
+		label={m.suggestControls()}
 		helpText={m.createAppliedControlsFromSuggestionsHelpText()}
 		cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
 		bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
