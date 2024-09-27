@@ -27,6 +27,8 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from iam.models import Folder
 
+from .fixtures import *
+
 
 User = get_user_model()
 
