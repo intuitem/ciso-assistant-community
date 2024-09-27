@@ -19,7 +19,12 @@
 	export let formAction: string;
 	import { superForm } from 'sveltekit-superforms';
 
-	const { form /*, message*/, enhance } = superForm(_form);
+	import SuperForm from '$lib/components/Forms/Form.svelte';
+
+	const { form, enhance } = superForm(_form, {
+		dataType: 'json',
+		id: 'confirm-modal-form'
+	});
 
 	// Base Classes
 	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
@@ -35,15 +40,15 @@
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 		<!-- Enable for debugging: -->
-		<form method="POST" action={formAction} class="modal-form {cForm}" use:enhance>
+		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-        <button class="btn variant-filled-error" type="submit" on:click={parent.onClose}>{m.submit()}</button>
-    </footer>
-		</form>
+        <button class="btn variant-filled-error" type="submit" on:click={parent.onConfirm}>{m.submit()}</button>
+      </footer>
+		</SuperForm>
 		{#if debug === true}
 			<SuperDebug data={$form} />
 		{/if}

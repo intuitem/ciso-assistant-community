@@ -11,7 +11,7 @@
 		TreeViewNode
 	} from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
@@ -23,10 +23,12 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
-	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
+	export let form: ActionData;
+
 	breadcrumbObject.set(data.compliance_assessment);
 	const tree = data.tree;
 
@@ -106,10 +108,10 @@
 
 	let expandedNodes: TreeViewNode[] = [];
 
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import { expandedNodesState } from '$lib/utils/stores';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
-	import { superForm } from 'sveltekit-superforms';
+	import { expandedNodesState } from '$lib/utils/stores';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
@@ -121,40 +123,6 @@
 	};
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
-	let { form: createForm, message: createMessage } = {
-		form: {},
-		message: {}
-	};
-
-	$: {
-		({ form: createForm, message: createMessage } = superForm(data.auditCreateForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-	}
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -175,28 +143,33 @@
 		modalStore.trigger(modal);
 	}
 
-	$: createAppliedControlsLoading = false;
+	let createAppliedControlsLoading = false;
 
-	async function createAppliedControlsFromSuggestions() {
-		createAppliedControlsLoading = true;
-		const response = await fetch(
-			`/compliance-assessments/${data.compliance_assessment.id}/suggestions/applied-controls`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				}
+	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'compliance-assessments',
+				formAction: action
 			}
-		);
-		createAppliedControlsLoading = false;
-		toastStore.trigger({
-			message: response.ok
-				? m.createAppliedControlsFromSuggestionsSuccess()
-				: m.createAppliedControlsFromSuggestionsError(),
-			background: response.ok ? 'variant-filled-success' : 'variant-filled-error'
-		});
-		return;
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`,
+			response: (r: boolean) => {
+				createAppliedControlsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
 	}
+
+	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -362,14 +335,20 @@
 			{#if !$page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
-					on:click={(_) => modalCreateForm()}
+					on:click={() => modalCreateForm()}
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
 				</button>
 			{/if}
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
 				<button
 					class="btn text-gray-100 bg-gradient-to-l from-tertiary-400 to-orange-600 h-fit whitespace-normal"
-					on:click={(_) => createAppliedControlsFromSuggestions()}
+					on:click={() => {
+						modalConfirmCreateSuggestedControls(
+							data.compliance_assessment.id,
+							data.compliance_assessment.name,
+							'?/createSuggestedControls'
+						);
+					}}
 				>
 					<span class="mr-2">
 						{#if createAppliedControlsLoading}
