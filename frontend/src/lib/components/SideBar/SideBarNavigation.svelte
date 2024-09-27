@@ -27,10 +27,8 @@
 		.map((item) => {
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
-				if (subItem.exclude){
-					return subItem.exclude.some((role) =>
-						!user.roles.includes(role)
-					);
+				if (subItem.exclude) {
+					return subItem.exclude.some((role) => !user.roles.includes(role));
 				} else if (subItem.permissions) {
 					return subItem.permissions.some((permission) =>
 						Object.hasOwn(user.permissions, permission)
