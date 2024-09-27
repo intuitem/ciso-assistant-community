@@ -21,9 +21,9 @@
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
-	const { form, enhance } = superForm(_form, {
+	const { form } = superForm(_form, {
 		dataType: 'json',
-		id: 'confirm-modal-form'
+		id: `confirm-modal-form-${crypto.randomUUID()}`
 	});
 
 	// Base Classes
