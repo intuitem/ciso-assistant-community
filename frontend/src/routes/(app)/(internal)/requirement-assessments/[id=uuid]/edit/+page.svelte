@@ -47,6 +47,7 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import List from '$lib/components/List/List.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -140,15 +141,23 @@
 				id: id,
 				debug: false,
 				URLModel: 'requirement-assessments',
-				formAction: action
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: reference_controls,
+					message: m.theFollowingControlsWillBeAddedColon()
+				}
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.confirmModalTitle(),
-			body: `${m.confirmModalMessage()}: ${name}?`,
+			title: m.suggestControls(),
+			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
+				count: reference_controls.length,
+				message: m.theFollowingControlsWillBeAddedColon()
+			}),
 			response: (r: boolean) => {
 				createAppliedControlsLoading = r;
 			}
