@@ -17,6 +17,9 @@
 	export let URLModel: urlModel;
 	export let id: string;
 	export let formAction: string;
+	export let bodyComponent: ComponentType | undefined;
+	export let bodyProps: Record<string, unknown> = {};
+
 	import { superForm } from 'sveltekit-superforms';
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -32,6 +35,7 @@
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
 	import SuperDebug from 'sveltekit-superforms';
+	import type { ComponentType } from 'svelte';
 	export let debug = false;
 </script>
 
@@ -39,6 +43,11 @@
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
+		{#if bodyComponent}
+			<div class="max-h-96 overflow-y-scroll scroll card">
+				<svelte:component this={bodyComponent} {...bodyProps} />
+			</div>
+		{/if}
 		<!-- Enable for debugging: -->
 		<SuperForm dataType="json" action={formAction} data={_form} class="modal-form {cForm}">
 			<!-- prettier-ignore -->
