@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { assessableNode } from './store.ts';
+	import { displayOnlyAssessableNodes } from './store';
 
 	import type {
 		ModalComponent,
@@ -73,7 +73,7 @@
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = !(!$assessableNode || node.assessable || hasAssessableChildren);
+			const hidden = !(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren);
 
 			return {
 				id: id,
@@ -364,7 +364,7 @@
 			</h4>
 
 			<div class="flex items-center justify-center space-x-4">
-				{#if $assessableNode}
+				{#if $displayOnlyAssessableNodes}
 					<p class="font-bold text-sm">{m.ShowAllNodesMessage()}</p>
 				{:else}
 					<p class="font-bold text-sm text-green-500">{m.ShowAllNodesMessage()}</p>
@@ -374,10 +374,10 @@
 					class="flex flex-row items-center justify-center"
 					active="bg-primary-500"
 					background="bg-green-500"
-					bind:checked={$assessableNode}
-					on:click={() => ($assessableNode = !$assessableNode)}
+					bind:checked={$displayOnlyAssessableNodes}
+					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
 				>
-					{#if $assessableNode}
+					{#if $displayOnlyAssessableNodes}
 						<p class="font-bold text-sm text-primary-500">{m.ShowOnlyAssessable()}</p>
 					{:else}
 						<p class="font-bold text-sm">{m.ShowOnlyAssessable()}</p>
@@ -388,7 +388,7 @@
 				<i class="fa-solid fa-diagram-project" />
 				<p>{m.mappingInferenceTip()}</p>
 			</div>
-			{#key $assessableNode}
+			{#key $displayOnlyAssessableNodes}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
