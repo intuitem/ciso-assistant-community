@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
-	import type { PageData } from '../[id=uuid]/edit/$types';
+	import type { ActionData, PageData } from './$types';
 
 	export let data: PageData;
+	export let form: ActionData;
+
 	const threats = data.requirement.threats;
 	const reference_controls = data.requirement.reference_controls;
 	const annotation = data.requirement.annotation;
@@ -24,6 +26,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
+		ProgressRadial,
 		Tab,
 		TabGroup,
 		getModalStore,
@@ -31,8 +34,7 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore,
-		type ToastStore,
-		ProgressRadial
+		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms';
 
@@ -41,10 +43,10 @@
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
+	import Question from '$lib/components/Forms/Question.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import { invalidateAll } from '$app/navigation';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -128,28 +130,33 @@
 		}
 	}
 
-	$: createAppliedControlsLoading = false;
+	let createAppliedControlsLoading = false;
 
-	async function createAppliedControlsFromSuggestions() {
-		createAppliedControlsLoading = true;
-		const response = await fetch(
-			`/requirement-assessments/${data.requirementAssessment.id}/suggestions/applied-controls`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				}
+	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'requirement-assessments',
+				formAction: action
 			}
-		);
-		createAppliedControlsLoading = false;
-		toastStore.trigger({
-			message: response.ok
-				? m.createAppliedControlsFromSuggestionsSuccess()
-				: m.createAppliedControlsFromSuggestionsError(),
-			background: response.ok ? 'variant-filled-success' : 'variant-filled-error'
-		});
-		invalidateAll();
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`,
+			response: (r: boolean) => {
+				createAppliedControlsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
 	}
+
+	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 
 	let { form: measureCreateForm, message: measureCreateMessage } = {
 		form: {},
@@ -368,9 +375,13 @@
 									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 										<button
 											class="btn text-gray-100 bg-gradient-to-l from-tertiary-400 to-orange-600 h-fit whitespace-normal"
-											on:click={(e) => {
-												e.preventDefault();
-												createAppliedControlsFromSuggestions();
+											type="button"
+											on:click={() => {
+												modalConfirmCreateSuggestedControls(
+													data.requirementAssessment.id,
+													data.requirementAssessment.name,
+													'?/createSuggestedControls'
+												);
 											}}
 										>
 											<span class="mr-2">
