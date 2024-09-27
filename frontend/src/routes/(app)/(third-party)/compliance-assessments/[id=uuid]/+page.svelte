@@ -112,6 +112,7 @@
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { expandedNodesState } from '$lib/utils/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import List from '$lib/components/List/List.svelte';
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
@@ -153,15 +154,22 @@
 				id: id,
 				debug: false,
 				URLModel: 'compliance-assessments',
-				formAction: action
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: data.compliance_assessment.framework.reference_controls,
+					message: m.theFollowingControlsWillBeAddedColon()
+				}
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.confirmModalTitle(),
-			body: `${m.confirmModalMessage()}: ${name}?`,
+			title: m.suggestControls(),
+			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
+				count: data.compliance_assessment.framework.reference_controls.length
+			}),
 			response: (r: boolean) => {
 				createAppliedControlsLoading = r;
 			}
