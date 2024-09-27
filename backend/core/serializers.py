@@ -541,7 +541,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
+        [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
