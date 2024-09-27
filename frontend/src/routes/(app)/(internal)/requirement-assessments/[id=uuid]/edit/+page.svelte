@@ -396,7 +396,7 @@
 													<i class="fa-solid fa-fire-extinguisher" />
 												{/if}
 											</span>
-											{m.createAppliedControlsFromSuggestions()}
+											{m.suggestControls()}
 										</button>
 									{/if}
 									<button
