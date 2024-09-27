@@ -1,2 +1,2 @@
 import { writable } from 'svelte/store';
-export const assessableNode = writable(true);
+export const displayOnlyAssessableNodes = writable(false);

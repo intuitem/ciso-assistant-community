@@ -7,7 +7,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
-	import { assessableNode } from './store.ts';
+	import { displayOnlyAssessableNodes } from './store';
 
 	export let ref_id: string;
 	export let name: string;
@@ -102,7 +102,7 @@
 	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
 </script>
 
-{#if !$assessableNode || assessable || hasAssessableChildren}
+{#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
 			<div class="flex flex-row space-x-2" style="font-weight: 300;">
