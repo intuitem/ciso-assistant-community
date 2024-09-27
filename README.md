@@ -164,7 +164,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 8. New Zealand Information Security Manual (NZISM) 🇳🇿
    <br/>
 
-> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
