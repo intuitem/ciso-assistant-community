@@ -469,6 +469,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_user_groups(self):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
         return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
+    
+    def get_roles(self):
+        """get the list of roles attached to the user"""
+        return list(self.user_groups.all()
+                .values_list('roleassignment__role__name', flat=True)
+                .distinct())
 
     @property
     def has_backup_permission(self) -> bool:
@@ -655,7 +661,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in [
             x
             for x in RoleAssignment.get_role_assignments(user)
-            if ref_permission in x.role.permissions.all() or user.is_third_party
+            if ref_permission in x.role.permissions.all()
         ]:
             ra_permissions = ra.role.permissions.all()
             for my_folder in perimeter & set(ra.perimeter_folders.all()):
