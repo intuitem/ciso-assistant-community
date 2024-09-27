@@ -289,7 +289,7 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "add_evidence",
     "change_evidence",
     "delete_evidence",
-    "view_folder"
+    "view_folder",
 ]
 
 
