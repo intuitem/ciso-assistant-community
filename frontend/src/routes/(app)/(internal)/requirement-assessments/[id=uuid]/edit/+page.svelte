@@ -383,7 +383,7 @@
 								<span class="flex flex-row justify-end items-center space-x-2">
 									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 										<button
-											class="btn text-gray-100 bg-gradient-to-l from-tertiary-400 to-orange-600 h-fit whitespace-normal"
+											class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 											type="button"
 											on:click={() => {
 												modalConfirmCreateSuggestedControls(
