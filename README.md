@@ -151,6 +151,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
+58. Adobe Common Controls Framework (CCF) 🌐
 
 ### Community contributions
 
@@ -162,7 +163,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
 7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 8. New Zealand Information Security Manual (NZISM) 🇳🇿
-   <br/>
+
+<br/>
 
 > [!NOTE]
 > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
