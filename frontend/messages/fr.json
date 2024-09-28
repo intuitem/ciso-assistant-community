@@ -675,9 +675,9 @@
 	"xRaysEmptyMessage": "Vous devez créer au moins un projet pour utiliser X-rays.",
 	"NoPreviewMessage": "Aucun aperçu disponible.",
 	"suggestControls": "Mesures recommendées",
-  "createAppliedControlsFromSuggestionsHelpText": "Créer des mesures appliquées à partir des mesures de référence suggérées",
-  "createAppliedControlsFromSuggestionsSuccess": "Mesures appliquées créées avec succès à partir des suggestions",
-  "createAppliedControlsFromSuggestionsError": "Une erreur s'est produite lors de la création des mesures appliquées depuis les suggestions",
-  "createAppliedControlsFromSuggestionsConfirmMessage": "{count} mesures appliquées seront créées à partir des suggestions. Voulez-vous continuer ?",
-  "theFollowingControlsWillBeAddedColon": "Les mesures suivantes seront appliquées :",
+	"createAppliedControlsFromSuggestionsHelpText": "Créer des mesures appliquées à partir des mesures de référence suggérées",
+	"createAppliedControlsFromSuggestionsSuccess": "Mesures appliquées créées avec succès à partir des suggestions",
+	"createAppliedControlsFromSuggestionsError": "Une erreur s'est produite lors de la création des mesures appliquées depuis les suggestions",
+	"createAppliedControlsFromSuggestionsConfirmMessage": "{count} mesures appliquées seront créées à partir des suggestions. Voulez-vous continuer ?",
+	"theFollowingControlsWillBeAddedColon": "Les mesures suivantes seront appliquées :"
 }
