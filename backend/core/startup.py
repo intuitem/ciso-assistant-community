@@ -153,6 +153,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_threat",
     "delete_threat",
     "view_referencecontrol",
+    "change_referencecontrol",
+    "delete_referencecontrol",
     "view_folder",
     "change_folder",
     "add_riskmatrix",
@@ -176,9 +178,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_user",
     "view_requirementmappingset",
     "view_requirementmapping",
-    "view_referencecontrol",
-    "change_referencecontrol",
-    "delete_referencecontrol",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
