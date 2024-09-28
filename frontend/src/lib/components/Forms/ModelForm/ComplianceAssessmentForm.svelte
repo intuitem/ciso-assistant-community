@@ -7,6 +7,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import Checkbox from '../Checkbox.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -130,3 +131,13 @@
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
 />
+{#if context === 'create'}
+	<Checkbox
+		{form}
+		field="create_applied_controls_from_suggestions"
+		label={m.suggestControls()}
+		helpText={m.createAppliedControlsFromSuggestionsHelpText()}
+		cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
+		bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+	/>
+{/if}

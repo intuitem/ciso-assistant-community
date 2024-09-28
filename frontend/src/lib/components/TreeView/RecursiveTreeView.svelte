@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { createEventDispatcher, onMount, setContext } from 'svelte';
 
 	// Types
-	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton';
 	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
+	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton';
 
 	// Props (parent)
 	/** Enable tree-view selection. */
@@ -112,6 +112,11 @@
 
 	// Reactive
 	$: classesBase = `${width} ${spacing} ${$$props.class ?? ''}`;
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <div
@@ -122,7 +127,7 @@
 	aria-label={labelledby}
 	aria-disabled={disabled}
 >
-	{#if nodes && nodes.length > 0}
+	{#if mounted && nodes && nodes.length > 0}
 		<RecursiveTreeViewItem
 			{nodes}
 			bind:expandedNodes
@@ -132,5 +137,7 @@
 			on:click={onClick}
 			on:toggle={onToggle}
 		/>
+	{:else}
+		<div class="placeholder animate-pulse"></div>
 	{/if}
 </div>
