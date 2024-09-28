@@ -15,7 +15,7 @@
 
 	const breadcrumb_library_data = {
 		...data.library,
-		id: data.library.urn
+		id: data.library.id
 	};
 	$: breadcrumbObject.set(breadcrumb_library_data);
 
