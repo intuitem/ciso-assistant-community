@@ -14,6 +14,7 @@
 	const threats = data.requirement.threats;
 	const reference_controls = data.requirement.reference_controls;
 	const annotation = data.requirement.annotation;
+	const typical_evidence = data.requirement.typical_evidence;
 
 	const has_threats = threats && threats.length > 0;
 	const has_reference_controls = reference_controls && reference_controls.length > 0;
@@ -170,6 +171,17 @@
 						</p>
 						<p class="whitespace-pre-line py-1">
 							{annotation}
+						</p>
+					</div>
+				{/if}
+				{#if typical_evidence}
+					<div class="my-2">
+						<p class="font-medium">
+							<i class="fa-solid fa-pencil" />
+							{m.typicalEvidence()}
+						</p>
+						<p class="whitespace-pre-line py-1">
+							{typical_evidence}
 						</p>
 					</div>
 				{/if}
