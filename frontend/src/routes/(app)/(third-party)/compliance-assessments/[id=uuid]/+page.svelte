@@ -382,34 +382,34 @@
 	</div>
 	{#if !$page.data.user.is_third_party}
 		<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-			<h4 class="h4 flex items-center font-semibold">
-				{m.associatedRequirements()}
+			<div class=" flex items-center font-semibold">
+				<span class="h4">{m.associatedRequirements()}</span>
 				<span class="badge variant-soft-primary ml-1">
 					{assessableNodesCount(treeViewNodes)}
 				</span>
-			</h4>
-
-			<div class="flex items-center justify-center space-x-4">
-				{#if $displayOnlyAssessableNodes}
-					<p class="font-bold text-sm">{m.ShowAllNodesMessage()}</p>
-				{:else}
-					<p class="font-bold text-sm text-green-500">{m.ShowAllNodesMessage()}</p>
-				{/if}
-				<SlideToggle
-					name="questionnaireToggle"
-					class="flex flex-row items-center justify-center"
-					active="bg-primary-500"
-					background="bg-green-500"
-					bind:checked={$displayOnlyAssessableNodes}
-					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
-				>
+				<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
 					{#if $displayOnlyAssessableNodes}
-						<p class="font-bold text-sm text-primary-500">{m.ShowOnlyAssessable()}</p>
+						<p class="font-bold">{m.ShowAllNodesMessage()}</p>
 					{:else}
-						<p class="font-bold text-sm">{m.ShowOnlyAssessable()}</p>
+						<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
 					{/if}
-				</SlideToggle>
+					<SlideToggle
+						name="questionnaireToggle"
+						class="flex flex-row items-center justify-center"
+						active="bg-primary-500"
+						background="bg-green-500"
+						bind:checked={$displayOnlyAssessableNodes}
+						on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
+					>
+						{#if $displayOnlyAssessableNodes}
+							<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
+						{:else}
+							<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+						{/if}
+					</SlideToggle>
+				</div>
 			</div>
+
 			<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
 				<i class="fa-solid fa-diagram-project" />
 				<p>{m.mappingInferenceTip()}</p>
