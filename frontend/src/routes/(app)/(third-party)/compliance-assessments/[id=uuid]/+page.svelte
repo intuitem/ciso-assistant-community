@@ -2,6 +2,8 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import { displayOnlyAssessableNodes } from './store';
+
 	import type {
 		ModalComponent,
 		ModalSettings,
@@ -10,7 +12,8 @@
 		ToastStore,
 		TreeViewNode
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
+
+	import { getModalStore, getToastStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -72,10 +75,17 @@
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
+			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+			const hidden = !(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren);
+
 			return {
 				id: id,
 				content: TreeViewItemContent,
-				contentProps: { ...node, canEditRequirementAssessment },
+				contentProps: {
+					...node,
+					canEditRequirementAssessment,
+					hidden
+				},
 				lead: TreeViewItemLead,
 				leadProps: {
 					statusI18n: node.status_i18n,
@@ -91,7 +101,7 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
+	const treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -378,11 +388,39 @@
 					{assessableNodesCount(treeViewNodes)}
 				</span>
 			</h4>
+
+			<div class="flex items-center justify-center space-x-4">
+				{#if $displayOnlyAssessableNodes}
+					<p class="font-bold text-sm">{m.ShowAllNodesMessage()}</p>
+				{:else}
+					<p class="font-bold text-sm text-green-500">{m.ShowAllNodesMessage()}</p>
+				{/if}
+				<SlideToggle
+					name="questionnaireToggle"
+					class="flex flex-row items-center justify-center"
+					active="bg-primary-500"
+					background="bg-green-500"
+					bind:checked={$displayOnlyAssessableNodes}
+					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
+				>
+					{#if $displayOnlyAssessableNodes}
+						<p class="font-bold text-sm text-primary-500">{m.ShowOnlyAssessable()}</p>
+					{:else}
+						<p class="font-bold text-sm">{m.ShowOnlyAssessable()}</p>
+					{/if}
+				</SlideToggle>
+			</div>
 			<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
 				<i class="fa-solid fa-diagram-project" />
 				<p>{m.mappingInferenceTip()}</p>
 			</div>
-			<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
+			{#key $displayOnlyAssessableNodes}
+				<RecursiveTreeView
+					nodes={transformToTreeView(Object.entries(tree))}
+					bind:expandedNodes
+					hover="hover:bg-initial"
+				/>
+			{/key}
 		</div>
 	{/if}
 </div>

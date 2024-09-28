@@ -747,5 +747,7 @@
 	"createAppliedControlsFromSuggestionsError": "An error occured while creating applied controls from the suggested reference controls",
 	"createAppliedControlsFromSuggestionsConfirmMessage": "{count} applied controls will be created from the suggested reference controls. Do you want to proceed?",
 	"theFollowingControlsWillBeAddedColon": "The following controls will be added:",
+	"ShowAllNodesMessage": "Show all nodes",
+	"ShowOnlyAssessable": "Only assessable nodes",
 	"NoPreviewMessage": "No preview available."
 }
