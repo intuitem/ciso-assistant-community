@@ -26,6 +26,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/795e9d4203bf469dafcc45a9f3131d57)](https://app.codacy.com/gh/intuitem/ciso-assistant-community/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
