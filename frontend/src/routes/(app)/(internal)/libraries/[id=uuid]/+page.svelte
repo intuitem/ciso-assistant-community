@@ -138,11 +138,7 @@
 				<p class="text-md leading-5 text-gray-700">
 					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
-						<li>
-							<a href="/libraries/{dependency.urn}" target="_parent" class="anchor"
-								>{dependency.name}</a
-							>
-						</li>
+						<li>{dependency.name}</li>
 					{/each}
 				</p>
 			{/if}
