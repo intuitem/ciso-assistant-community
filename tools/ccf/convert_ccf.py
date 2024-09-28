@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("filename", help="name of Adobe CCF Excel file")
 args = parser.parse_args()
 input_file_name = args.filename
-output_file_name = "ccf-v5.xlsx"
+output_file_name = "adobe-ccf-v5.xlsx"
 
 library_copyright = """Creative Commons"""
 packager = "intuitem"
