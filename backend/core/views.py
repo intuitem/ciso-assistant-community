@@ -1,44 +1,37 @@
 import csv
-import importlib
 import mimetypes
 import re
 import tempfile
 import uuid
 import zipfile
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Any, Tuple
 from uuid import UUID
-from datetime import date, timedelta
 
 import django_filters as df
-from ciso_assistant.settings import (
-    BUILD,
-    VERSION,
-)
-
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie, vary_on_headers
-from django.core.cache import cache
-
+from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.core.cache import cache
 from django.core.files.storage import default_storage
 from django.db import models
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
+from django.utils.decorators import method_decorator
 from django.utils.functional import Promise
-from django.utils import translation
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import (
     action,
     api_view,
     permission_classes,
+    renderer_classes,
 )
 from rest_framework.parsers import FileUploadParser
+from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
@@ -46,20 +39,22 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
 from weasyprint import HTML
 
+from ciso_assistant.settings import (
+    BUILD,
+    VERSION,
+)
 from core.helpers import *
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
-    ReferentialObjectMixin,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
+from iam.models import Folder, RoleAssignment, User, UserGroup
 
 from .models import *
 from .serializers import *
-
-from django.conf import settings
 
 User = get_user_model()
 
@@ -1661,6 +1656,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         Create RequirementAssessment objects for the newly created ComplianceAssessment
         """
         baseline = serializer.validated_data.pop("baseline", None)
+        create_applied_controls = serializer.validated_data.pop(
+            "create_applied_controls_from_suggestions", False
+        )
         instance: ComplianceAssessment = serializer.save()
         instance.create_requirement_assessments(baseline)
         if baseline and baseline.framework != instance.framework:
@@ -1688,6 +1686,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ]
                 )
                 requirement_assessment.save()
+        if create_applied_controls:
+            for requirement_assessment in instance.requirement_assessments.all():
+                requirement_assessment.create_applied_controls_from_suggestions()
 
     @action(detail=False, name="Compliance assessments per status")
     def per_status(self, request):
@@ -1819,6 +1820,22 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
 
+    @staticmethod
+    @api_view(["POST"])
+    @renderer_classes([JSONRenderer])
+    def create_suggested_applied_controls(request, pk):
+        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_appliedcontrol"),
+            folder=compliance_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        requirement_assessments = compliance_assessment.requirement_assessments.all()
+        for requirement_assessment in requirement_assessments:
+            requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(status=status.HTTP_200_OK)
+
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
     """
@@ -1908,6 +1925,20 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
+
+    @staticmethod
+    @api_view(["POST"])
+    @renderer_classes([JSONRenderer])
+    def create_suggested_applied_controls(request, pk):
+        requirement_assessment = RequirementAssessment.objects.get(id=pk)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_appliedcontrol"),
+            folder=requirement_assessment.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(status=status.HTTP_200_OK)
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):

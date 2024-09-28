@@ -541,7 +541,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
+        [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
@@ -558,6 +565,9 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         queryset=ComplianceAssessment.objects.all(),
         required=False,
         allow_null=True,
+    )
+    create_applied_controls_from_suggestions = serializers.BooleanField(
+        write_only=True, required=False, default=False
     )
 
     def create(self, validated_data: Any):

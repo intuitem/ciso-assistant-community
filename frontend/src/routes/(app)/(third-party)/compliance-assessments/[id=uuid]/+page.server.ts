@@ -2,10 +2,13 @@ import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
-import { type Actions } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms';
+import { json, type Actions } from '@sveltejs/kit';
+import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
+import { z } from 'zod';
+import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
@@ -79,6 +82,8 @@ export const load = (async ({ fetch, params }) => {
 
 	auditModel.selectOptions = selectOptions;
 
+	const form = await superValidate(zod(z.object({ id: z.string().uuid() })));
+
 	return {
 		URLModel,
 		compliance_assessment,
@@ -87,12 +92,51 @@ export const load = (async ({ fetch, params }) => {
 		object,
 		tree,
 		compliance_assessment_donut_values,
-		global_score
+		global_score,
+		form
 	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
 	create: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
+	},
+	createSuggestedControls: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = z.object({ id: z.string().uuid() });
+		const form = await superValidate(formData, zod(schema));
+
+		const response = await event.fetch(
+			`/compliance-assessments/${event.params.id}/suggestions/applied-controls`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			}
+		);
+		if (response.ok) {
+			setFlash(
+				{
+					type: 'success',
+					message: m.createAppliedControlsFromSuggestionsSuccess()
+				},
+				event
+			);
+		} else {
+			setFlash(
+				{
+					type: 'error',
+					message: m.createAppliedControlsFromSuggestionsError()
+				},
+				event
+			);
+		}
+		return { form };
 	}
 };

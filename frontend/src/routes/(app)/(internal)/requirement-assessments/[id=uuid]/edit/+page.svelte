@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
-	import type { PageData } from '../[id=uuid]/edit/$types';
+	import type { ActionData, PageData } from './$types';
 
 	export let data: PageData;
+	export let form: ActionData;
+
 	const threats = data.requirement.threats;
 	const reference_controls = data.requirement.reference_controls;
 	const annotation = data.requirement.annotation;
@@ -25,6 +27,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import {
+		ProgressRadial,
 		Tab,
 		TabGroup,
 		getModalStore,
@@ -41,9 +44,11 @@
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
+	import Question from '$lib/components/Forms/Question.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getRequirementTitle } from '$lib/utils/helpers';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import Question from '$lib/components/Forms/Question.svelte';
+	import List from '$lib/components/List/List.svelte';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -126,6 +131,42 @@
 			toastStore.trigger(toast);
 		}
 	}
+
+	let createAppliedControlsLoading = false;
+
+	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'requirement-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: reference_controls,
+					message: m.theFollowingControlsWillBeAddedColon()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.suggestControls(),
+			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
+				count: reference_controls.length,
+				message: m.theFollowingControlsWillBeAddedColon()
+			}),
+			response: (r: boolean) => {
+				createAppliedControlsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
+	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 
 	let { form: measureCreateForm, message: measureCreateMessage } = {
 		form: {},
@@ -351,7 +392,34 @@
 							<div
 								class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 							>
-								<span class="flex flex-row justify-end items-center">
+								<span class="flex flex-row justify-end items-center space-x-2">
+									{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
+										<button
+											class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+											type="button"
+											on:click={() => {
+												modalConfirmCreateSuggestedControls(
+													data.requirementAssessment.id,
+													data.requirementAssessment.name,
+													'?/createSuggestedControls'
+												);
+											}}
+										>
+											<span class="mr-2">
+												{#if createAppliedControlsLoading}
+													<ProgressRadial
+														class="-ml-2"
+														width="w-6"
+														meter="stroke-white"
+														stroke={80}
+													/>
+												{:else}
+													<i class="fa-solid fa-fire-extinguisher" />
+												{/if}
+											</span>
+											{m.suggestControls()}
+										</button>
+									{/if}
 									<button
 										class="btn variant-filled-primary self-end"
 										on:click={modalMeasureCreateForm}
