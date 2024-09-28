@@ -14,8 +14,10 @@ auth_data = dict()
 API_URL = ""
 GLOBAL_FOLDER_ID = None
 TOKEN = ""
-USERNAME = ""
+EMAIL = ""
 PASSWORD = ""
+
+CLICA_CONFG_PATH = ".clica_config.yaml"
 
 
 @click.group()
@@ -25,29 +27,32 @@ def cli():
 
 
 @click.command()
-def init():
-    """Create/Reset the config file"""
+def init_config():
+    """Create/Reset the config file."""
     template_data = {
         "rest": {"url": "http://localhost:8000/api"},
-        "credentials": {"username": "user@company.org", "password": ""},
+        "credentials": {"email": "user@company.org", "password": ""},
     }
     if click.confirm(
-        "This will create a config.yaml file for you to fill and will RESET any exisiting one. Do you wish to continue?"
+        f"This will create {CLICA_CONFG_PATH} for you to fill and will RESET any exisiting one. Do you wish to continue?"
     ):
-        with open("config.yaml", "w") as yfile:
+        with open(CLICA_CONFG_PATH, "w") as yfile:
             yaml.safe_dump(
                 template_data, yfile, default_flow_style=False, sort_keys=False
+            )
+            print(
+                f"Config file is available at {CLICA_CONFG_PATH}. Please update it with your credentials."
             )
 
 
 try:
-    with open("config.yaml", "r") as yfile:
+    with open(CLICA_CONFG_PATH, "r") as yfile:
         cli_cfg = yaml.safe_load(yfile)
 except FileNotFoundError:
     print(
         "Config file not found. Running the init command to create it but you need to fill it."
     )
-    init()
+    init_config()
 
 try:
     API_URL = cli_cfg["rest"]["url"]
@@ -58,7 +63,7 @@ except KeyError:
     sys.exit(1)
 
 try:
-    USERNAME = cli_cfg["credentials"]["username"]
+    EMAIL = cli_cfg["credentials"]["email"]
     PASSWORD = cli_cfg["credentials"]["password"]
 except KeyError:
     print(
@@ -89,8 +94,8 @@ def auth(email, password):
         data = {"username": email, "password": password}
     else:
         print("trying credentials from the config file")
-        if USERNAME and PASSWORD:
-            data = {"username": USERNAME, "password": PASSWORD}
+        if EMAIL and PASSWORD:
+            data = {"username": EMAIL, "password": PASSWORD}
         else:
             print("Could not find any usable credentials.")
             sys.exit(1)
@@ -106,6 +111,7 @@ def auth(email, password):
         print(
             "Check your credentials again. You can set them on the config file or on the command line."
         )
+        print(res.json())
 
 
 def _get_folders():
@@ -122,7 +128,7 @@ def _get_folders():
 
 @click.command()
 def get_folders():
-    """Get folders"""
+    """Get folders."""
     GLOBAL_FOLDER_ID, res = _get_folders()
     print("GLOBAL_FOLDER_ID: ", GLOBAL_FOLDER_ID)
     print(res)
@@ -230,7 +236,7 @@ cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
 cli.add_command(evidences_templates)
-cli.add_command(init)
+cli.add_command(init_config)
 
 if __name__ == "__main__":
     cli()
