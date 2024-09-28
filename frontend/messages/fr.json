@@ -681,5 +681,5 @@
 	"createAppliedControlsFromSuggestionsConfirmMessage": "{count} mesures appliquées seront créées à partir des suggestions. Voulez-vous continuer ?",
 	"theFollowingControlsWillBeAddedColon": "Les mesures suivantes seront appliquées :",
 	"ShowAllNodesMessage": "Tous les noeuds",
-	"ShowOnlyAssessable": "uniquement les nœuds évaluables",
+	"ShowOnlyAssessable": "uniquement les nœuds évaluables"
 }
