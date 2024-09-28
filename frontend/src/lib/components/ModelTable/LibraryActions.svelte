@@ -50,10 +50,10 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.urn}?/load"
+				action="/libraries/{library.id}?/load"
 				use:enhance={() => {
 					loading.form = true;
-					loading.library = library.urn;
+					loading.library = library.id;
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';

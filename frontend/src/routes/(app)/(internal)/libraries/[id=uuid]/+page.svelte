@@ -110,10 +110,10 @@
 					{:else}
 						<form
 							method="post"
-							action="/libraries/{data.library.urn}?/load"
+							action="/libraries/{data.library.id}?/load"
 							use:enhance={() => {
 								loading.form = true;
-								loading.library = data.library.urn;
+								loading.library = data.library.id;
 								return async ({ update }) => {
 									loading.form = false;
 									loading.library = '';
