@@ -110,6 +110,36 @@ export const actions: Actions = {
 		}
 	},
 	delete: async (event) => {
-		return nestedDeleteFormAction({ event });
+		const formData = await event.request.formData();
+		const schema = z.object({ id: z.string().regex(URN_REGEX) });
+		const deleteForm = await superValidate(formData, zod(schema));
+
+		const URLModel = formData.get('urlmodel');
+
+		const id = deleteForm.data.id;
+		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
+
+		if (!deleteForm.valid) {
+			console.error(deleteForm.errors);
+			return fail(400, { form: deleteForm });
+		}
+
+		if (formData.has('delete')) {
+			const requestInitOptions: RequestInit = {
+				method: 'DELETE'
+			};
+			const res = await event.fetch(endpoint, requestInitOptions);
+			if (!res.ok) {
+				const response = await res.json();
+				console.error(response);
+				setFlash({ type: 'error', message: `${response}` }, event);
+				if (response.non_field_errors) {
+					setError(deleteForm, 'non_field_errors', response.non_field_errors);
+				}
+				return fail(400, { form: deleteForm });
+			}
+			setFlash({ type: 'success', message: m.successfullyDeletedLibrary() }, event);
+		}
+		return { deleteForm };
 	}
 };
