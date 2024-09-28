@@ -17,13 +17,44 @@ TOKEN = ""
 USERNAME = ""
 PASSWORD = ""
 
-with open("config.yaml", "r") as yfile:
-    cli_cfg = yaml.safe_load(yfile)
+
+@click.group()
+def cli():
+    """CLICA is the CLI tool to interact with CISO Assistant REST API."""
+    pass
+
+
+@click.command()
+def init():
+    """Create/Reset the config file"""
+    template_data = {
+        "rest": {"url": "http://localhost:8000/api"},
+        "credentials": {"username": "user@company.org", "password": ""},
+    }
+    if click.confirm(
+        "This will create a config.yaml file for you to fill and will RESET any exisiting one. Do you wish to continue?"
+    ):
+        with open("config.yaml", "w") as yfile:
+            yaml.safe_dump(
+                template_data, yfile, default_flow_style=False, sort_keys=False
+            )
+
+
+try:
+    with open("config.yaml", "r") as yfile:
+        cli_cfg = yaml.safe_load(yfile)
+except FileNotFoundError:
+    print(
+        "Config file not found. Running the init command to create it but you need to fill it."
+    )
+    init()
 
 try:
     API_URL = cli_cfg["rest"]["url"]
 except KeyError:
-    print("Missing API URL. Check the yaml file")
+    print(
+        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one."
+    )
     sys.exit(1)
 
 try:
@@ -48,17 +79,11 @@ def check_auth():
 TOKEN = check_auth()
 
 
-@click.group()
-def cli():
-    """CLICA is the CLI tool to interact with CISO Assistant REST API."""
-    pass
-
-
 @click.command()
 @click.option("--email", required=False)
 @click.option("--password", required=False)
 def auth(email, password):
-    """Authenticate to get a temp token. Pass the email and password or set them on the config file"""
+    """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
     url = f"{API_URL}/iam/login/"
     if email and password:
         data = {"username": email, "password": password}
@@ -92,21 +117,22 @@ def _get_folders():
         for folder in output["results"]:
             if folder["content_type"] == "GLOBAL":
                 GLOBAL_FOLDER_ID = folder["id"]
-                return GLOBAL_FOLDER_ID
+                return GLOBAL_FOLDER_ID, output.get("results")
 
 
 @click.command()
 def get_folders():
     """Get folders"""
-    GLOBAL_FOLDER_ID = _get_folders()
+    GLOBAL_FOLDER_ID, res = _get_folders()
     print("GLOBAL_FOLDER_ID: ", GLOBAL_FOLDER_ID)
+    print(res)
 
 
 @click.command()
 @click.option("--file", required=True, help="Path of the csv file with assets")
 def import_assets(file):
-    """import assets from a csv"""
-    GLOBAL_FOLDER_ID = _get_folders()
+    """import assets from a csv. Check the samples for format."""
+    GLOBAL_FOLDER_ID, _ = _get_folders()
     df = pd.read_csv(file)
     url = f"{API_URL}/assets/"
     headers = {
@@ -139,9 +165,9 @@ def import_assets(file):
     "--file", required=True, help="Path of the csv file with applied controls"
 )
 def import_controls(file):
-    """import applied controls"""
+    """import applied controls. Check the samples for format."""
     df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID = _get_folders()
+    GLOBAL_FOLDER_ID, _ = _get_folders()
     url = f"{API_URL}/applied-controls/"
     headers = {
         "Authorization": f"Token {TOKEN}",
@@ -173,9 +199,9 @@ def import_controls(file):
     "--file", required=True, help="Path of the csv file with the list of evidences"
 )
 def evidences_templates(file):
-    """Create evidences templates"""
+    """Create evidences templates. Check the samples for format."""
     df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID = _get_folders()
+    GLOBAL_FOLDER_ID, _ = _get_folders()
 
     url = f"{API_URL}/evidences/"
     headers = {
@@ -204,6 +230,7 @@ cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
 cli.add_command(evidences_templates)
+cli.add_command(init)
 
 if __name__ == "__main__":
     cli()
