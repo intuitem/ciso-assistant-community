@@ -650,6 +650,7 @@
 	"suggestionColon": "Suggestion:",
 	"annotationColon": "Annotation:",
 	"mapping": "Mapping",
+	"applyMapping": "Apply mapping",
 	"mappingInference": "Mapping inference",
 	"mappingInferenceTip": "Mapping suggestion is available for this requirement",
 	"additionalInformation": "Additional information",

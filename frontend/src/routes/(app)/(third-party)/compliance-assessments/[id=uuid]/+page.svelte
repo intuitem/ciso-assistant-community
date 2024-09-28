@@ -344,7 +344,7 @@
 				<button
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
 					on:click={() => modalCreateForm()}
-					><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
+					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
 				</button>
 			{/if}
 			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
