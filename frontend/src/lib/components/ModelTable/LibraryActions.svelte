@@ -53,7 +53,7 @@
 				action="/libraries/{library.id}?/load"
 				use:enhance={() => {
 					loading.form = true;
-					loading.library = library.id;
+					loading.library = library.urn;
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
@@ -102,7 +102,7 @@
 				action="/libraries/{library.id}?/update"
 				use:enhance={() => {
 					loading.form = true;
-					loading.library = library.id;
+					loading.library = library.urn;
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
