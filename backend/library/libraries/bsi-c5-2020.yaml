@@ -2,7 +2,7 @@ urn: urn:intuitem:risk:library:bsi-c5-2020
 locale: en
 ref_id: BSI-C5-2020
 name: BSI C5 Library
-description: Criteria Catalogue C5
+description: Cloud Computing Compliance Criteria Catalogue (C5)
 copyright: BSI
 version: 1
 provider: BSI
@@ -12,7 +12,7 @@ objects:
     urn: urn:intuitem:risk:framework:bsi-c5-2020
     ref_id: BSI-C5-2020
     name: BSI C5 Library
-    description: Criteria Catalogue C5
+    description: Cloud Computing Compliance Criteria Catalogue (C5)
     min_score: 0
     max_score: 100
     requirement_nodes:
