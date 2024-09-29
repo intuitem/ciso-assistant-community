@@ -153,19 +153,20 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) 🌐
+59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 
 ### Community contributions
 
-1. ISO 27001:2022, version Française 🇫🇷🌐
-2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
-3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
-4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
-5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
-7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
-8. New Zealand Information Security Manual (NZISM) 🇳🇿
+1. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
+2. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+3. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+4. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
+5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
+6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
+7. New Zealand Information Security Manual (NZISM) 🇳🇿
 
 <br/>
+
 
 > [!NOTE]
 > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
