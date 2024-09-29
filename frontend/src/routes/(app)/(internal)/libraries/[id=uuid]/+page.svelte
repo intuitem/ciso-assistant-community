@@ -15,7 +15,7 @@
 
 	const breadcrumb_library_data = {
 		...data.library,
-		id: data.library.urn
+		id: data.library.id
 	};
 	$: breadcrumbObject.set(breadcrumb_library_data);
 
@@ -110,7 +110,7 @@
 					{:else}
 						<form
 							method="post"
-							action="/libraries/{data.library.urn}?/load"
+							action="/libraries/{data.library.id}?/load"
 							use:enhance={() => {
 								loading.form = true;
 								loading.library = data.library.urn;
@@ -138,11 +138,7 @@
 				<p class="text-md leading-5 text-gray-700">
 					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
-						<li>
-							<a href="/libraries/{dependency.urn}" target="_parent" class="anchor"
-								>{dependency.name}</a
-							>
-						</li>
+						<li>{dependency.name}</li>
 					{/each}
 				</p>
 			{/if}
