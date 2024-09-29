@@ -66,6 +66,7 @@ export class PageContent extends BasePage {
 	}
 
 	async importLibrary(name: string, urn?: string, language = 'English') {
+		this.page.getByTestId('search-input').fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&
 			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
