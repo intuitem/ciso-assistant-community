@@ -357,7 +357,7 @@
 					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
 				</button>
 			{/if}
-			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol')}
+			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
 				<button
 					class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 					on:click={() => {
