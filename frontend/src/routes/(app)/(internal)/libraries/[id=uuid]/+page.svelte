@@ -113,7 +113,7 @@
 							action="/libraries/{data.library.id}?/load"
 							use:enhance={() => {
 								loading.form = true;
-								loading.library = data.library.id;
+								loading.library = data.library.urn;
 								return async ({ update }) => {
 									loading.form = false;
 									loading.library = '';
