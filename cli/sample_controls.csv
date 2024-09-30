@@ -1,0 +1,21 @@
+name,description,category,csf_function
+Firewall,Monitors and controls incoming and outgoing network traffic.,Technical,Protect
+Disaster Recovery Plan,Provides steps for recovering from a major disaster.,Policy,Recover
+Vulnerability Scanning,Identifies vulnerabilities in systems and applications.,Process,Identify
+Security Information and Event Management (SIEM),Aggregates and analyzes security activity.,Technical,Detect
+Encryption,Secures data by converting it into unreadable code.,Technical,Protect
+Door and Facility Locks,Restricts physical access to sensitive areas.,Physical,Protect
+Business Continuity Plan,Ensures that critical business functions continue during a disaster.,Policy,Recover
+Multi-Factor Authentication (MFA),Requires two or more verification methods for access.,Process,Protect
+Physical Security Controls,Secures physical access to critical systems.,Physical,Protect
+Access Control Policy,Defines access privileges for employees.,Policy,Protect
+Intrusion Detection System (IDS),Detects suspicious activity and anomalies in the network.,Technical,Detect
+Incident Response Plan,Provides guidelines for responding to security incidents.,Policy,Respond
+Backup and Restore Procedures,Outlines steps to back up and restore data.,Process,Recover
+Patch Management,Regularly updates software to fix security vulnerabilities.,Process,Protect
+Network Segmentation,Divides networks into segments to limit access.,Technical,Protect
+Data Loss Prevention (DLP),Prevents sensitive data from being accessed or leaked.,Technical,Protect
+Intrusion Prevention System (IPS),Automatically blocks suspicious activity in the network.,Technical,Protect
+Endpoint Detection and Response (EDR),Provides real-time monitoring and response to endpoint threats.,Technical,Detect
+Anti-Virus Software,Detects and removes malicious software.,Technical,Protect
+Security Awareness Training,Educates employees on security best practices.,Process,Protect

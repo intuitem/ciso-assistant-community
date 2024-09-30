@@ -201,6 +201,7 @@ fi
 echo "=========================================================================================="
 
 if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -q " ]]; then
+	echo "| quick mode"
 	npx playwright test ./tests/functional/"${TEST_PATHS[@]}" -x --project=chromium "${SCRIPT_LONG_ARGS[@]}"
 else
 	npx playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}"
