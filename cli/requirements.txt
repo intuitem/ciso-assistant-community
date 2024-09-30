@@ -1,0 +1,5 @@
+pandas
+rich
+requests
+click
+pyyaml

@@ -8,6 +8,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 	import * as m from '$paraglide/messages';
+	import { displayOnlyAssessableNodes } from './store';
 
 	export let ref_id: string;
 	export let name: string;
@@ -102,42 +103,59 @@
 	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
 </script>
 
-<div class="flex flex-row justify-between space-x-8">
-	<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
-		<div class="flex flex-row space-x-2" style="font-weight: 300;">
-			<div>
-				{#if assessable}
-					<span class="w-full h-full flex rounded-token hover:text-primary-500">
-						{#if canEditRequirementAssessment}
-							<a href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}">
-								{#if title}
-									<span style="font-weight: 600;">{title}</span>
-								{/if}
-								{#if description}
-									<p>{description}</p>
-								{/if}
-							</a>
-						{:else}
-							<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
-								{#if title}
-									<span style="font-weight: 600;">{title}</span>
-								{/if}
-								{#if description}
-									<p>{description}</p>
-								{/if}
-							</a>
-						{/if}
-					</span>
-				{:else}
-					<p class="max-w-[80ch] whitespace-pre-line">
-						{#if title}
-							<span style="font-weight: 600;">{title}</span>
-						{/if}
-						{#if description}
-							<p>{description}</p>
-						{/if}
-					</p>
-				{/if}
+{#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
+	<div class="flex flex-row justify-between space-x-8">
+		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
+			<div class="flex flex-row space-x-2" style="font-weight: 300;">
+				<div>
+					{#if assessable}
+						<span class="w-full h-full flex rounded-token hover:text-primary-500">
+							{#if canEditRequirementAssessment}
+								<a href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}">
+									{#if title}
+										<span style="font-weight: 600;">{title}</span>
+									{/if}
+									{#if description}
+										<p>{description}</p>
+									{/if}
+								</a>
+							{:else}
+								<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
+									{#if title}
+										<span style="font-weight: 600;">{title}</span>
+									{/if}
+									{#if description}
+										<p>{description}</p>
+									{/if}
+								</a>
+							{/if}
+						</span>
+					{:else}
+						<p class="max-w-[80ch] whitespace-pre-line">
+							{#if title}
+								<span style="font-weight: 600;">{title}</span>
+							{/if}
+							{#if description}
+								<p>{description}</p>
+							{/if}
+						</p>
+					{/if}
+				</div>
+				<div>
+					{#if hasAssessableChildren}
+						{#each Object.entries(complianceStatusColorMap) as status}
+							{#if resultCounts[status[0]]}
+								<span
+									class="badge mr-1"
+									style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
+								>
+									{resultCounts[status[0]]}
+									{safeTranslate(status[0])}
+								</span>
+							{/if}
+						{/each}
+					{/if}
+				</div>
 			</div>
 			<div>
 				{#if hasAssessableChildren}
@@ -234,36 +252,36 @@
 				</div>
 			</div>
 		{/if}
-	</div>
-	{#if hasAssessableChildren}
-		<div class="flex max-w-96 grow items-center space-x-2">
-			<div
-				class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
-			>
-				{#each orderedResultPercentages as rp}
-					<div
-						class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-							complianceResultColorMap[rp.result]
-						)}"
-						style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
-							rp.result
-						]}"
-					>
-						{rp.percentage.display}%
-					</div>
-				{/each}
+		{#if hasAssessableChildren}
+			<div class="flex max-w-96 grow items-center space-x-2">
+				<div
+					class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+				>
+					{#each orderedResultPercentages as rp}
+						<div
+							class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
+								complianceResultColorMap[rp.result]
+							)}"
+							style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
+								rp.result
+							]}"
+						>
+							{rp.percentage.display}%
+						</div>
+					{/each}
+				</div>
+				{#if nodeScore() >= 0}
+					<span>
+						<ProgressRadial
+							stroke={100}
+							meter={displayScoreColor(nodeScore(), node.max_score)}
+							font={150}
+							value={formatScoreValue(nodeScore(), node.max_score)}
+							width={'w-10'}>{nodeScore()}</ProgressRadial
+						>
+					</span>
+				{/if}
 			</div>
-			{#if nodeScore() >= 0}
-				<span>
-					<ProgressRadial
-						stroke={100}
-						meter={displayScoreColor(nodeScore(), node.max_score)}
-						font={150}
-						value={formatScoreValue(nodeScore(), node.max_score)}
-						width={'w-10'}>{nodeScore()}</ProgressRadial
-					>
-				</span>
-			{/if}
-		</div>
-	{/if}
-</div>
+		{/if}
+	</div>
+{/if}

@@ -35,8 +35,8 @@
 				<ModelTable
 					source={data.storedLibrariesTable}
 					URLModel="libraries"
-					identifierField="urn"
-					pagination={false}
+					identifierField="id"
+					pagination={true}
 					deleteForm={data.deleteForm}
 				/>
 			{/if}
@@ -45,8 +45,8 @@
 				<ModelTable
 					source={data.loadedLibrariesTable}
 					URLModel="libraries"
-					identifierField="urn"
-					pagination={false}
+					identifierField="id"
+					pagination={true}
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
 				/>

@@ -650,6 +650,7 @@
 	"suggestionColon": "Suggestion:",
 	"annotationColon": "Annotation:",
 	"mapping": "Mapping",
+	"applyMapping": "Apply mapping",
 	"mappingInference": "Mapping inference",
 	"mappingInferenceTip": "Mapping suggestion is available for this requirement",
 	"additionalInformation": "Additional information",
@@ -746,5 +747,13 @@
 	"questionOrQuestions": "Question(s)",
 	"successfullyUpdatedClientSettings": "Client settings successfully updated, please refresh the page.",
 	"xRaysEmptyMessage": "You have to create at least one project to use X-rays.",
+	"suggestControls": "Suggest controls",
+	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls",
+	"createAppliedControlsFromSuggestionsSuccess": "Applied controls successfully created from the suggested reference controls",
+	"createAppliedControlsFromSuggestionsError": "An error occured while creating applied controls from the suggested reference controls",
+	"createAppliedControlsFromSuggestionsConfirmMessage": "{count} applied controls will be created from the suggested reference controls. Do you want to proceed?",
+	"theFollowingControlsWillBeAddedColon": "The following controls will be added:",
+	"ShowAllNodesMessage": "Show all",
+	"ShowOnlyAssessable": "Only assessable",
 	"NoPreviewMessage": "No preview available."
 }
