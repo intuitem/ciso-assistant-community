@@ -9,19 +9,6 @@ import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
-from django.utils.translation import get_language
-from library.helpers import (
-    update_translations_in_object,
-    update_translations_as_string,
-    update_translations,
-    get_referential_translation,
-)
-
-import os
-import json
-import yaml
-import re
-
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models, transaction
@@ -29,10 +16,17 @@ from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
-from library.helpers import update_translations, update_translations_in_object
 from structlog import get_logger
+
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from library.helpers import (
+    get_referential_translation,
+    update_translations,
+    update_translations_as_string,
+    update_translations_in_object,
+)
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from .utils import camel_case, sha256
@@ -924,6 +918,18 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             res["requirement_nodes"] = requirement_nodes
 
         return res
+
+    @property
+    def reference_controls(self):
+        _reference_controls = ReferenceControl.objects.filter(
+            requirements__framework=self
+        ).distinct()
+        reference_controls = []
+        for control in _reference_controls:
+            reference_controls.append(
+                {"str": control.display_long, "urn": control.urn, "id": control.id}
+            )
+        return reference_controls
 
     def get_requirement_nodes(self):
         # Prefetch related objects if they exist to reduce database queries.
@@ -2080,7 +2086,9 @@ class ComplianceAssessment(Assessment):
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
 
-    def create_requirement_assessments(self, baseline: Self | None = None):
+    def create_requirement_assessments(
+        self, baseline: Self | None = None
+    ) -> list["RequirementAssessment"]:
         requirements = RequirementNode.objects.filter(framework=self.framework)
         requirement_assessments = []
         for requirement in requirements:
@@ -2580,6 +2588,41 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             ):
                 return (RequirementAssessment.Result.NON_COMPLIANT, None)
         return (None, None)
+
+    def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
+        applied_controls: list[AppliedControl] = []
+        for reference_control in self.requirement.reference_controls.all():
+            try:
+                _name = reference_control.name or reference_control.ref_id
+                applied_control, created = AppliedControl.objects.get_or_create(
+                    name=_name,
+                    folder=self.folder,
+                    reference_control=reference_control,
+                    category=reference_control.category,
+                    description=reference_control.description,
+                )
+                if created:
+                    logger.info(
+                        "Successfully created applied control from reference_control",
+                        applied_control=applied_control,
+                        reference_control=reference_control,
+                    )
+                else:
+                    logger.info(
+                        "Applied control already exists, skipping creation and using existing one",
+                        applied_control=applied_control,
+                        reference_control=reference_control,
+                    )
+                applied_controls.append(applied_control)
+            except Exception as e:
+                logger.error(
+                    "An error occurred while creating applied control from reference control",
+                    reference_control=reference_control,
+                    exc_info=e,
+                )
+                continue
+        self.applied_controls.set(applied_controls)
+        return applied_controls
 
     class Meta:
         verbose_name = _("Requirement assessment")

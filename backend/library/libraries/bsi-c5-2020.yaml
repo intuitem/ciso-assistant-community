@@ -1,0 +1,2856 @@
+urn: urn:intuitem:risk:library:bsi-c5-2020
+locale: en
+ref_id: BSI-C5-2020
+name: BSI C5 Library
+description: Cloud Computing Compliance Criteria Catalogue (C5)
+copyright: BSI
+version: 1
+provider: BSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:bsi-c5-2020
+    ref_id: BSI-C5-2020
+    name: BSI C5 Library
+    description: Cloud Computing Compliance Criteria Catalogue (C5)
+    min_score: 0
+    max_score: 100
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      assessable: false
+      depth: 1
+      name: Organisation of Information Security (OIS)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-01
+      name: Information Security Management System (ISMS)
+      description: "The Cloud Service Provider operates an information security management\
+        \ system (ISMS) in accordance with ISO/IEC 27001. The scope of the ISMS covers\
+        \ the Cloud Service Provider's organisational units, locations and procedures\
+        \ for providing the cloud service.\nThe measures for setting up, implementing,\
+        \ maintaining and continuously improving the ISMS are documented. \nThe documentation\
+        \ includes:\n\n\u2022 Scope of the ISMS (Section 4.3 of ISO/IEC 27001);\n\n\
+        \u2022 Declaration of applicability (Section 6.1.3), and\n\n\u2022 Results\
+        \ of the last management review (Section 9.3)."
+      annotation: 'The Information Security Management System (ISMS) has a valid certification
+        according to ISO/IEC 27001 or ISO 27001 based on IT-Grundschutz.
+
+        The basic criterion can also be fulfilled without valid certification of the
+        ISMS according to ISO/IEC 27001 or ISO 27001 based on IT-Grundschutz, if the
+        submitted documentation meets the requirements of ISO/IEC 27001.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-02
+      name: Information Security Policy
+      description: "The top management of the Cloud Service Provider has adopted an\
+        \ information security policy and communicated it to internal and external\
+        \ employees as well as cloud customers.\nThe policy describes:\n\n\u2022 the\
+        \ importance of information security, based on the requirements of cloud customers\
+        \ in relation to information security;\n\n\u2022 the security objectives and\
+        \ the desired security level, based on the business goals and tasks of the\
+        \ Cloud Service Provider;\n\n\u2022 the most important aspects of the security\
+        \ strategy to achieve the security objectives set; and\n\n\u2022 the organisational\
+        \ structure for information security in the ISMS application area."
+      annotation: The top management is a natural person or group of persons who make
+        the final decision for the institution and is responsible for that decision.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-03
+      name: Interfaces and Dependencies
+      description: "Interfaces and dependencies between cloud service delivery activities\
+        \ performed by the Cloud Service Provider and activities performed by third\
+        \ parties are documented and communicated. This includes dealing with the\
+        \ following events:\n\n\u2022 Vulnerabilities;\n\n\u2022 Security incidents;\
+        \ and\n\n\u2022 Malfunctions.\n\nThe type and scope of the documentation is\
+        \ geared towards the information requirements of the subject matter experts\
+        \ of the affected organisations in order to carry out the activities appropriately\
+        \ (e.g. definition of roles and responsibilities in guidelines, description\
+        \ of cooperation obligations in service descriptions and contracts).\n\nThe\
+        \ communication of changes to the interfaces and dependencies takes place\
+        \ in a timely manner so that the affected organisations and third parties\
+        \ can react appropriately with organisational and technical measures before\
+        \ the changes take effect."
+      annotation: 'The Cloud Service Provider can define and document the interfaces
+        and dependencies described in the basic criterion in guidelines and instructions.
+        For example, Cloud customers'' obligations to cooperate should be described
+        in service descriptions and contracts.
+
+
+        Third parties in the sense of this basic criterion are, e.g. cloud customers
+        and sub-service providers.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-04
+      name: Segregation of Duties
+      description: "Conflicting tasks and responsibilities are separated based on\
+        \ an OIS-06 risk assessment to reduce the risk of unauthorised or unintended\
+        \ changes or misuse of cloud customer data processed, stored or transmitted\
+        \ in the cloud service.\n\nThe risk assessment covers the following areas,\
+        \ insofar as these are applicable to the provision of the Cloud Service and\
+        \ are in the area of responsibility of the Cloud Service Provider:\n\n\u2022\
+        \ Administration of rights profiles, approval and assignment of access and\
+        \ access authorisations (cf. IDM-01);\n\n\u2022 Development, testing and release\
+        \ of changes (cf. DEV-01); and\n\n\u2022 Operation of the system components.\n\
+        \nIf separation cannot be established for organisational or technical reasons,\
+        \ measures are in place to monitor the activities in order to detect unauthorised\
+        \ or unintended changes as well as misuse and to take appropriate actions."
+      annotation: Identified events that may constitute unauthorised or unintentional
+        changes to or misuse of cloud customer data may, for example, be treated as
+        a security incident, cf. SIM-01.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-05
+      name: Contact with Relevant Government Agencies and Interest Groups
+      description: The Cloud Service Provider leverages relevant authorities and interest
+        groups in order to stay informed about current threats and vulnerabilities.
+        The information flows into the procedures for handling risks (cf. OIS-06)
+        and vulnerabilities (cf. OPS-19).
+      annotation: "If the cloud service is used by public sector organisations in\
+        \ Germany, the Cloud Service Provider leverages contacts with the National\
+        \ IT Situation Centre and the CERT Association of the BSI.\nRelevant contacts\
+        \ are for example:\n\n\u2022 Federal Office for Information Security (BSI);\n\
+        \n\u2022 OWASP Foundation; and\n\n\u2022 CERT networks DFN-CERT, TF-CSIRT\
+        \ etc.\n\nPublic sector organisations in Germany are e.g. authorities and\
+        \ ministries."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-06
+      name: Risk Management Policy
+      description: "Policies and instructions for risk management procedures are documented,\
+        \ communicated and provided in accordance with SP-01 for the following aspects:\n\
+        \n\u2022 Identification of risks associated with the loss of confidentiality,\
+        \ integrity, availability and authenticity of information within the scope\
+        \ of the ISMS and assigning risk owners;\n\n\u2022 Analysis of the probability\
+        \ and impact of occurrence and determination of the level of risk;\n\n\u2022\
+        \ Evaluation of the risk analysis based on defined criteria for risk acceptance\
+        \ and prioritisation of handling;\n\n\u2022 Handling of risks through measures,\
+        \ including approval of authorisation and acceptance of residual risks by\
+        \ risk owners; and\n\n\u2022 Documentation of the activities implemented to\
+        \ enable consistent, valid and comparable results."
+      annotation: The risk level can be determined by qualitative, semi-quantitative
+        and quantitative methods (cf. ISO 31010) based on the likelihood and impacts.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ois-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node2
+      ref_id: OIS-07
+      name: Application of the Risk Management Policy
+      description: "The Cloud Service Provider executes the process for handling risks\
+        \ as needed or at least once a year. The following aspects are taken into\
+        \ account when identifying risks, insofar as they are applicable to the cloud\
+        \ service provided and are within the area of responsibility of the Cloud\
+        \ Service Provider:\n\n\u2022 Processing, storage or transmission of data\
+        \ of cloud customers with different protection needs;\n\n\u2022 Occurrence\
+        \ of vulnerabilities and malfunctions in technical protective measures for\
+        \ separating shared resources;\n\n\u2022 Attacks via access points, including\
+        \ interfaces accessible from public networks;\n\n\u2022 Conflicting tasks\
+        \ and areas of responsibility that cannot be separated for organisational\
+        \ or technical reasons; and\n\n\u2022 Dependencies on subservice organisations.\n\
+        \nThe analysis, evaluation and treatment of risks, including the approval\
+        \ of actions and acceptance of residual risks, is reviewed for adequacy at\
+        \ least annually by the risk owners."
+      annotation: "This criterion applies only to risks that reside within the area\
+        \ of responsibility of the cloud service provider. Risks that arise for the\
+        \ cloud customer when using the cloud service are not covered by this criterion.\
+        \ When outsourcing activities for the provision of cloud services to subservice\
+        \ organisations, the responsibility for these risks remains with the Cloud\
+        \ Service Provider. Requirements for measures to manage these risks can be\
+        \ found in the criteria area \u201CControl and Monitoring of Service Providers\
+        \ and Suppliers (SSO)\u201D.\n\nShared resources are e.g. networks, RAM or\
+        \ storage."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node10
+      assessable: false
+      depth: 1
+      name: Security Policies and Instructions (SP)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node10
+      ref_id: SP-01
+      name: Documentation, communication and provision of policies and instructions
+      description: "Policies and instructions (incl. concepts and guidelines) are\
+        \ derived from the information security policy and are documented according\
+        \ to a uniform structure. They are communicated and made available to all\
+        \ internal and external employees of the Cloud Service Provider in an appropriate\
+        \ manner.\n\nThe policies and instructions are version controlled and approved\
+        \ by the top management of the Cloud Service Provider or an authorised body.\n\
+        \nThe policies and instructions describe at least the following aspects:\n\
+        \n\u2022 Objectives;\n\n\u2022 Scope;\n\n\u2022 Roles and responsibilities,\
+        \ including staff qualification requirements and the establishment of substitution\
+        \ rules;\n\n\u2022 Roles and dependencies on other organisations (especially\
+        \ cloud customers and subservice organisations);\n\n\u2022 Steps for the execution\
+        \ of the security strategy; and\n\n\u2022 Applicable legal and regulatory\
+        \ requirements."
+      annotation: "The appropriateness of the demand-oriented communication and provision\
+        \ must be assessed against the size and complexity of the Cloud Service Provider's\
+        \ organisation and the type of cloud service offered. Possible criteria are:\n\
+        \n\u2022 Integration of guidelines and instructions in the onboarding of new\
+        \ employees\n\n\u2022 Training and information campaigns when adopting new\
+        \ or revising existing policies and instructions\n\n\u2022 Form of provision\n\
+        \nPolicies and instructions are required for the following basic criteria\
+        \ in which the content is specified in more detail:\n\n\u2022 Risk management\
+        \ policy (OIS-06)\n\n\u2022 Acceptable use and handling of assets policy (AM-02)\n\
+        \n\u2022 Security requirements for premises and buildings (PS-01)\n\n\u2022\
+        \ Physical site access control (PS-04)\n\n\u2022 Concept for protection against\
+        \ malware (OPS-04)\n\n\u2022 Concept for data protection and recovery (OPS-06)\n\
+        \n\u2022 Concept for logging and monitoring (OPS-10)\n\n\u2022 Concept for\
+        \ meta data handling (OPS-11)\n\n\u2022 Concept for handling of vulnerabilities,\
+        \ malfunctions and errors (OPS-18)\n\n\u2022 Policy for system and data access\
+        \ authorisations (IDM-01)\n\n\u2022 Policy for the use of encryption procedures\
+        \ and key management (CRY-01)\n\n\u2022 Policies for data transmission (COS-08)\n\
+        \n\u2022 Policies for the development/procurement of information systems (DEV-01)\n\
+        \n\u2022 Policies for changes to information systems (DEV-03)\n\n\u2022 Policies\
+        \ and instructions for controlling and monitoring third parties (SSO-01)\n\
+        \n\u2022 Policy for security incident management (SIM-01)\n\n\u2022 Business\
+        \ impact analysis policies and procedures (BCM-02)\n\n\u2022 Policy for planning\
+        \ and conducting audits (COM-02)"
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node10
+      ref_id: SP-02
+      name: Review and Approval of Policies and Instructions
+      description: "Information security policies and instructions are reviewed at\
+        \ least annually for adequacy by the Cloud Service Provider's subject matter\
+        \ experts.\n\nThe review shall consider at least the following aspects:\n\n\
+        \u2022 Organisational and technical changes in the procedures for providing\
+        \ the cloud service; and\n\n\u2022 Legal and regulatory changes in the Cloud\
+        \ Service Provider's environment.\n\nRevised policies and instructions are\
+        \ approved before they become effective."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sp-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node10
+      ref_id: SP-03
+      name: Exceptions from Existing Policies and Instructions
+      description: Exceptions to the policies and instructions for information security
+        as well as respective controls go through the OIS-06 risk management process,
+        including approval of these exceptions and acceptance of the associated risks
+        by the risk owners. The approvals of exceptions are documented, limited in
+        time and are reviewed for appropriateness at least annually by the risk owners.
+      annotation: "About the Criterion\nExceptions in the sense of the basic criterion\
+        \ can have organisational or technical causes, such as\n\n\u2022 An organisational\
+        \ unit should deviate from the intended processes and procedures in order\
+        \ to meet the requirements of a cloud customer; and\n\n\u2022 A system component\
+        \ lacks technical properties to configure it according to the applicable requirements.\n\
+        \nCloud customers can use appropriate controls to ensure that they obtain\
+        \ information from the Cloud Service Provider about deviations from information\
+        \ security policies and instructions in order to assess and appropriately\
+        \ manage the associated risks to their own information security."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      assessable: false
+      depth: 1
+      name: Personnel (HR)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      ref_id: HR-01
+      name: Verification of qualification and trustworthiness
+      description: "The competency and integrity of all internal and external employees\
+        \ of the Cloud Service Provider with access to cloud customer data or system\
+        \ components under the Cloud Service Provider's responsibility who are responsible\
+        \ to provide the cloud service in the production environment shall be verified\
+        \ prior to commencement of employment in accordance with local legislation\
+        \ and regulation by the Cloud Service Provider.\n\nTo the extent permitted\
+        \ by law, the review will cover the following areas:\n\n\u2022 Verification\
+        \ of the person through identity card;\n\n\u2022 Verification of the CV;\n\
+        \n\u2022 Verification of academic titles and degrees;\n\n\u2022 Request of\
+        \ a police clearance certificate for applicants;\n\n\u2022 Certificate of\
+        \ good conduct or national equivalent; and\n\n\u2022 Evaluation of the risk\
+        \ to be blackmailed."
+      annotation: 'External employees in the sense of the criteria are those who perform
+        activities in accordance with the processes and procedures of the Cloud Service
+        Provider. Employees of sub-service providers who perform activities according
+        to the sub-service own processes and procedures are not covered by this criterion.
+
+
+        The verification of qualification and trustworthiness can be supported by
+        a specialised service provider. Depending on national legislation, national
+        equivalents of the German certificate of good conduct may also be permitted.
+        The assessment of the extent to which a potential employee can be blackmailed
+        can be carried out, for example, by checking his creditworthiness.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      ref_id: HR-02
+      name: Employment terms and conditions
+      description: 'The Cloud Service Provider''s internal and external employees
+        are required by the employment terms and conditions to comply with applicable
+        policies and instructions relating to information security.
+
+
+        The information security policy, and the policies and instructions based on
+        it, are to be acknowledged by the internal and external personnel in a documented
+        form before access is granted to any cloud customer data or system components
+        under the responsibility of the Cloud Service Provider used to provide the
+        cloud service in the production environment.'
+      annotation: The Cloud Service Provider ensures that the policies and instructions
+        reflect applicable legal and regulatory requirements in accordance with SP-01.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      ref_id: HR-03
+      name: Security training and awareness programme
+      description: "The Cloud Service Provider operates a target group-oriented security\
+        \ awareness and training program, which is completed by all internal and external\
+        \ employees of the Cloud Service Provider on a regular basis. The program\
+        \ is regularly updated based on changes to policies and instructions and the\
+        \ current threat situation and includes the following aspects:\n\n\u2022 Handling\
+        \ system components used to provide the cloud service in the production environment\
+        \ in accordance with applicable policies and procedures;\n\n\u2022 Handling\
+        \ cloud customer data in accordance with applicable policies and instructions\
+        \ and applicable legal and regulatory requirements;\n\n\u2022 Information\
+        \ about the current threat situation; and\n\n\u2022 Correct behaviour in the\
+        \ event of security incidents."
+      annotation: The learning outcomes achieved through the awareness and training
+        programme are measured and evaluated in a target group-oriented manner. The
+        measurements cover quantitative and qualitative aspects. The results are used
+        to improve the awareness and training programme.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      ref_id: HR-04
+      name: Disciplinary measures
+      description: "In the event of violations of policies and instructions or applicable\
+        \ legal and regulatory requirements, actions are taken in accordance with\
+        \ a defined policy that includes the following aspects:\n\n\u2022 Verifying\
+        \ whether a violation has occurred; and\n\n\u2022 Consideration of the nature\
+        \ and severity of the violation and its impact.\n\nThe internal and external\
+        \ employees of the Cloud Service Provider are informed about possible disciplinary\
+        \ measures.\n\nThe use of disciplinary measures is appropriately documented."
+      annotation: The Cloud Service Provider ensures that the policies and instructions
+        reflect applicable legal and regulatory requirements in accordance with SP-01.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      ref_id: HR-05
+      name: Responsibilities in the event of termination or change of employment
+      description: Internal and external employees have been informed about which
+        responsibilities, arising from employment terms and conditions relating to
+        information security, will remain in place when their employment is terminated
+        or changed and for how long.
+      annotation: The Cloud Service Provider ensures that the policies and instructions
+        reflect applicable legal and regulatory requirements in accordance with SP-01.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:hr-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node14
+      ref_id: HR-06
+      name: Confidentiality agreements
+      description: "The non-disclosure or confidentiality agreements to be agreed\
+        \ with internal employees, external service providers and suppliers of the\
+        \ Cloud Service Provider are based on the requirements identified by the Cloud\
+        \ Service Provider for the protection of confidential information and operational\
+        \ details. \n\nThe agreements are to be accepted by external service providers\
+        \ and suppliers when the contract is agreed. The agreements must be accepted\
+        \ by internal employees of the Cloud Service Provider before authorisation\
+        \ to access data of cloud customers is granted.\n\nThe requirements must be\
+        \ documented and reviewed at regular intervals (at least annually). If the\
+        \ review shows that the requirements need to be adapted, the non-disclosure\
+        \ or confidentiality agreements are updated.\n\nThe Cloud Service Provider\
+        \ must inform the internal employees, external service providers and suppliers\
+        \ and obtain confirmation of the updated confidentiality or non-disclosure\
+        \ agreement."
+      annotation: "In a confidentiality agreement it should be described:\n\n\u2022\
+        \ Which information must be kept confidential;\n\n\u2022 The period for which\
+        \ this confidentiality agreement applies;\n\n\u2022 What actions must be taken\
+        \ upon termination of this agreement, e.g. destruction or return of data medium;\n\
+        \n\u2022 How the ownership of information is regulated;\n\n\u2022 What rules\
+        \ apply to the use and disclosure of confidential information to other partners,\
+        \ if necessary; and\n\n\u2022 The consequences of a breach of the agreement.\n\
+        \nConfidentiality or non-disclosure agreements can be signed by means of an\
+        \ electronic signature, insofar as this is legally binding."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      assessable: false
+      depth: 1
+      name: Asset Management (AM)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      ref_id: AM-01
+      name: Asset Inventory
+      description: 'The Cloud Service Provider has established procedures for inventorying
+        assets.
+
+
+        The inventory is performed automatically and/or by the people or teams responsible
+        for the assets to ensure complete, accurate, valid and consistent inventory
+        throughout the asset lifecycle.
+
+
+        Assets are recorded with the information needed to apply the Risk Management
+        Procedure (Cf. OIS-07), including the measures taken to manage these risks
+        throughout the asset lifecycle. Changes to this information are logged.'
+      annotation: "Logging and monitoring applications take into account the information\
+        \ collected on the assets in order to identify the impact on cloud services\
+        \ and functions in case of events that could lead to a breach of protection\
+        \ objectives, and to support information provided to affected cloud customers\
+        \ in accordance with contractual agreements.\nAssets within the meaning of\
+        \ this criteria area are the objects required for the information security\
+        \ of the cloud service during the creation, processing, storage, transmission,\
+        \ deletion or destruction of information in the Cloud Service Provider's area\
+        \ of responsibility, e.g. firewalls, load balancers, web servers, application\
+        \ servers and database servers.\n\nThese objects consist of hardware and software\
+        \ objects:\nHardware objects are\n\n\u2022 Physical and virtual infrastructure\
+        \ resources (e.g. servers, storage systems, network components); and\n\n\u2022\
+        \ As well as end devices if the Cloud Service Provider has determined in a\
+        \ risk assessment that these could endanger the information security of the\
+        \ cloud service in the event of loss or unauthorised access (e.g. mobile devices\
+        \ used as security tokens for authentication).\n\nSoftware objects are e.g.\
+        \ hypervisors, containers, operating systems, databases, microservices and\
+        \ programming interfaces (APIs).\n\nThe lifecycle of an asset includes:\n\n\
+        \u2022 Acquisition;\n\n\u2022 Commissioning;\n\n\u2022 Maintenance;\n\n\u2022\
+        \ Decommissioning; and\n\n\u2022 Disposal."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      ref_id: AM-02
+      name: Acceptable Use and Safe Handling of Assets Policy
+      description: "Policies and instructions for acceptable use and safe handling\
+        \ of assets are documented, communicated and provided in accordance with SP-01\
+        \ and address the following aspects of the asset lifecycle as applicable to\
+        \ the asset:\n\n\u2022 Approval procedures for acquisition, commissioning,\
+        \ maintenance, decommissioning, and disposal by authorised personnel or system\
+        \ components;\n\n\u2022 Inventory;\n\n\u2022 Classification and labelling\
+        \ based on the need for protection of the information and measures for the\
+        \ level of protection identified;\n\n\u2022 Secure configuration of mechanisms\
+        \ for error handling, logging, encryption, authentication and authorisation;\n\
+        \n\u2022 Requirements for versions of software and images as well as application\
+        \ of patches;\n\n\u2022 Handling of software for which support and security\
+        \ patches are not available anymore;\n\n\u2022 Restriction of software installations\
+        \ or use of services;\n\n\u2022 Protection against malware;\n\n\u2022 Remote\
+        \ deactivation, deletion or blocking;\n\n\u2022 Physical delivery and transport;\n\
+        \n\u2022 dealing with incidents and vulnerabilities; and\n\n\u2022 Complete\
+        \ and irrevocable deletion of the data upon decommissioning."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      ref_id: AM-03
+      name: Commissioning of Hardware
+      description: The Cloud Service Provider has an approval process for the use
+        of hardware to be commissioned, which is used to provide the cloud service
+        in the production environment, in which the risks arising from the commissioning
+        are identified, analysed and mitigated. Approval is granted after verification
+        of the secure configuration of the mechanisms for error handling, logging,
+        encryption, authentication and authorisation according to the intended use
+        and based on the applicable policies.
+      annotation: 'The basic criterion applies only to physical hardware objects,
+        such as servers, storage systems, and network components.
+
+
+        Virtual hardware and software objects are considered in the criteria areas
+        (OPS) and (DEV).
+
+
+        The approval process typically considers both the basic approval to use the
+        hardware and the final approval of the configured assets.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      ref_id: AM-04
+      name: Decommissioning of Hardware
+      description: 'The decommissioning of hardware used to operate system components
+        supporting the cloud service production environment under the responsibility
+        of the Cloud Service Provider requires approval based on the applicable policies.
+
+
+        The decommissioning includes the complete and permanent deletion of the data
+        or proper destruction of the media.'
+      annotation: The deletion of data or physical destruction of data mediums can
+        take place, for example, according to DIN 66399 or BSI IT-Grundschutz module
+        CON.6.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      ref_id: AM-05
+      name: Commitment to Permissible Use, Safe Handling and Return of Assets
+      description: 'The Cloud Service Provider''s internal and external employees
+        are provably committed to the policies and instructions for acceptable use
+        and safe handling of assets before they can be used if the Cloud Service Provider
+        has determined in a risk assessment that loss or unauthorised access could
+        compromise the information security of the Cloud Service.
+
+
+        Any assets handed over are provably returned upon termination of employment.'
+      annotation: 'Physical assets of internal and external employees are managed
+        centrally.
+
+
+        Central management enables software, data, and policy distribution, as well
+        as remote deactivation, deletion, or locking.
+
+        The basic criterion essentially concerns mobile devices (e.g. notebooks, tablets,
+        smartphones, etc.), where confidential information is stored on them which
+        can be used in the event of unauthorised access to obtain privileged access
+        to the cloud service (e.g. if these are used as security tokens for authentication).'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:am-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node21
+      ref_id: AM-06
+      name: Asset Classification and Labelling
+      description: 'Assets are classified and, if possible, labelled. Classification
+        and labelling of an asset reflect the protection needs of the information
+        it processes, stores, or transmits.
+
+
+        The need for protection is determined by the individuals or groups responsible
+        for the assets of the Cloud Service Provider according to a uniform schema.
+        The schema provides levels of protection for the confidentiality, integrity,
+        availability, and authenticity protection objectives.'
+      annotation: 'Logging and monitoring applications take the asset protection needs
+        into account in order to inform the responsible stakeholder of events that
+        could lead to a violation of the protection goals, so that the necessary measures
+        are taken with an appropriate priority. Actions for events on assets with
+        a higher level of protection take precedence over events on assets with a
+        lower need for protection.
+
+        If the Cloud Service Provider does not make a differentiated classification
+        of the assets, all assets are to be assigned to the highest defined protection
+        requirement.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      assessable: false
+      depth: 1
+      name: Physical Security (PS)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-01
+      name: Physical Security and Environmental Control Requirements
+      description: "Security requirements for premises and buildings related to the\
+        \ cloud service provided, are based on the security objectives of the information\
+        \ security policy, identified protection requirements for the cloud service\
+        \ and the assessment of risks to physical and environmental security. The\
+        \ security requirements are documented, communicated and provided in a policy\
+        \ or concept according to SP-01.\n\nThe security requirements for data centres\
+        \ are based on criteria which comply with established rules of technology.\
+        \ They are suitable for addressing the following risks in accordance with\
+        \ the applicable legal and contractual requirements:\n\n\u2022 Faults in planning;\n\
+        \n\u2022 Unauthorised access;\n\n\u2022 Insufficient surveillance;\n\n\u2022\
+        \ Insufficient air-conditioning;\n\n\u2022 Fire and smoke; \n\n\u2022 Water;\n\
+        \n\u2022 Power failure; and\n\n\u2022 Air ventilation and filtration.\n\n\
+        If the Cloud Service Provider uses premises or buildings operated by third\
+        \ parties to provide the Cloud Service, the document describes which security\
+        \ requirements the Cloud Service Provider places on these third parties. \n\
+        \nThe appropriate and effective verification of implementation is carried\
+        \ out in accordance with the criteria for controlling and monitoring subcontractors\
+        \ (cf. SSO-01, SSO-02)."
+      annotation: 'The security requirements include time constraints for self-sufficient
+        operation in the event of exceptional events (e.g. prolonged power outage,
+        heat waves, low water in cold river water supply) and maximum tolerable utility
+        downtime.
+
+
+        The time limits for self-sufficient operation provide for at least 48 hours
+        in the event of a failure of the external power supply.
+
+
+        For a self-sufficient operation during a heat period, the highest outside
+        temperatures measured to date within a radius of at least 50 km around the
+        locations of the premises and buildings have been determined with a safety
+        margin of 3 K. The security requirements stipulate that the permissible operating
+        and environmental parameters of the cooling supply must also be observed on
+        at least five consecutive days with these outside temperatures including the
+        safety margin (cf. PS-06 Protection against failure of the supply facilities).
+
+
+        If water is taken from a river for air conditioning, it is determined at which
+        water levels and water temperatures the air conditioning can be maintained
+        for how long.
+
+
+        The maximum tolerable downtimes of utility facilities are suitable for meeting
+        the availability requirements contained in the service level agreement.
+
+        Premises and buildings related to the cloud service provided include data
+        centres and server rooms housing system components used to process cloud customer
+        data and the technical utilities required to operate these system components
+        (e.g. power supply, refrigeration, fire-fighting, telecommunications, security,
+        etc.). Backup or redundancy computer centres.
+
+
+        Premises and buildings operated by third parties are e.g. server housing,
+        colocation, IaaS.
+
+
+        Premises and buildings in which no data from cloud customers is processed
+        or stored (e.g. offices of the Cloud Service Provider, server rooms with system
+        components for internal development and test systems) are not subject to this
+        criteria area.
+
+
+        The recognised rules of technology are defined in relevant standards, e.g.
+        EN 50600 (facilities and infrastructures of data centres).
+
+
+        Incorrect planning can endanger the operational safety and availability of
+        the premises or buildings. This can result from an incorrect assessment of
+        elementary hazards at the site (e.g. air traffic, earthquakes, floods, hazardous
+        substances) as well as an incorrect conception of the bandwidth or energy
+        supply.
+
+
+        Time specifications for self-sustaining operation as well as maximum tolerable
+        downtimes of utility facilities are typically collected during the business
+        impact analysis (cf. BCM-02, BCM-03).'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-02
+      name: Redundancy model
+      description: 'The cloud service is provided from two locations that are redundant
+        to each other. The locations meet the security requirements of the Cloud Service
+        Provider (cf. PS-01 Security Concept) and are located in an adequate distance
+        to each other to achieve operational redundancy. Operational redundancy is
+        designed in a way that ensures that the availability requirements specified
+        in the service level agreement are met. The functionality of the redundancy
+        is checked at least annually by suitable tests and exercises (cf. BCM-04 -
+        Verification, updating and testing of business continuity). '
+      annotation: "The cloud service is provided from more than two locations that\
+        \ provide each other with redundancy. The locations are sufficiently far apart\
+        \ to achieve georedundancy. If two locations fail at the same time, at least\
+        \ one third location is still available to prevent a total service failure.\
+        \ The georedundancy is designed in a way that ensures that the availability\
+        \ requirements specified in the service level agreement are met.. The functionality\
+        \ of the redundancy is checked at least annually by suitable tests and exercises\
+        \ (cf. BCM-04 - Verification, updating and testing of business continuity).\n\
+        Operational redundancy of the sites to each other in the sense of the basic\
+        \ requirement is given, if based on the assessment of elementary risks at\
+        \ the site corresponding distances of the premises and buildings to these\
+        \ risks are maintained. Very extensive events which, due to their extent,\
+        \ could affect several sites of the same redundancy group simultaneously or\
+        \ in a timely manner (e.g. floods, earthquakes) are not considered.\n\nA georedundancy\
+        \ of the sites to each other in the sense of the optional, more far-reaching\
+        \ requirement is given if a very extensive event at a site under no circumstances\
+        \ affects several sites of the same redundancy group simultaneously or promptly.\
+        \ The BSI publication \"Kriterien f\xFCr die Standortwahl h\xF6chstverf\xFC\
+        gbarer und georedundanter Rechenzentren\" provides assistance in this regard.\
+        \ \n\nThere are cloud providers who no longer address the issue of reliability\
+        \ of the cloud service on a physical level through redundancy from two independent\
+        \ locations, but through resilience. The cloud service is provided simultaneously\
+        \ from more than two locations. The underlying distributed data centre architecture\
+        \ ensures that the failure of a location or components of a location does\
+        \ not violate the defined availability criteria of the cloud service. Such\
+        \ an architecture can represent an alternative fulfilment (cf. Chapter 4.4.7)\
+        \ of the criterion. The tests and exercises on functionality required in the\
+        \ criterion also apply analogously to resilient architectures."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-03
+      name: Perimeter Protection
+      description: "The structural shell of premises and buildings related to the\
+        \ cloud service provided are physically solid and protected by adequate security\
+        \ measures that meet the security requirements of the Cloud Service Provider\
+        \ (cf. PS-01 Security Concept).\n\nThe security measures are designed to detect\
+        \ and prevent unauthorised access so that the information security of the\
+        \ cloud service is not compromised.\n\nThe outer doors, windows and other\
+        \ construction elements exhibit an appropriate security level and withstand\
+        \ a burglary attempt for at least 10 minutes. \n\nThe surrounding wall constructions\
+        \ as well as the locking mechanisms meet the associated requirements."
+      annotation: 'The security measures installed at the site include permanently
+        present security personnel (at least 2 individuals), video surveillance and
+        anti-burglary systems.
+
+        Security measures for detecting unauthorised access can be security personnel,
+        video surveillance or burglar alarm systems.
+
+
+        The resistance class RC4 according to DIN EN 1627 stipulates that doors, windows
+        and other components must withstand a break-in attempt for at least 10 minutes.
+        The US standard SD-STD-01.01 Rev.G. is an international equivalent to this
+        standard.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-04
+      name: Physical site access control
+      description: "At access points to premises and buildings related to the cloud\
+        \ service provided, physical access controls are set up in accordance with\
+        \ the Cloud Service Provider's security requirements (cf. PS-01 Security Concept)\
+        \ to prevent unauthorised access.\n\nAccess controls are supported by an access\
+        \ control system.\n\nThe requirements for the access control system are documented,\
+        \ communicated and provided in a policy or concept in accordance with SP-01\
+        \ and include the following aspects:\n\n\u2022 Specified procedure for the\
+        \ granting and revoking of access authorisations (cf. IDM-02) based on the\
+        \ principle of least authorisation (\"least-privilege-principle\") and as\
+        \ necessary for the performance of tasks (\"need-to-know-principle\");\n\n\
+        \u2022 Automatic revocation of access authorisations if they have not been\
+        \ used for a period of 2 month;\n\n\u2022 Automatic withdrawal of access authorisations\
+        \ if they have not been used for a period of 6 months;\n\n\u2022 Two-factor\
+        \ authentication for access to areas hosting system components that process\
+        \ cloud customer information;\n\n\u2022 Visitors and external personnel are\
+        \ tracked individually by the access control during their work in the premises\
+        \ and buildings, identified as such (e.g. by visible wearing of a visitor\
+        \ pass) and supervised during their stay; and\n\n\u2022 Existence and nature\
+        \ of access logging that enables the Cloud Service Provider, in the sense\
+        \ of an effectiveness audit, to check whether only defined personnel have\
+        \ entered the premises and buildings related to the cloud service provided."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-05
+      name: Protection from fire and smoke
+      description: "Premises and buildings related to the cloud service provided are\
+        \ protected from fire and smoke by structural, technical and organisational\
+        \ measures that meet the security requirements of the Cloud Service Provider\
+        \ (cf. PS-01 Security Concept) and include the following aspects: \n\na) Structural\
+        \ Measures:\n\nEstablishment of fire sections with a fire resistance duration\
+        \ of at least 90 minutes for all structural parts.\n\nb) Technical Measures:\n\
+        \n\u2022 Early fire detection with automatic voltage release. The monitored\
+        \ areas are sufficiently fragmented to ensure that the prevention of the spread\
+        \ of incipient fires is proportionate to the maintenance of the availability\
+        \ of the cloud service provided;\n\n\u2022 Extinguishing system or oxygen\
+        \ reduction; and\n\n\u2022 Fire alarm system with reporting to the local fire\
+        \ department.\n\nc) Organisational Measures\n\n\u2022 Regular fire protection\
+        \ inspections to check compliance with fire protection requirements; and\n\
+        \n\u2022 Regular fire protection exercises."
+      annotation: "The environmental parameters are monitored. When the permitted\
+        \ control range is exceeded, alarm messages are generated and forwarded to\
+        \ the Cloud Service Provider\u2019s subject matter experts\nThe monitoring\
+        \ of the environmental parameters is addressed in PS-01. When exceeding the\
+        \ allowed control range, alarm messages are generated and forwarded to the\
+        \ responsible Cloud Service Provider.\nStructural parts are walls, ceilings,\
+        \ floors, doors, ventilation flaps, etc."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-06
+      name: Protection against interruptions caused by power failures and other such
+        risks
+      description: "Measures to prevent the failure of the technical supply facilities\
+        \ required for the operation of system components with which information from\
+        \ cloud customers is processed, are documented and set up in accordance with\
+        \ the security requirements of the Cloud Service Provider (cf. PS-01 Security\
+        \ Concept) with respect to the following aspects:\n\na) Operational redundancy\
+        \ (N+1) in power and cooling supply\n\nb) Use of appropriately sized uninterruptible\
+        \ power supplies (UPS) and emergency power systems (NEA), designed to ensure\
+        \ that all data remains undamaged in the event of a power failure. The functionality\
+        \ of UPS and NEA is checked at least annually by suitable tests and exercises\
+        \ (cf. BCM-04 - Verification, updating and testing of business continuity).\n\
+        \nc) Maintenance (servicing, inspection, repair) of the utilities in accordance\
+        \ with the manufacturer's recommendations. \n\nd) Protection of power supply\
+        \ and telecommunications lines against interruption, interference, damage\
+        \ and eavesdropping. The protection is checked regularly, but at least every\
+        \ two years, as well as in case of suspected manipulation by qualified personnel\
+        \ regarding the following aspects:\n\n\u2022 Traces of violent attempts to\
+        \ open closed distributors;\n\n\u2022 Up-to-datedness of the documentation\
+        \ in the distribution list;\n\n\u2022 Conformity of the actual wiring and\
+        \ patching with the documentation;\n\n\u2022 The short-circuits and earthing\
+        \ of unneeded cables are intact; and\n\n\u2022 Impermissible installations\
+        \ and modifications."
+      annotation: 'Uninterruptible Power Supplies (UPS) and Emergency Power Supplies
+        (NPS) are designed to meet the availability requirements defined in the Service
+        Level Agreement.
+
+
+        The cooling supply is designed in such a way that the permissible operating
+        and environmental parameters are also ensured on at least five consecutive
+        days with the highest outside temperatures measured to date within a radius
+        of at least 50 km around the locations of the premises and buildings, with
+        a safety margin of 3 K (in relation to the outside temperature). The Cloud
+        Service Provider has previously determined the highest outdoor temperatures
+        measured to date (cf. PS-01 Security Concept).
+
+
+        The connection to the telecommunications network is designed with sufficient
+        redundancy so that the failure of a telecommunications network does not impair
+        the security or performance of the Cloud Service Provider.
+
+        Measures to prevent the failure of the technical supply facilities are e.g.
+        power supply, cooling, fire-fighting technology, telecommunications, security
+        technology, etc.
+
+
+        Cloud Service Providers can ensure that all data remains undamaged in the
+        event of a power failure by shutting down servers following a defined procedure.
+
+
+        Power supply and telecommunications lines can be protected against interruption,
+        interference, damage and eavesdropping by e.g. underground supply via different
+        supply routes.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ps-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node28
+      ref_id: PS-07
+      name: Surveillance of operational and environmental parameters
+      description: The operating parameters of the technical utilities (cf. PS-06)
+        and the environmental parameters of the premises and buildings related to
+        the cloud service provided are monitored and controlled in accordance with
+        the security requirements of the Cloud Service Provider (cf. PS-01 Security
+        Concept). When the permitted control range is exceeded, the responsible departments
+        of the Cloud-Provider are automatically informed in order to promptly initiate
+        the necessary measures for return to the control range.
+      annotation: Operating parameters and environmental parameters of the premises
+        and buildings are, e.g. air temperature and humidity, leakage.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      assessable: false
+      depth: 1
+      name: Operations (OPS)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-01
+      name: Capacity Management - Planning
+      description: "The planning of capacities and resources (personnel and IT resources)\
+        \ follows an established procedure in order to avoid possible capacity bottlenecks.\
+        \ The procedures include forecasting future capacity requirements in order\
+        \ to identify usage trends and manage system overload. \n\nCloud Service Providers\
+        \ take appropriate measures to ensure that they continue to meet the requirements\
+        \ agreed with cloud customers for the provision of the cloud service in the\
+        \ event of capacity bottlenecks or outages regarding personnel and IT resources,\
+        \ in particular those relating to the dedicated use of system components,\
+        \ in accordance with the respective agreements."
+      annotation: 'The forecasts are considered in accordance with the service level
+        agreement for planning and preparing the provisioning.
+
+        For economic reasons, Cloud Service Providers typically strive for a high
+        utilisation of IT resources (CPU, RAM, storage space, network). In multi-tenant
+        environments, existing resources must still be shared between cloud users
+        (clients) in such a way that service level agreements are adhered to. In this
+        respect, proper planning and monitoring of IT resources is critical to the
+        availability and competitiveness of the cloud service. If the procedures are
+        not documented or are subject to a higher degree of confidentiality as a trade
+        secret of the Cloud Service Provider, the Cloud Service Provider must be able
+        to explain the procedures at least orally within the scope of this audit.
+
+
+        Cloud customers must use appropriate controls to ensure that the capacity
+        and resource requirements to be covered by the Cloud Service Provider are
+        planned and reflected in the SLA with the Cloud Service Provider. The requirements
+        can also be reviewed regularly through appropriate controls and the SLA can
+        be adjusted accordingly.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-02
+      name: Capacity Management - Monitoring
+      description: Technical and organisational safeguards for the monitoring and
+        provisioning and de-provisioning of cloud services are defined. Thus, the
+        Cloud Service Provider ensures that resources are provided and/or services
+        are rendered according to the contractual agreements and that compliance with
+        the service level agreements is ensured.
+      annotation: "To monitor capacity and availability, the relevant information\
+        \ is available to the cloud customer in a self-service portal.\nTechnical\
+        \ and organisational measures typically include:\n\n\u2022 Use of monitoring\
+        \ tools with alarm function when defined threshold values are exceeded;\n\n\
+        \u2022 Process for correlating events and interface to incident management;\n\
+        \n\u2022 Continuous monitoring of the systems by qualified personnel; and\n\
+        \n\u2022 Redundancies in the IT systems."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-03
+      name: Capacity Management - Controlling of Resources
+      description: Depending on the capabilities of the respective service model,
+        the cloud customer can control and monitor the allocation of the system resources
+        assigned to the customer for administration/use in order to avoid overcrowding
+        of resources and to achieve sufficient performance.
+      annotation: "Resources according to the possibilities of the service model are\
+        \ for example\n\n\u2022 Computing capacity;\n\n\u2022 Storage capacity;\n\n\
+        \u2022 Configuration of network properties;\n\n\u2022 Application Programming\
+        \ Interfaces (APIs); and\n\n\u2022 Databases."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-04
+      name: Protection Against Malware - Concept
+      description: "Policies and instructions with specifications for protection against\
+        \ malware are documented, communicated, and provided in accordance with SP-01\
+        \ with respect to the following aspects:\n\n\u2022 Use of system-specific\
+        \ protection mechanisms;\n\n\u2022 Operating protection programs on system\
+        \ components under the responsibility of the Cloud Service Provider that are\
+        \ used to provide the cloud service in the production environment; and\n\n\
+        \u2022 Operation of protection programs for employees' terminal equipment."
+      annotation: 'The Cloud Service Provider creates regular reports on the checks
+        performed, which are reviewed and analysed by authorised bodies or committees.
+        Policies and instructions describe the technical measures taken to securely
+        configure and monitor the management console (both the customer''s self-service
+        and the service provider''s cloud administration) to protect it from malware.
+        Updates are applied at the highest frequency that the vendor(s) contractually
+        offer(s).
+
+        Protection programs for employee devices can be, for example, server-based
+        protection programs that scan files in attachments on the server or filter
+        network traffic.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-05
+      name: Protection Against Malware - Implementation
+      description: System components under the Cloud Service Provider's responsibility
+        that are used to deploy the cloud service in the production environment are
+        configured with malware protection according to the policies and instructions.
+        If protection programs are set up with signature and behaviour-based malware
+        detection and removal, these protection programs are updated at least daily.
+      annotation: 'The configuration of the protection mechanisms is monitored automatically.
+        Deviations from the specifications are automatically reported to the responsible
+        authorities so that they can be immediately assessed and the necessary measures
+        taken.
+
+        Protection against malicious programs can be implemented by operating system-specific
+        protection mechanisms or explicit protection programs (e.g. for signature-
+        and behaviour-based detection and removal of malicious programs).'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-06
+      name: Data Protection and Recovery - Concept
+      description: "Policies and instructions for data backup and recovery are documented,\
+        \ communicated and provided in accordance with SP-01 regarding the following\
+        \ aspects.\n\n\u2022 The extent and frequency of data backups and the duration\
+        \ of data retention are consistent with the contractual agreements with the\
+        \ cloud customers and the Cloud Service Provider's operational continuity\
+        \ requirements for Recovery Time Objective (RTO) and Recovery Point Objective\
+        \ (RPO);\n\n\u2022 Data is backed up in encrypted, state-of-the-art form;\
+        \ \n\n\u2022 Access to the backed-up data and the execution of restores is\
+        \ performed only by authorised persons; and\n\n\u2022 Tests of recovery procedures\
+        \ (cf. OPS-08)."
+      annotation: The data backup concept specifies which type of data backup is to
+        be carried out (e.g. type, manner, duration) and specifies which data must
+        also be backed up in special cases (e.g. pure use of compute nodes without
+        data storage). When backing up data, a distinction must be made between backups
+        and snapshots of virtual machines. Snapshots do not replace backups, but can
+        be part of the backup strategy to achieve Recovery Point Objectives (RPO)
+        if they are additionally stored outside the original data location. The business
+        requirements of the Cloud Service Provider for the scope, frequency and duration
+        of the data backup result from the business impact analysis (cf. BCM-03) for
+        development and operational processes of the cloud service. If different data
+        backup and recovery procedures exist for data under the responsibility of
+        the cloud customer and the Cloud Service Provider, both variants must be included
+        in a test according to this criteria catalogue. For procedures to secure the
+        data of the Cloud Service Provider, only the adequacy and implementation of
+        the controls must be proven, but not their effectiveness. For procedures to
+        secure the data of cloud customers, proof of effectiveness must also be provided.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-07
+      name: Data Backup and Recovery - Monitoring
+      description: The execution of data backups is monitored by technical and organisational
+        measures. Malfunctions are investigated by qualified staff and rectified promptly
+        to ensure compliance with contractual obligations to cloud customers or the
+        Cloud Service Provider's business requirements regarding the scope and frequency
+        of data backup and the duration of storage.
+      annotation: 'The relevant logs or summarised results are available to the cloud
+        customer in a self-service portal for monitoring the data backup.
+
+        If the data backup is not part of the contract concluded between the Cloud
+        Service Provider and the cloud customer, this criterion is not applicable.
+        The Cloud Service Provider must present this situation transparently in the
+        system description.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-08
+      name: Data Backup and Recovery - Regular Testing
+      description: 'Restore procedures are tested regularly, at least annually. The
+        tests allow an assessment to be made as to whether the contractual agreements
+        as well as the specifications for the maximum tolerable downtime (Recovery
+        Time Objective, RTO) and the maximum permissible data loss (Recovery Point
+        Objective, RPO) are adhered to (cf. BCM-02).
+
+
+        Deviations from the specifications are reported to the responsible personnel
+        or system components so that these can promptly assess the deviations and
+        initiate the necessary actions.'
+      annotation: 'At the customer''s request, the Cloud Service Provider inform the
+        cloud customer of the results of the recovery tests. Recovery tests are embedded
+        in the Cloud Service Provider''s emergency management.
+
+        If the data backup is not part of the contract concluded between the Cloud
+        Service Provider and the cloud customer, this criterion is not applicable.
+        The Cloud Service Provider must present this situation transparently in the
+        system description.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-09
+      name: Data Backup and Recovery - Storage
+      description: The Cloud Service Provider transfers data to be backed up to a
+        remote location or transports these on backup media to a remote location.
+        If the data backup is transmitted to the remote location via a network, the
+        data backup or the transmission of the data takes place in an encrypted form
+        that corresponds to the state-of-the-art. The distance to the main site is
+        chosen after sufficient consideration of the factors recovery times and impact
+        of disasters on both sites. The physical and environmental security measures
+        at the remote site are at the same level as at the main site.
+      annotation: 'If the data backup is not part of the contract concluded between
+        the Cloud Service Provider and the cloud customer, this criterion is not applicable.
+        The Cloud Service Provider must present this situation transparently in the
+        system description.
+
+
+        A remote location can be e.g. another data centre of the Cloud Service Provider.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-10
+      name: Logging and Monitoring - Concept
+      description: "The Cloud Service Provider has established policies and instructions\
+        \ that govern the logging and monitoring of events on system components within\
+        \ its area of responsibility. These policies and instructions are documented,\
+        \ communicated and provided according to SP-01 with respect to the following\
+        \ aspects:\n\n\u2022 Definition of events that could lead to a violation of\
+        \ the protection goals;\n\n\u2022 Specifications for activating, stopping\
+        \ and pausing the various logs;\n\n\u2022 Information regarding the purpose\
+        \ and retention period of the logs.\n\n\u2022 Define roles and responsibilities\
+        \ for setting up and monitoring logging;\n\n\u2022 Time synchronisation of\
+        \ system components; and\n\n\u2022 Compliance with legal and regulatory frameworks."
+      annotation: Legal and regulatory frameworks can define e.g. legal requirements
+        for retention and deletion of data.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-11
+      name: Logging and Monitoring - Metadata Management Concept
+      description: "Policies and instructions for the secure handling of metadata\
+        \ (usage data) are documented, communicated and provided according to SP-01\
+        \ with regard to the following aspects:\n\n\u2022 Metadata is collected and\
+        \ used solely for billing, incident management and security incident management\
+        \ purposes;\n\n\u2022 Exclusively anonymous metadata to deploy and enhance\
+        \ the cloud service so that no conclusions can be drawn about the cloud customer\
+        \ or user;\n\n\u2022 No commercial use; \n\n\u2022 Storage for a fixed period\
+        \ reasonably related to the purposes of the collection;\n\n\u2022 Immediate\
+        \ deletion if the purposes of the collection are fulfilled and further storage\
+        \ is no longer necessary.\n\n\u2022 Provision to cloud customers according\
+        \ to contractual agreements."
+      annotation: 'Personal data is automatically removed from the log data before
+        the Cloud Service Provider processes it as far as technically possible. The
+        removal is done in a way that allows the Cloud Service Provider to continue
+        to use the log data for the purpose for which it was collected.
+
+        Metadata is all data that is generated by the Cloud Service Provider through
+        the use of its service by the cloud customer and is not content-related data.
+        This includes login/logout times, IP addresses, customer''s GPS location,
+        which resources (network, storage, computer) were used, which data was accessed
+        when, with whom data was shared, with whom it was communicated, etc. This
+        data is partly used for billing purposes and for (security) incident management.
+        However, it can also be used to analyse customer behaviour (depending on the
+        cloud service) and to make the decision making and work processes visible
+        to the Cloud Service Provider. The criteria aim to provide a transparent and
+        clear definition of the collection and use of metadata. In addition, metadata
+        refers to data that is generated when the Cloud Service Provider accesses
+        customer data (e.g. for indexing).'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-12
+      name: Logging and Monitoring - Access, Storage and Deletion
+      description: "The requirements for the logging and monitoring of events and\
+        \ for the secure handling of metadata are implemented by technically supported\
+        \ procedures with regard to the following restrictions:\n\n\u2022 Access only\
+        \ for authorised users and systems;\n\n\u2022 Retention for the specified\
+        \ period; and\n\n\u2022 Deletion when further retention is no longer necessary\
+        \ for the purpose of collection."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-13
+      name: Logging and Monitoring - Identification of Events
+      description: "The logging data is automatically monitored for events that may\
+        \ violate the protection goals in accordance with the logging and monitoring\
+        \ requirements. This also includes the detection of relationships between\
+        \ events (event correlation). \n\nIdentified events are automatically reported\
+        \ to the appropriate departments for prompt evaluation and action."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-14
+      name: Logging and Monitoring - Storage of the Logging Data
+      description: "The Cloud Service Provider retains the generated log data and\
+        \ keeps these in an appropriate, unchangeable and aggregated form, regardless\
+        \ of the source of such data, so that a central, authorised evaluation of\
+        \ the data is possible. Log data is deleted if it is no longer required for\
+        \ the purpose for which they were collected. \n\nBetween logging servers and\
+        \ the assets to be logged, authentication takes place to protect the integrity\
+        \ and authenticity of the information transmitted and stored. The transfer\
+        \ takes place using state-of-the-art encryption or a dedicated administration\
+        \ network (out-of-band management)."
+      annotation: The Cloud Service Provider provides a customer-specific logging
+        (in terms of scope and duration of retention period) upon request of the Cloud
+        Customer. Depending on the protection requirements of the Cloud Service Provider
+        and the technical feasibility, a logical or physical separation of log and
+        customer data is carried out.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-15
+      name: Logging and Monitoring - Accountability
+      description: "The log data generated allows an unambiguous identification of\
+        \ user accesses at tenant level to support (forensic) analysis in the event\
+        \ of a security incident. \n\nInterfaces are available to conduct forensic\
+        \ analyses and perform backups of infrastructure components and their network\
+        \ communication."
+      annotation: 'On request of the Cloud customer, the Cloud Service Provider provides
+        the logs relating to the cloud customer in an appropriate form and in a timely
+        manner so that the cloud customer can investigate any incidents relating to
+        them.
+
+        Infrastructure components in the sense of this criterion are e.g. fabric controllers,
+        network components and virtualisation servers.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-16
+      name: Logging and Monitoring - Configuration
+      description: "Access to system components for logging and monitoring in the\
+        \ Cloud Service Provider\u2019s area of responsibility is restricted to authorised\
+        \ users. Changes to the configuration are made in accordance with the applicable\
+        \ policies (cf. DEV-03)."
+      annotation: Access to system components for logging and monitoring in the Cloud
+        Service Provider's area of responsibility requires two-factor authentication.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-17
+      name: Logging and Monitoring - Availability of the Monitoring Software
+      description: "The Cloud Service Provider monitors the system components for\
+        \ logging and monitoring in its area of responsibility. Failures are automatically\
+        \ and promptly reported to the Cloud Service Provider\u2019s responsible departments\
+        \ so that these can assess the failures and take required action."
+      annotation: The system components for logging and monitoring are designed in
+        such a way that the overall functionality is not restricted if individual
+        components fail.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-18
+      name: Managing Vulnerabilities, Malfunctions and Errors - Concept
+      description: "Guidelines and instructions with technical and organisational\
+        \ measures are documented, communicated and provided in accordance with SP-01\
+        \ to ensure the timely identification and addressing of vulnerabilities in\
+        \ the system components used to provide the cloud service. These guidelines\
+        \ and instructions contain specifications regarding the following aspects:\n\
+        \n\u2022 Regular identification of vulnerabilities;\n\n\u2022 Assessment of\
+        \ the severity of identified vulnerabilities;\n\n\u2022 Prioritisation and\
+        \ implementation of actions to promptly remediate or mitigate identified vulnerabilities\
+        \ based on severity and according to defined timelines; and\n\n\u2022 Handling\
+        \ of system components for which no measures are initiated for the timely\
+        \ remediation or mitigation of vulnerabilities."
+      annotation: Identified vulnerabilities can be classified according to established
+        metrics such as CVSS or OWASP. The decision not to remediate or mitigate identified
+        vulnerabilities must be made by the Cloud Service Provider based on a risk
+        assessment. If necessary, risk-compensating measures must be taken.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-19
+      name: Managing Vulnerabilities, Malfunctions and Errors - Penetration Tests
+      description: "The Cloud Service Provider has penetration tests carried out by\
+        \ qualified internal personnel or external service providers at least once\
+        \ a year. The penetration tests are carried out according to a documented\
+        \ test methodology and include the system components relevant to the provision\
+        \ of the cloud service in the area of responsibility of the Cloud Service\
+        \ Provider, which have been identified as such in a risk analysis. \n\nThe\
+        \ Cloud Service Provider assess the severity of the findings made in penetration\
+        \ tests according to defined criteria.\n\nFor findings with medium or high\
+        \ criticality regarding the confidentiality, integrity or availability of\
+        \ the cloud service, actions must be taken within defined time windows for\
+        \ prompt remediation or mitigation."
+      annotation: "The tests are carried out every six months. They must always be\
+        \ performed by independent external auditors. Internal personnel for penetration\
+        \ tests may support the external service providers.\nVulnerabilities should\
+        \ be classified according to damage potential and a period of time should\
+        \ be specified for the required response. The following classification according\
+        \ to the BSI publication \"Ein Praxis-Leitfaden f\xFCr IS-\nPenetrationstests\"\
+        \ can serve as an orientation:\n\n\u2022 High: Immediate reaction;\n\n\u2022\
+        \ Medium: Short-term response;\n\n\u2022 Low: Medium-term response; and\n\n\
+        \u2022 Information: Long-term response."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-20
+      name: Managing Vulnerabilities, Malfunctions and Errors - Measurements, Analyses
+        and Assessments of Procedures
+      description: 'The Cloud Service Provider regularly measures, analyses and assesses
+        the procedures with which vulnerabilities and incidents are handled to verify
+        their continued suitability, appropriateness and effectiveness.
+
+
+        Results are evaluated at least quarterly by accountable departments at the
+        Cloud Service Provider to initiate continuous improvement actions and to verify
+        their effectiveness.'
+      annotation: Common Vulnerabilities and Exposures (CVE) or similar methods are
+        a suitable way of documenting vulnerabilities and incidents.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-21
+      name: Involvement of Cloud customers in the event of incidents
+      description: 'The Cloud Service Provider periodically informs the cloud customer
+        on the status of incidents affecting the cloud customer, or, where appropriate
+        and necessary, involve the customer in the resolution, in a manner consistent
+        with the contractual agreements.
+
+
+        As soon as an incident has been resolved from the Cloud Service Provider''s
+        perspective, the cloud customer is informed according to the contractual agreements,
+        about the actions taken.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-22
+      name: Testing and Documentation of known Vulnerabilities
+      description: System components in the area of responsibility of the Cloud Service
+        Provider for the provision of the cloud service are automatically checked
+        for known vulnerabilities at least once a month in accordance with the policies
+        for handling vulnerabilities (cf. OPS-18), the severity is assessed in accordance
+        with defined criteria and measures for timely remediation or mitigation are
+        initiated within defined time windows.
+      annotation: "Available security patches are applied depending on the severity\
+        \ of the vulnerabilities, as determined based on the latest version of the\
+        \ Common Vulnerability Scoring System (CVSS):\n\n\u2022 Critical (CVSS = 9.0\
+        \ - 10.0): 3 hours;\n\n\u2022 High (CVSS = 7.0 - 8.9): 3 days;\n\n\u2022 Average\
+        \ (CVSS = 4.0 - 6.9): 1 month;\n\n\u2022 Low (CVSS = 0.1 - 3.9): 3 months.\n\
+        In contrast to penetration tests (Cf. OPS-20), which are carried out manually\
+        \ and according to an individual scheme, the check for open vulnerabilities\
+        \ is performed automatically, using so-called vulnerability scanners."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-23
+      name: Managing Vulnerabilities, Malfunctions and Errors - System Hardening
+      description: 'System components in the production environment used to provide
+        the cloud service under the Cloud Service Provider''s responsibility are hardened
+        according to generally accepted industry standards. The hardening requirements
+        for each system component are documented.
+
+
+        If non-modifiable ("immutable") images are used, compliance with the hardening
+        specifications as defined in the hardening requirements is checked upon creation
+        of the images. Configuration and log files regarding the continuous availability
+        of the images are retained.'
+      annotation: "System components in the Cloud Service Provider's area of responsibility\
+        \ are automatically monitored for compliance with hardening specifications.\
+        \ Deviations from the specifications are automatically reported to the appropriate\
+        \ departments of the Cloud Service Provider for immediate assessment and action.\n\
+        System components in the sense of the basic criterion are the objects required\
+        \ for the information security of the cloud service during the creation, processing,\
+        \ storage, transmission, deletion or destruction of information in the Cloud\
+        \ Service Provider's area of responsibility, e.g. firewalls, load balancers,\
+        \ web servers, application servers and database servers. These system components\
+        \ in turn consist of hardware and software objects. This criterion is limited\
+        \ to software objects such as hypervisors, operating systems, databases, programming\
+        \ interfaces (APIs), images (e.g. for virtual machines and containers) and\
+        \ applications for logging and monitoring security events.\n\nThe configuration\
+        \ and log files for non-modifiable mages include e.g.:\n\n\u2022 Configuration\
+        \ of the images used with regards to implemented hardening; and specifications\
+        \ including version history\n\n\u2022 Logs for file integrity monitoring of\
+        \ images in productive use.\n\nGenerally accepted industry standards are,\
+        \ for example, the Security Configuration Benchmark of the \u201CCentre for\
+        \ Internet Security\u201D (CIS) or the corresponding modules in the BSI IT-Grundschutz-Kompendium.\n\
+        \nCompliance with hardening specifications can be monitored with e.g. file\
+        \ integrity monitoring"
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:ops-24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node36
+      ref_id: OPS-24
+      name: Separation of Datasets in the Cloud Infrastructure
+      description: Cloud customer data stored and processed on shared virtual and
+        physical resources is securely and strictly separated according to a documented
+        approach based on OIS-07 risk analysis to ensure the confidentiality and integrity
+        of this data.
+      annotation: 'Resources in the storage network are segmented by secure zoning
+        (LUN binding and LUN masking).
+
+        Shared resources include memory, cores and storage networks. Technical segregation
+        (separation) of the stored and processed data of cloud customers into shared
+        resources can be achieved through firewalls, access lists, tagging, VLANs,
+        virtualisation and measures in the storage network (e.g. LUN binding and LUN
+        masking). Where the adequacy and effectiveness of segregation cannot be assessed
+        with reasonable assurance (e.g. due to complex implementation), evidence may
+        also be provided through expert third party review results (e.g. penetration
+        tests to validate the concept). The segregation of transmitted data is subject
+        to control COS-06.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      assessable: false
+      depth: 1
+      name: Identity and Access Management (IDM)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-01
+      name: Policy for user accounts and access rights
+      description: "A role and rights concept based on the business and security requirements\
+        \ of the Cloud Service Provider as well as a policy for managing user accounts\
+        \ and access rights for internal and external employees of the Cloud Service\
+        \ Provider and system components that have a role in automated authorisation\
+        \ processes of the Cloud Service Provider are documented, communicated and\
+        \ made available according to SP-01:\n\n\u2022 Assignment of unique usernames;\
+        \ \n\n\u2022 Granting and modifying user accounts and access rights based\
+        \ on the \u201Cleast-privilege- principle\u201D and the \u201Cneed-to-know\u201D\
+        \ principle;\n\n\u2022 Segregation of duties between operational and monitoring\
+        \ functions (\u201CSegregation of Duties\u201D); \n\n\u2022 Segregation of\
+        \ duties between managing, approving and assigning user accounts and access\
+        \ rights; \n\n\u2022 Approval by authorised individual(s) or system(s) for\
+        \ granting or modifying user accounts and access rights before data of the\
+        \ cloud customer or system components used to provision the cloud service\
+        \ can be accessed; \n\n\u2022 Regular review of assigned user accounts and\
+        \ access rights; \n\n\u2022 Blocking and removing access accounts in the event\
+        \ of inactivity; \n\n\u2022 Time-based or event-driven removal or adjustment\
+        \ of access rights in the event of changes to job responsibility; \n\n\u2022\
+        \ Two-factor or multi-factor authentication for users with privileged access;\n\
+        \n\u2022 Requirements for the approval and documentation of the management\
+        \ of user accounts and access rights."
+      annotation: System components in the sense of the basic criterion cf. definition
+        in OPS-23. Automated authorisation processes in the sense of this basic criterion
+        concern procedures for automated software provisioning (continuous delivery)
+        as well as for automated provisioning and deprovisioning of user accounts
+        and access rights based on approved requests.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-02
+      name: Granting and change of user accounts and access rights
+      description: Specified procedures for granting and modifying user accounts and
+        access rights for internal and external employees of the Cloud Service Provider
+        as well as for system components involved in automated authorisation processes
+        of the Cloud Service Provider ensure compliance with the role and rights concept
+        as well as the policy for managing user accounts and access rights.
+      annotation: The Cloud Service Provider offers cloud customers a self-service
+        with which they can independently assign and change user accounts and access
+        rights.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-03
+      name: Locking and withdrawal of user accounts in the event of inactivity or
+        multiple failed logins
+      description: 'User accounts of internal and external employees of the Cloud
+        Service Provider as well as for system components involved in automated authorisation
+        processes of the Cloud Service Provider are automatically locked if they have
+        not been used for a period of two months. Approval from authorised personnel
+        or system components are required to unlock these accounts.
+
+
+        Locked user accounts are automatically revoked after six months. After revocation,
+        the procedure for granting user accounts and access rights (cf. IDM-02) must
+        be repeated.'
+      annotation: Locking can result from a longer absence of the employee, for example,
+        due to illness, parental leave, or sabbatical.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-04
+      name: Withdraw or adjust access rights as the task area changes
+      description: Access rights are promptly revoked if the job responsibilities
+        of the Cloud Service Provider's internal or external staff or the tasks of
+        system components involved in the Cloud Service Provider's automated authorisation
+        processes change. Privileged access rights are adjusted or revoked within
+        48 hours after the change taking effect. All other access rights are adjusted
+        or revoked within 14 days. After revocation, the procedure for granting user
+        accounts and access rights (cf. IDM-02) must be repeated.
+      annotation: Changes in the task area of internal and external employees can
+        be triggered by changes in the employment relationship (e.g. termination,
+        transfer) or in contracts and agreements. For privileged access rights the
+        definition in IDM-06 applies.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-05
+      name: Regular review of access rights
+      description: Access rights of internal and external employees of the Cloud Service
+        Provider as well as of system components that play a role in automated authorisation
+        processes of the Cloud Service Provider are reviewed at least once a year
+        to ensure that they still correspond to the actual area of use. The review
+        is carried out by authorised persons from the Cloud Service Provider's organisational
+        units, who can assess the appropriateness of the assigned access rights based
+        on their knowledge of the task areas of the employees or system components.
+        Identified deviations will be dealt with promptly, but no later than 7 days
+        after their detection, by appropriate modification or withdrawal of the access
+        rights.
+      annotation: 'Privileged access rights are reviewed at least every six months. '
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-06
+      name: Privileged access rights
+      description: 'Privileged access rights for internal and external employees as
+        well as technical users of the Cloud Service Provider are assigned and changed
+        in accordance to the policy for managing user accounts and access rights (cf.
+        IDM-01) or a separate specific policy.
+
+
+        Privileged access rights are personalised, limited in time according to a
+        risk assessment and assigned as necessary for the execution of tasks ("need-to-know
+        principle"). Technical users are assigned to internal or external employees
+        of the Cloud Service Provider.
+
+
+        Activities of users with privileged access rights are logged in order to detect
+        any misuse of privileged access in suspicious cases. The logged information
+        is automatically monitored for defined events that may indicate misuse. When
+        such an event is identified, the responsible personnel are automatically informed
+        so that they can promptly assess whether misuse has occurred and take corresponding
+        action. In the event of proven misuse of privileged access rights, disciplinary
+        measures are taken in accordance with HR-04.'
+      annotation: "Privileged access rights in the sense of the Basic Criterion are\
+        \ those that enable employees of the Cloud Service Provider to perform any\
+        \ of the following activities: \n\n\u2022 Read or write access to the cloud\
+        \ customers' data processed, stored or transmitted in the cloud service, unless\
+        \ such data is encrypted or the encryption can be deactivated for access by\
+        \ the Cloud Service Provider; and\n\n\u2022 Changes to the operational and/or\
+        \ security configuration of the system components in the production environment,\
+        \ in particular the starting, stopping, deleting or deactivating of system\
+        \ components, if this can affect the confidentiality, integrity or availability\
+        \ of the data of the cloud customers (also indirectly, e.g. by deactivating\
+        \ the logging and monitoring of security-relevant events). Misused privileged\
+        \ access rights can be treated e.g. as a security incident, cf. SIM-01."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-07
+      name: Access to cloud customer data
+      description: The cloud customer is informed by the Cloud Service Provider whenever
+        internal or external employees of the Cloud Service Provider read or write
+        to the cloud customer's data processed, stored or transmitted in the cloud
+        service or have accessed it without the prior consent of the cloud customer.
+        The Information is provided whenever data of the cloud customer is/was not
+        encrypted, the encryption is/was disabled for access or the contractual agreements
+        do not explicitly exclude such information. The information contains the cause,
+        time, duration, type and scope of the access. The information is sufficiently
+        detailed to enable subject matter experts of the cloud customer to assess
+        the risks of the access. The information is provided in accordance with the
+        contractual agreements, or within 72 hours after the access.
+      annotation: 'Access to the data processed, stored or transmitted in the cloud
+        service by internal or external employees of the Cloud Service Provider requires
+        the prior consent of an authorised department of the cloud customer, provided
+        that the cloud customer''s data is not encrypted, encryption is disabled for
+        access, or contractual agreements do not explicitly exclude such consent.
+        For the consent, the cloud customer''s department is provided with meaningful
+        information about the cause, time, duration, type and scope of the access
+        supporting assessing the risks associated with the access.
+
+        Subject matter experts in the sense of this basic criterion is personnel from
+        e.g. IT, Compliance or Internal Audit. '
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-08
+      name: Confidentiality of authentication information
+      description: "The allocation of authentication information to access system\
+        \ components used to provide the cloud service to internal and external users\
+        \ of the cloud provider and system components that are involved in automated\
+        \ authorisation processes of the cloud provider is done in an orderly manner\
+        \ that ensures the confidentiality of the information. If passwords are used\
+        \ as authentication information, their confidentiality is ensured by the following\
+        \ procedures, as far as technically possible: \n\n\u2022 Users can initially\
+        \ create the password themselves or must change an initial password when logging\
+        \ on to the system component for the first time. An initial password loses\
+        \ its validity after a maximum of 14 days.\n\n\u2022 When creating passwords,\
+        \ compliance with the password specifications (cf. IDM-09) is enforced as\
+        \ far as technically possible.\n\n\u2022 The user is informed about changing\
+        \ or resetting the password.\n\n\u2022 The server-side storage takes place\
+        \ using cryptographically strong hash functions.\n\nDeviations are evaluated\
+        \ by means of a risk analysis and mitigating measures derived from this are\
+        \ implemented."
+      annotation: 'The users sign a declaration in which they assure that they treat
+        personal (or shared) authentication information confidentially and keep it
+        exclusively for themselves (within the members of the group).
+
+        Argon2i, for example, is suitable for using a password hash function.
+
+
+        Insofar as this is legally binding, declarations can be signed using an electronic
+        signature.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:idm-09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node61
+      ref_id: IDM-09
+      name: Authentication mechanisms
+      description: System components in the Cloud Service Provider's area of responsibility
+        that are used to provide the cloud service, authenticate users of the Cloud
+        Service Provider's internal and external employees as well as system components
+        that are involved in the Cloud Service Provider's automated authorisation
+        processes. Access to the production environment requires two-factor or multi-factor
+        authentication. Within the production environment, user authentication takes
+        place through passwords, digitally signed certificates or procedures that
+        achieve at least an equivalent level of security. If digitally signed certificates
+        are used, administration is carried out in accordance with the Guideline for
+        Key Management (cf. CRY-01). The password requirements are derived from a
+        risk assessment and documented, communicated and provided in a password policy
+        according to SP-01. Compliance with the requirements is enforced by the configuration
+        of the system components, as far as technically possible.
+      annotation: Access to the non-production environment requires two-factor or
+        multi-factor authentication. Within the non-production environment, users
+        are authenticated using passwords, digitally signed certificates, or procedures
+        that provide at least an equivalent level of security.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node71
+      assessable: false
+      depth: 1
+      name: Cryptography and Key Management (CRY)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node71
+      ref_id: CRY-01
+      name: Policy for the use of encryption procedures and key management
+      description: "Policies and instructions with technical and organisational safeguards\
+        \ for encryption procedures and key management are documented, communicated\
+        \ and provided according to SP-01, in which the following aspects are described:\n\
+        \n\u2022 Usage of strong encryption procedures and secure network protocols\
+        \ that correspond to the state-of-the-art;\n\n\u2022 Risk-based provisions\
+        \ for the use of encryption which are aligned with the information classification\
+        \ schemes (cf. AM-06) and consider the communication channel, type, strength\
+        \ and quality of the encryption;\n\n\u2022 Requirements for the secure generation,\
+        \ storage, archiving, retrieval, distribution, withdrawal and deletion of\
+        \ the keys; and \n\n\u2022 Consideration of relevant legal and regulatory\
+        \ obligations and requirements."
+      annotation: "The state-of-the-art of strong encryption procedures and secure\
+        \ network protocols is specified in the following BSI Technical Guidelines\
+        \ valid at the given time: \n\n\u2022 BSI TR-02102-1 Cryptographic Mechanisms:\
+        \ Recommendations and Key Lengths;\n\n\u2022 BSI TR-02102-2 Cryptographic\
+        \ Mechanisms: Use of Transport Layer Security (TLS);\n\n\u2022 BSI TR-02102-3\
+        \ Cryptographic Mechanisms: Use of Internet Protocol Security (IPSec) and\
+        \ Internet Key Exchange (IKEv2); and\n\n\u2022 BSI TR-02102-4 Cryptographic\
+        \ Mechanisms: Use of Secure Shell (SSH)."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node71
+      ref_id: CRY-02
+      name: Encryption of data for transmission (transport encryption)
+      description: The Cloud Service Provider has established procedures and technical
+        measures for strong encryption and authentication for the transmission of
+        data of cloud customers over public networks.
+      annotation: "The Cloud Service Provider has established procedures and technical\
+        \ measures for strong encryption and authentication for the transmission of\
+        \ all data.\nWhen transmitting data with normal protection requirements within\
+        \ the Cloud Service Provider\u2019s infrastructure, encryption is not mandatory\
+        \ provided that the data is not transmitted via public networks. In this case,\
+        \ the non-public environment of the Cloud Service Provider can generally be\
+        \ deemed trusted. The protocols TLS 1.2 and TLS 1.3 are currently regarded\
+        \ as strong, state-of-the-art transport encryptions, in each case in combination\
+        \ with Perfect Forward Secrecy. The specific configuration should comply with\
+        \ the recommendations of the (current) version of the BSI Technical Guideline\
+        \ TR-02102-2 \"Cryptographic Procedures: Recommendations and key lengths.\
+        \ Part 2 - Use of Transport Layer Security (TLS)\". Generally, the use of\
+        \ wildcard certificates is not considered a secure procedure.\n\nThe basic\
+        \ criterion for the transmission cloud customers' data, relates to e.g. the\
+        \ sending of electronic messages via public networks."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node71
+      ref_id: CRY-03
+      name: Encryption of sensitive data for storage
+      description: The Cloud Service Provider has established procedures and technical
+        safeguards to encrypt cloud customers' data during storage. The private keys
+        used for encryption are known only to the cloud customer in accordance with
+        applicable legal and regulatory obligations and requirements. Exceptions follow
+        a specified procedure. The procedures for the use of private keys, including
+        any exceptions, must be contractually agreed with the cloud customer.
+      annotation: 'The private keys used for encryption are known to the customer
+        exclusively and without exception in accordance with applicable legal and
+        regulatory obligations and requirements.
+
+        An exception to the requirement that keys are known only to the cloud customers
+        may be the use of a master key by the Cloud Service Provider. If the Cloud
+        Service Provider established a procedure to use a master key, the Cloud Service
+        Provider must perform sample-based checks regarding the suitability and effectiveness
+        of the procedure, on a regular basis. This criterion does not apply to data
+        that cannot be encrypted for the provision of the cloud service for functional
+        reasons.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cry-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node71
+      ref_id: CRY-04
+      name: Secure key management
+      description: "Procedures and technical safeguards for secure key management\
+        \ in the area of responsibility of the Cloud Service Provider include at least\
+        \ the following aspects: \n\n\u2022 Generation of keys for different cryptographic\
+        \ systems and applications;\n\n\u2022 Issuing and obtaining public-key certificates;\n\
+        \n\u2022 Provisioning and activation of the keys;\n\n\u2022 Secure storage\
+        \ of keys (separation of key management system from application and middleware\
+        \ level) including description of how authorised users get access;\n\n\u2022\
+        \ Changing or updating cryptographic keys including policies defining under\
+        \ which conditions and in which manner the changes and/or updates are to be\
+        \ realised;\n\n\u2022 Handling of compromised keys; \n\n\u2022 Withdrawal\
+        \ and deletion of keys; and \n\n\u2022 If pre-shared keys are used, the specific\
+        \ provisions relating to the safe use of this procedure are specified separately."
+      annotation: Keys should be withdrawn or deleted e.g. in the event of compromise
+        or employee changes. The Cloud Service Provider protects the keys which are
+        created and inserted into the cloud service by the cloud customers according
+        to the same criteria as the keys created by the Cloud Service Provider.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      assessable: false
+      depth: 1
+      name: Communication Security (COS)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-01
+      name: Technical safeguards
+      description: Based on the results of a risk analysis carried out according to
+        OIS-06, the Cloud Service Provider has implemented technical safeguards which
+        are suitable to promptly detect and respond to network-based attacks on the
+        basis of irregular incoming or outgoing traffic patterns and/or Distributed
+        Denial- of-Service (DDoS) attacks. Data from corresponding technical protection
+        measures implemented is fed into a comprehensive SIEM (Security Information
+        and Event Management) system, so that (counter) measures regarding correlating
+        events can be initiated. The safeguards are documented, communicated and provided
+        in accordance with SP-01.
+      annotation: "Technical measures ensure that no unknown (physical or virtual)\
+        \ devices join the Cloud Service Provider's (physical or virtual) network\
+        \ (e.g. MACSec according to IEEE 802.1X:2010). \nNetwork-based attacks can\
+        \ be conducted e.g. with MAC spoofing and ARP poisoning attacks. Technical\
+        \ measures to prevent unknown physical or virtual devices from joining a physical\
+        \ or virtual network can be based on e.g. MACSec according to IEEE 802.1X:2010. "
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-02
+      name: Security requirements for connections in the Cloud Service Provider's
+        network
+      description: "Specific security requirements are designed, published and provided\
+        \ for establishing connections within the Cloud Service Provider's network.\
+        \ The security requirements define for the Cloud Service Provider's area of\
+        \ responsibility: \n\n\u2022 in which cases the security zones are to be separated\
+        \ and in which cases cloud customers are to be logically or physically segregated;\n\
+        \n\u2022 which communication relationships and which network and application\
+        \ protocols are permitted in each case;\n\n\u2022 how the data traffic for\
+        \ administration and monitoring is segregated from each on network level;\n\
+        \n\u2022 which internal, cross-location communication is permitted and;\n\n\
+        \u2022 which cross-network communication is allowed"
+      annotation: 'Cross-location communication can be realised for e.g. individual
+        regions or data centres via e.g. WAN, LAN, VPN, RAS. '
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-03
+      name: Monitoring of connections in the Cloud Service Provider's network
+      description: 'A distinction is made between trusted and untrusted networks.
+        Based on a risk assessment, these are separated into different security zones
+        for internal and external network areas (and DMZ, if applicable). Physical
+        and virtualised network environments are designed and configured to restrict
+        and monitor the established connection to trusted or untrusted networks according
+        to the defined security requirements.
+
+
+        The entirety of the conception and configuration undertaken to monitor the
+        connections mentioned is assessed in a risk-oriented manner, at least annually,
+        with regard to the resulting security requirements.
+
+
+        Identified vulnerabilities and deviations are subject to risk assessment in
+        accordance with the risk management procedure (cf. OIS-06) and follow-up measures
+        are defined and tracked (cf. OPS-18).
+
+
+        At specified intervals, the business justification for using all services,
+        protocols, and ports is reviewed. The review also includes the justifications
+        for compensatory measures for the use of protocols that are considered insecure.'
+      annotation: The review of the security requirements depends on the measures
+        implemented to design the networks. For example, monitoring and reviewing
+        firewall rules or log files for abnormalities, as well as visual inspections
+        of physical network components for changes.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-04
+      name: Cross-network access
+      description: Each network perimeter is controlled by security gateways. The
+        system access authorisation for cross-network access is based on a security
+        assessment based on the requirements of the cloud customers.
+      annotation: 'Each network perimeter is controlled by redundant and highly-available
+        security gateways.
+
+        Cross-network access is access from one network to another network via a defined
+        network perimeter.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-05
+      name: Networks for administration
+      description: There are separate networks for the administrative management of
+        the infrastructure and for the operation of management consoles. These networks
+        are logically or physically separated from the cloud customer's network and
+        protected from unauthorised access by multi-factor authentication (cf. IDM-09).
+        Networks used by the Cloud Service Provider to migrate or create virtual machines
+        are also physically or logically separated from other networks
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-06
+      name: Segregation of data traffic in jointly used network environments
+      description: Data traffic of cloud customers in jointly used network environments
+        is segregated on network level according to a documented concept to ensure
+        the confidentiality and integrity of the data transmitted.
+      annotation: "In the case of IaaS/PaaS, the secure segregation is ensured by\
+        \ physically separated networks or by means of strongly encrypted VLANs. For\
+        \ the definition of strong encryption, the BSI Technical Guideline TR-02102\
+        \ must be considered.\nIf the suitability and effectiveness of the logical\
+        \ segmentation cannot be assessed with sufficient certainty (e.g. due to a\
+        \ complex implementation), evidence can also be provided based on audit results\
+        \ of expert third parties (e.g. security audits to validate the concept).\
+        \ The segregation of stored and processed data is subject of the criterion\
+        \ OPS-24. After successful authentication via an insecure communication channel\
+        \ (HTTP), a secure communication channel (HTTPS) is to be used. \n\nWith IaaS/PaaS,\
+        \ secure segregation is ensured by physically separated networks or strong\
+        \ encryption of the networks. For the definition of strong encryption, the\
+        \ BSI Technical Guideline TR-02102 must be considered (cf. CRY-01). \n\nIf\
+        \ the Cloud Service Provider does not use shared network environments for\
+        \ cloud customers and instead uses a physical segregation, the basic criterion\
+        \ is not applicable."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-07
+      name: Documentation of the network topology
+      description: The documentation of the logical structure of the network used
+        to provision or operate the Cloud Service, is traceable and up-to-date, in
+        order to avoid administrative errors during live operation and to ensure timely
+        recovery in the event of malfunctions in accordance with contractual obligations.
+        The documentation shows how the subnets are allocated and how the network
+        is zoned and segmented. In addition, the geographical locations in which the
+        cloud customers' data is stored are indicated.
+      annotation: Zoning is a segmentation of the subnets with a firewall implemented
+        at the network perimeters.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:cos-08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node76
+      ref_id: COS-08
+      name: Policies for data transmission
+      description: Policies and instructions with technical and organisational safeguards
+        in order to protect the transmission of data against unauthorised interception,
+        manipulation, copying, modification, redirection or destruction are documented,
+        communicated and provided according to SP-01. The policies and instructions
+        establish a reference to the classification of information (cf. AM-06).
+      annotation: A safeguard against unauthorised interception, manipulation, copying,
+        modification, redirection or destruction of data during transmission is e.g.
+        the use of transport encryption according to CRY-02.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node85
+      assessable: false
+      depth: 1
+      name: Portability and Interoperability (PI)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node85
+      ref_id: PI-01
+      name: Documentation and safety of input and output interfaces
+      description: 'The cloud service can be accessed by other cloud services or IT
+        systems of cloud customers through documented inbound and outbound interfaces.
+        Further, the interfaces are clearly documented for subject matter experts
+        on how they can be used to retrieve the data.
+
+
+        Communication takes place through standardised communication protocols that
+        ensure the confidentiality and integrity of the transmitted information according
+        to its protection requirements. Communication over untrusted networks is encrypted
+        according to CRY-02.
+
+
+        The type and scope of the documentation on the interfaces is geared to the
+        needs of the cloud customers'' subject matter experts in order to enable the
+        use of these interfaces. The information is maintained in such a way that
+        it is applicable for the cloud service''s version which is intended for productive
+        use.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node85
+      ref_id: PI-02
+      name: Contractual agreements for the provision of data
+      description: "In contractual agreements, the following aspects are defined with\
+        \ regard to the termination of the contractual relationship, insofar as these\
+        \ are applicable to the cloud service:\n\n\u2022 Type, scope and format of\
+        \ the data the Cloud Service Provider provides to the cloud customer;\n\n\u2022\
+        \ Definition of the timeframe, within which the Cloud Service Provider makes\
+        \ the data available to the cloud customer \n\n\u2022 Definition of the point\
+        \ in time as of which the Cloud Service Provider makes the data inaccessible\
+        \ to the cloud customer and deletes these; and\n\n\u2022 The cloud customers'\
+        \ responsibilities and obligations to cooperate for the provision of the data.\n\
+        \nThe definitions are based on the needs of subject matter experts of potential\
+        \ customers who assess the suitability of the cloud service with regard to\
+        \ a dependency on the Cloud Service Provider as well as legal and regulatory\
+        \ requirements."
+      annotation: "The design of the aspects is based on legal and regulatory requirements\
+        \ in the environment of the Cloud Service Provider. The Cloud Service Provider\
+        \ identifies the requirements regularly, at least once a year, and checks\
+        \ these for actuality and adjusts the contractual agreements accordingly.\n\
+        The type and scope of the data and the responsibilities for its provision\
+        \ depend on the service model of the cloud service or the services and functions\
+        \ provided:\n\nIn the case of IaaS and PaaS, the cloud customer is generally\
+        \ responsible for extracting and backing up the data which is stored in the\
+        \ cloud service before termination of the contractual relationship (cf. complementary\
+        \ requirement).\n\nThe Cloud Service Provider's responsibility is typically\
+        \ limited to the provision of data for the configuration of the infrastructure\
+        \ or platform that the cloud customer has set up within its environment (e.g.\
+        \ configuration of networks, images of virtual machines and containers).\n\
+        \nWith SaaS, the cloud customer typically relies on export functions provided\
+        \ by the Cloud Service Provider. Data created by the cloud customer should\
+        \ be available in the same format as stored in the cloud service. Other data,\
+        \ including relevant log files and metadata, should be available in an applicable\
+        \ standard format, such as CSV, JSON or XML.\n\nIn Germany, legal requirements\
+        \ for retention can be found, for example, in the German Tax Code (\xA7147\
+        \ AO) and the German Commercial Code (\xA7257 HGB). These provide for a retention\
+        \ obligation of six or ten years."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pi-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node85
+      ref_id: PI-03
+      name: Secure deletion of data
+      description: 'The Cloud Service Provider''s procedures for deleting the cloud
+        customers'' data upon termination of the contractual relationship ensure compliance
+        with the contractual agreements (cf. PI-02).
+
+
+        The deletion includes data in the cloud customer''s environment, metadata
+        and data stored in the data backups.
+
+
+        The deletion procedures prevent recovery by forensic means.'
+      annotation: Suitable methods for data deletion are e.g. multiple overwriting
+        or deletion of the encryption key.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      assessable: false
+      depth: 1
+      name: Procurement, Development and Modification of Information Systems (DEV)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-01
+      name: Policies for the development/procurement of information systems
+      description: "Policies and instructions with technical and organisational measures\
+        \ for the secure development of the cloud service are documented, communicated\
+        \ and provided in accordance with SP-01.\n\nThe policies and instructions\
+        \ contain guidelines for the entire life cycle of the cloud service and are\
+        \ based on recognised standards and methods with regard to the following aspects:\n\
+        \n\u2022 Security in Software Development (Requirements, Design, Implementation,\
+        \ Testing and Verification); \n\n\u2022 Security in software deployment (including\
+        \ continuous delivery); and\n\n\u2022 Security in operation (reaction to identified\
+        \ faults and vulnerabilities)."
+      annotation: "In procurement, products are preferred which have been certified\
+        \ according to the \"Common Criteria for Information Technology Security Evaluation\"\
+        \ (short: Common Criteria - CC) according Evaluation Assurance Level EAL 4.\
+        \ If non-certified products are to be procured for available certified products,\
+        \ a risk assessment is carried out in accordance with OIS-07.\nThe software\
+        \ provision can be carried out e.g. with Continuous Delivery methods.\n\n\
+        Accepted standards and methods are, for example:\n\n\u2022 ISO/IEC 27034;\
+        \ and\n\n\u2022 OWASP Secure Software Development Lifecycle (S-SDLC)."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-02
+      name: Outsourcing of the development
+      description: "In the case of outsourced development of the cloud service (or\
+        \ individual system components), specifications regarding the following aspects\
+        \ are contractually agreed between the Cloud Service Provider and the outsourced\
+        \ development contractor:\n\n\u2022 Security in software development (requirements,\
+        \ design, implementation, tests and verifications) in accordance with recognised\
+        \ standards and methods;\n\n\u2022 Acceptance testing of the quality of the\
+        \ services provided in accordance with the agreed functional and non-functional\
+        \ requirements; and\n\n\u2022 Providing evidence that sufficient verifications\
+        \ have been carried out to rule out the existence of known vulnerabilities."
+      annotation: 'Outsourced development in the sense of the basic criterion refers
+        to the development of system components used specifically for the cloud service
+        by a contractor of the Cloud Service Provider. The development takes place
+        according to the processes of the contractor.
+
+
+        The purchase of software available on the market as well as the integration
+        of external employees into the processes of the Cloud Service Provider do
+        not constitute outsourcing in the sense of this basic criterion.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-03
+      name: Policies for changes to information systems
+      description: "Policies and instructions with technical and organisational safeguards\
+        \ for change management of system components of the cloud service within the\
+        \ scope of software deployment are documented, communicated and provided according\
+        \ to SP-01 with regard to the following aspects:\n\n\u2022 Criteria for risk\
+        \ assessment, categorisation and prioritisation of changes and related requirements\
+        \ for the type and scope of testing to be performed, and necessary approvals\
+        \ for the development/implementation of the change and releases for deployment\
+        \ in the production environment by authorised personnel or system components;\n\
+        \n\u2022 Requirements for the performance and documentation of tests;\n\n\u2022\
+        \ Requirements for segregation of duties during development, testing and release\
+        \ of changes;\n\n\u2022 Requirements for the proper information of cloud customers\
+        \ about the type and scope of the change as well as the resulting obligations\
+        \ to cooperate in accordance with the contractual agreements;\n\n\u2022 Requirements\
+        \ for the documentation of changes in system, operational and user documentation;\
+        \ and\n\n\u2022 Requirements for the implementation and documentation of emergency\
+        \ changes that must comply with the same level of security as normal changes."
+      annotation: 'Changes in the sense of the basic criterion are those that can
+        lead to changes in the configuration, functionality or security of system
+        components of the cloud service in the production environment. This includes
+        changes to the infrastructure as well as to the source code.
+
+
+        If individual changes are combined in a new release, update, patch or comparable
+        software object for the purpose of software provisioning, this software object
+        is deemed to be a change within the meaning of the basic criterion, but not
+        the individual changes contained therein.
+
+
+        Changes to the existing network configuration must also undergo a specified
+        procedure, as they are necessary for effective segregation of cloud customers.
+
+
+        Personnel and system components receive authorisation to approve changes in
+        accordance with the requirements for access and access authorisations (cf.
+        IDM-01) via a specified procedure (cf. IDM-02).Relevant information includes
+        descriptions of e.g. new functions.
+
+
+        The cloud customer''s obligations to cooperate can define that, e.g. the cloud
+        customer must carry out certain tests.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-04
+      name: Safety training and awareness programme regarding continuous software
+        delivery and associated systems, components or tools.
+      description: The Cloud Service Provider provides a training program for regular,
+        target group-oriented security training and awareness for internal and external
+        employees on standards and methods of secure software development and provision
+        as well as on how to use the tools used for this purpose. The program is regularly
+        reviewed and updated with regard to the applicable policies and instructions,
+        the assigned roles and responsibilities and the tools used.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-05
+      name: Risk assessment, categorisation and prioritisation of changes
+      description: In accordance with the applicable policies (cf. DEV-03), changes
+        are subjected to a risk assessment with regard to potential effects on the
+        system components concerned and are categorised and prioritised accordingly.
+      annotation: In accordance with the contractual agreements, meaningful information
+        about the occasion, time, duration, type and scope of the change is submitted
+        to authorised bodies of the cloud customer so that they can carry out their
+        own risk assessment before the change is made available in the production
+        environment. Regardless of the contractual agreements, this is done for changes
+        that have the highest risk category based on their risk assessment.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-06
+      name: Testing changes
+      description: 'Changes to the cloud service are subject to appropriate testing
+        during software development and deployment.
+
+
+        The type and scope of the tests correspond to the risk assessment. The tests
+        are carried out by appropriately qualified personnel of the Cloud Service
+        Provider or by automated test procedures that comply with the state-of-the-art.
+        Cloud customers are involved into the tests in accordance with the contractual
+        requirements.
+
+
+        The severity of the errors and vulnerabilities identified in the tests, which
+        are relevant for the deployment decision, is determined according to defined
+        criteria and actions for timely remediation or mitigation are initiated.'
+      annotation: The errors and vulnerabilities identified in tests can be assessed,
+        for example, according to the Common Vulnerability Scoring System (CVSS).
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-07
+      name: Logging of changes
+      description: System components and tools for source code management and software
+        deployment that are used to make changes to system components of the cloud
+        service in the production environment are subject to a role and rights concept
+        according to IDM-01 and authorisation mechanisms. They must be configured
+        in such a way that all changes are logged and can therefore be traced back
+        to the individuals or system components executing them.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-08
+      name: Version Control
+      description: Version control procedures are set up to track dependencies of
+        individual changes and to restore affected system components back to their
+        previous state as a result of errors or identified vulnerabilities.
+      annotation: Version control procedures provide appropriate safeguards to ensure
+        that the integrity and availability of cloud customer data is not compromised
+        when system components are restored back to their previous state.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-09
+      name: Approvals for provision in the production environment
+      description: 'Authorised personnel or system components of the Cloud Service
+        Provider approve changes to the cloud service based on defined criteria (e.g.
+        test results and required approvals) before these are made available to the
+        cloud customers in the production environment.
+
+
+        Cloud customers are involved in the release according to contractual requirements.'
+      annotation: The definitions for criterion DEV-03 apply.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:dev-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node89
+      ref_id: DEV-10
+      name: Separation of environments
+      description: Production environments are physically or logically separated from
+        test or development environments to prevent unauthorised access to cloud customer
+        data, the spread of malware, or changes to system components. Data contained
+        in the production environments is not used in test or development environments
+        in order not to compromise their confidentiality.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node100
+      assessable: false
+      depth: 1
+      name: Control and Monitoring of Service Providers and Suppliers (SSO)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node100
+      ref_id: SSO-01
+      name: Policies and instructions for controlling and monitoring third parties
+      description: "Policies and instructions for controlling and monitoring third\
+        \ parties (e.g. service providers or suppliers) whose services contribute\
+        \ to the provision of the cloud service are documented, communicated and provided\
+        \ in accordance with SP-01 with respect to the following aspects:\n\n\u2022\
+        \ Requirements for the assessment of risks resulting from the procurement\
+        \ of third-party services;\n\n\u2022 Requirements for the classification of\
+        \ third parties based on the risk assessment by the Cloud Service Provider\
+        \ and the determination of whether the third party is a subcontractor (cf.\
+        \ Supplementary Information);\n\n\u2022 Information security requirements\
+        \ for the processing, storage or transmission of information by third parties\
+        \ based on recognised industry standards;\n\n\u2022 Information security awareness\
+        \ and training requirements for staff;\n\n\u2022 applicable legal and regulatory\
+        \ requirements;\n\n\u2022 Requirements for dealing with vulnerabilities, security\
+        \ incidents and malfunctions;\n\n\u2022 Specifications for the contractual\
+        \ agreement of these requirements;\n\n\u2022 Specifications for the monitoring\
+        \ of these requirements; and\n\n\u2022 Specifications for applying these requirements\
+        \ also to service providers used by the third parties, insofar as the services\
+        \ provided by these service providers also contribute to the provision of\
+        \ the cloud service."
+      annotation: "Subservice organisations of the Cloud Service Provider are contractually\
+        \ obliged to provide regular reports by independent auditors on the suitability\
+        \ of the design and operating effectiveness of their service-related internal\
+        \ control system.\n\nThe reports include the complementary subservice organisations\
+        \ that are required, together with the controls of the Cloud Service Provider,\
+        \ to meet the applicable basic criteria of BSI C5 with reasonable assurance.\n\
+        \nIn case no reports can be provided, the Cloud Service Provider agrees appropriate\
+        \ information and audit rights to assess the suitability and effectiveness\
+        \ of the service-related internal control system, including the complementary\
+        \ controls, by qualified personnel.\nReports by independent auditors on the\
+        \ suitability of the design and operating effectiveness of their service-related\
+        \ internal control system are, for example, attestation reports in accordance\
+        \ with ISAE 3402, IDW PS 951, SOC 2 or BSI C5.\n\nQualified personnel works,\
+        \ for example, in the Cloud Service Provider's internal audit department or\
+        \ is commissioned by the Cloud Service Provider in form of expert third parties,\
+        \ such as audit firms, and may hold relevant certifications such as \"Certified\
+        \ Internal Auditor (CIA)\". \n\nThe complementary controls at the sub-service\
+        \ provider are necessary in order to, together with the controls of the Cloud\
+        \ Service Provider, fulfil the applicable C5 criteria with reasonable assurance.\n\
+        \nApplicable legal and regulatory requirements may exist, for example, in\
+        \ the areas of data protection, intellectual property rights or copyright.\n\
+        \nIf legal or regulatory requirements provide for a regulation deviating from\
+        \ these criteria for the control of subcontractors, these regulations remain\
+        \ unaffected by the C5 criteria."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node100
+      ref_id: SSO-02
+      name: Risk assessment of service providers and suppliers
+      description: "Service providers and suppliers of the Cloud Service Provider\
+        \ undergo a risk assessment in accordance with the policies and instructions\
+        \ for the control and monitoring of third parties prior to contributing to\
+        \ the delivery of the cloud service. The adequacy of the risk assessment is\
+        \ reviewed regularly, at least annually, by qualified personnel of the Cloud\
+        \ Service Provider during service usage.\n \nThe risk assessment includes\
+        \ the identification, analysis, evaluation, handling and documentation of\
+        \ risks with regard to the following aspects:\n\n\u2022 Protection needs regarding\
+        \ the confidentiality, integrity, availability and authenticity of information\
+        \ processed, stored or transmitted by the third party; \n\n\u2022 Impact of\
+        \ a protection breach on the provision of the cloud service;\n\n\u2022 The\
+        \ Cloud Service Provider's dependence on the service provider or supplier\
+        \ for the scope, complexity and uniqueness of the service purchased, including\
+        \ the consideration of possible alternatives."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node100
+      ref_id: SSO-03
+      name: Directory of service providers and suppliers
+      description: "The Cloud Service Provider maintains a directory for controlling\
+        \ and monitoring the service providers and suppliers who contribute services\
+        \ to the delivery of the cloud service. The following information is maintained\
+        \ in the directory:\n\n\u2022 Company name;\n\n\u2022 Address;\n\n\u2022 Locations\
+        \ of data processing and storage;\n\n\u2022 Responsible contact person at\
+        \ the service provider/supplier;\n\n\u2022 Responsible contact person at the\
+        \ cloud service provider;\n\n\u2022 Description of the service;\n\n\u2022\
+        \ Classification based on the risk assessment;\n\n\u2022 Beginning of service\
+        \ usage; and\n\n\u2022 Proof of compliance with contractually agreed requirements.\n\
+        \nThe information in the list is checked at least annually for completeness,\
+        \ accuracy and validity."
+      annotation: It is not necessary to maintain a single central register in order
+        to fulfil the basic criterion.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node100
+      ref_id: SSO-04
+      name: Monitoring of compliance with requirements
+      description: "The Cloud Service Provider monitors compliance with information\
+        \ security requirements and applicable legal and regulatory requirements in\
+        \ accordance with policies and instructions concerning controlling and monitoring\
+        \ of third-parties.\n\nMonitoring includes a regular review of the following\
+        \ evidence to the extent that such evidence is to be provided by third parties\
+        \ in accordance with the contractual agreements:\n\n\u2022 reports on the\
+        \ quality of the service provided;\n\n\u2022 certificates of the management\
+        \ systems' compliance with international standards;\n\n\u2022 independent\
+        \ third-party reports on the suitability and operating effectiveness of their\
+        \ service-related internal control systems; and\n\n\u2022 Records of the third\
+        \ parties on the handling of vulnerabilities, security incidents and malfunctions.\n\
+        \nThe frequency of the monitoring corresponds to the classification of the\
+        \ third party based on the risk assessment conducted by the Cloud Service\
+        \ Provider (cf. SSO-02). The results of the monitoring are included in the\
+        \ review of the third party's risk assessment.\n\nIdentified violations and\
+        \ deviations are subjected to analysis, evaluation and treatment in accordance\
+        \ with the risk management procedure (cf. OIS-07)."
+      annotation: "The procedures for monitoring compliance with the requirements\
+        \ are supplemented by automatic procedures relating to the following aspects:\n\
+        \n\u2022 Configuration of system components;\n\n\u2022 Performance and availability\
+        \ of system components;\n\n\u2022 Response time to malfunctions and security\
+        \ incidents; and\n\n\u2022 Recovery time (time until completion of error handling).\n\
+        \nIdentified violations and discrepancies are automatically reported to the\
+        \ responsible personnel or system components of the Cloud Service Provider\
+        \ for prompt assessment and action.\nEvidence for the review of the suitability\
+        \ and operating effectiveness of the service-related internal control system\
+        \ include reports in accordance with ISAE 3402, IDW PS 951, SOC 2 or BSI C5.\n\
+        \nIn the evidence provided by the third parties, the Cloud Service Provider\
+        \ reviews, for example, the following aspects and, if necessary, incorporates\
+        \ the findings into the risk assessment in order to derive and initiate mitigating\
+        \ actions:\n\n\u2022 The scope and the validity respectively the period covered\
+        \ by the evidence;\n\n\u2022 For attestation reports: Qualifications of the\
+        \ opinion, included deviations/other observations including management's response\
+        \ and corresponding controls to be implemented and executed by the Cloud Service\
+        \ Provider;\n\n\u2022 Disclosed subcontractors incl. any changes among those\
+        \ (e.g. additional subcontractor); and\n\n\u2022 Stated security incidents."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sso-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node100
+      ref_id: SSO-05
+      name: Exit strategy for the receipt of benefits
+      description: "The Cloud Service Provider has defined and documented exit strategies\
+        \ for the purchase of services where the risk assessment of the service providers\
+        \ and suppliers regarding the scope, complexity and uniqueness of the purchased\
+        \ service resulted in a very high dependency (cf. Supplementary Information).\n\
+        \nExit strategies are aligned with operational continuity plans and include\
+        \ the following aspects:\n\n\u2022 Analysis of the potential costs, impacts,\
+        \ resources and timing of the transition of a purchased service to an alternative\
+        \ service provider or supplier;\n\n\u2022 Definition and allocation of roles,\
+        \ responsibilities and sufficient resources to perform the activities for\
+        \ a transition;\n\n\u2022 Definition of success criteria for the transition;\
+        \ and\n\n\u2022 Definition of indicators for monitoring the performance of\
+        \ services, which should initiate the withdrawal from the service if the results\
+        \ are unacceptable."
+      annotation: "A very high dependency can be assumed in the following situations\
+        \ in particular:\n\n\u2022 The purchased service is absolutely required for\
+        \ the provision of the cloud service \u2013 this situation is given when the\
+        \ Cloud Service Provider:\n\n    - provides the cloud service from data centres\
+        \ operated by third parties; and\n\n    - provides a SaaS service and uses\
+        \ the IaaS or PaaS of another Cloud Service Provider.\n\n\u2022 The service\
+        \ cannot be obtained within one month from an alternative service provider\
+        \ or supplier, as: \n\n    - It is unique on the market and no other supplier\
+        \ can deliver it;\n\n    - It is strongly individualised by the service provider\
+        \ or supplier and/or the Cloud Service Provider;\n\n    - It cannot be supplied\
+        \ by any other provider in the required quality of service; and\n\n    - It\
+        \ requires specific knowledge that is only/mainly available to the current\
+        \ service provider or supplier and not to the Cloud Service Provider."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node106
+      assessable: false
+      depth: 1
+      name: Security Incident Management (SIM)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node106
+      ref_id: SIM-01
+      name: Policy for security incident management
+      description: 'Policies and instructions with technical and organisational safeguards
+        are documented, communicated and provided in accordance with SP-01 to ensure
+        a fast, effective and proper response to all known security incidents.
+
+
+        The Cloud Service Provider defines guidelines for the classification, prioritisation
+        and escalation of security incidents and creates interfaces to the incident
+        management and business continuity management.
+
+
+        In addition, the Cloud Service Provider has set up a "Computer Emergency Response
+        Team" (CERT), which contributes to the coordinated resolution of occurring
+        security incidents.
+
+
+        Customers affected by security incidents are informed in a timely and appropriate
+        manner.'
+      annotation: There are instructions as to how the data of a suspicious system
+        can be collected in a conclusive manner in the event of a security incident.
+        In addition, there are analysis plans for typical security incidents and an
+        evaluation methodology so that the collected information does not lose its
+        evidential value in any subsequent legal assessment.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node106
+      ref_id: SIM-02
+      name: Processing of security incidents
+      description: Subject matter experts of the Cloud Service Provider, together
+        with external security providers where appropriate, classify, prioritise and
+        perform root-cause analyses for events that could constitute a security incident.
+      annotation: The Cloud Service Provider simulates the identification, analysis
+        and defence of security incidents and attacks at least once a year through
+        appropriate tests and exercises (e.g. Red Team training).
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node106
+      ref_id: SIM-03
+      name: Documentation and reporting of security incidents
+      description: After a security incident has been processed, the solution is documented
+        in accordance with the contractual agreements and the report is sent to the
+        affected customers for final acknowledgement or, if applicable, as confirmation.
+      annotation: 'The customer can either actively approve solutions or the solution
+        is automatically approved after a certain period.
+
+
+        Information on security incidents or confirmed security breaches is made available
+        to all affected customers.
+
+
+        The contract between the Cloud Service Provider and the cloud customer regulates
+        which data is made available to the cloud customer for his own analysis in
+        the event of security incidents.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node106
+      ref_id: SIM-04
+      name: Duty of the users to report security incidents to a central body
+      description: 'The Cloud Service Provider informs employees and external business
+        partners of their obligations. If necessary, they agree to or are contractually
+        obliged to report all security events that become known to them and are directly
+        related to the cloud service provided by the Cloud Service Provider to a previously
+        designated central office of the Cloud Service Provider promptly.
+
+
+        In addition, the Cloud Service Provider communicates that "false reports"
+        of events that do not subsequently turn out to be incidents do not have any
+        negative consequences.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:sim-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node106
+      ref_id: SIM-05
+      name: Evaluation and learning process
+      description: Mechanisms are in place to measure and monitor the type and scope
+        of security incidents and to report them to support agencies. The information
+        obtained from the evaluation is used to identify recurrent or significant
+        incidents and to identify the need for further protection.
+      annotation: Supporting bodies may be external service providers or government
+        agencies such as the BSI.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node112
+      assessable: false
+      depth: 1
+      name: Business Continuity Management (BCM)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node112
+      ref_id: BCM-01
+      name: Top management responsibility
+      description: 'The top management (or a member of the top management) of the
+        Cloud Service Provider is named as the process owner of business continuity
+        and emergency management and is responsible for establishing the process within
+        the company as well as ensuring compliance with the guidelines. They must
+        ensure that sufficient resources are made available for an effective process.
+
+
+        People in management and other relevant leadership positions demonstrate leadership
+        and commitment to this issue by encouraging employees to actively contribute
+        to the effectiveness of continuity and emergency management.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node112
+      ref_id: BCM-02
+      name: Business impact analysis policies and instructions
+      description: "Policies and instructions to determine the impact of any malfunction\
+        \ to the cloud service or enterprise are documented, communicated and made\
+        \ available in accordance with SP-01. The following aspects are considered\
+        \ as minimum:\n\n\u2022 Possible scenarios based on a risk analysis;\n\n\u2022\
+        \ Identification of critical products and services\n\n\u2022 Identify dependencies,\
+        \ including processes (including resources required), applications, business\
+        \ partners and third parties;\n\n\u2022 Capture threats to critical products\
+        \ and services;\n\n\u2022 Identification of effects resulting from planned\
+        \ and unplanned malfunctions and changes over time;\n\n\u2022 Determination\
+        \ of the maximum acceptable duration of malfunctions;\n\n\u2022 Identification\
+        \ of restoration priorities;\n\n\u2022 Determination of time targets for the\
+        \ resumption of critical products and services within the maximum acceptable\
+        \ time period (RTO);\n\n\u2022 Determination of time targets for the maximum\
+        \ reasonable period during which data can be lost and not recovered (RPO);\
+        \ and\n\n\u2022 Estimation of the resources needed for resumption."
+      annotation: Scenarios to be considered according to the basic criterion are,
+        for example, the loss of personnel, buildings, infrastructure and service
+        providers.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node112
+      ref_id: BCM-03
+      name: Planning business continuity
+      description: "Based on the business impact analysis, a single framework for\
+        \ operational continuity and business plan planning will be implemented, documented\
+        \ and enforced to ensure that all plans are consistent. Planning is based\
+        \ on established standards, which are documented in a \"Statement of Applicability\"\
+        .\n\nBusiness continuity plans and contingency plans take the following aspects\
+        \ into account:\n\n\u2022 Defined purpose and scope with consideration of\
+        \ the relevant dependencies;\n\n\u2022 Accessibility and comprehensibility\
+        \ of the plans for persons who are to act accordingly;\n\n\u2022 Ownership\
+        \ by at least one designated person responsible for review, updating and approval;\n\
+        \n\u2022 Defined communication channels, roles and responsibilities including\
+        \ notification of the customer;\n\n\u2022 Recovery procedures, manual interim\
+        \ solutions and reference information (taking into account prioritisation\
+        \ in the recovery of cloud infrastructure components and services and alignment\
+        \ with customers);\n\n\u2022 Methods for putting the plans into effect;\n\n\
+        \u2022 Continuous process improvement; and\n\n\u2022 Interfaces to Security\
+        \ Incident Management."
+      annotation: The consistency of plans according to the basic criterion must also
+        be maintained when different locations are used.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:bcm-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node112
+      ref_id: BCM-04
+      name: Verification, updating and testing of the business continuity
+      description: The business impact analysis, business continuity plans and contingency
+        plans are reviewed, updated and tested on a regular basis (at least annually)
+        or after significant organisational or environmental changes. Tests involve
+        affected customers (tenants) and relevant third parties. The tests are documented
+        and results are taken into account for future operational continuity measures.
+      annotation: "In addition to the tests, exercises are also carried out which,\
+        \ among other things, have resulted in scenarios from security incidents that\
+        \ have already occurred in the past.\nTests are primarily conducted at the\
+        \ operational level and are aimed at operational target groups. Tests include\
+        \ e.g.:\n\n\u2022 Test of technical precautionary measures;\n\n\u2022 Functional\
+        \ tests; and\n\n\u2022 Plan review.\nExercises also take place on a tactical\
+        \ and strategic level. These include e.g.:\n\n\u2022 Plan meeting;\n\n\u2022\
+        \ Staff exercise;\n\n\u2022 Command post exercise;\n\n\u2022 Communication\
+        \ and alerting exercise;\n\n\u2022 Simulation of scenarios; and\n\n\u2022\
+        \ Emergency or full exercise.\n\nAfter a completed exercise:\n\n\u2022 Review\
+        \ and possible adaptation of the existing alarm plan.\nRelevant third parties\
+        \ are in particular service providers and suppliers of the Cloud Service Provider\
+        \ who contribute to the provision of the cloud service (cf. basic criteria\
+        \ SSO-02 and SSO-05)."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node117
+      assessable: false
+      depth: 1
+      name: Compliance (COM)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node117
+      ref_id: COM-01
+      name: Identification of applicable legal, regulatory, self-imposed or contractual
+        requirements
+      description: The legal, regulatory, self-imposed and contractual requirements
+        relevant to the information security of the cloud service as well as the Cloud
+        Service Provider's procedures for complying with these requirements are explicitly
+        defined and documented.
+      annotation: "The Cloud Service Provider's documentation may refer to the following\
+        \ requirements, among others:\n\n\u2022 Requirements for the protection of\
+        \ personal data (e.g. EU General Data Protection Regulation);\n\n\u2022 Compliance\
+        \ requirements based on contractual obligations with cloud customers (e.g.\
+        \ ISO/IEC 27001, SOC 2, PCI-DSS);\n\n\u2022 generally accepted accounting\
+        \ principles (e.g. in accordance with HGB or IFRS);\n\n\u2022 Requirements\
+        \ regarding access to data and auditability of digital documents (e.g. according\
+        \ to GDPdU); and\n\n\u2022 Other laws (e.g. according to BSIG or AktG)."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node117
+      ref_id: COM-02
+      name: Policy for planning and conducting audits
+      description: "Policies and instructions for planning and conducting audits are\
+        \ documented, communicated and made available in accordance with SP-01 and\
+        \ address the following aspects:\n\n\u2022 Restriction to read-only access\
+        \ to system components in accordance with the agreed audit plan and as necessary\
+        \ to perform the activities;\n\n\u2022 Activities that may result in malfunctions\
+        \ to the cloud service or breaches of contractual requirements are performed\
+        \ during scheduled maintenance windows or outside peak periods; and\n\n\u2022\
+        \ Logging and monitoring of activities."
+      annotation: The Cloud Service Provider grants its cloud customers contractually
+        guaranteed information and audit rights.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node117
+      ref_id: COM-03
+      name: Internal audits of the information security management system
+      description: "Subject matter experts check the compliance of the information\
+        \ security management system at regular intervals, at least annually, with\
+        \ the relevant and applicable legal, regulatory, self-imposed or contractual\
+        \ requirements (cf. COM-01) as well as compliance with the policies and instructions\
+        \ (cf. SP-01) within their scope of responsibility (cf. OIS-01) through internal\
+        \ audits (cf. \xA7 9.2 of ISO/IEC 27001).\n\nIdentified vulnerabilities and\
+        \ deviations are subject to risk assessment in accordance with the risk management\
+        \ procedure (cf. OIS-06) and follow-up measures are defined and tracked (cf.\
+        \ OPS-18)."
+      annotation: "Internal audits are supplemented by procedures to automatically\
+        \ monitor applicable requirements of policies and instructions with regard\
+        \ to the following aspects:\n\n\u2022 Configuration of system components to\
+        \ provide the cloud service within the Cloud Service Provider's area of responsibility;\n\
+        \n\u2022 Performance and availability of these system components;\n\n\u2022\
+        \ Response time to malfunctions and security incidents;\n\n\u2022 Recovery\
+        \ time (time to completion of error handling);\n\nIdentified vulnerabilities\
+        \ and deviations are automatically reported to the appropriate Cloud Service\
+        \ Provider\u2019s subject matter experts for immediate assessment and action.\n\
+        \ \nCloud customers can view compliance with selected contractual requirements\
+        \ in real time.\nSubject matter experts operate, e.g., in the Cloud Service\
+        \ Provider's internal revision department or expert third parties commissioned\
+        \ by the Cloud Service Provider, such as auditing companies, and may hold\
+        \ relevant certifications such as \"Certified Internal Auditor (CIA)\". \n\
+        \nWith regard to ISMS compliance, see Section 9.2 of ISO/IEC 27001."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:com-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node117
+      ref_id: COM-04
+      name: Information on information security performance and management assessment
+        of the ISMS
+      description: The top management of the Cloud Service Provider is regularly informed
+        about the information security performance within the scope of the ISMS in
+        order to ensure its continued suitability, adequacy and effectiveness. The
+        information is included in the management review of the ISMS at is performed
+        at least once a year.
+      annotation: 'The top management is a natural person or group of people who make
+        final decisions for the institution and are responsible for these.
+
+
+        The aspects to be dealt with in the management review of the ISMS are listed
+        in Section 9.3 of ISO / IEC 27001.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node122
+      assessable: false
+      depth: 1
+      name: Dealing with investigation requests from government agencies (INQ)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node122
+      ref_id: INQ-01
+      name: Legal Assessment of Investigative Inquiries
+      description: Investigation requests from government agencies are subjected to
+        a legal assessment by subject matter experts of the Cloud Service Provider.
+        The assessment determines whether the government agency has an applicable
+        and legally valid legal basis and what further steps need to be taken.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node122
+      ref_id: INQ-02
+      name: Informing Cloud Customers about Investigation Requests
+      description: The Cloud Service Provider informs the affected Cloud Customer(s)
+        without undue delay, unless the applicable legal basis on which the government
+        agency is based prohibits this or there are clear indications of illegal actions
+        in connection with the use of the Cloud Service.
+      annotation: This does not affect other legal or regulatory requirements that
+        requires earlier information for cloud customers.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node122
+      ref_id: INQ-03
+      name: Conditions for Access to or Disclosure of Data in Investigation Requests
+      description: Access to or disclosure of cloud customer data in connection with
+        government investigation requests is subject to the proviso that the Cloud
+        Service Provider's legal assessment has shown that an applicable and valid
+        legal basis exists and that the investigation request must be granted on that
+        basis.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:inq-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node122
+      ref_id: INQ-04
+      name: Limiting Access to or Disclosure of Data in Investigation Requests
+      description: 'The Cloud Service Provider''s procedures establishing access to
+        or disclosing data of cloud customers in the context of investigation requests
+        from governmental agencies ensure that the agencies only gain access to or
+        insight into the data that is the subject of the investigation request.
+
+
+        If no clear limitation of the data is possible, the Cloud Service Provider
+        anonymises or pseudonymises the data so that government agencies can only
+        assign it to those cloud customers who are subject of the investigation request.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      assessable: false
+      depth: 1
+      name: Product Safety and Security (PSS)
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-01
+      name: Guidelines and Recommendations for Cloud Customers
+      description: "The Cloud Service Provider provides cloud customers with guidelines\
+        \ and recommendations for the secure use of the cloud service provided. The\
+        \ information contained therein is intended to assist the cloud customer in\
+        \ the secure configuration, installation and use of the cloud service, to\
+        \ the extent applicable to the cloud service and the responsibility of the\
+        \ cloud user.\n\nThe type and scope of the information provided will be based\
+        \ on the needs of subject matter experts of the cloud customers who set information\
+        \ security requirements, implement them or verify the implementation (e.g.\
+        \ IT, Compliance, Internal Audit). The information in the guidelines and recommendations\
+        \ for the secure use of the cloud service address the following aspects, where\
+        \ applicable to the cloud service:\n\n\u2022 Instructions for secure configuration;\n\
+        \n\u2022 Information sources on known vulnerabilities and update mechanisms;\n\
+        \n\u2022 Error handling and logging mechanisms;\n\n\u2022 Authentication mechanisms;\n\
+        \n\u2022 Roles and rights concept including combinations that result in an\
+        \ \nelevated risk; and\n\n\u2022 Services and functions for administration\
+        \ of the cloud service by privileged users. \n\nThe information is maintained\
+        \ so that it is applicable to the cloud service provided in the version intended\
+        \ for productive use."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-02
+      name: Identification of Vulnerabilities of the Cloud Service
+      description: "The Cloud Service Provider applies appropriate measures to check\
+        \ the cloud service for vulnerabilities which might have been integrated into\
+        \ the cloud service during the software development process.\n\nThe procedures\
+        \ for identifying such vulnerabilities are part of the software development\
+        \ process and, depending on a risk assessment, include the following activities:\n\
+        \n\u2022 Static Application Security Testing;\n\n\u2022 Dynamic Application\
+        \ Security Testing;\n\n\u2022 Code reviews by the Cloud Service Provider's\
+        \ subject matter experts; and\n\n\u2022 Obtaining information about confirmed\
+        \ vulnerabilities in software libraries provided by third parties and used\
+        \ in their own cloud service.\n\nThe severity of identified vulnerabilities\
+        \ is assessed according to defined criteria and measures are taken to immediately\
+        \ eliminate or mitigate them."
+      annotation: 'The procedures for identifying such vulnerabilities also include
+        annual code reviews or security penetration tests by qualified external third
+        parties.
+
+        Known vulnerabilities in externally related system components (e.g. operating
+        systems) used for the development and provision of the cloud service but not
+        going through the Cloud Service Provider''s software development process are
+        the subject of criteria OPS-23 (Management of vulnerabilities, malfunctions
+        and errors - open vulnerability assessment).'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-03
+      name: Online Register of Known Vulnerabilities
+      description: "The Cloud Service Provider operates or refers to a daily updated\
+        \ online register of known vulnerabilities that affect the Cloud Service Provider\
+        \ and assets provided by the Cloud Service Provider that the cloud customers\
+        \ have to install, provide or operate themselves under the customers responsibility.\n\
+        \nThe presentation of the vulnerabilities follows the Common Vulnerability\
+        \ Scoring System (CVSS).\n\nThe online register is easily accessible to any\
+        \ cloud customer. The information contained therein forms a suitable basis\
+        \ for risk assessment and possible follow-up measures on the part of cloud\
+        \ users. \n\nFor each vulnerability, it is indicated whether software updates\
+        \ (e.g. patch, update) are available, when they will be rolled out and whether\
+        \ they will be deployed by the Cloud Service Provider, the cloud customer\
+        \ or both of them together."
+      annotation: 'Assets provided by the Cloud Service Provider, which must be installed,
+        provided or operated by cloud users within their area of responsibility, are
+        equipped with automatic update mechanisms. After approval by the respective
+        cloud user, software updates can be rolled out in such a way that they can
+        be distributed to all affected users without human interaction.
+
+        Assets provided by the Cloud Service Provider that cloud customers have to
+        install, deploy or operate themselves in their area of responsibility are
+        for example local software clients and apps as well as tools for integrating
+        the cloud service.
+
+
+        If the cloud service relies on other cloud services, this registry has to
+        incorporate or refer to the vulnerabilities of those other cloud services
+        in order for this criterion to be met.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-04
+      name: Error handling and Logging Mechanisms
+      description: "The cloud service provided is equipped with error handling and\
+        \ logging mechanisms. These enable cloud users to obtain security-related\
+        \ information about the security status of the cloud service as well as the\
+        \ data, services or functions it provides.\n\nThe information is detailed\
+        \ enough to allow cloud users to check the following aspects, insofar as they\
+        \ are applicable to the cloud service:\n\n\u2022 Which data, services or functions\
+        \ available to the cloud user within the cloud service, have been accessed\
+        \ by whom and when (Audit Logs);\n\n\u2022 Malfunctions during processing\
+        \ of automatic or manual actions; and\n\n\u2022 Changes to security-relevant\
+        \ configuration parameters, error handling and logging mechanisms, user authentication,\
+        \ action authorisation, cryptography, and communication security.\n\nThe logged\
+        \ information is protected from unauthorised access and modification and can\
+        \ be deleted by the Cloud Customer.\n\nIf the cloud customer is responsible\
+        \ for the activation or type and scope of logging, the Cloud Service Provider\
+        \ must provide appropriate logging capabilities."
+      annotation: 'Cloud users can retrieve security-related information via documented
+        interfaces which are suitable for further processing this information as part
+        of their Security Information and Event Management (SIEM).
+
+        In the case of a SaaS service for secure data exchange, the terms data, services
+        or functions would mean, for example, the logging of all read or write accesses
+        to the stored files and their metadata.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-05
+      name: Authentication Mechanisms
+      description: "The Cloud Service Provider provides authentication mechanisms\
+        \ that can force strong authentication (e.g. two or more factors) for users,\
+        \ IT components or applications within the cloud users' area of responsibility.\n\
+        These authentication mechanisms are set up at all access points that allow\
+        \ users, IT components or applications to interact with the cloud service.\
+        \ \n\nFor privileged users, IT components or applications, these authentication\
+        \ mechanisms are enforced."
+      annotation: 'The cloud service offers out-of-band authentication (OOB), in which
+        the factors are transmitted via different channels (e.g. Internet and mobile
+        network).
+
+        IT components in the sense of this criterion are independently usable objects
+        with external interfaces that can be connected with other IT components.
+
+
+        Access points in the sense of this criterion are those that can be accessed
+        by users, IT components or applications via networks (for users, for example,
+        the login screen on the publicly accessible website of the Cloud Service Provider).
+
+
+        Multi-factor authentication can be performed with cryptographic certificates,
+        smart cards or tokens, for example.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-06
+      name: Session Management
+      description: To protect confidentiality, availability, integrity and authenticity
+        during interactions with the cloud service, a suitable session management
+        system is used that at least corresponds to the state-of-the-art and is protected
+        against known attacks. Mechanisms are implemented that invalidate a session
+        after it has been detected as inactive. The inactivity can be detected by
+        time measurement. In this case, the time interval can be configured by the
+        Cloud Service Provider or - if technically possible - by the cloud customer.
+      annotation: Known attacks include manipulation, forgery, session takeover, denial
+        of service attacks, enveloping, replay and null cipher attacks.
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-07
+      name: Confidentiality of Authentication Information
+      description: "If passwords are used as authentication information for the cloud\
+        \ service, their confidentiality is ensured by the following procedures:\n\
+        \n\u2022 Users can initially create the password themselves or must change\
+        \ an initial password when logging in to the cloud service for the first time.\
+        \ An initial password loses its validity after a maximum of 14 days.\n\n\u2022\
+        \ When creating passwords, compliance with the length and complexity requirements\
+        \ of the Cloud Service Provider (cf. IDM-09) or the cloud customer is technically\
+        \ enforced.\n\n\u2022 The user is informed about changing or resetting the\
+        \ password.\n\n\u2022 The server-side storage takes place using state-of-the-art\
+        \ cryptographically strong hash functions in combination with at least 32-bit\
+        \ long salt values."
+      annotation: "The state-of-the-art regarding cryptographically strong hash functions\
+        \ is described in the current version of the BSI Technical Guideline TR-02102-1\
+        \ \"Cryptographic mechanisms: Recommendations and key lengths\". In version\
+        \ 2019-01 of this guideline these were:\n\n\u2022 SHA-256, SHA-512/256, SHA-384,\
+        \ SHA-512; and\n\n\u2022 SHA3-256, SHA3-384, SHA3-512."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-08
+      name: Roles and Rights Concept
+      description: 'The Cloud Service Provider provides cloud users with a roles and
+        rights concept for managing access rights. It describes rights profiles for
+        the functions provided by the cloud service.
+
+
+        The rights profiles are suitable for enabling cloud users to manage access
+        authorisations and permissions in accordance with the principle of least-privilege
+        and how it is necessary for the performance of tasks ("need-to-know principle")
+        and to implement the principle of functional separation between operational
+        and controlling functions ("separation of duties").'
+      annotation: "In IaaS, a role and rights concept would describe, among other\
+        \ things, the rights profiles for the following functions of the cloud service:\n\
+        \n\u2022 Administration of the states of virtual machines (start, \npause,\
+        \ stop) as well as for their migration or monitoring;\n\n\u2022 Management\
+        \ of available images that can be used to create virtual machines; and\n\n\
+        \u2022 Management of virtual networks (e.g. configuration of virtual routers\
+        \ and switches)."
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-09
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-09
+      name: Authorisation Mechanisms
+      description: 'Access to the functions provided by the cloud service is restricted
+        by access controls (authorisation mechanisms) that verify whether users, IT
+        components, or applications are authorised to perform certain actions.
+
+
+        The Cloud Service Provider validates the functionality of the authorisation
+        mechanisms before new functions are made available to cloud users and in the
+        event of changes to the authorisation mechanisms of existing functions (cf.
+        DEV-06). The severity of identified vulnerabilities is assessed according
+        to defined criteria based on industry standard metrics (e.g. Common Vulnerability
+        Scoring System) and measures for timely resolution or mitigation are initiated.
+        Vulnerabilities that have not been fixed are listed in the online register
+        of known vulnerabilities (cf. PSS-02).'
+      annotation: Access controls are attribute-based to enable granular and contextual
+        checks against multiple attributes of a user, IT component, or application
+        (e.g., role, location, authentication method).
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-10
+      name: Software Defined Networking
+      description: 'If the Cloud Service offers functions for software-defined networking
+        (SDN), the confidentiality of the data of the cloud user is ensured by suitable
+        SDN procedures.
+
+
+        The Cloud Service Provider validates the functionality of the SDN functions
+        before providing new SDN features to cloud users or modifying existing SDN
+        features. Identified defects are assessed and corrected in a risk-oriented
+        manner.'
+      annotation: 'This criterion is typically not applicable to the SaaS service
+        model.
+
+
+        Suitable SDN methods for increasing confidentiality are, for example, L2 overlay
+        networking (tagging) or tunnelling/encapsulation.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-11
+      name: Images for Virtual Machines and Containers
+      description: "If cloud customers operate virtual machines or containers with\
+        \ the cloud service, the Cloud Service Provider must ensure the following\
+        \ aspects:\n\n\u2022 The cloud customer can restrict the selection of images\
+        \ of virtual machines or containers according to his specifications, so that\
+        \ users of this cloud customer can only launch the images or containers released\
+        \ according to these restrictions.\n\n\u2022 If the Cloud Service Provider\
+        \ provides images of virtual machines or containers to the Cloud Customer,\
+        \ the Cloud Service Provider appropriately inform the Cloud Customer of the\
+        \ changes made to the previous version.\n\n\u2022 In addition, these images\
+        \ provided by the Cloud Service Provider are hardened according to generally\
+        \ accepted industry standards."
+      annotation: 'At startup and runtime of virtual machine or container images,
+        an integrity check is performed that detects image manipulations and reports
+        them to the cloud customer.
+
+        This criterion is typically not applicable to the SaaS service model.
+
+
+        Generally accepted industry standards are, for example, the Security Configuration
+        Benchmark of the Centre for Internet Security (CIS) or the corresponding modules
+        in the BSI IT-Grundschutz-Kompendium.'
+    - urn: urn:intuitem:risk:req_node:bsi-c5-2020:pss-12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-c5-2020:node127
+      ref_id: PSS-12
+      name: Locations of Data Processing and Storage
+      description: 'The cloud customer is able to specify the locations (location/country)
+        of the data processing and storage including data backups according to the
+        contractually available options.
+
+
+        This must be ensured by the cloud architecture.'
+      annotation: 'This criterion supplements the General Condition BC-01.
+
+
+        The cloud architecture must exist in such a way that it enables the technical
+        design of the IT infrastructure to provide the cloud service in accordance
+        with the data location specifications agreed with the customer.'

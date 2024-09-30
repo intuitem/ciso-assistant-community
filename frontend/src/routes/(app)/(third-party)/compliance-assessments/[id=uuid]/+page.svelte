@@ -2,6 +2,8 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
+	import { displayOnlyAssessableNodes } from './store';
+
 	import type {
 		ModalComponent,
 		ModalSettings,
@@ -10,8 +12,9 @@
 		ToastStore,
 		TreeViewNode
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+
+	import { getModalStore, getToastStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
+	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
@@ -23,10 +26,12 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
-	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
+	export let form: ActionData;
+
 	breadcrumbObject.set(data.compliance_assessment);
 	const tree = data.tree;
 
@@ -70,10 +75,17 @@
 	function transformToTreeView(nodes: Node[]) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
+			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+			const hidden = !(!$displayOnlyAssessableNodes || node.assessable || hasAssessableChildren);
+
 			return {
 				id: id,
 				content: TreeViewItemContent,
-				contentProps: { ...node, canEditRequirementAssessment },
+				contentProps: {
+					...node,
+					canEditRequirementAssessment,
+					hidden
+				},
 				lead: TreeViewItemLead,
 				leadProps: {
 					statusI18n: node.status_i18n,
@@ -89,7 +101,7 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
+	const treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -106,10 +118,11 @@
 
 	let expandedNodes: TreeViewNode[] = [];
 
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import { expandedNodesState } from '$lib/utils/stores';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
-	import { superForm } from 'sveltekit-superforms';
+	import { expandedNodesState } from '$lib/utils/stores';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import List from '$lib/components/List/List.svelte';
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
@@ -121,40 +134,6 @@
 	};
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
-	let { form: createForm, message: createMessage } = {
-		form: {},
-		message: {}
-	};
-
-	$: {
-		({ form: createForm, message: createMessage } = superForm(data.auditCreateForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-	}
 
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -174,6 +153,41 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	let createAppliedControlsLoading = false;
+
+	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'compliance-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: data.compliance_assessment.framework.reference_controls,
+					message: m.theFollowingControlsWillBeAddedColon()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.suggestControls(),
+			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
+				count: data.compliance_assessment.framework.reference_controls.length
+			}),
+			response: (r: boolean) => {
+				createAppliedControlsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
+	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -339,22 +353,74 @@
 			{#if !$page.data.user.is_third_party}
 				<button
 					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
-					on:click={(_) => modalCreateForm()}
-					><i class="fa-solid fa-diagram-project mr-2" /> {m.mapping()}
+					on:click={() => modalCreateForm()}
+					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
+				</button>
+			{/if}
+			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+				<button
+					class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+					on:click={() => {
+						modalConfirmCreateSuggestedControls(
+							data.compliance_assessment.id,
+							data.compliance_assessment.name,
+							'?/createSuggestedControls'
+						);
+					}}
+				>
+					<span class="mr-2">
+						{#if createAppliedControlsLoading}
+							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
+						{:else}
+							<i class="fa-solid fa-fire-extinguisher" />
+						{/if}
+					</span>
+					{m.suggestControls()}
 				</button>
 			{/if}
 		</div>
 	</div>
-	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<h4 class="h4 flex items-center font-semibold">
-			{m.associatedRequirements()}
-			<span class="badge variant-soft-primary ml-1">
-				{assessableNodesCount(treeViewNodes)}
-			</span>
-		</h4>
-		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
-			<i class="fa-solid fa-diagram-project" />
-			<p>{m.mappingInferenceTip()}</p>
+	{#if !$page.data.user.is_third_party}
+		<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+			<div class=" flex items-center font-semibold">
+				<span class="h4">{m.associatedRequirements()}</span>
+				<span class="badge variant-soft-primary ml-1">
+					{assessableNodesCount(treeViewNodes)}
+				</span>
+				<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
+					{#if $displayOnlyAssessableNodes}
+						<p class="font-bold">{m.ShowAllNodesMessage()}</p>
+					{:else}
+						<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
+					{/if}
+					<SlideToggle
+						name="questionnaireToggle"
+						class="flex flex-row items-center justify-center"
+						active="bg-primary-500"
+						background="bg-green-500"
+						bind:checked={$displayOnlyAssessableNodes}
+						on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
+					>
+						{#if $displayOnlyAssessableNodes}
+							<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
+						{:else}
+							<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+						{/if}
+					</SlideToggle>
+				</div>
+			</div>
+
+			<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
+				<i class="fa-solid fa-diagram-project" />
+				<p>{m.mappingInferenceTip()}</p>
+			</div>
+			{#key $displayOnlyAssessableNodes}
+				<RecursiveTreeView
+					nodes={transformToTreeView(Object.entries(tree))}
+					bind:expandedNodes
+					hover="hover:bg-initial"
+				/>
+			{/key}
 		</div>
 		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 	</div>
