@@ -229,7 +229,7 @@
 						>
 							{#if value !== null && value !== undefined && value !== ''}
 								{#if key === 'library'}
-									{@const itemHref = `/libraries/${value.urn}`}
+									{@const itemHref = `/libraries/${value.id}?loaded`}
 									<a href={itemHref} class="anchor">{value.name}</a>
 								{:else if Array.isArray(value)}
 									{#if Object.keys(value).length > 0}

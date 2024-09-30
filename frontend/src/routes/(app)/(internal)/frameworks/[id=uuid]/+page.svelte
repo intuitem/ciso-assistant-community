@@ -58,7 +58,7 @@
 						<li class="text-gray-600 list-none">
 							{#if value}
 								{#if key === 'library'}
-									{@const itemHref = `/libraries/${value.urn}`}
+									{@const itemHref = `/libraries/${value.id}?loaded`}
 									<a href={itemHref} class="anchor">{value.str}</a>
 								{:else if key === 'scores_definition'}
 									{#each Object.entries(value) as [key, definition]}

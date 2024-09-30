@@ -10,7 +10,7 @@ else
     echo "Giving some time for the database to be ready, please wait ..."
     sleep 20
     echo "initialize your superuser account..."
-    docker compose exec backend python manage.py createsuperuser
+    docker compose exec backend poetry run python manage.py createsuperuser
     echo "connect to ciso assistant on https://cool-vm:8443"
     echo "for successive runs you can now use docker compose up"
 fi

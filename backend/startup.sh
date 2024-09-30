@@ -19,10 +19,10 @@ while ! python manage.py showmigrations iam >/dev/null; do
 	sleep 10
 done
 
-python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
-python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
+poetry run python manage.py migrate --settings="${DJANGO_SETTINGS_MODULE}"
+poetry run python manage.py storelibraries --settings="${DJANGO_SETTINGS_MODULE}"
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
-	python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"
+	poetry run python manage.py createsuperuser --noinput --settings="${DJANGO_SETTINGS_MODULE}"
 fi
 
 exec gunicorn --chdir ciso_assistant --bind :8000 --timeout 300 --env RUN_MAIN=true ciso_assistant.wsgi:application
