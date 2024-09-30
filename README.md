@@ -26,6 +26,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/795e9d4203bf469dafcc45a9f3131d57)](https://app.codacy.com/gh/intuitem/ciso-assistant-community/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
@@ -151,20 +152,24 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
+58. Adobe Common Controls Framework (CCF) 🌐
+59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 
 ### Community contributions
 
-1. ISO 27001:2022, version Française 🇫🇷🌐
-2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
-3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
-4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
-5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
-7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
-8. New Zealand Information Security Manual (NZISM) 🇳🇿
-   <br/>
+1. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
+2. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+3. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+4. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
+5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
+6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
+7. New Zealand Information Security Manual (NZISM) 🇳🇿
 
-> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+<br/>
+
+
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 

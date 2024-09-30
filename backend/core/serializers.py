@@ -219,7 +219,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 
 class ReferenceControlReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = ReferenceControl
@@ -249,7 +249,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 
 class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = Threat
@@ -478,7 +478,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
 class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
 
     class Meta:
         model = Framework
@@ -541,7 +541,14 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     framework = FieldsRelatedField(
-        ["id", "min_score", "max_score", "implementation_groups_definition", "ref_id"]
+        [
+            "id",
+            "min_score",
+            "max_score",
+            "implementation_groups_definition",
+            "ref_id",
+            "reference_controls",
+        ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
@@ -558,6 +565,9 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         queryset=ComplianceAssessment.objects.all(),
         required=False,
         allow_null=True,
+    )
+    create_applied_controls_from_suggestions = serializers.BooleanField(
+        write_only=True, required=False, default=False
     )
 
     def create(self, validated_data: Any):
@@ -620,7 +630,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementMappingSetReadSerializer(BaseModelSerializer):
     source_framework = FieldsRelatedField()
     target_framework = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "urn"])
+    library = FieldsRelatedField(["name", "id"])
     folder = FieldsRelatedField()
 
     class Meta:
