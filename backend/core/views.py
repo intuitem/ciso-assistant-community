@@ -105,9 +105,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         return serializer_class
 
+    # This constant must remain defined right before the _process_request_data if we ever move _process_request_data elsewhere
     COMMA_SEPARATED_UUIDS_REGEX = r"^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})*$"
 
-    def _process_request_data(self, request: Request) -> None:
+    # Maybe this should be consider as an helper function instead of a staticmethod attached to a class.
+    @staticmethod
+    def _process_request_data(request: Request) -> None:
         """
         Process the request data to split comma-separated UUIDs into a list
         and handle empty list scenarios.
@@ -120,7 +123,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             # TODO: Come back to this once superForms v2 is out of alpha. https://github.com/ciscoheat/sveltekit-superforms/releases
             if isinstance(request.data[field], list) and len(request.data[field]) == 1:
                 if isinstance(request.data[field][0], str) and re.match(
-                    self.COMMA_SEPARATED_UUIDS_REGEX, request.data[field][0]
+                    BaseModelViewSet.COMMA_SEPARATED_UUIDS_REGEX, request.data[field][0]
                 ):
                     request.data[field] = request.data[field][0].split(",")
                 elif not request.data[field][0]:

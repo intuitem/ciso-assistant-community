@@ -502,6 +502,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
+    # The following property exist solely for compatibilty between the User model and the DRF permission class IsAdminUser
+    @property
+    def is_staff(self):
+        return self.is_admin()
+
 
 class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""

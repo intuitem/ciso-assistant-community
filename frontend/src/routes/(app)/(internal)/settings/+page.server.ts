@@ -1,7 +1,7 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema } from '$lib/utils/schemas';
+import { SSOSettingsSchema, GlobalSettingsSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -14,10 +14,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	const selectOptions: Record<string, any> = {};
 
-	const model = getModelInfo('sso-settings');
+	const ssoMmodel = getModelInfo('sso-settings');
+	const globalSettingsModel = getModelInfo('global-settings');
 
-	if (model.selectFields) {
-		for (const selectField of model.selectFields) {
+	if (ssoMmodel.selectFields) {
+		for (const selectField of ssoMmodel.selectFields) {
 			const url = `${BASE_API_URL}/settings/sso/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
@@ -33,14 +34,45 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		}
 	}
 
-	model.selectOptions = selectOptions;
+	ssoMmodel.selectOptions = selectOptions;
 
-	const form = await superValidate(settings, zod(SSOSettingsSchema), { errors: false });
-	return { settings, form, model };
+	const ssoForm = await superValidate(settings, zod(SSOSettingsSchema), { errors: false });
+	const globalSettingsForm = await superValidate(settings, zod(GlobalSettingsSchema), {
+		errors: false
+	});
+
+	return { settings, ssoForm, ssoMmodel, globalSettingsForm, globalSettingsModel };
 };
 
 export const actions: Actions = {
-	default: async (event) => {
+	global: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = GlobalSettingsSchema;
+		const form = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/settings/global/update/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PATCH',
+			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		// Make the translation
+		// It must be called m.globalSettingsUpdated()
+		setFlash({ type: 'success', message: m.ssoSettingsUpdated() }, event);
+
+		return { form };
+	},
+	sso: async (event) => {
 		const formData = await event.request.formData();
 
 		if (!formData) {
@@ -61,7 +93,7 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
-		setFlash({ type: 'success', message: m.ssoSettingsupdated() }, event);
+		setFlash({ type: 'success', message: m.ssoSettingsUpdated() }, event);
 
 		return { form };
 	}

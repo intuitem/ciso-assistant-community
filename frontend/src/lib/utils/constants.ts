@@ -77,7 +77,9 @@ export const LOCALE_DISPLAY_MAP = {
 	pt: '🇵🇹 Português',
 	pl: '🇵🇱 Polski',
 	ro: '🇷🇴 Română',
-	ar: '🇸🇦 العربية'
+	ar: '🇸🇦 العربية',
+	hi: '🇮🇳 हिन्दी',
+	ur: '🇵🇰 اردو'
 };
 
 export const ISO_8601_REGEX =

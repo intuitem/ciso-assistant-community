@@ -7,7 +7,6 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
-    HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from rest_framework.parsers import FileUploadParser
 
@@ -129,7 +128,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         except Exception:
             return Response(
                 {"error": "Failed to load library"},  # This must translated
-                status=HTTP_422_UNPROCESSABLE_ENTITY,
+                status=HTTP_400_BAD_REQUEST,
             )
 
     @action(detail=True, methods=["get"])
@@ -172,7 +171,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 logger.error("Failed to store library content", error=e)
                 return HttpResponse(
                     json.dumps({"error": "Failed to store library content."}),
-                    status=HTTP_422_UNPROCESSABLE_ENTITY,
+                    status=HTTP_400_BAD_REQUEST,
                 )
 
             return HttpResponse(json.dumps({}), status=HTTP_200_OK)
@@ -323,5 +322,5 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         if error_msg is None:
             return Response(status=HTTP_204_NO_CONTENT)
         return Response(
-            error_msg, status=HTTP_422_UNPROCESSABLE_ENTITY
+            error_msg, status=HTTP_400_BAD_REQUEST
         )  # We must make at least one error message

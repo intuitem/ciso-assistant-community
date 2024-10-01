@@ -599,7 +599,7 @@
 	"or": "ou",
 	"errorImportingLibrary": "Erro durante a importação da biblioteca",
 	"libraryImportError": "Ocorreu um erro durante a importação da biblioteca",
-	"ssoSettingsupdated": "Configurações de SSO atualizadas",
+	"ssoSettingsUpdated": "Configurações de SSO atualizadas",
 	"ssoSettings": "Configurações de SSO",
 	"ssoSettingsDescription": "Defina suas configurações de logon único aqui.",
 	"sso": "SSO",

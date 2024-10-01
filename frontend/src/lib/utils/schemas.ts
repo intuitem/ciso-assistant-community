@@ -278,6 +278,10 @@ export const SSOSettingsSchema = z.object({
 	want_name_id_encrypted: z.boolean().optional().nullable()
 });
 
+export const GlobalSettingsSchema = z.object({
+	lang: z.string()
+});
+
 export const EntitiesSchema = baseNamedObject({
 	folder: z.string(),
 	mission: z.string().optional(),
@@ -343,6 +347,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
+	'global-settings': GlobalSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

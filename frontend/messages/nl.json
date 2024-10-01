@@ -599,7 +599,7 @@
 	"or": "of",
 	"errorImportingLibrary": "Fout bij het importeren van de bibliotheek",
 	"libraryImportError": "Er is een fout opgetreden tijdens het importeren van je bibliotheek.",
-	"ssoSettingsupdated": "SSO-instellingen bijgewerkt",
+	"ssoSettingsUpdated": "SSO-instellingen bijgewerkt",
 	"ssoSettings": "SSO-instellingen",
 	"ssoSettingsDescription": "Configureer hier uw Single Sign-On-instellingen.",
 	"sso": "SSO",

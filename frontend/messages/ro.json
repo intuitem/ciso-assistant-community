@@ -634,7 +634,7 @@
 	"or": "sau",
 	"errorImportingLibrary": "Eroare în timpul importului bibliotecii",
 	"libraryImportError": "A apărut o eroare în timpul importului bibliotecii",
-	"ssoSettingsupdated": "Setările SSO au fost actualizate",
+	"ssoSettingsUpdated": "Setările SSO au fost actualizate",
 	"ssoSettings": "Setări SSO",
 	"ssoSettingsDescription": "Configurați setările dvs. Single Sign-On aici.",
 	"sso": "SSO",

@@ -637,7 +637,7 @@
 	"or": "या",
 	"errorImportingLibrary": "लाइब्रेरी आयात के दौरान त्रुटि",
 	"libraryImportError": "लाइब्रेरी आयात के दौरान एक त्रुटि उत्पन्न हुई",
-	"ssoSettingsupdated": "SSO सेटिंग्स अपडेट की गईं",
+	"ssoSettingsUpdated": "SSO सेटिंग्स अपडेट की गईं",
 	"ssoSettings": "SSO सेटिंग्स",
 	"ssoSettingsDescription": "यहाँ अपने सिंगल साइन-ऑन सेटिंग्स कॉन्फ़िगर करें।",
 	"sso": "SSO",

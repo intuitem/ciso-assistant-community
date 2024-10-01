@@ -76,6 +76,7 @@
 				{@const defaultValue = blank ? '' : null}
 				<option value={defaultValue} selected>--</option>
 			{/if}
+			{JSON.stringify(options)}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}">
 					{safeTranslate(option.label)}
