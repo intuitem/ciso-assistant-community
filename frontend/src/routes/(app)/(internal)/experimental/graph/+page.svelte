@@ -48,7 +48,7 @@
 	function handleNodeClick(node: NodeDatum) {
 		selectedNodeId = node.id;
 		// this is ugly but the only trick I've found so far
-		containerHeight = '81vh';
+		containerHeight = '80.1vh';
 	}
 
 	function handleBackgroundClick() {
