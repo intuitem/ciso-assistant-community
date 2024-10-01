@@ -8,7 +8,6 @@ from iam.models import Folder, Role, RoleAssignment, UserGroup
 from django.contrib.auth import get_user_model
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from django.utils.translation import gettext_lazy as _
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 import structlog
 
@@ -39,7 +38,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     folder = FieldsRelatedField()
     solutions = FieldsRelatedField(many=True)
-    authors = FieldsRelatedField(many=True)
+    representatives = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
 
     class Meta:
@@ -48,7 +47,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
-    create_audit = serializers.BooleanField(default=True)
+    create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False
     )
@@ -82,23 +81,31 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 ],
             )
 
-            if not instance.compliance_assessment:
-                enclave = Folder.objects.create(
-                    content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.project.name}/{instance.name}",
-                    parent_folder=instance.folder,
-                )
-                audit.folder = enclave
-                audit.save()
+            enclave = Folder.objects.create(
+                content_type=Folder.ContentType.ENCLAVE,
+                name=f"{instance.project.name}/{instance.name}",
+                parent_folder=instance.folder,
+            )
+            audit.folder = enclave
+            audit.save()
 
             audit.create_requirement_assessments()
-            audit.authors.set(instance.authors.all())
             audit.reviewers.set(instance.reviewers.all())
+            audit.authors.set(instance.representatives.all())
             instance.compliance_assessment = audit
+            instance.save()
+        else:
+            if instance.compliance_assessment:
+                audit = instance.compliance_assessment
+                audit.reviewers.set(instance.reviewers.all())
+                audit.authors.set(instance.representatives.all())
             instance.save()
 
     def _assign_third_party_respondents(
-        self, instance: EntityAssessment, third_party_users: set[User]
+        self,
+        instance: EntityAssessment,
+        third_party_users: set[User],
+        old_third_party_users: set[User] = set(),
     ):
         if instance.compliance_assessment:
             enclave = instance.compliance_assessment.folder
@@ -119,25 +126,32 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.add(respondents)
+            for user in old_third_party_users:
+                if not user.is_third_party:
+                    logger.warning("User is not a third-party", user=user)
+                user.user_groups.remove(respondents)
 
     def create(self, validated_data):
         audit_data = self._extract_audit_data(validated_data)
         instance = super().create(validated_data)
         self._create_or_update_audit(instance, audit_data)
-        self._assign_third_party_respondents(instance, set(instance.authors.all()))
+        self._assign_third_party_respondents(
+            instance, set(instance.representatives.all())
+        )
         return instance
 
     def update(self, instance: EntityAssessment, validated_data):
         audit_data = self._extract_audit_data(validated_data)
-        new_authors = set(validated_data.get("authors", [])) - set(
-            instance.authors.all()
+        representatives = set(validated_data.get("representatives", []))
+        old_representatives = set(instance.representatives.all()) - set(
+            validated_data.get("representatives", [])
         )
         instance = super().update(instance, validated_data)
 
-        if not instance.compliance_assessment:
-            self._create_or_update_audit(instance, audit_data)
-
-        self._assign_third_party_respondents(instance, new_authors)
+        self._create_or_update_audit(instance, audit_data)
+        self._assign_third_party_respondents(
+            instance, representatives, old_representatives
+        )
         return instance
 
     class Meta:

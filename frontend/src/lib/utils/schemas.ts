@@ -285,7 +285,7 @@ export const EntitiesSchema = baseNamedObject({
 });
 
 export const EntityAssessmentSchema = baseNamedObject({
-	create_audit: z.boolean().optional().default(true),
+	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
@@ -294,6 +294,7 @@ export const EntityAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
+	representatives: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	entity: z.string(),
 	solutions: z.array(z.string().optional()).optional(),
