@@ -144,10 +144,19 @@
 	multiple
 	options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
 	field="authors"
-	helpText={m.entityAssessmentAuthorHelpText()}
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	options={getOptions({ objects: model.foreignKeys['representatives'], label: 'email' })}
+	field="representatives"
+	helpText={m.entityAssessmentAuthorHelpText()}
+	cacheLock={cacheLocks['representatives']}
+	bind:cachedValue={formDataCache['representatives']}
+	label={m.representatives()}
 />
 <AutocompleteSelect
 	{form}
