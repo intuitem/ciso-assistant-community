@@ -768,6 +768,78 @@ class AppliedControlViewSet(BaseModelViewSet):
             writer.writerow(row)
         return response
 
+    @action(detail=False, methods=["get"])
+    def get_controls_info(self, request):
+        nodes = list()
+        links = list()
+        for ac in AppliedControl.objects.all():
+            related_items_count = 0
+            for ca in ComplianceAssessment.objects.filter(
+                requirement_assessments__applied_controls=ac
+            ).distinct():
+                audit_coverage = (
+                    RequirementAssessment.objects.filter(compliance_assessment=ca)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += audit_coverage
+                links.append(
+                    {
+                        "source": ca.id,
+                        "target": ac.id,
+                        "coverage": audit_coverage,
+                    }
+                )
+            for ra in RiskAssessment.objects.filter(
+                risk_scenarios__applied_controls=ac
+            ).distinct():
+                risk_coverage = (
+                    RiskScenario.objects.filter(risk_assessment=ra)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += risk_coverage
+                links.append(
+                    {
+                        "source": ra.id,
+                        "target": ac.id,
+                        "coverage": risk_coverage,
+                    }
+                )
+            nodes.append(
+                {
+                    "id": ac.id,
+                    "label": ac.name,
+                    "shape": "hexagon",
+                    "counter": related_items_count,
+                    "color": "#47e845",
+                }
+            )
+        for audit in ComplianceAssessment.objects.all():
+            nodes.append(
+                {
+                    "id": audit.id,
+                    "label": audit.name,
+                    "shape": "circle",
+                    "color": "#5D4595",
+                }
+            )
+        for ra in RiskAssessment.objects.all():
+            nodes.append(
+                {
+                    "id": ra.id,
+                    "label": ra.name,
+                    "shape": "square",
+                    "color": "#E6499F",
+                }
+            )
+        return Response(
+            {
+                "nodes": nodes,
+                "links": links,
+            }
+        )
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
