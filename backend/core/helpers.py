@@ -1137,6 +1137,30 @@ def threats_count_per_name(user: User):
     return {"labels": labels, "values": values}
 
 
+def get_folder_content(folder: Folder):
+    content = []
+    for f in Folder.objects.filter(parent_folder=folder).distinct():
+        content.append({"name": f.name, "children": get_folder_content(f)})
+    for p in Project.objects.filter(folder=folder).distinct():
+        content.append(
+            {
+                "name": p.name,
+                "children": [
+                    {
+                        "name": "audits",
+                        "value": ComplianceAssessment.objects.filter(project=p).count(),
+                    },
+                    {
+                        "name": "risk assessments",
+                        "value": RiskAssessment.objects.filter(project=p).count(),
+                    },
+                ],
+            }
+        )
+
+    return content
+
+
 def handle(exc, context):
     # translate django validation error which ...
     # .. causes HTTP 500 status ==> DRF validation which will cause 400 HTTP status
