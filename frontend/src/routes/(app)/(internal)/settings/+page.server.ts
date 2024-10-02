@@ -74,9 +74,7 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
-		// Make the translation
-		// It must be called m.generalSettingsUpdated()
-		setFlash({ type: 'success', message: m.ssoSettingsUpdated() }, event);
+		setFlash({ type: 'success', message: m.generalSettingsUpdated() }, event);
 
 		return { form };
 	},

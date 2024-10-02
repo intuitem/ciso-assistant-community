@@ -26,5 +26,5 @@
 	cacheLock={cacheLocks['lang']}
 	bind:cachedValue={formDataCache['lang']}
 	options={langOptions}
-	label={m.language()}
+	label={m.defaultLanguage()}
 />

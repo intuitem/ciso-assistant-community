@@ -15,10 +15,8 @@
 		>
 	</TabGroup>
 	<TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
-		<!-- Translate the "Global Settings" String -->
-		<!-- Check if a translation already exist-->
 		<Tab bind:group={tabSet} name="ssoSettings" value={1}
-			><i class="fa-solid fa-cog" /> General Settings</Tab
+			><i class="fa-solid fa-cog" /> {m.generalSettings()}</Tab
 		>
 	</TabGroup>
 </div>
