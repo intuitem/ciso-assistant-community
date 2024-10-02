@@ -23,10 +23,7 @@ export class PageContent extends BasePage {
 		]
 	) {
 		super(page, url, name);
-		this.form =
-			typeof name == 'string'
-				? new FormContent(page, 'New ' + name.substring(0, name.length - 1), fields)
-				: new FormContent(page, new RegExp(/New /.source + name.source), fields);
+		this.form = new FormContent(page, this.getFormTitle(name), fields);
 		this.itemDetail = new PageDetail(page, url, this.form, '');
 		this.addButton = this.page.getByTestId('add-button');
 		this.editButton = this.page.getByTestId('edit-button');
@@ -36,13 +33,16 @@ export class PageContent extends BasePage {
 		this.deleteModalCancelButton = this.page.getByTestId('delete-cancel-button');
 	}
 
-	async createItem(values: { [k: string]: any }, dependency?: any) {
-		if (dependency) {
-			await this.page.goto('/libraries');
-			await this.page.waitForURL('/libraries');
+	private getFormTitle(name: string | RegExp): string | RegExp {
+		return typeof name === 'string' ? `New ${name.slice(0, -1)}` : new RegExp(`New ${name.source}`);
+	}
 
-			await this.importLibrary(dependency.name, dependency.urn);
-			await this.goto();
+	async createItem(
+		values: Record<string, any>,
+		dependency?: { name: string; urn: string }
+	): Promise<void> {
+		if (dependency) {
+			await this.importDependency(dependency);
 		}
 
 		await this.addButton.click();
@@ -50,63 +50,82 @@ export class PageContent extends BasePage {
 		await this.form.fill(values);
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
-		if (typeof this.name == 'string') {
-			await this.isToastVisible(
-				'The ' +
-					this.name.substring(0, this.name.length - 1).toLowerCase() +
-					' object has been successfully created' +
-					/.+/.source
-			);
+		await this.expectSuccessToast();
+	}
+
+	private async importDependency(dependency: { name: string; urn: string }): Promise<void> {
+		await this.page.goto('/libraries');
+		await this.page.waitForURL('/libraries');
+		await this.importLibrary(dependency.name, dependency.urn);
+		await this.goto();
+	}
+
+	private async expectSuccessToast(): Promise<void> {
+		const objectName =
+			typeof this.name === 'string' ? this.name.slice(0, -1).toLowerCase() : this.name.source;
+		await this.isToastVisible(
+			`The ${objectName} object has been successfully created${/.+/.source}`,
+			typeof this.name === 'string' ? undefined : 'i'
+		);
+	}
+
+	async importLibrary(name: string, urn?: string, language = 'English'): Promise<void> {
+		await this.searchInput.fill(name);
+		if (await this.isLibraryAlreadyLoaded(name)) return;
+
+		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
+			await this.switchToLoadedLibraries(name);
 		} else {
-			await this.isToastVisible(
-				'The ' + this.name.source + ' object has been successfully created' + /.+/.source,
-				'i'
-			);
+			await this.performLibraryImport(name, language);
 		}
 	}
 
-	async importLibrary(name: string, urn?: string, language = 'English') {
-		this.page.getByTestId('search-input').fill(name);
-		if (
-			(await this.tab('Loaded libraries').isVisible()) &&
-			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
-		) {
+	private async isLibraryAlreadyLoaded(name: string): Promise<boolean> {
+		if (await this.isLoadedLibrariesTabSelected()) {
 			if (await this.getRow(name).isHidden()) {
 				await this.tab('Libraries store').click();
-				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+				await expect(this.tab('Libraries store')).toHaveAttribute('aria-selected', 'true');
 			} else {
-				return;
+				return true;
 			}
 		}
-		// If the library is not visible, it might have already been loaded
-		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
-			await this.tab('Loaded libraries').click();
-			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-			this.page.getByTestId('search-input').fill(name);
-			expect(this.getRow(name)).toBeVisible();
-			return;
-		}
+		return false;
+	}
+
+	private async isLoadedLibrariesTabSelected(): Promise<boolean> {
+		return (
+			(await this.tab('Loaded libraries').isVisible()) &&
+			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
+		);
+	}
+
+	private async switchToLoadedLibraries(name: string): Promise<void> {
+		await this.tab('Loaded libraries').click();
+		await expect(this.tab('Loaded libraries')).toHaveAttribute('aria-selected', 'true');
+		await this.searchInput.fill(name);
+		await expect(this.getRow(name)).toBeVisible();
+	}
+
+	private async performLibraryImport(name: string, language: string): Promise<void> {
 		await this.importItemButton(name, language === 'any' ? undefined : language).click();
 		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
-		await this.tab('Loaded libraries').click();
-		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-		expect(this.getRow(name)).toBeVisible();
+		await this.switchToLoadedLibraries(name);
 	}
 
-	async viewItemDetail(value?: string) {
+	async viewItemDetail(value?: string): Promise<void> {
 		if (value) {
 			await this.getRow(value).getByTestId('tablerow-detail-button').click();
-			this.itemDetail.setItem(value);
+			await this.itemDetail.setItem(value);
 		} else {
 			await this.getRow().getByTestId('tablerow-detail-button').click();
-			this.itemDetail.setItem(await this.getRow().innerText());
+			await this.itemDetail.setItem(await this.getRow().innerText());
 		}
 		await this.page.waitForURL(new RegExp('^.*\\' + this.url + '/.+'));
 	}
 
-	getRow(value?: string, additional?: any) {
+	getRow(value?: string, additional?: any): Locator {
 		return value
 			? additional
 				? this.page
@@ -117,23 +136,23 @@ export class PageContent extends BasePage {
 			: this.page.getByRole('row').first();
 	}
 
-	collumnHeader(value: string) {
+	collumnHeader(value: string): Locator {
 		return this.page.getByTestId('tableheader').filter({ hasText: value });
 	}
 
-	tab(value: string) {
+	tab(value: string): Locator {
 		return this.page.getByTestId('tab').filter({ hasText: value });
 	}
 
-	editItemButton(value: string) {
+	editItemButton(value: string): Locator {
 		return this.getRow(value).getByTestId('tablerow-edit-button');
 	}
 
-	deleteItemButton(value: string) {
+	deleteItemButton(value: string): Locator {
 		return this.getRow(value).getByTestId('tablerow-delete-button');
 	}
 
-	importItemButton(value: string, language?: string) {
+	importItemButton(value: string, language?: string): Locator {
 		return language
 			? this.getRow(value, language).getByTestId('tablerow-import-button')
 			: this.getRow(value).getByTestId('tablerow-import-button');
