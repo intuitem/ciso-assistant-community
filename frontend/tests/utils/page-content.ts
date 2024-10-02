@@ -83,7 +83,7 @@ export class PageContent extends BasePage {
 			await this.tab('Loaded libraries').click();
 			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 			this.page.getByTestId('search-input').fill(name);
-			expect(this.getRow(name)).toBeVisible();
+			await expect(this.getRow(name)).toBeVisible();
 			return;
 		}
 		await this.importItemButton(name, language === 'any' ? undefined : language).click();
@@ -92,7 +92,7 @@ export class PageContent extends BasePage {
 		});
 		await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-		expect(this.getRow(name)).toBeVisible();
+		await expect(this.getRow(name)).toBeVisible();
 	}
 
 	async viewItemDetail(value?: string) {
