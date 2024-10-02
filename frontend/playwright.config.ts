@@ -7,7 +7,8 @@ const config: PlaywrightTestConfig = {
 			? 'echo "The docker compose frontend server didn\'t start correctly"'
 			: 'npm install -g pnpm && pnpm install && pnpm run build && pnpm run preview',
 		port: process.env.COMPOSE_TEST ? 3000 : 4173,
-		reuseExistingServer: process.env.COMPOSE_TEST
+		reuseExistingServer: process.env.COMPOSE_TEST,
+		timeout: 120 * 1000
 	},
 	testDir: 'tests',
 	outputDir: 'tests/results',
