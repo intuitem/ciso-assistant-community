@@ -34,33 +34,33 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
         )
 
 
-UPDATABLE_GLOBAL_SETTINGS = frozenset(
+UPDATABLE_GENERAL_SETTINGS = frozenset(
     ["lang"]
-)  # This represents the list of GlobalSettings an admin has the right to change.
+)  # This represents the list of "general" GlobalSettings an admin has the right to change.
 
 
 @api_view(["PATCH"])
 @permission_classes([permissions.IsAdminUser])
-def update_global_settings(request):
+def update_general_settings(request):
     """
-    API endpoint that returns the CSRF token.
+    API endpoint to update general settings as an administrator.
     """
     BaseModelViewSet._process_request_data(request)
 
-    global_settings = GlobalSettings.objects.filter(name="general").first()
-    if global_settings is not None:
-        global_settings = global_settings.value
+    general_settings = GlobalSettings.objects.filter(name="general").first()
+    if general_settings is not None:
+        general_settings = general_settings.value
     else:
-        global_settings = {}
+        general_settings = {}
 
     for key, value in request.data.items():
         # There is no schema verification for this
-        # An attacker may be able to break a ciso-assistant instance by injecting values with bad types in future global settings.
-        if key in UPDATABLE_GLOBAL_SETTINGS:
-            global_settings[key] = value
+        # An attacker may be able to break a ciso-assistant instance by injecting values with bad types in future general settings.
+        if key in UPDATABLE_GENERAL_SETTINGS:
+            general_settings[key] = value
 
     GlobalSettings.objects.update_or_create(
-        name="general", defaults={"value": global_settings}
+        name="general", defaults={"value": general_settings}
     )
 
     return Response({})

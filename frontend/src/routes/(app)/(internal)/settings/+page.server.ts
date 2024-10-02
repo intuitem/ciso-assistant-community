@@ -1,7 +1,7 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema, GlobalSettingsSchema } from '$lib/utils/schemas';
+import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const selectOptions: Record<string, any> = {};
 
 	const ssoMmodel = getModelInfo('sso-settings');
-	const globalSettingsModel = getModelInfo('global-settings');
+	const generalSettingModel = getModelInfo('general-settings');
 
 	if (ssoMmodel.selectFields) {
 		for (const selectField of ssoMmodel.selectFields) {
@@ -37,25 +37,25 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	ssoMmodel.selectOptions = selectOptions;
 
 	const ssoForm = await superValidate(settings, zod(SSOSettingsSchema), { errors: false });
-	const globalSettingsForm = await superValidate(settings, zod(GlobalSettingsSchema), {
+	const generalSettingForm = await superValidate(settings, zod(GeneralSettingsSchema), {
 		errors: false
 	});
 
-	return { settings, ssoForm, ssoMmodel, globalSettingsForm, globalSettingsModel };
+	return { settings, ssoForm, ssoMmodel, generalSettingForm, generalSettingModel };
 };
 
 export const actions: Actions = {
-	global: async (event) => {
+	general: async (event) => {
 		const formData = await event.request.formData();
 
 		if (!formData) {
 			return fail(400, { form: null });
 		}
 
-		const schema = GlobalSettingsSchema;
+		const schema = GeneralSettingsSchema;
 		const form = await superValidate(formData, zod(schema));
 
-		const endpoint = `${BASE_API_URL}/settings/global/update/`;
+		const endpoint = `${BASE_API_URL}/settings/general/update/`;
 
 		const requestInitOptions: RequestInit = {
 			method: 'PATCH',
@@ -67,7 +67,7 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		// Make the translation
-		// It must be called m.globalSettingsUpdated()
+		// It must be called m.generalSettingsUpdated()
 		setFlash({ type: 'success', message: m.ssoSettingsUpdated() }, event);
 
 		return { form };

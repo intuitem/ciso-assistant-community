@@ -18,7 +18,7 @@
 		<!-- Translate the "Global Settings" String -->
 		<!-- Check if a translation already exist-->
 		<Tab bind:group={tabSet} name="ssoSettings" value={1}
-			><i class="fa-solid fa-cog" /> Global Settings</Tab
+			><i class="fa-solid fa-cog" /> General Settings</Tab
 		>
 	</TabGroup>
 </div>
@@ -31,10 +31,10 @@
 	<div>
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
 		<ModelForm
-			form={data.globalSettingsForm}
-			model={data.globalSettingsModel}
+			form={data.generalSettingForm}
+			model={data.generalSettingModel}
 			cancelButton={false}
-			action="?/global"
+			action="?/general"
 		/>
 	</div>
 {/if}

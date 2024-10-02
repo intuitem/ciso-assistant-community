@@ -23,7 +23,7 @@
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
-	import GlobalSettingsForm from './ModelForm/GlobalSettingForm.svelte';
+	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -243,8 +243,8 @@
 		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} />
 	{:else if URLModel === 'sso-settings'}
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
-	{:else if URLModel === 'global-settings'}
-		<GlobalSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+	{:else if URLModel === 'general-settings'}
+		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
