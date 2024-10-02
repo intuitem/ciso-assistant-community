@@ -37,6 +37,25 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
 UPDATABLE_GENERAL_SETTINGS = frozenset(
     ["lang"]
 )  # This represents the list of "general" GlobalSettings an admin has the right to change.
+PUBLIC_GENERAL_SETTINGS = [
+    "lang"
+]  # List of general settings accessible by anyone (non-sensitive general settings).
+
+
+@api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def get_general_settings(request):
+    """
+    API endpoint to get the general settings.
+    """
+    general_settings = GlobalSettings.objects.filter(name="general").first()
+    if general_settings is None:
+        return {}
+
+    public_settings = {
+        key: general_settings.value.get(key) for key in PUBLIC_GENERAL_SETTINGS
+    }
+    return Response(public_settings)
 
 
 @api_view(["PATCH"])

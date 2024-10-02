@@ -25,7 +25,7 @@
 {#if tabSet === 0}
 	<div>
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
-		<ModelForm form={data.ssoForm} model={data.ssoMmodel} cancelButton={false} action="?/sso" />
+		<ModelForm form={data.ssoForm} model={data.ssoModel} cancelButton={false} action="?/sso" />
 	</div>
 {:else if tabSet === 1}
 	<div>

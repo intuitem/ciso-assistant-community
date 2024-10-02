@@ -7,6 +7,8 @@ import { languageTag, setLanguageTag } from '$paraglide/runtime';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
 
+let generalSettings = {};
+
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
 	if (!csrfToken) {
@@ -28,23 +30,43 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 
 async function validateUserSession(event: RequestEvent): Promise<User | null> {
 	const token = event.cookies.get('token');
+	const requestList = [fetch(`${BASE_API_URL}/settings/general/info/`)];
+	if (token) {
+		requestList.push(
+			fetch(`${BASE_API_URL}/iam/current-user/`, {
+				credentials: 'include',
+				headers: {
+					'content-type': 'application/json',
+					Authorization: `Token ${token}`
+				}
+			})
+		);
+	}
+
+	const responseList = await Promise.all(requestList);
+	const settingsRes = responseList[0];
+	const newGeneralSettings = await settingsRes.json();
+	generalSettings = newGeneralSettings;
+
+	if (!event.cookies.get('ciso_lang')) {
+		event.cookies.set('ciso_lang', generalSettings.lang || 'en', {
+			httpOnly: false,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+	}
+
 	if (!token) return null;
 
-	const res = await fetch(`${BASE_API_URL}/iam/current-user/`, {
-		credentials: 'include',
-		headers: {
-			'content-type': 'application/json',
-			Authorization: `Token ${token}`
-		}
-	});
-
-	if (!res.ok) {
+	const userRes = responseList[1];
+	if (!userRes.ok) {
 		event.cookies.delete('token', {
 			path: '/'
 		});
 		redirect(302, `/login?next=${event.url.pathname}`);
 	}
-	return res.json();
+	return userRes.json();
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -56,7 +78,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const errorId = new URL(event.request.url).searchParams.get('error');
 	if (errorId) {
-		setLanguageTag(event.cookies.get('ciso_lang') || 'en');
+		setLanguageTag(event.cookies.get('ciso_lang') || generalSettings.lang || 'en');
 		setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
 		redirect(302, '/login');
 	}

@@ -11,9 +11,8 @@
 
 	onMount(() => {
 		// const valueFromSession = sessionStorage.getItem('lang') || sourceLanguageTag;
-		const valueFromCookies = getCookie('ciso_lang') || sourceLanguageTag;
+		const valueFromCookies = getCookie('ciso_lang') || languageTag();
 		// @ts-ignore
-		setCookie('ciso_lang', valueFromCookies);
 		setLanguageTag(valueFromCookies);
 	});
 

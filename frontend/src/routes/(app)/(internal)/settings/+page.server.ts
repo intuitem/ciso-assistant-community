@@ -14,34 +14,42 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	const selectOptions: Record<string, any> = {};
 
-	const ssoMmodel = getModelInfo('sso-settings');
+	const ssoModel = getModelInfo('sso-settings');
 	const generalSettingModel = getModelInfo('general-settings');
 
-	if (ssoMmodel.selectFields) {
-		for (const selectField of ssoMmodel.selectFields) {
-			const url = `${BASE_API_URL}/settings/sso/${selectField.field}/`;
-			const response = await fetch(url);
-			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: key
-					}))
-				);
-			} else {
-				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
-			}
+	const requestList = [fetch(`${BASE_API_URL}/settings/general/info/`)];
+
+	const selectFields = ssoModel.selectFields ?? [];
+	for (const selectField of selectFields) {
+		const field = selectField.field;
+		const url = `${BASE_API_URL}/settings/sso/${field}/`;
+		requestList.push(fetch(url).then((response) => [response, field]));
+	}
+
+	const responseList = await Promise.all(requestList);
+	const generalSettingResponse = responseList[0];
+	for (let i = 1; i < responseList.length; i++) {
+		const [response, field] = responseList[i];
+		if (response.ok) {
+			selectOptions[field] = await response.json().then((data) =>
+				Object.entries(data).map(([key, value]) => ({
+					label: value,
+					value: key
+				}))
+			);
+		} else {
+			console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 		}
 	}
 
-	ssoMmodel.selectOptions = selectOptions;
-
+	ssoModel.selectOptions = selectOptions;
 	const ssoForm = await superValidate(settings, zod(SSOSettingsSchema), { errors: false });
-	const generalSettingForm = await superValidate(settings, zod(GeneralSettingsSchema), {
+	const generalSettings = await generalSettingResponse.json();
+	const generalSettingForm = await superValidate(generalSettings, zod(GeneralSettingsSchema), {
 		errors: false
 	});
 
-	return { settings, ssoForm, ssoMmodel, generalSettingForm, generalSettingModel };
+	return { settings, ssoForm, ssoModel, generalSettingForm, generalSettingModel };
 };
 
 export const actions: Actions = {
