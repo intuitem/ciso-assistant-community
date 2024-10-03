@@ -82,7 +82,7 @@ logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
 FEATURE_FLAGS = {}
-MODULE_PATHS = {}
+MODULE_PATHS = {"serializers": "enterprise_core.serializers"}
 ROUTES = {}
 MODULES = {}
 
@@ -384,8 +384,6 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
-
-MODULE_PATHS["serializers"] = ["enterprise_core.serializers"]
 
 ROUTES["client-settings"] = {
     "viewset": "enterprise_core.views.ClientSettingsViewSet",
