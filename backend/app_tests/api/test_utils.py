@@ -100,7 +100,7 @@ class EndpointTestsUtils:
                 # User has access to the domain
                 return False, expected_status, "ok"
             else:
-                return False, expected_status, "outside_scope"
+                return True, expected_status, "outside_scope"
         else:
             # User has not permission to perform the action
             if (
@@ -771,7 +771,7 @@ class EndpointTestsQueries:
                         ), f"{verbose_name} object detail can not be accessed with permission"
             else:
                 assert (
-                    response.status_code == status.HTTP_403_FORBIDDEN
+                    response.status_code == status.HTTP_404_NOT_FOUND
                 ), f"{verbose_name} object detail can be accessed without permission"
 
             if not (fails or user_perm_fails):
@@ -911,7 +911,7 @@ class EndpointTestsQueries:
                         ), f"{verbose_name} object detail can not be accessed with permission"
             else:
                 assert (
-                    response.status_code == status.HTTP_403_FORBIDDEN
+                    response.status_code == status.HTTP_404_NOT_FOUND
                 ), f"{verbose_name} object detail can be accessed without permission"
 
             # Asserts that the object was deleted successfully
