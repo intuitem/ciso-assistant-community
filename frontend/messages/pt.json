@@ -156,6 +156,7 @@
 	"justification": "Justificativa",
 	"parentFolder": "Pasta pai",
 	"contentType": "Tipo de conteúdo",
+	"objectType": "Tipo de objeto",
 	"type": "Tipo",
 	"lcStatus": "Status",
 	"internalReference": "Referência interna",
