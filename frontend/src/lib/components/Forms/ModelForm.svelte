@@ -23,6 +23,7 @@
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
+	import FolderForm from './ModelForm/FolderForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -175,6 +176,8 @@
 	{/if}
 	{#if URLModel === 'projects'}
 		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+	{:else if URLModel === 'folders'}
+		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'risk-assessments' || URLModel === 'risk-assessment-duplicate'}
 		<RiskAssessmentForm
 			{form}
