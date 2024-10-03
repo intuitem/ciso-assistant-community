@@ -20,7 +20,7 @@
 	<DetailView
 		{data}
 		{mailing}
-		exclude={['criticality', 'penetration', 'dependency', 'maturity', 'trust', 'evidence']}
+		exclude={['criticality', 'penetration', 'dependency', 'maturity', 'trust']}
 	/>
 	{#if data.data.compliance_assessment}
 		<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">

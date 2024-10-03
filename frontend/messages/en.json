@@ -739,7 +739,7 @@
 	"createUserHelpText": "Create or link a third party user to the representative based on the email",
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
-	"entityAssessmentAuthorHelpText": "The representative who is responsible for questionnaire completion",
+	"entityAssessmentRepresentativesHelpText": "The third party users who are responsible for questionnaire completion",
 	"sendQuestionnaire": "Send questionnaire",
 	"sureToSendMail": "Are you sure you want to send the mail?",
 	"mailSuccessfullySent": "The mail has been successfully sent",
@@ -755,5 +755,6 @@
 	"theFollowingControlsWillBeAddedColon": "The following controls will be added:",
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
-	"NoPreviewMessage": "No preview available."
+	"NoPreviewMessage": "No preview available.",
+	"entityAssessmentEvidenceHelpText": "An external questionnaire"
 }
