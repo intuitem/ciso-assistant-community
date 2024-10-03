@@ -235,6 +235,10 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
         }
 
+    @property
+    def permissions(self):
+        return RoleAssignment.get_permissions(self)
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -731,18 +735,20 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def get_role_assignments(user):
+    def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
-        assignments = list(user.roleassignment_set.all())
-        for user_group in user.user_groups.all():
-            assignments += list(user_group.roleassignment_set.all())
+        assignments = list(principal.roleassignment_set.all())
+        if hasattr(principal, "user_groups"):
+            for user_group in principal.user_groups.all():
+                assignments += list(user_group.roleassignment_set.all())
+        assignments += list(principal.roleassignment_set.all())
         return assignments
 
     @staticmethod
-    def get_permissions(user: AbstractBaseUser | AnonymousUser):
+    def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        for ra in RoleAssignment.get_role_assignments(user):
+        for ra in RoleAssignment.get_role_assignments(principal):
             for p in ra.role.permissions.all():
                 permission_dict = {p.codename: {"str": str(p)}}
                 permissions.update(permission_dict)
