@@ -50,11 +50,11 @@ def get_general_settings(request):
     """
     general_settings = GlobalSettings.objects.filter(name="general").first()
     if general_settings is None:
-        return {}
-
-    public_settings = {
-        key: general_settings.value.get(key) for key in PUBLIC_GENERAL_SETTINGS
-    }
+        public_settings = {}
+    else:
+        public_settings = {
+            key: general_settings.value.get(key) for key in PUBLIC_GENERAL_SETTINGS
+        }
     return Response(public_settings)
 
 
