@@ -227,6 +227,31 @@ const OWNER_FILTER: ListViewFilterConfig = {
   }
 }; */
 
+const LIBRARY_TYPE_FILTER = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const overviewKeys = new Set(row.overview.map((overviewRow) => overviewRow.split(':')[0]));
+		const libraryDatatypeSet = new Set([
+			'framework',
+			'risk_matrix',
+			'threats',
+			'requirement_mapping_set',
+			'reference_controls'
+		]);
+		const datatypes = [...libraryDatatypeSet].filter((datatype) => overviewKeys.has(datatype));
+		return datatypes;
+	},
+	extraProps: {
+		defaultOptionName: 'objectType',
+		optionLabels: {
+			reference_controls: 'referenceControls',
+			requirement_mapping_set: 'requirementMappingSet',
+			risk_matrix: 'riskMatrix'
+		}
+	},
+	alwaysDisplay: true
+};
+
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
 		head: ['name', 'description', 'parentDomain'],
@@ -409,8 +434,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
-			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'loaded-libraries': {
@@ -418,7 +443,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'sso-settings': {

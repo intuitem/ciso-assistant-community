@@ -156,6 +156,7 @@
 	"justification": "Rechtvaardiging",
 	"parentFolder": "Bovenliggende map",
 	"contentType": "Inhoudstype",
+	"objectType": "Objecttype",
 	"type": "Type",
 	"lcStatus": "Status",
 	"internalReference": "Interne referentie",
