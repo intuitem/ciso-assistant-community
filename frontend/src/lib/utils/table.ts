@@ -443,7 +443,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'sso-settings': {
