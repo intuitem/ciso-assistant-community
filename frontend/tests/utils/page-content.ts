@@ -92,6 +92,7 @@ export class PageContent extends BasePage {
 		});
 		await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+		this.page.getByTestId('search-input').fill(name);
 		await expect(this.getRow(name)).toBeVisible();
 	}
 
