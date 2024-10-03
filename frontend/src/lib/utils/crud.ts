@@ -17,7 +17,7 @@ type GetOptionsParams = {
 	selfSelect?: boolean;
 };
 
-export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any) {
+export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any): string[] {
 	const emptyConstraintsList = [];
 	for (const [key, constraint] of Object.entries(constraints)) {
 		if (constraint.required && foreignKeys[key])
