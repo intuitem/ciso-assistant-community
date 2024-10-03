@@ -9,4 +9,8 @@
 		class="bg-purple-600 text-white text-lg p-4 rounded-lg shadow-lg hover:bg-purple-500"
 		href="experimental/priority">Priority scatter</a
 	>
+	<a
+		class="bg-purple-600 text-white text-lg p-4 rounded-lg shadow-lg hover:bg-purple-500"
+		href="experimental/timeline">Timeline</a
+	>
 </div>
