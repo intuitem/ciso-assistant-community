@@ -157,6 +157,7 @@
 	"justification": "Begründung",
 	"parentFolder": "Übergeordneter Ordner",
 	"contentType": "Inhaltstyp",
+	"objectType": "Objekttyp",
 	"type": "Typ",
 	"lcStatus": "Status",
 	"internalReference": "Interne Referenz",

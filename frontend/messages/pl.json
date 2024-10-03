@@ -157,6 +157,7 @@
 	"justification": "Uzasadnienie",
 	"parentFolder": "Folder nadrzędny",
 	"contentType": "Rodzaj treści",
+	"objectType": "Typ obiektu",
 	"type": "Typ",
 	"lcStatus": "Status LC",
 	"internalReference": "Referencja wewnętrzna",

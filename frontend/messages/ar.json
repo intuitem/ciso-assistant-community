@@ -146,6 +146,7 @@
 	"justification": "التبرير",
 	"parentFolder": "المجلد الرئيسي",
 	"contentType": "نوع المحتوى",
+	"objectType": "نوع الكائن",
 	"type": "النوع",
 	"lcStatus": "حالة LC",
 	"internalReference": "المرجع الداخلي",

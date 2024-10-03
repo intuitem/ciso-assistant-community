@@ -157,6 +157,7 @@
 	"justification": "Giustificazione",
 	"parentFolder": "Cartella principale",
 	"contentType": "Tipo di contenuto",
+	"objectType": "Tipo di oggetto",
 	"type": "Tipo",
 	"lcStatus": "Stato",
 	"internalReference": "Riferimento interno",

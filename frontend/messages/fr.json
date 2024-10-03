@@ -157,6 +157,7 @@
 	"justification": "Justification",
 	"parentFolder": "Domaine parent",
 	"contentType": "Type de contenu",
+	"objectType": "Type d'objet",
 	"type": "Type",
 	"lcStatus": "Statut",
 	"internalReference": "Référence interne",

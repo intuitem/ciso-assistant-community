@@ -157,6 +157,7 @@
 	"justification": "Justificación",
 	"parentFolder": "Carpeta principal",
 	"contentType": "Tipo de contenido",
+	"objectType": "abcdef",
 	"type": "Tipo",
 	"lcStatus": "Estado",
 	"internalReference": "Referencia interna",
