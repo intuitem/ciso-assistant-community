@@ -80,9 +80,11 @@ export class PageContent extends BasePage {
 		}
 		// If the library is not visible, it might have already been loaded
 		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
-			await this.tab('Loaded libraries').click();
-			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-			this.page.getByTestId('search-input').fill(name);
+			if (await this.tab('Loaded libraries').isVisible()) {
+				await this.tab('Loaded libraries').click();
+				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
+				this.page.getByTestId('search-input').fill(name);
+			}
 			await expect(this.getRow(name)).toBeVisible();
 			return;
 		}
