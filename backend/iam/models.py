@@ -502,6 +502,19 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
+    @property
+    def is_editor(self) -> bool:
+        permissions = RoleAssignment.get_permissions(self)
+        editor_prefixes = {"add_", "change_", "delete_"}
+        return any(
+            any(perm.startswith(prefix) for prefix in editor_prefixes)
+            for perm in permissions
+        )
+
+    @classmethod
+    def get_editors(cls) -> List[Self]:
+        return [user for user in cls.objects.all() if user.is_editor]
+
 
 class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""
