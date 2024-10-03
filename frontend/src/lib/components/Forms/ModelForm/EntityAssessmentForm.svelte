@@ -153,7 +153,7 @@
 	multiple
 	options={getOptions({ objects: model.foreignKeys['representatives'], label: 'email' })}
 	field="representatives"
-	helpText={m.entityAssessmentAuthorHelpText()}
+	helpText={m.entityAssessmentRepresentativesHelpText()}
 	cacheLock={cacheLocks['representatives']}
 	bind:cachedValue={formDataCache['representatives']}
 	label={m.representatives()}
@@ -187,6 +187,7 @@
 	cacheLock={cacheLocks['evidence']}
 	bind:cachedValue={formDataCache['evidence']}
 	label={m.evidence()}
+	helpText={m.entityAssessmentEvidenceHelpText()}
 />
 <Select
 	{form}
