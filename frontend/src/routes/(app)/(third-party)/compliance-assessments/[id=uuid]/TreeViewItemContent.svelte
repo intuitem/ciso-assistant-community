@@ -155,27 +155,12 @@
 							{/if}
 						{/each}
 					{/if}
+					{#if node.question.questions}
+						<span class="badge" style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+							>{node.question.questions.length} {m.questionOrQuestions()}</span
+						>
+					{/if}
 				</div>
-			</div>
-			<div>
-				{#if hasAssessableChildren}
-					{#each Object.entries(complianceStatusColorMap) as status}
-						{#if resultCounts[status[0]]}
-							<span
-								class="badge mr-1"
-								style="background-color: {status[1] + '44'}; color: {darkenColor(status[1], 0.3)}"
-							>
-								{resultCounts[status[0]]}
-								{safeTranslate(status[0])}
-							</span>
-						{/if}
-					{/each}
-				{/if}
-				{#if node.question.questions}
-					<span class="badge" style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-						>{node.question.questions.length} {m.questionOrQuestions()}</span
-					>
-				{/if}
 			</div>
 		</div>
 		{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
