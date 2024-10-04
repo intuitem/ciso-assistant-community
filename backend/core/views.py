@@ -5,8 +5,11 @@ import tempfile
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
+import time
+import pytz
 from typing import Any, Tuple
 from uuid import UUID
+import random
 
 import django_filters as df
 from django.conf import settings
@@ -622,6 +625,25 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response({"results": "risk assessment duplicated"})
 
 
+def convert_date_to_timestamp(date):
+    """
+    Converts a date object (datetime.date) to a Linux timestamp.
+    It creates a datetime object for the date at midnight and makes it timezone-aware.
+    """
+    if date:
+        date_as_datetime = datetime.combine(date, datetime.min.time())
+        aware_datetime = pytz.UTC.localize(date_as_datetime)
+        return int(time.mktime(aware_datetime.timetuple())) * 1000
+    return None
+
+
+def gen_random_html_color():
+    r = random.randint(150, 255)
+    g = random.randint(150, 255)
+    b = random.randint(150, 255)
+    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
@@ -839,6 +861,29 @@ class AppliedControlViewSet(BaseModelViewSet):
                 "links": links,
             }
         )
+
+    @action(detail=False, methods=["get"])
+    def get_timeline_info(self, request):
+        entries = []
+        colorMap = {}
+        for ac in AppliedControl.objects.all():
+            if ac.start_date and ac.eta:
+                startDate = convert_date_to_timestamp(ac.start_date)
+                endDate = convert_date_to_timestamp(ac.eta)
+                entries.append(
+                    {
+                        "startDate": startDate,
+                        "endDate": endDate,
+                        "name": ac.name,
+                        "description": ac.description
+                        if ac.description
+                        else "(no description)",
+                        "domain": ac.folder.name,
+                    }
+                )
+        for domain in Folder.objects.all():
+            colorMap[domain.name] = gen_random_html_color()
+        return Response({"entries": entries, "colorMap": colorMap})
 
 
 class PolicyViewSet(AppliedControlViewSet):
