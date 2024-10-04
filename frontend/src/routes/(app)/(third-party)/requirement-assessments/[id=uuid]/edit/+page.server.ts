@@ -14,166 +14,184 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 
-
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';
 	const baseUrl = BASE_API_URL;
 	const endpoint = `${baseUrl}/${URLModel}/${params.id}/`;
-  
+
 	async function fetchJson(url: string) {
-	  const res = await fetch(url);
-	  if (!res.ok) {
-		console.error(`Failed to fetch data from ${url}: ${res.statusText}`);
-		return null;
-	  }
-	  return res.json();
+		const res = await fetch(url);
+		if (!res.ok) {
+			console.error(`Failed to fetch data from ${url}: ${res.statusText}`);
+			return null;
+		}
+		return res.json();
 	}
-  
+
 	const requirementAssessment = await fetchJson(endpoint);
 	const [compliance_assessment_score, requirement] = await Promise.all([
-	  fetchJson(`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`),
-	  fetchJson(`${baseUrl}/requirement-nodes/${requirementAssessment.requirement}/`)
+		fetchJson(
+			`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
+		),
+		fetchJson(`${baseUrl}/requirement-nodes/${requirementAssessment.requirement}/`)
 	]);
-  
-	const parent = await fetchJson(`${baseUrl}/requirement-nodes/?urn=${requirement.parent_urn}`)
-	  .then(res => res.results[0]);
-  
+
+	const parent = await fetchJson(
+		`${baseUrl}/requirement-nodes/?urn=${requirement.parent_urn}`
+	).then((res) => res.results[0]);
+
 	const model = getModelInfo(URLModel);
 	const object = { ...requirementAssessment };
-	Object.keys(object).forEach(key => {
-	  if (object[key] instanceof Object && 'id' in object[key]) {
-		object[key] = object[key].id;
-	  }
+	Object.keys(object).forEach((key) => {
+		if (object[key] instanceof Object && 'id' in object[key]) {
+			object[key] = object[key].id;
+		}
 	});
-  
+
 	const schema = modelSchema(URLModel);
 	const form = await superValidate(object, zod(schema), { errors: true });
-  
+
 	const foreignKeys: Record<string, any> = {};
 	if (model.foreignKeyFields) {
-	  await Promise.all(model.foreignKeyFields.map(async (keyField) => {
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-		const data = await fetchJson(url);
-		if (data) {
-		  foreignKeys[keyField.field] = data.results;
-		}
-	  }));
+		await Promise.all(
+			model.foreignKeyFields.map(async (keyField) => {
+				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+				const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
+				const data = await fetchJson(url);
+				if (data) {
+					foreignKeys[keyField.field] = data.results;
+				}
+			})
+		);
 	}
 	model.foreignKeys = foreignKeys;
-  
+
 	const selectOptions: Record<string, any> = {};
 	if (model.selectFields) {
-	  await Promise.all(model.selectFields.map(async (selectField) => {
-		const url = `${baseUrl}/${URLModel}/${selectField.field}/`;
-		const data = await fetchJson(url);
-		if (data) {
-		  selectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-			label: value,
-			value: key
-		  }));
-		}
-	  }));
+		await Promise.all(
+			model.selectFields.map(async (selectField) => {
+				const url = `${baseUrl}/${URLModel}/${selectField.field}/`;
+				const data = await fetchJson(url);
+				if (data) {
+					selectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: key
+					}));
+				}
+			})
+		);
 	}
 	model.selectOptions = selectOptions;
-  
+
 	const measureCreateSchema = modelSchema('applied-controls');
-	const measureCreateForm = await superValidate({ folder: requirementAssessment.folder.id }, zod(measureCreateSchema), { errors: false });
-  
+	const measureCreateForm = await superValidate(
+		{ folder: requirementAssessment.folder.id },
+		zod(measureCreateSchema),
+		{ errors: false }
+	);
+
 	const measureModel = getModelInfo('applied-controls');
-	
+
 	const measureSelectOptions: Record<string, any> = {};
 	if (measureModel.selectFields) {
-	  await Promise.all(measureModel.selectFields.map(async (selectField) => {
-		const url = `${baseUrl}/applied-controls/${selectField.field}/`;
-		const data = await fetchJson(url);
-		if (data) {
-		  measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-			label: value,
-			value: key
-		  }));
-		}
-	  }));
+		await Promise.all(
+			measureModel.selectFields.map(async (selectField) => {
+				const url = `${baseUrl}/applied-controls/${selectField.field}/`;
+				const data = await fetchJson(url);
+				if (data) {
+					measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: key
+					}));
+				}
+			})
+		);
 	}
 	measureModel.selectOptions = measureSelectOptions;
-  
+
 	const measureForeignKeys: Record<string, any> = {};
 	if (measureModel.foreignKeyFields) {
-	  await Promise.all(measureModel.foreignKeyFields.map(async (keyField) => {
-		if (keyField.field === 'folder') {
-		  measureForeignKeys[keyField.field] = [requirementAssessment.folder];
-		} else {
-		  const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		  const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
-		  const data = await fetchJson(url);
-		  if (data) {
-			measureForeignKeys[keyField.field] = data.results;
-		  }
-		}
-	  }));
+		await Promise.all(
+			measureModel.foreignKeyFields.map(async (keyField) => {
+				if (keyField.field === 'folder') {
+					measureForeignKeys[keyField.field] = [requirementAssessment.folder];
+				} else {
+					const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+					const url = `${baseUrl}/${keyField.urlModel}/${queryParams}`;
+					const data = await fetchJson(url);
+					if (data) {
+						measureForeignKeys[keyField.field] = data.results;
+					}
+				}
+			})
+		);
 	}
 	measureModel.foreignKeys = measureForeignKeys;
-  
+
 	const tables: Record<string, any> = {};
-	await Promise.all(['applied-controls', 'evidences'].map(async (key) => {
-	  const data = await fetchJson(`${baseUrl}/${key}/?requirement_assessments=${params.id}`);
-	  if (data) {
-		tables[key] = {
-		  head: listViewFields[key].head,
-		  body: tableSourceMapper(data.results, listViewFields[key].body),
-		  meta: data.results
-		};
-	  }
-	}));
-  
+	await Promise.all(
+		['applied-controls', 'evidences'].map(async (key) => {
+			const data = await fetchJson(`${baseUrl}/${key}/?requirement_assessments=${params.id}`);
+			if (data) {
+				tables[key] = {
+					head: listViewFields[key].head,
+					body: tableSourceMapper(data.results, listViewFields[key].body),
+					meta: data.results
+				};
+			}
+		})
+	);
+
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceCreateForm = await superValidate(
-	  { requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
-	  zod(evidenceCreateSchema),
-	  { errors: false }
+		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		zod(evidenceCreateSchema),
+		{ errors: false }
 	);
-  
+
 	const evidenceSelectOptions: Record<string, any> = {};
 	if (evidenceModel.selectFields) {
-	  await Promise.all(evidenceModel.selectFields.map(async (selectField) => {
-		const url = `${baseUrl}/evidences/${selectField.field}/`;
-		const data = await fetchJson(url);
-		if (data) {
-		  evidenceSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-			label: value,
-			value: key
-		  }));
-		}
-	  }));
+		await Promise.all(
+			evidenceModel.selectFields.map(async (selectField) => {
+				const url = `${baseUrl}/evidences/${selectField.field}/`;
+				const data = await fetchJson(url);
+				if (data) {
+					evidenceSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: key
+					}));
+				}
+			})
+		);
 	}
 	evidenceModel.selectOptions = evidenceSelectOptions;
-  
+
 	const evidenceForeignKeys: Record<string, any> = {};
 	if (evidenceModel.foreignKeyFields) {
-	  evidenceModel.foreignKeyFields.forEach((keyField) => {
-		if (keyField.field === 'folder') {
-		  evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
-		} else {
-		  evidenceForeignKeys[keyField.field] = [];
-		}
-	  });
+		evidenceModel.foreignKeyFields.forEach((keyField) => {
+			if (keyField.field === 'folder') {
+				evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
+			} else {
+				evidenceForeignKeys[keyField.field] = [];
+			}
+		});
 	}
 	evidenceModel.foreignKeys = evidenceForeignKeys;
-  
+
 	return {
-	  URLModel,
-	  requirementAssessment,
-	  compliance_assessment_score,
-	  requirement,
-	  parent,
-	  model,
-	  form,
-	  measureCreateForm,
-	  measureModel,
-	  evidenceModel,
-	  evidenceCreateForm,
-	  tables
+		URLModel,
+		requirementAssessment,
+		compliance_assessment_score,
+		requirement,
+		parent,
+		model,
+		form,
+		measureCreateForm,
+		measureModel,
+		evidenceModel,
+		evidenceCreateForm,
+		tables
 	};
 }) satisfies PageServerLoad;
 
