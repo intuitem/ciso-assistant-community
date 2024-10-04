@@ -751,5 +751,6 @@
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
 	"NoPreviewMessage": "No preview available.",
-	"errorLicenseSeatsExceeded": "The number of license seats is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator."
+	"errorLicenseSeatsExceeded": "The number of license seats is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator.",
+	"availableSeats": "Available seats"
 }
