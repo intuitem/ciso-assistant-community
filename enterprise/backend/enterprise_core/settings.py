@@ -399,7 +399,7 @@ logger.info(
     "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
 )
 
-LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 0))
+LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 
 INSTALLED_APPS.append("enterprise_core")
