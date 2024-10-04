@@ -60,7 +60,7 @@ export function formatScoreValue(value: number, max_score: number, fullDonut = f
 }
 
 export function getSecureRedirect(url: any): string {
-	const SECURE_REDIRECT_URL_REGEX = /^\/(?!.*\/\/)[^\s]*$/;
+	const SECURE_REDIRECT_URL_REGEX = /^\/[^/]/;
 	return typeof url === 'string' && SECURE_REDIRECT_URL_REGEX.test(url) ? url : '';
 }
 
