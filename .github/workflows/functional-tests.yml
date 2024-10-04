@@ -184,6 +184,7 @@ jobs:
           echo EMAIL_HOST_PASSWORD=password >> .env
           echo EMAIL_PORT=1025 >> .env
           echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
+          echo LICENSE_SEATS=999 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
