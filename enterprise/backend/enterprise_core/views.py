@@ -1,20 +1,22 @@
-import mimetypes
-import magic
+import os
+from datetime import datetime
 
+import magic
 import structlog
-from core.views import BaseModelViewSet
-from django.http import HttpResponse
+from django.conf import settings
+from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
     action,
     api_view,
     permission_classes,
 )
 from rest_framework.parsers import FileUploadParser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from django.conf import settings
+from core.views import BaseModelViewSet
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -129,6 +131,34 @@ class ClientSettingsViewSet(BaseModelViewSet):
     )
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
+
+
+class LicenseStatusView(APIView):
+    def get(self, request):
+        expiry_date_str = settings.LICENSE_EXPIRATION
+
+        if not expiry_date_str:
+            return Response(
+                {"status": "unknown", "message": "No expiry date set"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            expiry_date = datetime.fromisoformat(expiry_date_str)
+        except ValueError:
+            return Response(
+                {"status": "error", "message": "Invalid expiry date format"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        now = timezone.now()
+
+        if expiry_date > now:
+            days_left = (expiry_date - now).days
+            return Response({"status": "active", "days_left": days_left})
+        else:
+            days_expired = (now - expiry_date).days
+            return Response({"status": "expired", "days_expired": days_expired})
 
 
 @api_view(["GET"])
