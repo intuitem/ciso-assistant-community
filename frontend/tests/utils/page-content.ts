@@ -66,7 +66,7 @@ export class PageContent extends BasePage {
 	}
 
 	async importLibrary(name: string, urn?: string, language = 'English') {
-		this.page.getByTestId('search-input').fill(name);
+		await this.page.getByTestId('search-input').fill(name);
 		if (
 			(await this.tab('Loaded libraries').isVisible()) &&
 			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
@@ -83,7 +83,7 @@ export class PageContent extends BasePage {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
 				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-				this.page.getByTestId('search-input').fill(name);
+				await this.page.getByTestId('search-input').fill(name);
 			}
 			await expect(this.getRow(name)).toBeVisible();
 			return;
@@ -94,7 +94,7 @@ export class PageContent extends BasePage {
 		});
 		await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-		this.page.getByTestId('search-input').fill(name);
+		await this.page.getByTestId('search-input').fill(name);
 		await expect(this.getRow(name)).toBeVisible();
 	}
 
