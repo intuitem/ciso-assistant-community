@@ -751,5 +751,9 @@
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
 	"NoPreviewMessage": "No preview available.",
-	"experimental": "Experimental"
+	"experimental": "Experimental",
+	"timeline": "Timeline",
+	"graph": "Graph",
+	"startDate": "Start date",
+	"startDateHelpText": "Start date (useful for timeline)"
 }
