@@ -725,7 +725,7 @@ Projects have the following fields:
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
-Assets are of type primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
+Assets are of type primary or supporting. A primary asset has no parent, a supporting asset can have parent assets (primary or supporting), but not itself.
 
 ## Frameworks
 
@@ -1337,3 +1337,25 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - The change in applied control is not retained.
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
+
+## EBIOS-RM evolution
+
+### Mapping of essential concepts
+
+EBIOS-RM (english)    | EBIOS-RM (french)       |  CISO Assistant
+----------------------|-------------------------|----------------
+Study                 | Etude                   | Project
+Studied object        | Objet de l'étude        | Description of the project
+Mission               | Mission                 | Mission of an entity
+Business asset        | Valeurs métier          | Primary asset
+Supporting asset      | Bien support            | Supporting asset
+Feared event          | Evénement redouté       | TBD
+Impact                | Impact                  | Impact in a risk analysis
+Security baseline     | Socle de sécurité       | Compliance frameworks and audits
+Risk origins          | Sources de risque       | TBD
+Target objectives     | Objectifs visés         | TBD
+Ecosystem             | Ecosystème              | Third Party Risk Management
+Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)
+Security measures     | Mesures de sécurité     | Reference/applied controls
+Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability)
+Risk treatment        | Traitement du risque    | Applied controls in a risk analysis
