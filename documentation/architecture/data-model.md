@@ -1349,13 +1349,47 @@ Studied object        | Objet de l'étude        | Description of the project
 Mission               | Mission                 | Mission of an entity
 Business asset        | Valeurs métier          | Primary asset
 Supporting asset      | Bien support            | Supporting asset
-Feared event          | Evénement redouté       | TBD
+Feared event          | Evénement redouté       | Risk analysis at asset level
 Impact                | Impact                  | Impact in a risk analysis
 Security baseline     | Socle de sécurité       | Compliance frameworks and audits
 Risk origins          | Sources de risque       | TBD
 Target objectives     | Objectifs visés         | TBD
 Ecosystem             | Ecosystème              | Third Party Risk Management
 Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)
-Security measures     | Mesures de sécurité     | Reference/applied controls
+Security controls     | Mesures de sécurité     | Reference/applied controls
 Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability)
 Risk treatment        | Traitement du risque    | Applied controls in a risk analysis
+
+### Assets and Feared events
+
+We introduce a new field for risk analysis called analysis_focus, with possible values among feared impact/probability/full. Full is the current mode, and the default value. In the "impact" variant, only impact is evaluated. There is no probability, nor any risk treatment.
+
+Assets can be referred in a risk analysis. In addition, we add a new field in an asset called "feared events" to refer to zero, one or several risk analyses defining the feared events for this asset.
+
+A new field is added to a risk scenario, precising the security objective that is threatened, among the values Confidentiality/Integrity/Availability/Proof/Authenticity.
+
+The security "CIA" or "DICP" score of an asset can now be clearly defined as the highest impact for corresponding scenarios for analyses selected in "feared events", when a scenario points to the asset for one or several security objective. This can be calculated dynamically, after selection of the security objective model to use. This solves the issue of multiple conventions for security objectives.
+
+The following schematic illustrates this evolution of the data model.
+
+```mermaid
+erDiagram
+
+    RISK_ASSESSMENT       }o--o| ASSET                 : defines_feared_events
+    RISK_SCENARIO         }o--o{ ASSET                 : threatens
+    RISK_ASSESSMENT       ||--o{ RISK_SCENARIO         : contains
+
+    RISK_SCENARIO {
+        string     security_objectives
+    }
+    
+    RISK_ASSESSMENT {
+        string     analysis_focus
+    }
+
+```
+
+###
+
+
+###
