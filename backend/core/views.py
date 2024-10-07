@@ -5,8 +5,11 @@ import tempfile
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
+import time
+import pytz
 from typing import Any, Tuple
 from uuid import UUID
+import random
 
 import django_filters as df
 from django.conf import settings
@@ -622,6 +625,25 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response({"results": "risk assessment duplicated"})
 
 
+def convert_date_to_timestamp(date):
+    """
+    Converts a date object (datetime.date) to a Linux timestamp.
+    It creates a datetime object for the date at midnight and makes it timezone-aware.
+    """
+    if date:
+        date_as_datetime = datetime.combine(date, datetime.min.time())
+        aware_datetime = pytz.UTC.localize(date_as_datetime)
+        return int(time.mktime(aware_datetime.timetuple())) * 1000
+    return None
+
+
+def gen_random_html_color():
+    r = random.randint(150, 255)
+    g = random.randint(150, 255)
+    b = random.randint(150, 255)
+    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
@@ -767,6 +789,106 @@ class AppliedControlViewSet(BaseModelViewSet):
                 row += [owners]
             writer.writerow(row)
         return response
+
+    @action(detail=False, methods=["get"])
+    def get_controls_info(self, request):
+        nodes = list()
+        links = list()
+        for ac in AppliedControl.objects.all():
+            related_items_count = 0
+            for ca in ComplianceAssessment.objects.filter(
+                requirement_assessments__applied_controls=ac
+            ).distinct():
+                audit_coverage = (
+                    RequirementAssessment.objects.filter(compliance_assessment=ca)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += audit_coverage
+                links.append(
+                    {
+                        "source": ca.id,
+                        "target": ac.id,
+                        "coverage": audit_coverage,
+                    }
+                )
+            for ra in RiskAssessment.objects.filter(
+                risk_scenarios__applied_controls=ac
+            ).distinct():
+                risk_coverage = (
+                    RiskScenario.objects.filter(risk_assessment=ra)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += risk_coverage
+                links.append(
+                    {
+                        "source": ra.id,
+                        "target": ac.id,
+                        "coverage": risk_coverage,
+                    }
+                )
+            nodes.append(
+                {
+                    "id": ac.id,
+                    "label": ac.name,
+                    "shape": "hexagon",
+                    "counter": related_items_count,
+                    "color": "#47e845",
+                }
+            )
+        for audit in ComplianceAssessment.objects.all():
+            nodes.append(
+                {
+                    "id": audit.id,
+                    "label": audit.name,
+                    "shape": "circle",
+                    "color": "#5D4595",
+                }
+            )
+        for ra in RiskAssessment.objects.all():
+            nodes.append(
+                {
+                    "id": ra.id,
+                    "label": ra.name,
+                    "shape": "square",
+                    "color": "#E6499F",
+                }
+            )
+        return Response(
+            {
+                "nodes": nodes,
+                "links": links,
+            }
+        )
+
+    @action(detail=False, methods=["get"])
+    def get_timeline_info(self, request):
+        entries = []
+        colorMap = {}
+        for ac in AppliedControl.objects.all():
+            startDate = None
+            endDate = None
+            if ac.eta:
+                endDate = convert_date_to_timestamp(ac.eta)
+                if ac.start_date:
+                    startDate = convert_date_to_timestamp(ac.start_date)
+                else:
+                    startDate = endDate
+                    entries.append(
+                        {
+                            "startDate": startDate,
+                            "endDate": endDate,
+                            "name": ac.name,
+                            "description": ac.description
+                            if ac.description
+                            else "(no description)",
+                            "domain": ac.folder.name,
+                        }
+                    )
+        for domain in Folder.objects.all():
+            colorMap[domain.name] = gen_random_html_color()
+        return Response({"entries": entries, "colorMap": colorMap})
 
 
 class PolicyViewSet(AppliedControlViewSet):

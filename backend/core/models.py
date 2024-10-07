@@ -19,6 +19,7 @@ from django.utils.html import format_html
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
+from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from library.helpers import (
@@ -1308,6 +1309,12 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         blank=True,
         verbose_name=_("Owner"),
         related_name="applied_controls",
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text=_("Start date (useful for timeline)"),
+        verbose_name=_("Start date"),
     )
     eta = models.DateField(
         blank=True,
