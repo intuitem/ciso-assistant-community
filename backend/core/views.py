@@ -867,20 +867,25 @@ class AppliedControlViewSet(BaseModelViewSet):
         entries = []
         colorMap = {}
         for ac in AppliedControl.objects.all():
-            if ac.start_date and ac.eta:
-                startDate = convert_date_to_timestamp(ac.start_date)
+            startDate = None
+            endDate = None
+            if ac.eta:
                 endDate = convert_date_to_timestamp(ac.eta)
-                entries.append(
-                    {
-                        "startDate": startDate,
-                        "endDate": endDate,
-                        "name": ac.name,
-                        "description": ac.description
-                        if ac.description
-                        else "(no description)",
-                        "domain": ac.folder.name,
-                    }
-                )
+                if ac.start_date:
+                    startDate = convert_date_to_timestamp(ac.start_date)
+                else:
+                    startDate = endDate
+                    entries.append(
+                        {
+                            "startDate": startDate,
+                            "endDate": endDate,
+                            "name": ac.name,
+                            "description": ac.description
+                            if ac.description
+                            else "(no description)",
+                            "domain": ac.folder.name,
+                        }
+                    )
         for domain in Folder.objects.all():
             colorMap[domain.name] = gen_random_html_color()
         return Response({"entries": entries, "colorMap": colorMap})
