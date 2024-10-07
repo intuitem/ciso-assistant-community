@@ -6,12 +6,9 @@ test('prepare open redirect fuzz tests', async ({ logedPage }) => {
 	test.slow();
 
 	await test.step('fuzz open redirect', async () => {
-		await logedPage.page.getByRole('button', { name: 'Organization' }).click();
-		await logedPage.page.getByTestId('accordion-item-folders').click();
+		await logedPage.page.goto('/folders');
 		await logedPage.page.getByTestId('add-button').click();
-		await logedPage.page
-			.getByTestId('form-input-name')
-			.fill('Irure commodo consequat fugiat elit mollit in aute et incididunt et tempor.');
+		await logedPage.page.getByTestId('form-input-name').fill(crypto.randomUUID());
 		await logedPage.page.getByTestId('save-button').click();
 	});
 
