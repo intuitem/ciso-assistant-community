@@ -1,3 +1,5 @@
+import { URL_MODEL } from './types';
+
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
 	return date.toLocaleDateString(locale, {
@@ -60,8 +62,8 @@ export function formatScoreValue(value: number, max_score: number, fullDonut = f
 }
 
 export function getSecureRedirect(url: any): string {
-	const SECURE_REDIRECT_URL_REGEX = /^\/[^/]/;
-	return typeof url === 'string' && SECURE_REDIRECT_URL_REGEX.test(url) ? url : '';
+	const allowedRoutePrefixes = URL_MODEL;
+	return typeof url === 'string' && allowedRoutePrefixes.includes(url.split('/')[1]) ? url : '';
 }
 
 export function darkenColor(hex: string, amount: number) {
