@@ -12,6 +12,8 @@ test('prepare open redirect fuzz tests', async ({ logedPage }) => {
 		await logedPage.page.getByTestId('save-button').click();
 	});
 
+	// Payloads courtesy of PayloadsAllTheThings
+	// https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Open%20Redirect/Intruder/Open-Redirect-payloads.txt
 	const payloadsFile = './tests/fuzz/open-redirect/payloads.txt';
 	const payloads = readFileSync(payloadsFile, 'utf8').split('\n');
 
