@@ -103,13 +103,12 @@ export const load = (async ({ fetch, params }) => {
 					measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
 						label: value,
 						value: key
-					}))
-				
+					}));
 				} else {
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 				}
 			})
-		)
+		);
 	}
 
 	measureModel['selectOptions'] = measureSelectOptions;
