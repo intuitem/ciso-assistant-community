@@ -1,6 +1,3 @@
-import { URL_MODEL } from './types';
-import { navData } from '$lib/components/SideBar/navData';
-
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
 	return date.toLocaleDateString(locale, {
