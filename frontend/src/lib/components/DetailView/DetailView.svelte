@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type {
 		ModalComponent,
@@ -17,6 +18,7 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
 	import { toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import { checkConstraints } from '$lib/utils/crud';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
@@ -69,7 +71,7 @@
 	}
 
 	function modalCreateForm(model: Record<string, any>): void {
-		const modalComponent: ModalComponent = {
+		let modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
 				form: model.createForm,
@@ -77,12 +79,24 @@
 				debug: false
 			}
 		};
-		const modal: ModalSettings = {
+		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
 		};
+		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
+			modalComponent = {
+				ref: MissingConstraintsModal
+			};
+			modal = {
+				type: 'component',
+				component: modalComponent,
+				title: m.warning(),
+				body: safeTranslate('add' + capitalizeFirstLetter(model.info.localName)).toLowerCase(),
+				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
+			};
+		}
 		modalStore.trigger(modal);
 	}
 
