@@ -1156,32 +1156,12 @@ class FolderViewSet(BaseModelViewSet):
             object_type=Folder,
         )
         folders_list = list()
-        for folder in Folder.objects.exclude(content_type="GL").filter(
-            id__in=viewable_objects
+        for folder in (
+            Folder.objects.exclude(content_type="GL")
+            .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
+            .distinct()
         ):
-            entry = {"name": folder.name}
-            children = []
-            for project in Project.objects.filter(folder=folder):
-                children.append(
-                    {
-                        "name": project.name,
-                        "children": [
-                            {
-                                "name": "audits",
-                                "value": ComplianceAssessment.objects.filter(
-                                    project=project
-                                ).count(),
-                            },
-                            {
-                                "name": "risk assessments",
-                                "value": RiskAssessment.objects.filter(
-                                    project=project
-                                ).count(),
-                            },
-                        ],
-                    }
-                )
-            entry.update({"children": children})
+            entry = {"name": folder.name, "children": get_folder_content(folder)}
             folders_list.append(entry)
         tree.update({"children": folders_list})
 

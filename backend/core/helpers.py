@@ -1,24 +1,21 @@
+import json
 from collections.abc import MutableMapping
 from datetime import date, timedelta
+from typing import Optional
 
+from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError as DjValidationError
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from iam.models import Folder, Permission, RoleAssignment, User
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.views import api_settings
+from rest_framework.views import exception_handler as drf_exception_handler
 
+from iam.models import Folder, Permission, RoleAssignment, User
 from library.helpers import get_referential_translation
 
 from .models import *
 from .utils import camel_case
-
-from typing import List, Dict, Optional
-
-import json
-
-from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
-from django.core.exceptions import ValidationError as DjValidationError
-from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.views import api_settings
-from rest_framework.views import exception_handler as drf_exception_handler
 
 DRF_NON_FIELD_ERRORS = api_settings.NON_FIELD_ERRORS_KEY
 
@@ -1140,6 +1137,30 @@ def threats_count_per_name(user: User):
         label["max"] = max_offset
 
     return {"labels": labels, "values": values}
+
+
+def get_folder_content(folder: Folder):
+    content = []
+    for f in Folder.objects.filter(parent_folder=folder).distinct():
+        content.append({"name": f.name, "children": get_folder_content(f)})
+    for p in Project.objects.filter(folder=folder).distinct():
+        content.append(
+            {
+                "name": p.name,
+                "children": [
+                    {
+                        "name": "audits",
+                        "value": ComplianceAssessment.objects.filter(project=p).count(),
+                    },
+                    {
+                        "name": "risk assessments",
+                        "value": RiskAssessment.objects.filter(project=p).count(),
+                    },
+                ],
+            }
+        )
+
+    return content
 
 
 def handle(exc, context):
