@@ -1,4 +1,5 @@
 import { URL_MODEL } from './types';
+import { navData } from '$lib/components/SideBar/navData';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
@@ -62,8 +63,44 @@ export function formatScoreValue(value: number, max_score: number, fullDonut = f
 }
 
 export function getSecureRedirect(url: any): string {
-	const allowedRoutePrefixes = URL_MODEL;
-	return typeof url === 'string' && allowedRoutePrefixes.includes(url.split('/')[1]) ? url : '';
+	if (typeof url !== 'string') {
+		return '';
+	}
+
+	let parsedUrl: URL;
+	try {
+		parsedUrl = new URL(url);
+	} catch (error) {
+		return '';
+	}
+
+	const firstPathSegment = parsedUrl.pathname.split('/')[1];
+
+	if (isAllowedRoute(firstPathSegment)) {
+		return url;
+	}
+
+	return '';
+}
+
+function isAllowedRoute(url: string): boolean {
+	const allowedRoutes = new Set([...getNavRoutes(), ...URL_MODEL]);
+	return allowedRoutes.has(url);
+}
+
+function getNavRoutes(): Set<string> {
+	const routes = new Set<string>();
+
+	for (const item of navData.items) {
+		for (const subItem of item.items) {
+			const firstSegment = subItem.href.split('/')[1];
+			if (firstSegment) {
+				routes.add(firstSegment);
+			}
+		}
+	}
+
+	return routes;
 }
 
 export function darkenColor(hex: string, amount: number) {
