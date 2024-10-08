@@ -268,7 +268,7 @@
 					<AutocompleteSelect
 						multiple
 						{form}
-						options={getOptions({ objects: data.foreignKeys['applied_controls'] })}
+						options={getOptions({ objects: data.foreignKeys['applied_controls'], extra_fields: [['folder', 'str']] })}
 						field="applied_controls"
 						label={m.appliedControls()}
 					/>
