@@ -2,14 +2,14 @@ import { readFileSync } from 'fs';
 
 import { expect, test } from '../../utils/test-utils.js';
 
-test('open redirect fuzz testing', async ({ logedPage }) => {
+test('open redirect fuzz testing', async ({ logedPage, foldersPage }) => {
 	test.slow();
 
-	await test.step('fuzz open redirect', async () => {
-		await logedPage.page.goto('/folders');
-		await logedPage.page.getByTestId('add-button').click();
-		await logedPage.page.getByTestId('form-input-name').fill(crypto.randomUUID());
-		await logedPage.page.getByTestId('save-button').click();
+	await foldersPage.goto();
+	const folderName = crypto.randomUUID();
+
+	await test.step('prepare fuzz open redirect', async () => {
+		await foldersPage.createItem({ name: folderName });
 	});
 
 	// Payloads courtesy of PayloadsAllTheThings
@@ -17,8 +17,8 @@ test('open redirect fuzz testing', async ({ logedPage }) => {
 	const payloadsFile = './tests/fuzz/open-redirect/payloads.txt';
 	const payloads = readFileSync(payloadsFile, 'utf8').split('\n');
 
-	const href = await logedPage.page
-		.getByTestId('tablerow-edit-button')
+	const href = await foldersPage
+		.editItemButton(folderName)
 		.getAttribute('href')
 		.then((href) => href!.split('?')[0]);
 
