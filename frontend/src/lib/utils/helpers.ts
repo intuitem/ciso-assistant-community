@@ -63,44 +63,8 @@ export function formatScoreValue(value: number, max_score: number, fullDonut = f
 }
 
 export function getSecureRedirect(url: any): string {
-	if (typeof url !== 'string') {
-		return '';
-	}
-
-	let parsedUrl: URL;
-	try {
-		parsedUrl = new URL(url);
-	} catch (error) {
-		return '';
-	}
-
-	const firstPathSegment = parsedUrl.pathname.split('/')[1];
-
-	if (isAllowedRoute(firstPathSegment)) {
-		return url;
-	}
-
-	return '';
-}
-
-function isAllowedRoute(url: string): boolean {
-	const allowedRoutes = new Set([...getNavRoutes(), ...URL_MODEL]);
-	return allowedRoutes.has(url);
-}
-
-function getNavRoutes(): Set<string> {
-	const routes = new Set<string>();
-
-	for (const item of navData.items) {
-		for (const subItem of item.items) {
-			const firstSegment = subItem.href.split('/')[1];
-			if (firstSegment) {
-				routes.add(firstSegment);
-			}
-		}
-	}
-
-	return routes;
+	const SECURE_REDIRECT_URL_REGEX = /^\/\w+/;
+	return typeof url === 'string' && SECURE_REDIRECT_URL_REGEX.test(url) ? url : '';
 }
 
 export function darkenColor(hex: string, amount: number) {
