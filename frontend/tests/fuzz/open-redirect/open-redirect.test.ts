@@ -1,8 +1,8 @@
-import { expect, test } from '../../utils/test-utils.js';
-
 import { readFileSync } from 'fs';
 
-test('prepare open redirect fuzz tests', async ({ logedPage }) => {
+import { expect, test } from '../../utils/test-utils.js';
+
+test('open redirect fuzz testing', async ({ logedPage }) => {
 	test.slow();
 
 	await test.step('fuzz open redirect', async () => {
