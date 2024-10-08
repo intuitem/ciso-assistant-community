@@ -49,6 +49,7 @@ export const load = (async ({ fetch, params }) => {
 	});
 
 	const schema = modelSchema(URLModel);
+	object.evidences = object.evidences.map((evidence) => evidence.id);
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const foreignKeys: Record<string, any> = {};
@@ -102,12 +103,40 @@ export const load = (async ({ fetch, params }) => {
 					measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
 						label: value,
 						value: key
-					}));
+					}))
+				
+				} else {
+					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 				}
 			})
-		);
+		)
 	}
-	measureModel.selectOptions = measureSelectOptions;
+
+	measureModel['selectOptions'] = measureSelectOptions;
+
+	const tables: Record<string, any> = {};
+
+	await Promise.all(
+		['applied-controls', 'evidences'].map(async (key) => {
+			const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
+			const response = await fetch(keyEndpoint);
+
+			if (response.ok) {
+				const data = await response.json().then((data) => data.results);
+
+				const bodyData = tableSourceMapper(data, listViewFields[key].body);
+
+				const table: TableSource = {
+					head: listViewFields[key].head,
+					body: bodyData,
+					meta: data
+				};
+				tables[key] = table;
+			} else {
+				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
+			}
+		})
+	);
 
 	const measureForeignKeys: Record<string, any> = {};
 	if (measureModel.foreignKeyFields) {
@@ -127,20 +156,6 @@ export const load = (async ({ fetch, params }) => {
 		);
 	}
 	measureModel.foreignKeys = measureForeignKeys;
-
-	const tables: Record<string, any> = {};
-	await Promise.all(
-		['applied-controls', 'evidences'].map(async (key) => {
-			const data = await fetchJson(`${baseUrl}/${key}/?requirement_assessments=${params.id}`);
-			if (data) {
-				tables[key] = {
-					head: listViewFields[key].head,
-					body: tableSourceMapper(data.results, listViewFields[key].body),
-					meta: data.results
-				};
-			}
-		})
-	);
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');

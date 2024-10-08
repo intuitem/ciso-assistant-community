@@ -152,6 +152,7 @@
 	"justification": "Justificare",
 	"parentFolder": "Dosar părinte",
 	"contentType": "Tip conținut",
+	"objectType": "Tipul obiectului",
 	"type": "Tip",
 	"lcStatus": "Stare LC",
 	"internalReference": "Referință internă",

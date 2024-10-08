@@ -157,6 +157,7 @@
 	"justification": "Justification",
 	"parentFolder": "Parent folder",
 	"contentType": "Content type",
+	"objectType": "Object type",
 	"type": "Type",
 	"lcStatus": "Status",
 	"internalReference": "Internal reference",
