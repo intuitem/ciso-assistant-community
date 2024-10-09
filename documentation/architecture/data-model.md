@@ -1368,7 +1368,30 @@ Assets can be referred in a risk analysis. In addition, we add a new field in an
 
 A new field is added to a risk scenario, precising the security objective that is threatened, among the values Confidentiality/Integrity/Availability/Proof/Authenticity.
 
-The security "CIA" or "DICP" score of an asset can now be clearly defined as the highest impact for corresponding scenarios for analyses selected in "feared events", when a scenario points to the asset for one or several security objective. This can be calculated dynamically, after selection of the security objective model to use. This solves the issue of multiple conventions for security objectives.
+The security "CIA" or "AICP" score of an asset can now be clearly defined as the highest impact for corresponding scenarios for analyses selected in "feared events", when a scenario points to the asset for one or several security objective. This can be calculated dynamically, after selection of the security objective model to use. This solves the issue of multiple conventions for security objectives.
+
+The following fields are added to assets: Confidentiality, Integrity, Availability, Proof, Authenticity, with a integer value. This value is comprised between 0 and 3, and can be projected depending on a selected standard:
+
+standard | internal value | standard value
+---------|----------------|---------------
+AICP 0-3 | 0              | 0
+AICP 0-3 | 1              | 1
+AICP 0-3 | 2              | 2
+AICP 0-3 | 3              | 3
+AICP 1-4 | 0              | 1
+AICP 1-4 | 1              | 2
+AICP 1-4 | 2              | 3
+AICP 1-4 | 3              | 4
+FIPS-199 | 0              | low
+FIPS-199 | 1              | moderate
+FIPS-199 | 2              | moderate
+FIPS-199 | 3              | high
+
+Standard risk matrices will be provided to further describe the levels of security objectives, and can be customized to reflect the definition of levels for the client.
+
+The security objective standard is selected as a global parameter, but can be changed in the UX.
+
+The following fields are also added to assets: RTO, RPO, MTD (Maximum Tolerable Downtime).
 
 The following schematic illustrates this evolution of the data model.
 
@@ -1386,6 +1409,18 @@ erDiagram
     RISK_ASSESSMENT {
         string     analysis_focus
     }
+
+    ASSET {
+        int      confidentiality
+        int      integrity
+        int      availability
+        int      proof
+        int      authenticity
+        duration rto
+        duration rpo
+        duration mtd
+    }
+
 
 ```
 
