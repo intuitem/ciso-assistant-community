@@ -758,5 +758,6 @@
 	"ShowOnlyAssessable": "Only assessable",
 	"NoPreviewMessage": "No preview available.",
 	"entityAssessmentEvidenceHelpText": "An external questionnaire",
-	"associatedEntities": "Associated entities"
+	"associatedEntities": "Associated entities",
+	"noMailerConfigured": "No mailer configured"
 }
