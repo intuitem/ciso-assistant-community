@@ -126,7 +126,7 @@
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.form,
+				_form: {id: id, urlmodel: getModelInfo('compliance-assessments').urlModel},
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('compliance-assessments').urlModel,
