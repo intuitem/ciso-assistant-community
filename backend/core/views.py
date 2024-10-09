@@ -58,6 +58,7 @@ from .models import *
 from .serializers import *
 
 import structlog
+
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
@@ -1654,18 +1655,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         object_id=instance.id,
                     )
                 except Exception as primary_exception:
-                    logger.error(f"Failed to send email to {author}: {primary_exception}")
+                    logger.error(
+                        f"Failed to send email to {author}: {primary_exception}"
+                    )
                     raise ValidationError(
-                        {
-                            "error": [
-                                "An error occurred while sending the email"
-                            ]
-                        }
+                        {"error": ["An error occurred while sending the email"]}
                     )
             return Response({"results": "mail sent"})
-        raise ValidationError({"warning": [
-                                "noMailerConfigured"
-                            ]})
+        raise ValidationError({"warning": ["noMailerConfigured"]})
 
     def perform_create(self, serializer):
         """
