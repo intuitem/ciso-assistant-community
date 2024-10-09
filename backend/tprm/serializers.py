@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField
@@ -178,11 +179,33 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            user = User.objects.create_user(
-                email=instance.email,
-                first_name=instance.first_name,
-                last_name=instance.last_name,
-            )
+            send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+            try:
+                user = User.objects.create_user(
+                    email=instance.email,
+                    first_name=instance.first_name,
+                    last_name=instance.last_name,
+                )
+            except Exception as e:
+                logger.error(e)
+                user = User.objects.filter(email=instance.email).first()
+                if user and send_mail:
+                    user.is_third_party = True
+                    user.save()
+                    instance.user = user
+                    instance.save()
+                    logger.warning("mailing failed")
+                    raise serializers.ValidationError(
+                        {
+                            "warning": [
+                                "User created successfully but an error occurred while sending the email"
+                            ]
+                        }
+                    )
+                else:
+                    raise serializers.ValidationError(
+                        {"error": ["An error occurred while creating the user"]}
+                    )
             user.is_third_party = True
         user.save()
         instance.user = user
