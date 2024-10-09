@@ -2621,7 +2621,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     exc_info=e,
                 )
                 continue
-        self.applied_controls.set(applied_controls)
+        self.applied_controls.add(applied_controls)
         return applied_controls
 
     class Meta:
