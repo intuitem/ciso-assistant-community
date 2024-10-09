@@ -13,7 +13,7 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 	breadcrumbObject.set(data.data);
 
-	const mailing = Boolean(data.data.compliance_assessment) && Boolean(data.data.authors.length);
+	const mailing = Boolean(data.data.compliance_assessment) && Boolean(data.data.representatives.length);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
