@@ -57,6 +57,40 @@ class LoadBackupView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadBackupSerializer
 
+    def load_backup(self, request, decompressed_data, backup_version, current_version) :
+        with open(SQLITE_FILE, "rb") as database_file:
+            database_recover_data = database_file.read()
+
+        sys.stdin = io.StringIO(decompressed_data)
+        request.session.flush()
+        management.call_command("flush", interactive=False)
+        try:
+            # Here we load the data from stdin
+            management.call_command(
+                loaddata.Command(),
+                "-",
+                format="json",
+                verbosity=0,
+                exclude=[
+                    "contenttypes",
+                    "auth.permission",
+                    "sessions.session",
+                    "iam.ssosettings",
+                    "knox.authtoken",
+                ],
+            )
+        except Exception:
+            with open(SQLITE_FILE, "wb") as database_file:
+                database_file.write(database_recover_data)
+
+            if backup_version != current_version:
+                return Response(
+                    {"error": "LowerBackupVersion"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({}, status=status.HTTP_200_OK)
+
     def post(self, request, *args, **kwargs):
         if not request.user.has_backup_permission:
             return Response({}, status=status.HTTP_403_FORBIDDEN)
@@ -105,37 +139,5 @@ class LoadBackupView(APIView):
                     )
 
             decompressed_data = json.dumps(decompressed_data)
-
-            with open(SQLITE_FILE, "rb") as database_file:
-                database_recover_data = database_file.read()
-
-            sys.stdin = io.StringIO(decompressed_data)
-            request.session.flush()
-            management.call_command("flush", interactive=False)
-            try:
-                # Here we load the data from stdin
-                management.call_command(
-                    loaddata.Command(),
-                    "-",
-                    format="json",
-                    verbosity=0,
-                    exclude=[
-                        "contenttypes",
-                        "auth.permission",
-                        "sessions.session",
-                        "iam.ssosettings",
-                        "knox.authtoken",
-                    ],
-                )
-            except Exception:
-                with open(SQLITE_FILE, "wb") as database_file:
-                    database_file.write(database_recover_data)
-
-                if backup_version != current_version:
-                    return Response(
-                        {"error": "LowerBackupVersion"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({}, status=status.HTTP_200_OK)
+            return self.load_backup(request, decompressed_data, backup_version, current_version)
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
