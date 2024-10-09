@@ -57,7 +57,7 @@ class LoadBackupView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadBackupSerializer
 
-    def load_backup(self, request, decompressed_data, backup_version, current_version) :
+    def load_backup(self, request, decompressed_data, backup_version, current_version):
         with open(SQLITE_FILE, "rb") as database_file:
             database_recover_data = database_file.read()
 
@@ -139,5 +139,7 @@ class LoadBackupView(APIView):
                     )
 
             decompressed_data = json.dumps(decompressed_data)
-            return self.load_backup(request, decompressed_data, backup_version, current_version)
+            return self.load_backup(
+                request, decompressed_data, backup_version, current_version
+            )
         return Response({}, status=status.HTTP_400_BAD_REQUEST)
