@@ -750,5 +750,8 @@
 	"theFollowingControlsWillBeAddedColon": "The following controls will be added:",
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
-	"NoPreviewMessage": "No preview available."
+	"NoPreviewMessage": "No preview available.",
+	"backupLoadingError": "An error occurred while loading the backup.",
+	"backupGreaterVersionError": "Can't load the backup, the version of the backup is higher than the current version of your application.",
+	"backupLowerVersionError": "An error occurred, the backup version may be too old, if so it must be updated before retrying."
 }
