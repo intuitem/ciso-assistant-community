@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
 import * as m from '$paraglide/messages';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async (event) => {
 	return loadDetail({ event, model: getModelInfo('entity-assessments'), id: event.params.id });
@@ -31,6 +32,14 @@ export const actions: Actions = {
 		};
 		const res = await fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
+			const response = await res.json();
+			console.log(response.warning);
+			if (response.warning) {
+				for (const warning of response.warning) {
+					setFlash({ type: 'warning', message: safeTranslate(warning) }, cookies);
+				}
+				return fail(400, { form: ComplianceAssessmentForm });
+			}
 			setFlash({ type: 'error', message: m.mailFailedToSend() }, cookies);
 			return fail(400, { form: ComplianceAssessmentForm });
 		}
