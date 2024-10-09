@@ -508,7 +508,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     # The following property exist solely for compatibilty between the User model and the DRF permission class IsAdminUser
     @property
-    def is_staff(self):
+    def is_staff(self) -> bool:
         return self.is_admin()
 
     @property
