@@ -361,7 +361,7 @@
 	"librariesStore": "लाइब्रेरी स्टोर",
 	"currentlyNoLoadedLibraries": "आपके पास अभी कोई लोड की गई लाइब्रेरी नहीं है",
 	"loadingLibraryUploadButton": "लाइब्रेरी अपलोड बटन लोड हो रहा है",
-	"errorOccuredWhileLoadingLibrary": "लाइब्रेरी फ़ॉर्म लोड करते समय निम्नलिखित त्रुटि हुई",
+	"errorOccurredWhileLoadingLibrary": "लाइब्रेरी फ़ॉर्म लोड करते समय निम्नलिखित त्रुटि हुई",
 	"packager": "पैकेजिंग",
 	"packagerColon": "पैकेजिंग:",
 	"dependencies": "निर्भरता",

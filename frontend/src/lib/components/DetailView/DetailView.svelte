@@ -102,13 +102,14 @@
 	}
 
 	function modalConfirm(id: string, name: string, action: string): void {
+		const urlModel = getModelInfo('risk-acceptances').urlModel;
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.form,
+				_form: { id: id, urlmodel: urlModel },
 				id: id,
 				debug: false,
-				URLModel: getModelInfo('risk-acceptances').urlModel,
+				URLModel: urlModel,
 				formAction: action
 			}
 		};

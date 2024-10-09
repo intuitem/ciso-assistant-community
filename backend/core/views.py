@@ -67,6 +67,9 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
+SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
+MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
@@ -100,12 +103,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self, **kwargs):
-        MODULE_PATHS = settings.MODULE_PATHS
         serializer_factory = SerializerFactory(
-            self.serializers_module, *MODULE_PATHS.get("serializers", [])
+            self.serializers_module, MODULE_PATHS.get("serializers", [])
         )
         serializer_class = serializer_factory.get_serializer(
             self.model.__name__, kwargs.get("action", self.action)
+        )
+        logger.debug(
+            "Serializer class",
+            serializer_class=serializer_class,
+            action=kwargs.get("action", self.action),
+            viewset=self,
+            module_paths=MODULE_PATHS,
         )
 
         return serializer_class
@@ -1974,6 +1983,8 @@ def get_build(request):
     """
     API endpoint that returns the build version of the application.
     """
+    BUILD = settings.BUILD
+    VERSION = settings.VERSION
     return Response({"version": VERSION, "build": BUILD})
 
 
