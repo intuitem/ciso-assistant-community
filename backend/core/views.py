@@ -1,9 +1,11 @@
 import csv
 import mimetypes
 import re
+import os
 import tempfile
 import uuid
 import zipfile
+import importlib
 from datetime import date, datetime, timedelta
 from typing import Any, Tuple
 from uuid import UUID
@@ -62,6 +64,8 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
+SETTINGS_MODULE = importlib.import_module(os.environ.get("DJANGO_SETTINGS_MODULE"))
+
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
@@ -95,7 +99,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self, **kwargs):
-        MODULE_PATHS = settings.MODULE_PATHS
+        MODULE_PATHS = SETTINGS_MODULE.MODULE_PATHS
         serializer_factory = SerializerFactory(
             self.serializers_module, *MODULE_PATHS.get("serializers", [])
         )

@@ -31,17 +31,30 @@
 			}
 		}}><i class="fa-solid fa-key" /> {m.clientSettings()}</Tab
 	>
+	<Tab bind:group={tabSet} name="ssoSettings" value={2}
+		><i class="fa-solid fa-cog" /> {m.generalSettings()}</Tab
+	>
 </TabGroup>
 {#if tabSet === 0}
 	<div>
 		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
 		<ModelForm
-			form={data.form}
+			form={data.ssoForm}
 			schema={SSOSettingsSchema}
-			model={data.model}
+			model={data.ssoModel}
 			cancelButton={false}
 		/>
 	</div>
 {:else if tabSet === 1}
 	<ClientSettings data={$page.state.clientSettings} />
+{:else if tabSet === 2}
+	<div>
+		<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
+		<ModelForm
+			form={data.generalSettingForm}
+			model={data.generalSettingModel}
+			cancelButton={false}
+			action="?/general"
+		/>
+	</div>
 {/if}
