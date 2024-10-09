@@ -55,7 +55,6 @@
         <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-
         <button class="btn variant-filled-error" type="submit" on:click={parent.onConfirm}>{m.submit()}</button>
       </footer>
 		</SuperForm>
