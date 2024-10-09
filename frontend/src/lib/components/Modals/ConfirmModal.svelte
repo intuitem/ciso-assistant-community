@@ -24,10 +24,6 @@
 
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
-	// Can we use the HiddenInput component instead of setting these values manually ?
-	_form.data.id = id;
-	_form.data.urlmodel = URLModel;
-
 	const { form } = superForm(_form, {
 		dataType: 'json',
 		id: `confirm-modal-form-${crypto.randomUUID()}`
@@ -57,9 +53,9 @@
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
         <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
-				<!-- Can we use the HiddenInput component instead ?-->
-        <!-- <input type="hidden" name="urlmodel" value={URLModel} /> -->
-        <!-- <input type="hidden" name="id" value={id} /> -->
+        <input type="hidden" name="urlmodel" value={URLModel} />
+        <input type="hidden" name="id" value={id} />
+
         <button class="btn variant-filled-error" type="submit" on:click={parent.onConfirm}>{m.submit()}</button>
       </footer>
 		</SuperForm>
