@@ -40,6 +40,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     solutions = FieldsRelatedField(many=True)
     representatives = FieldsRelatedField(many=True)
+    authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
 
     class Meta:
