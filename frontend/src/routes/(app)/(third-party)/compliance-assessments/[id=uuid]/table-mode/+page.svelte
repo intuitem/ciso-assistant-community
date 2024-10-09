@@ -353,9 +353,11 @@
 										><p class="flex items-center space-x-2">
 											<span>{m.evidence()}</span>
 											{#key addedEvidence}
-												<span class="badge variant-soft-primary"
-													>{requirementAssessment.evidences.length}</span
-												>
+												{#if requirementAssessment.evidences != null}
+													<span class="badge variant-soft-primary"
+														>{requirementAssessment.evidences.length}</span
+													>
+												{/if}
 											{/key}
 										</p></svelte:fragment
 									>
