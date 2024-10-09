@@ -122,6 +122,8 @@ class LoadBackupView(APIView):
             backup_version = match.group()
             current_version = VERSION.split("-")[0]
 
+            if backup_version.lower() == "dev":
+                backup_version = "v0.0.0"
             if current_version.lower() == "dev":
                 current_version = "v0.0.0"
 
