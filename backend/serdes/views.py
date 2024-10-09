@@ -127,7 +127,7 @@ class LoadBackupView(APIView):
                         "knox.authtoken",
                     ],
                 )
-            except:
+            except Exception:
                 with open(SQLITE_FILE, "wb") as database_file:
                     database_file.write(database_recover_data)
 
