@@ -364,7 +364,7 @@
 	"librariesStore": "Magasin de bibliothèques",
 	"currentlyNoLoadedLibraries": "Vous n'avez actuellement aucune bibliothèque chargée",
 	"loadingLibraryUploadButton": "Chargement du bouton de téléchargement de la bibliothèque",
-	"errorOccuredWhileLoadingLibrary": "L'erreur suivante s'est produite lors du chargement du formulaire de bibliothèque",
+	"errorOccurredWhileLoadingLibrary": "L'erreur suivante s'est produite lors du chargement du formulaire de bibliothèque",
 	"packager": "Éditeur",
 	"packagerColon": "Éditeur :",
 	"dependencies": "Dépendances",

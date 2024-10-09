@@ -364,7 +364,7 @@
 	"librariesStore": "Bibliotheekwinkel",
 	"currentlyNoLoadedLibraries": "Je hebt momenteel geen geladen bibliotheken",
 	"loadingLibraryUploadButton": "Bibliotheek uploadknop laden",
-	"errorOccuredWhileLoadingLibrary": "De volgende fout deed zich voor tijdens het laden van het bibliotheekformulier",
+	"errorOccurredWhileLoadingLibrary": "De volgende fout deed zich voor tijdens het laden van het bibliotheekformulier",
 	"packager": "Pakkageerder",
 	"packagerColon": "Pakkageerder:",
 	"dependencies": "Afhankelijkheden",

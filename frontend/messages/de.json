@@ -364,7 +364,7 @@
 	"librariesStore": "Bibliotheksladen",
 	"currentlyNoLoadedLibraries": "Sie haben derzeit keine geladenen Bibliotheken",
 	"loadingLibraryUploadButton": "Bibliotheks-Upload-Button wird geladen",
-	"errorOccuredWhileLoadingLibrary": "Beim Laden des Bibliotheksformulars ist der folgende Fehler aufgetreten",
+	"errorOccurredWhileLoadingLibrary": "Beim Laden des Bibliotheksformulars ist der folgende Fehler aufgetreten",
 	"packager": "Paketierer",
 	"packagerColon": "Packager:",
 	"dependencies": "Abhängigkeiten",
