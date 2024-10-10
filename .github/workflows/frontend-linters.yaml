@@ -28,10 +28,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install prettier
         working-directory: ${{env.working-directory}}
-        run: npm install --save-dev prettier
+        run: pnpm add --save-dev prettier
       - name: Run prettier
         working-directory: ${{env.working-directory}}
-        run: npx prettier --check .
+        run: pnpm exec prettier --check .
       # NOTE: The following will be uncommented once the codebase is cleaned up
       # - name: Install latest npm
       #   working-directory: ${{env.working-directory}}
