@@ -365,7 +365,7 @@
 	"librariesStore": "Libraries store",
 	"currentlyNoLoadedLibraries": "You currently have no loaded libraries",
 	"loadingLibraryUploadButton": "Loading the library upload button",
-	"errorOccuredWhileLoadingLibrary": "The following error occurred while loading the library form",
+	"errorOccurredWhileLoadingLibrary": "The following error occurred while loading the library form",
 	"packager": "Packager",
 	"packagerColon": "Packager:",
 	"dependencies": "Dependencies",
@@ -745,10 +745,12 @@
 	"suggestControls": "Suggest controls",
 	"createAppliedControlsFromSuggestionsHelpText": "Create applied controls from the framework's requirements' suggested reference controls",
 	"createAppliedControlsFromSuggestionsSuccess": "Applied controls successfully created from the suggested reference controls",
-	"createAppliedControlsFromSuggestionsError": "An error occured while creating applied controls from the suggested reference controls",
+	"createAppliedControlsFromSuggestionsError": "An error occurred while creating applied controls from the suggested reference controls",
 	"createAppliedControlsFromSuggestionsConfirmMessage": "{count} applied controls will be created from the suggested reference controls. Do you want to proceed?",
 	"theFollowingControlsWillBeAddedColon": "The following controls will be added:",
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
-	"NoPreviewMessage": "No preview available."
+	"NoPreviewMessage": "No preview available.",
+	"errorLicenseSeatsExceeded": "The number of license seats is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator.",
+	"availableSeats": "Available seats"
 }

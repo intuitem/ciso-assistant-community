@@ -359,7 +359,7 @@
 	"librariesStore": "Magazin de biblioteci",
 	"currentlyNoLoadedLibraries": "În prezent, nu aveți nicio bibliotecă încărcată",
 	"loadingLibraryUploadButton": "Încărcarea butonului de încărcare a bibliotecii",
-	"errorOccuredWhileLoadingLibrary": "A apărut următoarea eroare în timpul încărcării formularului bibliotecii",
+	"errorOccurredWhileLoadingLibrary": "A apărut următoarea eroare în timpul încărcării formularului bibliotecii",
 	"packager": "Ambalator",
 	"packagerColon": "Ambalator:",
 	"dependencies": "Dependențe",
