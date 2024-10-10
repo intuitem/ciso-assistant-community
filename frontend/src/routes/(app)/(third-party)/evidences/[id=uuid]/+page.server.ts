@@ -43,7 +43,16 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 
-	return { URLModel, evidence, object, tables, deleteForm };
+	const attachmentDeleteSchema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+	const attachmentDeleteForm = await superValidate(
+		{
+			urlmodel: URLModel,
+			id: params.id
+		},
+		zod(attachmentDeleteSchema)
+	);
+
+	return { URLModel, evidence, object, tables, deleteForm, attachmentDeleteForm };
 };
 
 export const actions: Actions = {
