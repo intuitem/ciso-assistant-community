@@ -230,13 +230,48 @@ def evidences_templates(file):
                 print(f"✅ {row['name']} created")
 
 
-# Add commands to the CLI group
+@click.command()
+@click.option("--file", required=True, help="Path to the attachment to upload")
+@click.option("--name", required=True, help="Name of the evidence")
+def upload_evidence(file, name):
+    """Upload attachment as evidence"""
+
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+    # Get evidence ID by name
+    url = f"{API_URL}/evidences/"
+    res = requests.get(url, headers=headers, params={"name": name})
+    data = res.json()
+    if res.status_code != 200:
+        print(data)
+        print(f"Error: check credentials or filename.")
+        return
+    if not data["results"]:
+        print(f"Error: No evidence found with name '{name}'")
+        return
+
+    evidence_id = data["results"][0]["id"]
+
+    # Upload file
+    url = f"{API_URL}/evidences/{evidence_id}/upload/"
+    filename = Path(file).name
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+        "Content-Disposition": f'attachment;filename="{filename}"',
+    }
+    with open(file, "rb") as f:
+        res = requests.post(url, headers=headers, data=f)
+    print(res)
+    print(res.text)
+
+
 cli.add_command(get_folders)
 cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
 cli.add_command(evidences_templates)
 cli.add_command(init_config)
-
+cli.add_command(upload_evidence)
 if __name__ == "__main__":
     cli()
