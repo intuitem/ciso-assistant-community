@@ -479,6 +479,7 @@ class FolderReadSerializer(BaseModelSerializer):
 class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    reference_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = Framework
