@@ -7,7 +7,6 @@ import pandas as pd
 import requests
 import yaml
 from rich import print
-import mimetypes
 
 cli_cfg = dict()
 auth_data = dict()
