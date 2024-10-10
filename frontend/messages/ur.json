@@ -361,7 +361,7 @@
 	"librariesStore": "لائبریری اسٹور",
 	"currentlyNoLoadedLibraries": "آپ کے پاس فی الحال کوئی لوڈ شدہ لائبریری نہیں ہے",
 	"loadingLibraryUploadButton": "لائبریری اپلوڈ بٹن لوڈ ہو رہا ہے",
-	"errorOccuredWhileLoadingLibrary": "لائبریری فارم لوڈ کرنے کے دوران درج ذیل خرابی پیش آئی",
+	"errorOccurredWhileLoadingLibrary": "لائبریری فارم لوڈ کرنے کے دوران درج ذیل خرابی پیش آئی",
 	"packager": "پیکجر",
 	"packagerColon": "پیکجر:",
 	"dependencies": "انحصار",

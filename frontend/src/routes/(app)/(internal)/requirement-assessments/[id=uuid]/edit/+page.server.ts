@@ -10,7 +10,7 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
@@ -43,6 +43,7 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const schema = modelSchema(URLModel);
+	object.evidences = object.evidences.map((evidence) => evidence.id);
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const foreignKeys: Record<string, any> = {};
@@ -116,24 +117,27 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['applied-controls', 'evidences'] as urlModel[]) {
-		const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
-		const response = await fetch(keyEndpoint);
-		if (response.ok) {
-			const data = await response.json().then((data) => data.results);
+	await Promise.all(
+		['applied-controls', 'evidences'].map(async (key) => {
+			const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
+			const response = await fetch(keyEndpoint);
 
-			const bodyData = tableSourceMapper(data, listViewFields[key].body);
+			if (response.ok) {
+				const data = await response.json().then((data) => data.results);
 
-			const table: TableSource = {
-				head: listViewFields[key].head,
-				body: bodyData,
-				meta: data
-			};
-			tables[key] = table;
-		} else {
-			console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-		}
-	}
+				const bodyData = tableSourceMapper(data, listViewFields[key].body);
+
+				const table: TableSource = {
+					head: listViewFields[key].head,
+					body: bodyData,
+					meta: data
+				};
+				tables[key] = table;
+			} else {
+				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
+			}
+		})
+	);
 
 	const measureForeignKeys: Record<string, any> = {};
 
