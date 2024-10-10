@@ -47,6 +47,12 @@
 		value = event?.target?.value;
 		setLanguageTag(value);
 		// sessionStorage.setItem('lang', value);
+		fetch('/api/preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({
+				lang: value
+			})
+		});
 		setCookie('ciso_lang', value);
 		window.location.reload();
 	}
