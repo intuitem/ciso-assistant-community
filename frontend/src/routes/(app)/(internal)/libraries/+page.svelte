@@ -93,7 +93,7 @@
 				>
 			</SuperForm>
 		{:catch err}
-			<h1>{m.errorOccuredWhileLoadingLibrary()}: {err}</h1>
+			<h1>{m.errorOccurredWhileLoadingLibrary()}: {err}</h1>
 		{/await}
 	</div>
 {/if}
