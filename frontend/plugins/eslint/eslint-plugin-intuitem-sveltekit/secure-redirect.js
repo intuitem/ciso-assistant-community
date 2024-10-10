@@ -27,7 +27,9 @@ export function create(context) {
 				if (
 					locationArg.type !== 'Literal' &&
 					locationArg.type !== 'TemplateLiteral' &&
-					!(locationArg.type === 'CallExpression')
+					!(
+						locationArg.type === 'CallExpression' && locationArg.callee.name === 'getSecureRedirect'
+					)
 				) {
 					context.report({
 						node: locationArg,
