@@ -43,7 +43,16 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 
-	return { URLModel, evidence, object, tables, deleteForm };
+	const attachmentDeleteSchema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+	const attachmentDeleteForm = await superValidate(
+		{
+			urlmodel: URLModel,
+			id: params.id
+		},
+		zod(attachmentDeleteSchema)
+	);
+
+	return { URLModel, evidence, object, tables, deleteForm, attachmentDeleteForm };
 };
 
 export const actions: Actions = {
@@ -51,10 +60,14 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
 		const form = await superValidate(formData, zod(schema));
+		console.log(form.data);
 
 		const urlmodel = form.data.urlmodel;
 		const id = form.data.id;
 		const endpoint = `${BASE_API_URL}/${urlmodel}/${id}/delete_attachment/`;
+
+		console.log(endpoint);
+		console.log(form.valid);
 
 		if (!form.valid) {
 			return fail(400, { form: form });
