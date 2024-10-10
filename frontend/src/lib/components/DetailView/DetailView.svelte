@@ -23,6 +23,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import List from '$lib/components/List/List.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -131,7 +132,12 @@
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('compliance-assessments').urlModel,
-				formAction: action
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: data.data.representatives,
+					message: m.theFollowingRepresentativesWillReceiveTheQuestionnaireColon()
+				}
 			}
 		};
 		const modal: ModalSettings = {
@@ -139,7 +145,7 @@
 			component: modalComponent,
 			// Data
 			title: m.confirmModalTitle(),
-			body: m.sureToSendMail()
+			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
 		modalStore.trigger(modal);
 	}
@@ -298,14 +304,14 @@
 					on:click={(_) => {
 						modalMailConfirm(
 							data.data.compliance_assessment.id,
-							data.data.compliance_assessment.name,
+							data.data.compliance_assessment.str,
 							'?/mailing'
 						);
 					}}
 					on:keydown={(_) =>
 						modalMailConfirm(
 							data.data.compliance_assessment.id,
-							data.data.compliance_assessment.name,
+							data.data.compliance_assessment.str,
 							'?/mailing'
 						)}
 				>
