@@ -240,16 +240,21 @@ def upload_evidence(file, name):
         "Authorization": f"Token {TOKEN}",
     }
     # Get evidence ID by name
-    url = f"{API_URL}/evidences/get_by_name/"
+    url = f"{API_URL}/evidences/"
     res = requests.get(url, headers=headers, params={"name": name})
     data = res.json()
-
-    if "id" not in data:
-        print(f"Error: {data.get('error', 'Unable to find evidence')}")
+    if res.status_code != 200:
+        print(data)
+        print(f"Error: check credentials or filename.")
+        return
+    if not data["results"]:
+        print(f"Error: No evidence found with name '{name}'")
         return
 
-    id = data["id"]
-    url = f"{API_URL}/evidences/{id}/upload/"
+    evidence_id = data["results"][0]["id"]
+
+    # Upload file
+    url = f"{API_URL}/evidences/{evidence_id}/upload/"
     filename = Path(file).name
     headers = {
         "Authorization": f"Token {TOKEN}",

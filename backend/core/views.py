@@ -37,6 +37,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+
 from weasyprint import HTML
 
 from core.helpers import *
@@ -1385,7 +1386,7 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls", "requirement_assessments"]
+    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
     ordering_fields = ["name", "description"]
 
@@ -1432,29 +1433,6 @@ class EvidenceViewSet(BaseModelViewSet):
                 evidence.save()
                 response = Response(status=status.HTTP_200_OK)
         return response
-
-    @action(detail=False, methods=["get"])
-    def get_by_name(self, request):
-        name = request.query_params.get("name")
-        if not name:
-            return Response(
-                {"error": "Name parameter is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        viewable_objects_ids, *_ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
-        )
-        evidence = Evidence.objects.filter(
-            id__in=viewable_objects_ids, name=name
-        ).first()
-
-        if evidence:
-            return Response({"id": str(evidence.id)})
-        else:
-            return Response(
-                {"error": "Evidence not found"}, status=status.HTTP_404_NOT_FOUND
-            )
 
 
 class UploadAttachmentView(APIView):
