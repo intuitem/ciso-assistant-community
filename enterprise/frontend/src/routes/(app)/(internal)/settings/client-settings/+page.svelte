@@ -6,6 +6,7 @@
 	import { ClientSettingsSchema } from '$lib/utils/client-settings';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import * as m from '$paraglide/messages.js';
 
 	export let data: PageData;
@@ -40,6 +41,12 @@
 				? `${m.attachmentWarningText()}: ${data.settings.favicon}`
 				: m.faviconHelpText()}
 			accept="image/*"
+		/>
+		<Checkbox
+			{form}
+			field="show_images_unauthenticated"
+			label={m.showImagesUnauthenticated()}
+			helpText={m.showImagesUnauthenticatedHelpText()}
 		/>
 		<button
 			class="btn variant-filled-primary font-semibold w-full"
