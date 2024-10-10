@@ -23,6 +23,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import List from '$lib/components/List/List.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -30,6 +31,7 @@
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
 
 	export let data;
+	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
 
@@ -118,6 +120,32 @@
 			// Data
 			title: m.confirmModalTitle(),
 			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalMailConfirm(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: id, urlmodel: getModelInfo('compliance-assessments').urlModel },
+				id: id,
+				debug: false,
+				URLModel: getModelInfo('compliance-assessments').urlModel,
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: data.data.representatives,
+					message: m.theFollowingRepresentativesWillReceiveTheQuestionnaireColon()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
 		modalStore.trigger(modal);
 	}
@@ -269,13 +297,36 @@
 				</div>
 			{/each}
 		</div>
-		{#if displayEditButton()}
-			<a
-				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-				class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
-			>
-		{/if}
+		<div class="">
+			{#if mailing}
+				<button
+					class="btn variant-filled-primary h-fit"
+					on:click={(_) => {
+						modalMailConfirm(
+							data.data.compliance_assessment.id,
+							data.data.compliance_assessment.str,
+							'?/mailing'
+						);
+					}}
+					on:keydown={(_) =>
+						modalMailConfirm(
+							data.data.compliance_assessment.id,
+							data.data.compliance_assessment.str,
+							'?/mailing'
+						)}
+				>
+					<i class="fas fa-paper-plane mr-2" />
+					{m.sendQuestionnaire()}
+				</button>
+			{/if}
+			{#if displayEditButton()}
+				<a
+					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+					class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
+				>
+			{/if}
+		</div>
 	</div>
 </div>
 
