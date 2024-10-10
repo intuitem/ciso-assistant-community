@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 import yaml
 from rich import print
+import mimetypes
 
 cli_cfg = dict()
 auth_data = dict()
@@ -230,13 +231,43 @@ def evidences_templates(file):
                 print(f"✅ {row['name']} created")
 
 
-# Add commands to the CLI group
+@click.command()
+@click.option("--file", required=True, help="Path to the attachment to upload")
+@click.option("--name", required=True, help="Name of the evidence")
+def upload_evidence(file, name):
+    """Upload attachment as evidence"""
+
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+    # Get evidence ID by name
+    url = f"{API_URL}/evidences/get_by_name/"
+    res = requests.get(url, headers=headers, params={"name": name})
+    data = res.json()
+
+    if "id" not in data:
+        print(f"Error: {data.get('error', 'Unable to find evidence')}")
+        return
+
+    id = data["id"]
+    url = f"{API_URL}/evidences/{id}/upload/"
+    filename = Path(file).name
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+        "Content-Disposition": f'attachment;filename="{filename}"',
+    }
+    with open(file, "rb") as f:
+        res = requests.post(url, headers=headers, data=f)
+    print(res)
+    print(res.text)
+
+
 cli.add_command(get_folders)
 cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
 cli.add_command(evidences_templates)
 cli.add_command(init_config)
-
+cli.add_command(upload_evidence)
 if __name__ == "__main__":
     cli()
