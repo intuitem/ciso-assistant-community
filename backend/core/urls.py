@@ -84,6 +84,7 @@ urlpatterns = [
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
+    path("preferences/", UpdatePreferences.as_view(), name="preferences"),
     path("i18n/", include("django.conf.urls.i18n")),
     path(
         "accounts/saml/", include("iam.sso.saml.urls")

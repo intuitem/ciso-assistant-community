@@ -1278,6 +1278,15 @@ def get_composer_data(request):
     return Response({"result": data})
 
 
+class UpdatePreferences(APIView):
+    def get(self, request):
+        return Response(request.user.preferences)
+
+    def patch(self, request):
+        request.user.update_preferences(request.data)
+        return Response(status=status.HTTP_200_OK)
+
+
 # Compliance Assessment
 
 

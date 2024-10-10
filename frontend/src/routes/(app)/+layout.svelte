@@ -9,7 +9,16 @@
 	import { pageTitle, clientSideToast } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import * as m from '$paraglide/messages';
+
+	onMount(() => {
+		if ($page.url.searchParams.has('refresh')) {
+			$page.url.searchParams.delete('refresh');
+			window.location.href = $page.url.href;
+		}
+	});
 
 	let sidebarOpen = true;
 

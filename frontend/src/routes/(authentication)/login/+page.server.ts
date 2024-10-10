@@ -66,6 +66,21 @@ export const actions: Actions = {
 			secure: true
 		});
 
-		redirect(302, getSecureRedirect(url.searchParams.get('next')) || '/analytics');
+		const preferencesRes = await fetch(`${BASE_API_URL}/preferences/`);
+		const preferences = await preferencesRes.json();
+
+		const currentLang = cookies.get('ciso_lang') || 'en';
+		const preferedLang = preferences.lang;
+
+		if (preferedLang && currentLang !== preferedLang) {
+			cookies.set('ciso_lang', preferedLang, {
+				httpOnly: false,
+				sameSite: 'lax',
+				path: '/',
+				secure: true
+			});
+		}
+
+		redirect(302, getSecureRedirect(url.searchParams.get('next') || '/analytics') + '?refresh=1');
 	}
 };

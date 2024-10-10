@@ -2,8 +2,9 @@
 Inspired from Azure IAM model"""
 
 from collections import defaultdict
-from typing import Any, List, Self, Tuple
+from typing import Any, Dict, List, Self, Tuple
 import uuid
+from django.forms import JSONField
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -358,6 +359,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "granted to each of their user groups."
         ),
     )
+    preferences = models.JSONField(default=dict)
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -365,6 +367,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    # This is the set of of keys allowed in the preferences JSONField
+    PREFERENCE_SET = {"lang"}
 
     class Meta:
         """for Model"""
@@ -473,6 +478,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_user_groups(self):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
         return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
+
+    def update_preferences(self, new_preferences: Dict[str, Any]):
+        for key, value in new_preferences.items():
+            if key in self.PREFERENCE_SET:
+                self.preferences[key] = value
+        self.save()
 
     @property
     def has_backup_permission(self) -> bool:

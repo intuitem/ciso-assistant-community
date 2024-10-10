@@ -78,7 +78,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const errorId = new URL(event.request.url).searchParams.get('error');
 	if (errorId) {
-		setLanguageTag(event.cookies.get('ciso_lang') || generalSettings.lang || 'en');
+		setLanguageTag(event.cookies.get('ciso_lang') || 'en');
 		setFlash({ type: 'error', message: safeTranslate(errorId) }, event);
 		redirect(302, '/login');
 	}
