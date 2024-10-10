@@ -103,6 +103,7 @@ class LoadBackupView(APIView):
             return Response({}, status=status.HTTP_403_FORBIDDEN)
         if not request.data:
             logger.error("Request has no data")
+
             return Response(
                 {"error": "backupLoadNoData"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -129,6 +130,9 @@ class LoadBackupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if backup_version.lower() == "dev":
+            backup_version = "v0.0.0"
+
         VERSION_REGEX = r"^v[0-9]+\.[0-9]+\.[0-9]+"
         match = re.match(VERSION_REGEX, backup_version)
         if match is None:
@@ -145,8 +149,6 @@ class LoadBackupView(APIView):
         backup_version = match.group()
         current_version = VERSION.split("-")[0]
 
-        if backup_version.lower() == "dev":
-            backup_version = "v0.0.0"
         if current_version.lower() == "dev":
             current_version = "v0.0.0"
 
