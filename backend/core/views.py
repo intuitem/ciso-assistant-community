@@ -1433,6 +1433,29 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = Response(status=status.HTTP_200_OK)
         return response
 
+    @action(detail=False, methods=["get"])
+    def get_by_name(self, request):
+        name = request.query_params.get("name")
+        if not name:
+            return Response(
+                {"error": "Name parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        viewable_objects_ids, *_ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )
+        evidence = Evidence.objects.filter(
+            id__in=viewable_objects_ids, name=name
+        ).first()
+
+        if evidence:
+            return Response({"id": str(evidence.id)})
+        else:
+            return Response(
+                {"error": "Evidence not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
 
 class UploadAttachmentView(APIView):
     parser_classes = (FileUploadParser,)
