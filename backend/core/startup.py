@@ -321,10 +321,12 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "view_requirementnode",
     "view_evidence",
     "add_evidence",
     "change_evidence",
     "delete_evidence",
+    "view_folder",
 ]
 
 

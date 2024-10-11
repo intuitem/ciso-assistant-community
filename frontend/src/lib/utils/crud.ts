@@ -491,7 +491,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'framework', urlModel: 'frameworks' },
-			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=true' },
+			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'representatives', urlModel: 'users', urlParams: 'is_third_party=true' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
