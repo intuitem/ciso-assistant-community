@@ -765,5 +765,6 @@
 	"associatedEntities": "Associated entities",
 	"noMailerConfigured": "No mailer configured",
 	"errorLicenseSeatsExceeded": "The number of license seats is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator.",
-	"availableSeats": "Available seats"
+	"availableSeats": "Available seats",
+	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator"
 }

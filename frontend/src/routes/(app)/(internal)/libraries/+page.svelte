@@ -7,6 +7,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { page } from '$app/stores';
 
 	export let data;
 
@@ -32,6 +33,10 @@
 		<svelte:fragment slot="panel">
 			<!-- storedlibraries -->
 			{#if tabSet === 0}
+				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+					<i class="fa-solid fa-info-circle" />
+					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
+				</div>
 				<ModelTable
 					source={data.storedLibrariesTable}
 					URLModel="libraries"
@@ -54,7 +59,7 @@
 		</svelte:fragment>
 	</TabGroup>
 </div>
-{#if tabSet === 0}
+{#if tabSet === 0 && $page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>

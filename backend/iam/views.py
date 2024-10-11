@@ -78,6 +78,7 @@ class CurrentUserView(views.APIView):
             "roles": request.user.get_roles(),
             "permissions": request.user.permissions,
             "is_third_party": request.user.is_third_party,
+            "is_admin": request.user.is_superuser,
         }
         return Response(res_data, status=HTTP_200_OK)
 
