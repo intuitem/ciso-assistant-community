@@ -3,6 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/stores';
 
 	export let meta: any;
 	export let actionsURLModel: string;
@@ -62,13 +63,15 @@
 				}}
 				on:submit={handleSubmit}
 			>
-				<button
-					type="submit"
-					data-testid="tablerow-import-button"
-					on:click={(e) => e.stopPropagation()}
-				>
-					<i class="fa-solid fa-file-import" />
-				</button>
+				{#if $page.data.user.is_admin}
+					<button
+						type="submit"
+						data-testid="tablerow-import-button"
+						on:click={(e) => e.stopPropagation()}
+					>
+						<i class="fa-solid fa-file-import" />
+					</button>
+				{/if}
 			</form>
 		</span>
 	{/if}
