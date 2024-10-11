@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-13 19:22+0000\n"
+"POT-Creation-Date: 2024-09-25 14:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -156,7 +156,7 @@ msgstr ""
 msgid "Key"
 msgstr ""
 
-#: iam/views.py:96
+#: iam/views.py:97
 msgid "CISO Assistant: Password Reset"
 msgstr ""
 
@@ -236,10 +236,9 @@ msgstr ""
 msgid "Solution"
 msgstr ""
 
-#: tprm/serializers.py:61 tprm/serializers.py:96
+#: tprm/serializers.py:73
 msgid "Framework required"
 msgstr ""
 
-#: tprm/serializers.py:116
-msgid "CISO Assistant: A questionnaire has been assigned to you"
-msgstr "CISO Assistant: Un questionnaire vous a été assigné"
+#~ msgid "CISO Assistant: A questionnaire has been assigned to you"
+#~ msgstr "CISO Assistant: Un questionnaire vous a été assigné"
