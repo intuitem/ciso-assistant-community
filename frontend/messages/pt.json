@@ -363,7 +363,7 @@
 	"librariesStore": "Loja de bibliotecas",
 	"currentlyNoLoadedLibraries": "Atualmente, você não possui bibliotecas carregadas",
 	"loadingLibraryUploadButton": "Carregando o botão de upload de biblioteca",
-	"errorOccuredWhileLoadingLibrary": "O seguinte erro ocorreu ao carregar o formulário da biblioteca",
+	"errorOccurredWhileLoadingLibrary": "O seguinte erro ocorreu ao carregar o formulário da biblioteca",
 	"packager": "Empacotador",
 	"packagerColon": "Empacotador:",
 	"dependencies": "Dependências",
