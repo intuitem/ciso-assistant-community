@@ -7,6 +7,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
+	import * as m from '$paraglide/messages';
 	import { displayOnlyAssessableNodes } from './store';
 
 	export let ref_id: string;
@@ -154,83 +155,88 @@
 							{/if}
 						{/each}
 					{/if}
+					{#if node.question.questions}
+						<span class="badge" style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+							>{node.question.questions.length} {m.questionOrQuestions()}</span
+						>
+					{/if}
 				</div>
 			</div>
-			{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
-				<div
-					role="button"
-					tabindex="0"
-					class="select-none text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-					on:click={(e) => {
+		</div>
+		{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
+			<div
+				role="button"
+				tabindex="0"
+				class="select-none text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
+				on:click={(e) => {
+					e.preventDefault();
+					showInfo = !showInfo;
+				}}
+				on:keydown={(e) => {
+					if (e.key === 'Enter') {
 						e.preventDefault();
 						showInfo = !showInfo;
-					}}
-					on:keydown={(e) => {
-						if (e.key === 'Enter') {
-							e.preventDefault();
-							showInfo = !showInfo;
-						}
-					}}
-				>
-					<i class="text-xs fa-solid fa-info-circle" /> Learn more
+					}
+				}}
+			>
+				<i class="text-xs fa-solid fa-info-circle" /> Learn more
+			</div>
+			<div
+				class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
+					showInfo
+				)}"
+			>
+				<div class="flex-1">
+					<p class="font-medium">
+						<i class="fa-solid fa-gears" />
+						Suggested reference controls
+					</p>
+					{#if reference_controls?.length === 0}
+						<p>--</p>
+					{:else if reference_controls}
+						<ul class="list-disc ml-4">
+							{#each reference_controls as func}
+								<li>
+									{#if func.id}
+										<a
+											class="anchor"
+											href="/reference-controls/{func.id}?next={$page.url.pathname}"
+										>
+											{func.name}
+										</a>
+									{:else}
+										<p>{func.name}</p>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					{/if}
 				</div>
-				<div
-					class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
-						showInfo
-					)}"
-				>
-					<div class="flex-1">
-						<p class="font-medium">
-							<i class="fa-solid fa-gears" />
-							Suggested reference controls
-						</p>
-						{#if reference_controls?.length === 0}
-							<p>--</p>
-						{:else if reference_controls}
-							<ul class="list-disc ml-4">
-								{#each reference_controls as func}
-									<li>
-										{#if func.id}
-											<a
-												class="anchor"
-												href="/reference-controls/{func.id}?next={$page.url.pathname}"
-											>
-												{func.name}
-											</a>
-										{:else}
-											<p>{func.name}</p>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</div>
-					<div class="flex-1">
-						<p class="font-medium">
-							<i class="fa-solid fa-gears" />
-							Threats covered
-						</p>
-						{#if threats?.length === 0}
-							<p>--</p>
-						{:else if threats}
-							<ul class="list-disc ml-4">
-								{#each threats as threat}
-									<li>
-										{#if threat.id}
-											<a class="anchor" href="/threats/{threat.id}?next={$page.url.pathname}">
-												{threat.name}
-											</a>
-										{:else}
-											<p>{threat.name}</p>
-										{/if}
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</div>
+				<div class="flex-1">
+					<p class="font-medium">
+						<i class="fa-solid fa-gears" />
+						Threats covered
+					</p>
+					{#if threats?.length === 0}
+						<p>--</p>
+					{:else if threats}
+						<ul class="list-disc ml-4">
+							{#each threats as threat}
+								<li>
+									{#if threat.id}
+										<a class="anchor" href="/threats/{threat.id}?next={$page.url.pathname}">
+											{threat.name}
+										</a>
+									{:else}
+										<p>{threat.name}</p>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					{/if}
 				</div>
-			{/if}
-		</div>
+			</div>
+		{/if}
 		{#if hasAssessableChildren}
 			<div class="flex max-w-96 grow items-center space-x-2">
 				<div
