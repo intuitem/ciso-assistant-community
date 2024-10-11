@@ -590,12 +590,35 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
+        def duplicate_related_objects(
+            scenario, duplicate_scenario, folders, field_name, model_class
+        ):
+            """Duplicates applied objects (controls, threats, assets) if they do not already exist in a different domain."""
+            related_objects = getattr(scenario, field_name).all()
+            for obj in related_objects:
+                existing_obj = model_class.objects.filter(
+                    name=obj.name, folder=duplicate_risk_assessment.project.folder
+                ).first()
+
+                if existing_obj:
+                    getattr(duplicate_scenario, field_name).add(existing_obj)
+                elif obj.folder in folders:
+                    getattr(duplicate_scenario, field_name).add(obj)
+                else:
+                    duplicate_obj = obj
+                    duplicate_obj.pk = None
+                    duplicate_obj.folder = duplicate_risk_assessment.project.folder
+                    duplicate_obj.save()
+                    getattr(duplicate_scenario, field_name).add(duplicate_obj)
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
+
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
             data = request.data
+
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data["name"],
                 description=data["description"],
@@ -606,8 +629,14 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 due_date=risk_assessment.due_date,
                 status=risk_assessment.status,
             )
+
             duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
             duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+
+            folders = [
+                duplicate_risk_assessment.project.folder
+            ] + duplicate_risk_assessment.project.folder.get_parent_folders()
+
             for scenario in risk_assessment.risk_scenarios.all():
                 duplicate_scenario = RiskScenario.objects.create(
                     risk_assessment=duplicate_risk_assessment,
@@ -623,11 +652,30 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     strength_of_knowledge=scenario.strength_of_knowledge,
                     justification=scenario.justification,
                 )
-                duplicate_scenario.threats.set(scenario.threats.all())
-                duplicate_scenario.assets.set(scenario.assets.all())
-                duplicate_scenario.owner.set(scenario.owner.all())
-                duplicate_scenario.applied_controls.set(scenario.applied_controls.all())
+
+                duplicate_related_objects(
+                    scenario,
+                    duplicate_scenario,
+                    folders,
+                    "applied_controls",
+                    AppliedControl,
+                )
+                duplicate_related_objects(
+                    scenario, duplicate_scenario, folders, "threats", Threat
+                )
+                duplicate_related_objects(
+                    scenario, duplicate_scenario, folders, "assets", Asset
+                )
+
+                if (
+                    duplicate_risk_assessment.project.folder
+                    in [risk_assessment.project.folder]
+                    + risk_assessment.project.folder.sub_folders()
+                ):
+                    duplicate_scenario.owner.set(scenario.owner.all())
+
                 duplicate_scenario.save()
+
             duplicate_risk_assessment.save()
             return Response({"results": "risk assessment duplicated"})
 
