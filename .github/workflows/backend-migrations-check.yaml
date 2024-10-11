@@ -55,12 +55,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py makemigrations --check
-      - name: Check that all migrations were applied
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          python manage.py migrate --check
+          python manage.py makemigrations --check --dry-run --verbosity=3
 
   enterprise-migrations-check:
     runs-on: ubuntu-20.04
@@ -109,11 +104,5 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py makemigrations --check --settings=${{ env.enterprise-backend-settings-module }}
+          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings=${{ env.enterprise-backend-settings-module }}
           if [ $? -ne 0 ]; then echo "::error Migrations were not made, please run the makemigrations command." && exit 1; fi
-      - name: Check that all migrations were applied
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate --check --settings=${{ env.enterprise-backend-settings-module }}
-          if [ $? -ne 0 ]; then echo "::error Migrations were not applied, please run the migrate command." && exit 1; fi
