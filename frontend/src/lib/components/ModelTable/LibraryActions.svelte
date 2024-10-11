@@ -47,7 +47,7 @@
 				/>
 			</svg>
 		</div>
-	{:else}
+	{:else if $page.data.user.is_admin}
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
@@ -63,15 +63,13 @@
 				}}
 				on:submit={handleSubmit}
 			>
-				{#if $page.data.user.is_admin}
-					<button
-						type="submit"
-						data-testid="tablerow-import-button"
-						on:click={(e) => e.stopPropagation()}
-					>
-						<i class="fa-solid fa-file-import" />
-					</button>
-				{/if}
+				<button
+					type="submit"
+					data-testid="tablerow-import-button"
+					on:click={(e) => e.stopPropagation()}
+				>
+					<i class="fa-solid fa-file-import" />
+				</button>
 			</form>
 		</span>
 	{/if}
