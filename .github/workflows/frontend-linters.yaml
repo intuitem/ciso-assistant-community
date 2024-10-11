@@ -26,6 +26,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Install latest pnpm
+        working-directory: ${{env.working-directory}}
+        run: |
+          npm install -g pnpm &&
+          pnpm --version &&
+          pnpm list -g --depth 0
       - name: Install prettier
         working-directory: ${{env.working-directory}}
         run: pnpm add --save-dev prettier
