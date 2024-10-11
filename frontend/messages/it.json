@@ -363,7 +363,7 @@
 	"librariesStore": "Negozio di biblioteche",
 	"currentlyNoLoadedLibraries": "Attualmente non hai biblioteche caricate",
 	"loadingLibraryUploadButton": "Caricamento pulsante di caricamento della biblioteca",
-	"errorOccuredWhileLoadingLibrary": "Si è verificato il seguente errore durante il caricamento del modulo della biblioteca",
+	"errorOccurredWhileLoadingLibrary": "Si è verificato il seguente errore durante il caricamento del modulo della biblioteca",
 	"packager": "Impacchettatore",
 	"packagerColon": "Impacchettatore:",
 	"dependencies": "Dipendenze",
