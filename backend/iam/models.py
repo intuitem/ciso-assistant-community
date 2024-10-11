@@ -703,7 +703,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                         ):
                             permissions_per_object_id[object.id].add(p)
 
-        if hasattr(object_type, "is_published"):
+        if folder.content_type != Folder.ContentType.ENCLAVE and hasattr(
+            object_type, "is_published"
+        ):
             for my_folder in folders_with_local_view:
                 target_folders = []
                 my_folder2 = my_folder
