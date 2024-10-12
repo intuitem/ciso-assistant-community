@@ -9,7 +9,7 @@ import time
 import pytz
 from typing import Any, Tuple
 from uuid import UUID
-import random
+from itertools import cycle
 
 import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
@@ -652,13 +652,6 @@ def convert_date_to_timestamp(date):
     return None
 
 
-def gen_random_html_color():
-    r = random.randint(150, 255)
-    g = random.randint(150, 255)
-    b = random.randint(150, 255)
-    return "#{:02x}{:02x}{:02x}".format(r, g, b)
-
-
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
@@ -880,29 +873,45 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def get_timeline_info(self, request):
         entries = []
+        COLORS_PALETTE = [
+            "#F72585",
+            "#7209B7",
+            "#3A0CA3",
+            "#4361EE",
+            "#4CC9F0",
+            "#A698DC",
+        ]
         colorMap = {}
-        for ac in AppliedControl.objects.all():
-            startDate = None
-            endDate = None
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+
+        applied_controls = AppliedControl.objects.filter(
+            id__in=viewable_controls_ids
+        ).select_related("folder")
+
+        for ac in applied_controls:
             if ac.eta:
                 endDate = convert_date_to_timestamp(ac.eta)
-                if ac.start_date:
-                    startDate = convert_date_to_timestamp(ac.start_date)
-                else:
-                    startDate = endDate
-                    entries.append(
-                        {
-                            "startDate": startDate,
-                            "endDate": endDate,
-                            "name": ac.name,
-                            "description": ac.description
-                            if ac.description
-                            else "(no description)",
-                            "domain": ac.folder.name,
-                        }
-                    )
+                startDate = (
+                    convert_date_to_timestamp(ac.start_date)
+                    if ac.start_date
+                    else endDate
+                )
+                entries.append(
+                    {
+                        "startDate": startDate,
+                        "endDate": endDate,
+                        "name": ac.name,
+                        "description": ac.description
+                        if ac.description
+                        else "(no description)",
+                        "domain": ac.folder.name,
+                    }
+                )
+        color_cycle = cycle(COLORS_PALETTE)
         for domain in Folder.objects.all():
-            colorMap[domain.name] = gen_random_html_color()
+            colorMap[domain.name] = next(color_cycle)
         return Response({"entries": entries, "colorMap": colorMap})
 
 

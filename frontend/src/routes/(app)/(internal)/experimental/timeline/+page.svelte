@@ -43,26 +43,34 @@
 	const triggers = { [Timeline.selectors.label]: getTooltipText };
 </script>
 
-<div class="bg-white p-4 h-full">
-	<VisXYContainer data={tdata} height={800}>
-		<h3>Applied controls timeline</h3>
-		<div class="text-xs text-slate-500 mb-4">
-			<i class="fa-solid fa-circle-info mr-2"></i>Start date and ETA must be set for items to render
-		</div>
-		<VisBulletLegend items={legendItems} />
-		<VisTimeline
-			{x}
-			{length}
-			{type}
-			{color}
-			alternatingRowColors={true}
-			{labelWidth}
-			showLabels={true}
-			lineCap={true}
-			showEmptySegments={true}
-			rowHeight={30}
-		/>
-		<VisTooltip {triggers} />
-		<VisAxis type="x" tickFormat={dateFormatter} />
-	</VisXYContainer>
-</div>
+{#if data.data.entries.length > 0}
+	<div class="bg-white p-4 h-full">
+		<VisXYContainer data={tdata} height={800}>
+			<h3>Applied controls timeline</h3>
+			<div class="text-xs text-slate-500 mb-4">
+				<i class="fa-solid fa-circle-info mr-2"></i>Start date and ETA must be set for items to
+				render
+			</div>
+			<VisBulletLegend items={legendItems} />
+			<VisTimeline
+				{x}
+				{length}
+				{type}
+				{color}
+				alternatingRowColors={true}
+				{labelWidth}
+				showLabels={true}
+				lineCap={true}
+				showEmptySegments={true}
+				rowHeight={30}
+			/>
+			<VisTooltip {triggers} />
+			<VisAxis type="x" tickFormat={dateFormatter} />
+		</VisXYContainer>
+	</div>
+{:else}
+	<div class="p-4 text-slate-600">
+		<i class="fa-solid fa-triangle-exclamation"></i> No available data. Make sure you have ETA and start
+		dates on your controls.
+	</div>
+{/if}
