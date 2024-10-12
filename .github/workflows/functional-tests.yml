@@ -14,6 +14,7 @@ env:
   enterprise-frontend-directory: ./enterprise/frontend
   enterprise-frontend-build-directory: ./enterprise/frontend/.build/frontend
   enterprise-backend-settings-module: enterprise_core.settings
+  DEBUG: pw:webserver
 
 jobs:
   functional-tests:
@@ -60,7 +61,7 @@ jobs:
           pnpm i --frozen-lockfile
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
-        run: npx playwright install --with-deps ${{ matrix.playwright-browser }}
+        run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
       - name: Create frontend environment variables file
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -97,9 +98,12 @@ jobs:
           export $(grep -v '^#' .env | xargs)
           python manage.py createsuperuser --noinput
           nohup python manage.py runserver &
+      - name: Build frontend
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm run build
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.frontend-directory }}
-        run: npx playwright test --project=${{ matrix.playwright-browser }}
+        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
       - uses: actions/upload-artifact@v4
@@ -154,12 +158,12 @@ jobs:
       - name: Install enterprise backend
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
-      - name: Install frontend dependencies
+      - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
-        run: make pre-build
-      - name: Install Playwright Browsers
+        run: make
+      - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
       - name: Create frontend environment variables file
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: |
@@ -184,6 +188,7 @@ jobs:
           echo EMAIL_HOST_PASSWORD=password >> .env
           echo EMAIL_PORT=1025 >> .env
           echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
+          echo LICENSE_SEATS=999 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -197,7 +202,7 @@ jobs:
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: npx playwright test --project=${{ matrix.playwright-browser }}
+        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
       - uses: actions/upload-artifact@v4
