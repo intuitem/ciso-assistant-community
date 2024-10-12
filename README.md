@@ -167,7 +167,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 
 <br/>
 
-> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
