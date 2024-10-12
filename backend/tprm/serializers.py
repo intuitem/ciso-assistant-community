@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import ComplianceAssessment, Framework
 
 from core.serializer_fields import FieldsRelatedField
@@ -8,7 +9,6 @@ from iam.models import Folder, Role, RoleAssignment, UserGroup
 from django.contrib.auth import get_user_model
 from tprm.models import Entity, EntityAssessment, Representative, Solution
 from django.utils.translation import gettext_lazy as _
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 import structlog
 
@@ -39,6 +39,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     folder = FieldsRelatedField()
     solutions = FieldsRelatedField(many=True)
+    representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
 
@@ -48,7 +49,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentWriteSerializer(BaseModelSerializer):
-    create_audit = serializers.BooleanField(default=True)
+    create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False
     )
@@ -82,23 +83,31 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 ],
             )
 
-            if not instance.compliance_assessment:
-                enclave = Folder.objects.create(
-                    content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.project.name}/{instance.name}",
-                    parent_folder=instance.folder,
-                )
-                audit.folder = enclave
-                audit.save()
+            enclave = Folder.objects.create(
+                content_type=Folder.ContentType.ENCLAVE,
+                name=f"{instance.project.name}/{instance.name}",
+                parent_folder=instance.folder,
+            )
+            audit.folder = enclave
+            audit.save()
 
             audit.create_requirement_assessments()
-            audit.authors.set(instance.authors.all())
             audit.reviewers.set(instance.reviewers.all())
+            audit.authors.set(instance.representatives.all())
             instance.compliance_assessment = audit
+            instance.save()
+        else:
+            if instance.compliance_assessment:
+                audit = instance.compliance_assessment
+                audit.reviewers.set(instance.reviewers.all())
+                audit.authors.set(instance.representatives.all())
             instance.save()
 
     def _assign_third_party_respondents(
-        self, instance: EntityAssessment, third_party_users: set[User]
+        self,
+        instance: EntityAssessment,
+        third_party_users: set[User],
+        old_third_party_users: set[User] = set(),
     ):
         if instance.compliance_assessment:
             enclave = instance.compliance_assessment.folder
@@ -119,42 +128,32 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.add(respondents)
-
-    def _send_author_emails(self, instance, authors_to_email: set):
-        if EMAIL_HOST or EMAIL_HOST_RESCUE:
-            for author in authors_to_email:
-                try:
-                    author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_(
-                            "CISO Assistant: A questionnaire has been assigned to you"
-                        ),
-                        object="compliance-assessments",
-                        object_id=instance.compliance_assessment.id,
-                    )
-                except Exception as e:
-                    print(f"Failed to send email to {author}: {e}")
+            for user in old_third_party_users:
+                if not user.is_third_party:
+                    logger.warning("User is not a third-party", user=user)
+                user.user_groups.remove(respondents)
 
     def create(self, validated_data):
         audit_data = self._extract_audit_data(validated_data)
         instance = super().create(validated_data)
         self._create_or_update_audit(instance, audit_data)
-        self._assign_third_party_respondents(instance, set(instance.authors.all()))
-        self._send_author_emails(instance, set(instance.authors.all()))
+        self._assign_third_party_respondents(
+            instance, set(instance.representatives.all())
+        )
         return instance
 
     def update(self, instance: EntityAssessment, validated_data):
         audit_data = self._extract_audit_data(validated_data)
-        new_authors = set(validated_data.get("authors", [])) - set(
-            instance.authors.all()
+        representatives = set(validated_data.get("representatives", []))
+        old_representatives = set(instance.representatives.all()) - set(
+            validated_data.get("representatives", [])
         )
         instance = super().update(instance, validated_data)
 
-        if not instance.compliance_assessment:
-            self._create_or_update_audit(instance, audit_data)
-
-        self._assign_third_party_respondents(instance, new_authors)
-        self._send_author_emails(instance, new_authors)
+        self._create_or_update_audit(instance, audit_data)
+        self._assign_third_party_respondents(
+            instance, representatives, old_representatives
+        )
         return instance
 
     class Meta:
@@ -181,11 +180,33 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            user = User.objects.create_user(
-                email=instance.email,
-                first_name=instance.first_name,
-                last_name=instance.last_name,
-            )
+            send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+            try:
+                user = User.objects.create_user(
+                    email=instance.email,
+                    first_name=instance.first_name,
+                    last_name=instance.last_name,
+                )
+            except Exception as e:
+                logger.error(e)
+                user = User.objects.filter(email=instance.email).first()
+                if user and send_mail:
+                    user.is_third_party = True
+                    user.save()
+                    instance.user = user
+                    instance.save()
+                    logger.warning("mailing failed")
+                    raise serializers.ValidationError(
+                        {
+                            "warning": [
+                                "User created successfully but an error occurred while sending the email"
+                            ]
+                        }
+                    )
+                else:
+                    raise serializers.ValidationError(
+                        {"error": ["An error occurred while creating the user"]}
+                    )
             user.is_third_party = True
         user.save()
         instance.user = user

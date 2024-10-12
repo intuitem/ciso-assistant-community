@@ -5,6 +5,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/stores';
 
 	export let data;
 	let loading = { form: false, library: '' };
@@ -122,9 +123,11 @@
 							}}
 							on:submit={handleSubmit}
 						>
-							<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
-								<i class="fa-solid fa-file-import" />
-							</button>
+							{#if $page.data.user.is_admin}
+								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
+									<i class="fa-solid fa-file-import" />
+								</button>
+							{/if}
 						</form>
 					{/if}
 				{/if}
