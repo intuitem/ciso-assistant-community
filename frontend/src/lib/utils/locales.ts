@@ -79,6 +79,8 @@ export function localItems(): LocalItems {
 		edit: m.edit(),
 		overview: m.overview(),
 		context: m.context(),
+		catalog: m.catalog(),
+		actions: m.actions(),
 		governance: m.governance(),
 		risk: m.risk(),
 		compliance: m.compliance(),
