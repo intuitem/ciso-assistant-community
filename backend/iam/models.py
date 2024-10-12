@@ -235,6 +235,10 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
         }
 
+    @property
+    def permissions(self):
+        return RoleAssignment.get_permissions(self)
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -470,6 +474,14 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
         return [(x.__str__(), x.builtin) for x in self.user_groups.all()]
 
+    def get_roles(self):
+        """get the list of roles attached to the user"""
+        return list(
+            self.user_groups.all()
+            .values_list("roleassignment__role__name", flat=True)
+            .distinct()
+        )
+
     @property
     def has_backup_permission(self) -> bool:
         return RoleAssignment.is_access_allowed(
@@ -501,6 +513,19 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
+
+    @property
+    def is_editor(self) -> bool:
+        permissions = RoleAssignment.get_permissions(self)
+        editor_prefixes = {"add_", "change_", "delete_"}
+        return any(
+            any(perm.startswith(prefix) for prefix in editor_prefixes)
+            for perm in permissions
+        )
+
+    @classmethod
+    def get_editors(cls) -> List[Self]:
+        return [user for user in cls.objects.all() if user.is_editor]
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -655,7 +680,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in [
             x
             for x in RoleAssignment.get_role_assignments(user)
-            if ref_permission in x.role.permissions.all() or user.is_third_party
+            if ref_permission in x.role.permissions.all()
         ]:
             ra_permissions = ra.role.permissions.all()
             for my_folder in perimeter & set(ra.perimeter_folders.all()):
@@ -718,18 +743,20 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def get_role_assignments(user):
+    def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
-        assignments = list(user.roleassignment_set.all())
-        for user_group in user.user_groups.all():
-            assignments += list(user_group.roleassignment_set.all())
+        assignments = list(principal.roleassignment_set.all())
+        if hasattr(principal, "user_groups"):
+            for user_group in principal.user_groups.all():
+                assignments += list(user_group.roleassignment_set.all())
+        assignments += list(principal.roleassignment_set.all())
         return assignments
 
     @staticmethod
-    def get_permissions(user: AbstractBaseUser | AnonymousUser):
+    def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        for ra in RoleAssignment.get_role_assignments(user):
+        for ra in RoleAssignment.get_role_assignments(principal):
             for p in ra.role.permissions.all():
                 permission_dict = {p.codename: {"str": str(p)}}
                 permissions.update(permission_dict)

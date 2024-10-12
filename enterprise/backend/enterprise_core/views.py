@@ -1,9 +1,6 @@
-import mimetypes
 import magic
 
 import structlog
-from core.views import BaseModelViewSet
-from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
@@ -15,6 +12,9 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
 from django.conf import settings
+
+from core.views import BaseModelViewSet
+from iam.models import User
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -145,6 +145,7 @@ def get_build(request):
             "version": VERSION,
             "build": BUILD,
             "license_seats": LICENSE_SEATS,
+            "available_seats": LICENSE_SEATS - len(User.get_editors()),
             "license_expiration": LICENSE_EXPIRATION,
         }
     )

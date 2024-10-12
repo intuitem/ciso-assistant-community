@@ -363,7 +363,7 @@
 	"librariesStore": "Loja de bibliotecas",
 	"currentlyNoLoadedLibraries": "Atualmente, você não possui bibliotecas carregadas",
 	"loadingLibraryUploadButton": "Carregando o botão de upload de biblioteca",
-	"errorOccuredWhileLoadingLibrary": "O seguinte erro ocorreu ao carregar o formulário da biblioteca",
+	"errorOccurredWhileLoadingLibrary": "O seguinte erro ocorreu ao carregar o formulário da biblioteca",
 	"packager": "Empacotador",
 	"packagerColon": "Empacotador:",
 	"dependencies": "Dependências",
@@ -671,5 +671,8 @@
 	"observationSemiColon": "Observação:",
 	"tableMode": "Modo de tabela",
 	"owner": "Proprietário",
-	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco."
+	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco.",
+	"backupLoadingError": "Ocorreu um erro ao carregar o backup.",
+	"backupGreaterVersionError": "Não é possível carregar o backup, a versão do backup é superior à versão atual do seu aplicativo.",
+	"backupLowerVersionError": "Ocorreu um erro, a versão de backup pode ser muito antiga. Se for o caso, ela deve ser atualizada antes de tentar novamente."
 }

@@ -82,7 +82,7 @@ logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
 FEATURE_FLAGS = {}
-MODULE_PATHS = {}
+MODULE_PATHS = {"serializers": "enterprise_core.serializers"}
 ROUTES = {}
 MODULES = {}
 
@@ -385,8 +385,6 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
-MODULE_PATHS["serializers"] = ["enterprise_core.serializers"]
-
 ROUTES["client-settings"] = {
     "viewset": "enterprise_core.views.ClientSettingsViewSet",
     "basename": "client-settings",
@@ -401,7 +399,7 @@ logger.info(
     "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
 )
 
-LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 0))
+LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 
 INSTALLED_APPS.append("enterprise_core")

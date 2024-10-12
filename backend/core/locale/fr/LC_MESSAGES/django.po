@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-13 19:22+0000\n"
+"POT-Creation-Date: 2024-09-25 14:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,7 +52,7 @@ msgstr "Nom"
 msgid "Description"
 msgstr "Description"
 
-#: core/base_models.py:126 core/models.py:1309
+#: core/base_models.py:126 core/models.py:1310
 #: core/templates/core/action_plan_pdf.html:46
 #: core/templates/snippets/mp_data.html:62
 msgid "ETA"
@@ -232,7 +232,7 @@ msgstr "Locale par défaut"
 msgid "Copyright"
 msgstr "Copyright"
 
-#: core/models.py:189 core/models.py:1443
+#: core/models.py:189 core/models.py:1444
 msgid "Version"
 msgstr "Version"
 
@@ -252,11 +252,11 @@ msgstr "Dépendances"
 msgid "Threat"
 msgstr "Menace"
 
-#: core/models.py:709 core/models.py:960 core/models.py:1849
+#: core/models.py:709 core/models.py:960 core/models.py:1850
 msgid "Threats"
 msgstr "Menaces"
 
-#: core/models.py:729 core/models.py:1414
+#: core/models.py:729 core/models.py:1415
 msgid "Policy"
 msgstr "Politique"
 
@@ -296,12 +296,12 @@ msgstr ""
 msgid "Recover"
 msgstr ""
 
-#: core/models.py:757 core/models.py:1283
+#: core/models.py:757 core/models.py:1284
 #: core/templates/core/action_plan_pdf.html:44
 msgid "Category"
 msgstr "Catégorie"
 
-#: core/models.py:765 core/models.py:1290
+#: core/models.py:765 core/models.py:1291
 #, fuzzy
 #| msgid "Search function..."
 msgid "CSF Function"
@@ -343,15 +343,15 @@ msgstr ""
 "Si la matrice de risque est désactivée, elle ne sera pas disponible pour la "
 "sélection lors de nouvelles évaluations de risque."
 
-#: core/models.py:891 core/models.py:2065
+#: core/models.py:891 core/models.py:2066
 msgid "Minimum score"
 msgstr "Score minimum"
 
-#: core/models.py:892 core/models.py:2066
+#: core/models.py:892 core/models.py:2067
 msgid "Maximum score"
 msgstr "Score maximum"
 
-#: core/models.py:894 core/models.py:2068
+#: core/models.py:894 core/models.py:2069
 msgid "Score definition"
 msgstr "Définition du score"
 
@@ -359,7 +359,7 @@ msgstr "Définition du score"
 msgid "Implementation groups definition"
 msgstr "Définition des groupes d'implémentation"
 
-#: core/models.py:908 core/models.py:974 core/models.py:2059
+#: core/models.py:908 core/models.py:974 core/models.py:2060
 #: core/templates/core/action_plan_pdf.html:20
 msgid "Framework"
 msgstr "Référentiel"
@@ -486,7 +486,7 @@ msgstr "Exigence source"
 msgid "Strength of relationship"
 msgstr ""
 
-#: core/models.py:1103 core/models.py:1251
+#: core/models.py:1103 core/models.py:1252
 msgid "Undefined"
 msgstr "Non défini"
 
@@ -514,13 +514,13 @@ msgstr "Abandonné"
 msgid "Internal reference"
 msgstr "Référence interne"
 
-#: core/models.py:1117 core/models.py:1297 core/models.py:1450
-#: core/models.py:2497 core/templates/snippets/mp_data.html:66
+#: core/models.py:1117 core/models.py:1298 core/models.py:1451
+#: core/models.py:2498 core/templates/snippets/mp_data.html:66
 #: core/templates/snippets/ri_list_nested.html:31
 msgid "Status"
 msgstr "Statut"
 
-#: core/models.py:1122 core/models.py:1436 core/models.py:1929
+#: core/models.py:1122 core/models.py:1437 core/models.py:1930
 #: core/templates/core/action_plan_pdf.html:16
 #: core/templates/snippets/mp_data.html:7
 msgid "Project"
@@ -550,7 +550,7 @@ msgstr "type"
 msgid "parent assets"
 msgstr "actifs parents"
 
-#: core/models.py:1172 core/models.py:1836
+#: core/models.py:1172 core/models.py:1837
 msgid "Assets"
 msgstr "Actifs"
 
@@ -567,181 +567,181 @@ msgstr ""
 msgid "Attachment"
 msgstr "Pièce jointe"
 
-#: core/models.py:1210
+#: core/models.py:1211
 msgid "Link to the evidence (eg. Jira ticket, etc.)"
 msgstr "Lien vers la preuve (par ex. billet Jira, etc.)"
 
-#: core/models.py:1211 core/models.py:1322
+#: core/models.py:1212 core/models.py:1323
 #: core/templates/snippets/mp_data.html:65
 msgid "Link"
 msgstr "Lien"
 
-#: core/models.py:1217
+#: core/models.py:1218
 msgid "Evidence"
 msgstr "Preuve"
 
-#: core/models.py:1218 core/models.py:1275 core/models.py:2517
+#: core/models.py:1219 core/models.py:1276 core/models.py:2518
 msgid "Evidences"
 msgstr "Preuves"
 
-#: core/models.py:1246 core/models.py:2481
+#: core/models.py:1247 core/models.py:2482
 msgid "To do"
 msgstr "À faire"
 
-#: core/models.py:1247 core/models.py:1430 core/models.py:2482
+#: core/models.py:1248 core/models.py:1431 core/models.py:2483
 msgid "In progress"
 msgstr "En cours"
 
-#: core/models.py:1248
+#: core/models.py:1249
 msgid "On hold"
 msgstr ""
 
-#: core/models.py:1249
+#: core/models.py:1250
 msgid "Active"
 msgstr "Actif"
 
-#: core/models.py:1250 core/models.py:1433
+#: core/models.py:1251 core/models.py:1434
 msgid "Deprecated"
 msgstr "Déprécié"
 
-#: core/models.py:1257
+#: core/models.py:1258
 msgid "Small"
 msgstr "Petit"
 
-#: core/models.py:1258 core/models.py:1813 core/tests/test_helpers.py:77
+#: core/models.py:1259 core/models.py:1814 core/tests/test_helpers.py:77
 #: core/tests/test_helpers.py:142
 msgid "Medium"
 msgstr "Moyen"
 
-#: core/models.py:1259
+#: core/models.py:1260
 msgid "Large"
 msgstr "Grand"
 
-#: core/models.py:1260
+#: core/models.py:1261
 msgid "Extra Large"
 msgstr "Extra large"
 
-#: core/models.py:1270
+#: core/models.py:1271
 msgid "Reference Control"
 msgstr "Mesure de référence"
 
-#: core/models.py:1302 core/models.py:1865
+#: core/models.py:1303 core/models.py:1866
 msgid "Owner"
 msgstr "Propriétaire"
 
-#: core/models.py:1308
+#: core/models.py:1309
 msgid "Estimated Time of Arrival"
 msgstr "Heure d'arrivée estimée"
 
-#: core/models.py:1314
+#: core/models.py:1315
 msgid "Date after which the applied control is no longer valid"
 msgstr "Date à partir de laquelle la mesure appliquée n'est plus valide"
 
-#: core/models.py:1315 core/models.py:2625
+#: core/models.py:1316 core/models.py:2626
 #: core/templates/core/action_plan_pdf.html:47
 msgid "Expiry date"
 msgstr "Date d'expiration"
 
-#: core/models.py:1321
+#: core/models.py:1322
 msgid "External url for action follow-up (eg. Jira ticket)"
 msgstr "URL externe pour le suivi de l'action (par ex. billet Jira)"
 
-#: core/models.py:1329
+#: core/models.py:1330
 msgid "Relative effort of the measure (using T-Shirt sizing)"
 msgstr "Effort relatif de la mesure (en utilisant la taille des T-shirts)"
 
-#: core/models.py:1330 core/templates/core/action_plan_pdf.html:48
+#: core/models.py:1331 core/templates/core/action_plan_pdf.html:48
 #: core/templates/snippets/mp_data.html:63
 msgid "Effort"
 msgstr "Effort"
 
-#: core/models.py:1334
+#: core/models.py:1335
 msgid "Cost of the measure (using globally-chosen currency)"
 msgstr ""
 
-#: core/models.py:1335 core/templates/core/action_plan_pdf.html:49
+#: core/models.py:1336 core/templates/core/action_plan_pdf.html:49
 #: core/templates/snippets/mp_data.html:64
 msgid "Cost"
 msgstr ""
 
-#: core/models.py:1341
+#: core/models.py:1342
 msgid "Applied control"
 msgstr "Mesure appliqué"
 
-#: core/models.py:1342 core/models.py:1843 core/models.py:2533
+#: core/models.py:1343 core/models.py:1844 core/models.py:2534
 msgid "Applied controls"
 msgstr "Mesures appliquées"
 
-#: core/models.py:1415
+#: core/models.py:1416
 msgid "Policies"
 msgstr "Politiques"
 
-#: core/models.py:1429
+#: core/models.py:1430
 msgid "Planned"
 msgstr "Planifié"
 
-#: core/models.py:1431 core/models.py:2483
+#: core/models.py:1432 core/models.py:2484
 msgid "In review"
 msgstr "En examen"
 
-#: core/models.py:1432 core/models.py:2484
+#: core/models.py:1433 core/models.py:2485
 msgid "Done"
 msgstr "Terminé"
 
-#: core/models.py:1442
+#: core/models.py:1443
 msgid "Version of the compliance assessment (eg. 1.0, 2.0, etc.)"
 msgstr "Version de l'évaluation de conformité (par ex. 1.0, 2.0, etc.)"
 
-#: core/models.py:1457
+#: core/models.py:1458
 msgid "Authors"
 msgstr "Auteurs"
 
-#: core/models.py:1463 core/templates/core/audit_report.html:35
+#: core/models.py:1464 core/templates/core/audit_report.html:35
 msgid "Reviewers"
 msgstr "Relecteurs"
 
-#: core/models.py:1466 core/models.py:2520
+#: core/models.py:1467 core/models.py:2521
 msgid "Observation"
 msgstr "Observation"
 
-#: core/models.py:1483
+#: core/models.py:1484
 msgid "WARNING! After choosing it, you will not be able to change it"
 msgstr ""
 "ATTENTION ! Une fois que vous l'aurez choisi, vous ne pourrez plus le "
 "modifier."
 
-#: core/models.py:1484
+#: core/models.py:1485
 msgid "Risk matrix"
 msgstr "Matrice de risque"
 
-#: core/models.py:1488 core/templates/snippets/mp_data.html:9
+#: core/models.py:1489 core/templates/snippets/mp_data.html:9
 #: core/templates/snippets/ra_data.html:8
 msgid "Risk assessment"
 msgstr "Évaluation de risque"
 
-#: core/models.py:1489
+#: core/models.py:1490
 msgid "Risk assessments"
 msgstr "Évaluations de risque"
 
-#: core/models.py:1513
+#: core/models.py:1514
 msgid "{}: Risk assessment is still in progress"
 msgstr "{} : L'évaluation des risques est toujours en cours"
 
-#: core/models.py:1524
+#: core/models.py:1525
 msgid "{}: No author assigned to this risk assessment"
 msgstr "{} : Aucun auteur n'a été affecté à cette évaluation des risques"
 
-#: core/models.py:1536
+#: core/models.py:1537
 msgid "{}: RiskAssessment is empty. No risk scenario declared yet"
 msgstr ""
 "{} : L'évaluation des risques est vide. Aucun scénario de risque n'a encore "
 "été déclaré."
 
-#: core/models.py:1557
+#: core/models.py:1558
 msgid "{} current risk level has not been assessed"
 msgstr "{} : Le niveau de risque actuel n'a pas été évalué"
 
-#: core/models.py:1570
+#: core/models.py:1571
 msgid ""
 "{} residual risk level has not been assessed. If no additional measures are "
 "applied, it should be at the same level as the current risk"
@@ -750,43 +750,43 @@ msgstr ""
 "mesures supplémentaires appliquées, il devrait être au même niveau que le "
 "risque actuel."
 
-#: core/models.py:1581
+#: core/models.py:1582
 msgid "{} residual risk level is higher than the current one"
 msgstr "{} : Le niveau de risque résiduel est supérieur à l'actuel"
 
-#: core/models.py:1593
+#: core/models.py:1594
 msgid "{} residual risk probability is higher than the current one"
 msgstr "{} : La probabilité de risque résiduel est supérieure à l'actuelle"
 
-#: core/models.py:1605
+#: core/models.py:1606
 msgid "{} residual risk impact is higher than the current one"
 msgstr "{} : L'impact du risque résiduel est supérieur à l'actuel"
 
-#: core/models.py:1626
+#: core/models.py:1627
 msgid "{}: residual risk level has been lowered without any specific measure"
 msgstr ""
 "{} : Le niveau de risque résiduel a été réduit sans aucune mesure spécifique"
 
-#: core/models.py:1640
+#: core/models.py:1641
 msgid "{} risk accepted but no risk acceptance attached"
 msgstr "{} : Risque accepté mais aucune acceptation de risque jointe"
 
-#: core/models.py:1663
+#: core/models.py:1664
 msgid "{} does not have an ETA"
 msgstr "{} : Pas d'ETA"
 
-#: core/models.py:1675
+#: core/models.py:1676
 msgid "{} ETA is in the past now. Consider updating its status or the date"
 msgstr ""
 "{} : L'ETA est dans le passé maintenant. Envisagez de mettre à jour son "
 "statut ou la date."
 
-#: core/models.py:1688
+#: core/models.py:1689
 msgid ""
 "{} does not have an estimated effort. This will help you for prioritization"
 msgstr "{} : Pas d'effort estimé. Cela vous aidera pour la prioritisation"
 
-#: core/models.py:1701
+#: core/models.py:1702
 #, fuzzy
 #| msgid ""
 #| "{} does not have an estimated effort. This will help you for "
@@ -795,7 +795,7 @@ msgid ""
 "{} does not have an estimated cost. This will help you for prioritization"
 msgstr "{} : Pas d'effort estimé. Cela vous aidera pour la prioritisation"
 
-#: core/models.py:1714
+#: core/models.py:1715
 msgid ""
 "{}: Applied control does not have an external link attached. This will help "
 "you for follow-up"
@@ -803,112 +803,112 @@ msgstr ""
 "{} : La mesure appliquée ne comporte pas de lien externe joint. Cela vous "
 "aidera pour le suivi"
 
-#: core/models.py:1737
+#: core/models.py:1738
 msgid "{}: Acceptance has no expiry date"
 msgstr "{} : L'acceptation n'a pas de date d'expiration"
 
-#: core/models.py:1751
+#: core/models.py:1752
 msgid "{}: Acceptance has expired. Consider updating the status or the date"
 msgstr ""
 "{} : L'acceptation a expiré. Envisagez de mettre à jour le statut ou la date."
 
-#: core/models.py:1780
+#: core/models.py:1781
 msgid "Open"
 msgstr "Ouvert"
 
-#: core/models.py:1781
+#: core/models.py:1782
 msgid "Mitigate"
 msgstr "Atténuer"
 
-#: core/models.py:1782
+#: core/models.py:1783
 msgid "Accept"
 msgstr "Accepter"
 
-#: core/models.py:1783
+#: core/models.py:1784
 msgid "Avoid"
 msgstr "Éviter"
 
-#: core/models.py:1784
+#: core/models.py:1785
 msgid "Transfer"
 msgstr "Transférer"
 
-#: core/models.py:1788
+#: core/models.py:1789
 msgid "Financial"
 msgstr ""
 
-#: core/models.py:1789
+#: core/models.py:1790
 msgid "Legal"
 msgstr ""
 
-#: core/models.py:1790
+#: core/models.py:1791
 #, fuzzy
 #| msgid "Rationale"
 msgid "Reputation"
 msgstr "Raison"
 
-#: core/models.py:1791
+#: core/models.py:1792
 #, fuzzy
 #| msgid "Observation"
 msgid "Operational"
 msgstr "Observation"
 
-#: core/models.py:1792
+#: core/models.py:1793
 msgid "Confidentiality"
 msgstr ""
 
-#: core/models.py:1793
+#: core/models.py:1794
 msgid "Integrity"
 msgstr ""
 
-#: core/models.py:1794
+#: core/models.py:1795
 #, fuzzy
 #| msgid "Probability"
 msgid "Availability"
 msgstr "Probabilité"
 
-#: core/models.py:1795
+#: core/models.py:1796
 msgid "Authenticity"
 msgstr ""
 
-#: core/models.py:1800
+#: core/models.py:1801
 msgid "--"
 msgstr "--"
 
-#: core/models.py:1802
+#: core/models.py:1803
 msgid "The strength of the knowledge supporting the assessment is undefined"
 msgstr "La force de la connaissance soutenant l'évaluation est indéfinie"
 
-#: core/models.py:1806 core/tests/test_helpers.py:76
+#: core/models.py:1807 core/tests/test_helpers.py:76
 #: core/tests/test_helpers.py:141
 msgid "Low"
 msgstr "Faible"
 
-#: core/models.py:1808
+#: core/models.py:1809
 msgid "The strength of the knowledge supporting the assessment is low"
 msgstr "La force de la connaissance soutenant l'évaluation est faible"
 
-#: core/models.py:1815
+#: core/models.py:1816
 msgid "The strength of the knowledge supporting the assessment is medium"
 msgstr "La force de la connaissance soutenant l'évaluation est moyenne"
 
-#: core/models.py:1820 core/tests/test_helpers.py:78
+#: core/models.py:1821 core/tests/test_helpers.py:78
 #: core/tests/test_helpers.py:143
 msgid "High"
 msgstr "Élevé"
 
-#: core/models.py:1822
+#: core/models.py:1823
 msgid "The strength of the knowledge supporting the assessment is high"
 msgstr "La force de la connaissance soutenant l'évaluation est élevée"
 
-#: core/models.py:1831
+#: core/models.py:1832
 msgid "RiskAssessment"
 msgstr "ÉvaluationDesRisques"
 
-#: core/models.py:1838
+#: core/models.py:1839
 msgid "Assets impacted by the risk scenario"
 msgstr "Actifs impactés par le scénario de risque"
 
-#: core/models.py:1856
+#: core/models.py:1857
 msgid ""
 "The existing controls to manage this risk. Edit the risk scenario to add "
 "extra applied controls."
@@ -916,24 +916,24 @@ msgstr ""
 "Les mesures existantes pour gérer ce risque. Modifiez le scénario de risque "
 "pour ajouter des mesures appliquées supplémentaires."
 
-#: core/models.py:1858 core/templates/snippets/mp_data.html:48
+#: core/models.py:1859 core/templates/snippets/mp_data.html:48
 #: core/templates/snippets/ri_list_nested.html:22
 msgid "Existing controls"
 msgstr "Mesures existantes"
 
-#: core/models.py:1870
+#: core/models.py:1871
 msgid "Current probability"
 msgstr "Probabilité actuelle"
 
-#: core/models.py:1873
+#: core/models.py:1874
 msgid "Current impact"
 msgstr "Impact actuel"
 
-#: core/models.py:1877
+#: core/models.py:1878
 msgid "Current level"
 msgstr "Niveau actuel"
 
-#: core/models.py:1879
+#: core/models.py:1880
 msgid ""
 "The risk level given the current measures. Automatically updated on Save, "
 "based on the chosen risk matrix"
@@ -942,19 +942,19 @@ msgstr ""
 "automatiquement lors de l'enregistrement, sur la base de la matrice de "
 "risque choisie."
 
-#: core/models.py:1885
+#: core/models.py:1886
 msgid "Residual probability"
 msgstr "Probabilité résiduelle"
 
-#: core/models.py:1888
+#: core/models.py:1889
 msgid "Residual impact"
 msgstr "Impact résiduel"
 
-#: core/models.py:1892
+#: core/models.py:1893
 msgid "Residual level"
 msgstr "Niveau résiduel"
 
-#: core/models.py:1894
+#: core/models.py:1895
 msgid ""
 "The risk level when all the extra measures are done. Automatically updated "
 "on Save, based on the chosen risk matrix"
@@ -963,61 +963,61 @@ msgstr ""
 "œuvre. Mis à jour automatiquement lors de l'enregistrement, sur la base de "
 "la matrice de risque choisie."
 
-#: core/models.py:1902
+#: core/models.py:1903
 msgid "Treatment status"
 msgstr "Statut de traitement"
 
-#: core/models.py:1905
+#: core/models.py:1906
 #, fuzzy
 #| msgid "Justification"
 msgid "Qualifications"
 msgstr "Justification"
 
-#: core/models.py:1909
+#: core/models.py:1910
 msgid "Strength of Knowledge"
 msgstr "Force de la connaissance"
 
-#: core/models.py:1910
+#: core/models.py:1911
 msgid "The strength of the knowledge supporting the assessment"
 msgstr "La force de la connaissance soutenant l'évaluation"
 
-#: core/models.py:1913 core/models.py:2637
+#: core/models.py:1914 core/models.py:2638
 msgid "Justification"
 msgstr "Justification"
 
-#: core/models.py:1919
+#: core/models.py:1920
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 
-#: core/models.py:1920 core/models.py:2602
+#: core/models.py:1921 core/models.py:2603
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
-#: core/models.py:2030
+#: core/models.py:2031
 msgid ": "
 msgstr ": "
 
-#: core/models.py:2062 core/templates/core/audit_report.html:43
+#: core/models.py:2063 core/templates/core/audit_report.html:43
 msgid "Selected implementation groups"
 msgstr "Groupes d'implémentation sélectionnés"
 
-#: core/models.py:2072 core/models.py:2524
+#: core/models.py:2073 core/models.py:2525
 msgid "Compliance assessment"
 msgstr "Évaluation de conformité"
 
-#: core/models.py:2073
+#: core/models.py:2074
 msgid "Compliance assessments"
 msgstr "Évaluations de conformité"
 
-#: core/models.py:2310
+#: core/models.py:2311
 msgid "{}: Compliance assessment is still in progress"
 msgstr "{} : L'évaluation de la conformité est toujours en cours"
 
-#: core/models.py:2323
+#: core/models.py:2324
 msgid "{}: No author assigned to this compliance assessment"
 msgstr "{} : Aucun auteur n'a été affecté à cette évaluation de conformité"
 
-#: core/models.py:2350
+#: core/models.py:2351
 #, fuzzy
 #| msgid ""
 #| "{}: Requirement assessment status is compliant or partially compliant "
@@ -1029,94 +1029,94 @@ msgstr ""
 "{} : Le statut de l'évaluation de l'exigence est conforme ou partiellement "
 "conforme, sans aucun mesure appliquée"
 
-#: core/models.py:2375
+#: core/models.py:2376
 msgid "{}: Applied control has no reference control selected"
 msgstr ""
 "{} : La mesure appliquée ne comporte pas de mesure de référence sélectionné"
 
-#: core/models.py:2401
+#: core/models.py:2402
 msgid "{}: Evidence has no file uploaded"
 msgstr "{} : La preuve ne comporte pas de fichier téléchargé"
 
-#: core/models.py:2487
+#: core/models.py:2488
 msgid "Not assessed"
 msgstr "Non évalué"
 
-#: core/models.py:2488
+#: core/models.py:2489
 msgid "Partially compliant"
 msgstr "Partiellement conforme"
 
-#: core/models.py:2489
+#: core/models.py:2490
 #, fuzzy
 #| msgid "Non compliant"
 msgid "Non-compliant"
 msgstr "Non conforme"
 
-#: core/models.py:2490
+#: core/models.py:2491
 msgid "Compliant"
 msgstr "Conforme"
 
-#: core/models.py:2491
+#: core/models.py:2492
 msgid "Not applicable"
 msgstr "Non applicable"
 
-#: core/models.py:2502
+#: core/models.py:2503
 msgid "Result"
 msgstr "Résultat"
 
-#: core/models.py:2508
+#: core/models.py:2509
 msgid "Score"
 msgstr "Score"
 
-#: core/models.py:2512
+#: core/models.py:2513
 msgid "Is scored"
 msgstr "Est noté"
 
-#: core/models.py:2528
+#: core/models.py:2529
 msgid "Requirement"
 msgstr "Exigence"
 
-#: core/models.py:2538
+#: core/models.py:2539
 msgid "Selected"
 msgstr "Sélectionné"
 
-#: core/models.py:2542
+#: core/models.py:2543
 msgid "Mapping inference"
 msgstr "Inference de mapping"
 
-#: core/models.py:2547
+#: core/models.py:2548
 msgid "Answer"
 msgstr ""
 
-#: core/models.py:2584
+#: core/models.py:2585
 msgid "Requirement assessment"
 msgstr "Évaluation de l'exigence"
 
-#: core/models.py:2585
+#: core/models.py:2586
 msgid "Requirement assessments"
 msgstr "Évaluations de l'exigence"
 
-#: core/models.py:2593
+#: core/models.py:2594
 msgid "Created"
 msgstr "Créé"
 
-#: core/models.py:2594
+#: core/models.py:2595
 msgid "Submitted"
 msgstr "Soumis"
 
-#: core/models.py:2595
+#: core/models.py:2596
 msgid "Accepted"
 msgstr "Accepté"
 
-#: core/models.py:2596
+#: core/models.py:2597
 msgid "Rejected"
 msgstr "Rejeté"
 
-#: core/models.py:2597
+#: core/models.py:2598
 msgid "Revoked"
 msgstr "Révoqué"
 
-#: core/models.py:2604
+#: core/models.py:2605
 msgid ""
 "Select the risk scenarios to be accepted, attention they must be part of the "
 "chosen domain"
@@ -1124,39 +1124,39 @@ msgstr ""
 "Sélectionnez les scénarios de risque à accepter, faites attention, ils "
 "doivent faire partie du domaine choisi"
 
-#: core/models.py:2610
+#: core/models.py:2611
 msgid "Risk owner and approver identity"
 msgstr "Identité du propriétaire du risque et de l'approbateur"
 
-#: core/models.py:2611 core/utils.py:50 core/utils.py:57 core/utils.py:60
+#: core/models.py:2612 core/utils.py:52 core/utils.py:60 core/utils.py:63
 msgid "Approver"
 msgstr "Approbateur"
 
-#: core/models.py:2620
+#: core/models.py:2621
 msgid "State"
 msgstr "État"
 
-#: core/models.py:2623
+#: core/models.py:2624
 msgid "Specify when the risk acceptance will no longer apply"
 msgstr "Précisez quand l'acceptation du risque ne sera plus valable"
 
-#: core/models.py:2628
+#: core/models.py:2629
 msgid "Acceptance date"
 msgstr "Date d'acceptation"
 
-#: core/models.py:2631
+#: core/models.py:2632
 msgid "Rejection date"
 msgstr "Date de rejet"
 
-#: core/models.py:2634
+#: core/models.py:2635
 msgid "Revocation date"
 msgstr "Date de révocation"
 
-#: core/models.py:2646
+#: core/models.py:2647
 msgid "Risk acceptance"
 msgstr "Acceptation du risque"
 
-#: core/models.py:2647
+#: core/models.py:2648
 msgid "Risk acceptances"
 msgstr "Acceptations du risque"
 
@@ -1375,21 +1375,25 @@ msgstr "Actuel"
 msgid "Residual"
 msgstr "Résiduel"
 
-#: core/templates/snippets/req_node.html:27
+#: core/templates/snippets/req_node.html:32
+msgid "No answer"
+msgstr "Aucun réponse"
+
+#: core/templates/snippets/req_node.html:38
 #, fuzzy
 #| msgid "Observation"
 msgid "Observation:"
 msgstr "Observation"
 
-#: core/templates/snippets/req_node.html:36
+#: core/templates/snippets/req_node.html:47
 msgid "Associated evidence:"
 msgstr "Preuves associées :"
 
-#: core/templates/snippets/req_node.html:50
+#: core/templates/snippets/req_node.html:61
 msgid "Applied controls:"
 msgstr "Mesures appliquées :"
 
-#: core/templates/snippets/req_node.html:51
+#: core/templates/snippets/req_node.html:62
 msgid "Evidence of applied controls:"
 msgstr "Preuves des mesures appliquées :"
 
@@ -1443,29 +1447,37 @@ msgstr "Très faible"
 msgid "Very High"
 msgstr "Très élevé"
 
-#: core/utils.py:47 core/utils.py:55
+#: core/utils.py:49 core/utils.py:58
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: core/utils.py:48 core/utils.py:58
+#: core/utils.py:50 core/utils.py:61
 msgid "Domain manager"
 msgstr "Gestionnaire de domaine"
 
-#: core/utils.py:49 core/utils.py:59
+#: core/utils.py:51 core/utils.py:62
 msgid "Analyst"
 msgstr "Analyste"
 
-#: core/utils.py:51 core/utils.py:56 core/utils.py:61
+#: core/utils.py:53 core/utils.py:59 core/utils.py:64
 msgid "Reader"
 msgstr "Lecteur"
 
-#: core/utils.py:70
+#: core/utils.py:54 core/utils.py:65
+msgid "Third-party respondent"
+msgstr ""
+
+#: core/utils.py:74
 msgid "French"
 msgstr "Français"
 
-#: core/utils.py:71
+#: core/utils.py:75
 msgid "English"
 msgstr "Anglais"
+
+#: core/views.py:1668
+msgid "CISO Assistant: A questionnaire has been assigned to you"
+msgstr ""
 
 #~ msgid "Inactive"
 #~ msgstr "Inactif"

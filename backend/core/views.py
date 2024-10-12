@@ -12,21 +12,27 @@ from uuid import UUID
 import random
 
 import django_filters as df
-from django.conf import settings
-from django.contrib.auth.models import Permission
+from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+
+from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
-from django.utils.decorators import method_decorator
 from django.utils.functional import Promise
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 from django_filters.rest_framework import DjangoFilterBackend
+from iam.models import Folder, RoleAssignment, UserGroup
 from rest_framework import filters, permissions, status, viewsets
+from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
     api_view,
@@ -40,12 +46,9 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+
 from weasyprint import HTML
 
-from ciso_assistant.settings import (
-    BUILD,
-    VERSION,
-)
 from core.helpers import *
 from core.models import (
     AppliedControl,
@@ -54,16 +57,22 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
-from iam.models import Folder, RoleAssignment, User, UserGroup
 
 from .models import *
 from .serializers import *
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
+
+SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
+MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -98,12 +107,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self, **kwargs):
-        MODULE_PATHS = settings.MODULE_PATHS
         serializer_factory = SerializerFactory(
-            self.serializers_module, *MODULE_PATHS.get("serializers", [])
+            self.serializers_module, MODULE_PATHS.get("serializers", [])
         )
         serializer_class = serializer_factory.get_serializer(
             self.model.__name__, kwargs.get("action", self.action)
+        )
+        logger.debug(
+            "Serializer class",
+            serializer_class=serializer_class,
+            action=kwargs.get("action", self.action),
+            viewset=self,
+            module_paths=MODULE_PATHS,
         )
 
         return serializer_class
@@ -1498,7 +1513,7 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls", "requirement_assessments"]
+    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
     ordering_fields = ["name", "description"]
 
@@ -1752,6 +1767,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Send compliance assessment by mail to authors",
+    )
+    def mailing(self, request, pk):
+        instance = self.get_object()
+        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+            for author in instance.authors.all():
+                try:
+                    author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="compliance-assessments",
+                        object_id=instance.id,
+                    )
+                except Exception as primary_exception:
+                    logger.error(
+                        f"Failed to send email to {author}: {primary_exception}"
+                    )
+                    raise ValidationError(
+                        {"error": ["An error occurred while sending the email"]}
+                    )
+            return Response({"results": "mail sent"})
+        raise ValidationError({"warning": ["noMailerConfigured"]})
 
     def perform_create(self, serializer):
         """
@@ -2063,6 +2106,8 @@ def get_build(request):
     """
     API endpoint that returns the build version of the application.
     """
+    BUILD = settings.BUILD
+    VERSION = settings.VERSION
     return Response({"version": VERSION, "build": BUILD})
 
 

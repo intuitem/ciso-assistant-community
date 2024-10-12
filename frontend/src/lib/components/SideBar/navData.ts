@@ -127,7 +127,8 @@ export const navData = {
 				{
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
-					href: '/folders'
+					href: '/folders',
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'projects',

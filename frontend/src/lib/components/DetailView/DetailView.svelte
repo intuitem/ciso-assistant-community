@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type {
 		ModalComponent,
@@ -17,10 +18,12 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
 	import { toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import { checkConstraints } from '$lib/utils/crud';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import List from '$lib/components/List/List.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -28,6 +31,7 @@
 	const defaultExcludes = ['id', 'is_published', 'localization_dict'];
 
 	export let data;
+	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
 
@@ -69,7 +73,7 @@
 	}
 
 	function modalCreateForm(model: Record<string, any>): void {
-		const modalComponent: ModalComponent = {
+		let modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
 				form: model.createForm,
@@ -77,23 +81,36 @@
 				debug: false
 			}
 		};
-		const modal: ModalSettings = {
+		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
 		};
+		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
+			modalComponent = {
+				ref: MissingConstraintsModal
+			};
+			modal = {
+				type: 'component',
+				component: modalComponent,
+				title: m.warning(),
+				body: safeTranslate('add' + capitalizeFirstLetter(model.info.localName)).toLowerCase(),
+				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
+			};
+		}
 		modalStore.trigger(modal);
 	}
 
 	function modalConfirm(id: string, name: string, action: string): void {
+		const urlModel = getModelInfo('risk-acceptances').urlModel;
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.form,
+				_form: { id: id, urlmodel: urlModel },
 				id: id,
 				debug: false,
-				URLModel: getModelInfo('risk-acceptances').urlModel,
+				URLModel: urlModel,
 				formAction: action
 			}
 		};
@@ -103,6 +120,32 @@
 			// Data
 			title: m.confirmModalTitle(),
 			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalMailConfirm(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: id, urlmodel: getModelInfo('compliance-assessments').urlModel },
+				id: id,
+				debug: false,
+				URLModel: getModelInfo('compliance-assessments').urlModel,
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: data.data.representatives,
+					message: m.theFollowingRepresentativesWillReceiveTheQuestionnaireColon()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
 		modalStore.trigger(modal);
 	}
@@ -254,13 +297,36 @@
 				</div>
 			{/each}
 		</div>
-		{#if displayEditButton()}
-			<a
-				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-				class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
-			>
-		{/if}
+		<div class="">
+			{#if mailing}
+				<button
+					class="btn variant-filled-primary h-fit"
+					on:click={(_) => {
+						modalMailConfirm(
+							data.data.compliance_assessment.id,
+							data.data.compliance_assessment.str,
+							'?/mailing'
+						);
+					}}
+					on:keydown={(_) =>
+						modalMailConfirm(
+							data.data.compliance_assessment.id,
+							data.data.compliance_assessment.str,
+							'?/mailing'
+						)}
+				>
+					<i class="fas fa-paper-plane mr-2" />
+					{m.sendQuestionnaire()}
+				</button>
+			{/if}
+			{#if displayEditButton()}
+				<a
+					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+					class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
+				>
+			{/if}
+		</div>
 	</div>
 </div>
 
