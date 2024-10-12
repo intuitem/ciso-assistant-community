@@ -30,7 +30,10 @@ def cli():
 def init_config():
     """Create/Reset the config file."""
     template_data = {
-        "rest": {"url": "http://localhost:8000/api"},
+        "rest": {
+            "url": "https://localhost:8443/api",
+            "verify_certificate": True,
+        },
         "credentials": {"email": "user@company.org", "password": ""},
     }
     if click.confirm(
@@ -70,6 +73,7 @@ except KeyError:
         "Missing credentials in the config file. You need to pass them to the CLI in this case."
     )
 
+VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
 
 def check_auth():
     if Path(".tmp.yaml").exists():
@@ -101,7 +105,7 @@ def auth(email, password):
             sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
-    res = requests.post(url, data, headers)
+    res = requests.post(url, data, headers, verify=VERIFY_CERTIFICATE)
     print(res.status_code)
     if res.status_code == 200:
         with open(".tmp.yaml", "w") as yfile:
@@ -117,7 +121,7 @@ def auth(email, password):
 def _get_folders():
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
-    res = requests.get(url, headers=headers)
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code == 200:
         output = res.json()
         for folder in output["results"]:
@@ -158,7 +162,7 @@ def import_assets(file):
                 "folder": GLOBAL_FOLDER_ID,
                 "type": asset_type,
             }
-            res = requests.post(url, json=data, headers=headers)
+            res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
             if res.status_code != 201:
                 click.echo("❌ something went wrong")
                 print(res.json())
@@ -192,7 +196,7 @@ def import_controls(file):
                 "csf_function": csf_function.lower(),
                 "category": category.lower(),
             }
-            res = requests.post(url, json=data, headers=headers)
+            res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
             if res.status_code != 201:
                 click.echo("❌ something went wrong")
                 print(res.json())
@@ -222,7 +226,7 @@ def evidences_templates(file):
                 "applied_controls": [],
                 "requirement_assessments": [],
             }
-            res = requests.post(url, json=data, headers=headers)
+            res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
             if res.status_code != 201:
                 click.echo("❌ something went wrong")
                 print(res.json())
@@ -241,7 +245,7 @@ def upload_evidence(file, name):
     }
     # Get evidence ID by name
     url = f"{API_URL}/evidences/"
-    res = requests.get(url, headers=headers, params={"name": name})
+    res = requests.get(url, headers=headers, params={"name": name}, verify=VERIFY_CERTIFICATE)
     data = res.json()
     if res.status_code != 200:
         print(data)
@@ -261,7 +265,7 @@ def upload_evidence(file, name):
         "Content-Disposition": f'attachment;filename="{filename}"',
     }
     with open(file, "rb") as f:
-        res = requests.post(url, headers=headers, data=f)
+        res = requests.post(url, headers=headers, data=f, verify=VERIFY_CERTIFICATE)
     print(res)
     print(res.text)
 
