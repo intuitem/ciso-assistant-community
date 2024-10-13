@@ -221,6 +221,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
 					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'Experimental',
+					fa_icon: 'fa-solid fa-flask',
+					href: '/experimental',
+					permissions: ['change_globalsettings']
 				}
 			]
 		}
