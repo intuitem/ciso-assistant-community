@@ -53,7 +53,8 @@ try:
         cli_cfg = yaml.safe_load(yfile)
 except FileNotFoundError:
     print(
-        "Config file not found. Running the init command to create it but you need to fill it."
+        "Config file not found. Running the init command to create it but you need to fill it.",
+        file=sys.stderr,
     )
     init_config()
 
@@ -61,7 +62,8 @@ try:
     API_URL = cli_cfg["rest"]["url"]
 except KeyError:
     print(
-        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one."
+        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one.",
+        file=sys.stderr,
     )
     sys.exit(1)
 
@@ -70,19 +72,21 @@ try:
     PASSWORD = cli_cfg["credentials"]["password"]
 except KeyError:
     print(
-        "Missing credentials in the config file. You need to pass them to the CLI in this case."
+        "Missing credentials in the config file. You need to pass them to the CLI in this case.",
+        file=sys.stderr,
     )
 
 VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
 
+
 def check_auth():
     if Path(".tmp.yaml").exists():
-        click.echo("Found auth data. Trying them")
+        click.echo("Found auth data. Trying them", err=True)
         with open(".tmp.yaml", "r") as yfile:
             auth_data = yaml.safe_load(yfile)
             return auth_data["token"]
     else:
-        click.echo("Could not find authentication data.")
+        click.echo("Could not find authentication data.", err=True)
 
 
 TOKEN = check_auth()
@@ -97,11 +101,11 @@ def auth(email, password):
     if email and password:
         data = {"username": email, "password": password}
     else:
-        print("trying credentials from the config file")
+        print("trying credentials from the config file", file=sys.stderr)
         if EMAIL and PASSWORD:
             data = {"username": EMAIL, "password": PASSWORD}
         else:
-            print("Could not find any usable credentials.")
+            print("Could not find any usable credentials.", file=sys.stderr)
             sys.exit(1)
     headers = {"accept": "application/json", "Content-Type": "application/json"}
 
@@ -110,10 +114,11 @@ def auth(email, password):
     if res.status_code == 200:
         with open(".tmp.yaml", "w") as yfile:
             yaml.safe_dump(res.json(), yfile)
-            print("Looks good, you can move to other commands.")
+            print("Looks good, you can move to other commands.", file=sys.stderr)
     else:
         print(
-            "Check your credentials again. You can set them on the config file or on the command line."
+            "Check your credentials again. You can set them on the config file or on the command line.",
+            file=sys.stderr,
         )
         print(res.json())
 
@@ -162,12 +167,14 @@ def import_assets(file):
                 "folder": GLOBAL_FOLDER_ID,
                 "type": asset_type,
             }
-            res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
+            res = requests.post(
+                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
+            )
             if res.status_code != 201:
-                click.echo("❌ something went wrong")
+                click.echo("❌ something went wrong", err=True)
                 print(res.json())
             else:
-                print(f"✅ {name} created")
+                print(f"✅ {name} created", file=sys.stderr)
 
 
 @click.command()
@@ -196,12 +203,14 @@ def import_controls(file):
                 "csf_function": csf_function.lower(),
                 "category": category.lower(),
             }
-            res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
+            res = requests.post(
+                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
+            )
             if res.status_code != 201:
-                click.echo("❌ something went wrong")
+                click.echo("❌ something went wrong", err=True)
                 print(res.json())
             else:
-                print(f"✅ {name} created")
+                print(f"✅ {name} created", file=sys.stderr)
 
 
 @click.command()
@@ -226,12 +235,14 @@ def evidences_templates(file):
                 "applied_controls": [],
                 "requirement_assessments": [],
             }
-            res = requests.post(url, json=data, headers=headers, verify=VERIFY_CERTIFICATE)
+            res = requests.post(
+                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
+            )
             if res.status_code != 201:
-                click.echo("❌ something went wrong")
+                click.echo("❌ something went wrong", err=True)
                 print(res.json())
             else:
-                print(f"✅ {row['name']} created")
+                print(f"✅ {row['name']} created", file=sys.stderr)
 
 
 @click.command()
@@ -245,14 +256,16 @@ def upload_evidence(file, name):
     }
     # Get evidence ID by name
     url = f"{API_URL}/evidences/"
-    res = requests.get(url, headers=headers, params={"name": name}, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        url, headers=headers, params={"name": name}, verify=VERIFY_CERTIFICATE
+    )
     data = res.json()
     if res.status_code != 200:
         print(data)
-        print(f"Error: check credentials or filename.")
+        print(f"Error: check credentials or filename.", file=sys.stderr)
         return
     if not data["results"]:
-        print(f"Error: No evidence found with name '{name}'")
+        print(f"Error: No evidence found with name '{name}'", file=sys.stderr)
         return
 
     evidence_id = data["results"][0]["id"]
