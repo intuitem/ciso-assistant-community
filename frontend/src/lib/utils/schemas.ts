@@ -125,6 +125,7 @@ export const AppliedControlSchema = baseNamedObject({
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
+	start_date: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
