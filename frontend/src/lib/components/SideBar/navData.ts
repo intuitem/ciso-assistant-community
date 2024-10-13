@@ -95,7 +95,7 @@ export const navData = {
 			]
 		},
 		{
-			name: 'actions',
+			name: 'operations',
 			items: [
 				{
 					name: 'appliedControls',
@@ -107,6 +107,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
 					permissions: ['view_appliedcontrol', 'view_riskacceptance', 'view_riskassessment']
+				},
+				{
+					name: 'xRays',
+					fa_icon: 'fa-solid fa-bolt',
+					href: '/x-rays',
+					permissions: ['view_riskassessment', 'view_assessment']
 				}
 			]
 		},
@@ -120,10 +126,15 @@ export const navData = {
 					permissions: ['view_appliedcontrol']
 				},
 				{
-					name: 'xRays',
-					fa_icon: 'fa-solid fa-bolt',
-					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_assessment']
+					name: 'riskAcceptances',
+					fa_icon: 'fa-solid fa-signature',
+					href: '/risk-acceptances'
+				},
+				{
+					name: 'libraries',
+					fa_icon: 'fa-solid fa-folder-plus',
+					href: '/libraries',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				}
 			]
 		},
@@ -139,11 +150,6 @@ export const navData = {
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'
-				},
-				{
-					name: 'riskAcceptances',
-					fa_icon: 'fa-solid fa-signature',
-					href: '/risk-acceptances'
 				},
 				{
 					name: 'scoringAssistant',
@@ -164,7 +170,7 @@ export const navData = {
 				},
 				{
 					name: 'evidences',
-					fa_icon: 'fa-solid fa-file',
+					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'
 				}
 			]
@@ -203,12 +209,6 @@ export const navData = {
 					fa_icon: 'fa-brands fa-searchengin',
 					href: '/x-rays/inspect',
 					permissions: ['view_riskassessment', 'view_assessment']
-				},
-				{
-					name: 'libraries',
-					fa_icon: 'fa-solid fa-folder-plus',
-					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				},
 				{
 					name: 'backupRestore',

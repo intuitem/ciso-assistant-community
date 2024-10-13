@@ -81,6 +81,7 @@ export function localItems(): LocalItems {
 		context: m.context(),
 		catalog: m.catalog(),
 		actions: m.actions(),
+		operations: m.operations(),
 		governance: m.governance(),
 		risk: m.risk(),
 		compliance: m.compliance(),
