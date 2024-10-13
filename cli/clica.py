@@ -217,8 +217,8 @@ def import_controls(file):
 @click.option(
     "--file", required=True, help="Path of the csv file with the list of evidences"
 )
-def evidences_templates(file):
-    """Create evidences templates. Check the samples for format."""
+def import_evidences(file):
+    """Import evidences. Check the samples for format."""
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
 
@@ -248,7 +248,7 @@ def evidences_templates(file):
 @click.command()
 @click.option("--file", required=True, help="Path to the attachment to upload")
 @click.option("--name", required=True, help="Name of the evidence")
-def upload_evidence(file, name):
+def upload_attachment(file, name):
     """Upload attachment as evidence"""
 
     headers = {
@@ -260,6 +260,7 @@ def upload_evidence(file, name):
         url, headers=headers, params={"name": name}, verify=VERIFY_CERTIFICATE
     )
     data = res.json()
+    print(data)
     if res.status_code != 200:
         print(data)
         print(f"Error: check credentials or filename.", file=sys.stderr)
@@ -287,8 +288,8 @@ cli.add_command(get_folders)
 cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
-cli.add_command(evidences_templates)
+cli.add_command(import_evidences)
 cli.add_command(init_config)
-cli.add_command(upload_evidence)
+cli.add_command(upload_attachment)
 if __name__ == "__main__":
     cli()
