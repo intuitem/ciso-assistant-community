@@ -97,7 +97,7 @@ test('user usual routine actions are working correctly', async ({
 	});
 
 	await test.step('user can create an applied control', async () => {
-		await sideBar.click('Actions', pages.appliedControlsPage.url);
+		await sideBar.click('Operations', pages.appliedControlsPage.url);
 		await pages.appliedControlsPage.hasUrl();
 		await pages.appliedControlsPage.hasTitle();
 
@@ -223,7 +223,7 @@ test('user usual routine actions are working correctly', async ({
 	});
 
 	await test.step('user can create a risk acceptance', async () => {
-		await sideBar.click('Risk', pages.riskAcceptancesPage.url);
+		await sideBar.click('Governance', pages.riskAcceptancesPage.url);
 		await pages.riskAcceptancesPage.hasUrl();
 		await pages.riskAcceptancesPage.hasTitle();
 
