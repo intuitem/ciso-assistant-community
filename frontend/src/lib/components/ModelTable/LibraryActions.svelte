@@ -3,6 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 	import * as m from '$paraglide/messages';
+	import { page } from '$app/stores';
 
 	export let meta: any;
 	export let actionsURLModel: string;
@@ -46,7 +47,7 @@
 				/>
 			</svg>
 		</div>
-	{:else}
+	{:else if $page.data.user.is_admin}
 		<span class="hover:text-primary-500">
 			<form
 				method="post"

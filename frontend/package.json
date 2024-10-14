@@ -79,6 +79,8 @@
 		"@fortawesome/fontawesome-free": "^6.6.0",
 		"@inlang/paraglide-js-adapter-vite": "^1.2.40",
 		"@inlang/paraglide-sveltekit": "0.11.0",
+		"@unovis/svelte": "1.4.3-beta.0",
+		"@unovis/ts": "1.4.3-beta.0",
 		"dotenv": "^16.4.5",
 		"echarts": "^5.5.1",
 		"globals": "^15.11.0",
