@@ -672,7 +672,11 @@
 	"tableMode": "Modo de tabla",
 	"owner": "Titular",
 	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo.",
+	"licenseSeats": "Asientos de licencia",
+	"licenseExpiration": "Caducidad de la licencia",
+	"licenseExpiredMessage": "Su licencia ha expirado. Las operaciones de escritura están deshabilitadas. Comuníquese con su administrador para renovarla.",
 	"backupLoadingError": "Se produjo un error al cargar la copia de seguridad.",
 	"backupGreaterVersionError": "No se puede cargar la copia de seguridad, la versión de la copia de seguridad es superior a la versión actual de la aplicación.",
-	"backupLowerVersionError": "Se produjo un error, la versión de respaldo puede ser demasiado antigua, si es así debe actualizarse antes de volver a intentarlo."
+	"backupLowerVersionError": "Se produjo un error, la versión de respaldo puede ser demasiado antigua, si es así debe actualizarse antes de volver a intentarlo.",
+	"errorLicenseSeatsExceeded": "Se ha excedido la cantidad de asientos de editor permitidos por su licencia; no podrá otorgar derechos de edición a este usuario. Comuníquese con su administrador."
 }
