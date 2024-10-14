@@ -48,9 +48,10 @@
 {#if data.table}
 	<div class="shadow-lg">
 		{#key URLModel}
+			{@debug URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
-					{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(URLModel)}
+					{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
 						<button
 							class="btn variant-filled-primary self-end"
 							data-testid="add-button"
@@ -73,6 +74,10 @@
 					{:else if URLModel === 'frameworks'}
 						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
 							><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
+						>
+					{:else if URLModel === 'requirement-mapping-sets'}
+						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+							><i class="fa-solid fa-file-import mr-2" />{m.importMappings()}</a
 						>
 					{/if}
 				</div>
