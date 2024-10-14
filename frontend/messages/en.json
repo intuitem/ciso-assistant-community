@@ -178,6 +178,7 @@
 	"noObservation": "No observation",
 	"importMatrices": "Import matrices",
 	"importFrameworks": "Import frameworks",
+	"importMappings": "Import mappings",
 	"summary": "Summary",
 	"composer": "Composer",
 	"statistics": "Statistics",
