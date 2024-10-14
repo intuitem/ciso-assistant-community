@@ -5,25 +5,34 @@ import tempfile
 import uuid
 import zipfile
 from datetime import date, datetime, timedelta
+import time
+import pytz
 from typing import Any, Tuple
 from uuid import UUID
+from itertools import cycle
 
 import django_filters as df
-from django.conf import settings
-from django.contrib.auth.models import Permission
+from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+
+from django.contrib.auth.models import Permission
+from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse
 from django.middleware import csrf
 from django.template.loader import render_to_string
-from django.utils.decorators import method_decorator
 from django.utils.functional import Promise
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 from django_filters.rest_framework import DjangoFilterBackend
+from iam.models import Folder, RoleAssignment, UserGroup
 from rest_framework import filters, permissions, status, viewsets
+from django.utils.translation import gettext_lazy as _
 from rest_framework.decorators import (
     action,
     api_view,
@@ -37,6 +46,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+
 from weasyprint import HTML
 
 from core.helpers import *
@@ -47,7 +57,6 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
-from iam.models import Folder, RoleAssignment, User, UserGroup
 
 from .models import *
 from .serializers import *
@@ -631,6 +640,18 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response({"results": "risk assessment duplicated"})
 
 
+def convert_date_to_timestamp(date):
+    """
+    Converts a date object (datetime.date) to a Linux timestamp.
+    It creates a datetime object for the date at midnight and makes it timezone-aware.
+    """
+    if date:
+        date_as_datetime = datetime.combine(date, datetime.min.time())
+        aware_datetime = pytz.UTC.localize(date_as_datetime)
+        return int(time.mktime(aware_datetime.timetuple())) * 1000
+    return None
+
+
 class AppliedControlViewSet(BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
@@ -776,6 +797,122 @@ class AppliedControlViewSet(BaseModelViewSet):
                 row += [owners]
             writer.writerow(row)
         return response
+
+    @action(detail=False, methods=["get"])
+    def get_controls_info(self, request):
+        nodes = list()
+        links = list()
+        for ac in AppliedControl.objects.all():
+            related_items_count = 0
+            for ca in ComplianceAssessment.objects.filter(
+                requirement_assessments__applied_controls=ac
+            ).distinct():
+                audit_coverage = (
+                    RequirementAssessment.objects.filter(compliance_assessment=ca)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += audit_coverage
+                links.append(
+                    {
+                        "source": ca.id,
+                        "target": ac.id,
+                        "coverage": audit_coverage,
+                    }
+                )
+            for ra in RiskAssessment.objects.filter(
+                risk_scenarios__applied_controls=ac
+            ).distinct():
+                risk_coverage = (
+                    RiskScenario.objects.filter(risk_assessment=ra)
+                    .filter(applied_controls=ac)
+                    .count()
+                )
+                related_items_count += risk_coverage
+                links.append(
+                    {
+                        "source": ra.id,
+                        "target": ac.id,
+                        "coverage": risk_coverage,
+                    }
+                )
+            nodes.append(
+                {
+                    "id": ac.id,
+                    "label": ac.name,
+                    "shape": "hexagon",
+                    "counter": related_items_count,
+                    "color": "#47e845",
+                }
+            )
+        for audit in ComplianceAssessment.objects.all():
+            nodes.append(
+                {
+                    "id": audit.id,
+                    "label": audit.name,
+                    "shape": "circle",
+                    "color": "#5D4595",
+                }
+            )
+        for ra in RiskAssessment.objects.all():
+            nodes.append(
+                {
+                    "id": ra.id,
+                    "label": ra.name,
+                    "shape": "square",
+                    "color": "#E6499F",
+                }
+            )
+        return Response(
+            {
+                "nodes": nodes,
+                "links": links,
+            }
+        )
+
+    @action(detail=False, methods=["get"])
+    def get_timeline_info(self, request):
+        entries = []
+        COLORS_PALETTE = [
+            "#F72585",
+            "#7209B7",
+            "#3A0CA3",
+            "#4361EE",
+            "#4CC9F0",
+            "#A698DC",
+        ]
+        colorMap = {}
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+
+        applied_controls = AppliedControl.objects.filter(
+            id__in=viewable_controls_ids
+        ).select_related("folder")
+
+        for ac in applied_controls:
+            if ac.eta:
+                endDate = convert_date_to_timestamp(ac.eta)
+                startDate = (
+                    convert_date_to_timestamp(ac.start_date)
+                    if ac.start_date
+                    else endDate
+                )
+                entries.append(
+                    {
+                        "startDate": startDate,
+                        "endDate": endDate,
+                        "name": ac.name,
+                        "description": ac.description
+                        if ac.description
+                        else "(no description)",
+                        "domain": ac.folder.name,
+                    }
+                )
+        color_cycle = cycle(COLORS_PALETTE)
+        for domain in Folder.objects.all():
+            colorMap[domain.name] = next(color_cycle)
+        return Response({"entries": entries, "colorMap": colorMap})
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -1385,7 +1522,7 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "applied_controls", "requirement_assessments"]
+    filterset_fields = ["folder", "applied_controls", "requirement_assessments", "name"]
     search_fields = ["name"]
     ordering_fields = ["name", "description"]
 
@@ -1639,6 +1776,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+
+    @action(
+        detail=True,
+        methods=["post"],
+        name="Send compliance assessment by mail to authors",
+    )
+    def mailing(self, request, pk):
+        instance = self.get_object()
+        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+            for author in instance.authors.all():
+                try:
+                    author.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="compliance-assessments",
+                        object_id=instance.id,
+                    )
+                except Exception as primary_exception:
+                    logger.error(
+                        f"Failed to send email to {author}: {primary_exception}"
+                    )
+                    raise ValidationError(
+                        {"error": ["An error occurred while sending the email"]}
+                    )
+            return Response({"results": "mail sent"})
+        raise ValidationError({"warning": ["noMailerConfigured"]})
 
     def perform_create(self, serializer):
         """

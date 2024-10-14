@@ -30,7 +30,7 @@
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.deleteForm,
+				_form: data.attachmentDeleteForm,
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('evidences').urlModel,
