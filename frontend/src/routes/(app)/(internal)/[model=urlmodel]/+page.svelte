@@ -48,7 +48,6 @@
 {#if data.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			{@debug URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
 					{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
