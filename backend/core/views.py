@@ -591,12 +591,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     )
     def duplicate(self, request, pk):
         def duplicate_related_objects(
-        scenario, duplicate_scenario, target_folder, field_name, model_class
+            scenario, duplicate_scenario, target_folder, field_name, model_class
         ):
             """
-            Duplicates related objects (e.g., controls, threats, assets) from a source scenario to a duplicate scenario, 
+            Duplicates related objects (e.g., controls, threats, assets) from a source scenario to a duplicate scenario,
             ensuring that objects are not duplicated if they already exist in the/a target/parent domain (folder).
-            
+
             Parameters:
             - scenario (object): The source scenario containing the related objects to be duplicated.
             - duplicate_scenario (object): The duplicate scenario where the objects will be added.
@@ -604,28 +604,27 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             - field_name (str): The field name representing the related objects to duplicate in the scenario.
             - model_class (class): The model class of the related objects to be processed.
             """
-            
+
             # Get parent folders of the target folder
             target_parent_folders = target_folder.get_parent_folders()
-            
+
             # Fetch all related objects for the given field name
             related_objects = getattr(scenario, field_name).all()
-            
+
             for obj in related_objects:
                 # Check if an object with the same name already exists in the target folder
                 existing_obj = model_class.objects.filter(
-                    name=obj.name, 
-                    folder=target_folder
+                    name=obj.name, folder=target_folder
                 ).first()
 
                 if existing_obj:
                     # If the object already exists in the targer folder, add the existing one to the duplicate scenario
                     getattr(duplicate_scenario, field_name).add(existing_obj)
-                
+
                 elif obj.folder in target_parent_folders:
                     # If the object's folder is a parent of the targert folder, add the object to the duplicate scenario
                     getattr(duplicate_scenario, field_name).add(obj)
-                
+
                 else:
                     # If the object doesn't exist, duplicate the object
                     duplicate_obj = obj
@@ -680,10 +679,18 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     AppliedControl,
                 )
                 duplicate_related_objects(
-                    scenario, duplicate_scenario, duplicate_risk_assessment.project.folder, "threats", Threat
+                    scenario,
+                    duplicate_scenario,
+                    duplicate_risk_assessment.project.folder,
+                    "threats",
+                    Threat,
                 )
                 duplicate_related_objects(
-                    scenario, duplicate_scenario, duplicate_risk_assessment.project.folder, "assets", Asset
+                    scenario,
+                    duplicate_scenario,
+                    duplicate_risk_assessment.project.folder,
+                    "assets",
+                    Asset,
                 )
 
                 if (
