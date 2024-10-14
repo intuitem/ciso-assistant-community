@@ -66,6 +66,15 @@
 <TextField
 	type="date"
 	{form}
+	field="start_date"
+	label={m.startDate()}
+	helpText={m.startDateHelpText()}
+	cacheLock={cacheLocks['start_date']}
+	bind:cachedValue={formDataCache['start_date']}
+/>
+<TextField
+	type="date"
+	{form}
 	field="eta"
 	label={m.eta()}
 	helpText={m.etaHelpText()}
