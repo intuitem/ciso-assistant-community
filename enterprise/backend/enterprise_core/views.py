@@ -15,6 +15,7 @@ from django.conf import settings
 
 from core.views import BaseModelViewSet
 from iam.models import User
+from tprm.models import Entity
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -38,6 +39,19 @@ class ClientSettingsViewSet(BaseModelViewSet):
             {"detail": "Client settings object cannot be deleted."},
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if instance.name:
+            main_entity = Entity.get_main_entity()
+            logger.info(
+                "Updating main entity name", entity=main_entity, name=instance.name
+            )
+            main_entity.name = instance.name
+            main_entity.save()
+            logger.info(
+                "Main entity name updated", entity=main_entity, name=instance.name
+            )
 
     @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def info(self, request):
