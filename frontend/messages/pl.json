@@ -709,7 +709,11 @@
 	"tableMode": "Tryb tabeli",
 	"owner": "Właściciel",
 	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko.",
+	"licenseSeats": "Miejsca na licencję",
+	"licenseExpiration": "Wygaśnięcie licencji",
+	"licenseExpiredMessage": "Twoja licencja wygasła. Operacje zapisu są wyłączone. Skontaktuj się z administratorem, aby ją odnowić.",
 	"backupLoadingError": "Wystąpił błąd podczas ładowania kopii zapasowej.",
 	"backupGreaterVersionError": "Nie można załadować kopii zapasowej. Wersja kopii zapasowej jest nowsza niż bieżąca wersja aplikacji.",
-	"backupLowerVersionError": "Wystąpił błąd. Wersja kopii zapasowej może być za stara. Jeśli tak, należy ją zaktualizować przed ponowną próbą."
+	"backupLowerVersionError": "Wystąpił błąd. Wersja kopii zapasowej może być za stara. Jeśli tak, należy ją zaktualizować przed ponowną próbą.",
+	"errorLicenseSeatsExceeded": "Liczba miejsc redaktora dozwolona przez Twoją licencję została przekroczona, nie będziesz mógł przyznać praw do edycji temu użytkownikowi. Skontaktuj się z administratorem."
 }

@@ -672,7 +672,11 @@
 	"tableMode": "Modalità tabella",
 	"owner": "Proprietario",
 	"waitingRiskAcceptances": "Ciao! Al momento hai {number} rischi{s} in attesa di accettazione. Puoi trovarli nella scheda rischi.",
+	"licenseSeats": "Posti di licenza",
+	"licenseExpiration": "Scadenza della licenza",
+	"licenseExpiredMessage": "La tua licenza è scaduta. Le operazioni di scrittura sono disabilitate. Contatta il tuo amministratore per rinnovarla.",
 	"backupLoadingError": "Si è verificato un errore durante il caricamento del backup.",
 	"backupGreaterVersionError": "Impossibile caricare il backup, la versione del backup è successiva alla versione corrente dell'applicazione.",
-	"backupLowerVersionError": "Si è verificato un errore, la versione di backup potrebbe essere troppo vecchia. In tal caso, è necessario aggiornarla prima di riprovare."
+	"backupLowerVersionError": "Si è verificato un errore, la versione di backup potrebbe essere troppo vecchia. In tal caso, è necessario aggiornarla prima di riprovare.",
+	"errorLicenseSeatsExceeded": "Il numero di postazioni di modifica consentite dalla tua licenza è stato superato, non potrai concedere diritti di modifica a questo utente. Contatta il tuo amministratore."
 }
