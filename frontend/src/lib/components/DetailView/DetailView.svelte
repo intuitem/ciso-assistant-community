@@ -231,71 +231,72 @@
 			{/if}
 		</div>
 	{/if}
-	<div class="card px-6 py-4 bg-white flex flex-row space-y-2 justify-between shadow-lg">
-		<div class="flex flex-col space-y-2 whitespace-pre-line">
-			{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
-				<div class="flex flex-col">
-					<div
-						class="text-sm font-medium text-gray-800"
-						data-testid="{key.replace('_', '-')}-field-title"
-					>
-						{safeTranslate(key)}
-					</div>
-					<ul class="text-sm">
-						<li
-							class="text-gray-600 list-none"
-							data-testid={!(value instanceof Array)
-								? key.replace('_', '-') + '-field-value'
-								: null}
-						>
-							{#if value !== null && value !== undefined && value !== ''}
-								{#if key === 'library'}
-									{@const itemHref = `/libraries/${value.id}?loaded`}
-									<a href={itemHref} class="anchor">{value.name}</a>
-								{:else if Array.isArray(value)}
-									{#if Object.keys(value).length > 0}
-										<ul>
-											{#each value as val}
-												<li data-testid={key.replace('_', '-') + '-field-value'}>
-													{#if val.str && val.id}
-														{@const itemHref = `/${
-															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel
-														}/${val.id}`}
-														<a href={itemHref} class="anchor">{val.str}</a>
-													{:else}
-														{value}
-													{/if}
-												</li>
-											{/each}
-										</ul>
+	<div class="card shadow-lg bg-white flex flex-row p-4 justify-between">
+		<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-sm w-3/4">
+			<dl class="-my-3 divide-y divide-gray-100 text-sm">
+				{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					<div class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium text-gray-900" data-testid="{key.replace('_', '-')}-field-title">
+							{safeTranslate(key)}
+						</dt>
+						<dd class="text-gray-700 sm:col-span-2">
+							<ul class="">
+								<li
+									class="list-none"
+									data-testid={!(value instanceof Array)
+										? key.replace('_', '-') + '-field-value'
+										: null}
+								>
+									{#if value !== null && value !== undefined && value !== ''}
+										{#if key === 'library'}
+											{@const itemHref = `/libraries/${value.id}?loaded`}
+											<a href={itemHref} class="anchor">{value.name}</a>
+										{:else if Array.isArray(value)}
+											{#if Object.keys(value).length > 0}
+												<ul>
+													{#each value as val}
+														<li data-testid={key.replace('_', '-') + '-field-value'}>
+															{#if val.str && val.id}
+																{@const itemHref = `/${
+																	URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																		(item) => item.field === key
+																	)?.urlModel
+																}/${val.id}`}
+																<a href={itemHref} class="anchor">{val.str}</a>
+															{:else}
+																{value}
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											{:else}
+												--
+											{/if}
+										{:else if value.id}
+											{@const itemHref = `/${
+												URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+													(item) => item.field === key
+												)?.urlModel
+											}/${value.id}`}
+											<a href={itemHref} class="anchor">{value.str}</a>
+										{:else if isURL(value) && !value.startsWith('urn')}
+											<a href={value} target="_blank" class="anchor">{value}</a>
+										{:else if ISO_8601_REGEX.test(value)}
+											{formatDateOrDateTime(value, languageTag())}
+										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+											{safeTranslate((value.str || value.name) ?? value)}
+										{:else}
+											{(value.str || value.name) ?? value}
+										{/if}
 									{:else}
 										--
 									{/if}
-								{:else if value.id}
-									{@const itemHref = `/${
-										URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-											(item) => item.field === key
-										)?.urlModel
-									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
-								{:else if isURL(value) && !value.startsWith('urn')}
-									<a href={value} target="_blank" class="anchor">{value}</a>
-								{:else if ISO_8601_REGEX.test(value)}
-									{formatDateOrDateTime(value, languageTag())}
-								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
-									{safeTranslate((value.str || value.name) ?? value)}
-								{:else}
-									{(value.str || value.name) ?? value}
-								{/if}
-							{:else}
-								--
-							{/if}
-						</li>
-					</ul>
-				</div>
-			{/each}
+								</li>
+							</ul>
+						</dd>
+					</div>
+				{/each}
+			</dl>
 		</div>
 		<div class="">
 			{#if mailing}
