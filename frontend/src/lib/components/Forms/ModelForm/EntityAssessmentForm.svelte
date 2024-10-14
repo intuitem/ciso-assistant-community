@@ -151,6 +151,16 @@
 <AutocompleteSelect
 	{form}
 	multiple
+	options={getOptions({ objects: model.foreignKeys['representatives'], label: 'email' })}
+	field="representatives"
+	helpText={m.entityAssessmentRepresentativesHelpText()}
+	cacheLock={cacheLocks['representatives']}
+	bind:cachedValue={formDataCache['representatives']}
+	label={m.representatives()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
 	options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
 	field="reviewers"
 	cacheLock={cacheLocks['reviewers']}
@@ -177,6 +187,7 @@
 	cacheLock={cacheLocks['evidence']}
 	bind:cachedValue={formDataCache['evidence']}
 	label={m.evidence()}
+	helpText={m.entityAssessmentEvidenceHelpText()}
 />
 <Select
 	{form}
@@ -194,6 +205,6 @@
 	bind:cachedValue={formDataCache['observation']}
 />
 <!-- <Score {form} label={m.penetration()} field="penetration" always_enabled={true} inversedColors fullDonut max_score={5} />
-		<Score {form} label={m.dependency()} field="dependency" always_enabled={true} inversedColors fullDonut max_score={5} />
-		<Score {form} label={m.maturity()} field="maturity" always_enabled={true} inversedColors fullDonut max_score={5} />
-		<Score {form} label={m.trust()} field="trust" always_enabled={true} inversedColors fullDonut max_score={5} /> -->
+<Score {form} label={m.dependency()} field="dependency" always_enabled={true} inversedColors fullDonut max_score={5} />
+<Score {form} label={m.maturity()} field="maturity" always_enabled={true} inversedColors fullDonut max_score={5} />
+<Score {form} label={m.trust()} field="trust" always_enabled={true} inversedColors fullDonut max_score={5} /> -->

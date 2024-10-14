@@ -23,6 +23,17 @@
             {% if node.assessments.requirement.description %}
                 <div class='text-left w-full'>{{ node.assessments.requirement.get_description_translated }}</div>
             {% endif %}
+            {% if node.assessments.answer %}
+                {% for question in node.assessments.answer.questions %}
+                    <div class='text-left w-full'><p class="font-semibold">{{ question.text }}</p>
+                        {% if question.answer %}
+                            <span style="color: indigo;">{{ question.answer }}</span>
+                        {% else %}
+                            <span style="color: gray;"> {% trans "No answer" %}</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
             {% if node.assessments.observation %}
                 <div class='text-left w-full'><p class="font-semibold">{% trans "Observation:" %}<p> {{ node.assessments.observation }}</div>
             {% endif %}

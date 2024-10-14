@@ -23,3 +23,4 @@ pre-commit==3.8.0
 django-allauth[saml]==64.2.1
 django-allauth==64.2.1
 python-magic==0.4.27
+pytz==2024.2
