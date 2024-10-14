@@ -1,4 +1,4 @@
-import secureRedirectRule from './secure-redirect';
+import secureRedirectRule from './secure-redirect.js';
 
 const plugin = {
 	meta: {
