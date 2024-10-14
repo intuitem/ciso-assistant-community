@@ -688,7 +688,7 @@
 	"referenceLink": "Reference link",
 	"mission": "Mission",
 	"ownedFolders": "Owned domains",
-	"thirdParty": "Third party",
+	"thirdParty": "Third parties",
 	"entityAssessment": "Entity assessment",
 	"entityAssessments": "Entity assessments",
 	"addEntityAssessment": "Add entity assessment",
@@ -757,6 +757,11 @@
 	"theFollowingControlsWillBeAddedColon": "The following controls will be added:",
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
+	"experimental": "Experimental",
+	"timeline": "Timeline",
+	"graph": "Graph",
+	"startDate": "Start date",
+	"startDateHelpText": "Start date (useful for timeline)",
 	"backupLoadingError": "An error occurred while loading the backup.",
 	"backupGreaterVersionError": "Can't load the backup, the version of the backup is higher than the current version of your application.",
 	"backupLowerVersionError": "An error occurred, the backup version may be too old, if so it must be updated before retrying.",
@@ -766,5 +771,8 @@
 	"noMailerConfigured": "No mailer configured",
 	"errorLicenseSeatsExceeded": "The number of license seats is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator.",
 	"availableSeats": "Available seats",
-	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator"
+	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator",
+	"catalog": "Catalog",
+	"actions": "Actions",
+	"operations": "Operations"
 }
