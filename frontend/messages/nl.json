@@ -672,7 +672,11 @@
 	"tableMode": "Tabelmodus",
 	"owner": "Eigenaar",
 	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het tabblad risico.",
+	"licenseSeats": "Licentieplaatsen",
+	"licenseExpiration": "Licentie verloopt",
+	"licenseExpiredMessage": "Uw licentie is verlopen. Schrijfbewerkingen zijn uitgeschakeld. Neem contact op met uw beheerder om deze te verlengen.",
 	"backupLoadingError": "Er is een fout opgetreden tijdens het laden van de back-up.",
 	"backupGreaterVersionError": "De back-up kan niet worden geladen. De versie van de back-up is hoger dan de huidige versie van uw applicatie.",
-	"backupLowerVersionError": "Er is een fout opgetreden. Mogelijk is de back-upversie te oud. Als dat zo is, moet u deze bijwerken voordat u het opnieuw probeert."
+	"backupLowerVersionError": "Er is een fout opgetreden. Mogelijk is de back-upversie te oud. Als dat zo is, moet u deze bijwerken voordat u het opnieuw probeert.",
+	"errorLicenseSeatsExceeded": "Het aantal editor seats dat is toegestaan door uw licentie is overschreden, u kunt deze gebruiker geen bewerkingsrechten meer verlenen. Neem contact op met uw beheerder."
 }
