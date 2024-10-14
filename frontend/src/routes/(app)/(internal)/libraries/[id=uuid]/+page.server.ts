@@ -1,9 +1,9 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { safeTranslate } from '$lib/utils/i18n';
+import { localItems } from '$lib/utils/locales';
+import * as m from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import * as m from '$paraglide/messages';
-import { localItems } from '$lib/utils/locales';
-import { languageTag } from '$paraglide/runtime';
 
 export const actions: Actions = {
 	load: async (event) => {
@@ -12,7 +12,7 @@ export const actions: Actions = {
 		if (!res.ok) {
 			const response = await res.json();
 			console.error('server response:', response);
-			setFlash({ type: 'error', message: response.error }, event);
+			setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 			return fail(400, { error: m.errorLoadingLibrary() });
 		}
 		setFlash(
