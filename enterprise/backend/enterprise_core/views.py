@@ -1,9 +1,10 @@
-import os
 from datetime import datetime
 
 import magic
 import structlog
+from core.views import BaseModelViewSet
 from django.conf import settings
+from iam.models import User
 from rest_framework import status
 from rest_framework.decorators import (
     action,
@@ -14,11 +15,6 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from core.views import BaseModelViewSet
-
-from core.views import BaseModelViewSet
-from iam.models import User
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
