@@ -4,7 +4,6 @@ from datetime import datetime
 import magic
 import structlog
 from django.conf import settings
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import (
     action,
@@ -154,7 +153,7 @@ class LicenseStatusView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        now = timezone.now()
+        now = datetime.now()
 
         if expiry_date > now:
             days_left = (expiry_date - now).days
