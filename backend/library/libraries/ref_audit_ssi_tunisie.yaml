@@ -1,0 +1,1302 @@
+urn: urn:intuitem:risk:library:referentiel-audit-SSI-ANCS-Tunisie
+locale: fr
+ref_id: "R\xE9ferenti-d'Audit-SSI (ANCS Tunisie) "
+name: "R\xE9f\xE9rentiel d\u2019Audit de la S\xE9curit\xE9 des Syst\xE8mes d\u2019\
+  Information (ANCS Tunisie) "
+description: "Le pr\xE9sent document d\xE9taille les crit\xE8res par rapport auxquels\
+  \ l\u2019audit est r\xE9alis\xE9 conform\xE9ment aux exigences du d\xE9cret-loi\
+  \ 2023-17, \xE0 l\u2019arr\xEAt\xE9 du ministre des technologies de la communication\
+  \ du 12 Septembre 2023, fixant les crit\xE8res techniques d'audit et les modalit\xE9\
+  s de suivi de la mise en \u0153uvre des recommandations contenues dans le rapport\
+  \ d'audit, et \xE0 l\u2019arr\xEAt\xE9 du ministre des technologies de la communication\
+  \ et de l'\xE9conomie num\xE9rique et du ministre du d\xE9veloppement, de l\u2019\
+  investissement et de la coop\xE9ration internationale du 01 Octobre 2019, fixant\
+  \ le cahier des charges relatif \xE0 l'exercice de l\u2019activit\xE9 d\u2019audit\
+  \ dans le domaine de la s\xE9curit\xE9 de l\u2019information.\nLe pr\xE9sent document\
+  \ est un document de r\xE9f\xE9rence pour :\n- Les experts auditeurs qui r\xE9alisent\
+  \ les missions d\u2019audit, pour les accompagner \xE0 conduire la\nmission conform\xE9\
+  ment aux exigences du pr\xE9sent r\xE9f\xE9rentiel\n- Les audit\xE9s, b\xE9n\xE9\
+  ficiaires de la mission d\u2019audit, pour assurer un meilleur suivi de ladite\n\
+  mission.\nLien du Document :\nhttps://www.ancs.tn/sites/default/files/Referentiel_Audit%203.1.pdf"
+copyright: Public
+version: 1
+provider: ANCS Tunisie
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:referentiel-audit-SSI-ANCS-Tunisie
+    ref_id: "R\xE9ferenti-d'Audit-SSI (ANCS Tunisie) "
+    name: "R\xE9f\xE9rentiel d\u2019Audit de la S\xE9curit\xE9 des Syst\xE8mes d\u2019\
+      Information (ANCS Tunisie) "
+    description: "Le pr\xE9sent document d\xE9taille les crit\xE8res par rapport auxquels\
+      \ l\u2019audit est r\xE9alis\xE9 conform\xE9ment aux exigences du d\xE9cret-loi\
+      \ 2023-17, \xE0 l\u2019arr\xEAt\xE9 du ministre des technologies de la communication\
+      \ du 12 Septembre 2023, fixant les crit\xE8res techniques d'audit et les modalit\xE9\
+      s de suivi de la mise en \u0153uvre des recommandations contenues dans le rapport\
+      \ d'audit, et \xE0 l\u2019arr\xEAt\xE9 du ministre des technologies de la communication\
+      \ et de l'\xE9conomie num\xE9rique et du ministre du d\xE9veloppement, de l\u2019\
+      investissement et de la coop\xE9ration internationale du 01 Octobre 2019, fixant\
+      \ le cahier des charges relatif \xE0 l'exercice de l\u2019activit\xE9 d\u2019\
+      audit dans le domaine de la s\xE9curit\xE9 de l\u2019information.\nLe pr\xE9\
+      sent document est un document de r\xE9f\xE9rence pour :\n- Les experts auditeurs\
+      \ qui r\xE9alisent les missions d\u2019audit, pour les accompagner \xE0 conduire\
+      \ la\nmission conform\xE9ment aux exigences du pr\xE9sent r\xE9f\xE9rentiel\n\
+      - Les audit\xE9s, b\xE9n\xE9ficiaires de la mission d\u2019audit, pour assurer\
+      \ un meilleur suivi de ladite\nmission.\nLien du Document :\nhttps://www.ancs.tn/sites/default/files/Referentiel_Audit%203.1.pdf "
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "Contr\xF4les de s\xE9curit\xE9 organisationnels"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.1'
+      name: "Politiques de s\xE9curit\xE9 de l\u2019information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.1
+      description: "Une politique de s\xE9curit\xE9 de l\u2019information et des politiques\
+        \ sp\xE9cifiques doivent \xEAtre d\xE9finies, approuv\xE9es par la direction,\
+        \ publi\xE9es, communiqu\xE9es au personnel et aux parties int\xE9ress\xE9\
+        es concern\xE9s avec demande de confirmation et r\xE9vis\xE9es \xE0 intervalles\
+        \ planifi\xE9s et si des changements significatifs ont lieu."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.2'
+      name: "Fonctions et responsabilit\xE9s li\xE9es \xE0 la s\xE9curit\xE9 de l\u2019\
+        information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.2
+      description: "Les fonctions et les responsabilit\xE9s li\xE9es \xE0 la s\xE9\
+        curit\xE9 de l\u2019information doivent \xEAtre d\xE9finies et attribu\xE9\
+        es selon les besoins de l\u2019organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.3'
+      name: "S\xE9paration des t\xE2ches"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.3
+      description: "Les t\xE2ches et les domaines de responsabilit\xE9 incompatibles\
+        \ doivent \xEAtre cloisonn\xE9s pour \xE9viter qu\u2019une personne ne puisse\
+        \ r\xE9aliser seule des t\xE2ches potentiellement incompatibles."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.4'
+      name: "Responsabilit\xE9s de la direction"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.4
+      description: "La direction doit demander \xE0 tout le personnel d\u2019appliquer\
+        \ les mesures de s\xE9curit\xE9 de l\u2019information conform\xE9ment \xE0\
+        \ la politique de s\xE9curit\xE9 de l'information, aux politiques sp\xE9cifiques\
+        \ et aux proc\xE9dures \xE9tablies de l'organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.5'
+      name: "Contacts avec les autorit\xE9s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.5
+      description: "Le contact avec les autorit\xE9s appropri\xE9es doit \xEAtre \xE9\
+        tabli et maintenu."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.6'
+      name: "Contacts avec des groupes d\u2019int\xE9r\xEAt sp\xE9cifique"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.6
+      description: "Des contacts avec des groupes d\u2019int\xE9r\xEAt sp\xE9cifiques,\
+        \ des forums sp\xE9cialis\xE9s dans la s\xE9curit\xE9 et des associations\
+        \ professionnelles doivent \xEAtre \xE9tablis et maintenus."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.7'
+      name: Renseignements sur les menaces
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.7
+      description: "Les informations relatives aux menaces de s\xE9curit\xE9 de l'information\
+        \ doivent \xEAtre collect\xE9es et analys\xE9es pour produire les renseignements\
+        \ sur les menaces."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.8'
+      name: "S\xE9curit\xE9 de l'information dans la gestion de projet"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.8
+      description: "La s\xE9curit\xE9 de l'information doit \xEAtre int\xE9gr\xE9\
+        e dans la gestion de projet."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.9'
+      name: "Inventaire des informations et autres actifs associ\xE9s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.9
+      description: "Un inventaire des informations et autres actifs associ\xE9s, y\
+        \ compris leurs propri\xE9taires doit \xEAtre \xE9labor\xE9 et tenu \xE0 jour."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.10'
+      name: "Utilisation correcte des informations et autres actifs associ\xE9s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.10
+      description: "Les r\xE8gles d'utilisation correcte et les proc\xE9dures de traitement\
+        \ des informations et autres actifs associ\xE9s doivent \xEAtre identifi\xE9\
+        es, document\xE9es et mises en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.11'
+      name: Restitution des actifs
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.11
+      description: "Le personnel et les autres parties int\xE9ress\xE9es doivent restituer\
+        \ tous les actifs de l\u2019organisme qui sont en leur possession au moment\
+        \ du changement ou de la fin de leur emploi, contrat ou accord."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.12'
+      name: Classification des Informations
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node26
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.12
+      description: "Les informations doivent \xEAtre classifi\xE9es conform\xE9ment\
+        \ aux besoins de s\xE9curit\xE9 de l'information de l'organisme en termes\
+        \ d\u2019exigences de confidentialit\xE9, d'int\xE9grit\xE9, de disponibilit\xE9\
+        \ et des exigences importantes des parties int\xE9ress\xE9es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.13'
+      name: 'Marquage des informations '
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node28
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.13
+      description: "Un ensemble appropri\xE9 de proc\xE9dures pour le marquage des\
+        \ informations doit \xEAtre \xE9labor\xE9 et mis en \u0153uvre conform\xE9\
+        ment au sch\xE9ma de classification adopt\xE9 par l\u2019organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.14'
+      name: Transfert des informations
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node30
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.14
+      description: "Des r\xE8gles, proc\xE9dures ou accords sur le transfert des informations\
+        \ doivent \xEAtre mises en place pour tous types de moyens de transfert au\
+        \ sein de l'organisme et entre l'organisme et des tierces parties."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.15'
+      name: "Contr\xF4le d'acc\xE8s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node32
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.15
+      description: "Des r\xE8gles visant \xE0 contr\xF4ler l'acc\xE8s physique et\
+        \ logique aux informations et autres actifs associ\xE9s en fonction des exigences\
+        \ m\xE9tier et de s\xE9curit\xE9 de l'information doivent \xEAtre d\xE9finis\
+        \ et mis en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.16'
+      name: "Gestion des identit\xE9s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node34
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.16
+      description: "Le cycle de vie complet des identit\xE9s doit \xEAtre g\xE9r\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.17'
+      name: Informations d'authentification
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node36
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.17
+      description: "L\u2019attribution et la gestion des informations secr\xE8tes\
+        \ d\u2019authentification doivent \xEAtre contr\xF4l\xE9es par un processus\
+        \ de gestion, incluant des recommandations au personnel sur l\u2019utilisation\
+        \ appropri\xE9e des informations d\u2019authentification."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.18'
+      name: "Droits d'acc\xE8s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node38
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.18
+      description: "Les droits d'acc\xE8s aux informations et autres actifs associ\xE9\
+        s doivent \xEAtre pourvus, r\xE9vis\xE9s, modifi\xE9s et supprim\xE9s conform\xE9\
+        ment \xE0 la politique sp\xE9cifique au contr\xF4le d'acc\xE8s et aux r\xE8\
+        gles de contr\xF4le d'acc\xE8s de l'organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.19'
+      name: "S\xE9curit\xE9 de l'information dans les relations avec les fournisseurs"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node40
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.19
+      description: "Des processus et proc\xE9dures pour g\xE9rer les risques de s\xE9\
+        curit\xE9 de l'information qui sont associ\xE9s \xE0 l'utilisation des produits\
+        \ ou services du fournisseur doivent \xEAtre d\xE9finis et mis en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.20'
+      name: "La s\xE9curit\xE9 de l'information dans les accords conclus avec les\
+        \ fournisseurs"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node42
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.20
+      description: "Les exigences de s\xE9curit\xE9 de l'information appropri\xE9\
+        es doivent \xEAtre mises en place et convenues avec chaque fournisseur, selon\
+        \ le type de relation avec le fournisseur."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.21'
+      name: "Gestion de la s\xE9curit\xE9 de l'information dans la cha\xEEne d'approvisionnem\
+        \ ent TIC"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node44
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.21
+      description: "Des processus et proc\xE9dures pour g\xE9rer les risques de s\xE9\
+        curit\xE9 de l'information associ\xE9s \xE0 la cha\xEEne d'approvisionnement\
+        \ des produits et services TIC doivent \xEAtre d\xE9finis et mis en \u0153\
+        uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.22'
+      name: "Surveillance, r\xE9vision et gestion des changements des services fournisseurs"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node46
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.22
+      description: "L\u2019organisme doit proc\xE9der r\xE9guli\xE8rement \xE0 la\
+        \ surveillance, \xE0 la r\xE9vision, \xE0 l\u2019\xE9valuation et \xE0 la\
+        \ gestion des changements des pratiques de s\xE9curit\xE9 de l\u2019information\
+        \ du fournisseur et de prestation de services"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.23'
+      name: "S\xE9curit\xE9 de l'information dans l'utilisation de services en nuage"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node48
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.23
+      description: "Les processus d'acquisition, d'utilisation, de gestion et de cessation\
+        \ des services en nuage doivent \xEAtre \xE9tablis conform\xE9ment aux exigences\
+        \ de s\xE9curit\xE9 de l'information de l'organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.24'
+      name: "Planification et pr\xE9paration de la gestion des incidents de s\xE9\
+        curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node50
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.24
+      description: "L'organisme doit planifier et pr\xE9parer la gestion des incidents\
+        \ de s\xE9curit\xE9 de l'information en proc\xE9dant \xE0 la d\xE9finition,\
+        \ \xE0 l'\xE9tablissement et \xE0 la communication des processus, fonctions\
+        \ et responsabilit\xE9s li\xE9s \xE0 la gestion des incidents de s\xE9curit\xE9\
+        \ de l'information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.25'
+      name: "\xC9valuation des \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
+        \ et prise de d\xE9cision"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node52
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.25
+      description: "Les \xE9v\xE9nements de s\xE9curit\xE9 de l\u2019information doivent\
+        \ \xEAtre \xE9valu\xE9s et il doit \xEAtre d\xE9cid\xE9 s\u2019il faut les\
+        \ cat\xE9goriser comme des incidents de s\xE9curit\xE9 de l\u2019information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.26'
+      name: "R\xE9ponse aux incidents de s\xE9curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node54
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.26
+      description: "Les incidents li\xE9s \xE0 la s\xE9curit\xE9 de l\u2019information\
+        \ doivent \xEAtre trait\xE9s conform\xE9ment aux proc\xE9dures document\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.27'
+      name: "Tirer des enseignements des incidents de s\xE9curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node56
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.27
+      description: "Les connaissances recueillies suite \xE0 l\u2019analyse et la\
+        \ r\xE9solution d\u2019incidents doivent \xEAtre utilis\xE9es pour r\xE9duire\
+        \ la probabilit\xE9 ou l\u2019impact d\u2019incidents ult\xE9rieurs."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.28
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.28'
+      name: Collecte des preuves
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node58
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.28
+      description: "L\u2019organisme doit d\xE9finir et appliquer des proc\xE9dures\
+        \ d\u2019identification, de collecte, d\u2019acquisition et de protection\
+        \ de l\u2019information pouvant servir de preuve."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.29
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.29'
+      name: "S\xE9curit\xE9 de l'information pendant une perturbation"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node60
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.29
+      description: "L\u2019organisme doit planifier comment maintenir la s\xE9curit\xE9\
+        \ de l\u2019information au niveau appropri\xE9 pendant une perturbation."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.30
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.30'
+      name: "Pr\xE9paration des TIC pour la continuit\xE9 d'activit\xE9"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node62
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.30
+      description: "La pr\xE9paration des TIC doit \xEAtre planifi\xE9e, mise en \u0153\
+        uvre, maintenue et test\xE9e en se basant sur les objectifs de continuit\xE9\
+        \ d'activit\xE9 et des exigences de continuit\xE9 des TIC."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.31
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.31'
+      name: "Exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node64
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.31
+      description: "Les exigences l\xE9gales, statutaires, r\xE9glementaires et contractuelles\
+        \ pertinentes pour la s\xE9curit\xE9 de l\u2019information, ainsi que l'approche\
+        \ de l'organisme pour respecter ces exigences, doivent \xEAtre identifi\xE9\
+        es, document\xE9es et tenues \xE0 jour."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.32
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.32'
+      name: "Droits de propri\xE9t\xE9 Intellectuelle"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node66
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.32
+      description: "Des proc\xE9dures appropri\xE9es doivent \xEAtre mises en \u0153\
+        uvre pour garantir la conformit\xE9 avec les exigences l\xE9gales, r\xE9glementaires\
+        \ et contractuelles relatives \xE0 la propri\xE9t\xE9 intellectuelle et \xE0\
+        \ l\u2019usage des licences de logiciels propri\xE9taires."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.33
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.33'
+      name: Protection des enregistrements
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node68
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.33
+      description: "Les enregistrements doivent \xEAtre prot\xE9g\xE9s de la perte,\
+        \ de la destruction, de la falsification, des acc\xE8s non autoris\xE9s et\
+        \ des diffusions non autoris\xE9es, conform\xE9ment aux exigences l\xE9gales,\
+        \ r\xE9glementaires, contractuelles et aux exigences m\xE9tier."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.34
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.34'
+      name: "Protection de la vie priv\xE9e et des DCP"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node70
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.34
+      description: "les exigences relatives \xE0 la protection de la vie priv\xE9\
+        e et des DCP doivent \xEAtre identifi\xE9es et respect\xE9es conform\xE9ment\
+        \ \xE0 la l\xE9gislation, aux r\xE9glementations et aux clauses contractuelles\
+        \ applicables."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.35
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.35'
+      name: "R\xE9vision ind\xE9pendante de la s\xE9curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node72
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.35
+      description: "Des revues r\xE9guli\xE8res et ind\xE9pendantes de l\u2019approche\
+        \ retenue par l\u2019organisme pour g\xE9rer et mettre en \u0153uvre la s\xE9\
+        curit\xE9 de l\u2019information (\xE0 savoir le suivi des objectifs de s\xE9\
+        curit\xE9, les mesures, les politiques, les proc\xE9dures et les processus\
+        \ relatifs \xE0 la s\xE9curit\xE9 de l\u2019information) doivent \xEAtre effectu\xE9\
+        es \xE0 intervalles d\xE9finis ou lorsque des changements importants sont\
+        \ intervenus."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.36
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.36'
+      name: "Conformit\xE9 aux politiques, r\xE8gles et normes de s\xE9curit\xE9 de\
+        \ l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node74
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.36
+      description: "La conformit\xE9 \xE0 la politique de s\xE9curit\xE9 de l'information,\
+        \ aux politiques sp\xE9cifiques, aux r\xE8gles et aux normes de l'organisme\
+        \ doit \xEAtre r\xE9guli\xE8rement v\xE9rifi\xE9e."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.37
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5
+      ref_id: '5.37'
+      name: "Proc\xE9dures d\u2019exploitation Document\xE9es"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node76
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:5.37
+      description: "Les proc\xE9dures d\u2019exploitation doivent \xEAtre document\xE9\
+        es et mises \xE0 disposition de tous les utilisateurs concern\xE9s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "Contr\xF4les de s\xE9curit\xE9 applicables aux personnes"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.1'
+      name: "S\xE9lection des candidats"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node79
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.1
+      description: "Des v\xE9rifications doivent \xEAtre effectu\xE9es sur tous les\
+        \ candidats \xE0 l\u2019embauche conform\xE9ment aux lois, aux r\xE8glements\
+        \ et \xE0 l\u2019\xE9thique et \xEAtre proportionn\xE9es aux exigences m\xE9\
+        tier, \xE0 la classification des informations accessibles et aux risques identifi\xE9\
+        s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.2'
+      name: Termes et conditions du contrat de travail
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node81
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.2
+      description: "Les contrats de travail doivent pr\xE9ciser les responsabilit\xE9\
+        s du personnel et celles de l\u2019organisme en mati\xE8re de s\xE9curit\xE9\
+        \ de l\u2019information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.3'
+      name: "Sensibilisation, enseignement et formation en s\xE9curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node83
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.3
+      description: "L\u2019ensemble des salari\xE9s de l\u2019organisme et les parties\
+        \ int\xE9ress\xE9es doit b\xE9n\xE9ficier d\u2019une sensibilisation, d\u2019\
+        un enseignement et des formations en s\xE9curit\xE9 de l\u2019information\
+        \ appropri\xE9s et recevoir r\xE9guli\xE8rement les mises \xE0 jour des politiques\
+        \ et proc\xE9dures de l\u2019organisme s\u2019appliquant \xE0 leurs fonctions."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.4'
+      name: Processus disciplinaire
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node85
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.4
+      description: "Un processus disciplinaire formel et communiqu\xE9 doit exister\
+        \ pour prendre des mesures \xE0 l\u2019encontre du personnel et d\u2019autres\
+        \ parties int\xE9ress\xE9es qui ont commis une violation de la politique de\
+        \ s\xE9curit\xE9 de l'information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.5'
+      name: "Responsabilit\xE9s apr\xE8s la fin ou le changement d\u2019un emploi"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node87
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.5
+      description: "Les responsabilit\xE9s et les obligations li\xE9es \xE0 la s\xE9\
+        curit\xE9 de l\u2019information qui restent valables apr\xE8s la fin ou le\
+        \ changement d\u2019un emploi doivent \xEAtre d\xE9finies, appliqu\xE9es et\
+        \ communiqu\xE9es au personnel et autres parties int\xE9ress\xE9es pertinents."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.6'
+      name: "Accords de confidentialit\xE9 ou de non- divulgation"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node89
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.6
+      description: "Les exigences en mati\xE8re d\u2019accords de confidentialit\xE9\
+        \ ou de non-divulgation, doivent \xEAtre identifi\xE9es, document\xE9es v\xE9\
+        rifi\xE9es r\xE9guli\xE8rement et sign\xE9es par le personnel et les autres\
+        \ parties int\xE9ress\xE9es pertinentes conform\xE9ment aux besoins de l\u2019\
+        organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.7'
+      name: "Travail \xE0 distance"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node91
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.7
+      description: "Des mesures de s\xE9curit\xE9 doivent \xEAtre mises en \u0153\
+        uvre lorsque le personnel travaille \xE0 distance, pour prot\xE9ger les informations\
+        \ accessibles, trait\xE9es ou stock\xE9es en dehors des locaux de l'audit\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6
+      ref_id: '6.8'
+      name: "D\xE9claration des \xE9v\xE9nements de s\xE9curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node93
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:6.8
+      description: "L'organisme doit fournir un m\xE9canisme au personnel pour d\xE9\
+        clarer rapidement les \xE9v\xE9nements de s\xE9curit\xE9 de l'information\
+        \ observ\xE9s ou suspect\xE9s, \xE0 travers des canaux appropri\xE9s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: "Contr\xF4les de s\xE9curit\xE9 physique"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.1'
+      name: "P\xE9rim\xE8tres de s\xE9curit\xE9 physique"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node96
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.1
+      description: "Des p\xE9rim\xE8tres de s\xE9curit\xE9 Description doivent \xEA\
+        tre d\xE9finis et utilis\xE9s pour prot\xE9ger les zones contenant les informations\
+        \ et autres actifs associ\xE9s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.2'
+      name: "Les entr\xE9es physiques"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node98
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.2
+      description: "Les zones s\xE9curis\xE9es doivent \xEAtre prot\xE9g\xE9es par\
+        \ des mesures de s\xE9curit\xE9 des acc\xE8s et des points d'acc\xE8s appropri\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.3'
+      name: "S\xE9curisation des bureaux, des salles et des installations"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node100
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.3
+      description: "Des mesures de s\xE9curit\xE9 physique pour les bureaux, les salles\
+        \ et les installations doivent \xEAtre con\xE7ues et mises en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.4'
+      name: "Surveillance de la s\xE9curit\xE9 physique"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node102
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.4
+      description: "Les locaux doivent \xEAtre continuellement surveill\xE9s pour\
+        \ emp\xEAcher l'acc\xE8s physique non autoris\xE9."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.5'
+      name: Protection contre les menaces physiques et environnementales
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node104
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.5
+      description: "Une protection contre les menaces physiques et environnementales\
+        \ telles que les catastrophes naturelles et autres menaces physiques, intentionnelles\
+        \ ou non intentionnelles, impactant l\u2019infrastructure doit \xEAtre con\xE7\
+        ue et mise en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.6'
+      name: "Travail dans les zones S\xE9curis\xE9es"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node106
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.6
+      description: "Des proc\xE9dures pour le travail dans les zones s\xE9curis\xE9\
+        es doivent \xEAtre con\xE7ues et appliqu\xE9es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.7'
+      name: "Bureau vide et \xE9cran vide"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node108
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.7
+      description: "Les r\xE8gles du bureau vide, d\xE9gag\xE9 des documents papier\
+        \ et des supports de stockage amovibles, et les r\xE8gles de l'\xE9cran vide\
+        \ pour les moyens de traitement de l'information doivent \xEAtre d\xE9finies\
+        \ et appliqu\xE9es de mani\xE8re appropri\xE9e."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.8'
+      name: "Emplacement et protection du mat\xE9riel"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node110
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.8
+      description: "Un emplacement s\xE9curis\xE9 pour le mat\xE9riel doit \xEAtre\
+        \ choisi et prot\xE9g\xE9."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.9'
+      name: "S\xE9curit\xE9 des actifs hors des locaux"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node112
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.9
+      description: "Des mesures de s\xE9curit\xE9 doivent \xEAtre appliqu\xE9es aux\
+        \ actifs hors des locaux de l\u2019organisme pour les prot\xE9ger."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.10'
+      name: Supports de stockage
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node114
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.10
+      description: "Les supports de stockage doivent \xEAtre g\xE9r\xE9s tout au long\
+        \ de leur cycle de vie d'acquisition, d'utilisation, de transport et de mise\
+        \ au rebut conform\xE9ment au sch\xE9ma de classification et aux exigences\
+        \ de traitement de l'organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.11'
+      name: Services supports
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node116
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.11
+      description: "Les moyens de traitement de l\u2019information doivent \xEAtre\
+        \ prot\xE9g\xE9s contre coupures de courant et autres perturbations caus\xE9\
+        es par des d\xE9faillances des services supports."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.12'
+      name: "S\xE9curit\xE9 du c\xE2blage"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node118
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.12
+      description: "Les c\xE2bles \xE9lectriques transportant des donn\xE9es ou supportant\
+        \ les services d\u2019information doivent \xEAtre prot\xE9g\xE9s contre des\
+        \ interceptions, interf\xE9rences ou dommages."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.13'
+      name: "Maintenance du mat\xE9riel"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node120
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.13
+      description: "Le mat\xE9riel doit \xEAtre entretenu correctement pour assurer\
+        \ la disponibilit\xE9, l\u2019int\xE9grit\xE9 et la confidentialit\xE9 de\
+        \ l\u2019information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7
+      ref_id: '7.14'
+      name: "\xC9limination ou recyclage s\xE9curis\xE9(e) du mat\xE9riel"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node122
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:7.14
+      description: "Tous les composants des mat\xE9riels contenant des supports de\
+        \ stockage doivent \xEAtre v\xE9rifi\xE9s pour s\u2019assurer que toute donn\xE9\
+        e sensible a bien \xE9t\xE9 supprim\xE9e et que tout logiciel sous licence\
+        \ a bien \xE9t\xE9 d\xE9sinstall\xE9 ou \xE9cras\xE9 de fa\xE7on s\xE9curis\xE9\
+        e, avant leur mise au rebut ou leur r\xE9utilisation."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: "Contr\xF4les de s\xE9curit\xE9 technologiques"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.1'
+      name: Terminaux finaux des utilisateurs
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node125
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.1
+      description: "Les informations stock\xE9es, trait\xE9es ou accessibles via les\
+        \ terminaux finaux des utilisateurs, doivent \xEAtre prot\xE9g\xE9es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.2'
+      name: "Droits d'acc\xE8s privil\xE9gi\xE9s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node127
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.2
+      description: "L\u2019attribution et l\u2019utilisation des droits d\u2019acc\xE8\
+        s privil\xE9gi\xE9s doivent \xEAtre limit\xE9es et g\xE9r\xE9es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.3'
+      name: "Restrictions d'acc\xE8s aux informations"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node129
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.3
+      description: "L\u2019acc\xE8s \xE0 l\u2019information et aux fonctions d\u2019\
+        application syst\xE8me doit \xEAtre restreint conform\xE9ment \xE0 la politique\
+        \ de contr\xF4le d\u2019acc\xE8s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.4'
+      name: "Acc\xE8s aux codes source"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node131
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.4
+      description: "L'acc\xE8s en lecture et en \xE9criture au code source, aux outils\
+        \ de d\xE9veloppement et aux biblioth\xE8ques de logiciels doit \xEAtre g\xE9\
+        r\xE9 de mani\xE8re appropri\xE9e."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.5'
+      name: "Authentification s\xE9curis\xE9e"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node133
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.5
+      description: "Des technologies et proc\xE9dures d'authentification s\xE9curis\xE9\
+        e sur la base des restrictions d'acc\xE8s aux informations et de la politique\
+        \ de contr\xF4le d'acc\xE8s doivent \xEAtre mises en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.6'
+      name: Dimensionnement
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node135
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.6
+      description: "L'utilisation des ressources doit \xEAtre surveill\xE9e et ajust\xE9\
+        e selon les besoins de dimensionnement actuels et pr\xE9vus."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.7'
+      name: Protection contre les programmes malveillants (malware)
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node137
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.7
+      description: "une protection contre les programmes malveillants doit \xEAtre\
+        \ mise en \u0153uvre et renforc\xE9e par une sensibilisation appropri\xE9\
+        e des utilisateurs."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.8'
+      name: "Gestion des vuln\xE9rabilit\xE9s techniques"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node139
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.8
+      description: "Des informations sur les vuln\xE9rabilit\xE9s techniques des syst\xE8\
+        mes d\u2019information utilis\xE9s doivent \xEAtre obtenues, l\u2019exposition\
+        \ de l\u2019organisme \xE0 ces vuln\xE9rabilit\xE9s doit \xEAtre \xE9valu\xE9\
+        e et des mesures appropri\xE9es doivent \xEAtre prises."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.9'
+      name: Gestion des configurations
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node141
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.9
+      description: "Les configurations, y compris les configurations de s\xE9curit\xE9\
+        , du mat\xE9riel, des logiciels, des services et des r\xE9seaux doivent \xEA\
+        tre d\xE9finies, document\xE9es, mises en \u0153uvre, surveill\xE9es et r\xE9\
+        vis\xE9es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.10'
+      name: Suppression des informations
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node143
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.10
+      description: "Les informations stock\xE9es dans les syst\xE8mes d\u2019information,\
+        \ les terminaux ou tout autre support de stockage, doivent \xEAtre supprim\xE9\
+        es lorsqu\u2019elles ne sont plus n\xE9cessaires."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.11'
+      name: "Masquage des donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node145
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.11
+      description: "Le masquage des donn\xE9es doit \xEAtre utilis\xE9 conform\xE9\
+        ment \xE0 la politique de contr\xF4le d'acc\xE8s de l'organisme et d\u2019\
+        autres politiques sp\xE9cifiques associ\xE9es, ainsi qu'aux exigences m\xE9\
+        tier, tout en prenant en compte la l\xE9gislation applicable."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.12'
+      name: "Pr\xE9vention de la fuite de donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node147
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.12
+      description: "Des mesures de pr\xE9vention de la fuite de donn\xE9es doivent\
+        \ \xEAtre appliqu\xE9es aux syst\xE8mes, aux r\xE9seaux et \xE0 tous les autres\
+        \ terminaux qui traitent, stockent ou transmettent des informations sensibles."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.13'
+      name: Sauvegarde des informations
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node149
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.13
+      description: "Des copies de sauvegarde de l\u2019information, des logiciels\
+        \ et des syst\xE8mes doivent \xEAtre r\xE9alis\xE9es et test\xE9es r\xE9guli\xE8\
+        rement conform\xE9ment \xE0 une politique de sauvegarde convenue."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.14'
+      name: Redondance des moyens de traitement de l'information
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node151
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.14
+      description: "Des moyens de traitement de l'information doivent \xEAtre mis\
+        \ en \u0153uvre avec suffisamment de redondances pour r\xE9pondre aux exigences\
+        \ de disponibilit\xE9."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.15'
+      name: Journalisation
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node153
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.15
+      description: "Les journaux qui enregistrent les activit\xE9s, les exceptions,\
+        \ les pannes et autres \xE9v\xE9nements pertinents doivent \xEAtre g\xE9n\xE9\
+        r\xE9s, conserv\xE9s, prot\xE9g\xE9s et analys\xE9s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.16'
+      name: "Activit\xE9s de surveillance"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node155
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.16
+      description: "les r\xE9seaux, syst\xE8mes et applications doivent \xEAtre surveill\xE9\
+        s pour d\xE9tecter les comportements anormaux et des mesures appropri\xE9\
+        es doivent \xEAtre prises pour \xE9valuer les \xE9ventuels incidents de s\xE9\
+        curit\xE9 de l'information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.17'
+      name: Synchronisation des Horloges
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node157
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.17
+      description: "Les horloges des syst\xE8mes de traitement de l'information utilis\xE9\
+        s par l'organisme doivent \xEAtre synchronis\xE9es avec des sources de temps\
+        \ approuv\xE9es"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.18'
+      name: "Utilisation de programmes utilitaires \xE0 privil\xE8ges"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node159
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.18
+      description: "L'utilisation des programmes utilitaires ayant la capacit\xE9\
+        \ de contourner les mesures de s\xE9curit\xE9 des syst\xE8mes ou des applications\
+        \ doit \xEAtre limit\xE9e et contr\xF4l\xE9e \xE9troitement."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.19'
+      name: "Installation de logiciels sur des syst\xE8mes op\xE9rationnels"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node161
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.19
+      description: "Des proc\xE9dures et des mesures doivent \xEAtre mises en \u0153\
+        uvre pour g\xE9rer de mani\xE8re s\xE9curis\xE9e l'installation de logiciels\
+        \ sur les syst\xE8mes op\xE9rationnels."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.20'
+      name: "S\xE9curit\xE9 des r\xE9seaux"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node163
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.20
+      description: "Les r\xE9seaux et les terminaux r\xE9seau doivent \xEAtre s\xE9\
+        curis\xE9s, g\xE9r\xE9s et contr\xF4l\xE9s pour prot\xE9ger les informations\
+        \ des syst\xE8mes et des applications."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.21'
+      name: "S\xE9curit\xE9 des services R\xE9seau"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node165
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.21
+      description: "Les m\xE9canismes de s\xE9curit\xE9, les niveaux de service et\
+        \ les exigences de services des services r\xE9seau doivent \xEAtre identifi\xE9\
+        s, mis en \u0153uvre et surveill\xE9s."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.22'
+      name: "Cloisonnement des r\xE9seaux"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node167
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.22
+      description: "Les groupes de services d'information, d'utilisateurs et de syst\xE8\
+        mes d'information doivent \xEAtre cloisonn\xE9s dans les r\xE9seaux de l'organisme."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.23'
+      name: Filtrage web
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node169
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.23
+      description: "L'acc\xE8s aux sites web externes doit \xEAtre g\xE9r\xE9 pour\
+        \ r\xE9duire l'exposition aux contenus malveillants."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.24'
+      name: Utilisation de la cryptographie
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node171
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.24
+      description: "Des r\xE8gles pour l'utilisation efficace de la cryptographie,\
+        \ notamment la gestion des cl\xE9s cryptographiques, doivent \xEAtre d\xE9\
+        finies et mises en \u0153uvre."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.25'
+      name: "Cycle de vie de d\xE9veloppement s\xE9curis\xE9"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node173
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.25
+      description: "Des r\xE8gles pour le d\xE9veloppement s\xE9curis\xE9 des logiciels\
+        \ et des syst\xE8mes doivent \xEAtre \xE9tablies et appliqu\xE9es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.26'
+      name: "Exigences de s\xE9curit\xE9 des applications"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node175
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.26
+      description: "Les exigences de s\xE9curit\xE9 de l'information doivent \xEA\
+        tre identifi\xE9es, sp\xE9cifi\xE9es et approuv\xE9es lors du d\xE9veloppement\
+        \ ou de l\u2019acquisition d'applications"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.27'
+      name: "Principes d'ing\xE9nierie et d'architecture des syst\xE8mes s\xE9curis\xE9\
+        s"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node177
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.27
+      description: "Des principes d\u2019ing\xE9nierie de la s\xE9curit\xE9 des syst\xE8\
+        mes doivent \xEAtre \xE9tablis, document\xE9s, tenus \xE0 jour et appliqu\xE9\
+        s \xE0 toutes les activit\xE9s de d\xE9veloppement de syst\xE8mes d\u2019\
+        information."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.28
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.28'
+      name: "Codage s\xE9curis\xE9"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node179
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.28
+      description: "Des principes de codage s\xE9curis\xE9 doivent \xEAtre appliqu\xE9\
+        s au d\xE9veloppement de logiciels."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.29
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.29'
+      name: "Tests de s\xE9curit\xE9 dans le d\xE9veloppement et l'acceptation"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node181
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.29
+      description: "Des processus pour les tests de s\xE9curit\xE9 doivent \xEAtre\
+        \ d\xE9finis et mis en \u0153uvre au cours du cycle de vie de d\xE9veloppement."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.30
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.30'
+      name: "D\xE9veloppement externalis\xE9"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node183
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.30
+      description: "les activit\xE9s relatives au d\xE9veloppement externalis\xE9\
+        \ des syst\xE8mes doivent \xEAtre dirig\xE9es, contr\xF4l\xE9es et v\xE9rifi\xE9\
+        es."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.31
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.31'
+      name: "S\xE9paration des environnements de d\xE9veloppement, de test et op\xE9\
+        rationnels"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node185
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.31
+      description: "Les environnements de d\xE9veloppement, de test et op\xE9rationnels\
+        \ doivent \xEAtre s\xE9par\xE9s et s\xE9curis\xE9s pour r\xE9duire les risques\
+        \ d\u2019acc\xE8s ou de changements non autoris\xE9s dans l\u2019environnement\
+        \ op\xE9rationnel."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.32
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.32'
+      name: Gestion des changements
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node187
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.32
+      description: "Les changements apport\xE9s aux moyens de traitement de l'information\
+        \ et aux syst\xE8mes d'information doivent \xEAtre soumis \xE0 des proc\xE9\
+        dures de gestion des changements."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.33
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.33'
+      name: Informations de test
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node189
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.33
+      description: "Les informations de test doivent \xEAtre s\xE9lectionn\xE9es avec\
+        \ soin, prot\xE9g\xE9es et g\xE9r\xE9es de mani\xE8re appropri\xE9e."
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.34
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8
+      ref_id: '8.34'
+      name: "Protection des syst\xE8mes d'information pendant les tests d'audit"
+    - urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:node191
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:referentiel-audit-SSI-ANCS-Tunisie:8.34
+      description: "Les tests d'audit et les autres activit\xE9s d'assurance impliquant\
+        \ l\u2019\xE9valuation des syst\xE8mes op\xE9rationnels devraient \xEAtre\
+        \ planifi\xE9s et convenus entre le testeur et le niveau appropri\xE9 du management."
