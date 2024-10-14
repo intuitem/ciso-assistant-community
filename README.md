@@ -87,7 +87,7 @@ and run the starter script
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ## End-user Documentation
 
@@ -167,7 +167,6 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 
 <br/>
 
-
 > [!NOTE]
 > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
@@ -245,8 +244,10 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 
 - Python 3.11+
 - pip 20.3+
+- poetry 1.8+
 - node 18+
 - npm 10.2+
+- pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
 
 ### Running the backend
@@ -317,23 +318,14 @@ export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes)
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
-3. Choose the tool of your choice, either python-venv or virtualenv. For example:
+3. Install poetry
 
-```sh
-# Install python-venv
-sudo apt install python-venv # or python3-venv
-# Create the virtual environment venv
-python -m venv venv # or python3 -m venv venv
-# To enter inside the virtual environment
-source venv/bin/activate
-# If you want to exit the virtual environment once finished
-deactivate
-```
+Visit the poetry website for instructions: https://python-poetry.org/docs/#installation
 
 4. Install required dependencies.
 
 ```sh
-pip install -r requirements.txt
+poetry install
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -357,7 +349,7 @@ pre-commit install
 7. Apply migrations.
 
 ```sh
-python manage.py migrate
+poetry run python manage.py migrate
 ```
 
 8. Create a Django superuser, that will be CISO Assistant administrator.
@@ -365,13 +357,13 @@ python manage.py migrate
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-python manage.py createsuperuser
+poetry run python manage.py createsuperuser
 ```
 
 9. Run development server.
 
 ```sh
-python manage.py runserver
+poetry run python manage.py runserver
 ```
 
 10. Configure the git hooks for generating the build name.
@@ -393,13 +385,14 @@ cd frontend
 2. Install dependencies
 
 ```bash
-npm install
+npm install -g pnpm
+pnpm install
 ```
 
 3. Start a development server (make sure that the django app is running)
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 4. Reach the frontend on <http://localhost:5173>
@@ -413,7 +406,7 @@ All variables in the frontend have handy default values.
 
 If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
 
-When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
+When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
 
 ### Managing migrations
 
@@ -431,8 +424,8 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-python manage.py makemigrations
-python manage.py migrate
+poetry run python manage.py makemigrations
+poetry run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
@@ -462,12 +455,12 @@ To interact with it:
 
 ## Setting CISO Assistant for production
 
-The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
+The docker-compose-prod.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
 Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
-> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "npm run dev", which should not be a worry for production.
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!

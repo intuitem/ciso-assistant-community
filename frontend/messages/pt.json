@@ -674,5 +674,8 @@
 	"observationSemiColon": "Observação:",
 	"tableMode": "Modo de tabela",
 	"owner": "Proprietário",
-	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco."
+	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco.",
+	"backupLoadingError": "Ocorreu um erro ao carregar o backup.",
+	"backupGreaterVersionError": "Não é possível carregar o backup, a versão do backup é superior à versão atual do seu aplicativo.",
+	"backupLowerVersionError": "Ocorreu um erro, a versão de backup pode ser muito antiga. Se for o caso, ela deve ser atualizada antes de tentar novamente."
 }
