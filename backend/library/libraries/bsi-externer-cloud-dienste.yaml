@@ -7,7 +7,7 @@ description: "Das Bundesamt f\xFCr Sicherheit in der Informationstechnik (BSI) M
   \ auf der Grundlage des \xA7 8 Absatz 1 BSIG im Benehmen mit den Ressorts. Als gesetzliche\
   \ Vorgabe definieren Mindeststandards somit ein verbindliches Mindestniveau f\xFC\
   r die Informationssicherheit. \nnach \xA7 8 Absatz 1 Satz 1 BSIG \u2013 Version\
-  \ 2.1 vom 15.12.2022\nHere is the link to the document :\nhttps://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
+  \ 2.1 vom 15.12.2022\nLink : https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
 copyright: BSI
 version: 1
 provider: BSI
@@ -22,8 +22,7 @@ objects:
       \ fest. Dies erfolgt auf der Grundlage des \xA7 8 Absatz 1 BSIG im Benehmen\
       \ mit den Ressorts. Als gesetzliche Vorgabe definieren Mindeststandards somit\
       \ ein verbindliches Mindestniveau f\xFCr die Informationssicherheit. \nnach\
-      \ \xA7 8 Absatz 1 Satz 1 BSIG \u2013 Version 2.1 vom 15.12.2022\nHere is the\
-      \ link to the document :\nhttps://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
+      \ \xA7 8 Absatz 1 Satz 1 BSIG \u2013 Version 2.1 vom 15.12.2022\nLink : https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01
       assessable: false
