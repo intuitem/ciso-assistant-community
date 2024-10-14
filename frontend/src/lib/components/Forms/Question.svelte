@@ -19,7 +19,7 @@
 		errors && errors.length > 0 ? 'input-error' : '';
 	let questionLabel =
 		$value.questions.length > 1
-			? `${$value.questions.length} ${m.questionPlurial()}`
+			? `${$value.questions.length} ${m.questionPlural()}`
 			: `1 ${m.questionSingular()}`;
 </script>
 
