@@ -59,3 +59,8 @@ export function create(context) {
 		}
 	};
 }
+
+export default {
+	meta,
+	create
+};
