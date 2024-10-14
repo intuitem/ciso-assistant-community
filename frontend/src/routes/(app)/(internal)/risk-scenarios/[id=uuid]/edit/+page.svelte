@@ -189,7 +189,11 @@
 				<AutocompleteSelect
 					{form}
 					multiple
-					options={getOptions({ objects: data.foreignKeys['threats'] })}
+					options={getOptions({
+						objects: data.foreignKeys['threats'],
+						extra_fields: [['folder', 'str']],
+						label: 'auto'
+					})}
 					field="threats"
 					label={m.threats()}
 				/>
@@ -200,7 +204,11 @@
 				<AutocompleteSelect
 					multiple
 					{form}
-					options={getOptions({ objects: data.foreignKeys['assets'] })}
+					options={getOptions({
+						objects: data.foreignKeys['assets'],
+						extra_fields: [['folder', 'str']],
+						label: 'auto'
+					})}
 					field="assets"
 					label={m.assets()}
 					helpText={m.riskScenarioAssetHelpText()}
@@ -268,7 +276,10 @@
 					<AutocompleteSelect
 						multiple
 						{form}
-						options={getOptions({ objects: data.foreignKeys['applied_controls'] })}
+						options={getOptions({
+							objects: data.foreignKeys['applied_controls'],
+							extra_fields: [['folder', 'str']]
+						})}
 						field="applied_controls"
 						label={m.appliedControls()}
 					/>
