@@ -363,7 +363,7 @@
 	"librariesStore": "Bibliotheksladen",
 	"currentlyNoLoadedLibraries": "Sie haben derzeit keine geladenen Bibliotheken",
 	"loadingLibraryUploadButton": "Bibliotheks-Upload-Button wird geladen",
-	"errorOccuredWhileLoadingLibrary": "Beim Laden des Bibliotheksformulars ist der folgende Fehler aufgetreten",
+	"errorOccurredWhileLoadingLibrary": "Beim Laden des Bibliotheksformulars ist der folgende Fehler aufgetreten",
 	"packager": "Paketierer",
 	"packagerColon": "Packager:",
 	"dependencies": "Abhängigkeiten",
@@ -671,5 +671,8 @@
 	"observationSemiColon": "Beobachtung:",
 	"tableMode": "Tabellenmodus",
 	"owner": "Eigentümer",
-	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie auf der Registerkarte „Risiken“."
+	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie auf der Registerkarte „Risiken“.",
+	"backupLoadingError": "Beim Laden der Sicherung ist ein Fehler aufgetreten.",
+	"backupGreaterVersionError": "Das Backup kann nicht geladen werden, die Version des Backups ist höher als die aktuelle Version Ihrer Anwendung.",
+	"backupLowerVersionError": "Ein Fehler ist aufgetreten. Die Sicherungsversion ist möglicherweise zu alt. Wenn dies der Fall ist, muss sie vor einem erneuten Versuch aktualisiert werden."
 }

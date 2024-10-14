@@ -16,6 +16,8 @@
 	export let initialData: Record<string, any> = {};
 	export let object: any = {};
 	export let context: string;
+
+	let suggestions = false;
 </script>
 
 {#if context === 'fromBaseline' && initialData.baseline}
@@ -72,6 +74,7 @@
 					model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
 						(group) => ({ label: group.name, value: group.ref_id })
 					);
+					suggestions = r['reference_controls'].length > 0;
 				});
 		}
 	}}
@@ -131,7 +134,7 @@
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
 />
-{#if context === 'create'}
+{#if context === 'create' && suggestions}
 	<Checkbox
 		{form}
 		field="create_applied_controls_from_suggestions"

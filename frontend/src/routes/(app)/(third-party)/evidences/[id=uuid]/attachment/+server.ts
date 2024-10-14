@@ -29,9 +29,13 @@ export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
 		}
 
 		const reader = attachmentResponse.body.getReader();
+		let readerTerminated = false;
 		const stream = new ReadableStream({
 			start(controller) {
 				function push() {
+					if (readerTerminated) {
+						return;
+					}
 					reader.read().then(({ done, value }) => {
 						if (done) {
 							controller.close();
@@ -42,6 +46,9 @@ export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
 					});
 				}
 				push();
+			},
+			cancel() {
+				readerTerminated = true;
 			}
 		});
 

@@ -363,7 +363,7 @@
 	"librariesStore": "Sklep z bibliotekami",
 	"currentlyNoLoadedLibraries": "Obecnie nie masz załadowanych bibliotek",
 	"loadingLibraryUploadButton": "Ładowanie przycisku przesyłania biblioteki",
-	"errorOccuredWhileLoadingLibrary": "Wystąpił następujący błąd podczas ładowania formularza biblioteki",
+	"errorOccurredWhileLoadingLibrary": "Wystąpił następujący błąd podczas ładowania formularza biblioteki",
 	"packager": "Paker",
 	"packagerColon": "Paker:",
 	"dependencies": "Zależności",
@@ -708,5 +708,8 @@
 	"observationSemiColon": "Obserwacja:",
 	"tableMode": "Tryb tabeli",
 	"owner": "Właściciel",
-	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko."
+	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko.",
+	"backupLoadingError": "Wystąpił błąd podczas ładowania kopii zapasowej.",
+	"backupGreaterVersionError": "Nie można załadować kopii zapasowej. Wersja kopii zapasowej jest nowsza niż bieżąca wersja aplikacji.",
+	"backupLowerVersionError": "Wystąpił błąd. Wersja kopii zapasowej może być za stara. Jeśli tak, należy ją zaktualizować przed ponowną próbą."
 }

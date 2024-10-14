@@ -18,6 +18,9 @@ from rest_framework.views import APIView
 
 from core.views import BaseModelViewSet
 
+from core.views import BaseModelViewSet
+from iam.models import User
+
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
 
@@ -175,6 +178,7 @@ def get_build(request):
             "version": VERSION,
             "build": BUILD,
             "license_seats": LICENSE_SEATS,
+            "available_seats": LICENSE_SEATS - len(User.get_editors()),
             "license_expiration": LICENSE_EXPIRATION,
         }
     )

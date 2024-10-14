@@ -23,9 +23,9 @@ pre-build: ensure-pnpm
 
 build-enterprise: pre-build
 	@$(PM) run -C $(FRONTEND_DIR) build
-	@mv $(FRONTEND_DIR)/build $(ENTERPRISE_DIR)/build
-	@mv $(FRONTEND_DIR)/node_modules $(ENTERPRISE_DIR)/node_modules
-	@mv $(FRONTEND_DIR)/package.json $(ENTERPRISE_DIR)/package.json
+	@rsync -av $(FRONTEND_DIR)/build $(ENTERPRISE_DIR)/build
+	@rsync -av $(FRONTEND_DIR)/node_modules $(ENTERPRISE_DIR)/node_modules
+	@rsync -av $(FRONTEND_DIR)/package.json $(ENTERPRISE_DIR)/package.json
 
 CHANGED_FILES =
 
