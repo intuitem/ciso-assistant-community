@@ -31,7 +31,7 @@
 	export let shallow = false;
 
 	export let actionPath: string = '';
-	export let questionnaireOnly: boolean = $page.data.user.is_third_party;
+	export let questionnaireOnly: boolean = false;
 	export let assessmentOnly: boolean = false;
 	export let invalidateAll: boolean = true;
 
@@ -157,26 +157,28 @@
 		class="card px-6 py-4 bg-white flex flex-col justify-between shadow-lg w-full h-full space-y-2"
 	>
 		{#if !(questionnaireOnly ? !assessmentOnly : assessmentOnly)}
-			<div class="flex items-center justify-center space-x-4">
-				{#if questionnaireMode}
-					<p class="font-bold text-sm">{m.assessmentMode()}</p>
-				{:else}
-					<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
-				{/if}
-				<SlideToggle
-					name="questionnaireToggle"
-					class="flex flex-row items-center justify-center"
-					active="bg-primary-500"
-					background="bg-green-500"
-					bind:checked={questionnaireMode}
-					on:click={() => (questionnaireMode = !questionnaireMode)}
-				>
+			<div class="sticky top-0 p-2 z-10 card bg-white">
+				<div class="flex items-center justify-center space-x-4">
 					{#if questionnaireMode}
-						<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+						<p class="font-bold text-sm">{m.assessmentMode()}</p>
 					{:else}
-						<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+						<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
 					{/if}
-				</SlideToggle>
+					<SlideToggle
+						name="questionnaireToggle"
+						class="flex flex-row items-center justify-center"
+						active="bg-primary-500"
+						background="bg-green-500"
+						bind:checked={questionnaireMode}
+						on:click={() => (questionnaireMode = !questionnaireMode)}
+					>
+						{#if questionnaireMode}
+							<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+						{:else}
+							<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+						{/if}
+					</SlideToggle>
+				</div>
 			</div>
 		{/if}
 		{#each data.requirements as requirementAssessment}
@@ -351,9 +353,11 @@
 										><p class="flex items-center space-x-2">
 											<span>{m.evidence()}</span>
 											{#key addedEvidence}
-												<span class="badge variant-soft-primary"
-													>{requirementAssessment.evidences.length}</span
-												>
+												{#if requirementAssessment.evidences != null}
+													<span class="badge variant-soft-primary"
+														>{requirementAssessment.evidences.length}</span
+													>
+												{/if}
 											{/key}
 										</p></svelte:fragment
 									>

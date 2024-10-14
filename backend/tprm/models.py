@@ -40,6 +40,12 @@ class EntityAssessment(Assessment):
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))
     maturity = models.IntegerField(default=0, verbose_name=_("Maturity"))
     trust = models.IntegerField(default=0, verbose_name=_("Trust"))
+    representatives = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Representative"),
+        related_name="entity_assessments",
+    )
     entity = models.ForeignKey(
         Entity,
         on_delete=models.CASCADE,
