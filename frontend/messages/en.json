@@ -771,6 +771,8 @@
 	"noMailerConfigured": "No mailer configured",
 	"errorLicenseSeatsExceeded": "The number of license seats is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator.",
 	"availableSeats": "Available seats",
+	"showImagesUnauthenticated": "Show logo and favicon to unauthenticated users",
+	"showImagesUnauthenticatedHelpText": "If disabled, the regular CISO Assistant logo and favicon will be displayed on the login screen",
 	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator",
 	"catalog": "Catalog",
 	"actions": "Actions",
