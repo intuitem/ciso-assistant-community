@@ -1,13 +1,15 @@
-from enum import Enum
+import base64
 import os
+from enum import Enum
+
+import magic
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from iam.models import FolderMixin
+from django.utils.translation import gettext_lazy as _
+
 from core.base_models import AbstractBaseModel
 from core.utils import sha256
-
-import base64
-import magic
+from iam.models import FolderMixin
 
 
 class ClientSettings(AbstractBaseModel, FolderMixin):
@@ -27,6 +29,9 @@ class ClientSettings(AbstractBaseModel, FolderMixin):
         null=True,
         blank=True,
         validators=[FileExtensionValidator(["ico", "png", "jpeg", "jpg", "webp"])],
+    )
+    show_images_unauthenticated = models.BooleanField(
+        default=True, help_text=_("Show logo and favicon to unauthenticated users")
     )
 
     @property
