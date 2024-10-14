@@ -1,6 +1,6 @@
 urn: urn:intuitem:risk:library:referentiel-audit-SSI-ANCS-Tunisie
 locale: fr
-ref_id: "R\xE9ferenti-d'Audit-SSI (ANCS Tunisie) "
+ref_id: "R\xE9ferentiel-audit-SSI-ANCS-Tunisie"
 name: "R\xE9f\xE9rentiel d\u2019Audit de la S\xE9curit\xE9 des Syst\xE8mes d\u2019\
   Information (ANCS Tunisie) "
 description: "Le pr\xE9sent document d\xE9taille les crit\xE8res par rapport auxquels\
@@ -25,7 +25,7 @@ packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:referentiel-audit-SSI-ANCS-Tunisie
-    ref_id: "R\xE9ferenti-d'Audit-SSI (ANCS Tunisie) "
+    ref_id: "R\xE9ferentiel-audit-SSI-ANCS-Tunisie"
     name: "R\xE9f\xE9rentiel d\u2019Audit de la S\xE9curit\xE9 des Syst\xE8mes d\u2019\
       Information (ANCS Tunisie) "
     description: "Le pr\xE9sent document d\xE9taille les crit\xE8res par rapport auxquels\
