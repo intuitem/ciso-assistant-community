@@ -2,7 +2,6 @@
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-
 	let _class = 'w-fit';
 
 	export { _class as class };
