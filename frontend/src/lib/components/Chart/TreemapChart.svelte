@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	export let s_label = '';
 
 	export let width = 'w-auto';
 	export let height = 'h-full';

@@ -1,8 +1,8 @@
 <script lang="ts">
 	export let count: string = '0';
 	export let label: string;
-	export let href: string | undefined = undefined;
-	export let help: string;
+	// export let href: string | undefined = undefined;
+	// export let help: string;
 	export let icon: string;
 	export let section: string;
 	export let emphasis: boolean = false;
