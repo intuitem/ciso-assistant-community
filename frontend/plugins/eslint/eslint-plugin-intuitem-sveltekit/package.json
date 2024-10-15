@@ -1,0 +1,12 @@
+{
+	"name": "eslint-plugin-intuitem-sveltekit",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "node ./secure-redirect.test.js"
+	},
+	"author": "",
+	"license": "ISC"
+}

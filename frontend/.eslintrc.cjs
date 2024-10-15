@@ -8,7 +8,10 @@ module.exports = {
 		'plugin:storybook/recommended'
 	],
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint'],
+	plugins: ['@typescript-eslint', 'eslint-plugin-intuitem-sveltekit'],
+	rules: {
+		'eslint-plugin-intuitem-sveltekit/secure-redirect': 'error'
+	},
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
