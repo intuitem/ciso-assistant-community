@@ -687,7 +687,8 @@
 	"backupLoadingError": "Une erreur s'est produite lors du chargement de la sauvegarde.",
 	"backupGreaterVersionError": "Impossible de charger la sauvegarde, la version de la sauvegarde est supérieure à la version actuelle de votre application.",
 	"backupLowerVersionError": "Une erreur s'est produite, la version de sauvegarde est peut-être trop ancienne, si c'est le cas, elle doit être mise à jour avant de réessayer.",
-	"thirdParty": "Gestion des tiers",
+	"thirdParty": "Tiers",
+	"thirdPartyCategory": "Gestion des tiers",
 	"catalog": "Catalogue",
 	"actions": "Actions"
 }
