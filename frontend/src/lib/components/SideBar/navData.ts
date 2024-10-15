@@ -177,7 +177,7 @@ export const navData = {
 		},
 
 		{
-			name: 'thirdParty',
+			name: 'thirdPartyCategory',
 			items: [
 				{
 					name: 'entities',
