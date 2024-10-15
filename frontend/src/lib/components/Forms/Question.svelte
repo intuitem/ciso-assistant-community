@@ -2,7 +2,6 @@
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-	import { writable } from 'svelte/store';
 	let _class = 'w-fit';
 
 	export { _class as class };
@@ -40,19 +39,17 @@
 			<li class="flex justify-between items-center border rounded-xl p-2">
 				{question.text}
 				{#if question.type === 'unique_choice'}
-					<div class="flex items-center justify-end gap-2 ml-auto">
-						<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
-							{#each question.options as option}
-								<RadioItem
-									bind:group={question.answer}
-									name="question"
-									value={option}
-									on:click={() => (question.answer = question.answer === option ? null : option)}
-									>{option}</RadioItem
-								>
-							{/each}
-						</RadioGroup>
-					</div>
+					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
+						{#each question.options as option}
+							<RadioItem
+								bind:group={question.answer}
+								name="question"
+								value={option}
+								on:click={() => (question.answer = question.answer === option ? null : option)}
+								>{option}</RadioItem
+							>
+						{/each}
+					</RadioGroup>
 				{:else if question.type === 'date'}
 					<input
 						type="date"
