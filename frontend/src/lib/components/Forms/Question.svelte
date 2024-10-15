@@ -41,7 +41,11 @@
 				{#if question.type === 'unique_choice'}
 					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
 						{#each question.options as option}
-							<RadioItem bind:group={question.answer} name="question" value={option}
+							<RadioItem
+								bind:group={question.answer}
+								name="question"
+								value={option}
+								on:click={() => (question.answer = question.answer === option ? null : option)}
 								>{option}</RadioItem
 							>
 						{/each}
