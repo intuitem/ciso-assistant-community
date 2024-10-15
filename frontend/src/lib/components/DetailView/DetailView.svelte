@@ -124,6 +124,26 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalAppliedControlDuplicateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.duplicateForm,
+				model: data.model,
+				debug: false,
+				duplicate: true,
+				formAction: '?/duplicate'
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.duplicateAppliedControl()
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalMailConfirm(id: string, name: string, action: string): void {
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
@@ -321,11 +341,24 @@
 				</button>
 			{/if}
 			{#if displayEditButton()}
-				<a
-					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-					class="btn variant-filled-primary h-fit"
-					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
-				>
+				<div class="flex flex-col space-y-2 ml-4">
+					<a
+						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+						class="btn variant-filled-primary h-fit"
+						><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
+					>
+					{#if data.urlModel === 'applied-controls'}
+						<span class="pt-4 font-light text-sm">Power-ups:</span>
+						<button
+							class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600"
+							on:click={(_) => modalAppliedControlDuplicateForm()}
+							data-testid="duplicate-button"
+						>
+							<i class="fa-solid fa-copy mr-2"></i>
+							{m.duplicate()}</button
+						>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	</div>

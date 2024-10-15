@@ -48,7 +48,7 @@
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
 	export let cancelButton = true;
-	export let riskAssessmentDuplication = false;
+	export let duplicate = false;
 
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
@@ -119,7 +119,7 @@
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
 	<!--NOTE: Not the cleanest pattern, will refactor-->
 	<!--TODO: Refactor-->
-	{#if shape.reference_control}
+	{#if shape.reference_control && !duplicate}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
@@ -178,11 +178,11 @@
 		<ProjectForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'folders'}
 		<FolderForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
-	{:else if URLModel === 'risk-assessments' || URLModel === 'risk-assessment-duplicate'}
+	{:else if URLModel === 'risk-assessments'}
 		<RiskAssessmentForm
 			{form}
 			{model}
-			{riskAssessmentDuplication}
+			{duplicate}
 			{cacheLocks}
 			{formDataCache}
 			{initialData}
@@ -198,6 +198,7 @@
 		<AppliedControlsPoliciesForm
 			{form}
 			{model}
+			{duplicate}
 			{cacheLocks}
 			{formDataCache}
 			{schema}

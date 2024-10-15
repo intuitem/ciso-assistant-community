@@ -10,111 +10,114 @@
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
+	export let duplicate: boolean = false;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
 </script>
 
-{#if schema.shape.category}
+{#if !duplicate}
+	{#if schema.shape.category}
+		<Select
+			{form}
+			options={model.selectOptions['category']}
+			field="category"
+			label={m.category()}
+			cacheLock={cacheLocks['category']}
+			bind:cachedValue={formDataCache['category']}
+		/>
+	{/if}
 	<Select
 		{form}
-		options={model.selectOptions['category']}
-		field="category"
-		label={m.category()}
-		cacheLock={cacheLocks['category']}
-		bind:cachedValue={formDataCache['category']}
+		options={model.selectOptions['csf_function']}
+		field="csf_function"
+		label={m.csfFunction()}
+		cacheLock={cacheLocks['csf_function']}
+		bind:cachedValue={formDataCache['csf_function']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+		field="owner"
+		cacheLock={cacheLocks['owner']}
+		bind:cachedValue={formDataCache['owner']}
+		label={m.owner()}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['status']}
+		field="status"
+		label={m.status()}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		options={getOptions({
+			objects: model.foreignKeys['evidences'],
+			extra_fields: [['folder', 'str']]
+		})}
+		field="evidences"
+		cacheLock={cacheLocks['evidences']}
+		bind:cachedValue={formDataCache['evidences']}
+		label={m.evidences()}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="start_date"
+		label={m.startDate()}
+		helpText={m.startDateHelpText()}
+		cacheLock={cacheLocks['start_date']}
+		bind:cachedValue={formDataCache['start_date']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="eta"
+		label={m.eta()}
+		helpText={m.etaHelpText()}
+		cacheLock={cacheLocks['eta']}
+		bind:cachedValue={formDataCache['eta']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="expiry_date"
+		label={m.expiryDate()}
+		helpText={m.expiryDateHelpText()}
+		cacheLock={cacheLocks['expiry_date']}
+		bind:cachedValue={formDataCache['expiry_date']}
+	/>
+	<TextField
+		{form}
+		field="link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['link']}
+		bind:cachedValue={formDataCache['link']}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['effort']}
+		field="effort"
+		label={m.effort()}
+		helpText={m.effortHelpText()}
+		cacheLock={cacheLocks['effort']}
+		bind:cachedValue={formDataCache['effort']}
+	/>
+	<NumberField
+		{form}
+		field="cost"
+		label={m.cost()}
+		helpText={m.costHelpText()}
+		cacheLock={cacheLocks['cost']}
+		bind:cachedValue={formDataCache['cost']}
 	/>
 {/if}
-<Select
-	{form}
-	options={model.selectOptions['csf_function']}
-	field="csf_function"
-	label={m.csfFunction()}
-	cacheLock={cacheLocks['csf_function']}
-	bind:cachedValue={formDataCache['csf_function']}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
-	field="owner"
-	cacheLock={cacheLocks['owner']}
-	bind:cachedValue={formDataCache['owner']}
-	label={m.owner()}
-/>
-<Select
-	{form}
-	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	options={getOptions({
-		objects: model.foreignKeys['evidences'],
-		extra_fields: [['folder', 'str']]
-	})}
-	field="evidences"
-	cacheLock={cacheLocks['evidences']}
-	bind:cachedValue={formDataCache['evidences']}
-	label={m.evidences()}
-/>
-<TextField
-	type="date"
-	{form}
-	field="start_date"
-	label={m.startDate()}
-	helpText={m.startDateHelpText()}
-	cacheLock={cacheLocks['start_date']}
-	bind:cachedValue={formDataCache['start_date']}
-/>
-<TextField
-	type="date"
-	{form}
-	field="eta"
-	label={m.eta()}
-	helpText={m.etaHelpText()}
-	cacheLock={cacheLocks['eta']}
-	bind:cachedValue={formDataCache['eta']}
-/>
-<TextField
-	type="date"
-	{form}
-	field="expiry_date"
-	label={m.expiryDate()}
-	helpText={m.expiryDateHelpText()}
-	cacheLock={cacheLocks['expiry_date']}
-	bind:cachedValue={formDataCache['expiry_date']}
-/>
-<TextField
-	{form}
-	field="link"
-	label={m.link()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['link']}
-	bind:cachedValue={formDataCache['link']}
-/>
-<Select
-	{form}
-	options={model.selectOptions['effort']}
-	field="effort"
-	label={m.effort()}
-	helpText={m.effortHelpText()}
-	cacheLock={cacheLocks['effort']}
-	bind:cachedValue={formDataCache['effort']}
-/>
-<NumberField
-	{form}
-	field="cost"
-	label={m.cost()}
-	helpText={m.costHelpText()}
-	cacheLock={cacheLocks['cost']}
-	bind:cachedValue={formDataCache['cost']}
-/>
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}

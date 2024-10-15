@@ -1374,9 +1374,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     def projects(self):
         return {risk_assessment.project for risk_assessment in self.risk_assessments}
 
-    def parent_project(self):
-        pass
-
     def __str__(self):
         return self.name
 

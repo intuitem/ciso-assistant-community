@@ -2,19 +2,47 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
 import { localItems, toCamelCase } from '$lib/utils/locales';
+import { safeTranslate } from '$lib/utils/i18n';
 import * as m from '$paraglide/messages';
 
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
+import { setFlash } from 'sveltekit-flash-message/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
+import { modelSchema } from '$lib/utils/schemas';
 
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	return await loadDetail({ event, model: getModelInfo(event.params.model), id: event.params.id });
+	const data = await loadDetail({
+		event,
+		model: getModelInfo(event.params.model),
+		id: event.params.id
+	});
+
+	if (event.params.model === 'applied-controls') {
+		const appliedControlSchema = modelSchema(event.params.model);
+		const appliedControl = data.data;
+		const initialDataDuplicate = {
+			name: appliedControl.name,
+			description: appliedControl.description
+		};
+
+		const appliedControlDuplicateForm = await superValidate(
+			initialDataDuplicate,
+			zod(appliedControlSchema),
+			{
+				errors: false
+			}
+		);
+
+		data.duplicateForm = appliedControlDuplicateForm;
+	}
+
+	return data;
 };
 
 export const actions: Actions = {
@@ -23,6 +51,43 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
+	},
+	duplicate: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) return;
+
+		const schema = modelSchema(event.params.model as string);
+
+		const form = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/duplicate/`;
+
+		if (!form.valid) {
+			console.log(form.errors);
+			return fail(400, { form: form });
+		}
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const modelVerboseName: string = urlParamModelVerboseName(event.params.model as string);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDuplicateObject({
+					object: safeTranslate(modelVerboseName).toLowerCase()
+				})
+			},
+			event
+		);
+
+		return { form };
 	},
 	reject: async ({ request, fetch, params }) => {
 		const formData = await request.formData();

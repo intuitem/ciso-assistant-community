@@ -317,6 +317,12 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     owner = FieldsRelatedField(many=True)
 
 
+class AppliedControlDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = AppliedControl
+        fields = ["name", "description", "folder"]
+
+
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
     class Meta:
         model = Policy
