@@ -156,9 +156,19 @@
 						{/each}
 					{/if}
 					{#if node.question.questions}
-						<span class="badge" style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-							>{node.question.questions.length} {m.questionOrQuestions()}</span
-						>
+						{#if node.question.questions.length > 1}
+							<span
+								class="badge"
+								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+								>{node.question.questions.length} {m.questionPlural()}</span
+							>
+						{:else}
+							<span
+								class="badge"
+								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
+								>{node.question.questions.length} {m.questionSingular()}</span
+							>
+						{/if}
 					{/if}
 				</div>
 			</div>
