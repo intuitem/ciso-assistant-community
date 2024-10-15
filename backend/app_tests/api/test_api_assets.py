@@ -10,7 +10,7 @@ ASSET_NAME = "Test Asset"
 ASSET_DESCRIPTION = "Test Description"
 ASSET_BUSINESS_VALUE = "test"
 ASSET_TYPE = ("PR", "Primary")
-ASSET_TYPE2 = ("SP", "Support")
+ASSET_TYPE2 = ("SP", "Supporting")
 ASSET_PARENT_ASSETS = []
 
 
