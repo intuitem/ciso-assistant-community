@@ -176,6 +176,7 @@
 	"observation": "Observation",
 	"importMatrices": "Importer des matrices",
 	"importFrameworks": "Importer des référentiels",
+	"importMappings": "Importer des mappings",
 	"summary": "Synthèse",
 	"composer": "Compositeur",
 	"statistics": "Statistiques",
