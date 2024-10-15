@@ -1,0 +1,898 @@
+urn: urn:intuitem:risk:library:bsi-externer-cloud-dienste
+locale: de
+ref_id: Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste
+name: Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1)
+description: "Das Bundesamt f\xFCr Sicherheit in der Informationstechnik (BSI) Mindeststandards\
+  \ (MST) f\xFCr die Sicherheit der Informationstechnik des Bundes1 fest. Dies erfolgt\
+  \ auf der Grundlage des \xA7 8 Absatz 1 BSIG im Benehmen mit den Ressorts. Als gesetzliche\
+  \ Vorgabe definieren Mindeststandards somit ein verbindliches Mindestniveau f\xFC\
+  r die Informationssicherheit. \nnach \xA7 8 Absatz 1 Satz 1 BSIG \u2013 Version\
+  \ 2.1 vom 15.12.2022\nLink : https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
+copyright: BSI
+version: 1
+provider: BSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:bsi-externer-cloud-dienste
+    ref_id: Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste
+    name: Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1)
+    description: "Das Bundesamt f\xFCr Sicherheit in der Informationstechnik (BSI)\
+      \ Mindeststandards (MST) f\xFCr die Sicherheit der Informationstechnik des Bundes1\
+      \ fest. Dies erfolgt auf der Grundlage des \xA7 8 Absatz 1 BSIG im Benehmen\
+      \ mit den Ressorts. Als gesetzliche Vorgabe definieren Mindeststandards somit\
+      \ ein verbindliches Mindestniveau f\xFCr die Informationssicherheit. \nnach\
+      \ \xA7 8 Absatz 1 Satz 1 BSIG \u2013 Version 2.1 vom 15.12.2022\nLink : https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Mindeststandards/Mindeststandard_Nutzung_externer_Cloud-Dienste_Version_2_1.pdf?__blob=publicationFile&v=4 "
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.1.01
+      name: "Strategie f\xFCr die Cloud-Nutzung"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01
+      ref_id: NCD.2.1.01.a
+      description: "Die Einrichtung MUSS eine Strategie f\xFCr die Cloud-Nutzung nach\
+        \ OPS.2.2.A1 Erstellung einer Strategie f\xFCr die Cloud-Nutzung  erstellen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A1"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01
+      ref_id: NCD.2.1.01.b
+      description: "Die Einrichtung MUSS in dieser Strategie f\xFCr die Cloud-Nutzung\
+        \ festlegen, wie sie mit Risiken bei der Nutzung externer Cloud-Dienste umgeht.\
+        \ Hierzu MUSS eine Richtlinie zur Risikoanalyse erstellt werden."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01
+      ref_id: NCD.2.1.01.c
+      description: "Die Einrichtung MUSS pr\xFCfen, ob ein externer Cloud-Dienst grunds\xE4\
+        tzlich mit den in ihrer Strategie f\xFCr die Cloud-Nutzung definierten Zielen,\
+        \ Chancen und Risiken vereinbar ist.   Die Einrichtung DARF einen externen\
+        \ Cloud-Dienst NUR nutzen, wenn dieser die in der Strategie f\xFCr die Cloud-Nutzung\
+        \ definierten Ziele, Chancen und Risiken angemessen unterst\xFCtzt."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.01
+      ref_id: NCD.2.1.01.d
+      description: "Die Einrichtung MUSS vor der Nutzung eines externen Cloud-Dienstes\
+        \ eine Risikoanalyse gem\xE4\xDF der in NCD.2.1.01 b) festgelegten Richtlinie\
+        \ durchf\xFChren."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.1.02
+      name: "Sicherheitsrichtlinie f\xFCr externe Cloud-Dienste"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02
+      ref_id: NCD.2.1.02.a
+      description: "Die Einrichtung MUSS eine Sicherheitsrichtlinie f\xFCr externe\
+        \ Cloud-Dienste nach OPS.2.2.A2 Erstellung einer Sicherheitsrichtlinie f\xFC\
+        r die Cloud-Nutzung  erstellen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A2"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02
+      ref_id: NCD.2.1.02.b
+      description: "Die Einrichtung MUSS in dieser Sicherheitsrichtlinie mindestens\
+        \ die Umsetzung und Einhaltung der Basiskriterien nach dem Cloud Computing\
+        \ Compliance Criteria Catalogue \u2013 C5 (Kriterienkatalog Cloud Computing)\
+        \ als spezielle Sicherheitsanforderungen an den Cloud-Diensteanbieter festlegen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.02
+      ref_id: NCD.2.1.02.c
+      description: "Die Einrichtung MUSS die IT-Sicherheitsbeauftragten bei der Erstellung\
+        \ der Sicherheitsrichtlinie beteiligen und ebenfalls - sofern betroffen -\
+        \ die zust\xE4ndigen Datenschutz- und Geheimschutzbeauftragten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.1.03
+      name: "Sicherheitskonzept f\xFCr den externen Cloud-Dienst"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.a
+      description: "Die Einrichtung MUSS ein Sicherheitskonzept f\xFCr den externen\
+        \ Cloud-Dienst nach OPS.2.2.A7 Erstellung eines Sicherheitskonzeptes f\xFC\
+        r die Cloud-Nutzung  erstellen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A7"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.b
+      description: "Die Einrichtung MUSS in dem Sicherheitskonzept die aktuellen Ver\xF6\
+        ffentlichungen des BSI zu Cloud-Sicherheit ber\xFCcksichtigen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.c
+      description: "Die Einrichtung MUSS die IT-Sicherheitsbeauftragten bei der Erstellung\
+        \ des Sicherheitskonzeptes beteiligen und ebenfalls \u2013 sofern betroffen\
+        \ \u2013 die zust\xE4ndigen Datenschutz- und Geheimschutzbeauftragten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.d
+      description: "Die Einrichtung MUSS s\xE4mtliche dienstliche Daten identifizieren,\
+        \ die k\xFCnftig in dem externen Cloud-Dienst verarbeitet werden sollen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.e
+      description: "Kommt die Einrichtung zu dem Ergebnis, dass in dem externen Cloud-Dienst\
+        \ keine dienstlichen Daten  verarbeitet werden, handelt es sich nicht um eine\
+        \ Nutzung oder Mitnutzung externer Cloud-Dienste im Sinne dieses Mindeststandards.\
+        \ In diesen F\xE4llen KANN die Einrichtung die Sicherheitsanforderungen des\
+        \ Mindeststandards umsetzen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.f
+      description: "Die Einrichtung MUSS die identifizierten dienstlichen Daten den\
+        \ nachfolgenden Kategorien zuordnen:\n \u2212 Kategorie 1 = Privat-, Dienst-,\
+        \ Betriebs- und Gesch\xE4ftsgeheimnisse gem\xE4\xDF Strafgesetzbuch (StGB)\
+        \ \xA7\xA7 203 und 353b\n \u2212 Kategorie 2 = personenbezogene Daten gem\xE4\
+        \xDF Datenschutz-Grundverordnung (DSGVO) Art. 4 Nr. 1\n \u2212 Kategorie 3\
+        \ = Verschlusssachen gem\xE4\xDF Verschlusssachenanweisung - VSA \n \u2212\
+        \ Kategorie 4 = sonstige Daten (weder Kategorie 1, noch 2, noch 3)\n"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.g
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.g
+      description: Die Einrichtung KANN die identifizierten dienstlichen Daten den
+        Kategorien 1, 2 und 3 gleichzeitig zuordnen.
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.h
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.h
+      description: "Falls Daten den Kategorien 1, 2 oder 3 zugeordnet wurden: Die\
+        \ Einrichtung MUSS f\xFCr die identifizierten dienstlichen Daten dieser Kategorien\
+        \ die Geheim- und Datenschutzaspekte  sowie Anforderungen hinsichtlich Privat-,\
+        \ Dienst, Betriebs- und Gesch\xE4ftsgeheimnisse ermitteln und aus diesen ggf.\
+        \ entstehende weitere Anforderungen ableiten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.h.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.h
+      ref_id: NCD.2.1.03.h.i
+      description: "Die Einrichtung MUSS Risiken, die aus der k\xFCnftigen Nutzung\
+        \ des externen Cloud-Dienstes entstehen k\xF6nnen, umfassend ermitteln und\
+        \ bewerten.  Die Einrichtung MUSS die ermittelten Risiken gem\xE4\xDF der\
+        \ in der Strategie f\xFCr die Cloud-Nutzung festgelegten Richtlinie zur Risikoanalyse\
+        \ bewerten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.h.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.h
+      ref_id: NCD.2.1.03.h.ii
+      description: "Die Einrichtung DARF den externen Cloud-Dienst NUR nutzen, wenn\
+        \ alle ermittelten Risiken gem\xE4\xDF der in der Strategie f\xFCr die Cloud-Nutzung\
+        \ genannten Richtlinie zur Risikoanalyse wirksam vermieden oder hinreichend\
+        \ reduziert oder in \xDCbereinstimmung mit den Risikoakzeptanzkriterien bei\
+        \ der Cloud-Nutzung getragen werden k\xF6nnen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03.i
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.03
+      ref_id: NCD.2.1.03.i
+      description: "Die Einrichtung MUSS pr\xFCfen, ob sie weiteren Anforderungen\
+        \ (z. B. aus Gesetzen, Verordnungen, Beschl\xFCssen oder anderen Quellen)\
+        \  unterliegt, die hinsichtlich der Cloud-Nutzung relevant sind. Diese Anforderungen\
+        \ MUSS die Einrichtung einhalten. Sie werden im \xDCbrigen durch diesen Mindeststandard\
+        \ nicht ber\xFChrt."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.1.04
+      name: "Notfall- und Kontinuit\xE4tsmanagement"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04
+      ref_id: NCD.2.1.04.a
+      description: "Die Einrichtung MUSS bewerten, welche Bedeutung der externe Cloud-Dienst\
+        \ in Notf\xE4llen und Krisensituationen einnehmen w\xFCrde."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04
+      ref_id: NCD.2.1.04.b
+      description: "Die Einrichtung MUSS pr\xFCfen, ob sie in Notf\xE4llen und Krisensituationen\
+        \ weiter auf den externen Cloud-Dienst zugreifen k\xF6nnen muss."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.1.04
+      ref_id: NCD.2.1.04.c
+      description: "Die Einrichtung MUSS die zust\xE4ndigen Notfallbeauftragten entsprechend\
+        \ einbinden. Diese M\xDCSSEN pr\xFCfen, ob sich die Cloud-Nutzung auf Ma\xDF\
+        nahmen, die Notf\xE4llen und Krisensituationen pr\xE4ventiv und/oder reaktiv\
+        \ entgegenwirken, auswirkt und inwiefern diese Ma\xDFnahmen ggf. anzupassen\
+        \ sind. Die Einrichtung MUSS diese \xC4nderungen vor der Cloud-Nutzung umsetzen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A11"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.01
+      name: Umsetzung der Sicherheitsanforderungen
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.a
+      description: "Die Einrichtung MUSS vor Vertragsabschluss bewerten, inwiefern\
+        \ der externe Cloud-Dienst die in ihrer Sicherheitsrichtlinie festgelegten\
+        \ Sicherheitsanforderungen (siehe NCD.2.1.02, Buchstabe a) erf\xFCllt."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.b
+      description: "Die Einrichtung MUSS die Erf\xFCllung dieser Sicherheitsanforderungen\
+        \ bereits in der Leistungsbeschreibung des externen Cloud-Dienstes einfordern."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A8"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.c
+      description: "Die Einrichtung MUSS die Angaben und Nachweise des Cloud-Diensteanbieters\
+        \ zu Buchstabe a hinsichtlich Inhalt, Aussagekraft, Nachvollziehbarkeit, Aktualit\xE4\
+        t, nachteiliger Regelungen sowie Mitwirkungspflichten und Ma\xDFnahmen auswerten.\
+        \ Dazu SOLLTE der Leitfaden mit Checkliste zur Auswertung einer Berichterstattung\
+        \ nach BSI C5 verwendet werden."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.d
+      description: "Die Einrichtung MUSS sich die regelm\xE4\xDFige Vorlage von Sicherheitsnachweisen\
+        \ vom Cloud-Diensteanbieter zusichern lassen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.e
+      description: "Diese Sicherheitsnachweise SOLLTEN mindestens\n\u2212 die angemessene\
+        \ und wirksame Erf\xFCllung der Basiskriterien nach C5,\n\u2212 die aktuelle\
+        \ Dokumentation der Systembeschreibung,\n\u2212 die Aktualit\xE4t von vertraglich\
+        \ zugesicherten Zertifizierungen und Berichterstattungen sowie\n\u2212 die\
+        \ ordnungsgem\xE4\xDFe Durchf\xFChrung von Datensicherungen und erprobten\
+        \ R\xFCcksicherungen\numfassen und K\xD6NNEN vom Cloud-Diensteanbieter durch\
+        \ die regelm\xE4\xDFige Bereitstellung einer aktuellen C5-Berichterstattung\
+        \ vom Typ2 erbracht werden."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.f
+      description: "Die Einrichtung MUSS die Sicherheitsnachweise des Cloud-Diensteanbieters\
+        \ auswerten und eventuellen Unklarheiten und insbesondere darin ausgewiesene\
+        \ Abweichungen in geeigneter Form nachgehen. Hierbei MUSS die Einrichtung\
+        \ auch abw\xE4gen, ob und inwiefern ein Risiko entsteht und wie mit diesem\
+        \ umzugehen ist."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.g
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.g
+      description: "Insbesondere M\xDCSSEN Zertifikate, Pr\xFCfberichte und Nachweise\
+        \ den Zeitraum, in dem die Einrichtung den Cloud-Dienst nutzt, jeweils vollst\xE4\
+        ndig abdecken und D\xDCRFEN KEINE zeitlichen L\xFCcken enthalten oder entstehen\
+        \ lassen. Dies MUSS die Einrichtung in ihre Sicherheitsanforderungen sowie\
+        \ demzufolge in die Leistungsbeschreibung aufnehmen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.h
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.h
+      description: "Die Einrichtung MUSS sich die Einhaltung vorgesehener und vereinbarter\
+        \ Prozesse sowie die Durchf\xFChrung von Audits, Sicherheitspr\xFCfungen,\
+        \ Penetrationstests und Schwachstellenanalysen durch den Cloud-Diensteanbieter\
+        \ vertraglich zusichern lassen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.i
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.i
+      description: "Die Einrichtung MUSS ermittelte Risiken, die nicht bereits durch\
+        \ Basiskriterien nach C5 abgedeckt sind, \xFCber zus\xE4tzliche Anforderungen,\
+        \ die vom Cloud-Diensteanbieter zu erf\xFCllen sind, abdecken oder diese Risiken\
+        \ transferieren oder akzeptieren, und MUSS dies entsprechend dokumentieren."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.i.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.i
+      ref_id: NCD.2.2.01.i.i
+      description: "Die Einrichtung MUSS die weiteren Anforderungen nach NCD.2.1.03,\
+        \ Buchstabe i, in ihre Sicherheitsanforderungen aufnehmen. Soweit die Einrichtung\
+        \ diese weiteren Anforderungen nur gemeinsam mit dem Cloud-Diensteanbieter\
+        \ erf\xFCllen kann, MUSS die Einrichtung diese in die Leistungsbeschreibung\
+        \ bzw. in das Vertragsverh\xE4ltnis mit dem Cloud-Diensteanbieter aufnehmen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.i.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.i
+      ref_id: NCD.2.2.01.i.ii
+      description: "F\xFCr die zus\xE4tzlichen Anforderungen MUSS die Einrichtung\
+        \ mit dem Cloud-Diensteanbieter vereinbaren, dass dieser regelm\xE4\xDFig\
+        \ geeignete Nachweise ihrer angemessenen und wirksamen Umsetzung vorlegt.\
+        \ Falls die Anforderungen nur gemeinsam erf\xFCllt werden k\xF6nnen, erstrecken\
+        \ sich die Nachweise nur auf den Anteil, der vom Cloud-Diensteanbieter umgesetzt\
+        \ wird."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01
+      ref_id: NCD.2.2.01.j
+      description: "Die Einrichtung SOLLTE sich eigene Pr\xFCfrechte vertraglich zusichern\
+        \ lassen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j
+      ref_id: NCD.2.2.01.j.i
+      description: "Die Einrichtung MUSS die Pr\xFCfrechte so ausgestalten, dass die\
+        \ Einrichtung ihre weiteren Anforderungen (z. B. aus Gesetzen, Verordnungen,\
+        \ Beschl\xFCssen oder anderen Quellen) erf\xFCllt."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j
+      ref_id: NCD.2.2.01.j.ii
+      description: "Die Einrichtung MUSS die Pr\xFCfrechte so ausgestalten, dass sie\
+        \ nach Art und Umfang eine Bewertung des vom Cloud-Diensteanbieter f\xFCr\
+        \ den betrachteten Cloud-Dienst gebotenen Informationssicherheitsniveaus erm\xF6\
+        glichen und die Einrichtung selbst oder Dritte in ihrem Auftrag (z. B. andere\
+        \ Stellen, externe IT-Revision, Wirtschaftspr\xFCfende) die Pr\xFCfrechte\
+        \ wahrnehmen k\xF6nnen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j.iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j
+      ref_id: NCD.2.2.01.j.iii
+      description: "Sofern der Cloud-Diensteanbieter keinen Pr\xFCfbericht nach C5\
+        \ vorlegen kann, MUSS sich die Einrichtung vom Cloud-Diensteanbieter dazu\
+        \ berechtigen lassen, die Pr\xFCfung nach C5 durch Dritte selbst beauftragen\
+        \ zu k\xF6nnen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j.iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.01.j
+      ref_id: NCD.2.2.01.j.iv
+      description: "Aufgrund der Ergebnisse aus der Datenkategorisierung und Risikoanalyse\
+        \ KANN die Einrichtung in begr\xFCndeten F\xE4llen auf eigene Pr\xFCfrechte\
+        \ verzichten, soweit weitere Anforderungen (z. B. aus Gesetzen, Verordnungen,\
+        \ Beschl\xFCssen oder anderen Quellen) nicht entgegenstehen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.02
+      name: Umgang mit Unterauftragnehmern und anderen externen Dritten vertraglich
+        zusichern
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02
+      ref_id: NCD.2.2.02.a
+      description: "Die Einrichtung MUSS sich vom Cloud-Diensteanbieter vollst\xE4\
+        ndig benennen lassen, welche seiner Unterauftragnehmer gem\xE4\xDF C5 als\
+        \ Subdienstleistungsunternehmen  anzusehen sind und auf welche Art und in\
+        \ welchem Umfang er diese in die Bereitstellung des Cloud-Dienstes einbezieht."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A9"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02
+      ref_id: NCD.2.2.02.b
+      description: "Die Einrichtung MUSS mit dem Cloud-Diensteanbieter vereinbaren,\
+        \ dass er der Einrichtung beabsichtigte \xC4nderungen an vertraglichen Vereinbarungen\
+        \ mit Subdienstleistungsunternehmen, die in die Bereitstellung des Cloud-Dienstes\
+        \ involviert sind, unverz\xFCglich schriftlich oder per E-Mail mitteilt."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.b.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.b
+      ref_id: NCD.2.2.02.b.i
+      description: "Diese Mitteilung SOLLTE zeitlich vor Umsetzung der \xC4nderung\
+        \ erfolgen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.b.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.b
+      ref_id: NCD.2.2.02.b.ii
+      description: "Der Cloud-Diensteanbieter MUSS der Einrichtung insbesondere mitteilen,\
+        \ wenn er bestehende Vertragsverh\xE4ltnisse beendet oder neue Vertragsverh\xE4\
+        ltnisse mit Subdienstleistungsunternehmen eingeht. Vertragsverh\xE4ltnisse\
+        \ in diesem Sinne schlie\xDFen alle mitgeltenden Dokumente und Regelungen,\
+        \ wie z. B. Leistungsscheine, Dienstg\xFCtevereinbarungen oder Allgemeine\
+        \ Gesch\xE4fts- und Einkaufsbedingungen ein."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02
+      ref_id: NCD.2.2.02.c
+      description: "Diese Mitteilungen KANN der Cloud-Diensteanbieter z. B. \xFCber\
+        \ Internetportale oder Push-Benachrichtigungen bereitstellen, wenn die Einrichtung\
+        \ diese Anforderungen als erf\xFCllt ansieht."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.02
+      ref_id: NCD.2.2.02.d
+      description: "Falls der Cloud-Diensteanbieter Subdienstleistungsunternehmen\
+        \ einbezieht oder anderweitig wesentliche Teile der Entwicklung oder Bereitstellung\
+        \ des Cloud-Dienstes an Unterauftragnehmer auslagert, MUSS sich die Einrichtung\
+        \ vom Cloud-Diensteanbieter zusichern lassen, dass\n - die Subdienstleistungsunternehmen\
+        \ und Unterauftragnehmer die zwischen der Einrichtung und dem Cloud-Diensteanbieter\
+        \ vertraglich festgelegten Vorgaben ebenfalls erf\xFCllen und\n - sich die\
+        \ Pr\xFCfrechte, die der Cloud-Diensteanbieter der Einrichtung zugesichert\
+        \ hat, auch auf die Subdienstleistungsunternehmen und Unterauftragnehmer des\
+        \ Cloud-Diensteanbieters beziehen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.03
+      name: Gerichtsbarkeit
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03
+      ref_id: NCD.2.2.03.a
+      description: "Die Einrichtung SOLLTE zur Absicherung der Verf\xFCgbarkeit als\
+        \ Teil der Informationssicherheit Vereinbarungen ausschlie\xDFlich nach deutschem\
+        \ Recht und deutschem Gerichtsstand und ohne obligatorisch vorab zu betreibende\
+        \ Schlichtungsverfahren abschlie\xDFen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03
+      ref_id: NCD.2.2.03.b
+      description: "Die Einrichtung MUSS ber\xFCcksichtigen, dass bei gegebenenfalls\
+        \ notwendigem Rechtsschutz beziehungsweise Eilrechtsschutz Zeitverluste eintreten\
+        \ k\xF6nnen, insbesondere durch eine Einarbeitung in fremde Rechtsordnungen\
+        \ oder ein Auftreten vor entfernt gelegenen Gerichten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.03
+      ref_id: NCD.2.2.03.c
+      description: "Die Einrichtung MUSS beim Verhandeln des Vertrages sicherstellen,\
+        \ dass sie handlungsf\xE4hig bleibt und ihre Forderungen effektiv durchsetzen\
+        \ kann."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.04
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.04
+      name: Lokation der Datenverarbeitung
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.04.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.04
+      ref_id: NCD.2.2.04.a
+      description: "Die Einrichtung MUSS pr\xFCfen, ob die dienstlichen Daten an den\
+        \ vertraglich zugesicherten Lokationen verarbeitet werden d\xFCrfen. Hierzu\
+        \ MUSS die Einrichtung die Ergebnisse der Datenkategorisierung und der Risikoanalyse,\
+        \ das m\xF6gliche Risiko eines fremdstaatlichen Zugriffs (z. B. durch Nachrichtendienste\
+        \ oder Ermittlungsbeh\xF6rden) sowie weitere Anforderungen (z. B. aus Gesetzen,\
+        \ Verordnungen, Beschl\xFCssen oder anderen Quellen) bewerten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.04.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.04
+      ref_id: NCD.2.2.04.b
+      description: "Die Einrichtung MUSS s\xE4mtliche Lokationen, an denen der Cloud-Diensteanbieter\
+        \ mit dem Cloud-Dienst dienstliche Daten speichert und verarbeitet, vertraglich\
+        \ festlegen. Dabei MUSS die Einrichtung auch Datensicherungen ber\xFCcksichtigen,\
+        \ da diese ggf. an Drittlokationen durchgef\xFChrt werden."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A9"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.05
+      name: "Meldepflicht sicherheitsrelevanter Vorf\xE4lle"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05
+      ref_id: NCD.2.2.05.a
+      description: "Die Einrichtung MUSS die Pflichten des Cloud-Diensteanbieters,\
+        \ sicherheitsrelevante Vorf\xE4lle (sowie ggf. andere Vorf\xE4lle) gegen\xFC\
+        ber der Einrichtung zu melden, vertraglich regeln."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05.a.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05.a
+      ref_id: NCD.2.2.05.a.i
+      description: "Die Einrichtung MUSS beim Festlegen von Vertragsstrafen und Haftungsfragen\
+        \ auf ein angemessenes Verh\xE4ltnis zum ermittelten Schutzbedarf der mit\
+        \ dem Cloud-Dienst verarbeiteten dienstlichen Daten achten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05.a.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.05.a
+      ref_id: NCD.2.2.05.a.ii
+      description: "Beim Festlegen von Vertragsstrafen und Haftungsregelungen sind\
+        \ die aus rechtlicher Sicht zul\xE4ssigen Grenzen zu ber\xFCcksichtigen. Die\
+        \ Einrichtung SOLLTE bei der Ansetzung von Vertragsstrafen 5% des Auftragsvolumens\
+        \ nicht unterschreiten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.06
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.06
+      name: "Beendigung des Vertragsverh\xE4ltnisses"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.06.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.06
+      ref_id: NCD.2.2.06.a
+      description: "Die Einrichtung MUSS dem Anwendungsfall angemessene K\xFCndigungsfristen\
+        \ festlegen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A9 & OPS.2.2.A14"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.06.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.06
+      ref_id: NCD.2.2.06.b
+      description: "Soweit rechtlich m\xF6glich, MUSS die Einrichtung kurzfristige\
+        \ einseitige K\xFCndigungs- oder Zur\xFCckbehaltungsrechte an den Leistungen\
+        \ zu Lasten der Einrichtung ausschlie\xDFen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.07
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.2.07
+      name: "Regelung der Datenr\xFCckgabe und Datenl\xF6schung"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.07.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.07
+      ref_id: NCD.2.2.07.a
+      description: "Die Einrichtung MUSS mit dem Cloud-Diensteanbieter vertraglich\
+        \ regeln, wie dieser die mit dem Cloud-Dienst verarbeiteten dienstlichen Daten\
+        \ nach Beendigung der Nutzung an die Einrichtung \xFCbergibt (z. B. Fristen,\
+        \ Datenformat, Datentr\xE4ger, Protokolle)."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.07.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.2.07
+      ref_id: NCD.2.2.07.b
+      description: "Die Einrichtung MUSS mit dem Cloud-Diensteanbieter vertraglich\
+        \ regeln, welche Ma\xDFnahmen dieser zur L\xF6schung der dienstlichen Daten\
+        \ durchf\xFChrt. Dabei MUSS die Einrichtung sicherstellen, dass die Ma\xDF\
+        nahmen dem zuvor ermittelten Schutzbedarf entsprechen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A9"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.01
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.3.01
+      name: Einbindung in das ISMS
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.01.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.01
+      ref_id: NCD.2.3.01.a
+      description: Die Einrichtung MUSS den externen Cloud-Dienst in ihr eigenes Informationssicherheits-managementsystem
+        (ISMS) einbinden.
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A12"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.01.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.01
+      ref_id: NCD.2.3.01.b
+      description: "Die Einrichtung MUSS die im C5-Bericht genannten korrespondierenden\
+        \ Kontrollen f\xFCr Cloud-Kunden  in ihrem ISMS einrichten. Die Einrichtung\
+        \ SOLLTE dar\xFCber hinaus die im C5 beschriebenen korrespondierenden Kriterien\
+        \ f\xFCr Kunden ber\xFCcksichtigen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.3.02
+      name: Auswertung von Sicherheitsnachweisen
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02
+      ref_id: NCD.2.3.02.a
+      description: Die Einrichtung MUSS die Nachweise und sonstige Berichte des Cloud-Diensteanbieters
+        auswerten.
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A13"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02.a.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02.a
+      ref_id: NCD.2.3.02.a.i
+      description: "Diese D\xDCRFEN \xFCber den Nutzungszeitraum KEINE zeitlichen\
+        \ L\xFCcken enthalten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02.a.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02.a
+      ref_id: NCD.2.3.02.a.ii
+      description: Ergeben sich aus der Auswertung Unklarheiten, MUSS die Einrichtung
+        diesen nachgehen.
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.02
+      ref_id: NCD.2.3.02.b
+      description: "Die Einrichtung MUSS pr\xFCfen, ob festgestellten Unklarheiten\
+        \ durch Wahrnehmung der zugesicherten Pr\xFCf- und Kontrollrechte nachzugehen\
+        \ ist."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.3.03
+      name: "Pr\xFCfung der Leistungsf\xE4higkeit"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03
+      ref_id: NCD.2.3.03.a
+      description: "Die Einrichtung MUSS mindestens j\xE4hrlich die Leistungsf\xE4\
+        higkeiten ihrer eigenen IT-Infrastruktur, wie Performance der Netzanbindung\
+        \ und -verbindungen, vor dem Hintergrund der Nutzung des Cloud-Dienstes beurteilen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03
+      ref_id: NCD.2.3.03.b
+      description: Die Einrichtung MUSS ggf. auftretende Abweichungen bewerten und
+        auf diese durch geeignete Anpassungen an der eigenen IT-Infrastruktur und
+        Netzanbindung reagieren.
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.03
+      ref_id: NCD.2.3.03.c
+      description: "Die Einrichtung MUSS mindestens j\xE4hrlich die Leistungsf\xE4\
+        higkeiten des Cloud-Diensteanbieters und des Cloud-Dienstes sowie der Netzverbindung\
+        \ zum Cloud-Diensteanbieter beurteilen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A12"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.04
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.3.04
+      name: Informationspflichten
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.04.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.04
+      ref_id: NCD.2.3.04.a
+      description: "Die Einrichtung MUSS nachhalten, dass der Cloud-Diensteanbieter\
+        \ seinen vertraglichen Informationspflichten stets nachkommt. Dies gilt insbesondere\
+        \ bei\n - einer Eingliederung des Cloud-Diensteanbieters in ein anderes Unternehmen\
+        \ oder einen anderen Konzern oder in sonstigen F\xE4llen des Wechsels des\
+        \ wirtschaftlichen Eigentums an ihm,\n - einem Austausch von Unterauftragnehmern\
+        \ oder Dritten (siehe hierzu auch NCD.2.2.02)."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.04.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.04
+      ref_id: NCD.2.3.04.b
+      description: "Die Einrichtung MUSS Meldungen des Cloud-Diensteanbieters \xFC\
+        ber relevante St\xF6rungen und Cyber-Angriffe dokumentieren und auf diese\
+        \ gem\xE4\xDF der vereinbarten Mitwirkungspflichten nach NCD.2.2.01, Buchstabe\
+        \ c, reagieren."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.05
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.3.05
+      name: Multi-Faktor-Authentisierung
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.05.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.05
+      ref_id: NCD.2.3.05.a
+      description: "Bietet der externe Cloud-Dienst eine Multi-Faktor-Authentisierung\
+        \ f\xFCr Anmeldungen von Benutzenden (Log-in) an, SOLLTE die Einrichtung diese\
+        \ nutzen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.05.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.3.05
+      ref_id: NCD.2.3.05.b
+      description: "Bietet der externe Cloud-Dienst eine Multi-Faktor-Authentisierung\
+        \ f\xFCr Anmeldungen von Benutzenden mit privilegierten Rechten (Log-in),\
+        \ wie bspw. zur Administration, an, MUSS die Einrichtung diese nutzen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.01
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.4.01
+      name: "Datenr\xFCckgabe bei Beendigung"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.01.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.01
+      ref_id: NCD.2.4.01.a
+      description: "Die Einrichtung MUSS pr\xFCfen, ob der Cloud-Diensteanbieter alle\
+        \ dienstlichen Daten in der vereinbarten Form zur\xFCck \xFCbergeben hat."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A14 & OPS.2.2.A15"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.01.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.01
+      ref_id: NCD.2.4.01.b
+      description: "Die Einrichtung MUSS die \xDCbergabe dokumentieren."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A14"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.4.02
+      name: "Datenl\xF6schung bei Beendigung"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02
+      ref_id: NCD.2.4.02.a
+      description: "Die Einrichtung MUSS sich vom Cloud-Diensteanbieter die gem. NCD.2.2.07\
+        \ erfolgte L\xF6schung aller dienstlichen Daten, einschlie\xDFlich vorhandener\
+        \ Datensicherungen, best\xE4tigen lassen.  Dies umfasst die Best\xE4tigung,\
+        \ dass die dienstlichen Daten gem\xE4\xDF der vertraglich vereinbarten Verfahren\
+        \ gel\xF6scht wurden."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A14 & OPS.2.2.A15"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02
+      ref_id: NCD.2.4.02.b
+      description: "Die Best\xE4tigung nach Buchstabe a MUSS auch Daten und Datensicherungen\
+        \ bei m\xF6glichen Unterauftragnehmern (z. B. Subdienstleistungsunternehmen)\
+        \ und anderen externen Dritten umfassen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A14"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.4.02
+      ref_id: NCD.2.4.02.c
+      description: "Die Einrichtung MUSS die durch den Cloud-Diensteanbieter best\xE4\
+        tigte Datenl\xF6schung dokumentieren."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A14"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      assessable: false
+      depth: 1
+      ref_id: NCD.2.5.01
+      name: Mitnutzung externer Cloud-Dienste
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.a
+      description: "Die Einrichtung MUSS sicherstellen, dass die Mitnutzung mit der\
+        \ eigenen Strategie f\xFCr die Cloud-Nutzung (siehe NCD.2.1.01) vereinbar\
+        \ ist."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.b
+      description: Die Einrichtung MUSS die Sicherheitsanforderungen nach NCD.2.1.03,
+        Buchstaben d bis i, umsetzen und einhalten.
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.c
+      description: "Die Einrichtung MUSS ermitteln, an welchen Lokationen mit dem\
+        \ externen Cloud-Dienst dienstliche Daten verarbeitet werden. Dies schlie\xDF\
+        t auch Datensicherungen sowie, sofern gegeben, Unterauftragnehmer und Subdienstleister\
+        \ des Cloud-Diensteanbieters ein."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.c.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.c
+      ref_id: NCD.2.5.01.c.i
+      description: "Die Einrichtung MUSS bewerten, ob die dienstlichen Daten an diesen\
+        \ Lokationen verarbeitet werden d\xFCrfen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.c.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.c
+      ref_id: NCD.2.5.01.c.ii
+      description: "F\xFCr diese Bewertung MUSS die Einrichtung insbesondere die Ergebnisse\
+        \ der Datenkategorisierung sowie, sofern gegeben, weitere Anforderungen (z.\
+        \ B. aus Gesetzen, Verordnungen, Beschl\xFCssen oder anderen Quellen) heranziehen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.d
+      description: "Die Einrichtung MUSS ermitteln, welche Rechte an den dienstlichen\
+        \ Daten dem Cloud-Diensteanbieter oder Dritten durch das Akzeptieren der vom\
+        \ Cloud-Diensteanbieter vorgegebenen Allgemeinen Gesch\xE4ftsbedingungen (AGB),\
+        \ Datenschutzerkl\xE4rung oder sonstigen Nutzungsbedingungen einger\xE4umt\
+        \ werden."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.d.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.d
+      ref_id: NCD.2.5.01.d.i
+      description: Die Einrichtung MUSS bewerten, ob diese Rechte mit den eigenen
+        Sicherheitsanforderungen, die sie in der Sicherheitsrichtlinie und dem eigenen
+        Sicherheitskonzept definiert hat, vereinbar sind.
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.d.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.d
+      ref_id: NCD.2.5.01.d.ii
+      description: "Die Einrichtung MUSS insbesondere die Nutzungsbedingungen und\
+        \ die Datenschutzerkl\xE4rung des Cloud-Diensteanbieters auswerten."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.e
+      description: "Die Einrichtung MUSS bewerten, ob und wie die dienstlichen Daten\
+        \ im externen Cloud-Dienst verschl\xFCsselt zu speichern sind. F\xFCr die\
+        \ anschlie\xDFende Bewertung SOLLTE die Einrichtung die identifizierten Risiken\
+        \ mit der eigenen Strategie f\xFCr die Cloud-Nutzung (siehe NCD.2.1.01) abgleichen."
+      annotation: "IT-Grundschutz-Kompendium 2022 \nOPS.2.2.A17"
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.e.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.e
+      ref_id: NCD.2.5.01.e.i
+      description: "Die Einrichtung MUSS dann bewerten, ob die Verschl\xFCsselung\
+        \ mit den Anforderungen aus den Ergebnissen der Datenkategorisierung vereinbar\
+        \ ist."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.e.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.e
+      ref_id: NCD.2.5.01.e.ii
+      description: "Ist die vom Cloud-Diensteanbieter eingesetzte Verschl\xFCsselung\
+        \ nicht geeignet, MUSS die Einrichtung pr\xFCfen, ob Anforderungen an die\
+        \ Vertraulichkeit der Daten \xFCber eine clientseitige Verschl\xFCsselung\
+        \ erf\xFCllt werden k\xF6nnen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.f
+      description: "Die Einrichtung MUSS erheben, wie und wann Daten durch den Cloud-Anbieter\
+        \ gel\xF6scht werden (z.B. L\xF6schfristen). Die Einrichtung MUSS dann bewerten,\
+        \ ob dies mit den Anforderungen aus den Ergebnissen der Datenkategorisierung\
+        \ vereinbar ist. "
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.g
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01
+      ref_id: NCD.2.5.01.g
+      description: "Die Einrichtung MUSS ermitteln, ob f\xFCr die Mitnutzung auf den\
+        \ eigenen Arbeitsplatzcomputern oder mobilen Endger\xE4ten zus\xE4tzliche\
+        \ Softwareinstallationen erforderlich sind."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.g.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.g
+      ref_id: NCD.2.5.01.g.i
+      description: "Die Einrichtung MUSS bewerten, ob die hierf\xFCr einzur\xE4umenden\
+        \ Zugriffs- und Ausf\xFChrungsrechte mit der eigenen Sicherheitsrichtlinie\
+        \ vereinbar sind und inwiefern gesonderte Lizenzen f\xFCr die Mitnutzung eingeholt\
+        \ werden m\xFCssen."
+    - urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.g.ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:bsi-externer-cloud-dienste:ncd.2.5.01.g
+      ref_id: NCD.2.5.01.g.ii
+      description: "Ist ein Zugriff \xFCber mobile Endger\xE4te geplant, MUSS die\
+        \ Einrichtung diese zentral verwalten. Die Vorgaben des Mindeststandards Mobile\
+        \ Device Management sind zu beachten."
