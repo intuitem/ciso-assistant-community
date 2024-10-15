@@ -398,7 +398,7 @@ export class TestContent {
 					name: '',
 					description: '',
 					business_value: '',
-					type: 'Support'
+					type: 'Supporting'
 					//TODO add parent_assets
 				}
 			},
