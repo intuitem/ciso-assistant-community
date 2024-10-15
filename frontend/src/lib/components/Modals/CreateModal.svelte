@@ -15,7 +15,7 @@
 	export let riskAssessmentDuplication = false;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let formAction = '?/create';
-	export let context = 'default';
+	export let context = 'create';
 	let closeModal = true;
 	export let suggestions: { [key: string]: any } = {};
 
@@ -52,7 +52,7 @@
 			{invalidateAll}
 			{model}
 			{closeModal}
-			context="create"
+			{context}
 			{riskAssessmentDuplication}
 			caching={true}
 			action={formAction}

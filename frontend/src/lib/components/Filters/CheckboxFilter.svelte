@@ -1,5 +1,4 @@
 <script lang="ts">
-	export let options: any[];
 	export let value: boolean = false;
 	export let title: string = 'Filter: ';
 </script>
