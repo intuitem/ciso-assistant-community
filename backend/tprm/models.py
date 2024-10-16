@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.models import Assessment, ComplianceAssessment, Evidence
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
 
 
@@ -26,6 +26,15 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Meta:
         verbose_name = _("Entity")
         verbose_name_plural = _("Entities")
+
+    @classmethod
+    def get_main_entity(cls):
+        return (
+            cls.objects.filter(builtin=True)
+            .filter(owned_folders=Folder.get_root_folder())
+            .order_by("created_at")
+            .first()
+        )
 
 
 class EntityAssessment(Assessment):

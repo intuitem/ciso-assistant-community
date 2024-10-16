@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	// export let name: string;
-	export let s_label = '';
-
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
