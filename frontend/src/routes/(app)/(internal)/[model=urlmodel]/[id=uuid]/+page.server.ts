@@ -21,9 +21,29 @@ import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
+	const modelInfo = getModelInfo(event.params.model + '_duplicate');
+	const foreignKeys: Record<string, any> = {};
+
+	if (modelInfo.foreignKeyFields) {
+		await Promise.all(
+			modelInfo.foreignKeyFields.map(async (keyField) => {
+				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+				const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+				const response = await event.fetch(url);
+				if (response.ok) {
+					foreignKeys[keyField.field] = await response.json().then((data) => data.results);
+				} else {
+					console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+				}
+			})
+		);
+	}
+
+	modelInfo['foreignKeys'] = foreignKeys;
+
 	const data = await loadDetail({
 		event,
-		model: getModelInfo(event.params.model),
+		model: modelInfo,
 		id: event.params.id
 	});
 
