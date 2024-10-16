@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils.formats import date_format
 
 import magic
 import structlog
@@ -167,13 +168,13 @@ def get_build(request):
     VERSION = settings.VERSION
     BUILD = settings.BUILD
     LICENSE_SEATS = settings.LICENSE_SEATS
-    LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
+    LICENSE_EXPIRATION = datetime.fromisoformat(settings.LICENSE_EXPIRATION)
     return Response(
         {
             "version": VERSION,
             "build": BUILD,
             "license_seats": LICENSE_SEATS,
             "available_seats": LICENSE_SEATS - len(User.get_editors()),
-            "license_expiration": LICENSE_EXPIRATION,
+            "license_expiration": date_format(LICENSE_EXPIRATION, use_l10n=True),
         }
     )
