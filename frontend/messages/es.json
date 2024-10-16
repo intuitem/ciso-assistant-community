@@ -674,5 +674,7 @@
 	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo.",
 	"backupLoadingError": "Se produjo un error al cargar la copia de seguridad.",
 	"backupGreaterVersionError": "No se puede cargar la copia de seguridad, la versión de la copia de seguridad es superior a la versión actual de la aplicación.",
-	"backupLowerVersionError": "Se produjo un error, la versión de respaldo puede ser demasiado antigua, si es así debe actualizarse antes de volver a intentarlo."
+	"backupLowerVersionError": "Se produjo un error, la versión de respaldo puede ser demasiado antigua, si es así debe actualizarse antes de volver a intentarlo.",
+	"questionSingular": "Pregunta",
+	"questionPlural": "Preguntas"
 }
