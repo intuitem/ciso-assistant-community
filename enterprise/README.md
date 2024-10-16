@@ -33,7 +33,7 @@ cd ../backend
 poetry shell
 ```
 
-3. Install enterprise backend module
+3. Install enterprise backend module.
 
 ```sh
 cd ../enterprise/backend
@@ -46,7 +46,19 @@ poetry install
 export SQLITE_FILE=db/ciso-assistant-enterprise.sqlite3
 ```
 
-5. Run the development server
+5. Apply migrations.
+
+```sh
+poetry run ./manage.sh migrate
+```
+
+6. Create a Django superuser, that will be CISO Assistant administrator.
+
+```sh
+poetry run ./manage.sh createsuperuser
+```
+
+7. Run the development server.
 
 ```sh
 poetry run ./manage.sh runserver
@@ -54,13 +66,13 @@ poetry run ./manage.sh runserver
 
 ### Running the frontend
 
-1. cd into the enteprise frontend directory
+1. cd into the enteprise frontend directory.
 
 ```bash
 cd enterprise/frontend
 ```
 
-3. Start a development server (make sure that the django app is running)
+3. Start a development server (make sure that the django app is running).
 
 ```bash
 make dev
