@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 
@@ -120,8 +121,8 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && localItems()[toCamelCase(option.label)]}
-					{localItems()[toCamelCase(option.label)]}
+				{:else if translateOptions && safeTranslate(toCamelCase(option.label))}
+					{safeTranslate(toCamelCase(option.label))}
 				{:else}
 					{option.label}
 				{/if}

@@ -7,8 +7,8 @@
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -28,7 +28,7 @@
 			{#if value}
 				{m.missingMandatoyObjects1({ model: $modalStore[0].body })}:
 				{#each value as key}
-					<li class="font-bold">{localItems()[toCamelCase(key)]}</li>
+					<li class="font-bold">{safeTranslate(toCamelCase(key))}</li>
 				{/each}
 				{m.missingMandatoyObjects2()}.
 			{/if}

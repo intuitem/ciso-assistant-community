@@ -1,7 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
-import { localItems, toCamelCase } from '$lib/utils/locales';
+import { toCamelCase } from '$lib/utils/locales';
+import { safeTranslate } from '$lib/utils/i18n';
 import * as m from '$paraglide/messages';
 
 import { fail, type Actions } from '@sveltejs/kit';
@@ -53,7 +54,7 @@ export const actions: Actions = {
 		return message(
 			rejectForm,
 			m.successfullyRejectedObject({
-				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: safeTranslate(toCamelCase(model.toLowerCase())).toLowerCase(),
 				id: id
 			})
 		);
@@ -87,7 +88,7 @@ export const actions: Actions = {
 		return message(
 			acceptForm,
 			m.successfullyValidatedObject({
-				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: safeTranslate(toCamelCase(model.toLowerCase())).toLowerCase(),
 				id: id
 			})
 		);
@@ -121,7 +122,7 @@ export const actions: Actions = {
 		return message(
 			revokeForm,
 			m.successfullyRevokedObject({
-				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: safeTranslate(toCamelCase(model.toLowerCase())).toLowerCase(),
 				id: id
 			})
 		);

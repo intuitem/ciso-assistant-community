@@ -12,7 +12,8 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 
 	import * as m from '$paraglide/messages';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
@@ -72,7 +73,7 @@
 						class="text-sm font-medium text-gray-800 capitalize-first"
 						data-testid={key.replace('_', '-') + '-field-title'}
 					>
-						{localItems()[toCamelCase(key)]}
+						{safeTranslate(toCamelCase(key))}
 					</div>
 					<ul class="text-sm">
 						<li
