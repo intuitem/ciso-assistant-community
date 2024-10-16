@@ -150,20 +150,6 @@
 		modalStore.trigger(modal);
 	}
 
-	function getForms(model: Record<string, any>) {
-		let { form: createForm, message: createMessage } = superForm(model.createForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		});
-		let { form: deleteForm, message: deleteMessage } = superForm(model.deleteForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		});
-		return { createForm, createMessage, deleteForm, deleteMessage };
-	}
-
-	let forms: Record<string, any> = {};
-
 	const user = $page.data.user;
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${data.model.name}`);
 
@@ -175,9 +161,6 @@
 			!data.data.builtin
 		);
 	};
-	$: Object.entries(data.relatedModels).forEach(([key, value]) => {
-		forms[key] = getForms(value);
-	});
 </script>
 
 <div class="flex flex-col space-y-2">

@@ -155,7 +155,7 @@
 							{/if}
 						{/each}
 					{/if}
-					{#if node.question.questions}
+					{#if node.question && node.question.questions}
 						{#if node.question.questions.length > 1}
 							<span
 								class="badge"
