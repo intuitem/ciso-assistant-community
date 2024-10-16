@@ -6,7 +6,8 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import * as m from '$paraglide/messages';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.framework);
@@ -48,7 +49,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{localItems()[toCamelCase(key)]}
+							{safeTranslate(toCamelCase(key))}
 						{/if}
 					</div>
 					<ul class="text-sm">

@@ -26,7 +26,8 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
@@ -202,7 +203,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{localItems()[toCamelCase(key)]}
+							{safeTranslate(toCamelCase(key))}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -243,8 +244,8 @@
 									{:else}
 										{value.str}
 									{/if}
-								{:else if localItems()[toCamelCase(value.str ?? value)]}
-									{localItems()[toCamelCase(value.str ?? value)]}
+								{:else if safeTranslate(toCamelCase(value.str ?? value))}
+									{safeTranslate(toCamelCase(value.str ?? value))}
 								{:else}
 									{value.str ?? value}
 								{/if}

@@ -27,7 +27,8 @@
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';
-	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
+	import { capitalizeFirstLetter } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { languageTag } from '$paraglide/runtime';
 	import { zod } from 'sveltekit-superforms/adapters';
 
@@ -72,7 +73,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: safeTranslate('add' + capitalizeFirstLetter(data.measureModel.localName))
 		};
 		modalStore.trigger(modal);
 	}
