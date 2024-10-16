@@ -18,7 +18,7 @@
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
 	import * as m from '$paraglide/messages';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	// Event Dispatcher
@@ -368,8 +368,8 @@
                   {/if}
                 {:else if value && value.hexcolor}
                   <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(value.hexcolor)}" style="background-color: {value.hexcolor}">
-                    {#if localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
-                      {localItems()[toCamelCase(value.name ?? value.str ?? '-')]}
+                    {#if safeTranslate(toCamelCase(value.name ?? value.str ?? '-'))}
+                      {safeTranslate(toCamelCase(value.name ?? value.str ?? '-'))}
                     {:else}
                       {value.name ?? value.str ?? '-'}
                     {/if}
@@ -377,8 +377,8 @@
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
-					{#if localItems()[toCamelCase(value)]}
-						{localItems()[toCamelCase(value)]}
+					{#if safeTranslate(toCamelCase(value))}
+						{safeTranslate(toCamelCase(value))}
 					{:else}
 						{value ?? '-'}
 					{/if}
