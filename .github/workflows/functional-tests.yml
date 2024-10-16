@@ -97,8 +97,9 @@ jobs:
         run: |
           export $(grep -v '^#' .env | xargs)
           echo BACKEND_LOGFILE=${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-backend.log >> "$GITHUB_ENV"
+          touch ${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-backend.log
           python manage.py createsuperuser --noinput
-          nohup python manage.py runserver > "$BACKEND_LOGFILE" &
+          nohup python manage.py runserver > ${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-backend.log &
       - name: Build frontend
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
@@ -201,6 +202,7 @@ jobs:
         run: |
           export $(grep -v '^#' .env | xargs)
           echo ENTERPRISE_BACKEND_LOGFILE=${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-enterprise-backend.log >> "$GITHUB_ENV"
+          touch "$ENTERPRISE_BACKEND_LOGFILE"
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} > "$ENTERPRISE_BACKEND_LOGFILE" &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
