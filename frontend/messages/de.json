@@ -678,5 +678,6 @@
 	"backupLoadingError": "Beim Laden der Sicherung ist ein Fehler aufgetreten.",
 	"backupGreaterVersionError": "Das Backup kann nicht geladen werden, die Version des Backups ist höher als die aktuelle Version Ihrer Anwendung.",
 	"backupLowerVersionError": "Ein Fehler ist aufgetreten. Die Sicherungsversion ist möglicherweise zu alt. Wenn dies der Fall ist, muss sie vor einem erneuten Versuch aktualisiert werden.",
-	"errorLicenseSeatsExceeded": "Die von Ihrer Lizenz zugelassene Anzahl an Editorplätzen ist überschritten. Sie können diesem Benutzer keine Bearbeitungsrechte mehr erteilen. Wenden Sie sich bitte an Ihren Administrator."
+	"errorLicenseSeatsExceeded": "Die von Ihrer Lizenz zugelassene Anzahl an Editorplätzen ist überschritten. Sie können diesem Benutzer keine Bearbeitungsrechte mehr erteilen. Wenden Sie sich bitte an Ihren Administrator.",
+	"availableSeats": "Verfügbare Plätze"
 }

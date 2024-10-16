@@ -715,5 +715,6 @@
 	"backupLoadingError": "Wystąpił błąd podczas ładowania kopii zapasowej.",
 	"backupGreaterVersionError": "Nie można załadować kopii zapasowej. Wersja kopii zapasowej jest nowsza niż bieżąca wersja aplikacji.",
 	"backupLowerVersionError": "Wystąpił błąd. Wersja kopii zapasowej może być za stara. Jeśli tak, należy ją zaktualizować przed ponowną próbą.",
-	"errorLicenseSeatsExceeded": "Liczba miejsc redaktora dozwolona przez Twoją licencję została przekroczona, nie będziesz mógł przyznać praw do edycji temu użytkownikowi. Skontaktuj się z administratorem."
+	"errorLicenseSeatsExceeded": "Liczba miejsc redaktora dozwolona przez Twoją licencję została przekroczona, nie będziesz mógł przyznać praw do edycji temu użytkownikowi. Skontaktuj się z administratorem.",
+	"availableSeats": "Dostępne miejsca"
 }
