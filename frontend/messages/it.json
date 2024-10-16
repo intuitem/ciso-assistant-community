@@ -678,5 +678,6 @@
 	"backupLoadingError": "Si è verificato un errore durante il caricamento del backup.",
 	"backupGreaterVersionError": "Impossibile caricare il backup, la versione del backup è successiva alla versione corrente dell'applicazione.",
 	"backupLowerVersionError": "Si è verificato un errore, la versione di backup potrebbe essere troppo vecchia. In tal caso, è necessario aggiornarla prima di riprovare.",
-	"errorLicenseSeatsExceeded": "Il numero di postazioni di modifica consentite dalla tua licenza è stato superato, non potrai concedere diritti di modifica a questo utente. Contatta il tuo amministratore."
+	"errorLicenseSeatsExceeded": "Il numero di postazioni di modifica consentite dalla tua licenza è stato superato, non potrai concedere diritti di modifica a questo utente. Contatta il tuo amministratore.",
+	"availableSeats": "Posti disponibili"
 }
