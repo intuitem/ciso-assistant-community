@@ -3,7 +3,7 @@
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
-	export let title = '';
+	// export let title = '';
 	export let name = '';
 
 	interface ndChartData {

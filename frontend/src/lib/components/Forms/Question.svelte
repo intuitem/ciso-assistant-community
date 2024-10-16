@@ -2,7 +2,6 @@
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
-
 	let _class = 'w-fit';
 	import * as m from '$paraglide/messages.js';
 
@@ -43,7 +42,11 @@
 				{#if question.type === 'unique_choice'}
 					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
 						{#each question.options as option}
-							<RadioItem bind:group={question.answer} name="question" value={option}
+							<RadioItem
+								bind:group={question.answer}
+								name="question"
+								value={option}
+								on:click={() => (question.answer = question.answer === option ? null : option)}
 								>{option}</RadioItem
 							>
 						{/each}
