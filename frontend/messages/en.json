@@ -777,7 +777,6 @@
 	"showImagesUnauthenticatedHelpText": "If disabled, the regular CISO Assistant logo and favicon will be displayed on the login screen",
 	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator",
 	"catalog": "Catalog",
-	"actions": "Actions",
 	"operations": "Operations",
 	"questionSingular": "Question",
 	"questionPlural": "Questions"
