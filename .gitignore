@@ -6,7 +6,7 @@
 *.sqlite3
 django_secret_key
 temp/
-db/
+./db/
 .dccache
 /backend/profiles
 ./backend/ciso_assistant/.meta
