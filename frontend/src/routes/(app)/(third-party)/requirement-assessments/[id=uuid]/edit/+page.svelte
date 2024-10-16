@@ -41,7 +41,6 @@
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { capitalizeFirstLetter } from '$lib/utils/locales';
-	import { safeTranslate } from '$lib/utils/i18n';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
