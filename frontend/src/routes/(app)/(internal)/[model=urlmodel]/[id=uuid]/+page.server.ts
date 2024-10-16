@@ -81,7 +81,7 @@ export const actions: Actions = {
 
 		if (!formData) return;
 
-		const schema = modelSchema(event.params.model as string);
+		const schema = modelSchema((event.params.model + '_duplicate') as string);
 
 		const form = await superValidate(formData, zod(schema));
 

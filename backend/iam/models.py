@@ -2,7 +2,7 @@
 Inspired from Azure IAM model"""
 
 from collections import defaultdict
-from typing import Any, List, Self, Tuple
+from typing import Any, List, Self, Tuple, Generator
 import uuid
 from django.utils import timezone
 from django.db import models
@@ -99,23 +99,31 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def sub_folders(self) -> List[Self]:
+    def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
 
-        def sub_folders_in(f, sub_folder_list):
-            for sub_folder in f.folder_set.all():
-                sub_folder_list.append(sub_folder)
-                sub_folders_in(sub_folder, sub_folder_list)
-            return sub_folder_list
+        def sub_folders_in(folder):
+            for sub_folder in folder.folder_set.all():
+                yield sub_folder
+                yield from sub_folders_in(sub_folder)
 
-        return sub_folders_in(self, [])
+        yield from sub_folders_in(self)
 
-    def get_parent_folders(self) -> List[Self]:
+    # Should we update data-model.md now that this method is a generator ?
+    def get_parent_folders(self) -> Generator[Self, None, None]:
         """Return the list of parent folders"""
+        current_folder = self
+        while (current_folder := current_folder.parent_folder) is not None:
+            yield current_folder
+
+    # Is this function usefull ?
+    def can_access(self, folder: Self) -> bool:
         return (
-            [self.parent_folder] + Folder.get_parent_folders(self.parent_folder)
-            if self.parent_folder
-            else []
+            self == folder
+            or any(
+                folder == parent_folder for parent_folder in self.get_parent_folders()
+            )
+            or any(folder == sub_folder for sub_folder in self.get_sub_folders())
         )
 
     @staticmethod
@@ -635,11 +643,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         ]:
             for f in ra.perimeter_folders.all():
                 folders_set.add(f)
-                folders_set.update(f.sub_folders())
+                folders_set.update(f.get_sub_folders())
         # calculate perimeter
         perimeter = set()
         perimeter.add(folder)
-        perimeter.update(folder.sub_folders())
+        perimeter.update(folder.get_sub_folders())
         # return filtered result
         return [
             x.id
@@ -676,7 +684,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         folder_for_object = {x: Folder.get_folder(x) for x in all_objects}
         perimeter = set()
         perimeter.add(folder)
-        perimeter.update(folder.sub_folders())
+        perimeter.update(folder.get_sub_folders())
         for ra in [
             x
             for x in RoleAssignment.get_role_assignments(user)
@@ -685,7 +693,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ra_permissions = ra.role.permissions.all()
             for my_folder in perimeter & set(ra.perimeter_folders.all()):
                 target_folders = (
-                    [my_folder] + my_folder.sub_folders()
+                    [my_folder, *my_folder.get_sub_folders()]
                     if ra.is_recursive
                     else [my_folder]
                 )
@@ -705,18 +713,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if hasattr(object_type, "is_published"):
             for my_folder in folders_with_local_view:
-                target_folders = []
-                my_folder2 = my_folder
-                while my_folder2:
-                    if my_folder2 != my_folder:
-                        target_folders.append(my_folder2)
-                    my_folder2 = my_folder2.parent_folder
-                for object in [
-                    x
-                    for x in all_objects
-                    if folder_for_object[x] in target_folders and x.is_published
-                ]:
-                    permissions_per_object_id[object.id].add(permissions[0])
+                if my_folder.content_type != Folder.ContentType.ENCLAVE:
+                    target_folders = []
+                    my_folder2 = my_folder
+                    while my_folder2:
+                        if my_folder2 != my_folder:
+                            target_folders.append(my_folder2)
+                        my_folder2 = my_folder2.parent_folder
+                    for object in [
+                        x
+                        for x in all_objects
+                        if folder_for_object[x] in target_folders and x.is_published
+                    ]:
+                        permissions_per_object_id[object.id].add(permissions[0])
 
         return (
             [

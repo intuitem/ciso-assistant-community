@@ -927,11 +927,12 @@ class AppliedControlViewSet(BaseModelViewSet):
         if UUID(pk) in object_ids_view:
             applied_control = self.get_object()
             data = request.data
+            new_folder = Folder.objects.get(id=data["folder"])
             duplicate_applied_control = AppliedControl.objects.create(
                 reference_control=applied_control.reference_control,
                 name=data["name"],
                 description=data["description"],
-                folder=Folder.objects.get(id=data["folder"]),
+                folder=new_folder,
                 category=applied_control.category,
                 csf_function=applied_control.csf_function,
                 status=applied_control.status,
@@ -942,11 +943,16 @@ class AppliedControlViewSet(BaseModelViewSet):
                 effort=applied_control.effort,
                 cost=applied_control.cost,
             )
-            # Should we duplicate the owners and evidences ?
-            # duplicate_applied_control.owner.set(applied_control.owner.all())
-            # The evidences must be cloned before being linked to the applied_control if they are not in the same scope (an applied_control with a scope FOLDER1/PROJECT1 must have evidences into FOLDER1/PROJECT1)
-            # duplicate_applied_control.evidences.set(applied_control.evidences.all())
-            # duplicate_applied_control.save() # This line must be used if one of the ManyToManyField of the applied_control is modified during this function execution.
+            if request.data["duplicate_evidences"]:
+                for evidence in applied_control.evidences.all():
+                    # Evidences will only be duplicated if necessary
+                    if new_folder.can_access(evidence.folder):
+                        duplicate_applied_control.evidences.add(evidence)
+                    else:
+                        new_evidence = evidence.duplicate_into_folder(new_folder)
+                        duplicate_applied_control.evidences.add(new_evidence)
+
+                duplicate_applied_control.save()
 
             return Response({"results": "applied control duplicated"})
 

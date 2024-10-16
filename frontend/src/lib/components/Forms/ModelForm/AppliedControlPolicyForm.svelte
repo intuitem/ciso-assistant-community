@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import { getOptions } from '$lib/utils/crud';
@@ -118,6 +119,19 @@
 		bind:cachedValue={formDataCache['cost']}
 	/>
 {/if}
+
+{#if duplicate}
+	<!-- We must set the right translation for this checkbox -->
+	<!-- Duplicate the evidences -->
+	<!-- If disabled, the applied control will be duplicated without its evidences -->
+	<Checkbox
+		{form}
+		field="duplicate_evidences"
+		label={m.showImagesUnauthenticated()}
+		helpText={m.showImagesUnauthenticatedHelpText()}
+	/>
+{/if}
+
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}
