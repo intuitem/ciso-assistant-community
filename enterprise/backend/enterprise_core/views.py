@@ -15,7 +15,7 @@ from rest_framework.decorators import (
 from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import 
+from rest_framework.views import APIView
 
 from django.conf import settings
 
@@ -164,7 +164,7 @@ class ClientSettingsViewSet(BaseModelViewSet):
         return self.handle_file_upload(request, pk, "favicon")
 
 
-class LicenseStatusView():
+class LicenseStatusView(APIView):
     def get(self, request):
         expiry_date_str = settings.LICENSE_EXPIRATION
 
