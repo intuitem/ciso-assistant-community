@@ -1,6 +1,7 @@
 import { safeTranslate } from '$lib/utils/i18n';
 import { availableLanguageTags, setLanguageTag } from '../../src/paraglide/runtime.js';
 import { expect, setHttpResponsesListener, test } from '../utils/test-utils.js';
+import * as m from '$paraglide/messages.js';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
 	test.slow();
@@ -70,9 +71,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
 			setLanguageTag(languageTag);
-			const locales = safeTranslate(languageTag);
 			await sideBar.languageSelect.selectOption(languageTag);
-			await logedPage.hasTitle(locales['analytics']);
+			await logedPage.hasTitle(m.analytics());
 		}
 	});
 
