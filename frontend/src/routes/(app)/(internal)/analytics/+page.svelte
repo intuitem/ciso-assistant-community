@@ -532,7 +532,7 @@
 									<div class="absolute top-2 right-4 mt-2 space-x-1">
 										<div class="flex flex-col space-y-1">
 											<a
-												href="/compliance-assessments/{compliance_assessment.id}/edit"
+												href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
 												class="btn variant-filled-primary"
 												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 											</a>
