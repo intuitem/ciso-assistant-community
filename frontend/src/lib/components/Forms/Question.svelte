@@ -4,7 +4,6 @@
 	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
 
 	let _class = 'w-fit';
-	import * as m from '$paraglide/messages.js';
 
 	export { _class as class };
 	export let label: string | undefined = undefined;
