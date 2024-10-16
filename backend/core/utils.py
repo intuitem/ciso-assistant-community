@@ -65,6 +65,10 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
 }
 
+# NOTE: This is set to "Main" now, but will be changed to a unique identifier
+# for internationalization.
+MAIN_ENTITY_DEFAULT_NAME = "Main"
+
 COUNTRY_FLAGS = {
     "fr": "🇫🇷",
     "en": "🇬🇧",
