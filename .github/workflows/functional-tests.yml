@@ -96,8 +96,10 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
+          echo BACKEND_LOGFILE=${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-backend.log >> "$GITHUB_ENV"
+          touch ${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-backend.log
           python manage.py createsuperuser --noinput
-          nohup python manage.py runserver &
+          nohup python manage.py runserver > ${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-backend.log &
       - name: Build frontend
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
@@ -111,6 +113,7 @@ jobs:
         with:
           name: functional-tests-report-${{ matrix.playwright-browser }}
           path: |
+            ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/results/
             ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
@@ -198,8 +201,10 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
+          echo ENTERPRISE_BACKEND_LOGFILE=${{ matrix.python-version }}-${{ matrix.playwright-browser }}-${{ github.run_id }}-${{ github.run_attempt }}-enterprise-backend.log >> "$GITHUB_ENV"
+          touch "$ENTERPRISE_BACKEND_LOGFILE"
           poetry run python manage.py createsuperuser --noinput
-          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} > "$ENTERPRISE_BACKEND_LOGFILE" &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
@@ -210,6 +215,7 @@ jobs:
         with:
           name: enterprise-functional-tests-report-${{ matrix.playwright-browser }}
           path: |
+            ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/
             ${{ env.enterprise-frontend-build-directory }}/tests/reports/
           retention-days: 5
