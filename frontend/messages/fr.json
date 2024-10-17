@@ -596,7 +596,7 @@
 	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence.",
 	"providerID": "ID fournisseur",
 	"clientID": "ID client",
-	"secret": "Secrète",
+	"secret": "Secret",
 	"key": "Clé",
 	"settings": "Paramètres",
 	"identityProvider": "Fournisseur d'identité",
