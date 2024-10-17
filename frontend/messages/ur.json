@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "غیر فعال ہونے پر، باقاعدہ CISO اسسٹنٹ لوگو اور فیویکن لاگ ان اسکرین پر ظاہر ہوں گے۔",
 	"librariesCanOnlyBeLoadedByAdmin": "لائبریریوں کو صرف ایک منتظم ہی لوڈ کر سکتا ہے۔",
 	"catalog": "کیٹلاگ",
-	"operations": "آپریشنز"
+	"operations": "آپریشنز",
+	"fillMetadataURL": "آپشن 1: میٹا ڈیٹا یو آر ایل کو بھریں۔",
+	"fillSSOSLOURLx509cert": "اختیار 2: SSO URL، SLO URL اور x509cert پُر کریں۔"
 }

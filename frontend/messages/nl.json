@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "Als deze optie is uitgeschakeld, worden het normale CISO Assistant-logo en favicon weergegeven op het inlogscherm",
 	"librariesCanOnlyBeLoadedByAdmin": "Bibliotheken kunnen alleen door een beheerder worden geladen",
 	"catalog": "Catalogus",
-	"operations": "Operaties"
+	"operations": "Operaties",
+	"fillMetadataURL": "Optie 1: Vul de metadata-url in",
+	"fillSSOSLOURLx509cert": "Optie 2: Vul de SSO-URL, SLO-URL en x509cert in"
 }

@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "Jeśli ta opcja jest wyłączona, na ekranie logowania będzie wyświetlane standardowe logo i ikona asystenta CISO",
 	"librariesCanOnlyBeLoadedByAdmin": "Biblioteki mogą być ładowane tylko przez administratora",
 	"catalog": "Katalog",
-	"operations": "Operacje"
+	"operations": "Operacje",
+	"fillMetadataURL": "Opcja 1: Wypełnij adres URL metadanych",
+	"fillSSOSLOURLx509cert": "Opcja 2: Wypełnij adres URL SSO, adres URL SLO i certyfikat x509cert"
 }

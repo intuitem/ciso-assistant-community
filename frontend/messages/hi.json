@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "यदि अक्षम किया गया है, तो नियमित CISO सहायक लोगो और फ़ेविकॉन लॉगिन स्क्रीन पर प्रदर्शित किया जाएगा",
 	"librariesCanOnlyBeLoadedByAdmin": "लाइब्रेरीज़ को केवल व्यवस्थापक द्वारा ही लोड किया जा सकता है",
 	"catalog": "सूची",
-	"operations": "संचालन"
+	"operations": "संचालन",
+	"fillMetadataURL": "विकल्प 1: मेटाडेटा यूआरएल भरें",
+	"fillSSOSLOURLx509cert": "विकल्प 2: SSO URL, SLO URL और x509cert भरें"
 }
