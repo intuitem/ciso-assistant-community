@@ -40,7 +40,6 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 

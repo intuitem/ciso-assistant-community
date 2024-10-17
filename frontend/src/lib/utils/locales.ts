@@ -54,7 +54,3 @@ export function toCamelCase(str: string) {
 	str = str.charAt(0).toLowerCase() + str.slice(1);
 	return str.replace(/[_-\s]\w/g, (match) => match.charAt(1).toUpperCase());
 }
-
-export function capitalizeFirstLetter(str: string) {
-	return str.charAt(0).toUpperCase() + str.slice(1);
-}
