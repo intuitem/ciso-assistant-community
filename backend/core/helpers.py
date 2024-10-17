@@ -1193,6 +1193,7 @@ def duplicate_related_objects(
 
             # Get parent folders of the target folder
             target_parent_folders = target_folder.get_parent_folders()
+            sub_folders = target_folder.sub_folders()
 
             # Fetch all related objects for the given field name
             related_objects = getattr(object, field_name).all()
@@ -1209,6 +1210,10 @@ def duplicate_related_objects(
 
                 elif obj.folder in target_parent_folders and obj.is_published:
                     # If the object's folder is a parent of the targert folder and is published, add the object to the duplicate object
+                    getattr(duplicate_object, field_name).add(obj)
+                
+                elif obj.folder in sub_folders:
+                    # If the object's folder is a subfolder of the target folder, add the object to the duplicate object
                     getattr(duplicate_object, field_name).add(obj)
 
                 else:
