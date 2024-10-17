@@ -200,11 +200,7 @@
 						class="text-sm font-medium text-gray-800 capitalize-first"
 						data-testid={key.replaceAll('_', '-') + '-field-title'}
 					>
-						{#if key === 'urn'}
-							{m.urn()}
-						{:else}
-							{safeTranslate(toCamelCase(key))}
-						{/if}
+						{safeTranslate(key)}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -244,10 +240,8 @@
 									{:else}
 										{value.str}
 									{/if}
-								{:else if safeTranslate(toCamelCase(value.str ?? value))}
-									{safeTranslate(toCamelCase(value.str ?? value))}
 								{:else}
-									{value.str ?? value}
+									{safeTranslate(value.str ?? value)}
 								{/if}
 							{:else}
 								--

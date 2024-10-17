@@ -49,7 +49,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-							{safeTranslate(toCamelCase(key))}
+							{safeTranslate(key)}
 						{/if}
 					</div>
 					<ul class="text-sm">
