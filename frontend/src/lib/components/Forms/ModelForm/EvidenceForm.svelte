@@ -27,7 +27,7 @@
 	field="attachment"
 	label={m.attachment()}
 />
-{#if !(initialData.applied_controls || initialData.requirement_assessments)}
+{#if !initialData.requirement_assessments}
 	<AutocompleteSelect
 		{form}
 		options={getOptions({ objects: model.foreignKeys['folder'] })}
@@ -35,7 +35,6 @@
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
-		hidden={initialData.applied_controls || initialData.requirement_assessments}
 	/>
 {:else}
 	<HiddenInput {form} field="folder" />
