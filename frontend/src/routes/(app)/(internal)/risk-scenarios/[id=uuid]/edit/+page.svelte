@@ -73,7 +73,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add' + capitalizeFirstLetter(data.measureModel.localName))
+			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
