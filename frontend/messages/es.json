@@ -654,7 +654,7 @@
 	"mapping": "Cartografía",
 	"applyMapping": "Aplicar mapeo",
 	"mappingInference": "Inferencia de mapeo",
-	"mappingInferenceTip": "La sugerencia de mapeo está disponible para este requisito.",
+	"mappingInferenceTip": "La sugerencia de mapping está disponible para este requisito.",
 	"additionalInformation": "Información adicional",
 	"requirementMappingSet": "Mapping",
 	"requirementMappingSetColon": "Mapping:",
