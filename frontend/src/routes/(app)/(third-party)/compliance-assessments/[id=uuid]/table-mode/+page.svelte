@@ -299,7 +299,7 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							<Accordion regionCaret="flex">
-								<AccordionItem>
+								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
 										><p class="flex">{m.observation()}</p></svelte:fragment
 									>
@@ -348,7 +348,7 @@
 										</div>
 									</svelte:fragment>
 								</AccordionItem>
-								<AccordionItem>
+								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
 										><p class="flex items-center space-x-2">
 											<span>{m.evidence()}</span>
