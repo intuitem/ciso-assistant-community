@@ -636,24 +636,13 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     justification=scenario.justification,
                 )
 
-                duplicate_related_objects(
-                    scenario,
-                    duplicate_scenario,
-                    duplicate_risk_assessment.project.folder,
-                    "applied_controls",
-                )
-                duplicate_related_objects(
-                    scenario,
-                    duplicate_scenario,
-                    duplicate_risk_assessment.project.folder,
-                    "threats",
-                )
-                duplicate_related_objects(
-                    scenario,
-                    duplicate_scenario,
-                    duplicate_risk_assessment.project.folder,
-                    "assets",
-                )
+                for field in ["applied_controls", "threats",  "assets"] :
+                    duplicate_related_objects(
+                        scenario,
+                        duplicate_scenario,
+                        duplicate_risk_assessment.project.folder,
+                        field,
+                    )
 
                 if (
                     duplicate_risk_assessment.project.folder
