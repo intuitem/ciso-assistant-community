@@ -1190,9 +1190,15 @@ def duplicate_related_objects(
     - field_name (str): The field name representing the related objects in the source object.
     - model_class (class): The model class of the related objects.
     """
-    
+
     def process_related_object(
-        obj, duplicate_object, target_folder, target_parent_folders, sub_folders, field_name, model_class
+        obj,
+        duplicate_object,
+        target_folder,
+        target_parent_folders,
+        sub_folders,
+        field_name,
+        model_class,
     ):
         """
         Process a single related object: add, link, or duplicate it based on folder and existence checks.
@@ -1200,7 +1206,7 @@ def duplicate_related_objects(
 
         # Check if the object already exists in the target folder
         existing_obj = get_existing_object(obj, target_folder, model_class)
-        
+
         if existing_obj:
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
@@ -1217,13 +1223,11 @@ def duplicate_related_objects(
             # Otherwise, duplicate the object and link it
             duplicate_and_link_object(obj, duplicate_object, target_folder, field_name)
 
-
     def get_existing_object(obj, target_folder, model_class):
         """
         Check if an object with the same name already exists in the target folder.
         """
         return model_class.objects.filter(name=obj.name, folder=target_folder).first()
-
 
     def link_existing_object(duplicate_object, existing_obj, field_name):
         """
@@ -1231,15 +1235,14 @@ def duplicate_related_objects(
         """
         getattr(duplicate_object, field_name).add(existing_obj)
 
-
     def duplicate_and_link_object(obj, duplicate_object, target_folder, field_name):
         """
         Duplicate an object and link it to the duplicate object.
         """
         duplicate_obj = obj
-        duplicate_obj.pk = None  # Reset primary key to create a new object
+        duplicate_obj.pk = None
         duplicate_obj.folder = target_folder
-        duplicate_obj.save()  # Save the new duplicated object
+        duplicate_obj.save()
         getattr(duplicate_object, field_name).add(duplicate_obj)
 
     # Get parent and sub-folders of the target folder
@@ -1251,5 +1254,12 @@ def duplicate_related_objects(
 
     # Process each related object
     for obj in related_objects:
-        # Determine if the object should be added, linked, or duplicated
-        process_related_object(obj, duplicate_object, target_folder, target_parent_folders, sub_folders, field_name, model_class)
+        process_related_object(
+            obj,
+            duplicate_object,
+            target_folder,
+            target_parent_folders,
+            sub_folders,
+            field_name,
+            model_class,
+        )
