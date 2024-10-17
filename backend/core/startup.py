@@ -298,6 +298,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_globalsettings",
     "change_globalsettings",
     "view_requirementmappingset",
+    "add_requirementmappingset",
+    "delete_requirementmappingset",
     "view_requirementmapping",
     "add_entity",
     "change_entity",
@@ -367,7 +369,7 @@ def startup(sender: AppConfig, **kwargs):
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
     # if main entity does not exist, then create it
-    if not Entity.objects.filter(name="Main").exists():
+    if not Entity.get_main_entity():
         main = Entity.objects.create(
             name="Main", folder=Folder.get_root_folder(), builtin=True
         )

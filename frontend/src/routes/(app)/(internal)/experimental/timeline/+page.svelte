@@ -7,7 +7,6 @@
 		VisTimeline,
 		VisAxis
 	} from '@unovis/svelte';
-	import { colors } from '@unovis/ts';
 
 	import type { PageData } from './$types';
 	export let data: PageData;

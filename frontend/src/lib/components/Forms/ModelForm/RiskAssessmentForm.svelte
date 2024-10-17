@@ -15,8 +15,8 @@
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 	export let object: Record<string, any> = {};
-	export let context: string = 'default';
-	export let updated_fields: Set<string> = new Set();
+	// export let context: string = 'default';
+	// export let updated_fields: Set<string> = new Set();
 </script>
 
 <AutocompleteSelect

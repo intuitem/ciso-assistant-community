@@ -6,7 +6,7 @@
 	let _class = '';
 
 	export { _class as class };
-	export let regionContainer: CssClasses = '';
+	// export let regionContainer: CssClasses = '';
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
