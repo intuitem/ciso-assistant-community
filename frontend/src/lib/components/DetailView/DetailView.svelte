@@ -85,7 +85,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
+			title: safeTranslate('add-' + model.info.localName)
 		};
 		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -95,7 +95,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: safeTranslate('add' + capitalizeFirstLetter(model.info.localName)).toLowerCase(),
+				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
 				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
 			};
 		}
@@ -330,7 +330,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{safeTranslate('associated' + capitalizeFirstLetter(model.info.localNamePlural))}
+								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
 						{#if model.table}

@@ -105,7 +105,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName))
+			title: safeTranslate('add-' + data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
