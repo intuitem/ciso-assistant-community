@@ -612,7 +612,7 @@
 	"SLOURL": "URL de SLO",
 	"x509Cert": "Certificado x509",
 	"SPEntityID": "Identificación de entidad SP",
-	"attributeMappingUID": "Mapeo de atributos UID",
+	"attributeMappingUID": "Asignación de atributos UID",
 	"attributeMappingEmail": "Asignación de atributos por correo electrónico",
 	"attributeMappingEmailVerified": "Asignación de atributos por correo electrónico verificado",
 	"allowRepeatAttributeName": "Permitir repetir nombre de atributo",
