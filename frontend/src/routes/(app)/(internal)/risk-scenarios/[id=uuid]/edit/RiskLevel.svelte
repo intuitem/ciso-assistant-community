@@ -61,11 +61,7 @@
 			)}"
 			style="background-color: {riskLevel.hexcolor}"
 		>
-			{#if safeTranslate(toCamelCase(riskLevel.name))}
-				{safeTranslate(toCamelCase(riskLevel.name))}
-			{:else}
-				{riskLevel.name}
-			{/if}
+			{safeTranslate(riskLevel.name)}
 		</div>
 	{:else}
 		<div class="flex font-medium w-32 justify-center p-2 rounded-token bg-gray-300">--</div>

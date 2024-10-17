@@ -54,7 +54,7 @@ export const actions: Actions = {
 		return message(
 			rejectForm,
 			m.successfullyRejectedObject({
-				object: safeTranslate(toCamelCase(model.toLowerCase())).toLowerCase(),
+				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})
 		);
@@ -88,7 +88,7 @@ export const actions: Actions = {
 		return message(
 			acceptForm,
 			m.successfullyValidatedObject({
-				object: safeTranslate(toCamelCase(model.toLowerCase())).toLowerCase(),
+				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})
 		);
@@ -122,7 +122,7 @@ export const actions: Actions = {
 		return message(
 			revokeForm,
 			m.successfullyRevokedObject({
-				object: safeTranslate(toCamelCase(model.toLowerCase())).toLowerCase(),
+				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})
 		);

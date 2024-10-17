@@ -100,7 +100,7 @@
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.treatmentStatus()}</p>
 					<p class="text-sm font-semibold">
-						{safeTranslate(toCamelCase(data.scenario.treatment))}
+						{safeTranslate(data.scenario.treatment)}
 					</p>
 				</div>
 			</div>
@@ -135,11 +135,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_proba]}"
 				>
-					{#if safeTranslate(toCamelCase(data.scenario.current_proba.name))}
-						{safeTranslate(toCamelCase(data.scenario.current_proba.name))}
-					{:else}
-						{data.scenario.current_proba.name}
-					{/if}
+					{safeTranslate(data.scenario.current_proba.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-xmark mt-5" />
@@ -149,11 +145,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_impact]}"
 				>
-					{#if safeTranslate(toCamelCase(data.scenario.current_impact.name))}
-						{safeTranslate(toCamelCase(data.scenario.current_impact.name))}
-					{:else}
-						{data.scenario.current_impact.name}
-					{/if}
+					{safeTranslate(data.scenario.current_impact.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-equals mt-5" />
@@ -167,11 +159,7 @@
 					)}"
 					style="background-color: {data.scenario.current_level.hexcolor}"
 				>
-					{#if safeTranslate(toCamelCase(data.scenario.current_level.name))}
-						{safeTranslate(toCamelCase(data.scenario.current_level.name))}
-					{:else}
-						{data.scenario.current_level.name}
-					{/if}
+					{safeTranslate(data.scenario.current_level.name)}
 				</span>
 			</p>
 		</div>
@@ -193,11 +181,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_proba]}"
 				>
-					{#if safeTranslate(toCamelCase(data.scenario.residual_proba.name))}
-						{safeTranslate(toCamelCase(data.scenario.residual_proba.name))}
-					{:else}
-						{data.scenario.residual_proba.name}
-					{/if}
+					{safeTranslate(data.scenario.residual_proba.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-xmark mt-5" />
@@ -207,11 +191,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_impact]}"
 				>
-					{#if safeTranslate(toCamelCase(data.scenario.residual_impact.name))}
-						{safeTranslate(toCamelCase(data.scenario.residual_impact.name))}
-					{:else}
-						{data.scenario.residual_impact.name}
-					{/if}
+					{safeTranslate(data.scenario.residual_impact.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-equals mt-5" />
@@ -225,11 +205,7 @@
 					)}"
 					style="background-color: {data.scenario.residual_level.hexcolor}"
 				>
-					{#if safeTranslate(toCamelCase(data.scenario.residual_level.name))}
-						{safeTranslate(toCamelCase(data.scenario.residual_level.name))}
-					{:else}
-						{data.scenario.residual_level.name}
-					{/if}
+					{safeTranslate(data.scenario.residual_level.name)}
 				</span>
 			</p>
 		</div>
@@ -241,9 +217,8 @@
 				<span class="font-semibold">
 					{#each data.scenario.qualifications as qualification, i}
 						{#if i > 0},{/if}
-						{safeTranslate(toCamelCase(qualification)) ||
-							qualification ||
-							safeTranslate('undefined')}
+						{safeTranslate(qualification) ||
+							m.undefined()}
 					{/each}
 				</span>
 			</p>
@@ -255,11 +230,7 @@
 					{data.scenario.strength_of_knowledge.symbol}
 				{/if}
 				<span class="font-semibold">
-					{#if safeTranslate(toCamelCase(data.scenario.strength_of_knowledge.name))}
-						{safeTranslate(toCamelCase(data.scenario.strength_of_knowledge.name))}
-					{:else}
-						{safeTranslate('undefined')}
-					{/if}
+					{safeTranslate(data.scenario.strength_of_knowledge.name) || m.undefined()}
 				</span>
 			</p>
 		</div>
