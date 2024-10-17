@@ -7,7 +7,6 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { checkConstraints } from '$lib/utils/crud';
 
 	export let data: PageData;

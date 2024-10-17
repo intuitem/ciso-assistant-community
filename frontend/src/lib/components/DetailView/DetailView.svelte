@@ -17,7 +17,7 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import { toCamelCase } from '$lib/utils/locales.js';
 	import { checkConstraints } from '$lib/utils/crud';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
@@ -340,7 +340,7 @@
 									class="btn variant-filled-primary self-end my-auto"
 									on:click={(_) => modalCreateForm(model)}
 									><i class="fa-solid fa-plus mr-2 lowercase" />{safeTranslate(
-										'add' + capitalizeFirstLetter(model.info.localName)
+										'add-' + model.info.localName
 									)}</button
 								>
 							</ModelTable>
