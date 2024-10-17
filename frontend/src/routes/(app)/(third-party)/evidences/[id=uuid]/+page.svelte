@@ -73,7 +73,7 @@
 						class="text-sm font-medium text-gray-800 capitalize-first"
 						data-testid={key.replace('_', '-') + '-field-title'}
 					>
-						{safeTranslate(toCamelCase(key))}
+						{safeTranslate(key)}
 					</div>
 					<ul class="text-sm">
 						<li
