@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "في حالة تعطيله، سيتم عرض شعار CISO Assistant العادي ورمز favicon على شاشة تسجيل الدخول",
 	"librariesCanOnlyBeLoadedByAdmin": "لا يمكن تحميل المكتبات إلا بواسطة المسؤول",
 	"catalog": "الكتالوج",
-	"operations": "العمليات"
+	"operations": "العمليات",
+	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
+	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert"
 }

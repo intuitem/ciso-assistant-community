@@ -610,7 +610,7 @@
 	"metadataURL": "URL de metadados",
 	"SSOURL": "URL do SSO",
 	"SLOURL": "URL do SLO",
-	"x509Cert": "certificado x509",
+	"x509Cert": "Certificado x509",
 	"SPEntityID": "ID da entidade SP",
 	"attributeMappingUID": "Mapeamento de atributos UID",
 	"attributeMappingEmail": "Mapeamento de atributos de e-mail",
@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "Se desabilitado, o logotipo e o favicon regulares do Assistente CISO serão exibidos na tela de login",
 	"librariesCanOnlyBeLoadedByAdmin": "As bibliotecas só podem ser carregadas por um administrador",
 	"catalog": "Catálogo",
-	"operations": "Operações"
+	"operations": "Operações",
+	"fillMetadataURL": "Opção 1: Preencha a URL dos metadados",
+	"fillSSOSLOURLx509cert": "Opção 2: Preencha a URL do SSO, a URL do SLO e o x509cert"
 }
