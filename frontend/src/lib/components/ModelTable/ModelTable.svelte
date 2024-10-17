@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import {
@@ -282,7 +282,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{safeTranslate(heading) ?? heading}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{unsafeTranslate(heading) ?? heading}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
@@ -349,8 +349,8 @@
                             )?.urlModel
                           }/${val.id}`}
                           <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
-                        {:else if safeTranslate(val.split(':')[0])}
-                        	<span class="text">{safeTranslate(val.split(':')[0]+"Colon")} {val.split(':')[1]}</span>
+                        {:else if unsafeTranslate(val.split(':')[0])}
+														<span class="text">{unsafeTranslate(val.split(':')[0]+"Colon")} {val.split(':')[1]}</span>
 						{:else}
 						  {val ?? '-'}
                         {/if}
@@ -368,8 +368,8 @@
                   {/if}
                 {:else if value && value.hexcolor}
                   <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(value.hexcolor)}" style="background-color: {value.hexcolor}">
-                    {#if safeTranslate(toCamelCase(value.name ?? value.str ?? '-'))}
-                      {safeTranslate(toCamelCase(value.name ?? value.str ?? '-'))}
+                    {#if unsafeTranslate(toCamelCase(value.name ?? value.str ?? '-'))}
+                      {unsafeTranslate(toCamelCase(value.name ?? value.str ?? '-'))}
                     {:else}
                       {value.name ?? value.str ?? '-'}
                     {/if}
@@ -377,8 +377,8 @@
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
-					{#if safeTranslate(toCamelCase(value))}
-						{safeTranslate(toCamelCase(value))}
+					{#if unsafeTranslate(toCamelCase(value))}
+						{unsafeTranslate(toCamelCase(value))}
 					{:else}
 						{value ?? '-'}
 					{/if}
