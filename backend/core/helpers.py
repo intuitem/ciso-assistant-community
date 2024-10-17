@@ -1178,7 +1178,11 @@ def handle(exc, context):
 
 
 def duplicate_related_objects(
-    source_object, duplicate_object, target_folder, field_name, model_class
+    source_object: models.Model,
+    duplicate_object: models.Model,
+    target_folder: Folder,
+    field_name: str,
+    model_class: Type[models.Model],
 ):
     """
     Duplicates related objects from a source object to a duplicate object, avoiding duplicates in the target folder.
@@ -1188,7 +1192,7 @@ def duplicate_related_objects(
     - duplicate_object (object): The object where duplicated objects will be linked.
     - target_folder (object): The folder where duplicated objects will be stored.
     - field_name (str): The field name representing the related objects in the source object.
-    - model_class (class): The model class of the related objects.
+    - model_class (type): The model class of the related objects.
     """
 
     def process_related_object(
