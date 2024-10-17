@@ -641,21 +641,18 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     duplicate_scenario,
                     duplicate_risk_assessment.project.folder,
                     "applied_controls",
-                    AppliedControl,
                 )
                 duplicate_related_objects(
                     scenario,
                     duplicate_scenario,
                     duplicate_risk_assessment.project.folder,
                     "threats",
-                    Threat,
                 )
                 duplicate_related_objects(
                     scenario,
                     duplicate_scenario,
                     duplicate_risk_assessment.project.folder,
                     "assets",
-                    Asset,
                 )
 
                 if (

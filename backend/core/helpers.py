@@ -1182,7 +1182,6 @@ def duplicate_related_objects(
     duplicate_object: models.Model,
     target_folder: Folder,
     field_name: str,
-    model_class: Type[models.Model],
 ):
     """
     Duplicates related objects from a source object to a duplicate object, avoiding duplicates in the target folder.
@@ -1190,9 +1189,8 @@ def duplicate_related_objects(
     Parameters:
     - source_object (object): The source object containing related objects to duplicate.
     - duplicate_object (object): The object where duplicated objects will be linked.
-    - target_folder (object): The folder where duplicated objects will be stored.
-    - field_name (str): The field name representing the related objects in the source object.
-    - model_class (type): The model class of the related objects.
+    - target_folder (Folder): The folder where duplicated objects will be stored.
+    - field_name (str): The field name representing the related objects in the source
     """
 
     def process_related_object(
@@ -1247,6 +1245,8 @@ def duplicate_related_objects(
         new_obj.folder = target_folder
         new_obj.save()
         link_existing_object(duplicate_object, new_obj, field_name)
+
+    model_class = getattr(type(source_object), field_name).field.related_model
 
     # Get parent and sub-folders of the target folder
     target_parent_folders = target_folder.get_parent_folders()
