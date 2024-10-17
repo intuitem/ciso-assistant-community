@@ -93,7 +93,7 @@
 					cacheLock={cacheLocks['idp_entity_id']}
 					bind:cachedValue={formDataCache['idp_entity_id']}
 				/>
-				<p class="text-gray-600 text-sm">Option 1: Fill the metadata url</p>
+				<p class="text-gray-600 text-sm">{m.fillMetadataURL()}</p>
 				<TextField
 					{form}
 					field="metadata_url"
@@ -107,7 +107,7 @@
 					<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
 					<hr class="w-1/2 items-center bg-gray-200 border-0" />
 				</div>
-				<p class="text-gray-600 text-sm">Option 2: Fill the SSO URL, SLO URL and x509cert</p>
+				<p class="text-gray-600 text-sm">{m.fillSSOSLOURLx509cert()}</p>
 				<TextField
 					{form}
 					field="sso_url"
