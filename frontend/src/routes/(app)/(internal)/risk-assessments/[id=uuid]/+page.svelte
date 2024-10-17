@@ -164,9 +164,7 @@
 					<ul>
 						<li class="pb-1">
 							<span class="font-semibold">{m.status()}:</span>
-							{risk_assessment.status === null
-								? '--'
-								: safeTranslate(risk_assessment.status)}
+							{risk_assessment.status === null ? '--' : safeTranslate(risk_assessment.status)}
 						</li>
 						<li class="pb-1">
 							<span class="font-semibold">{m.authors()}:</span>
