@@ -1239,15 +1239,14 @@ def duplicate_related_objects(
         """
         getattr(duplicate_object, field_name).add(existing_obj)
 
-    def duplicate_and_link_object(obj, duplicate_object, target_folder, field_name):
+    def duplicate_and_link_object(new_obj, duplicate_object, target_folder, field_name):
         """
         Duplicate an object and link it to the duplicate object.
         """
-        duplicate_obj = obj
-        duplicate_obj.pk = None
-        duplicate_obj.folder = target_folder
-        duplicate_obj.save()
-        getattr(duplicate_object, field_name).add(duplicate_obj)
+        new_obj.pk = None
+        new_obj.folder = target_folder
+        new_obj.save()
+        link_existing_object(duplicate_object, new_obj, field_name)
 
     # Get parent and sub-folders of the target folder
     target_parent_folders = target_folder.get_parent_folders()
