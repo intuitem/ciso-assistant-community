@@ -636,7 +636,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     justification=scenario.justification,
                 )
 
-                for field in ["applied_controls", "threats",  "assets"] :
+                for field in ["applied_controls", "threats", "assets"]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
