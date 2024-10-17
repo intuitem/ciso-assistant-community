@@ -11,7 +11,7 @@
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { localItems } from '$lib/utils/locales.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
 	import { ProgressRadial, Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
@@ -39,7 +39,7 @@
 	const rsd_rsk_label = m.residualRisk();
 
 	function localizeChartLabels(labels: string[]): string[] {
-		return labels.map((label) => localItems()[label]);
+		return labels.map((label) => safeTranslate(label));
 	}
 
 	const appliedControlTodoTable: TableSource = {
