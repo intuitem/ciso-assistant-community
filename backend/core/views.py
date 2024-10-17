@@ -988,6 +988,48 @@ class AppliedControlViewSet(BaseModelViewSet):
             colorMap[domain.name] = next(color_cycle)
         return Response({"entries": entries, "colorMap": colorMap})
 
+    @action(
+        detail=True,
+        name="Duplicate applied control",
+        methods=["post"],
+        serializer_class=AppliedControlDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        if UUID(pk) in object_ids_view:
+            applied_control = self.get_object()
+            data = request.data
+            new_folder = Folder.objects.get(id=data["folder"])
+            duplicate_applied_control = AppliedControl.objects.create(
+                reference_control=applied_control.reference_control,
+                name=data["name"],
+                description=data["description"],
+                folder=new_folder,
+                category=applied_control.category,
+                csf_function=applied_control.csf_function,
+                status=applied_control.status,
+                start_date=applied_control.start_date,
+                eta=applied_control.eta,
+                expiry_date=applied_control.expiry_date,
+                link=applied_control.link,
+                effort=applied_control.effort,
+                cost=applied_control.cost,
+            )
+            if request.data["duplicate_evidences"]:
+                for evidence in applied_control.evidences.all():
+                    # Evidences will only be duplicated if necessary
+                    if new_folder.can_access(evidence.folder):
+                        duplicate_applied_control.evidences.add(evidence)
+                    else:
+                        new_evidence = evidence.duplicate_into_folder(new_folder)
+                        duplicate_applied_control.evidences.add(new_evidence)
+
+                duplicate_applied_control.save()
+
+            return Response({"results": "applied control duplicated"})
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy

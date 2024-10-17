@@ -1248,6 +1248,17 @@ class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         else:
             return f"{size / 1024 / 1024:.1f} MB"
 
+    def duplicate_into_folder(self, folder: Folder) -> Self:
+        duplicated_evidence = Evidence(
+            folder=folder,
+            name=self.name,
+            description=self.description,
+            attachment=self.attachment,
+            link=self.link,
+        )
+        duplicated_evidence.save()
+        return duplicated_evidence
+
 
 class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
@@ -1373,9 +1384,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     @property
     def projects(self):
         return {risk_assessment.project for risk_assessment in self.risk_assessments}
-
-    def parent_project(self):
-        pass
 
     def __str__(self):
         return self.name

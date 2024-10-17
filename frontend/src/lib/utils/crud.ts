@@ -277,6 +277,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner' }
 		]
 	},
+	'applied-controls_duplicate': {
+		name: 'appliedcontrol',
+		localName: 'appliedControl',
+		localNamePlural: 'appliedControls',
+		verboseName: 'Applied control',
+		verboseNamePlural: 'Applied controls',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
+	},
 	policies: {
 		name: 'appliedcontrol',
 		localName: 'policy',
@@ -702,7 +712,8 @@ export const urlParamModelSelectFields = (model: string): SelectField[] => {
 
 export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 	const map = URL_MODEL_MAP[model] || {};
-	map['urlModel'] = model;
+	// The urlmodel of {model}_duplicate must be {model}
+	map['urlModel'] = model.split('_')[0];
 	return map;
 };
 

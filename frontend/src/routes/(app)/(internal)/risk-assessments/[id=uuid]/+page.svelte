@@ -103,10 +103,11 @@
 				form: data.riskAssessmentDuplicateForm,
 				model: data.riskAssessmentModel,
 				debug: false,
-				riskAssessmentDuplication: true,
+				duplicate: true,
 				formAction: '?/duplicate'
 			}
 		};
+
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
