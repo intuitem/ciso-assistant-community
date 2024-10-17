@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "Dacă este dezactivată, logo-ul obișnuit al Asistentului CISO și favicon-ul vor fi afișate pe ecranul de conectare",
 	"librariesCanOnlyBeLoadedByAdmin": "Bibliotecile pot fi încărcate numai de un administrator",
 	"catalog": "Catalog",
-	"operations": "Operațiuni"
+	"operations": "Operațiuni",
+	"fillMetadataURL": "Opțiunea 1: completați adresa URL a metadatelor",
+	"fillSSOSLOURLx509cert": "Opțiunea 2: completați URL-ul SSO, URL-ul SLO și x509cert"
 }

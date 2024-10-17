@@ -777,5 +777,7 @@
 	"showImagesUnauthenticatedHelpText": "Wenn deaktiviert, werden das normale CISO Assistant-Logo und das Favicon auf dem Anmeldebildschirm angezeigt",
 	"librariesCanOnlyBeLoadedByAdmin": "Bibliotheken können nur von einem Administrator geladen werden",
 	"catalog": "Katalog",
-	"operations": "Operationen"
+	"operations": "Operationen",
+	"fillMetadataURL": "Option 1: Füllen Sie die Metadaten-URL aus",
+	"fillSSOSLOURLx509cert": "Option 2: Füllen Sie die SSO-URL, SLO-URL und x509cert aus"
 }
