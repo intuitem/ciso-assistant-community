@@ -20,9 +20,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { page } from '$app/stores';
 
 	export let data: PageData;
 	export let form: Actions;

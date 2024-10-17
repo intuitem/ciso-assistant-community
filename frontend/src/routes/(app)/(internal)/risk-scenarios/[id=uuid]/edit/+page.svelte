@@ -27,7 +27,6 @@
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { languageTag } from '$paraglide/runtime';
 	import { zod } from 'sveltekit-superforms/adapters';
