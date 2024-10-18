@@ -773,3 +773,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if ra.role == role:
                 return True
         return False
+
+    @classmethod
+    def get_permissions_per_folder(
+        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup
+    ):
+        """
+        Get all permissions attached to a user directly or indirectly, grouped by folder.
+        """
+        permissions = defaultdict(list)
+        for ra in cls.get_role_assignments(principal):
+            for p in ra.role.permissions.all():
+                permissions[str(ra.folder.id)].append(p.codename)
+        return permissions
