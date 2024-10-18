@@ -33,7 +33,6 @@
 				: m.logoHelpText()}
 			accept="image/*"
 		/>
-		<button>hello</button>
 		<FileInput
 			{form}
 			field="favicon"
