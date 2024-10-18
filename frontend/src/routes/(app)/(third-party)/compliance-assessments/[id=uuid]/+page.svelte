@@ -32,6 +32,12 @@
 	export let data: PageData;
 	export let form: ActionData;
 
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { displayScoreColor } from '$lib/utils/helpers';
+	import { expandedNodesState } from '$lib/utils/stores';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import List from '$lib/components/List/List.svelte';
+
 	breadcrumbObject.set(data.compliance_assessment);
 	const tree = data.tree;
 
@@ -117,12 +123,6 @@
 	}
 
 	let expandedNodes: TreeViewNode[] = [];
-
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { displayScoreColor } from '$lib/utils/helpers';
-	import { expandedNodesState } from '$lib/utils/stores';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
-	import List from '$lib/components/List/List.svelte';
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
