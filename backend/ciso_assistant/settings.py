@@ -26,6 +26,7 @@ BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
+LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
@@ -58,6 +59,15 @@ LOGGING = {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
     },
 }
+
+if LOG_OUTFILE:
+    LOGGING["handlers"]["file"] = {
+        "level": LOG_LEVEL,
+        "class": "logging.handlers.WatchedFileHandler",
+        "filename": "ciso-assistant.log",
+        "formatter": "json",
+    }
+    LOGGING["loggers"][""]["handlers"].append("file")
 
 structlog.configure(
     processors=[
