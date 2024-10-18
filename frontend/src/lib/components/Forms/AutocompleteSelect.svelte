@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { unsafeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 
