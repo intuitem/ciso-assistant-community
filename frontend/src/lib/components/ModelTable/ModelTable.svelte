@@ -368,7 +368,7 @@
                   {/if}
                 {:else if value && value.hexcolor}
                   <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(value.hexcolor)}" style="background-color: {value.hexcolor}">
-										{safeTranslate(value.name ?? value.str ?? '-')}
+										{safeTranslate(value.name ?? value.str) ?? '-'}
                   </p>
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
