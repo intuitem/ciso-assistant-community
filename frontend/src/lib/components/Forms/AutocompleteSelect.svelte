@@ -120,8 +120,8 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && unsafeTranslate(option.label)}
-					{unsafeTranslate(option.label)}
+				{:else if translateOptions}
+					{safeTranslate(option.label)}
 				{:else}
 					{option.label}
 				{/if}
