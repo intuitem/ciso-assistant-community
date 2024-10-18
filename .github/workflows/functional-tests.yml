@@ -206,7 +206,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py createsuperuser --noinput
+          poetry run python manage.py createsuperuser  --noinput --settings=${{ env.enterprise-backend-settings-module }}
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
