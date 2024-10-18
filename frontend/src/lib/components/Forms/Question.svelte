@@ -42,6 +42,7 @@
 					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
 						{#each question.options as option}
 							<RadioItem
+								class="whitespace-nowrap"
 								bind:group={question.answer}
 								name="question"
 								value={option}

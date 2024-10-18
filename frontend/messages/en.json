@@ -779,5 +779,7 @@
 	"catalog": "Catalog",
 	"operations": "Operations",
 	"questionSingular": "Question",
-	"questionPlural": "Questions"
+	"questionPlural": "Questions",
+	"fillMetadataURL": "Option 1: Fill the metadata url",
+	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert"
 }
