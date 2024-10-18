@@ -176,7 +176,8 @@ class LicenseStatusView(APIView):
 
         try:
             expiry_date = datetime.fromisoformat(expiry_date_str)
-        except ValueError:
+        except ValueError as e:
+            logger.error("Invalid expiry date format", exc_info=e)
             return Response(
                 {"status": "error", "message": "Invalid expiry date format"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -200,13 +201,19 @@ def get_build(request):
     VERSION = settings.VERSION
     BUILD = settings.BUILD
     LICENSE_SEATS = settings.LICENSE_SEATS
-    LICENSE_EXPIRATION = datetime.fromisoformat(settings.LICENSE_EXPIRATION)
+    LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
+    try:
+        expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
+        license_expiration = date_format(expiration_iso, use_l10n=True)
+    except ValueError:
+        logger.error("Invalid expiry date format", exc_info=True)
+        license_expiration = LICENSE_EXPIRATION
     return Response(
         {
             "version": VERSION,
             "build": BUILD,
             "license_seats": LICENSE_SEATS,
             "available_seats": LICENSE_SEATS - len(User.get_editors()),
-            "license_expiration": date_format(LICENSE_EXPIRATION, use_l10n=True),
+            "license_expiration": license_expiration,
         }
     )
