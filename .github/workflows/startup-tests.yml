@@ -67,6 +67,8 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo LOG_LEVEL=DEBUG >> .env
+          echo LOG_OUTFILE=ciso-assistant.log >> .env
           echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
@@ -98,6 +100,7 @@ jobs:
         with:
           name: startup-functional-test-report
           path: |
+            ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
 
@@ -196,6 +199,8 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo LOG_LEVEL=DEBUG >> .env
+          echo LOG_OUTFILE=ciso-assistant.log >> .env
           echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
@@ -225,6 +230,7 @@ jobs:
         with:
           name: enterprise-startup-functional-test-report
           path: |
+            ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/reports/
           retention-days: 5
 
