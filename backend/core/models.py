@@ -2606,7 +2606,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
-                    description=reference_control.description,
                 )
                 if created:
                     logger.info(
