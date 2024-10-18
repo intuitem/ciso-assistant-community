@@ -181,7 +181,7 @@
 				</div>
 			</div>
 		{/if}
-		{#each data.requirements as requirementAssessment}
+		{#each data.requirement_assessments as requirementAssessment}
 			<div
 				class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2"
 			>
