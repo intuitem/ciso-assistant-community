@@ -2,6 +2,7 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Option {
 		label: string;
