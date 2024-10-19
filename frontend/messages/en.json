@@ -780,6 +780,9 @@
 	"showImagesUnauthenticatedHelpText": "If disabled, the regular CISO Assistant logo and favicon will be displayed on the login screen",
 	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator",
 	"catalog": "Catalog",
-	"actions": "Actions",
-	"operations": "Operations"
+	"operations": "Operations",
+	"questionSingular": "Question",
+	"questionPlural": "Questions",
+	"fillMetadataURL": "Option 1: Fill the metadata url",
+	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert"
 }
