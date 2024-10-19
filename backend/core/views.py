@@ -1,9 +1,11 @@
 import csv
 import mimetypes
 import re
+import os
 import tempfile
 import uuid
 import zipfile
+import importlib
 from datetime import date, datetime, timedelta
 import time
 import pytz
@@ -71,8 +73,7 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
-MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+SETTINGS_MODULE = importlib.import_module(os.environ.get("DJANGO_SETTINGS_MODULE"))
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -107,6 +108,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_class(self, **kwargs):
+        MODULE_PATHS = SETTINGS_MODULE.MODULE_PATHS
         serializer_factory = SerializerFactory(
             self.serializers_module, MODULE_PATHS.get("serializers", [])
         )
@@ -123,9 +125,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         return serializer_class
 
+    # This constant must remain defined right before the _process_request_data if we ever move _process_request_data elsewhere
     COMMA_SEPARATED_UUIDS_REGEX = r"^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})*$"
 
-    def _process_request_data(self, request: Request) -> None:
+    # Maybe this should be consider as an helper function instead of a staticmethod attached to a class.
+    @staticmethod
+    def _process_request_data(request: Request) -> None:
         """
         Process the request data to split comma-separated UUIDs into a list
         and handle empty list scenarios.
@@ -138,7 +143,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             # TODO: Come back to this once superForms v2 is out of alpha. https://github.com/ciscoheat/sveltekit-superforms/releases
             if isinstance(request.data[field], list) and len(request.data[field]) == 1:
                 if isinstance(request.data[field][0], str) and re.match(
-                    self.COMMA_SEPARATED_UUIDS_REGEX, request.data[field][0]
+                    BaseModelViewSet.COMMA_SEPARATED_UUIDS_REGEX, request.data[field][0]
                 ):
                     request.data[field] = request.data[field][0].split(",")
                 elif not request.data[field][0]:
@@ -1425,6 +1430,15 @@ def get_composer_data(request):
 
     data = serialize_nested(data)
     return Response({"result": data})
+
+
+class UpdatePreferences(APIView):
+    def get(self, request):
+        return Response(request.user.preferences)
+
+    def patch(self, request):
+        request.user.update_preferences(request.data)
+        return Response(status=status.HTTP_200_OK)
 
 
 # Compliance Assessment

@@ -21,7 +21,8 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         choices=Names,
         default=Names.GENERAL,
     )
-    # Value of the setting.
+    # Value of the setting
+    # This field must always be of type Dict[str, Any]
     value = models.JSONField(default=dict)
 
     def __str__(self):

@@ -122,6 +122,7 @@
 	"frameworkColon": "Estructura:",
 	"file": "Archivo",
 	"language": "Idioma",
+	"defaultLanguage": "Idioma predeterminado",
 	"builtin": "Integrado",
 	"next": "Siguiente",
 	"previous": "Anterior",
