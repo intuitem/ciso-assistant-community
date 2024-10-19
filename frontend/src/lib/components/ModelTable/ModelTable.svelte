@@ -373,7 +373,7 @@
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
-						{unsafeTranslate(value) ?? '-'}
+						{safeTranslate(value ?? '-')}
                 {/if}
                 </span>
 							{/if}
