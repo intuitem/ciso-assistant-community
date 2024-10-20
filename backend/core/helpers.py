@@ -283,6 +283,7 @@ def get_sorted_requirement_nodes(
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "max_score": max_score if req_as else None,
+                "question": req_as.answer if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -320,6 +321,7 @@ def get_sorted_requirement_nodes(
                     "is_scored": child_req_as.is_scored if child_req_as else None,
                     "score": child_req_as.score if child_req_as else None,
                     "max_score": max_score if child_req_as else None,
+                    "question": child_req_as.answer if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,
@@ -1173,3 +1175,94 @@ def handle(exc, context):
         exc = DRFValidationError(detail=data)
 
     return drf_exception_handler(exc, context)
+
+
+def duplicate_related_objects(
+    source_object: models.Model,
+    duplicate_object: models.Model,
+    target_folder: Folder,
+    field_name: str,
+):
+    """
+    Duplicates related objects from a source object to a duplicate object, avoiding duplicates in the target folder.
+
+    Parameters:
+    - source_object (object): The source object containing related objects to duplicate.
+    - duplicate_object (object): The object where duplicated objects will be linked.
+    - target_folder (Folder): The folder where duplicated objects will be stored.
+    - field_name (str): The field name representing the related objects in the source
+    """
+
+    def process_related_object(
+        obj,
+        duplicate_object,
+        target_folder,
+        target_parent_folders,
+        sub_folders,
+        field_name,
+        model_class,
+    ):
+        """
+        Process a single related object: add, link, or duplicate it based on folder and existence checks.
+        """
+
+        # Check if the object already exists in the target folder
+        existing_obj = get_existing_object(obj, target_folder, model_class)
+
+        if existing_obj:
+            # If the object exists in the target folder, link it to the duplicate object
+            link_existing_object(duplicate_object, existing_obj, field_name)
+
+        elif obj.folder in target_parent_folders and obj.is_published:
+            # If the object's folder is a parent and it's published, link it
+            link_existing_object(duplicate_object, obj, field_name)
+
+        elif obj.folder in sub_folders:
+            # If the object's folder is a subfolder of the target folder, link it
+            link_existing_object(duplicate_object, obj, field_name)
+
+        else:
+            # Otherwise, duplicate the object and link it
+            duplicate_and_link_object(obj, duplicate_object, target_folder, field_name)
+
+    def get_existing_object(obj, target_folder, model_class):
+        """
+        Check if an object with the same name already exists in the target folder.
+        """
+        return model_class.objects.filter(name=obj.name, folder=target_folder).first()
+
+    def link_existing_object(duplicate_object, existing_obj, field_name):
+        """
+        Link an existing object to the duplicate object by adding it to the related field.
+        """
+        getattr(duplicate_object, field_name).add(existing_obj)
+
+    def duplicate_and_link_object(new_obj, duplicate_object, target_folder, field_name):
+        """
+        Duplicate an object and link it to the duplicate object.
+        """
+        new_obj.pk = None
+        new_obj.folder = target_folder
+        new_obj.save()
+        link_existing_object(duplicate_object, new_obj, field_name)
+
+    model_class = getattr(type(source_object), field_name).field.related_model
+
+    # Get parent and sub-folders of the target folder
+    target_parent_folders = target_folder.get_parent_folders()
+    sub_folders = target_folder.sub_folders()
+
+    # Get all related objects for the specified field
+    related_objects = getattr(source_object, field_name).all()
+
+    # Process each related object
+    for obj in related_objects:
+        process_related_object(
+            obj,
+            duplicate_object,
+            target_folder,
+            target_parent_folders,
+            sub_folders,
+            field_name,
+            model_class,
+        )

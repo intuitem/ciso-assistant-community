@@ -125,6 +125,7 @@ export const AppliedControlSchema = baseNamedObject({
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
+	start_date: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
@@ -285,7 +286,7 @@ export const EntitiesSchema = baseNamedObject({
 });
 
 export const EntityAssessmentSchema = baseNamedObject({
-	create_audit: z.boolean().optional().default(true),
+	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
@@ -294,6 +295,7 @@ export const EntityAssessmentSchema = baseNamedObject({
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
 	authors: z.array(z.string().optional()).optional(),
+	representatives: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	entity: z.string(),
 	solutions: z.array(z.string().optional()).optional(),

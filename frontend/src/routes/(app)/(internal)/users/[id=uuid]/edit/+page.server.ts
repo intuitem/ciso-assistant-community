@@ -1,14 +1,14 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { UserEditSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
-import { getSecureRedirect } from '$lib/utils/helpers';
-import { redirect, fail, type Actions } from '@sveltejs/kit';
 import { getModelInfo } from '$lib/utils/crud';
-import { setFlash } from 'sveltekit-flash-message/server';
+import { getSecureRedirect } from '$lib/utils/helpers';
+import { safeTranslate } from '$lib/utils/i18n';
+import { UserEditSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
-import { localItems } from '$lib/utils/locales';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'users';
@@ -61,12 +61,15 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.error('server response:', response);
 			if (response.error) {
-				setFlash({ type: 'error', message: localItems()[response.error] }, event);
+				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 				return fail(403, { form: form });
 			}
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
+			Object.entries(response).forEach(([key, value]) => {
+				setError(form, key, safeTranslate(value));
+			});
 			return fail(400, { form: form });
 		}
 		setFlash(

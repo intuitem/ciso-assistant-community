@@ -6,7 +6,7 @@ from django.db.models.signals import post_migrate
 from structlog import get_logger
 
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
-from core.utils import RoleCodename
+from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
 
@@ -298,6 +298,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_globalsettings",
     "change_globalsettings",
     "view_requirementmappingset",
+    "add_requirementmappingset",
+    "delete_requirementmappingset",
     "view_requirementmapping",
     "add_entity",
     "change_entity",
@@ -321,10 +323,12 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "view_requirementnode",
     "view_evidence",
     "add_evidence",
     "change_evidence",
     "delete_evidence",
+    "view_folder",
 ]
 
 
@@ -365,7 +369,7 @@ def startup(sender: AppConfig, **kwargs):
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
     # if main entity does not exist, then create it
-    if not Entity.objects.filter(name="Main").exists():
+    if not Entity.get_main_entity():
         main = Entity.objects.create(
             name="Main", folder=Folder.get_root_folder(), builtin=True
         )
@@ -413,6 +417,22 @@ def startup(sender: AppConfig, **kwargs):
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_readers.folder)
+    if not UserGroup.objects.filter(
+        name=UserGroupCodename.ANALYST.value, folder=Folder.get_root_folder()
+    ).exists():
+        analysts = UserGroup.objects.create(
+            name=UserGroupCodename.ANALYST.value,
+            folder=Folder.get_root_folder(),
+            builtin=True,
+        )
+        ra2 = RoleAssignment.objects.create(
+            user_group=analysts,
+            role=Role.objects.get(name=RoleCodename.ANALYST.value),
+            is_recursive=True,
+            builtin=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra2.perimeter_folders.add(analysts.folder)
     # if global approvers user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-GAP", folder=Folder.get_root_folder()

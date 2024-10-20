@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.models import Assessment, ComplianceAssessment, Evidence
-from iam.models import FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
 
 
@@ -27,6 +27,15 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name = _("Entity")
         verbose_name_plural = _("Entities")
 
+    @classmethod
+    def get_main_entity(cls):
+        return (
+            cls.objects.filter(builtin=True)
+            .filter(owned_folders=Folder.get_root_folder())
+            .order_by("created_at")
+            .first()
+        )
+
 
 class EntityAssessment(Assessment):
     class Conclusion(models.TextChoices):
@@ -40,6 +49,12 @@ class EntityAssessment(Assessment):
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))
     maturity = models.IntegerField(default=0, verbose_name=_("Maturity"))
     trust = models.IntegerField(default=0, verbose_name=_("Trust"))
+    representatives = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Representative"),
+        related_name="entity_assessments",
+    )
     entity = models.ForeignKey(
         Entity,
         on_delete=models.CASCADE,

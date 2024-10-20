@@ -3,7 +3,6 @@
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
 	import { localItems } from '$lib/utils/locales';
-
 	export let data: PageData;
 
 	const aggregateQualityChecks = (item: any) => {

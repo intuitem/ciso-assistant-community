@@ -1,9 +1,6 @@
-import mimetypes
 import magic
 
 import structlog
-from core.views import BaseModelViewSet
-from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
@@ -15,6 +12,11 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
 from django.conf import settings
+
+from core.views import BaseModelViewSet
+from core.utils import MAIN_ENTITY_DEFAULT_NAME
+from iam.models import User
+from tprm.models import Entity
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -38,6 +40,31 @@ class ClientSettingsViewSet(BaseModelViewSet):
             {"detail": "Client settings object cannot be deleted."},
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._update_main_entity_name(instance)
+
+    def _update_main_entity_name(self, instance):
+        main_entity = Entity.get_main_entity()
+
+        if instance.name:
+            self._set_main_entity_name(main_entity, instance.name)
+        elif main_entity.name != MAIN_ENTITY_DEFAULT_NAME:
+            self._set_main_entity_name(main_entity, MAIN_ENTITY_DEFAULT_NAME)
+
+    def _set_main_entity_name(self, main_entity, new_name):
+        if main_entity.name == new_name:
+            return
+
+        logger.info("Updating main entity name", entity=main_entity, name=new_name)
+        try:
+            main_entity.name = new_name
+            main_entity.save()
+            logger.info("Main entity name updated", entity=main_entity, name=new_name)
+        except Exception as e:
+            logger.error("An error occurred while renaming main entity", exc_info=e)
+            raise
 
     @action(methods=["get"], detail=False, permission_classes=[AllowAny])
     def info(self, request):
@@ -145,6 +172,7 @@ def get_build(request):
             "version": VERSION,
             "build": BUILD,
             "license_seats": LICENSE_SEATS,
+            "available_seats": LICENSE_SEATS - len(User.get_editors()),
             "license_expiration": LICENSE_EXPIRATION,
         }
     )

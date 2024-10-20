@@ -63,6 +63,9 @@ interface LocalItems {
 	[key: string]: string;
 }
 
+/**
+ * @deprecated Use `safeTranslate` instead.
+ */
 export function localItems(): LocalItems {
 	const LOCAL_ITEMS = {
 		french: m.french(),
@@ -79,6 +82,9 @@ export function localItems(): LocalItems {
 		edit: m.edit(),
 		overview: m.overview(),
 		context: m.context(),
+		catalog: m.catalog(),
+		actions: m.actions(),
+		operations: m.operations(),
 		governance: m.governance(),
 		risk: m.risk(),
 		compliance: m.compliance(),

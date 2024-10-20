@@ -57,7 +57,7 @@ jobs:
           pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install
       - name: Create frontend environment variables file
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -87,9 +87,12 @@ jobs:
           export $(grep -v '^#' .env | xargs)
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
+      - name: Build frontend
+        working-directory: ${{ env.frontend-directory }}
+        run: pnpm run build
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
-        run: npx playwright test tests/functional/startup.test.ts
+        run: pnpm exec playwright test tests/functional/startup.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -114,7 +117,7 @@ jobs:
           pnpm i --frozen-lockfile
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install
       - name: Build the Docker app
         run: docker compose -f docker-compose-build.yml up -d
       - name: Create backend environment variables file
@@ -178,12 +181,12 @@ jobs:
       - name: Install enterprise backend
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
-      - name: Install frontend dependencies
+      - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
-        run: make pre-build
+        run: make
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install
       - name: Create frontend environment variables file
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: |
@@ -216,7 +219,7 @@ jobs:
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: npx playwright test tests/functional/startup.test.ts
+        run: pnpm exec playwright test tests/functional/startup.test.ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -239,7 +242,7 @@ jobs:
         run: make pre-build
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
       - name: Create backend environment variables file

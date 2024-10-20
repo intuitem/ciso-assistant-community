@@ -361,6 +361,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
 			category: CATEGORY_FILTER,
+			provider: PROVIDER_FILTER,
 			csf_function: CSF_FUNCTION_FILTER
 		}
 	},

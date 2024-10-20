@@ -37,8 +37,6 @@ services:
       - ./caddy_data:/data
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/iam/sso/redirect/ backend:8000
-      reverse_proxy /api/accounts/saml/0/acs/ backend:8000
-      reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+      reverse_proxy /api/* backend:8000
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'

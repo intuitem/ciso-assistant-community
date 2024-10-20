@@ -1,12 +1,12 @@
+import { ClientSettingsSchema } from '$lib/utils/client-settings';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { safeTranslate } from '$lib/utils/i18n';
-import { ClientSettingsSchema } from '$lib/utils/client-settings';
+import * as m from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const settings = await fetch(`${BASE_API_URL}/client-settings/`)
@@ -62,7 +62,7 @@ export const actions: Actions = {
 				return { form };
 			}
 			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
+				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 				return { form };
 			}
 			Object.entries(response).forEach(([key, value]) => {
@@ -98,7 +98,6 @@ export const actions: Actions = {
 			}
 		}
 
-		const modelVerboseName: string = 'clientSettings';
 
 		return setFlash(
 			{
