@@ -115,6 +115,7 @@ erDiagram
         string description
         string internal_reference
         string status
+        json   tags
     }
 
     FRAMEWORK {
@@ -144,13 +145,13 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        string[]    tags
+        json        tags
         string      observation
 
         string[]    selected_implementation_groups
-        int     min_score
-        int     max_score
-        json    scores_definition
+        int         min_score
+        int         max_score
+        json        scores_definition
     }
 
     RISK_ASSESSMENT {
@@ -163,10 +164,8 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        string[]    tags
+        json        tags
         string      observation
-
-        string      risk_assessment_method
     }
 
     THREAT {
@@ -178,16 +177,6 @@ erDiagram
         string  annotation
         string  provider
         json    translations
-    }
-
-    VULNERABILITY {
-        string  urn
-        string  locale
-        string  ref_id
-        string  name
-        string  description
-        string  annotation
-        string  provider
     }
 
     REQUIREMENT_NODE {
@@ -233,8 +222,21 @@ erDiagram
         url      link
         string   effort
         float    cost
-        string[] tags
+        json     tags
     }
+
+    VULNERABILITY {
+        string  name
+        string  description
+        string  status
+        date    eta
+        date    due_date
+        url     link
+        string  effort
+        float   cost
+        json    tags
+    }
+
 
     REQUIREMENT_ASSESSMENT {
         string status
@@ -278,6 +280,7 @@ erDiagram
         string business_value
         string type
         asset  parent_asset
+        json   tags
     }
 
     RISK_SCENARIO {
@@ -766,7 +769,14 @@ Threats are referential objects used to clarify the aim of a requirement node or
 
 ## Vulnerabilities
 
-Vulnerabilities are referential objects used to clarify a risk scenario and to follow remediations. They are informative, risk assessments can be realised without using them. Well-known providers are NVD and CISA KEV, but custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
+Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE or CISA KEV can be done in the link field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
+
+Vulnerabilities have a status among the following values: --/potential/exposed/mitigated/fixed.
+
+Vulnerabilities have an eta and due date to follow remediation, and also:
+  - an effort (--/S/M/L/XL)
+  - a cost (--/float value)
+  - a url link
 
 ## Reference controls
 
@@ -869,7 +879,7 @@ The following inference rules are used:
 
 A risk assessment is based on scenarios, covered by Applied controls. Gathering the risk scenarios constitutes the "risk identification" phase.
 
-A risk assessment has an *risk_assessment_method* field that can take the following values: 0 (risk matrix)/1 (Open FAIR). This cannot be changed once the risk assessment is created. Similarly, the risk matrix cannot be changed once the risk assessment is created.
+The risk matrix cannot be changed once the risk assessment is created.
 
 To analyse the risk, each scenario contains Existing Controls, current probability and impact, proposed controls, residual probability and impact. To facilitate using an assistant to estimate probability and impact, or for advanced methods like openfair, the json fields *current_risk_vector* and *residual_risk_vector* are aimed at keeping the data used to calculate to the estimation.
 
@@ -929,7 +939,6 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 Libraries can contain:
 - frameworks (including requirement nodes)
 - threats
-- vulnerabilities
 - reference controls
 - risk matrices
 - requirement mapping sets
@@ -957,7 +966,7 @@ Deleting a library is possible only if none of its objects is currently used. Re
 
 ## Referential objects
 
-Frameworks (including requirement nodes), mappings, threats, vulnerabilities, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
+Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
 
 Referential objects can be downloaded from a library. They are called "global referential objects" or "library objects" in that case, and they have the following characteristics:
 - they have a non-null URN identifier *urn* of the form: ```urn:intuitem:<domain>:<object_type>:[<framework>:]<short_id>```. Client-defined URNs are also possible. The framework part is present for items that are part of a framework.
@@ -1370,26 +1379,25 @@ A new field is added to a risk scenario, precising the security objective that i
 
 The security "CIA" or "AICP" score of an asset can now be clearly defined as the highest impact for corresponding scenarios for analyses selected in "feared events", when a scenario points to the asset for one or several security objective. This can be calculated dynamically, after selection of the security objective model to use. This solves the issue of multiple conventions for security objectives.
 
-The following fields are added to assets: Confidentiality, Integrity, Availability, Proof, Authenticity, with a integer value. This value is comprised between 0 and 3, and can be projected depending on a selected standard:
+The following fields are added to assets: Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety, with a integer value. This value is comprised between 0 and 3 in the database, but can be displayed differently depending on the selected scale system.
+For the MVP, the scale system is global, and defined in the global parameters, with 1-4 as the default value.
 
 standard | internal value | standard value
 ---------|----------------|---------------
-AICP 0-3 | 0              | 0
-AICP 0-3 | 1              | 1
-AICP 0-3 | 2              | 2
-AICP 0-3 | 3              | 3
-AICP 1-4 | 0              | 1
-AICP 1-4 | 1              | 2
-AICP 1-4 | 2              | 3
-AICP 1-4 | 3              | 4
+0-3      | 0              | 0
+0-3      | 1              | 1
+0-3      | 2              | 2
+0-3      | 3              | 3
+1-4      | 0              | 1
+1-4      | 1              | 2
+1-4      | 2              | 3
+1-4      | 3              | 4
 FIPS-199 | 0              | low
 FIPS-199 | 1              | moderate
 FIPS-199 | 2              | moderate
 FIPS-199 | 3              | high
 
-Standard risk matrices will be provided to further describe the levels of security objectives, and can be customized to reflect the definition of levels for the client.
-
-The security objective standard is selected as a global parameter, but can be changed in the UX.
+There is also a global parameter to define which security objectives are considered, among Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety. Non-considered security objectives are hidden. The default value is Confidentiality, Integrity, Availability, Proof.
 
 The following fields are also added to assets: RTO, RPO, MTD (Maximum Tolerable Downtime).
 
@@ -1416,15 +1424,37 @@ erDiagram
         int      availability
         int      proof
         int      authenticity
+        int      privacy
+        int      safety
         duration rto
         duration rpo
         duration mtd
     }
 
-
 ```
 
-###
 
+### Risk study
+
+A risk study is sophisticated object able to address advanced risk analysis methodologies like EBIOS-RM.
+
+It is based on a Domain-Specific Language that allows to describe the datamodel of the target methodology, based on components provided by CISO Assistant.
+
+The following components can be used:
+- entity
+- asset
+- Matrix
+- Risk assessment with parameters:
+  - show probability
+  - show impact
+  - show remediations
+- Framework
+- Compliance assessment
+
+The DSL allows to create a custom "story" that guides the user to fill compoments. Each component can have a custom name and description. E.g.:
+    - "feared events" is a risk assessment with no probability nor remediations
+    - "strategic scenarios" is a risk assessment with no probability.
+    - "operational scenarios" is a risk assessment with no impact.
+    - "risk treatment" is a risk assessment is a risk assessment with current risk read-only
 
 ###
