@@ -49,31 +49,46 @@
 		{#key URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
-					{#if !['risk-matrices', 'frameworks', 'user-groups', 'role-assignments'].includes(URLModel)}
-						<button
-							class="btn variant-filled-primary self-end"
-							data-testid="add-button"
-							on:click={modalCreateForm}
-							><i class="fa-solid fa-plus mr-2" />
-							{safeTranslate('add-' + data.model.localName)}
-						</button>
-						{#if URLModel === 'applied-controls'}
+					<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+						{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
+							<button
+								class="inline-block border-e p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								data-testid="add-button"
+								title={safeTranslate('add-' + data.model.localName)}
+								on:click={modalCreateForm}
+								><i class="fa-solid fa-file-circle-plus"></i>
+							</button>
+							{#if URLModel === 'applied-controls'}
+								<a
+									href="{URLModel}/export/"
+									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									title={m.exportButton()}
+									data-testid="export-button"><i class="fa-solid fa-download mr-2" /></a
+								>
+							{/if}
+						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="{URLModel}/export/"
-								class="btn variant-filled-surface"
-								data-testid="export-button"
-								><i class="fa-solid fa-download mr-2" />{m.exportButton()}</a
+								href="/libraries"
+								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								data-testid="add-button"
+								title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2" /></a
+							>
+						{:else if URLModel === 'frameworks'}
+							<a
+								href="/libraries"
+								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								data-testid="add-button"
+								title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
+							>
+						{:else if URLModel === 'requirement-mapping-sets'}
+							<a
+								href="/libraries"
+								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								data-testid="add-button"
+								title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{/if}
-					{:else if URLModel === 'risk-matrices'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-							><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
-						>
-					{:else if URLModel === 'frameworks'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-							><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
-						>
-					{/if}
+					</span>
 				</div>
 			</ModelTable>
 		{/key}
