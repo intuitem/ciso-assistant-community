@@ -650,8 +650,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
                 if (
                     duplicate_risk_assessment.project.folder
-                    in [risk_assessment.project.folder]
-                    + risk_assessment.project.folder.sub_folders()
+                    == risk_assessment.project.folder
+                    or duplicate_risk_assessment.project.folder
+                    in risk_assessment.project.folder.get_sub_folders()
                 ):
                     duplicate_scenario.owner.set(scenario.owner.all())
 
