@@ -955,19 +955,34 @@ class AppliedControlViewSet(BaseModelViewSet):
             applied_control: AppliedControl, data: dict, folder: Folder
         ) -> AppliedControl:
             return AppliedControl.objects.create(
-                reference_control=applied_control.reference_control,
+                # reference_control=applied_control.reference_control,
                 name=data["name"],
                 description=data["description"],
                 folder=new_folder,
-                category=applied_control.category,
-                csf_function=applied_control.csf_function,
-                status=applied_control.status,
-                start_date=applied_control.start_date,
-                eta=applied_control.eta,
-                expiry_date=applied_control.expiry_date,
-                link=applied_control.link,
-                effort=applied_control.effort,
-                cost=applied_control.cost,
+                **{
+                    key: getattr(applied_control, key)
+                    for key in [
+                        "reference_control",
+                        "category",
+                        "csf_function",
+                        "status",
+                        "start_date",
+                        "eta",
+                        "expiry_date",
+                        "link",
+                        "effort",
+                        "cost",
+                    ]
+                },
+                # category=applied_control.category,
+                # csf_function=applied_control.csf_function,
+                # status=applied_control.status,
+                # start_date=applied_control.start_date,
+                # eta=applied_control.eta,
+                # expiry_date=applied_control.expiry_date,
+                # link=applied_control.link,
+                # effort=applied_control.effort,
+                # cost=applied_control.cost,
             )
 
         applied_control = self.get_object()
