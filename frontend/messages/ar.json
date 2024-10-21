@@ -767,8 +767,6 @@
 	"backupLoadingError": "حدث خطأ أثناء تحميل النسخة الاحتياطية.",
 	"backupGreaterVersionError": "لا يمكن تحميل النسخة الاحتياطية، إصدار النسخة الاحتياطية أعلى من الإصدار الحالي للتطبيق الخاص بك.",
 	"backupLowerVersionError": "حدث خطأ، قد تكون نسخة النسخ الاحتياطي قديمة جدًا، إذا كان الأمر كذلك فيجب تحديثها قبل إعادة المحاولة.",
-	"questionSingular": "سؤال",
-	"questionPlural": "أسئلة",
 	"NoPreviewMessage": "لا يوجد معاينة متاحة.",
 	"entityAssessmentEvidenceHelpText": "استبيان خارجي",
 	"associatedEntities": "الكيانات المرتبطة",
@@ -780,6 +778,8 @@
 	"librariesCanOnlyBeLoadedByAdmin": "لا يمكن تحميل المكتبات إلا بواسطة المسؤول",
 	"catalog": "الكتالوج",
 	"operations": "العمليات",
+	"questionSingular": "سؤال",
+	"questionPlural": "أسئلة",
 	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
 	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert"
 }

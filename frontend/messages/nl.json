@@ -767,8 +767,6 @@
 	"backupLoadingError": "Er is een fout opgetreden tijdens het laden van de back-up.",
 	"backupGreaterVersionError": "De back-up kan niet worden geladen. De versie van de back-up is hoger dan de huidige versie van uw applicatie.",
 	"backupLowerVersionError": "Er is een fout opgetreden. Mogelijk is de back-upversie te oud. Als dat zo is, moet u deze bijwerken voordat u het opnieuw probeert.",
-	"questionSingular": "Vraag",
-	"questionPlural": "Vragen",
 	"NoPreviewMessage": "Geen voorbeeld beschikbaar.",
 	"entityAssessmentEvidenceHelpText": "Een externe vragenlijst",
 	"associatedEntities": "Geassocieerde entiteiten",
@@ -780,6 +778,8 @@
 	"librariesCanOnlyBeLoadedByAdmin": "Bibliotheken kunnen alleen door een beheerder worden geladen",
 	"catalog": "Catalogus",
 	"operations": "Operaties",
+	"questionSingular": "Vraag",
+	"questionPlural": "Vragen",
 	"fillMetadataURL": "Optie 1: Vul de metadata-url in",
 	"fillSSOSLOURLx509cert": "Optie 2: Vul de SSO-URL, SLO-URL en x509cert in"
 }
