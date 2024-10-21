@@ -985,7 +985,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                 # cost=applied_control.cost,
             )
 
-        applied_control = self.get_object()
+        """applied_control = self.get_object()
         data = request.data
         new_folder = Folder.objects.get(id=data["folder"])
         duplicate_applied_control = duplicate_into_folder(
@@ -996,7 +996,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             duplicate_related_objects(
                 applied_control, duplicate_applied_control, new_folder, "evidences"
             )
-            duplicate_applied_control.save()
+            duplicate_applied_control.save()"""
 
         return Response({"results": "applied control duplicated"})
 
