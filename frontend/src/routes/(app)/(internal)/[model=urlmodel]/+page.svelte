@@ -7,7 +7,6 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { checkConstraints } from '$lib/utils/crud';
 
 	export let data: PageData;
@@ -27,7 +26,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add' + capitalizeFirstLetter(data.model.localName))
+			title: safeTranslate('add-' + data.model.localName)
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -37,7 +36,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: safeTranslate('add' + capitalizeFirstLetter(data.model.localName)).toLowerCase(),
+				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
@@ -56,7 +55,7 @@
 							data-testid="add-button"
 							on:click={modalCreateForm}
 							><i class="fa-solid fa-plus mr-2" />
-							{safeTranslate('add' + capitalizeFirstLetter(data.model.localName))}
+							{safeTranslate('add-' + data.model.localName)}
 						</button>
 						{#if URLModel === 'applied-controls'}
 							<a

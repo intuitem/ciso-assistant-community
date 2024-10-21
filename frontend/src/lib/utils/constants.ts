@@ -12,8 +12,6 @@ export const BACKEND_API_EXPOSED_URL = `${
 		: BASE_API_URL
 }`;
 
-export const RISK_COLOR_PALETTE: string[] = ['#BBF7D0', '#BEF264', '#FEF08A', '#FBBF24', '#F87171'];
-
 export const complianceResultColorMap: { [key: string]: string } = {
 	not_assessed: '#d1d5db',
 	partially_compliant: '#fde047',

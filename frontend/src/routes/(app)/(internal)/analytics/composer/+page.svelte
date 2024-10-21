@@ -2,10 +2,7 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
 	import * as m from '$paraglide/messages';
-	import { localItems } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 	import type { AppliedControlStatus } from '$lib/utils/types';
-	import { RISK_COLOR_PALETTE } from '$lib/utils/constants.js';
 
 	export let data;
 	data.risk_assessment_objects.forEach((risk_assessment: Record<string, any>) => {

@@ -40,7 +40,6 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { capitalizeFirstLetter, localItems } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
@@ -87,7 +86,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -106,7 +105,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.evidenceModel.localName)]
+			title: safeTranslate('add-' + data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
