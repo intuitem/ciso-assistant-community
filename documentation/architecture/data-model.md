@@ -62,6 +62,7 @@ erDiagram
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
 
     DOMAIN {
+        string ref_id
         string name
         string description
         int version
@@ -111,6 +112,7 @@ erDiagram
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
 
     PROJECT {
+        string ref_id
         string name
         string description
         string internal_reference
@@ -135,6 +137,7 @@ erDiagram
     }
 
     COMPLIANCE_ASSESSMENT {
+        string      ref_id
         string      name
         string      description
 
@@ -155,6 +158,7 @@ erDiagram
     }
 
     RISK_ASSESSMENT {
+        string      ref_id
         string      name
         string      description
 
@@ -211,6 +215,7 @@ erDiagram
     }
 
     APPLIED_CONTROL {
+        string  ref_id
         string   name
         string   description
 
@@ -226,15 +231,12 @@ erDiagram
     }
 
     VULNERABILITY {
+        string  ref_id
         string  name
         string  description
         string  status
-        date    eta
-        date    due_date
-        url     link
-        string  effort
-        float   cost
-        json    tags
+        int     severity
+        json    references
     }
 
 
@@ -769,14 +771,20 @@ Threats are referential objects used to clarify the aim of a requirement node or
 
 ## Vulnerabilities
 
-Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE or CISA KEV can be done in the link field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
+Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE, CISA KEV or any other catalog can be done in the references field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
 
-Vulnerabilities have a status among the following values: --/potential/exposed/mitigated/fixed.
+Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
 
-Vulnerabilities have an eta and due date to follow remediation, and also:
-  - an effort (--/S/M/L/XL)
-  - a cost (--/float value)
-  - a url link
+The format of the references field is list of the following objects (* for mandatory):
+- string ref_id (*)
+- boolean is_cve
+- boolean is_kev
+- boolean cve_score
+- ...
+
+The UX shall facilitate the proper edition of references.
+
+Vulnerabilities also have a ref_id (defaults to empty string), a name, a description, and a severity within values --/low/medium/high/critical.
 
 ## Reference controls
 
@@ -1457,4 +1465,4 @@ The DSL allows to create a custom "story" that guides the user to fill compoment
     - "operational scenarios" is a risk assessment with no impact.
     - "risk treatment" is a risk assessment is a risk assessment with current risk read-only
 
-###
+
