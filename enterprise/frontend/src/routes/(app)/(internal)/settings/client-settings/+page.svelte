@@ -10,6 +10,15 @@
 	import * as m from '$paraglide/messages.js';
 
 	export let data: PageData;
+
+	async function deleteLogo() {
+        const res = await fetch(`${BASE_API_URL}/client-settings/${data.settings.id}/logo/delete/`, {
+            method: 'POST',
+        });
+		data.form.logo = null;
+    }
+
+
 </script>
 
 {#if data && Object.hasOwn(data, 'form')}
@@ -33,6 +42,8 @@
 				: m.logoHelpText()}
 			accept="image/*"
 		/>
+		<button class="btn variant-filled-primary font-semibold w-full"  on:click={deleteLogo} >
+		Reset logo</button>
 		<FileInput
 			{form}
 			field="favicon"
