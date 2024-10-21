@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages';
 	import { toCamelCase } from '$lib/utils/locales';
-	import { localItems } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { languageTag } from '$paraglide/runtime';
 
 	function filterUserData() {
@@ -46,7 +46,7 @@
 		<div class="flex flex-col w-1/2 border p-2 rounded-lg shadow-lg space-y-4">
 			{#each Object.entries(filterUserData()) as [label, value]}
 				<div class="flex flex-col">
-					<p class="font-semibold text-sm">{localItems()[label]}</p>
+					<p class="font-semibold text-sm">{safeTranslate(label)}</p>
 					<p class="text-sm">{value}</p>
 				</div>
 			{/each}

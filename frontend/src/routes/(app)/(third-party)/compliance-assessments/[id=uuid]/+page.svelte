@@ -26,7 +26,8 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
@@ -199,11 +200,7 @@
 						class="text-sm font-medium text-gray-800 capitalize-first"
 						data-testid={key.replaceAll('_', '-') + '-field-title'}
 					>
-						{#if key === 'urn'}
-							{m.urn()}
-						{:else}
-							{localItems()[toCamelCase(key)]}
-						{/if}
+						{safeTranslate(key)}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -243,10 +240,8 @@
 									{:else}
 										{value.str}
 									{/if}
-								{:else if localItems()[toCamelCase(value.str ?? value)]}
-									{localItems()[toCamelCase(value.str ?? value)]}
 								{:else}
-									{value.str ?? value}
+									{safeTranslate(value.str ?? value)}
 								{/if}
 							{:else}
 								--
