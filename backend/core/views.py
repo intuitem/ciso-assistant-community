@@ -943,7 +943,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+        """(object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, AppliedControl
         )
         if UUID(pk) not in object_ids_view:
@@ -983,7 +983,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                 # link=applied_control.link,
                 # effort=applied_control.effort,
                 # cost=applied_control.cost,
-            )
+            )"""
 
         """applied_control = self.get_object()
         data = request.data
