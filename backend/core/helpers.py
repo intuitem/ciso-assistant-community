@@ -797,18 +797,17 @@ def build_audits_tree_metrics(user):
             block_prj = {"name": project.name, "domain": domain.name, "children": []}
             children = []
             for audit in ComplianceAssessment.objects.filter(project=project):
-                cnt_reqs = RequirementAssessment.objects.filter(
-                    compliance_assessment=audit
-                ).count()
                 cnt_res = {}
                 for result in RequirementAssessment.Result.choices:
-                    cnt_res[result[0]] = (
-                        RequirementAssessment.objects.filter(
-                            requirement__assessable=True
-                        )
-                        .filter(compliance_assessment=audit)
-                        .filter(result=result[0])
-                        .count()
+                    requirement_assessments = audit.get_requirement_assessments(
+                        include_non_assessable=False
+                    )
+                    cnt_res[result[0]] = len(
+                        [
+                            requirement
+                            for requirement in requirement_assessments
+                            if requirement.result == result[0]
+                        ]
                     )
                 blk_audit = {
                     "name": audit.name,
