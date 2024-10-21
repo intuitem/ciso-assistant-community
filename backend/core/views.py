@@ -968,7 +968,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             effort=applied_control.effort,
             cost=applied_control.cost,
         )
-        if request.data["duplicate_evidences"]:
+        if data["duplicate_evidences"]:
             duplicate_related_objects(
                 applied_control, duplicate_applied_control, new_folder, "evidences"
             )

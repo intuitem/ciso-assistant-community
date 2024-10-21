@@ -116,16 +116,6 @@ class Folder(NameDescriptionMixin):
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
 
-    # Is this function usefull ?
-    def can_access(self, folder: Self) -> bool:
-        return (
-            self == folder
-            or any(
-                folder == parent_folder for parent_folder in self.get_parent_folders()
-            )
-            or any(folder == sub_folder for sub_folder in self.get_sub_folders())
-        )
-
     @staticmethod
     def _navigate_structure(start, path):
         """
