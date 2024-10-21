@@ -950,27 +950,31 @@ class AppliedControlViewSet(BaseModelViewSet):
                 {"results": "applied control duplicated"}, status=HTTP_404_NOT_FOUND
             )
 
-        def duplicate_into_folder(applied_control: AppliedControl, data: dict, folder: Folder) -> AppliedControl :
-            return duplicate_applied_control = AppliedControl.objects.create(
-            reference_control=applied_control.reference_control,
-            name=data["name"],
-            description=data["description"],
-            folder=new_folder,
-            category=applied_control.category,
-            csf_function=applied_control.csf_function,
-            status=applied_control.status,
-            start_date=applied_control.start_date,
-            eta=applied_control.eta,
-            expiry_date=applied_control.expiry_date,
-            link=applied_control.link,
-            effort=applied_control.effort,
-            cost=applied_control.cost,
-        )
+        def duplicate_into_folder(
+            applied_control: AppliedControl, data: dict, folder: Folder
+        ) -> AppliedControl:
+            return AppliedControl.objects.create(
+                reference_control=applied_control.reference_control,
+                name=data["name"],
+                description=data["description"],
+                folder=new_folder,
+                category=applied_control.category,
+                csf_function=applied_control.csf_function,
+                status=applied_control.status,
+                start_date=applied_control.start_date,
+                eta=applied_control.eta,
+                expiry_date=applied_control.expiry_date,
+                link=applied_control.link,
+                effort=applied_control.effort,
+                cost=applied_control.cost,
+            )
 
         applied_control = self.get_object()
         data = request.data
         new_folder = Folder.objects.get(id=data["folder"])
-        duplicate_applied_control = duplicate_into_folder(applied_control, data, new_folder)
+        duplicate_applied_control = duplicate_into_folder(
+            applied_control, data, new_folder
+        )
 
         if data["duplicate_evidences"]:
             duplicate_related_objects(
