@@ -733,6 +733,7 @@
 	"waitingRiskAcceptances": "Cześć! Obecnie masz {number} ryzyko{s} oczekujące na akceptację. Możesz je znaleźć w zakładce ryzyko.",
 	"licenseSeats": "Miejsca na licencję",
 	"licenseExpiration": "Wygaśnięcie licencji",
+	"licenseExpiredMessage": "Twoja licencja wygasła. Operacje zapisu są wyłączone. Skontaktuj się z administratorem, aby ją odnowić.",
 	"answer": "Odpowiedź",
 	"questionnaireMode": "Tryb ankiety",
 	"assessmentMode": "Tryb oceny",

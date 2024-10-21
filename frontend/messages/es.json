@@ -731,6 +731,7 @@
 	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo.",
 	"licenseSeats": "Asientos de licencia",
 	"licenseExpiration": "Caducidad de la licencia",
+	"licenseExpiredMessage": "Su licencia ha expirado. Las operaciones de escritura están deshabilitadas. Comuníquese con su administrador para renovarla.",
 	"answer": "Respuesta",
 	"questionnaireMode": "Modo cuestionario",
 	"assessmentMode": "Modo de evaluación",

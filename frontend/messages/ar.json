@@ -733,6 +733,7 @@
 	"waitingRiskAcceptances": "مرحبًا! لديك حاليًا {number} مخاطرة معلقة .يمكنك العثور عليها في علامة التبويب المخاطر.",
 	"licenseSeats": "مقاعد الترخيص",
 	"licenseExpiration": "انتهاء صلاحية الترخيص",
+	"licenseExpiredMessage": "انتهت صلاحية ترخيصك. عمليات الكتابة معطلة. يرجى الاتصال بالمسؤول لتجديد الترخيص.",
 	"answer": "إجابة",
 	"questionnaireMode": "وضع الاستبيان",
 	"assessmentMode": "وضع التقييم",

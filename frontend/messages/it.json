@@ -733,6 +733,7 @@
 	"waitingRiskAcceptances": "Ciao! Al momento hai {number} rischi{s} in attesa di accettazione. Puoi trovarli nella scheda rischi.",
 	"licenseSeats": "Posti di licenza",
 	"licenseExpiration": "Scadenza della licenza",
+	"licenseExpiredMessage": "La tua licenza è scaduta. Le operazioni di scrittura sono disabilitate. Contatta il tuo amministratore per rinnovarla.",
 	"answer": "Risposta",
 	"questionnaireMode": "Modalità questionario",
 	"assessmentMode": "Modalità di valutazione",
