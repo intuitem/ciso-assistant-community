@@ -43,7 +43,11 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+)
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
 
@@ -942,7 +946,9 @@ class AppliedControlViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, AppliedControl
         )
         if UUID(pk) not in object_ids_view:
-            return Response({"results": "applied control duplicated"}, status=HTTP_404_NOT_FOUND)
+            return Response(
+                {"results": "applied control duplicated"}, status=HTTP_404_NOT_FOUND
+            )
 
         applied_control = self.get_object()
         data = request.data
@@ -963,7 +969,9 @@ class AppliedControlViewSet(BaseModelViewSet):
             cost=applied_control.cost,
         )
         if request.data["duplicate_evidences"]:
-            duplicate_related_objects(applied_control, duplicate_applied_control, new_folder, "evidences")
+            duplicate_related_objects(
+                applied_control, duplicate_applied_control, new_folder, "evidences"
+            )
             # Delete the can_access method
             # Delete the duplicate_into_folder method
             duplicate_applied_control.save()
