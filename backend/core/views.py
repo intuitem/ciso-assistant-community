@@ -950,10 +950,8 @@ class AppliedControlViewSet(BaseModelViewSet):
                 {"results": "applied control duplicated"}, status=HTTP_404_NOT_FOUND
             )
 
-        applied_control = self.get_object()
-        data = request.data
-        new_folder = Folder.objects.get(id=data["folder"])
-        duplicate_applied_control = AppliedControl.objects.create(
+        def duplicate_into_folder(applied_control: AppliedControl, data: dict, folder: Folder) -> AppliedControl :
+            return duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
             description=data["description"],
@@ -968,12 +966,16 @@ class AppliedControlViewSet(BaseModelViewSet):
             effort=applied_control.effort,
             cost=applied_control.cost,
         )
+
+        applied_control = self.get_object()
+        data = request.data
+        new_folder = Folder.objects.get(id=data["folder"])
+        duplicate_applied_control = duplicate_into_folder(applied_control, data, new_folder)
+
         if data["duplicate_evidences"]:
             duplicate_related_objects(
                 applied_control, duplicate_applied_control, new_folder, "evidences"
             )
-            # Delete the can_access method
-            # Delete the duplicate_into_folder method
             duplicate_applied_control.save()
 
         return Response({"results": "applied control duplicated"})
