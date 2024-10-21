@@ -175,6 +175,15 @@ class Folder(NameDescriptionMixin):
         # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
         return None
 
+    def tree(self):
+        """Return the tree structure of the folder"""
+        tree = {}
+        tree[str(self.id)] = {
+            "name": self.name,
+            "children": [f.tree() for f in self.folder_set.all()],
+        }
+        return tree
+
 
 class FolderMixin(models.Model):
     """
@@ -776,13 +785,44 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
     @classmethod
     def get_permissions_per_folder(
-        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup
+        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup, recursive=False
     ):
         """
         Get all permissions attached to a user directly or indirectly, grouped by folder.
+        If recursive is set to True, permissions from recursive role assignments are transmitted
+        to the children of its perimeter folders.
         """
-        permissions = defaultdict(list)
+        permissions = defaultdict(set)
         for ra in cls.get_role_assignments(principal):
-            for p in ra.role.permissions.all():
-                permissions[str(ra.folder.id)].append(p.codename)
+            for folder in ra.perimeter_folders.all():
+                permissions[str(folder.id)] |= set(
+                    ra.role.permissions.all().values_list("codename", flat=True)
+                )
+                if recursive and ra.is_recursive:
+                    for f in folder.sub_folders():
+                        permissions[str(f.id)] |= set(
+                            ra.role.permissions.all().values_list("codename", flat=True)
+                        )
         return permissions
+
+    @classmethod
+    def get_permission_folder_tree(
+        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup
+    ):
+        def recurse(folder, permissions):
+            id = list(folder.keys())[0]
+            _folder = folder[list(folder.keys())[0]]
+            return {
+                id: {
+                    "name": _folder["name"],
+                    "permissions": permissions.get(id, []),
+                    "children": [recurse(f, permissions) for f in _folder["children"]],
+                }
+            }
+
+        folder_tree = Folder.get_root_folder().tree()
+        permissions = cls.get_permissions_per_folder(principal, recursive=True)
+        for folder_id, folder in folder_tree.items():
+            folder["permissions"] = permissions.get(folder_id, [])
+            folder["children"] = [recurse(f, permissions) for f in folder["children"]]
+        return folder_tree
