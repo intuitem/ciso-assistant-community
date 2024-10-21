@@ -767,8 +767,6 @@
 	"backupLoadingError": "Wystąpił błąd podczas ładowania kopii zapasowej.",
 	"backupGreaterVersionError": "Nie można załadować kopii zapasowej. Wersja kopii zapasowej jest nowsza niż bieżąca wersja aplikacji.",
 	"backupLowerVersionError": "Wystąpił błąd. Wersja kopii zapasowej może być za stara. Jeśli tak, należy ją zaktualizować przed ponowną próbą.",
-	"questionSingular": "Pytanie",
-	"questionPlural": "Pytania",
 	"NoPreviewMessage": "Podgląd niedostępny.",
 	"entityAssessmentEvidenceHelpText": "Kwestionariusz zewnętrzny",
 	"associatedEntities": "Podmioty powiązane",
@@ -780,6 +778,8 @@
 	"librariesCanOnlyBeLoadedByAdmin": "Biblioteki mogą być ładowane tylko przez administratora",
 	"catalog": "Katalog",
 	"operations": "Operacje",
+	"questionSingular": "Pytanie",
+	"questionPlural": "Pytania",
 	"fillMetadataURL": "Opcja 1: Wypełnij adres URL metadanych",
 	"fillSSOSLOURLx509cert": "Opcja 2: Wypełnij adres URL SSO, adres URL SLO i certyfikat x509cert"
 }

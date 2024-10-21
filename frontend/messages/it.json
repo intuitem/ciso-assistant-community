@@ -767,8 +767,6 @@
 	"backupLoadingError": "Si è verificato un errore durante il caricamento del backup.",
 	"backupGreaterVersionError": "Impossibile caricare il backup, la versione del backup è successiva alla versione corrente dell'applicazione.",
 	"backupLowerVersionError": "Si è verificato un errore, la versione di backup potrebbe essere troppo vecchia. In tal caso, è necessario aggiornarla prima di riprovare.",
-	"questionSingular": "Domanda",
-	"questionPlural": "Domande",
 	"NoPreviewMessage": "Nessuna anteprima disponibile.",
 	"entityAssessmentEvidenceHelpText": "Un questionario esterno",
 	"associatedEntities": "Entità collegate",
@@ -780,6 +778,8 @@
 	"librariesCanOnlyBeLoadedByAdmin": "Le librerie possono essere caricate solo da un amministratore",
 	"catalog": "Catalogare",
 	"operations": "Operazioni",
+	"questionSingular": "Domanda",
+	"questionPlural": "Domande",
 	"fillMetadataURL": "Opzione 1: compila l'URL dei metadati",
 	"fillSSOSLOURLx509cert": "Opzione 2: compilare l'URL SSO, l'URL SLO e x509cert"
 }
