@@ -106,5 +106,17 @@ export const actions: Actions = {
 			},
 			event
 		);
+	},
+
+	deleteLogo: async (event) => {
+		const formData= await event.request.formData();
+		const schema = ClientSettingsSchema;
+		const form = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/logo/delete/`;
+
+
+		await event.fetch(endpoint, { method: 'POST' });
+		return { success: true };
 	}
 };
