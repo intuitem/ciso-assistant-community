@@ -730,6 +730,7 @@
 	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco.",
 	"licenseSeats": "Assentos de licença",
 	"licenseExpiration": "Expiração da licença",
+	"licenseExpiredMessage": "Sua licença expirou. Operações de gravação estão desabilitadas. Entre em contato com seu administrador para renová-la.",
 	"answer": "Responder",
 	"questionnaireMode": "Modo questionário",
 	"assessmentMode": "Modo de avaliação",
