@@ -209,6 +209,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
         "core.permissions.RBACPermissions",
+        "enterprise_core.permissions.LicensePermission",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -407,10 +408,14 @@ MODULES["enterprise_core"] = {
 }
 
 logger.info(
-    "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
+    "Enterprise startup information",
+    feature_flags=FEATURE_FLAGS,
+    module_paths=MODULE_PATHS,
 )
 
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
+
+logger.info("License information", seats=LICENSE_SEATS, expiration=LICENSE_EXPIRATION)
 
 INSTALLED_APPS.append("enterprise_core")
