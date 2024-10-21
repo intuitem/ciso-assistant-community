@@ -142,93 +142,97 @@
 				<section id="summary" class=" grid grid-cols-6 gap-4">
 					<Card
 						count={metrics.controls.total}
-						label="total"
+						label={m.sumpageTotal()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 						emphasis={true}
 					/>
 					<Card
 						count={metrics.controls.active}
-						label="active"
+						label={m.sumpageActive()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.deprecated}
-						label="deprecated"
+						label={m.sumpageDeprecated()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<div class="h-64 col-span-3 row-span-2 bg-white">
 						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 					</div>
 					<Card
 						count={metrics.controls.to_do}
-						label="to do"
+						label={m.sumpageToDo()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.in_progress}
-						label="in progress"
+						label={m.sumpageInProgress()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.on_hold}
-						label="on hold"
+						label={m.sumpageOnHold()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<div class="col-span-4 row-span-4 bg-white">
-						<TreemapChart title="Compliance overview" tree={metrics.audits_tree} name="sunburst" />
+						<TreemapChart
+							title={m.sumpageTitleComplianceOverview()}
+							tree={metrics.audits_tree}
+							name="sunburst"
+						/>
 					</div>
 					<!---->
 					<Card
 						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
-						label="active audits"
+						label={m.sumpageActiveAudits()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 						emphasis={true}
 					/>
 					<div></div>
 					<Card
 						count={metrics.compliance.compliant_items}
-						label="compliant items"
+						label={m.sumpageCompliantItems()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 					/>
 					<Card
 						count={metrics.compliance.non_compliant_items}
-						label="non compliant items"
+						label={m.sumpageNonCompliantItems()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 					/>
 					<Card
 						count={metrics.compliance.evidences}
-						label="evidences"
+						label={m.sumpageEvidences()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 					/>
 					<div class=""></div>
 					<div class=""></div>
@@ -236,52 +240,52 @@
 					<div class=" col-span-2 row-span-2 h-80 bg-white">
 						<HalfDonutChart
 							name="current_h"
-							title="Current risks"
+							title={m.sumpageTitleCurrentRisks()}
 							values={data.risks_count_per_level.current}
 							colors={data.risks_count_per_level.current.map((object) => object.color)}
 						/>
 					</div>
 					<Card
 						count={metrics.risk.assessments}
-						label="assessments"
+						label={m.sumpageAssessments()}
 						href="#"
 						help="this is interesting"
 						emphasis={true}
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<Card
 						count={metrics.risk.scenarios}
-						label="scenarios"
+						label={m.sumpageScenarios()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<div class=" col-span-2 row-span-2 bg-white">
 						<HalfDonutChart
 							name="residual_h"
-							title="Residual risks"
+							title={m.sumpageTitleResidualRisks()}
 							values={data.risks_count_per_level.residual}
 							colors={data.risks_count_per_level.residual.map((object) => object.color)}
 						/>
 					</div>
 					<Card
 						count={metrics.risk.threats}
-						label="mapped threats"
+						label={m.sumpageMappedThreats()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<!---->
 					<Card
 						count={metrics.risk.acceptances}
-						label="risks accepted"
+						label={m.sumpageRiskAccepted()}
 						href="#"
 						help="this is interesting"
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<div class=""></div>
 				</section>
