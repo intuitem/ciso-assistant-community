@@ -58,6 +58,7 @@ erDiagram
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ VULNERABILITY               : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
 
