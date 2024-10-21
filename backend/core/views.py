@@ -963,14 +963,9 @@ class AppliedControlViewSet(BaseModelViewSet):
             cost=applied_control.cost,
         )
         if request.data["duplicate_evidences"]:
-            for evidence in applied_control.evidences.all():
-                # Evidences will only be duplicated if necessary
-                if new_folder.can_access(evidence.folder):
-                    duplicate_applied_control.evidences.add(evidence)
-                else:
-                    new_evidence = evidence.duplicate_into_folder(new_folder)
-                    duplicate_applied_control.evidences.add(new_evidence)
-
+            duplicate_related_objects(applied_control, duplicate_applied_control, new_folder, "evidences")
+            # Delete the can_access method
+            # Delete the duplicate_into_folder method
             duplicate_applied_control.save()
 
         return Response({"results": "applied control duplicated"})
