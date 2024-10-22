@@ -18,7 +18,7 @@
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 
-	const allowedExtensions = new Set(['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'bmp', 'tiff']);
+	export let allowedExtensions = new Set(['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'bmp', 'tiff']);
 
 	function getShortenPreciseType(preciseType: string): string {
 		const shortPreciseTypeResult = /^[a-z0-9]+/.exec(preciseType);
@@ -106,6 +106,7 @@
 			placeholder=""
 			bind:files={$value}
 			bind:this={fileInput}
+      accept={Array.from(allowedExtensions).map(ext => '.' + ext).join(',')}
 			{...$constraints}
 			{...$$restProps}
 		/>
