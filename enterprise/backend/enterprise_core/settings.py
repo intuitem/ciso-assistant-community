@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     "allauth.headless",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
+    "allauth.mfa",
 ]
 
 MIDDLEWARE = [
@@ -385,6 +386,8 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 HEADLESS_ONLY = True
+
+HEADLESS_TOKEN_STRATEGY = "iam.utils.KnoxTokenStrategy"
 
 HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
