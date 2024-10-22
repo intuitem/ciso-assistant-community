@@ -8,9 +8,11 @@ import { toCamelCase } from '$lib/utils/locales';
  * @param options The options to pass to the translation function.
  */
 export function unsafeTranslate(key: string, params = {}, options = {}): string | undefined {
-	key = toCamelCase(key);
 	if (Object.hasOwn(m, key)) {
 		return m[key](params, options);
+	}
+	if (Object.hasOwn(m, toCamelCase(key))) {
+		return m[toCamelCase(key)](params, options);
 	}
 }
 
@@ -21,5 +23,5 @@ export function unsafeTranslate(key: string, params = {}, options = {}): string 
  * @param options The options to pass to the translation function.
  */
 export function safeTranslate(key: string, params = {}, options = {}): string {
-	return unsafeTranslate(key) || key;
+	return unsafeTranslate(key, params, options) || key;
 }
