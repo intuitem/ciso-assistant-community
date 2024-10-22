@@ -22,7 +22,7 @@
 				<span> {m.forComplianceRiskManagement()} </span>
 			</div>
 		</Typewriter>
-	{:else if clientSettings.settings.logo}
+	{:else}
 		<Logo width={400} height={400} />
 	{/if}
 </div>
