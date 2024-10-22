@@ -279,10 +279,10 @@ erDiagram
     ASSET {
         string name
         string description
-
         string business_value
         string type
         asset  parent_asset
+        url    reference_link
         json   tags
     }
 
@@ -1184,15 +1184,6 @@ erDiagram
         url     reference_link
     }
 
-    ASSET {
-        string      name
-        string      description
-        string      business_value
-        string      type
-        string      security_need
-        asset       parent_asset
-    }
-
     SOLUTION {
         string      name
         string      description
@@ -1380,8 +1371,6 @@ Risk treatment        | Traitement du risque    | Applied controls in a risk ana
 
 ### Assets and Feared events
 
-We introduce a new field for risk analysis called analysis_focus, with possible values among feared impact/probability/full. Full is the current mode, and the default value. In the "impact" variant, only impact is evaluated. There is no probability, nor any risk treatment.
-
 Assets can be referred in a risk analysis. In addition, we add a new field in an asset called "feared events" to refer to zero, one or several risk analyses defining the feared events for this asset.
 
 A new field is added to a risk scenario, precising the security objective that is threatened, among the values Confidentiality/Integrity/Availability/Proof/Authenticity.
@@ -1418,16 +1407,15 @@ erDiagram
     RISK_ASSESSMENT       }o--o| ASSET                 : defines_feared_events
     RISK_SCENARIO         }o--o{ ASSET                 : threatens
     RISK_ASSESSMENT       ||--o{ RISK_SCENARIO         : contains
-
-    RISK_SCENARIO {
-        string     security_objectives
-    }
     
-    RISK_ASSESSMENT {
-        string     analysis_focus
-    }
-
     ASSET {
+        string   name
+        string   description
+        string   business_value
+        string   type
+        asset    parent_asset
+        url      reference_link
+        json     tags
         int      confidentiality
         int      integrity
         int      availability
