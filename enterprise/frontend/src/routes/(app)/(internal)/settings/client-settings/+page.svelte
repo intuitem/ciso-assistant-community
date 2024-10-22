@@ -11,12 +11,34 @@
 
 	export let data: PageData;
 
-	async function deleteLogo() {
-        const res = await fetch(`${BASE_API_URL}/client-settings/${data.settings.id}/logo/delete/`, {
-            method: 'POST',
-        });
-		data.form.logo = null;
-    }
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import { getModelInfo } from '$lib/utils/crud.js';
+
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalConfirm(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+			_form: data.attachmentDeleteForm,
+			id: id,
+			debug: false,
+			URLModel: "settings",
+			formAction: action
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
 
 
 </script>
@@ -42,8 +64,12 @@
 				: m.logoHelpText()}
 			accept="image/*"
 		/>
-		<button class="btn variant-filled-primary font-semibold w-full"  on:click={deleteLogo} >
-		Reset logo</button>
+		<button
+			class="btn variant-filled-primary font-semibold w-full"
+			on:click={(_) => modalConfirm(data.settings.id, data.settings.logo, '?/deleteLogo')}
+			>
+			Reset logo
+		</button>
 		<FileInput
 			{form}
 			field="favicon"
