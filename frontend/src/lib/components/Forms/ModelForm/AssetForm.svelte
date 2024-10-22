@@ -4,6 +4,7 @@
 	import Score from '../Score.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -52,37 +53,51 @@
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
 />
-<Score {form} label={m.confidentiality()} field="confidentiality" always_enabled={true} inversedColors fullDonut max_score={3} />
-<Score {form} label={m.integrity()} field="integrity" always_enabled={true} inversedColors fullDonut max_score={3} />
-<Score {form} label={m.availability()} field="availability" always_enabled={true} inversedColors fullDonut max_score={3} />
-<Score {form} label={m.proof()} field="proof" always_enabled={true} inversedColors fullDonut max_score={3} />
-<Score {form} label={m.authenticity()} field="authenticity" always_enabled={true} inversedColors fullDonut max_score={3} />
-<Score {form} label={m.privacy()} field="privacy" always_enabled={true} inversedColors fullDonut max_score={3} />
-<Score {form} label={m.safety()} field="safety" always_enabled={true} inversedColors fullDonut max_score={3} />
-<NumberField
-	{form}
-	field="rto"
-	label={m.rto()}
-	positiveOnly
-	helpText={m.rtoHelpText()}
-	cacheLock={cacheLocks['rto']}
-	bind:cachedValue={formDataCache['rto']}
-/>
-<NumberField
-	{form}
-	field="rpo"
-	label={m.rpo()}
-	positiveOnly
-	helpText={m.rpoHelpText()}
-	cacheLock={cacheLocks['rpo']}
-	bind:cachedValue={formDataCache['rpo']}
-/>
-<NumberField
-	{form}
-	field="mtd"
-	label={m.mtd()}
-	positiveOnly
-	helpText={m.mtdHelpText()}
-	cacheLock={cacheLocks['mtd']}
-	bind:cachedValue={formDataCache['mtd']}
-/>
+<Dropdown
+			open={false}
+			style="hover:text-indigo-700"
+			icon="fa-solid fa-shield-halved"
+			header={m.securityObjectives()}
+		>
+		<Score {form} label={m.confidentiality()} field="confidentiality" always_enabled={true} inversedColors fullDonut max_score={3} />
+		<Score {form} label={m.integrity()} field="integrity" always_enabled={true} inversedColors fullDonut max_score={3} />
+		<Score {form} label={m.availability()} field="availability" always_enabled={true} inversedColors fullDonut max_score={3} />
+		<Score {form} label={m.proof()} field="proof" always_enabled={true} inversedColors fullDonut max_score={3} />
+		<Score {form} label={m.authenticity()} field="authenticity" always_enabled={true} inversedColors fullDonut max_score={3} />
+		<Score {form} label={m.privacy()} field="privacy" always_enabled={true} inversedColors fullDonut max_score={3} />
+		<Score {form} label={m.safety()} field="safety" always_enabled={true} inversedColors fullDonut max_score={3} />
+</Dropdown>
+<Dropdown
+			open={false}
+			style="hover:text-indigo-700"
+			icon="fa-regular fa-clock"
+			header={m.timingObjectives()}
+		>
+	<NumberField
+		{form}
+		field="rto"
+		label={m.rto()}
+		positiveOnly
+		helpText={m.rtoHelpText()}
+		cacheLock={cacheLocks['rto']}
+		bind:cachedValue={formDataCache['rto']}
+	/>
+	<NumberField
+		{form}
+		field="rpo"
+		label={m.rpo()}
+		positiveOnly
+		helpText={m.rpoHelpText()}
+		cacheLock={cacheLocks['rpo']}
+		bind:cachedValue={formDataCache['rpo']}
+	/>
+	<NumberField
+		{form}
+		field="mtd"
+		label={m.mtd()}
+		positiveOnly
+		helpText={m.mtdHelpText()}
+		cacheLock={cacheLocks['mtd']}
+		bind:cachedValue={formDataCache['mtd']}
+	/>
+</Dropdown>
