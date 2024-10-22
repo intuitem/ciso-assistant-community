@@ -9,19 +9,18 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
-	export let cachedValue: string | undefined; // = '';
+	export let cachedValue: string | undefined;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
 	};
-
 	export let form;
+	export let positiveOnly: boolean = false; // Nouveau paramètre pour accepter uniquement les valeurs positives
 
 	label = label ?? field;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	// $: value.set(cachedValue);
-	// $value = cachedValue;
+
 	$: cachedValue = $value;
 
 	$: if ($$restProps.type === 'date' && $value === '') {
@@ -67,6 +66,7 @@
 			bind:value={$value}
 			{...$constraints}
 			{...$$restProps}
+			{...(positiveOnly ? { min: 0 } : {})}
 		/>
 	</div>
 	{#if helpText}

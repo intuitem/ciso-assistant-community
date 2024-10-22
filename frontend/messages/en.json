@@ -782,5 +782,14 @@
 	"questionSingular": "Question",
 	"questionPlural": "Questions",
 	"fillMetadataURL": "Option 1: Fill the metadata url",
-	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert"
+	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert",
+	"proof": "Proof",
+	"privacy": "Privacy",
+	"safety": "Safety",
+	"rto": "RTO",
+	"rtoHelpText": "Recovery Time Objective in seconds",
+	"rpo": "RPO",
+	"rpoHelpText": "Recovery Point Objective in seconds",
+	"mtd": "MTD",
+	"mtdHelpText": "Maximum Tolerable Downtime in seconds"
 }
