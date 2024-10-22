@@ -154,7 +154,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
-60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, (ANCS Tunisie 🇹🇳
+60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 
 ### Community contributions
 
