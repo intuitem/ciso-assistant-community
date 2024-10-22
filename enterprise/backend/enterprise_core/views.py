@@ -203,8 +203,11 @@ def get_build(request):
     LICENSE_SEATS = settings.LICENSE_SEATS
     LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
     try:
-        expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
-        license_expiration = date_format(expiration_iso, use_l10n=True)
+        if LICENSE_EXPIRATION and LICENSE_EXPIRATION.lower() != "unset":
+            expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
+            license_expiration = date_format(expiration_iso, use_l10n=True)
+        else:
+            license_expiration = "No expiration date set"
     except ValueError:
         logger.error("Invalid expiry date format", exc_info=True)
         license_expiration = LICENSE_EXPIRATION
