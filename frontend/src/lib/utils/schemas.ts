@@ -178,7 +178,7 @@ export const AssetSchema = baseNamedObject({
 	safety: z.number().optional().nullable(),
 	rto: z.number().nonnegative().optional().nullable(),
 	rpo: z.number().nonnegative().optional().nullable(),
-	mtd: z.number().nonnegative().optional().nullable(),
+	mtd: z.number().nonnegative().optional().nullable()
 });
 
 export const RequirementAssessmentSchema = z.object({

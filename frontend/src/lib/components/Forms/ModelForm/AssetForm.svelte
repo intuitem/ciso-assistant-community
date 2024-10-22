@@ -54,25 +54,81 @@
 	label={m.parentAssets()}
 />
 <Dropdown
-			open={false}
-			style="hover:text-indigo-700"
-			icon="fa-solid fa-shield-halved"
-			header={m.securityObjectives()}
-		>
-		<Score {form} label={m.confidentiality()} field="confidentiality" always_enabled={true} inversedColors fullDonut max_score={3} />
-		<Score {form} label={m.integrity()} field="integrity" always_enabled={true} inversedColors fullDonut max_score={3} />
-		<Score {form} label={m.availability()} field="availability" always_enabled={true} inversedColors fullDonut max_score={3} />
-		<Score {form} label={m.proof()} field="proof" always_enabled={true} inversedColors fullDonut max_score={3} />
-		<Score {form} label={m.authenticity()} field="authenticity" always_enabled={true} inversedColors fullDonut max_score={3} />
-		<Score {form} label={m.privacy()} field="privacy" always_enabled={true} inversedColors fullDonut max_score={3} />
-		<Score {form} label={m.safety()} field="safety" always_enabled={true} inversedColors fullDonut max_score={3} />
+	open={false}
+	style="hover:text-indigo-700"
+	icon="fa-solid fa-shield-halved"
+	header={m.securityObjectives()}
+>
+	<Score
+		{form}
+		label={m.confidentiality()}
+		field="confidentiality"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
+	<Score
+		{form}
+		label={m.integrity()}
+		field="integrity"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
+	<Score
+		{form}
+		label={m.availability()}
+		field="availability"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
+	<Score
+		{form}
+		label={m.proof()}
+		field="proof"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
+	<Score
+		{form}
+		label={m.authenticity()}
+		field="authenticity"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
+	<Score
+		{form}
+		label={m.privacy()}
+		field="privacy"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
+	<Score
+		{form}
+		label={m.safety()}
+		field="safety"
+		always_enabled={true}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
 </Dropdown>
 <Dropdown
-			open={false}
-			style="hover:text-indigo-700"
-			icon="fa-regular fa-clock"
-			header={m.timingObjectives()}
-		>
+	open={false}
+	style="hover:text-indigo-700"
+	icon="fa-regular fa-clock"
+	header={m.timingObjectives()}
+>
 	<NumberField
 		{form}
 		field="rto"

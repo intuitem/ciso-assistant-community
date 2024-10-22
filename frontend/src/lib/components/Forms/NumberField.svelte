@@ -66,7 +66,7 @@
 			bind:value={$value}
 			{...$constraints}
 			{...$$restProps}
-			{...(positiveOnly ? { min: 0 } : {})}
+			{...positiveOnly ? { min: 0 } : {}}
 		/>
 	</div>
 	{#if helpText}
