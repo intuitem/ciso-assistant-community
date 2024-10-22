@@ -1162,8 +1162,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
         PRIMARY = "PR", _("Primary")
         SUPPORT = "SP", _("Support")
-        
-    
+
     class IntegerChoices(models.IntegerChoices):
         """
         The integer choices for the security attributes.
@@ -1173,8 +1172,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ONE = 1, "1"
         TWO = 2, "2"
         THREE = 3, "3"
- 
-    
+
     business_value = models.CharField(
         max_length=200, blank=True, verbose_name=_("business value")
     )
@@ -1185,19 +1183,31 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
     )
     confidentiality = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("confidentiality"), choices=IntegerChoices.choices
+        null=True,
+        blank=True,
+        verbose_name=_("confidentiality"),
+        choices=IntegerChoices.choices,
     )
     integrity = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("integrity"), choices=IntegerChoices.choices
+        null=True,
+        blank=True,
+        verbose_name=_("integrity"),
+        choices=IntegerChoices.choices,
     )
     availability = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("availability"), choices=IntegerChoices.choices
+        null=True,
+        blank=True,
+        verbose_name=_("availability"),
+        choices=IntegerChoices.choices,
     )
     proof = models.PositiveIntegerField(
         null=True, blank=True, verbose_name=_("proof"), choices=IntegerChoices.choices
     )
     authenticity = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("authenticity"), choices=IntegerChoices.choices
+        null=True,
+        blank=True,
+        verbose_name=_("authenticity"),
+        choices=IntegerChoices.choices,
     )
     privacy = models.PositiveIntegerField(
         null=True, blank=True, verbose_name=_("privacy"), choices=IntegerChoices.choices
@@ -1206,13 +1216,22 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         null=True, blank=True, verbose_name=_("safety"), choices=IntegerChoices.choices
     )
     rto = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("rto"), help_text=_("Recovery Time Objective in seconds")
+        null=True,
+        blank=True,
+        verbose_name=_("rto"),
+        help_text=_("Recovery Time Objective in seconds"),
     )
     rpo = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("rpo"), help_text=_("Recovery Point Objective in seconds")
+        null=True,
+        blank=True,
+        verbose_name=_("rpo"),
+        help_text=_("Recovery Point Objective in seconds"),
     )
     mtd = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("mtd"), help_text=_("Maximum Tolerable Downtime in seconds")
+        null=True,
+        blank=True,
+        verbose_name=_("mtd"),
+        help_text=_("Maximum Tolerable Downtime in seconds"),
     )
 
     fields_to_check = ["name"]
