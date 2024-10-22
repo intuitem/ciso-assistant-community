@@ -791,5 +791,7 @@
 	"rpo": "RPO",
 	"rpoHelpText": "Recovery Point Objective in seconds",
 	"mtd": "MTD",
-	"mtdHelpText": "Maximum Tolerable Downtime in seconds"
+	"mtdHelpText": "Maximum Tolerable Downtime in seconds",
+	"securityObjectives": "Security objectives",
+	"timingObjectives": "Timing objectives"
 }
