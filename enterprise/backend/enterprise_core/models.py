@@ -22,7 +22,7 @@ class ClientSettings(AbstractBaseModel, FolderMixin):
         upload_to="client_logos",
         null=True,
         blank=True,
-        validators=[FileExtensionValidator(["png", "jpeg", "jpg", "webp", "svg"])],
+        validators=[FileExtensionValidator(["png", "jpeg", "jpg", "webp"])],
     )
     favicon = models.ImageField(
         upload_to="client_favicons",

@@ -31,7 +31,7 @@
 			helpText={data.settings.logo
 				? `${m.attachmentWarningText()}: ${data.settings.logo}`
 				: m.logoHelpText()}
-			accept="image/*"
+			allowedExtensions={new Set(['png', 'jpeg', 'jpg', 'webp'])}
 		/>
 		<FileInput
 			{form}
