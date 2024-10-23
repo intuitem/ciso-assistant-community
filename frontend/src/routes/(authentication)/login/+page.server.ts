@@ -28,15 +28,15 @@ export const actions: Actions = {
 			return fail(400, { form });
 		}
 
-		const username = form.data.username;
+		const email = form.data.username;
 		const password = form.data.password;
 
 		const login: LoginRequestBody = {
-			username,
+			email,
 			password
 		};
 
-		const endpoint = `${BASE_API_URL}/iam/login/`;
+		const endpoint = `${BASE_API_URL}/_allauth/app/v1/auth/login`;
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
@@ -59,7 +59,7 @@ export const actions: Actions = {
 
 		const data = await res.json();
 
-		cookies.set('token', data.token, {
+		cookies.set('token', data.meta.access_token, {
 			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
