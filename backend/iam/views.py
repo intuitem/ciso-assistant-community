@@ -1,4 +1,5 @@
 from base64 import urlsafe_b64decode
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.decorators import method_decorator
@@ -196,5 +197,15 @@ class SetPasswordView(views.APIView):
             user = serializer.validated_data.get("user")
             user.set_password(new_password)
             user.save()
+            try:
+                email_address = EmailAddress.objects.get(user=user, primary=True)
+                email_address.verified = True
+                email_address.save()
+            except Exception as e:
+                logger.error(
+                    "Error setting email address as verified",
+                    user=user,
+                    error=e,
+                )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
