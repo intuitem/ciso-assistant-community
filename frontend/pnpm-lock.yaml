@@ -75,6 +75,9 @@ importers:
       '@storybook/test':
         specifier: ^8.3.0
         version: 8.3.5(storybook@8.3.5)
+      '@svelte-put/qr':
+        specifier: ^1.2.1
+        version: 1.2.1(svelte@4.2.19)
       '@sveltejs/adapter-auto':
         specifier: ^3.2.4
         version: 3.2.5(@sveltejs/kit@2.6.4(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.8(@types/node@20.16.11)))(svelte@4.2.19)(vite@5.4.8(@types/node@20.16.11)))
@@ -1470,6 +1473,11 @@ packages:
     resolution: {integrity: sha512-9HmDDyC691oqfg4RziIM9ElsS2HITaxmH7n/yeUPtuirkPdAQzqOzhvH/Sa0qOhifzs8VjR+Gd/a/ZQ+S38r7w==}
     peerDependencies:
       storybook: ^8.3.5
+
+  '@svelte-put/qr@1.2.1':
+    resolution: {integrity: sha512-VIAze6mCVWdiyq6xnMFhbD3dbTvz9CDFVN3lVkDvx6SYFcstgHuIyb7Pi3aJIr2ClDc4U+W2U+SGhFuQBskvBg==}
+    peerDependencies:
+      svelte: ^3.55.0 || ^4.0.0 || ^5.0.0
 
   '@sveltejs/adapter-auto@3.2.5':
     resolution: {integrity: sha512-27LR+uKccZ62lgq4N/hvyU2G+hTP9fxWEAfnZcl70HnyfAjMSsGk1z/SjAPXNCD1mVJIE7IFu3TQ8cQ/UH3c0A==}
@@ -3931,6 +3939,9 @@ packages:
     resolution: {integrity: sha512-s3EBxg5RSWmpqd0KGzNqPiaBbWDz1/As+2MzoYVGMqgDqRTLBhJW6sywfTBek7OwNfoS/6pS0xdtvChNhFj2cw==}
     hasBin: true
 
+  qrcode-generator@1.4.4:
+    resolution: {integrity: sha512-HM7yY8O2ilqhmULxGMpcHSF1EhJJ9yBj8gvDEuZ6M+KGJ0YY2hKpnXvRD+hZPLrDVck3ExIGhmPtSdcjC+guuw==}
+
   qs@6.13.0:
     resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
     engines: {node: '>=0.6'}
@@ -6166,6 +6177,11 @@ snapshots:
   '@storybook/theming@8.3.5(storybook@8.3.5)':
     dependencies:
       storybook: 8.3.5
+
+  '@svelte-put/qr@1.2.1(svelte@4.2.19)':
+    dependencies:
+      qrcode-generator: 1.4.4
+      svelte: 4.2.19
 
   '@sveltejs/adapter-auto@3.2.5(@sveltejs/kit@2.6.4(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.19)(vite@5.4.8(@types/node@20.16.11)))(svelte@4.2.19)(vite@5.4.8(@types/node@20.16.11)))':
     dependencies:
@@ -8906,6 +8922,8 @@ snapshots:
       glob: 10.4.5
       postcss: 8.4.47
       postcss-selector-parser: 6.1.2
+
+  qrcode-generator@1.4.4: {}
 
   qs@6.13.0:
     dependencies:
