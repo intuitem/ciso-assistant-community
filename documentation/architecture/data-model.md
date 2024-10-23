@@ -778,14 +778,14 @@ Vulnerabilities have a status among the following values: --/potential/exploitab
 
 The format of the references field is list of the following objects (* for mandatory):
 - string ref_id (*)
+- url reference_link
 - boolean is_cve
 - boolean is_kev
-- boolean cve_score
 - ...
 
 The UX shall facilitate the proper edition of references.
 
-Vulnerabilities also have a ref_id (defaults to empty string), a name, a description, and a severity within values --/low/medium/high/critical.
+Vulnerabilities also have a ref_id (defaults to empty string), a name, a description, and a severity within values --/low/medium/high/critical (coded as an integer from -1 to 3).
 
 ## Reference controls
 
