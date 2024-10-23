@@ -7,17 +7,21 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
+
 	import * as m from '$paraglide/messages';
 
 	const modalStore: ModalStore = getModalStore();
+
 	export let row: Record<string, any>;
 	export let model: ModelMapEntry | undefined = undefined;
+
 	export let detailURL: string;
 	export let editURL: string | undefined;
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined;
 	export let URLModel: urlModel | string | undefined;
 	export let identifierField = 'id';
 	export let preventDelete = false;
+
 	export let hasBody = false;
 
 	function stopPropagation(event: Event): void {
@@ -48,6 +52,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
+			// Data
 			title: m.deleteModalTitle(),
 			body: body
 		};
@@ -57,6 +62,7 @@
 	const user = $page.data.user;
 	$: canDeleteObject = Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
 	$: canEditObject = Object.hasOwn(user.permissions, `change_${model?.name}`);
+
 	$: displayDetail = detailURL;
 	$: displayEdit =
 		canEditObject && URLModel && !['frameworks', 'risk-matrices'].includes(URLModel) && editURL;
@@ -64,8 +70,8 @@
 </script>
 
 <span class="space-x-2 whitespace-nowrap flex flex-row items-center text-surface-700 justify-end">
-	<slot name="actions-start" />
-	<slot name="actions-middle" />
+	<slot name="head" />
+	<slot name="body" />
 	{#if !hasBody}
 		{#if displayDetail}
 			<a
@@ -94,5 +100,5 @@
 			>
 		{/if}
 	{/if}
-	<slot name="actions-end" />
+	<slot name="tail" />
 </span>
