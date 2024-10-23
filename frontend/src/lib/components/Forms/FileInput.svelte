@@ -18,16 +18,7 @@
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 
-	export let allowedExtensions = new Set([
-		'jpg',
-		'jpeg',
-		'png',
-		'svg',
-		'webp',
-		'gif',
-		'bmp',
-		'tiff'
-	]);
+	export let allowedExtensions = ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'bmp', 'tiff'];
 
 	function getShortenPreciseType(preciseType: string): string {
 		const shortPreciseTypeResult = /^[a-z0-9]+/.exec(preciseType);
