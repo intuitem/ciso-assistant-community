@@ -155,18 +155,23 @@
 								</div>
 								<div>
 									<table class="border border-collapse my-2 p-2 rounded">
-										<tr>
-											<th class="border p-2 bg-gray-200" />
-											<th class="border p-2 bg-gray-200">{m.current()}</th>
-											<th class="border p-2 bg-gray-200">{m.residual()}</th>
-										</tr>
-										{#each item.synth_table as lvl}
+										<thead>
 											<tr>
-												<td class="border p-2" style="background-color: {lvl.color}">{lvl.lvl}</td>
-												<td class="border p-2 text-center">{lvl.current}</td>
-												<td class="border p-2 text-center">{lvl.residual}</td>
+												<th class="border p-2 bg-gray-200" />
+												<th class="border p-2 bg-gray-200">{m.current()}</th>
+												<th class="border p-2 bg-gray-200">{m.residual()}</th>
 											</tr>
-										{/each}
+										</thead>
+										<tbody>
+											{#each item.synth_table as lvl}
+												<tr>
+													<td class="border p-2" style="background-color: {lvl.color}">{lvl.lvl}</td
+													>
+													<td class="border p-2 text-center">{lvl.current}</td>
+													<td class="border p-2 text-center">{lvl.residual}</td>
+												</tr>
+											{/each}
+										</tbody>
 									</table>
 								</div>
 
