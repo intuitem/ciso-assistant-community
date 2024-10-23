@@ -66,6 +66,13 @@ export const actions: Actions = {
 			secure: true
 		});
 
+		cookies.set('allauth_session_token', data.meta.session_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
 		redirect(302, getSecureRedirect(url.searchParams.get('next')) || '/analytics');
 	}
 };
