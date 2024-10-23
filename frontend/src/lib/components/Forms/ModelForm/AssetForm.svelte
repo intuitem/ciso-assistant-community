@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import Score from '../Score.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -52,6 +53,14 @@
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
+/>
+<TextField
+	{form}
+	field="reference_link"
+	label={m.link()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['reference_link']}
+	bind:cachedValue={formDataCache['reference_link']}
 />
 <Dropdown
 	open={false}

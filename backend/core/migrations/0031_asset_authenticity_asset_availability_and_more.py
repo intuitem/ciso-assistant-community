@@ -109,4 +109,15 @@ class Migration(migrations.Migration):
                 verbose_name="safety",
             ),
         ),
+        migrations.AddField(
+            model_name="asset",
+            name="reference_link",
+            field=models.URLField(
+                null=True,
+                blank=True,
+                max_length=2048,
+                help_text="External url for action follow-up (eg. Jira ticket)",
+                verbose_name="Link",
+            ),
+        ),
     ]

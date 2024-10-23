@@ -1182,6 +1182,13 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     parent_assets = models.ManyToManyField(
         "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
     )
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        help_text=_("External url for action follow-up (eg. Jira ticket)"),
+        verbose_name=_("Link"),
+    )
     confidentiality = models.PositiveIntegerField(
         null=True,
         blank=True,

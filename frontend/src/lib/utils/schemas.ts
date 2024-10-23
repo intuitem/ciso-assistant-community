@@ -178,7 +178,8 @@ export const AssetSchema = baseNamedObject({
 	safety: z.number().optional().nullable(),
 	rto: z.number().nonnegative().optional().nullable(),
 	rpo: z.number().nonnegative().optional().nullable(),
-	mtd: z.number().nonnegative().optional().nullable()
+	mtd: z.number().nonnegative().optional().nullable(),
+	reference_link: z.string().url().optional().or(z.literal('')),
 });
 
 export const RequirementAssessmentSchema = z.object({
@@ -242,7 +243,7 @@ export const EvidenceSchema = baseNamedObject({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().optional().nullable()
+	link: z.string().url().optional().or(z.literal(''))
 });
 
 export const SSOSettingsSchema = z.object({
@@ -292,7 +293,7 @@ export const SSOSettingsSchema = z.object({
 export const EntitiesSchema = baseNamedObject({
 	folder: z.string(),
 	mission: z.string().optional(),
-	reference_link: z.string().optional()
+	reference_link: z.string().url().optional().or(z.literal(''))
 });
 
 export const EntityAssessmentSchema = baseNamedObject({
