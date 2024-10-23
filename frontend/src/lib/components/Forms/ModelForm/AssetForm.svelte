@@ -6,6 +6,7 @@
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import { getOptions } from '$lib/utils/crud';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -68,15 +69,26 @@
 	icon="fa-solid fa-shield-halved"
 	header={m.securityObjectives()}
 >
-	<Score
-		{form}
-		label={m.confidentiality()}
-		field="confidentiality"
-		always_enabled={true}
-		inversedColors
-		fullDonut
-		max_score={3}
-	/>
+	<div class="flex flex-row space-x-2">
+		<SlideToggle
+			name="toggle"
+			class="flex flex-row items-center justify-center"
+			active="bg-primary-500"
+			background="bg-green-500"
+			checked={true}
+		>
+		</SlideToggle>
+		<Score
+			{form}
+			cssClass="flex w-full items-center space-x-2"
+			label={m.confidentiality()}
+			field="confidentiality"
+			always_enabled={true}
+			inversedColors
+			fullDonut
+			max_score={3}
+		/>
+	</div>
 	<Score
 		{form}
 		label={m.integrity()}
