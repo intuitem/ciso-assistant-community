@@ -31,6 +31,7 @@
 		"@storybook/svelte": "^8.3.0",
 		"@storybook/sveltekit": "^8.3.0",
 		"@storybook/test": "^8.3.0",
+		"@svelte-put/qr": "^1.2.1",
 		"@sveltejs/adapter-auto": "^3.2.4",
 		"@sveltejs/adapter-node": "^5.2.2",
 		"@sveltejs/kit": "^2.5.26",
