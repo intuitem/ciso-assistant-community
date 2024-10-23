@@ -4,9 +4,16 @@
 	import { onMount } from 'svelte';
 
 	let clientSettings: Record<string, any>;
+	let licenseStatus: Record<string, any>;
+	let warning: boolean = false;
 
 	onMount(async () => {
 		clientSettings = await fetch('/settings/client-settings').then((res) => res.json());
+		licenseStatus = await fetch('/api/license-status').then((res) => res.json());
+
+        if (licenseStatus?.status === "active" && licenseStatus?.days_left <= 7) {
+            warning = true;
+        }
 	});
 </script>
 
@@ -26,4 +33,10 @@
 			</div>
 		</Typewriter>
 	{/if}
+
+	{#if warning}
+        <div class="text-2xl unstyled text-center">
+            <span>License is nearing expiration</span>
+        </div>
+    {/if}
 </div>
