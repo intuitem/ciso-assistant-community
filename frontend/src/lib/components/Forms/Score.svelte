@@ -14,6 +14,7 @@
 	export let score_step = 1;
 	export let always_enabled = false;
 	export let helpText: string | undefined = undefined;
+	export let cssClass = "";
 
 	interface ScoresDefinition {
 		score: number;
@@ -42,8 +43,9 @@
 	$: isApplicable = $result === 'not_applicable' ? false : true;
 </script>
 
-<div>
+<div class={cssClass}>
 	{#if label !== undefined}
+	<div>
 		{#if $constraints?.required}
 			<label class="text-sm font-semibold" for={field}
 				>{label} <span class="text-red-500">*</span></label
@@ -51,6 +53,7 @@
 		{:else}
 			<label class="text-sm font-semibold" for={field}>{label}</label>
 		{/if}
+	</div>
 	{/if}
 	{#if $errors && $errors.length > 0}
 		<div>
