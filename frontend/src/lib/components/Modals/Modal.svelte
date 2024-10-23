@@ -31,51 +31,32 @@
 	import { focusTrap, getModalStore } from '@skeletonlabs/skeleton';
 
 	// Props (components)
-	/** Register a list of reusable component modals. */
 	export let components: Record<string, ModalComponent> = {};
 
 	// Props (backdrop)
-	/** Set the modal position within the backdrop container */
 	export let position: CssClasses = 'items-center';
 
 	// Props (modal)
-	/** Provide classes to style the modal background. */
 	export let background: CssClasses = 'bg-surface-100-800-token';
-	/** Provide classes to style the modal width. */
 	export let width: CssClasses = 'w-modal';
-	/** Provide classes to style the modal height. */
 	export let height: CssClasses = 'h-auto';
-	/** Provide classes to style the modal padding. */
 	export let padding: CssClasses = 'p-4';
-	/** Provide classes to style the modal spacing. */
 	export let spacing: CssClasses = 'space-y-4';
-	/** Provide classes to style the modal border radius. */
 	export let rounded: CssClasses = 'rounded-container-token';
-	/** Provide classes to style modal box shadow. */
 	export let shadow: CssClasses = 'shadow-xl';
-	/** Provide a class to override the z-index */
 	export let zIndex: CssClasses = 'z-[999]';
 
 	// Props (buttons)
-	/** Provide classes for neutral buttons, such as Cancel. */
 	export let buttonNeutral: CssClasses = 'variant-ghost-surface';
-	/** Provide classes for positive actions, such as Confirm or Submit. */
 	export let buttonPositive: CssClasses = 'variant-filled';
-	/** Override the text for the Cancel button. */
 	export let buttonTextCancel: CssClasses = 'Cancel';
-	/** Override the text for the Confirm button. */
 	export let buttonTextConfirm: CssClasses = 'Confirm';
-	/** Override the text for the Submit button. */
 	export let buttonTextSubmit: CssClasses = 'Submit';
 
 	// Props (regions)
-	/** Provide arbitrary classes to the backdrop region. */
 	export let regionBackdrop: CssClasses = '';
-	/** Provide arbitrary classes to modal header region. */
 	export let regionHeader: CssClasses = 'text-2xl font-bold';
-	/** Provide arbitrary classes to modal body region. */
 	export let regionBody: CssClasses = 'max-h-[200px] overflow-hidden';
-	/** Provide arbitrary classes to modal footer region. */
 	export let regionFooter: CssClasses = 'flex justify-end space-x-2';
 
 	// Props (transition)
@@ -188,12 +169,12 @@
 		if (event.code === 'Escape') onClose();
 	}
 
-	// Get additional classes from $$props while maintaining Svelte 4 compatibility
-	$: additionalClasses = $$props.class ?? '';
+	// Replacing $$props.class with classProp for compatibility
+	let classProp = ''; // Replacing $$props.class
 
 	// State & Reactive
 	$: cPosition = $modalStore[0]?.position ?? position;
-	$: classesBackdrop = `${cBackdrop} ${regionBackdrop} ${zIndex} ${additionalClasses} ${
+	$: classesBackdrop = `${cBackdrop} ${regionBackdrop} ${zIndex} ${classProp} ${
 		$modalStore[0]?.backdropClasses ?? ''
 	}`;
 	$: classesTransitionLayer = `${cTransitionLayer} ${cPosition ?? ''}`;
@@ -266,7 +247,7 @@
 						data-testid="modal"
 						role="dialog"
 						aria-modal="true"
-						aria-label={$modalStore[0].title ?? ''}
+						aria-label={$modalStore[0].title ?? 'Modal'}
 					>
 						{#if $modalStore[0]?.title}
 							<header class="modal-header {regionHeader}">{$modalStore[0].title}</header>
@@ -318,7 +299,7 @@
 						data-testid="modal-component"
 						role="dialog"
 						aria-modal="true"
-						aria-label={$modalStore[0].title ?? ''}
+						aria-label={$modalStore[0].title ?? 'Modal'}
 					>
 						{#if currentComponent?.slot}
 							<svelte:component this={currentComponent?.ref} {...currentComponent?.props} {parent}>
