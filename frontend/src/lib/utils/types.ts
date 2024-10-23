@@ -17,7 +17,7 @@ export interface GlobalSettings {
 }
 
 export interface LoginRequestBody {
-	username: string;
+	email: string;
 	password: string;
 }
 
