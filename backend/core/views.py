@@ -972,8 +972,6 @@ class AppliedControlViewSet(BaseModelViewSet):
             duplicate_related_objects(
                 applied_control, duplicate_applied_control, new_folder, "evidences"
             )
-            # Delete the can_access method
-            # Delete the duplicate_into_folder method
             duplicate_applied_control.save()
 
         return Response({"results": "applied control duplicated"})
