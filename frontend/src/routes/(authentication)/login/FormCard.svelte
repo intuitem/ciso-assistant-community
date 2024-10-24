@@ -31,6 +31,7 @@
 				dataType="form"
 				let:form
 				validators={zod(loginSchema)}
+				action="?/login"
 			>
 				<TextField type="email" {form} field="username" label={m.email()} />
 				<TextField type="password" {form} field="password" label={m.password()} />

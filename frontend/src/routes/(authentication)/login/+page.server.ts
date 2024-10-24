@@ -1,13 +1,32 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
-import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { zod } from 'sveltekit-superforms/adapters';
-import type { PageServerLoad } from './$types';
-import type { LoginRequestBody } from '$lib/utils/types';
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
+import type { LoginRequestBody } from '$lib/utils/types';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import type { PageServerLoad } from './$types';
+import { mfaAuthenticateSchema } from './mfa/utils/schemas';
+import { setFlash } from 'sveltekit-flash-message/server';
+
+interface AuthenticationFlow {
+	id:
+		| 'verify_email'
+		| 'login'
+		| 'signup'
+		| 'provider_redirect'
+		| 'provider_signup'
+		| 'provider_token'
+		| 'mfa_authenticate'
+		| 'reauthenticate'
+		| 'mfa_reauthenticate';
+	provider?: Record<string, string>;
+	is_pending: boolean;
+	types: 'totp' | 'recovery_codes';
+}
+
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
@@ -18,11 +37,13 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 
 	const SSOInfo = await fetch(`${BASE_API_URL}/settings/sso/info/`).then((res) => res.json());
 
-	return { form, SSOInfo };
+	const mfaAuthenticateForm = await superValidate(request, zod(mfaAuthenticateSchema));
+
+	return { form, SSOInfo, mfaAuthenticateForm };
 };
 
 export const actions: Actions = {
-	default: async ({ request, url, fetch, cookies }) => {
+	login: async ({ request, url, fetch, cookies }) => {
 		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) {
 			return fail(400, { form });
@@ -46,29 +67,53 @@ export const actions: Actions = {
 			body: JSON.stringify(login)
 		};
 
-		const res = await fetch(endpoint, requestInitOptions);
+		const res = await fetch(endpoint, requestInitOptions).then((res) => res.json());
 
-		if (!res.ok) {
-			const response = await res.json();
-			console.error(response);
-			if (response.errors) {
-				response.errors.forEach((error) => {
+		if (res.status !== 200) {
+			console.error(res);
+			if (res.errors) {
+				res.errors.forEach((error) => {
 					setError(form, error.param, error.code);
 				});
+				return fail(res.status, { form });
+			}
+			if (res.status === 401) {
+				// User is not authenticated
+				if (res.data) {
+					const flows: AuthenticationFlow[] = res.data.flows;
+					if (flows.length > 0) {
+						const mfaFlow = flows.find((flow) => flow.id === 'mfa_authenticate');
+						const sessionToken = res.meta.session_token;
+						if (sessionToken) {
+							cookies.set('allauth_session_token', sessionToken, {
+								httpOnly: true,
+								sameSite: 'lax',
+								path: '/',
+								secure: true
+							});
+						}
+
+						if (mfaFlow) {
+							return {
+								form,
+								mfa: true,
+								mfaFlow
+							};
+						}
+					}
+				}
 			}
 			return { form };
 		}
 
-		const data = await res.json();
-
-		cookies.set('token', data.meta.access_token, {
+		cookies.set('token', res.meta.access_token, {
 			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
 			secure: true
 		});
 
-		cookies.set('allauth_session_token', data.meta.session_token, {
+		cookies.set('allauth_session_token', res.meta.session_token, {
 			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
@@ -79,5 +124,57 @@ export const actions: Actions = {
 			302,
 			getSecureRedirect(getSecureRedirect(url.searchParams.get('next')) || '/analytics')
 		);
+	},
+	mfaAuthenticate: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(mfaAuthenticateSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const endpoint = `${ALLAUTH_API_URL}/auth/2fa/authenticate`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
+
+		console.debug('requestInitOptions', requestInitOptions);
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+		if (!response.ok) {
+			const data = await response.json();
+			console.error('Could not activate TOTP', data);
+			return fail(data.status, { error: data });
+		}
+
+		const data = await response.json();
+
+		if (data.status !== 200) {
+			console.error('Could not activate TOTP', data);
+			if (Object.hasOwn(data, 'errors')) {
+				data.errors.forEach((error) => {
+					setError(form, error.param, error.message);
+				});
+			}
+			return fail(data.status, { form });
+		}
+
+		console.debug('Authenticated via MFA', data);
+		setFlash({ type: 'success', message: '_successfulyAuthenticatedUsingMFA' }, event);
+		event.cookies.set('token', data.meta.access_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		event.cookies.set('allauth_session_token', data.meta.session_token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
+
+		return { form };
 	}
 };
