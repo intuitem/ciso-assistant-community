@@ -17,6 +17,8 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
 
+from iam.utils import KnoxTokenStrategy
+
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
@@ -82,6 +84,13 @@ class CurrentUserView(views.APIView):
             "is_admin": request.user.is_admin(),
         }
         return Response(res_data, status=HTTP_200_OK)
+
+
+class AllauthSessionTokenView(views.APIView):
+    def get(self, request):
+        strategy = KnoxTokenStrategy()
+        allauth_session_token = strategy.create_session_token(request)
+        return Response({"token": allauth_session_token})
 
 
 class PasswordResetView(views.APIView):
