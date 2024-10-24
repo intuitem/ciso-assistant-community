@@ -802,5 +802,6 @@
 	"sumpageTitleCurrentRisks": "Current risks",
 	"sumpageTitleResidualRisks": "Residual risks",
 	"sumpageSectionCompliance": "compliance",
-	"sumpageSectionRisk": "risk"
+	"sumpageSectionRisk": "risk",
+	"emailPasswordMismatch": "The email address and/or password you specified are not correct."
 }
