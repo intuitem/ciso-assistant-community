@@ -10,7 +10,9 @@
 <div class="relative h-screen w-screen bg-slate-200">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row max-w-48 space-x-4 pb-3">
-			<Logo />
+			{#if !data.clientSettings.settings.name}
+				<Logo />
+			{/if}
 		</div>
 	</div>
 	<div class="absolute top-1/2 left-1/2 w-full transform -translate-x-1/2 -translate-y-1/2">
