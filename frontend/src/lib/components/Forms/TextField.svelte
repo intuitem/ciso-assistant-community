@@ -2,6 +2,7 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	let _class = '';
 
@@ -51,7 +52,7 @@
 		{#if $errors}
 			<div>
 				{#each $errors as error}
-					<p class="text-error-500 text-xs font-medium">{error}</p>
+					<p class="text-error-500 text-xs font-medium">{safeTranslate(error)}</p>
 				{/each}
 			</div>
 		{/if}
