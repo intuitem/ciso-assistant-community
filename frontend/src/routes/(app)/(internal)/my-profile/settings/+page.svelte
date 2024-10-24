@@ -29,8 +29,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: '_activateTOTPTitle',
-			body: '_activateTOTPMessage'
+			title: m.activateTOTPTitle(),
+			body: m.activateTOTPMessage()
 		};
 		modalStore.trigger(modal);
 	}
