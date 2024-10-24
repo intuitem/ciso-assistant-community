@@ -803,5 +803,13 @@
 	"sumpageTitleResidualRisks": "Residual risks",
 	"sumpageSectionCompliance": "compliance",
 	"sumpageSectionRisk": "risk",
-	"emailPasswordMismatch": "The email address and/or password you specified are not correct."
+	"emailPasswordMismatch": "The email address and/or password you specified are not correct.",
+	"securitySettings": "Security settings",
+	"securitySettingsDescription": "Configure your security settings here.",
+	"multiFactorAuthentication": "Multi-factor authentication",
+	"authenticatorApps": "Authenticator apps (TOTP)",
+	"authenticatorAppsDescription": "Use an authenticator app to generate a time-based one-time password (TOTP) for two-factor authentication.",
+	"enableTOTP": "Enable TOTP",
+	"disableTOTP": "Disable TOTP",
+	"recommended": "Recommended"
 }
