@@ -11,6 +11,8 @@
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
 
+	import * as m from '$paraglide/messages';
+
 	export let data: PageData;
 	export let form: ActionData;
 
@@ -28,8 +30,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: '_mfaAuthenticateTitle',
-			body: '_mfaAuthenticateMessage'
+			title: m.mfaAuthenticateTitle(),
+			body: m.enterCodeGeneratedByApp()
 		};
 		modalStore.trigger(modal);
 	}

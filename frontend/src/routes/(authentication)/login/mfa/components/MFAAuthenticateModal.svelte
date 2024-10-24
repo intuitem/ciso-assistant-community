@@ -44,7 +44,7 @@
 				class="modal-form {cForm}"
 			>
 				<!-- prettier-ignore -->
-				<TextField {form} field="code" label="_code" />
+				<TextField {form} field="code" label={m.code()} />
 				<footer class="modal-footer {parent.regionFooter}">
 					<button
 						type="button"
