@@ -8,19 +8,18 @@ import { setFlash } from 'sveltekit-flash-message/server';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
-	const authenticatorsResponse = await event.fetch(authenticatorsEndpoint);
-	if (!authenticatorsResponse.ok) {
-		const response = await authenticatorsResponse.json();
-		console.error('Could not get authenticators', response);
-		fail(response.status, { error: 'Could not get authenticators' });
+	const authenticatorsResponse = await event
+		.fetch(authenticatorsEndpoint)
+		.then((res) => res.json());
+	if (authenticatorsResponse.status !== 200) {
+		console.error('Could not get authenticators', authenticatorsResponse);
+		fail(authenticatorsResponse.status, { error: 'Could not get authenticators' });
 	}
-	const authenticators = await authenticatorsResponse.json().then((res) => res.data);
-	console.debug('authenticators', authenticators);
+	const authenticators = authenticatorsResponse.data;
 
 	const totpEndpoint = `${authenticatorsEndpoint}/totp`;
 	const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
 	const totp = totpResponse.meta;
-	console.debug('totp', totp);
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 
@@ -67,7 +66,19 @@ export const actions: Actions = {
 		return { form };
 	},
 	deactivateTOTP: async (event) => {
-		throw new Error('Not implemented');
+		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/totp`;
+		const requestInitOptions: RequestInit = {
+			method: 'DELETE'
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
+		if (response.status !== 200) {
+			console.error('Could not deactivate TOTP', response);
+			return fail(response.status, { error: 'Could not deactivate TOTP' });
+		}
+
+		setFlash({ type: 'success', message: '_successfullyDeactivatedTOTP' }, event);
+		return { status: 'success' };
 	},
 	regenerateRecoveryCodes: async (event) => {
 		throw new Error('Not implemented');

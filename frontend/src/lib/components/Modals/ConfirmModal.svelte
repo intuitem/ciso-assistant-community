@@ -13,9 +13,9 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let _form;
-	export let URLModel: urlModel;
-	export let id: string;
+	export let _form = {};
+	export let URLModel: urlModel | '' = '';
+	export let id: string = '';
 	export let formAction: string;
 	export let bodyComponent: ComponentType | undefined;
 	export let bodyProps: Record<string, unknown> = {};
