@@ -61,9 +61,6 @@ export const actions: Actions = {
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
-			headers: {
-				'X-CSRFToken': csrfToken
-			},
 			body: JSON.stringify(login)
 		};
 
@@ -138,8 +135,6 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		console.debug('requestInitOptions', requestInitOptions);
-
 		const response = await event.fetch(endpoint, requestInitOptions);
 		if (!response.ok) {
 			const data = await response.json();
@@ -159,8 +154,6 @@ export const actions: Actions = {
 			return fail(data.status, { form });
 		}
 
-		console.debug('Authenticated via MFA', data);
-		setFlash({ type: 'success', message: '_successfulyAuthenticatedUsingMFA' }, event);
 		event.cookies.set('token', data.meta.access_token, {
 			httpOnly: true,
 			sameSite: 'lax',
