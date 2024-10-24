@@ -2,6 +2,7 @@ from django.urls import include, path
 
 
 from .views import (
+    AllauthSessionTokenView,
     LoginView,
     ChangePasswordView,
     CurrentUserView,
@@ -25,4 +26,9 @@ urlpatterns = [
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
     path("sso/", include("iam.sso.urls")),
+    path(
+        "allauth-session-token/",
+        AllauthSessionTokenView.as_view(),
+        name="allauth-session-token",
+    ),
 ]
