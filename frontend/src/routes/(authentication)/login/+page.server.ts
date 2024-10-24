@@ -4,7 +4,7 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { LoginRequestBody } from '$lib/utils/types';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
@@ -36,7 +36,7 @@ export const actions: Actions = {
 			password
 		};
 
-		const endpoint = `${BASE_API_URL}/_allauth/app/v1/auth/login`;
+		const endpoint = `${ALLAUTH_API_URL}/auth/login`;
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
@@ -51,8 +51,10 @@ export const actions: Actions = {
 		if (!res.ok) {
 			const response = await res.json();
 			console.error(response);
-			if (response.non_field_errors) {
-				setError(form, 'non_field_errors', response.non_field_errors);
+			if (response.errors) {
+				response.errors.forEach((error) => {
+					setError(form, error.param, error.code);
+				});
 			}
 			return { form };
 		}
@@ -73,6 +75,9 @@ export const actions: Actions = {
 			secure: true
 		});
 
-		redirect(302, getSecureRedirect(url.searchParams.get('next')) || '/analytics');
+		redirect(
+			302,
+			getSecureRedirect(getSecureRedirect(url.searchParams.get('next')) || '/analytics')
+		);
 	}
 };
