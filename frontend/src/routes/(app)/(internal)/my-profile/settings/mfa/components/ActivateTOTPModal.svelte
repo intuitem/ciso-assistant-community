@@ -20,7 +20,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
@@ -33,41 +33,55 @@
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
-		<article>{$modalStore[0].body ?? '(body missing)'}</article>
-		<article class="flex flex-col space-y-4 items-center">
-			<QR
-				data={totp.totp_url}
-				anchorInnerFill="black"
-				anchorOuterFill="black"
-				width="500"
-				height="500"
-			/>
-			<p>{totp.secret}</p>
-			<!-- Enable for debugging: -->
-			<SuperForm
-				dataType="json"
-				action={formAction}
-				data={_form}
-				validators={zod(activateTOTPSchema)}
-				let:form
-				class="modal-form {cForm}"
-			>
-				<!-- prettier-ignore -->
-				<TextField {form} field="code" label="_code" />
-				<footer class="modal-footer {parent.regionFooter}">
-					<button
-						type="button"
-						class="btn {parent.buttonNeutral}"
-						data-testid="delete-cancel-button"
-						on:click={parent.onClose}>{m.cancel()}</button
-					>
-					<button
-						class="btn variant-filled-primary"
-						data-testid="activate-totp-confirm-button"
-						type="submit">{m.submit()}</button
-					>
-				</footer>
-			</SuperForm>
+		<article class="flex flex-row space-x-8">
+			<div class="flex flex-col space-y-4 items-center">
+				<h4 class="h4">{m.step({ number: 1 })}</h4>
+				<p class="text-surface-900">{$modalStore[0].body ?? '(body missing)'}</p>
+				<QR
+					data={totp.totp_url}
+					anchorInnerFill="black"
+					anchorOuterFill="black"
+					width="400"
+					height="400"
+				/>
+
+				<div class="flex items-center justify-center w-full space-x-2">
+					<hr class="w-64 items-center bg-gray-200 border-0" />
+					<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+					<hr class="w-64 items-center bg-gray-200 border-0" />
+				</div>
+
+				<div>
+					<p class="text-center text-surface-900">{m.enterTOTPCodeManually()}</p>
+					<p class="text-center">{totp.secret}</p>
+				</div>
+			</div>
+
+			<span class="divider-vertical" />
+
+			<div class="flex flex-col space-y-4 items-center self-center">
+				<h4 class="h4">{m.step({ number: 2 })}</h4>
+				<p class="text-surface-900">{m.enterCodeGeneratedByApp()}</p>
+				<!-- Enable for debugging: -->
+				<SuperForm
+					dataType="json"
+					action={formAction}
+					data={_form}
+					validators={zod(activateTOTPSchema)}
+					let:form
+					class="modal-form {cForm}"
+				>
+					<!-- prettier-ignore -->
+					<TextField {form} field="code" label={m.code()} />
+					<footer class="modal-footer {parent.regionFooter}">
+						<button
+							class="btn variant-filled-primary w-full"
+							data-testid="activate-totp-confirm-button"
+							type="submit">{m.submit()}</button
+						>
+					</footer>
+				</SuperForm>
+			</div>
 		</article>
 	</div>
 {/if}
