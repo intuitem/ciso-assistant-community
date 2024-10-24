@@ -5,6 +5,7 @@ import { activateTOTPSchema } from './mfa/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
@@ -77,7 +78,7 @@ export const actions: Actions = {
 			return fail(response.status, { error: 'Could not deactivate TOTP' });
 		}
 
-		setFlash({ type: 'success', message: '_successfullyDeactivatedTOTP' }, event);
+		setFlash({ type: 'success', message: m.successfullyDeactivatedTOTP() }, event);
 		return { status: 'success' };
 	},
 	regenerateRecoveryCodes: async (event) => {
