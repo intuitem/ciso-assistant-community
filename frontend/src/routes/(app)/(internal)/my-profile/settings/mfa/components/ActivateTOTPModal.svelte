@@ -25,7 +25,7 @@
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import QR from '@svelte-put/qr/img/QR.svelte';
+	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../utils/schemas';
 </script>
@@ -37,12 +37,12 @@
 		<article class="flex flex-col space-y-4 items-center">
 			<QR
 				data={totp.totp_url}
-				moduleFill="white"
-				anchorOuterFill="white"
-				anchorInnerFill="white"
+				anchorInnerFill="black"
+				anchorOuterFill="black"
 				width="500"
 				height="500"
 			/>
+			<p>{totp.secret}</p>
 			<!-- Enable for debugging: -->
 			<SuperForm
 				dataType="json"
