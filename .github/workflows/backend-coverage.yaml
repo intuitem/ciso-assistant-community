@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      working-directory: ./backend
+      backend-directory: ./backend
 
     services:
       postgres:
@@ -46,7 +46,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: poetry install
       - name: Create environment variables file
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         run: |
           touch .env
           echo DJANGO_DEBUG='True' >> .env
@@ -63,12 +63,12 @@ jobs:
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://127.0.0.1:5173 >> .env
       - name: Run migrations
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         run: |
           export $(grep -v '^#' .env | xargs)
           poetry run python manage.py migrate
       - name: Run coverage
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: |
@@ -76,7 +76,7 @@ jobs:
           poetry shell
           find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m pytest
       - name: Display coverage report
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: coverage report
