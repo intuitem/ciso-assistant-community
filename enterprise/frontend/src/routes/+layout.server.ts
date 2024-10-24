@@ -14,6 +14,7 @@ export const load: LayoutServerLoad = async ({ fetch, locals }) => {
     clientSettings.settings.favicon = '';
     clientSettings.settings.logo_hash = '';
     clientSettings.settings.favicon_hash = '';
+    clientSettings.settings.name = '';
   }
 	return { featureFlags: locals.featureFlags, clientSettings, licenseStatus };
 };
