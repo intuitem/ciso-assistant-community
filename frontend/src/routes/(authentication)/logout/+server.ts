@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
 
 export const GET = async ({ locals }) => {
 	if (!locals.user) {
@@ -13,7 +13,7 @@ export const POST = async ({ fetch, cookies }) => {
 		method: 'DELETE'
 	};
 
-	const endpoint = `${BASE_API_URL}/_allauth/app/v1/auth/session`;
+	const endpoint = `${ALLAUTH_API_URL}/auth/session`;
 	const res = await fetch(endpoint, requestInitOptions);
 
 	const response = await res.json();
