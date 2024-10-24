@@ -16,7 +16,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      working-directory: ./backend
+      backend-directory: ./backend
 
     strategy:
       max-parallel: 4
@@ -39,7 +39,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: poetry install
       - name: Create environment variables file
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         run: |
           touch .env
           echo DJANGO_DEBUG='True' >> .env
@@ -53,12 +53,12 @@ jobs:
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://127.0.0.1:5173 >> .env
       - name: Run migrations
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         run: |
           export $(grep -v '^#' .env | xargs)
           poetry run python manage.py migrate
       - name: Run API tests
-        working-directory: ${{env.working-directory}}
+        working-directory: ${{env.backend-directory}}
         run: |
           export $(grep -v '^#' .env | xargs)
           poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
@@ -66,5 +66,5 @@ jobs:
         if: always()
         with:
           name: api-tests-report
-          path: ${{ env.working-directory }}/pytest-report.html
+          path: ${{ env.backend-directory }}/pytest-report.html
           retention-days: 5
