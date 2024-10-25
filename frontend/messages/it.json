@@ -783,13 +783,13 @@
 	"questionPlural": "Domande",
 	"fillMetadataURL": "Opzione 1: compila l'URL dei metadati",
 	"fillSSOSLOURLx509cert": "Opzione 2: compilare l'URL SSO, l'URL SLO e x509cert",
-	"critical": "Critico",
+	"critical": "Critica",
 	"vulnerabilities": "Vulnerabilità",
 	"referenceRefId": "ID di riferimento del riferimento",
 	"referenceVulnerabilityCatalog": "Catalogo delle vulnerabilità del riferimento",
 	"severity": "Gravità",
 	"potential": "Potenziale",
 	"exploitable": "Sfruttabile",
-	"mitigated": "Mitigato",
-	"fixed": "Fisso"
+	"mitigated": "Mitigata",
+	"fixed": "Fissa"
 }
