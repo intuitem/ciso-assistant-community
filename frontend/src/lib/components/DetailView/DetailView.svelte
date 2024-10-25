@@ -240,7 +240,7 @@
 											{@const stringifiedSeverity =
 												value < 0
 													? '--'
-													: (safeTranslate(['low', ' medium', 'high', 'critical'][value]) ??
+													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
 														m.undefined())}
 											{stringifiedSeverity}
 										{:else if Array.isArray(value)}
