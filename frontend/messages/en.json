@@ -782,5 +782,14 @@
 	"questionSingular": "Question",
 	"questionPlural": "Questions",
 	"fillMetadataURL": "Option 1: Fill the metadata url",
-	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert"
+	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert",
+	"critical": "critical",
+	"vulnerabilities": "vulnerabilities",
+	"referenceRefId": "referenceRefId",
+	"vulnerabilityCatalog": "vulnerabilityCatalog",
+	"severity": "severity",
+	"potential": "potential",
+	"exploitable": "exploitable",
+	"mitigated": "mitigated",
+	"fixed": "fixed"
 }

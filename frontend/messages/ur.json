@@ -782,5 +782,14 @@
 	"catalog": "کیٹلاگ",
 	"operations": "آپریشنز",
 	"fillMetadataURL": "آپشن 1: میٹا ڈیٹا یو آر ایل کو بھریں۔",
-	"fillSSOSLOURLx509cert": "اختیار 2: SSO URL، SLO URL اور x509cert پُر کریں۔"
+	"fillSSOSLOURLx509cert": "اختیار 2: SSO URL، SLO URL اور x509cert پُر کریں۔",
+	"critical": "critical",
+	"vulnerabilities": "vulnerabilities",
+	"referenceRefId": "referenceRefId",
+	"vulnerabilityCatalog": "vulnerabilityCatalog",
+	"severity": "severity",
+	"potential": "potential",
+	"exploitable": "exploitable",
+	"mitigated": "mitigated",
+	"fixed": "fixed"
 }
