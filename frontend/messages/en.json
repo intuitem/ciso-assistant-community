@@ -803,7 +803,7 @@
 	"sumpageTitleResidualRisks": "Residual risks",
 	"sumpageSectionCompliance": "compliance",
 	"sumpageSectionRisk": "risk",
-	"emailPasswordMismatch": "Unable to log in with provided credentials",
+	"emailPasswordMismatch": "Unable to log in with provided credentials.",
 	"securitySettings": "Security settings",
 	"securitySettingsDescription": "Configure your security settings here.",
 	"multiFactorAuthentication": "Multi-factor authentication",
