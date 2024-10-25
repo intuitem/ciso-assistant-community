@@ -1,0 +1,3059 @@
+urn: urn:intuitem:risk:library:ict-minimal
+locale: en
+ref_id: ict-minimal
+name: ICT - Minimum standard
+description: Minimum standard for improving ICT resilience - Version may 2023
+copyright: Creative Commons BY.
+version: '1'
+provider: Swiss FONES
+packager: intuitem
+translations:
+  de:
+    name: IKT - Minimalstandard
+    description: 'Minimal standard zur Verbesserung der IKT-Resilienz - '
+  fr:
+    name: Norme minimale TIC
+    description: "Norme minimale pour am\xE9liorer la r\xE9silience - version mai\
+      \ 2023"
+  it:
+    name: Standard minimo TIC
+    description: Standard minimo per migliorare la resilienza delle TIC
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:ict-minimal
+    ref_id: ict-minimal
+    name: ICT - Minimum standard
+    description: Minimum standard for improving ICT resilience - Version may 2023
+    translations:
+      de:
+        name: IKT - Minimalstandard
+        description: Minimal standard zur Verbesserung der IKT-Resilienz
+      fr:
+        name: Norme minimale TIC
+        description: "Norme minimale pour am\xE9liorer la r\xE9silience - version\
+          \ mai 2023"
+      it:
+        name: Standard minimo TIC
+        description: Standard minimo per migliorare la resilienza delle TIC
+    min_score: 0
+    max_score: 4
+    scores_definition:
+    - score: 0
+      name: not implemented
+      description: null
+      translations:
+        de:
+          name: Nicht umgesetzt
+          description: null
+        fr:
+          name: Pas mis en oeuvre
+          description: null
+        it:
+          name: non attuata
+          description: null
+    - score: 1
+      name: Partial
+      description: null
+      translations:
+        de:
+          name: "Partiell umgesetzt, nicht vollst\xE4ndig definiert und abgenommen"
+          description: null
+        fr:
+          name: "partiellement mis en oeuvre, pas enti\xE8rement d\xE9fini ni valid\xE9"
+          description: null
+        it:
+          name: parzialmente attuata, non definita e approvata completamente
+          description: null
+    - score: 2
+      name: Risk informed
+      description: null
+      translations:
+        de:
+          name: "Partiell umgesetzt, vollst\xE4ndig definiert und abgenommen"
+          description: null
+        fr:
+          name: "partiellement mis en oeuvre, enti\xE8rement d\xE9fini et accept\xE9"
+          description: null
+        it:
+          name: parzialmente attuata, definita e approvata completamente
+          description: null
+    - score: 3
+      name: Repeatable
+      description: null
+      translations:
+        de:
+          name: "Umgesetzt, vollst\xE4ndig oder gr\xF6sstenteils umgesetzt, statisch"
+          description: null
+        fr:
+          name: "enti\xE8rement ou tr\xE8s largement mis en oeuvre, d\xE9finitif (\"\
+            statique\")"
+          description: null
+        it:
+          name: attuata, completamente o in gran parte attuata, statica
+          description: null
+    - score: 4
+      name: Adaptive
+      description: null
+      translations:
+        de:
+          name: "Dynamisch, umgesetzt, kontinuierlich \xFCberpr\xFCft, verbessert"
+          description: null
+        fr:
+          name: "mis en oeuvre dynamiquement, contr\xF4l\xE9 et am\xE9lior\xE9 en\
+            \ permanence"
+          description: null
+        it:
+          name: dinamica, attuata, verificata costantemente, migliorata
+          description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id
+      assessable: false
+      depth: 1
+      ref_id: ID
+      name: Identify
+      translations:
+        de:
+          name: Identifizieren (ID-Identify)
+          description: null
+        fr:
+          name: Identifier (ID-Identify)
+          description: null
+        it:
+          name: Identificare (ID-Identify)
+          description: null
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id
+      ref_id: ID.AM
+      name: 'Asset Management '
+      description: "The data, personnel, devices, systems, and facilities that enable\
+        \ the organization to achieve business purposes are identified and managed\
+        \ consistent with their relative importance to business objectives and the\
+        \ organization\u2019s risk strategy."
+      translations:
+        de:
+          name: Inventar Management (Assest Management ID.AM)
+          description: "Die Daten, Personen, Ger\xE4te, Systeme und Anlagen, einer\
+            \ Organisation sind in einer Art und Weise identifiziert, katalogisiert\
+            \ und bewertet, die ihrer Kritikalit\xE4t hinsichtlich der zu erf\xFC\
+            llenden Gesch\xE4ftsprozesse, sowie der Risikostrategie der Organisation\
+            \ entspricht."
+        fr:
+          name: Inventaire et organisation (Asset Management ID.AM)
+          description: "Les donn\xE9es, les personnes, les appareils, les syst\xE8\
+            mes et les installations d\u2019une entreprise sont identifi\xE9s, catalogu\xE9\
+            s et \xE9valu\xE9s. L\u2019\xE9valuation se fait en fonction de leur criticit\xE9\
+            \ pour les processus op\xE9rationnels \xE0 mettre en place et de la strat\xE9\
+            gie de l\u2019entreprise en mati\xE8re de risque."
+        it:
+          name: "Gestione dell\u2019inventario (Asset Management ID:AM): "
+          description: "Dati, persone, apparecchi, sistemi e impianti di un organismo\
+            \ o di un\u2019impresa sono identificati, catalogati e valutati. La valutazione\
+            \ deve corrispondere alla loro criticit\xE0 in relazione alle procedure\
+            \ operative da attuare e alla strategia di rischio adottata."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      ref_id: ID.AM-1
+      description: Draw up an inventory-taking process which ensures that you have
+        a complete inventory of all your ICT assets at all times.
+      translations:
+        de:
+          name: null
+          description: "Erarbeiten Sie einen Inventarisierungsprozess welcher sicherstellt,\
+            \ dass zu jedem Zeitpunkt ein vollst\xE4ndiges Inventar Ihrer IKT-Betriebsmittel\
+            \ (Assets) vorhanden ist."
+        fr:
+          name: null
+          description: "D\xE9veloppez un processus d\u2019inventaire garantissant\
+            \ en permanence un recensement exhaustif de vos \xE9quipements TIC (Asset)."
+        it:
+          name: null
+          description: Definite una procedura che garantisca la costante presenza
+            di un inventario completo dei vostri strumenti operativi TIC (asset).
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      ref_id: ID.AM-2
+      description: Produce an inventory of all of the software platforms/licences
+        and applications within your organisation.
+      translations:
+        de:
+          name: null
+          description: Inventarisieren Sie all ihre Softwareplattformen / -Lizenzen
+            und Applikationen innerhalb Ihrer Organisation.
+        fr:
+          name: null
+          description: Inventoriez toutes les plateformes, licences et applications
+            logicielles dans votre entreprise.
+        it:
+          name: null
+          description: "Inventariate tutte le piattaforme/licenze e applicazioni di\
+            \ software all\u2019interno dell\u2019organismo."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      ref_id: ID.AM-3
+      description: Catalogue all of your internal communication and data flows.
+      translations:
+        de:
+          name: null
+          description: "Organisatorische Kommunikation und Datenfl\xFCsse werden abgebildet."
+        fr:
+          name: null
+          description: "Listez tous les flux de communication et de transferts de\
+            \ donn\xE9es en interne."
+        it:
+          name: null
+          description: Catalogate tutti i flussi di comunicazione e di dati interni.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      ref_id: ID.AM-4
+      description: Catalogue all external ICT systems that are relevant to your organisation.
+      translations:
+        de:
+          name: null
+          description: Externe Informationssysteme werden katalogisiert.
+        fr:
+          name: null
+          description: "Listez tous les syst\xE8mes TIC externes cruciaux pour votre\
+            \ entreprise."
+        it:
+          name: null
+          description: Catalogate tutti i sistemi TIC esterni pertinenti per il vostro
+            organismo o la vostra impresa.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      ref_id: ID.AM-5
+      description: Resources (e.g., hardware, devices, data, time, personnel, and
+        software) are prioritized based on their classification, criticality, and
+        business value
+      translations:
+        de:
+          name: null
+          description: "Ressourcen (z. B. Hardware, Ger\xE4te, Daten, Zeit, Personal\
+            \ und Software) werden basierend auf ihrer Klassifizierung, Kritikalit\xE4\
+            t und ihrem Gesch\xE4ftswert priorisiert."
+        fr:
+          name: null
+          description: "Les ressources (par exemple, le hardware, les \xE9quipements,\
+            \ les donn\xE9es, le temps, le personnel et les softwares) sont class\xE9\
+            es par ordre de priorit\xE9 en fonction de leur classification, de leur\
+            \ criticit\xE9 et de leur valeur pour l'entreprise"
+        it:
+          name: null
+          description: "Le risorse (ad esempio, hardware, dispositivi, dati, tempo,\
+            \ personale e software) vengono classificate in base alla loro classificazione,\
+            \ criticit\xE0 e valore aziendale."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.am-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.am
+      ref_id: ID.AM-6
+      description: Cybersecurity roles and responsibilities for the entire workforce
+        and third-party stakeholders (e.g., suppliers, customers, partners) are established.
+      translations:
+        de:
+          name: null
+          description: "Cybersecurity-Rollen und -Verantwortlich-keiten f\xFCr die\
+            \ gesamte Belegschaft und externe Stakeholder (z. B. Lieferanten, Kunden,\
+            \ Partner) sind festgelegt."
+        fr:
+          name: null
+          description: "Les r\xF4les et responsabilit\xE9s de l\u2019ensemble du personnel\
+            \ et des parties prenantes externes (p.ex. Fournisseurs, clients, partenaires)\
+            \ sont \xE9tablies."
+        it:
+          name: null
+          description: "Vengono stabiliti i ruoli e le responsabilit\xE0 in materia\
+            \ di cybersecurity per l'intera forza lavoro e per gli stakeholder terzi\
+            \ (ad esempio, fornitori, clienti, partner)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.be
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id
+      ref_id: ID.BE
+      name: 'Business Environment '
+      description: "The business\u2019s objectives, tasks and activities are rated\
+        \ and prioritised. This information is used as a basis for allocating responsibilities"
+      translations:
+        de:
+          name: "Gesch\xE4ftsumfeld (Business Environment ID.BE)"
+          description: "Die Ziele, Aufgaben und Aktivit\xE4ten des Unternehmens sind\
+            \ priorisiert und bewertet. Diese Informationen dienen als Grundlage f\xFC\
+            r die Zuweisung der Verantwortlichkeiten hinsichtlich Cybersicherheit\
+            \ und Risikomanagement."
+        fr:
+          name: "Environnement de l\u2019entreprise (Business Environment ID.BE) "
+          description: "Les objectifs, les t\xE2ches et les activit\xE9s de l\u2019\
+            entreprise sont hi\xE9rarchis\xE9s et \xE9valu\xE9s. Cette information\
+            \ sert \xE0 r\xE9partir les responsabilit\xE9s."
+        it:
+          name: Ambiente operativo (Business environment ID.BE)
+          description: "Obiettivi, mansioni e attivit\xE0 dell\u2019impresa sono definiti\
+            \ in ordine di priorit\xE0 e valutati. Queste informazioni servono da\
+            \ riferimento per l\u2019attribuzione delle responsabilit\xE0."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.be-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.be
+      ref_id: ID.BE-1
+      description: Identify, document and communicate the exact role of your business
+        within the (critical) supply chain.
+      translations:
+        de:
+          name: null
+          description: Die Rolle Ihres Unternehmens innerhalb der (kritischen) Versorgungskette
+            ist identifiziert, dokumentiert und kommuniziert.
+        fr:
+          name: null
+          description: "D\xE9finissez, documentez et communiquez le r\xF4le exact\
+            \ de votre entreprise dans la cha\xEEned\u2019approvisionnement (critique)."
+        it:
+          name: null
+          description: "Identificate, documentate e comunicate il ruolo esatto del\
+            \ vostro organismo o della vostra impresa all\u2019interno della catena\
+            \ di approvvigionamento (critica)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.be-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.be
+      ref_id: ID.BE-2
+      description: The importance of the organisation as a critical infrastructure
+        operator, and its position within the critical sector, is identified and communicated.
+      translations:
+        de:
+          name: null
+          description: Die Bedeutung der Organisation als kritische Infrastruktur
+            und ihre Position innerhalb des kritischen Sektors ist identifiziert und
+            kommuniziert.
+        fr:
+          name: null
+          description: "Identifiez et communiquez l\u2019importance de votre entreprise\
+            \ en tant qu\u2019infrastructure vitale et sa position dans le secteur\
+            \ critique."
+        it:
+          name: null
+          description: "Il significato dell\u2019organismo o dell\u2019impresa come\
+            \ infrastrutture critiche e la loro posizione all\u2019interno del settore\
+            \ sono identificati e comunicati."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.be-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.be
+      ref_id: ID.BE-3
+      description: Objectives, tasks and activities within the organisation are prioritised
+        and rated.
+      translations:
+        de:
+          name: null
+          description: "Die Ziele, Aufgaben und Aktivit\xE4ten innerhalb der Organisation\
+            \ sind bewertet und priorisiert."
+        fr:
+          name: null
+          description: "Evaluez et hi\xE9rarchisez les objectifs, les t\xE2ches et\
+            \ les activit\xE9s dans l\u2019entreprise."
+        it:
+          name: null
+          description: "Obiettivi, mansioni e attivit\xE0 all\u2019interno dell\u2019\
+            impresa sono definiti in ordine di priorit\xE0 e valutati."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.be-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.be
+      ref_id: ID.BE-4
+      description: Dependencies and critical functions for delivery of critical services
+        are established.
+      translations:
+        de:
+          name: null
+          description: "Abh\xE4ngigkeiten und kritische Funktionen f\xFCr die Bereitstellung\
+            \ kritischer Dienste sind festgelegt."
+        fr:
+          name: null
+          description: "Les d\xE9pendances et les fonctions critiques pour la fourniture\
+            \ de services critiques sont \xE9tablies."
+        it:
+          name: null
+          description: Catalogate tutti i sistemi TIC esterni pertinenti per il vostro
+            organismo o la vostra impresa.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.be-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.be
+      ref_id: ID.BE-5
+      description: Resilience requirements to support delivery of critical services
+        are established for all operating states (e.g. under duress/attack, during
+        recovery, normal operations).
+      translations:
+        de:
+          name: null
+          description: "F\xFCr alle Betriebszust\xE4nde (z. B. unter Zwang/Angriff,\
+            \ w\xE4hrend der Wiederherstellung, im Normalbetrieb) sind die Anforderungen\
+            \ an die Widerstandsf\xE4higkeit zur Unterst\xFCtzung der Erbringung kritischer\
+            \ Dienste festgelegt."
+        fr:
+          name: null
+          description: "Pour toutes les circonstances (p.ex. en cas d\u2019attaque/contrainte,\
+            \ pendant la recuperation, en fonctionnement normal) sont \xE9tablies\
+            \ des exigences de resilience pour la fourniture de services critiques."
+        it:
+          name: null
+          description: I requisiti di resilienza per supportare l'erogazione dei servizi
+            critici sono stabiliti per tutti gli stati operativi (ad esempio, in caso
+            di stress/attacco, durante il recupero, durante le normali operazioni).
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.gv
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id
+      ref_id: ID.GV
+      name: 'Governance '
+      description: Governance determines responsibilities, monitors, and ensures compliance
+        with regulatory, legal and operational requirements from the business environment.
+      translations:
+        de:
+          name: 'Governance (Governance ID.GV):'
+          description: "Die Governance bildet den Ordnungsrahmen f\xFCr die Leitung\
+            \ und \xDCberwachung der Cybersicherheit. Sie setzt sich zusammen aus\
+            \ ihren Weisungen, Abl\xE4ufen und Prozessen. Sie regelt Zust\xE4ndigkeiten,\
+            \ \xFCberwacht und stellt sicher, dass regulatorische und rechtliche Anforderungen\
+            \ aus dem Gesch\xE4ftsumfeld sowie operationelle Anforderungen richtig\
+            \ verstanden werden und informiert das Management entsprechend."
+        fr:
+          name: "R\xE8gles (Governance ID.GV)"
+          description: "Une bonne gouvernance fixe les responsabilit\xE9s, surveille\
+            \ et s\u2019assure que les exigences r\xE9glementaires, juridiques et\
+            \ op\xE9rationnelles soient respect\xE9es dans la sph\xE8re d\u2019activit\xE9\
+            ."
+        it:
+          name: Direttive (Governance ID.GV)
+          description: "La governance regola competenze e controlla e garantisce il\
+            \ rispetto dei requisiti regolatori, giuridici e operazionali dell\u2019\
+            ambiente operativo."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.gv-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.gv
+      ref_id: ID.GV-1
+      description: Organizational cybersecurity policy is established and communicated
+      translations:
+        de:
+          name: null
+          description: Vorgaben zur Informationssicherheit sind im Unternehmen festgelegt
+            und kommuniziert.
+        fr:
+          name: null
+          description: "Des directives sur la s\xE9curit\xE9 de l\u2019information\
+            \ sont \xE9tablies et communiqu\xE9es dans l\u2019entreprise."
+        it:
+          name: null
+          description: La politica di cybersecurity dell'organizzazione viene stabilita
+            e comunicata.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.gv-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.gv
+      ref_id: ID.GV-2
+      description: Information security roles and responsibilities are coordinated
+        with internal roles (e.g. those in risk management) and external partners.
+      translations:
+        de:
+          name: null
+          description: Rollen und Verantwortlichkeiten im Bereich der Informationssicherheit
+            sind mit internen Rollen (z.B. aus dem Riskmanagement) sowie externen
+            Partnern koordiniert.
+        fr:
+          name: null
+          description: "Convenir entre les responsables internes (gestion des risques\
+            \ par ex.) et des partenaires externes, des r\xF4les et des responsabilit\xE9\
+            s en mati\xE8re de s\xE9curit\xE9 informatique."
+        it:
+          name: null
+          description: "Ruoli e responsabilit\xE0 nel settore della sicurezza dell\u2019\
+            informazione sono coordinati con i ruoli interni (p.es. della gestione\
+            \ dei rischi) e con i partner esterni."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.gv-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.gv
+      ref_id: ID.GV-3
+      description: Ensure that your organisation complies with all statutory and regulatory
+        cybersecurity requirements, including those applicable to data protection.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Ihre Organisation alle gesetzlichen\
+            \ und regulatorischen Vorgaben im Bereich der Cybersecurity erf\xFCllt,\
+            \ inkl. Vorgaben zum Datenschutz."
+        fr:
+          name: null
+          description: "V\xE9rifiez que votre entreprise respecte toutes les exigences\
+            \ l\xE9gales et r\xE9glementaires en mati\xE8re de cybers\xE9curit\xE9\
+            , y compris au niveau de la protection des donn\xE9es."
+        it:
+          name: null
+          description: Assicuratevi che il vostro organismo o la vostra impresa soddisfino
+            tutte le direttive legali e regolatorie nel settore della cybersicurezza,
+            incluse quelle che riguardano la protezione dei dati.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.gv-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.gv
+      ref_id: ID.GV-4
+      description: Ensure that cybersecurity risks are embedded in business-wide risk
+        management structures.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass Cyberrisiken Teil des unternehmensweiten
+            Risikomanagements sind.
+        fr:
+          name: null
+          description: "Assurez-vous que les cyber-risques sont bien int\xE9gr\xE9\
+            s dans la gestion des risques pour toute l\u2019entreprise."
+        it:
+          name: null
+          description: "Assicuratevi che i cyberrischi siano parte della gestione\
+            \ dei rischi a livello dell\u2019organismo o dell\u2019impresa."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id
+      ref_id: ID.RA
+      name: 'Risk Assessment '
+      description: The organisation understands the effects of cybersecurity risks
+        on business operations, assets and individuals, including reputational risks.
+      translations:
+        de:
+          name: 'Risikomanagement (Risk Assessment ID.RA):'
+          description: "Die Organisation kennt die Auswirkungen von Cybersicherheits-Risiken\
+            \ auf die Gesch\xE4ftst\xE4tigkeit, auf Betriebsmittel und Individuen,\
+            \ inklusive Reputationsrisiken."
+        fr:
+          name: Analyse de risque (Risk Assessment ID.RA)
+          description: "L\u2019entreprise analyse l\u2019impact des cyber-risques\
+            \ sur ses activit\xE9s, ses \xE9quipements et son personnel, y compris\
+            \ les risques r\xE9putationnels."
+        it:
+          name: Analisi dei rischi (Risk Assessment ID.RA)
+          description: "L\u2019organismo o l\u2019impresa conoscono le conseguenze\
+            \ dei cyberrischi sull\u2019attivit\xE0, gli strumenti operativi e gli\
+            \ individui, inclusi i rischi legati alla propria reputazione."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      ref_id: ID.RA-1
+      description: Identify the (technical) vulnerabilities of your assets, and document
+        them.
+      translations:
+        de:
+          name: null
+          description: Identifizieren Sie die (technischen) Verwundbarkeiten ihrer
+            Betriebsmittel und dokumentieren Sie diese.
+        fr:
+          name: null
+          description: "Identifiez les faiblesses (techniques) de vos \xE9quipements\
+            \ et documentez-les."
+        it:
+          name: null
+          description: "Identificate le vulnerabilit\xE0 (tecniche) dei vostri strumenti\
+            \ operativi e documentatele."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      ref_id: ID.RA-2
+      description: Share intelligence regularly in fora and other bodies to stay up
+        to date about cybersecurity threats.
+      translations:
+        de:
+          name: null
+          description: "Aktuelle Informationen \xFCber Cyber-Bedrohungen werden durch\
+            \ regelm\xE4ssigen Austausch in Foren und Gremien erhalten."
+        fr:
+          name: null
+          description: "Participez \xE0 des forums et \xE0 des r\xE9unions d\u2019\
+            experts pour \xE9changer des informations et \xEAtre au courant des cybermenaces."
+        it:
+          name: null
+          description: Scambiate regolarmente opinioni ed esperienze in forum e comitati
+            per ottenere informazioni aggiornate sulle cyberminacce.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      ref_id: ID.RA-3
+      description: Identify and document internal and external cybersecurity threats.
+      translations:
+        de:
+          name: null
+          description: Identifizieren und dokumentieren Sie interne und externe Cyberbedrohungen.
+        fr:
+          name: null
+          description: "Identifiez et documentez les cybermenaces, aussi bien internes\
+            \ qu\u2019externes."
+        it:
+          name: null
+          description: Identificate e documentate cyberminacce interne ed esterne.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      ref_id: ID.RA-4
+      description: Identify the possible business impacts of cybersecurity threats,
+        and calculate the probability of their occurring.
+      translations:
+        de:
+          name: null
+          description: "Identifizieren Sie m\xF6gliche Auswirkungen der Cyber-Bedrohungen\
+            \ auf die Gesch\xE4ftst\xE4tigkeit und bewerten Sie ihre Eintretenswahrscheinlichkeit."
+        fr:
+          name: null
+          description: "Identifiez l\u2019impact potentiel des cybermenaces sur vos\
+            \ activit\xE9s et \xE9valuez leur probabilit\xE9 d\u2019occurrence."
+        it:
+          name: null
+          description: "Identificate possibili effetti delle cyberminacce sull\u2019\
+            attivit\xE0 operativa e valutate le probabilit\xE0 che si verifichino."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      ref_id: ID.RA-5
+      description: Rate the risks to your organisation based on threats, vulnerabilities,
+        impacts (on business activity) and probabilities.
+      translations:
+        de:
+          name: null
+          description: "Bewerten Sie die Risiken f\xFCr Ihre Organisation, basierend\
+            \ auf den Bedrohungen, Verwundbarkeiten, Auswirkungen (auf die Gesch\xE4\
+            ftst\xE4tigkeit) und Eintretenswahrscheinlichkeiten."
+        fr:
+          name: null
+          description: "\xC9valuez les risques pour votre entreprise en fonction des\
+            \ menaces, des vuln\xE9rabilit\xE9s, de l\u2019impact (sur ses activit\xE9\
+            s) et de leur probabilit\xE9 d\u2019occurrence."
+        it:
+          name: null
+          description: "Valutate i rischi per il vostro organismo o la vostra impresa\
+            \ basandovi su minacce, vulnerabilit\xE0, conseguenze (sull\u2019attivit\xE0\
+            \ operativa) e probabilit\xE0 che si verifichino."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.ra-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.ra
+      ref_id: ID.RA-6
+      description: Define possible immediate responses should a risk occur, and prioritise
+        these measures.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie m\xF6gliche Sofortmassnahmen bei Eintritt eines\
+            \ Risikos und priorisieren Sie diese."
+        fr:
+          name: null
+          description: "D\xE9finissez les mesures \xE0 prendre imm\xE9diatement lorsqu\u2019\
+            un risque se concr\xE9tise et fixez des priorit\xE9s."
+        it:
+          name: null
+          description: "Definite possibili misure immediate in presenza di un rischio\
+            \ e classificatele secondo le priorit\xE0."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.rm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id
+      ref_id: ID.RM
+      name: 'Risk Management Strategy '
+      description: Determine the priorities, constraints and maximum risk tolerances
+        of your organisation. On this basis, assess your operational risks.
+      translations:
+        de:
+          name: 'Risikomanagement Strategie (Risk Management Strategy ID.RM):'
+          description: "Priorit\xE4ten, Einschr\xE4nkungen und maximal tragbare Risiken\
+            \ der Organisation sind festgelegt. Diese Definitionen werden als Grundlage\
+            \ zur Beurteilung operativer Risiken genutzt."
+        fr:
+          name: "Strat\xE9gie pour g\xE9rer les risques (Risk Management Strategy\
+            \ ID.RM)"
+          description: "D\xE9finissez les priorit\xE9s, les restrictions et les risques\
+            \ maximaux supportables pour votre entreprise. \xC9valuez vos risques\
+            \ op\xE9rationnels sur cette base."
+        it:
+          name: Strategia di gestione dei rischi (Risk Management Strategy ID.RM)
+          description: "Definite priorit\xE0, limiti e rischi massimi ammissibili.\
+            \ Valutate in base a questi elementi i rischi operativi."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.rm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.rm
+      ref_id: ID.RM-1
+      description: Establish risk management processes, manage them actively and have
+        them confirmed by the persons/stakeholders concerned.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie Risikomanagementprozesse, managen Sie diese\
+            \ aktiv und lassen Sie sich von den Beteiligten Personen / Anspruchsgruppen\
+            \ best\xE4tigen."
+        fr:
+          name: null
+          description: "D\xE9finissez les processus de gestion des risques, g\xE9\
+            rez-les activement et faites-les confirmer par les personnes impliqu\xE9\
+            es ou les parties prenantes."
+        it:
+          name: null
+          description: Definite procedure di gestione dei rischi, applicatele e chiedete
+            riscontro alle persone/ai gruppi di riferimento coinvolti.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.rm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.rm
+      ref_id: ID.RM-2
+      description: "Define and communicate your organisation\u203As maximum risk tolerance."
+      translations:
+        de:
+          name: null
+          description: Definieren und kommunizieren Sie das maximal tragbare Risiko
+            Ihrer Organisation.
+        fr:
+          name: null
+          description: "D\xE9finissez et communiquez la tol\xE9rance maximale au risque\
+            \ de pour votre entreprise."
+        it:
+          name: null
+          description: Definite e comunicate i rischi massimi ammissibili del vostro
+            organismo o della vostra impresa.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.rm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.rm
+      ref_id: ID.RM-3
+      description: "Ensure that maximum risk tolerance is calculated taking into account\
+        \ your organisation\u2019s importance as an operator of a critical infrastructure.\
+        \ This calculation should also be informed by sector-specific risk analyses."
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass die Definition des maximal tragbaren\
+            \ Risikos unter der Ber\xFCcksichtigung der Bedeutung als kritischer Infrastruktur\
+            \ und unter Einbezug von sektorspezifischen Risikoanalysen erstellt wurde."
+        fr:
+          name: null
+          description: "Assurez-vous que la tol\xE9rance maximale au risque est \xE9\
+            valu\xE9e en prenant en compte l\u2019importance de votre entreprise du\
+            \ fait qu\u2019elle exploite une infrastructure critique. Prenez \xE9\
+            galement en consid\xE9ration, dans votre analyse, les risques propres\
+            \ au secteur."
+        it:
+          name: null
+          description: "Assicuratevi che i rischi massimi ammissibili vengano valutati\
+            \ considerando l\u2019importanza del vostro organismo o della vostra impresa\
+            \ come gestori di un\u2019infrastruttura sensibile. Tenete conto anche\
+            \ delle analisi dei rischi specifiche al settore."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.sc
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id
+      ref_id: ID.SC
+      name: 'Supply Chain Riskmanagement '
+      description: Determine priorities, constraints, and the maximum risks that your
+        organisation is willing to accept in connection with supplier-related risks.
+      translations:
+        de:
+          name: 'Lieferketten Risikomanagement '
+          description: "(Supply Chain Riskmanagement ID.SC): Legen Sie die Priorit\xE4\
+            ten, Einschr\xE4nkungen und maximalen Risiken fest, die Ihre Organisation\
+            \ in Zusammenhang mit Lieferantenrisiken zu tragen gewillt ist. Verwenden\
+            \ Sie die Definition der Lieferantenrisiken als Grundlage zur Beurteilung\
+            \ operativer Risiken."
+        fr:
+          name: "Gestion des risques li\xE9s \xE0 la cha\xEEne d\u2019approvisionnement\
+            \ (Supply Chain Riskmanagement ID.SC)"
+          description: "D\xE9finissez les priorit\xE9s, les restrictions et les risques\
+            \ maximaux que votre entreprise  peut accepter par rapport \xE0 ses fournisseurs."
+        it:
+          name: Gestione dei rischi della catena di fornitori
+          description: "(Supply Chain Riskmanagement ID.SC) Definite priorit\xE0,\
+            \ limiti e rischi massimi che il vostro organismo o la vostra impresa\
+            \ sono disposti ad assumere in relazione ai fornitori."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.sc-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.sc
+      ref_id: ID.SC-1
+      description: Establish clear procedures to manage supply chain risks. Have these
+        procedures reviewed and agreed by all of the stakeholders involved.
+      translations:
+        de:
+          name: null
+          description: "Prozesse f\xFCr das Risikomanagement in der Cyber-Supply-Chain\
+            \ sind identifiziert, etabliert, bewertet, verwaltet und von den organisatorischen\
+            \ Interessenvertretern vereinbart."
+        fr:
+          name: null
+          description: "D\xE9finissez des processus clairs pour g\xE9rer les risques\
+            \ li\xE9s \xE0 une perturbation dans la cha\xEEne d\u2019approvisionnement.\
+            \ Faites contr\xF4ler et valider ces processus par toutes les parties\
+            \ prenantes."
+        it:
+          name: null
+          description: Definite procedure chiare per la gestione dei rischi relativi
+            ai fornitori. Fatele verificare da tutti i gruppi di riferimento e chiedete
+            il loro consenso.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.sc-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.sc
+      ref_id: ID.SC-2
+      description: Suppliers and third party partners of information systems, components,
+        and services are identified, prioritized, and assessed using a cyber supply
+        chain risk assessment process.
+      translations:
+        de:
+          name: null
+          description: "Lieferanten und Drittpartner von Informationssystemen, Komponenten\
+            \ und Dienstleistungen werden identifiziert, nach Priorit\xE4ten geordnet\
+            \ und anhand eines Risikobewertungs-prozesses f\xFCr die CyberLieferkette\
+            \ bewertet."
+        fr:
+          name: null
+          description: "Les fournisseurs et prestataires pour les syst\xE8mes d\u2019\
+            information, composants et services sont identifi\xE9s, class\xE9s par\
+            \ priorit\xE9 et \xE9valu\xE9s par un processus d\u2019\xE9valuation des\
+            \ risques pour la cha\xEEne d\u2019approvisionnement cyber."
+        it:
+          name: null
+          description: I fornitori e i partner terzi di sistemi informativi, componenti
+            e servizi vengono identificati, classificati e valutati utilizzando un
+            processo di valutazione del rischio della catena di approvvigionamento
+            informatico.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.sc-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.sc
+      ref_id: ID.SC-3
+      description: Place your suppliers and service-providers under a contractual
+        obligation to develop and implement appropriate measures to meet the objectives
+        and requirements of the supply chain risk management process.
+      translations:
+        de:
+          name: null
+          description: "Vertr\xE4ge mit Lieferanten und Drittparteien  verpflichten\
+            \ diese, Massnahmen, zur Erf\xFCllung der Ziele des Cybersicherheitsprogramms\
+            \ und des Cyber-Lieferketten Risikomanagement Plans der Organisation umzusetzen\
+            \ und einzuhalten."
+        fr:
+          name: null
+          description: "Exigez de vos fournisseurs et prestataires de services qu\u2019\
+            ils s\u2019engagent contractuellement \xE0 d\xE9velopper et mettre en\
+            \ \u0153uvre des mesures appropri\xE9es pour atteindre les objectifs du\
+            \ processus pour g\xE9rer les risques li\xE9s \xE0 la cha\xEEne d\u2019\
+            approvisionnement."
+        it:
+          name: null
+          description: Obbligate per contratto fornitori e operatori a sviluppare
+            e introdurre misure adeguate a rispettare obiettivi e direttive relativi
+            alla procedura di gestione dei rischi nella catena di fornitori.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.sc-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.sc
+      ref_id: ID.SC-4
+      description: Establish a system of monitoring to ensure that all of your suppliers
+        and service-providers are fulfilling their obligations as required. Have this
+        confirmed on a regular basis by audit reports or technical test results.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie ein Monitoring um sicherzustellen, dass all\
+            \ Ihre Lieferanten und Dienstleister ihre Verpflichtungen gem\xE4ss den\
+            \ Vorgaben erf\xFCllen. Lassen sie sich dies regelm\xE4ssig in Audit-Berichten\
+            \ oder technische Pr\xFCfergebnissen best\xE4tigen."
+        fr:
+          name: null
+          description: "Faites un suivi syst\xE9matique pour vous assurer que tous\
+            \ vos fournisseurs et prestataires de services remplissent leurs obligations\
+            \ conform\xE9ment aux exigences. Faites-le v\xE9rifier r\xE9guli\xE8rement\
+            \ par des rapports d\u2019audit ou par les r\xE9sultats des tests techniques."
+        it:
+          name: null
+          description: Create un sistema di monitoraggio per garantire che fornitori
+            e operatori si attengano ai loro obblighi secondo le direttive. Chiedete
+            regolarmente riscontro in sede di rapporti su audit o risultati di prove
+            tecniche.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:id.sc-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:id.sc
+      ref_id: ID.SC-5
+      description: Work with your suppliers and service-providers to define response
+        and recovery procedures following cybersecurity incidents. Conduct drills
+        to test these procedures.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie mit Ihren Lieferanten und Dienstleistern Reaktions-\
+            \ und Widerherstellungsprozesse.Testen sie diese Prozesse in \xDCbungen."
+        fr:
+          name: null
+          description: "D\xE9finissez avec vos fournisseurs et prestataires les processus\
+            \ pour r\xE9agir et r\xE9cup\xE9rer apr\xE8s des probl\xE8mes de cybers\xE9\
+            curit\xE9. Validez ces processus par des simulations."
+        it:
+          name: null
+          description: Definite con fornitori e operatori procedure di reazione e
+            ripristino susseguenti a cybereventi. Verificatele in sede di test.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      assessable: false
+      depth: 1
+      ref_id: PR
+      name: Protect
+      translations:
+        de:
+          name: "Sch\xFCtzen (PR - Protect)"
+          description: null
+        fr:
+          name: "Prot\xE9ger (PR - Protect)"
+          description: null
+        it:
+          name: Proteggere (PR - Protect)
+          description: null
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      ref_id: PR.AC
+      name: 'Access Management '
+      description: Ensure that physical and logical access to ICT assets and facilities
+        is restricted to authorised individuals, processes and devices, and that they
+        can be used only for permitted activities.
+      translations:
+        de:
+          name: "Identit\xE4tsmanagement, Authentifizierung und Zugriffsmanagement"
+          description: "(Identity Management, Authentication and Access Control PR.AC):\
+            \ Stellen Sie sicher, dass der physische und logische Zugriff auf IKT-Betriebsmittel\
+            \ und \u2013Anlagen nur f\xFCr autorisierte Personen, Prozesse und Ger\xE4\
+            te m\xF6glich ist und dass der Zugriff nur f\xFCr als zul\xE4ssig definierte\
+            \ Aktivit\xE4ten m\xF6glich ist. Dies wird in \xDCbereinstimmung mit dem\
+            \ bewerteten Risiko eines unbefugten Zugangs zu autorisierten Aktivit\xE4\
+            ten und Transaktionen verwaltet."
+        fr:
+          name: "Gestion des acc\xE8s (Access management PR.AC)"
+          description: "Veiller \xE0 ce que les acc\xE8s physique et logique aux \xE9\
+            quipements et installations TIC ne soient possibles que pour les personnes,\
+            \ processus et appareils autoris\xE9s et \xE0 ce que seules les activit\xE9\
+            s pr\xE9vues soient permises."
+        it:
+          name: "Gestione dell\u2019inventario (Asset management PR.AC)"
+          description: "Assicuratevi che l\u2019accesso fisico e logico a strumenti\
+            \ e impianti operativi TIC sia possibile solo a persone, procedure e apparecchi\
+            \ autorizzati e unicamente per attivit\xE0 consentite."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-1
+      description: Establish a clearly defined procedure for granting and managing
+        permissions and access data for users, devices and processes.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie einen klar definierten Prozess zur Erteilung\
+            \ und Verwaltung von Berechtigungen und Zugangsdaten f\xFCr Benutzer,\
+            \ Ger\xE4te und Prozesse."
+        fr:
+          name: null
+          description: "D\xE9finissez un processus clair pour octroyer et g\xE9rer\
+            \ les autorisations et les donn\xE9es d\u2019identification pour utilisateurs,\
+            \ appareils/machines et processus."
+        it:
+          name: null
+          description: Definite una procedura chiaramente definita per attribuire
+            e gestire autorizzazioni e dati di accesso per utenti, apparecchi e procedure.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-2
+      description: Ensure that only authorised individuals have physical access to
+        ICT assets. Take action (on building security, for example) to ensure that
+        ICT assets are protected from unauthorised physical access.
+      translations:
+        de:
+          name: null
+          description: "Stellen sie sicher, dass nur autorisierte Personen physischen\
+            \ Zugriff auf die IKT-Betriebsmittel haben. Sorgen sie mit (baulichen)\
+            \ Massnahmen daf\xFCr, dass die IKT-Betriebsmittel vor unautorisiertem\
+            \ physischem Zugriff gesch\xFCtzt sind."
+        fr:
+          name: null
+          description: "Assurez-vous que seules les personnes autoris\xE9es ont physiquement\
+            \ acc\xE8s aux \xE9quipements TIC. Prenez des mesures concr\xE8tes pour\
+            \ garantir que les ressources TIC sont prot\xE9g\xE9es contre tout acc\xE8\
+            s physique non autoris\xE9."
+        it:
+          name: null
+          description: Assicuratevi che unicamente persone autorizzate abbiano accesso
+            agli strumenti operativi TIC. Proteggete con misure (strutturali) gli
+            strumenti operativi TIC da accessi fisici non autorizzati.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-3
+      description: Establish procedures by which to manage remote access.
+      translations:
+        de:
+          name: null
+          description: Etablieren Sie Prozesse zur Verwaltung der Fernzugriffe.
+        fr:
+          name: null
+          description: "D\xE9finissez les processus pour g\xE9rer les acc\xE8s \xE0\
+            \ distance."
+        it:
+          name: null
+          description: Definite procedure per gestire gli accessi a distanza.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-4
+      description: Define permission levels according to the principle of least privilege,
+        as well as separation of functions.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie Zugriffsberechtigungen und Autorisierungen\
+            \ unter Ber\xFCcksichtigung der Grunds\xE4tze der geringsten Rechte und\
+            \ der Aufgabentrennung."
+        fr:
+          name: null
+          description: "D\xE9finissez les niveaux d\u2019autorisation en \xE9tant\
+            \ le plus restrictif possible (principe de moindre privil\xE8ge) et s\xE9\
+            parez les fonctions."
+        it:
+          name: null
+          description: Definite livelli di autorizzazione secondo il principio del
+            privilegio minimo e della separazione delle funzioni.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-5
+      description: Ensure that the integrity of your network is protected. Segregate
+        your network both logically and physically where necessary and sensible.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass die Integrit\xE4t ihres Netzwerks\
+            \ gesch\xFCtzt ist. Segmentieren und segregieren Sie Ihr Netzwerk logisch\
+            \ und physisch, wo notwendig und sinnvoll."
+        fr:
+          name: null
+          description: "Contr\xF4lez que l\u2019int\xE9grit\xE9 de votre r\xE9seau\
+            \ est prot\xE9g\xE9e. S\xE9parez votre r\xE9seau au niveau logique comme\
+            \ physique, si c\u2019est n\xE9cessaire et judicieux.."
+        it:
+          name: null
+          description: "Assicuratevi che l\u2019integrit\xE0 della vostra rete sia\
+            \ protetta. Separate la vostra rete sul piano fisico e logico qualora\
+            \ utile e necessario."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-6
+      description: Ensure that digital identities are allocated to unambiguously authenticated
+        individuals or processes.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass digitale Identit\xE4ten eindeutig\
+            \ verifizierten Personen oder Prozessen zugeordnet sind."
+        fr:
+          name: null
+          description: "N\u2019attribuez des identit\xE9s num\xE9riques qu\u2019\xE0\
+            \ des personnes ou \xE0 des processus que vous avez clairement identifi\xE9\
+            s."
+        it:
+          name: null
+          description: "Assicuratevi che le identit\xE0 digitali siano attribuite\
+            \ chiaramente a persone e procedure verificate."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ac
+      ref_id: PR.AC-7
+      description: "Users, devices, and other assets are authenticated (e.g., single-factor,\
+        \ multi-factor) commensurate with the risk of the transaction (e.g., individuals\u2019\
+        \ security and privacy risks and other organizational risks)."
+      translations:
+        de:
+          name: null
+          description: "Die Authentifizierung von Benutzern, Ger\xE4ten und anderen\
+            \ Verm\xF6genswerten (z. B. Ein-Faktor- oder Mehr-Faktor-Authentifizierung)\
+            \ erfolgt entsprechend dem Risiko der Transaktion (z. B. Sicherheits-\
+            \ und Datenschutzrisiken f\xFCr Einzelpersonen und andere Unternehmensrisiken)."
+        fr:
+          name: null
+          description: "L\u2018authentification d\u2018utilisateurs, appareils et\
+            \ autres assets (p.ex. Authentification \xE0 un ou plusieurs facteurs)\
+            \ est effectu\xE9e en fonction du risque de la transaction (p.ex. Risques\
+            \ de s\xE9curit\xE9 ou protection des donn\xE9es pour des personnes et\
+            \ autres risques d\u2018entreprise)."
+        it:
+          name: null
+          description: "Gli utenti, i dispositivi e le altre risorse sono autenticati\
+            \ (ad esempio, a un solo fattore o a pi\xF9 fattori) in base al rischio\
+            \ della transazione (ad esempio, i rischi per la sicurezza e la privacy\
+            \ degli individui e altri rischi organizzativi)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.at
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      ref_id: PR.AT
+      name: 'Awareness and Training '
+      description: Ensure that your staff and external partners receive appropriate,
+        regular training on all cybersecurity matters. Ensure that your staff and
+        external partners perform their security-related tasks in accordance with
+        the related requirements and procedures.
+      translations:
+        de:
+          name: 'Awareness and Training (PR.AT):'
+          description: "Stellen Sie sicher, dass Ihre Mitarbeitenden und externen\
+            \ Partner regelm\xE4ssig bez\xFCglich aller Belange der Cybersicherheit\
+            \ geschult und ausgebildet werden. Stellen Sie sicher, dass Ihre Mitarbeitenden\
+            \ und externen Partner ihre sicherheitsrelevanten Aufgaben gem\xE4ss den\
+            \ zugeh\xF6rigen Vorgaben, Vereinbarungen und Prozessen ausf\xFChren."
+        fr:
+          name: Sensibilisation et formation (PR.AT)
+          description: "Assurez-vous que vos employ\xE9s et vos partenaires externes\
+            \ sont correctement form\xE9s et conscients de tous les aspects de la\
+            \ cybers\xE9curit\xE9. Veillez \xE0 ce qu\u2019ils ex\xE9cutent les t\xE2\
+            ches impactant la s\xE9curit\xE9 conform\xE9ment aux exigences et aux\
+            \ processus d\xE9finis."
+        it:
+          name: Sensibilizzazione e formazione (PR.AT)
+          description: Assicuratevi che il vostro personale e i partner esterni seguano
+            regolarmente una formazione su tutti gli aspetti legati alla cybersicurezza.
+            Assicuratevi che il vostro personale e i partner esterni svolgano le mansioni
+            pertinenti per la sicurezza secondo le relative procedure e direttive.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.at-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.at
+      ref_id: PR.AT-1
+      description: Ensure that all members of staff are informed and trained on cybersecurity.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass alle Mitarbeitenden bez\xFCglich\
+            \ Cybersecurity informiert und geschult sind."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que tous vos collaborateurs soient sensibilis\xE9\
+            s et form\xE9s en mati\xE8re de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: Assicuratevi che tutto il personale sia informato e istruito
+            sulla cybersicurezza.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.at-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.at
+      ref_id: PR.AT-2
+      description: Ensure that higher-level users are particularly aware of their
+        role and responsibility.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Anwender mit h\xF6heren Berechtigungsstufen\
+            \ sich ihrer Rolle und Verantwortung besonders bewusst sind."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que les utilisateurs ayant des niveaux d\u2019\
+            autorisation \xE9lev\xE9s soient conscients de leur r\xF4le et de leurs\
+            \ responsabilit\xE9s."
+        it:
+          name: null
+          description: "Assicuratevi che gli utenti con livelli di autorizzazione\
+            \ elevati siano consapevoli del loro ruolo e delle relative responsabilit\xE0\
+            ."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.at-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.at
+      ref_id: PR.AT-3
+      description: Ensure that all third-party stakeholders (suppliers, customers
+        and partners) are aware of their role and responsibility.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass sich alle beteiligten Akteure ausserhalb
+            Ihres Unternehmens (Lieferanten, Kunden, Partner) ihrer Rolle und Verantwortung
+            bewusst sind.
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que tous les acteurs ext\xE9rieurs \xE0 votre\
+            \ entreprise (fournisseurs, clients, partenaires) soient conscients de\
+            \ leur r\xF4le et de leurs responsabilit\xE9s."
+        it:
+          name: null
+          description: "Assicuratevi che tutti i soggetti coinvolti al di fuori dell\u2019\
+            impresa (fornitori, clienti, partner) siano consapevoli del loro ruolo\
+            \ e delle relative responsabilit\xE0."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.at-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.at
+      ref_id: PR.AT-4
+      description: Ensure that all managers are aware of their particular role and
+        responsibility.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass sich alle F\xFChrungskr\xE4fte ihrer\
+            \ besonderen Rolle und Verantwortung bewusst sind."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que tous les cadres soient conscients de leurs\
+            \ r\xF4les sp\xE9cifiques et de leurs responsabilit\xE9s."
+        it:
+          name: null
+          description: "Assicuratevi che tutti i quadri dirigenti siano consapevoli\
+            \ del loro ruolo e delle relative responsabilit\xE0."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.at-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.at
+      ref_id: PR.AT-5
+      description: Ensure that those in charge of physical security and information
+        security are aware of their particular role and responsibilities.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass die Verantwortlichen f\xFCr physische\
+            \ Sicherheit und Informationssicherheit sich ihrer besonderen Rolle und\
+            \ Verantwortung bewusst sind."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que les responsables de la s\xE9curit\xE9\
+            \ physique et de la s\xE9curit\xE9 informatique soient conscients de leurs\
+            \ r\xF4les sp\xE9cifiques et de leurs responsabilit\xE9s."
+        it:
+          name: null
+          description: "Assicuratevi che i responsabili della sicurezza fisica e della\
+            \ sicurezza dell\u2019informazione siano consapevoli del loro ruolo e\
+            \ delle loro responsabilit\xE0 particolari."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      ref_id: PR.DS
+      name: 'Data Security '
+      description: "Ensure that information, data and data carriers are managed in\
+        \ a way which protects the confidentiality, integrity and availability of\
+        \ the data in accordance with the organisation\u2019s risk strategy."
+      translations:
+        de:
+          name: Datensicherheit (Data Security PR.DS)
+          description: "Informationen, Daten und Datentr\xE4ger werden so gehandhabt,\
+            \ dass die Vertraulichkeit, Integrit\xE4t und Verf\xFCgbarkeit der Daten\
+            \ gem\xE4ss der Risikostrategie der Organisation gesch\xFCtzt werden kann."
+        fr:
+          name: "S\xE9curit\xE9 des donn\xE9es (Data Security PR.DS)"
+          description: "Assurez-vous que les informations, les donn\xE9es et leurs\
+            \ supports sont g\xE9r\xE9s de mani\xE8re \xE0 prot\xE9ger la confidentialit\xE9\
+            , l\u2019int\xE9grit\xE9 et la disponibilit\xE9 des donn\xE9es, conform\xE9\
+            ment\xE0 la strat\xE9gie de votre entreprise pour g\xE9rer les risques."
+        it:
+          name: Sicurezza dati (Data security PR.DS)
+          description: "Assicuratevi che informazioni, dati e supporti dati siano\
+            \ gestiti in modo da proteggere confidenzialit\xE0, integrit\xE0 e disponibilit\xE0\
+            \ dei dati secondo la strategia dei rischi del vostro organismo o della\
+            \ vostra impresa."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-1
+      description: Ensure that stored data is protected (against violations of confidentiality,
+        integrity and availability).
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass gespeicherte Daten gesch\xFCtzt sind\
+            \ (vor Verletzungen der Vertraulichkeit, Integrit\xE4t und Verf\xFCgbarkeit)."
+        fr:
+          name: null
+          description: "Assurez-vous que les donn\xE9es stock\xE9es sont prot\xE9\
+            g\xE9es (contre toute atteinte ou pr\xE9judice en termes de confidentialit\xE9\
+            , d\u2019int\xE9grit\xE9 et de disponibilit\xE9)."
+        it:
+          name: null
+          description: "Assicuratevi che i dati memorizzati siano protetti (da violazioni\
+            \ della confidenzialit\xE0, dell\u2019integrit\xE0 e della disponibilit\xE0\
+            )."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-2
+      description: Ensure that data is protected while in transit (against violations
+        of confidentiality, integrity and availability).
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Daten w\xE4hren der \xDCbertragung\
+            \ (vor Verletzungen der Vertraulichkeit, Integrit\xE4t und Verf\xFCgbarkeit)\
+            \ gesch\xFCtzt sind."
+        fr:
+          name: null
+          description: "Assurez-vous que les donn\xE9es sont prot\xE9g\xE9es pendant\
+            \ leur transmission (contre toute atteinte ou pr\xE9judice en termes de\
+            \ confidentialit\xE9, d\u2019int\xE9grit\xE9 et de disponibilit\xE9)."
+        it:
+          name: null
+          description: "Assicuratevi che in sede di trasmissione i dati siano protetti\
+            \ (da violazioni della confidenzialit\xE0, dell\u2019integrit\xE0 e della\
+            \ disponibilit\xE0)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-3
+      description: Ensure that you have a formal procedure in place for your ICT assets
+        which protects data upon removal, transfer or the replacement of those assets.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass f\xFCr Ihre IKT-Betriebsmittel ein\
+            \ formaler Prozess etabliert ist, welcher die Daten bei Entfernung, Verschiebung\
+            \ oder Ersatz der Betriebsmittel sch\xFCtzt."
+        fr:
+          name: null
+          description: "Veuillez \xE0 ce qu\u2019un processus formel soit d\xE9fini\
+            \ pour votre mat\xE9riel TIC afin de prot\xE9ger les donn\xE9es lorsque\
+            \ des \xE9quipements sont supprim\xE9s, d\xE9plac\xE9s ou remplac\xE9\
+            s."
+        it:
+          name: null
+          description: Assicuratevi che per i vostri strumenti operativi TIC venga
+            definita una procedura formale idonea a proteggere i dati in caso di eliminazione,
+            spostamento o sostituzione di tali strumenti.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-4
+      description: Ensure that your ICT assets have sufficient capacity to ensure
+        data availability is maintained.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass ihre IKT-Betriebsmittel bez\xFCglich\
+            \ der Verf\xFCgbarkeit der Daten \xFCber ausreichende Kapazit\xE4tsreserven\
+            \ verf\xFCgen."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que vos \xE9quipements TIC aient une r\xE9\
+            serve de capacit\xE9 suffisante afin que vos donn\xE9es soient toujours\
+            \ disponibles."
+        it:
+          name: null
+          description: "Assicuratevi che i vostri strumenti operativi TIC dispongano\
+            \ di riserve di capacit\xE0 sufficienti in relazione alla disponibilit\xE0\
+            \ dei dati."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-5
+      description: Ensure that appropriate action has been taken to prevent data leaks.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass ad\xE4quate Massnahmen gegen den\
+            \ Abfluss von Daten (Datenlecks) implementiert sind."
+        fr:
+          name: null
+          description: "Assurez-vous que des mesures appropri\xE9es sont mises en\
+            \ oeuvre contre les fuites de donn\xE9es(\xABpompage\xBB)."
+        it:
+          name: null
+          description: Assicuratevi che vengano introdotte misure adeguate conto le
+            fughe di dati (Data leak).
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-6
+      description: Establish a procedure to check the integrity of firmware, operating
+        systems, application software and data.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie einen Prozess, um Firmware, Betriebssysteme,\
+            \ Anwendungssoftware und Daten hinsichtlich ihrer Integrit\xE4t zu verifizieren."
+        fr:
+          name: null
+          description: "D\xE9finissez un processus pour v\xE9rifier l\u2019int\xE9\
+            grit\xE9 des firmwares, des syst\xE8mes d\u2019exploitation, des softwares\
+            \ d\u2019application et des donn\xE9es."
+        it:
+          name: null
+          description: "Definite una procedura per verificare l\u2019integrit\xE0\
+            \ di firmware, sistemi operativi, software applicativi e dati."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-7
+      description: Provide a development and testing IT environment which is completely
+        separate from productive systems.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie eine IT-Umgebung f\xFCr das Entwickeln und Testen\
+            \ zur Verf\xFCgung, welche komplett unabh\xE4ngig von den produktiven\
+            \ Systemen ist."
+        fr:
+          name: null
+          description: "Ayez un environnement informatique (IT) pour le d\xE9veloppement\
+            \ et les tests qui soit totalement ind\xE9pendant des syst\xE8mes de production."
+        it:
+          name: null
+          description: Mettete a disposizione un ambiente IT per lo sviluppo e i test
+            completamente indipendente dai sistemi produttivi.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ds
+      ref_id: PR.DS-8
+      description: Establish a procedure to check the integrity of the hardware you
+        use.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie einen Prozess, um die eingesetzte Hardware\
+            \ hinsichtlich ihrer Integrit\xE4t zu verifizieren."
+        fr:
+          name: null
+          description: "D\xE9finissez un processus pour v\xE9rifier l\u2019int\xE9\
+            grit\xE9 des hardwares utilis\xE9s."
+        it:
+          name: null
+          description: "Definite una procedura per verificare l\u2019integrit\xE0\
+            \ dell\u2019hardware."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      ref_id: PR.IP
+      name: 'Information Protection Processes and Procedures '
+      description: Draw up policies to protect information systems and assets. Apply
+        these policies to protect those information systems and assets.
+      translations:
+        de:
+          name: 'Schutz von Daten (Information Protection Processes and Procedures
+            PR.IP):'
+          description: "Richtlinien zum Schutz von Informationssystemen und Betriebsmitteln\
+            \ sind erstellt. Diese Richtlinien umfassen im Minimum den Zweck, den\
+            \ Umfang, die Rollen und die Verantwortlichkeiten sowie die Koordination\
+            \ innerhalb der Organisation. Diese Richtlinien werden genutzt um die\
+            \ Informationssysteme und Betriebsmittel zu sch\xFCtzen."
+        fr:
+          name: "Protection des donn\xE9es (Information Protection Processes and Procedures\
+            \ PR.IP)"
+          description: "Etablissez des directives pour prot\xE9ger vos syst\xE8mes\
+            \ informatiques et vos \xE9quipements de production. Et appliquez-les\
+            \ strictement pour garantir cette protection."
+        it:
+          name: Protezione di dati (Information protection processes and procedures
+            PR.IP)
+          description: Definite direttive per la protezione di sistemi di informazione
+            e strumenti operativi. Applicate le direttive per proteggere i sistemi
+            di informazione e gli strumenti operativi.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-1
+      description: Draw up a baseline configuration for your information and communication
+        infrastructure, as well as for industrial control systems. Ensure that this
+        baseline configuration complies with typical security principles (e.g. N-1
+        redundancy, least-functionality configuration, etc.).
+      translations:
+        de:
+          name: null
+          description: "Erstellen Sie eine Standardkonfiguration f\xFCr die Informations-\
+            \ und Kommunikationsinfrastruktur, sowie f\xFCr die industriellen Kontrollsysteme.\
+            \ Stellen sie sicher, dass diese Standardkonfiguration typische Security-Prinzipien\
+            \ (z.B. N-1 Redundanz, Minimalkon-figuration, etc.) einh\xE4lt."
+        fr:
+          name: null
+          description: "G\xE9n\xE9rez une configuration standard pour l\u2019infrastructure\
+            \ d\u2019information et de communication, ainsi que pour les syst\xE8\
+            mes de contr\xF4le industriel. Assurez-vous que cette configuration par\
+            \ d\xE9faut ob\xE9it aux r\xE8gles usuelles de s\xE9curit\xE9 (par ex.\
+            \ redondance N-1, configuration minimale, etc.)."
+        it:
+          name: null
+          description: "Definite la configurazione standard per l\u2019infrastruttura\
+            \ dell\u2019informazione e della comunicazione e per i sistemi di controllo\
+            \ industriali. Assicuratevi che questa configurazione standard preveda\
+            \ principi di sicurezza tipici (p.es. ridondanza N-1, configurazione minima\
+            \ ecc.)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-2
+      description: Establish a life cycle procedure for the use of ICT assets.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie einen Lebenszyklus-Prozess f\xFCr den Einsatz\
+            \ von IKT-Betriebsmitteln."
+        fr:
+          name: null
+          description: "D\xE9finissez un processus \xAB cycle de vie \xBB pour l\u2019\
+            utilisation des \xE9quipements TIC."
+        it:
+          name: null
+          description: "Definite una procedura per il ciclo di vita relativa all\u2019\
+            impiego di strumenti operativi TIC."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-3
+      description: Establish a procedure to monitor configuration changes.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie einen Prozess zur Kontrolle von Konfigurations\xE4\
+            nderungen."
+        fr:
+          name: null
+          description: "D\xE9finissez un processus pour contr\xF4ler les changements\
+            \ de configuration."
+        it:
+          name: null
+          description: Definite una procedura per il controllo delle modifiche alla
+            configurazione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-4
+      description: Ensure that backups of your information are conducted, maintained
+        and tested on a regular basis (check that you are able to revert to your backups).
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Sicherungen (Backups) Ihrer Informationen\
+            \ regelm\xE4ssig durchgef\xFChrt, bewirtschaftet und getestet werden (R\xFC\
+            ckspielbarkeit der Backups testen)."
+        fr:
+          name: null
+          description: "Assurez-vous que des sauvegardes informatiques (Backups) sont\
+            \ effectu\xE9es, g\xE9r\xE9es et test\xE9es r\xE9guli\xE8rement (+ qu\u2019\
+            on peut restaurer les donn\xE9es sauvegard\xE9es)."
+        it:
+          name: null
+          description: Assicuratevi che le duplicazioni delle informazioni (backup)
+            vengano effettuate, gestite e testate regolarmente (sperimentare il ripristino
+            del backup).
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-5
+      description: Ensure that you comply with all (regulatory) requirements and policies
+        concerning your physical assets.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass sie alle (regulatorischen) Vorgaben\
+            \ und Richtlinien hinsichtlich den physischen Betriebsmittel erf\xFCllen."
+        fr:
+          name: null
+          description: "Contr\xF4lez que toutes les exigences (r\xE9glementaires)\
+            \ et les directives concernant les \xE9quipements \xAB physiques \xBB\
+            \ soient respect\xE9es."
+        it:
+          name: null
+          description: Assicuratevi di rispettare tutte le disposizioni e le direttive
+            regolatorie in relazione agli strumenti operativi fisici.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-6
+      description: Ensure that data is destroyed according to requirements.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Daten gem\xE4ss den Vorgaben vernichtet\
+            \ werden."
+        fr:
+          name: null
+          description: "Contr\xF4lez que les donn\xE9es soient toujours d\xE9truites\
+            \ selon les prescriptions."
+        it:
+          name: null
+          description: Assicuratevi che i dati vengano smaltiti secondo le direttive.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-7
+      description: Ensure that your information security procedures are enhanced and
+        improved continuously.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass ihre Prozesse zur Informationssicherheit
+            kontinuierlich weiterentwickelt und verbessert werden.
+        fr:
+          name: null
+          description: "D\xE9veloppez et am\xE9liorez r\xE9guli\xE8rement vos processus\
+            \ de s\xE9curit\xE9 informatique."
+        it:
+          name: null
+          description: "Assicuratevi che le procedure relative alla sicurezza dell\u2019\
+            informazione vengano costantemente aggiornate e migliorate."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-8
+      description: Share information about the effectiveness of various protection
+        technologies with your partners.
+      translations:
+        de:
+          name: null
+          description: "Tauschen Sie sich bez\xFCglich der Effektivit\xE4t verschiedener\
+            \ Schutztechnologien mit Ihren Partnern aus."
+        fr:
+          name: null
+          description: "Discutez de l\u2019efficacit\xE9 des diff\xE9rentes technologies\
+            \ de protection avec vos partenaires."
+        it:
+          name: null
+          description: "Scambiate con i vostri partner esperienze sull\u2019efficacia\
+            \ delle tecnologie di protezione."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-9
+      description: Establish response procedures for any cyber incidents that may
+        occur. (Incident response planning, business continuity management, incident
+        recovery, disaster recovery.)
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie Prozesse zur Reaktion auf eingetretene Cyber-Vorf\xE4\
+            lle. (Incident Response-Planning, Business Continuity Management, Incident\
+            \ Recovery, Disaster Recovery)."
+        fr:
+          name: null
+          description: "Instaurez des processus pour r\xE9agir aux cyberincidents.\
+            \ (Incident Response-Planing, Business Continuity Management, Incident\
+            \ Recovery, Disaster Recovery)."
+        it:
+          name: null
+          description: Definite procedure per reagire a cybereventi (incident response-planning,
+            business continuity management, incident recovery, disaster recovery).
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-10
+      description: Test response and recovery plans.
+      translations:
+        de:
+          name: null
+          description: "Testen sie die Reaktions- und Widerherstellungspl\xE4ne."
+        fr:
+          name: null
+          description: "Testez les plans de r\xE9action et de r\xE9cup\xE9ration."
+        it:
+          name: null
+          description: Testate i piani di reazione e ripristino.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-11
+      description: Embed aspects of cybersecurity in the staff recruitment process
+        at an early stage (e.g. by conducting background checks and individual security
+        checks).
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie Aspekte der Cybersecurity bereits in den Personalrekrutierungsprozess\
+            \ (z.B. durch die Etablierung von Background-checks / Personensicherheitspr\xFC\
+            fungen)."
+        fr:
+          name: null
+          description: "Tenez compte de la cybers\xE9curit\xE9 d\xE8s le processus\
+            \ de recrutement (en v\xE9rifiant les ant\xE9c\xE9dents ou par des contr\xF4\
+            les de s\xE9curit\xE9 personnels, par ex.)."
+        it:
+          name: null
+          description: "Definite gli aspetti della cybersicurezza gi\xE0 in sede di\
+            \ iter di assunzione del personale (p.es. tramite controlli/verifiche\
+            \ di sicurezza sulle persone)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ip
+      ref_id: PR.IP-12
+      description: Develop and implement a procedure for dealing with identified vulnerabilities.
+      translations:
+        de:
+          name: null
+          description: Entwickeln und implementieren Sie einen Prozess zum Umgang
+            mit erkannten Schwachstellen.
+        fr:
+          name: null
+          description: "D\xE9veloppez et mettez en oeuvre un processus pour traiter\
+            \ les failles rep\xE9r\xE9es."
+        it:
+          name: null
+          description: Sviluppate e introducete una procedura per gestire le carenze
+            individuate.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ma
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      ref_id: PR.MA
+      name: 'Maintenance '
+      description: Ensure that maintenance and repair work to components of the ICT
+        system and/or the ICS are conducted in accordance with policies and procedures.
+      translations:
+        de:
+          name: 'Wartung (Maintenance PR.MA):'
+          description: "Unterhalts- und Reparaturarbeiten an Komponenten von IT-Systemen\
+            \ und ICS werden gem\xE4ss den geltenden Richtlinien und Prozessen durchgef\xFC\
+            hrt."
+        fr:
+          name: Maintenance (PR.MA)
+          description: "Veillez \xE0 ce que la maintenance et la r\xE9paration des\
+            \ composantes des syst\xE8mes TIC et du SCI soient effectu\xE9es conform\xE9\
+            ment aux directives et m\xE9thodes en vigueur."
+        it:
+          name: Manutenzione (Maintenance PR.MA)
+          description: "Assicuratevi che i lavori di riparazione e manutenzione su\
+            \ componenti del sistema TIC e/o dell\u2019ICS vengano effettuati conformemente\
+            \ alle direttive a alle procedure vigenti."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ma-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ma
+      ref_id: PR.MA-1
+      description: Ensure that the operation and maintenance of, and any repairs to
+        assets are logged. Ensure that such work is conducted promptly and uses only
+        those means which have been tested and approved.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass der Betrieb, die Wartung und allf\xE4\
+            llige Reparaturen an den Betriebsmitteln aufgezeichnet und dokumentiert\
+            \ werden (Logging). Stellen Sie sicher, dass diese zeitnah durchgef\xFC\
+            hrt werden und nur unter Einsatz von gepr\xFCften und freigegebenen Mitteln\
+            \ erfolgen."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que le fonctionnement, la maintenance et les\
+            \ \xE9ventuelles r\xE9parations des \xE9quipements soient enregistr\xE9\
+            s et document\xE9s (journalisation). Assurez-vous qu\u2019elles sont effectu\xE9\
+            es rapidement et en ne recourant qu\u2019\xE0 des moyens test\xE9s et\
+            \ approuv\xE9s."
+        it:
+          name: null
+          description: Assicuratevi che il funzionamento, la manutenzione ed eventuali
+            riparazioni agli strumenti operativi vengano registrati e documentati
+            (logging). Assicuratevi che queste operazioni siano effettuate rapidamente
+            e unicamente utilizzando mezzi verificati e autorizzati.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.ma-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.ma
+      ref_id: PR.MA-2
+      description: Ensure that maintenance work on your systems that is carried out
+        via remote access is logged. Ensure that no unauthorised access is possible.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Unterhaltsarbeiten an Ihren Systemen,\
+            \ die \xFCber Fernzugriffe erfolgen, aufgezeichnet und dokumentiert werden.\
+            \ Stellen Sie sicher, dass kein unautorisierter Zugriff m\xF6glich ist."
+        fr:
+          name: null
+          description: "Enregistrez et documentez \xE9galement les travaux de maintenance\
+            \ de vos syst\xE8mes distants. Assurez-vous qu\u2019aucun acc\xE8s non\
+            \ autoris\xE9 n\u2019est possible."
+        it:
+          name: null
+          description: Assicuratevi che i lavori di manutenzione a sistemi accessibili
+            a distanza siano registrati e documentati. Assicuratevi che non siano
+            possibili accessi non autorizzati.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr
+      ref_id: PR.PT
+      name: 'Protective Technology '
+      description: Install technical security solutions in accordance with requirements
+        and procedures to ensure the security and resilience of your ICT systems and
+        their data.
+      translations:
+        de:
+          name: 'Protective Technology (PR.PT):'
+          description: "Technische Security-L\xF6sungen sind installiert um die Sicherheit\
+            \ und Resilienz der Systeme und Daten gem\xE4ss den Vorgaben und Prozessen\
+            \ zu garantieren."
+        fr:
+          name: Technologie de protection (Protective Technology PR.PT)
+          description: "Installez des solutions techniques pour assurer la s\xE9curit\xE9\
+            \ et la r\xE9silience de vos syst\xE8mes ICT et de leurs donn\xE9es selon\
+            \ les exigences et processus."
+        it:
+          name: Impiego di tecnologie di protezione (Protective technology PR.PT)
+          description: Installate soluzioni tecniche per garantire la sicurezza e
+            la resilienza dei sistemi TIC e dei loro dati secondo le direttive e le
+            procedure definite.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt
+      ref_id: PR.PT-1
+      description: Define requirements for audits and log records. Produce and check
+        the regular logs in accordance with those requirements and policies.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie Vorgaben zu Audits und Log-Aufzeichnungen.\
+            \ Erstellen und pr\xFCfen Sie die regelm\xE4ssigen Logs gem\xE4ss den\
+            \ Vorgaben und Richtlinien."
+        fr:
+          name: null
+          description: "D\xE9finissez les exigences pour les audits et les enregistrements\
+            \ de journaux. G\xE9n\xE9rez et v\xE9rifiez ces journaux r\xE9guli\xE8\
+            rement, selon les exigences et les directives."
+        it:
+          name: null
+          description: Definite le direttive per gli audit e le registrazioni log.
+            Definite e verificate i log regolari secondo le disposizioni e le direttive.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt
+      ref_id: PR.PT-2
+      description: Ensure that removable media are protected, and that they are used
+        only in accordance with policy.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Wechseldatentr\xE4ger gesch\xFCtzt\
+            \ sind und dass sie nur gem\xE4ss den Richtlinien eingesetzt werden."
+        fr:
+          name: null
+          description: "Assurez-vous que les supports amovibles sont prot\xE9g\xE9\
+            s et que leur utilisation se fait dans le strict respect des directives."
+        it:
+          name: null
+          description: Assicuratevi che i supporti rimovibili siano protetti e vengano
+            utilizzati unicamente in base alle direttive.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt
+      ref_id: PR.PT-3
+      description: Ensure that your system is configured so that a minimum level of
+        functionality is guaranteed at all times.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Ihr System so konfiguriert ist, dass\
+            \ jederzeit eine Minimalfunktionalit\xE4t gew\xE4hrleistet wird (Systemh\xE4\
+            rtung)."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que votre syst\xE8me soit configur\xE9 pour\
+            \ assurer en tout temps une fonctionnalit\xE9 minimale (Hardening de syst\xE8\
+            me)."
+        it:
+          name: null
+          description: "Assicuratevi che il vostro sistema sia configurato in modo\
+            \ da garantire sempre un livello minimo di funzionalit\xE0."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt
+      ref_id: PR.PT-4
+      description: Ensure that your communications and control networks are protected.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass ihre Kommunikations- und Steuernetzwerke\
+            \ gesch\xFCtzt sind."
+        fr:
+          name: null
+          description: "Assurez la protection de vos r\xE9seaux de communication et\
+            \ de contr\xF4le."
+        it:
+          name: null
+          description: Assicuratevi che le vostre reti di comunicazione e di controllo
+            siano protette.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:pr.pt
+      ref_id: PR.PT-5
+      description: Ensure that mechanisms (e.g. failsafe, load balancing, hot swap)
+        are implemented to achieve resilience requirements in normal and adverse situations.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Mechanismen (z.B. Ausfallsicherheit,\
+            \ Lastenausgleich, Hot-Swap) implementiert sind, um die Anforderungen\
+            \ an die Ausfallsicherheit in normalen und ung\xFCnstigen Situationen\
+            \ zu erf\xFCllen."
+        fr:
+          name: null
+          description: "Assurez-vous que des m\xE9canismes (par ex. s\xE9curit\xE9\
+            \ en cas de panne, \xE9quilibrage de charge, remplacement \xE0 chaud)\
+            \ sont mis en oeuvre pour r\xE9pondre aux exigences en mati\xE8re de s\xE9\
+            curit\xE9 en cas de panne dans des situations normales et d\xE9favorables."
+        it:
+          name: null
+          description: "Assicuratevi che i vostri sistemi funzionino conformemente\
+            \ agli scenari predefiniti. P.es.: funzionalit\xE0 durante un attacco,\
+            \ nella fase di ripristino e nella fase operativa normale."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de
+      assessable: false
+      depth: 1
+      ref_id: DE
+      name: Detect
+      translations:
+        de:
+          name: Detektieren (DE - Detect)
+          description: null
+        fr:
+          name: "D\xE9tecter (DE - Detect)"
+          description: null
+        it:
+          name: Intercettare (DE - Detect)
+          description: null
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.ae
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de
+      ref_id: DE.AE
+      name: 'Anomalies and Events '
+      description: Ensure that anomalies (abnormal behaviours) and security-related
+        events are detected swiftly and that the potential impact of incidents is
+        understood.
+      translations:
+        de:
+          name: "Vorf\xE4lle (Anomalies and Events DE.AE):"
+          description: Anomalien und sicherheitsrelevante Ereignisse werden erkannt
+            und potenzielle Auswirkungen des Vorfalls verstanden.
+        fr:
+          name: Anomalies et incidents (Anomalies and Events DE.AE)
+          description: "Veillez \xE0 ce que les anomalies et autres \xE9v\xE9nements\
+            \ (exceptionnels) soient d\xE9tect\xE9s \xE0 temps et que le personnel\
+            \ soit conscient de l\u2019impact potentiel de ces incidents."
+        it:
+          name: Anomalie ed eventi (Anomalies and events DE.AE)
+          description: Assicuratevi che le anomalie (comportamenti anormali) e gli
+            eventi pertinenti per la sicurezza vengano individuati in tempo utile
+            e i loro effetti potenziali siano recepiti.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.ae-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.ae
+      ref_id: DE.AE-1
+      description: Define a baseline for permitted network operations and expected
+        data flows for users and systems. Manage these values continuously.
+      translations:
+        de:
+          name: null
+          description: "Definieren sie Standardwerte f\xFCr zul\xE4ssige Netzwerkoperationen\
+            \ und die zu erwartenden Datenfl\xFCsse f\xFCr Anwender und Systeme. Managen\
+            \ sie diese Werte fortlaufend."
+        fr:
+          name: null
+          description: "D\xE9finissez des valeurs par d\xE9faut pour les op\xE9rations\
+            \ r\xE9seau licites et les flux de donn\xE9es pr\xE9vus pour les utilisateurs\
+            \ et les syst\xE8mes. G\xE9rez ces valeurs en permanence."
+        it:
+          name: null
+          description: Definite valori standard per operazioni di rete ammesse e relativi
+            flussi di dati per utenti e sistemi. Gestite regolarmente questi valori.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.ae-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.ae
+      ref_id: DE.AE-2
+      description: Ensure that detected cybersecurity incidents are analysed to understand
+        their targets and methods.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass entdeckte Cybersecurity Vorf\xE4\
+            lle hinsichtlich ihrer Ziele und ihrer Methoden analysiert werden."
+        fr:
+          name: null
+          description: "Assurez-vous que les incidents de cybers\xE9curit\xE9 d\xE9\
+            tect\xE9s sont analys\xE9s quant \xE0 leurs objectifs et m\xE9thodes."
+        it:
+          name: null
+          description: Assicuratevi che gli eventi di cybersicurezza individuati siano
+            analizzati in funzione di obiettivi e metodi.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.ae-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.ae
+      ref_id: DE.AE-3
+      description: Ensure that information on cybersecurity incidents is aggregated
+        and correlated from multiple sources and sensors.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Informationen zu Cybersecurityvorf\xE4\
+            llen aus verschiedenen Quellen und Sensoren aggregiert und aufbereitet\
+            \ werden."
+        fr:
+          name: null
+          description: "Assurez-vous que les informations sur les incidents de cybers\xE9\
+            curit\xE9 provenant de diff\xE9rentes sources et capteurs sont compil\xE9\
+            es et exploit\xE9es."
+        it:
+          name: null
+          description: Assicuratevi che le informazioni sugli eventi di cybersicurezza
+            provenienti da fonti e sensori diversi siano raggruppate ed elaborate.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.ae-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.ae
+      ref_id: DE.AE-4
+      description: Determine the impact of possible events.
+      translations:
+        de:
+          name: null
+          description: "Bestimmen Sie die Auswirkungen m\xF6glicher Ereignissen."
+        fr:
+          name: null
+          description: "D\xE9terminez les cons\xE9quences probables des incidents."
+        it:
+          name: null
+          description: Definite gli effetti di possibili eventi.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.ae-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.ae
+      ref_id: DE.AE-5
+      description: Define the thresholds above which cybersecurity incidents trigger
+        an alert.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie Schwellenwerte die f\xFCr Vorfallswarnungen\
+            \ festgelegt sind."
+        fr:
+          name: null
+          description: "D\xE9finissez les valeurs limites au-del\xE0 desquelles les\
+            \ incidents de cybers\xE9curit\xE9 doivent g\xE9n\xE9rer des alertes."
+        it:
+          name: null
+          description: Definite i valori soglia a partire dai quali gli eventi di
+            cybersicurezza innescano una situazione di allarme.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de
+      ref_id: DE.CM
+      name: 'Security Continuous Monitoring '
+      description: Ensure that ICT systems, including all assets, are monitored at
+        regular intervals to detect cybersecurity incidents, and also to verify the
+        effectiveness of protective measures.
+      translations:
+        de:
+          name: "\xDCberwachung (Security Continuous Monitoring DE.CM):"
+          description: "Das IKT-System inkl. aller Betriebsmittel wird in regelm\xE4\
+            ssigen Intervallen \xFCberwacht, um einerseits Cybersicherheitsvorf\xE4\
+            lle zu entdecken und anderseits die Effektivit\xE4t der Gegenmassnahmen\
+            \ sicherstellen zu k\xF6nnen."
+        fr:
+          name: Anomalies et incidents (Anomalies and Events DE.CM)
+          description: "Veillez \xE0 ce que les anomalies et autres \xE9v\xE9nements\
+            \ (exceptionnels) soient d\xE9tect\xE9s \xE0 temps et que le personnel\
+            \ soit conscient de l\u2019impact potentiel de ces incidents."
+        it:
+          name: Anomalie ed eventi (Anomalies and events DE.CM)
+          description: Assicuratevi che le anomalie (comportamenti anormali) e gli
+            eventi pertinenti per la sicurezza vengano individuati in tempo utile
+            e i loro effetti potenziali siano recepiti.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-1
+      description: Monitor networks continuously to detect potential cybersecurity
+        events.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie ein kontinuierliches Netzwerkmonitoring, um\
+            \ potentielle Cybersecurity-vorf\xE4lle zu entdecken."
+        fr:
+          name: null
+          description: "Mettez en place une surveillance permanente du r\xE9seau pour\
+            \ d\xE9tecter les incidentsde cybers\xE9curit\xE9 potentiels."
+        it:
+          name: null
+          description: Mettete a punto un sistema di monitoraggio costante della rete
+            per individuare eventi di cybersicurezza.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-2
+      description: Continuous monitoring/surveillance of all physical assets and buildings
+        to detect cybersecurity incidents.
+      translations:
+        de:
+          name: null
+          description: "Etablieren Sie ein kontinuierliches Monitoring / \xDCberwachung\
+            \ aller physischen Betriebsmittel und Geb\xE4ude, um Cybersecurityvorf\xE4\
+            lle entdecken zu k\xF6nnen."
+        fr:
+          name: null
+          description: "Mettez en place une surveillance continue (monitorage) de\
+            \ tous les \xE9quipements et des b\xE2timents pour d\xE9tecter les incidents\
+            \ de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: Definite un sistema di monitoraggio/controllo costanti di tutti
+            gli strumenti operativi fisici e degli edifici per individuare eventi
+            di cybersicurezza.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-3
+      description: Establish a system to monitor ICT use on the part of your staff,
+        to detect potential cybersecurity incidents.
+      translations:
+        de:
+          name: null
+          description: "Die Aktivit\xE4ten der Mitarbeiter werden \xFCberwacht, um\
+            \ potenzielle Cybersicherheitsvorf\xE4lle zu erkennen."
+        fr:
+          name: null
+          description: "Mettez en place un monitorage de l\u2019utilisation des TIC\
+            \ par les employ\xE9s pour d\xE9tecter les incidents de cybers\xE9curit\xE9\
+            \ potentiels."
+        it:
+          name: null
+          description: "Definite un sistema di monitoraggio sull\u2019uso dei TIC\
+            \ da parte del personale per individuare potenziali eventi di cybersicurezza."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-4
+      description: Ensure that malware can be detected.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass Schadsoftware entdeckt werden kann.
+        fr:
+          name: null
+          description: "Veillez \xE0 pouvoir d\xE9tecter les maliciels."
+        it:
+          name: null
+          description: Assicuratevi che i software dannosi vengano identificati.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-5
+      description: Ensure that malware can be detected on mobile devices.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Schadsoftware auf Mobilger\xE4ten\
+            \ entdeckt werden kann."
+        fr:
+          name: null
+          description: "Veillez \xE0 pouvoir d\xE9tecter les maliciels sur les appareils\
+            \ mobiles."
+        it:
+          name: null
+          description: Assicuratevi che i software dannosi su apparecchi mobili vengano
+            identificati.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-6
+      description: Ensure that the activities of external service providers can be
+        monitored so that cybersecurity incidents can be detected.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass die Aktivit\xE4ten von externen Dienstleistern\
+            \ \xFCberwacht werden, so dass Cybersecurityvorf\xE4lle entdeckt werden\
+            \ k\xF6nnen."
+        fr:
+          name: null
+          description: "Assurez-vous que les activit\xE9s des prestataires de services\
+            \ externes sont surveill\xE9es (monitor\xE9es) pour d\xE9tecter d\u2019\
+            \xE9ventuels incidents de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: "Assicuratevi che le attivit\xE0 degli operatori esterni siano\
+            \ sottoposte a controllo in modo da poter individuare eventi di cybersicurezza."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-7
+      description: Monitor your system continuously to ensure that activities or access
+        by unauthorised persons, devices and software are detected.
+      translations:
+        de:
+          name: null
+          description: "\xDCberwachen Sie ihre Systeme laufend, um sicherzustellen,\
+            \ dass Aktivit\xE4ten / Zugriffe von unberechtigten Personen, Ger\xE4\
+            ten und Software erkannt wird."
+        fr:
+          name: null
+          description: "Surveillez votre syst\xE8me en permanence pour \xEAtre certain\
+            \ que des activit\xE9s ou acc\xE8s li\xE9s \xE0 des personnes, \xE9quipements\
+            \ ou logiciels non autoris\xE9s seront d\xE9tect\xE9s."
+        it:
+          name: null
+          description: "Controllate costantemente il vostro sistema per garantire\
+            \ che le attivit\xE0/gli accessi di persone, apparecchi e software non\
+            \ autorizzati possano essere individuati."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.cm-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.cm
+      ref_id: DE.CM-8
+      description: Vulnerability scans are performed.
+      translations:
+        de:
+          name: null
+          description: "F\xFChren Sie Verwundbarkeitsscans durch."
+        fr:
+          name: null
+          description: "Proc\xE9dez \xE0 des scans de vuln\xE9rabilit\xE9s."
+        it:
+          name: null
+          description: "Vengono eseguite scansioni di vulnerabilit\xE0"
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.dp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de
+      ref_id: DE.DP
+      name: 'Detection Processes '
+      description: Processes and instructions for detecting cybersecurity incidents
+        are cultivated, maintained and tested.
+      translations:
+        de:
+          name: 'Erkennungsprozesse (Detection Processes DE.DP):'
+          description: "Prozesse und Handlungsanweisungen zur Detektion von Cybersicherheitsvorf\xE4\
+            llen werden gepflegt, getestet und unterhalten, so dass Cybersicherheitsvorf\xE4\
+            lle erkannt werden."
+        fr:
+          name: "Processus de d\xE9tection (Detection Processes DE.DP)"
+          description: "Maintenez, testez et entretenez les processus et les instructions\
+            \ pour d\xE9tecter les incidents de cybers\xE9curit\xE9."
+        it:
+          name: Procedure di intercettazione (Detection processes DE.DP)
+          description: "Procedure e istruzioni operative per l\u2019intercettazione\
+            \ di eventi di cybersicurezza vengono gestite, testate e aggiornate."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.dp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.dp
+      ref_id: DE.DP-1
+      description: Define clear roles and responsibilities so that there is no doubt
+        about who is responsible for what, and who holds what authority.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie klare Rollen und Verantwortlichkeiten, so dass\
+            \ klar ist, wer wof\xFCr zust\xE4ndig ist und wer welche Kompetenzen hat."
+        fr:
+          name: null
+          description: "D\xE9finissez clairement les r\xF4les et les responsabilit\xE9\
+            s pour que tous sachent bien qui est responsable de quoi et qui a telles\
+            \ ou telles comp\xE9tences."
+        it:
+          name: null
+          description: "Definite ruoli e responsabilit\xE0 in modo che sia chiaro\
+            \ chi svolge quali mansioni e con quali competenze."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.dp-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.dp
+      ref_id: DE.DP-2
+      description: Ensure that detection processes comply with all requirements and
+        conditions.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass die Detektionsprozesse all ihre Vorgaben\
+            \ und Bedingungen erf\xFCllen."
+        fr:
+          name: null
+          description: "Assurez-vous que les processus de d\xE9tection correspondent\
+            \ aux exigences et conditions fix\xE9es."
+        it:
+          name: null
+          description: Assicuratevi che le procedure di intercettazione rispettino
+            tutte le direttive e le condizioni vigenti..
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.dp-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.dp
+      ref_id: DE.DP-3
+      description: Test your detection processes.
+      translations:
+        de:
+          name: null
+          description: Testen Sie ihre Detektionsprozesse.
+        fr:
+          name: null
+          description: "Testez vos processus de d\xE9tection."
+        it:
+          name: null
+          description: Testate le procedure di intercettazione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.dp-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.dp
+      ref_id: DE.DP-4
+      description: Communicate detected incidents to the relevant actors (e.g. suppliers,
+        customers, partners, authorities, etc.).
+      translations:
+        de:
+          name: null
+          description: "Kommunizieren Sie detektierte Vorf\xE4lle an die zust\xE4\
+            ndigen Stellen (z.B. Lieferanten, Kunden, Partner, Beh\xF6rden, etc.)."
+        fr:
+          name: null
+          description: "Communiquez aux personnes concern\xE9es (par ex. fournisseurs,\
+            \ clients, partenaires, autorit\xE9s) les incidents que vous avez d\xE9\
+            tect\xE9s."
+        it:
+          name: null
+          description: "Segnalate gli eventi intercettati alle persone competenti\
+            \ (p. es. fornitori, clienti, partner, autorit\xE0 ecc.)"
+    - urn: urn:intuitem:risk:req_node:ict-minimal:de.dp-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:de.dp
+      ref_id: DE.DP-5
+      description: Improve your detection processes continuously.
+      translations:
+        de:
+          name: null
+          description: Verbessern Sie Ihre Detektionsprozesse kontinuierlich.
+        fr:
+          name: null
+          description: "Am\xE9liorez en permanence vos processus de d\xE9tection."
+        it:
+          name: null
+          description: Migliorate continuamente le vostre procedure di intercettazione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs
+      assessable: false
+      depth: 1
+      ref_id: RS
+      name: Respond
+      translations:
+        de:
+          name: Reagieren (RS - Respond)
+          description: null
+        fr:
+          name: "R\xE9agir (RS - Respond)"
+          description: null
+        it:
+          name: Reagire (RS - Respond)
+          description: null
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.rp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs
+      ref_id: RS.RP
+      name: 'Response Planning '
+      description: Draw up a response plan to address detected cybersecurity incidents.
+        Ensure that this response plan is executed promptly and properly in any incident.
+      translations:
+        de:
+          name: 'Reaktionsplanung (Response Planning RS.RP):'
+          description: "Reaktionsprozesse und -verfahren werden kontinuierlich ausgef\xFC\
+            hrt und aufrechterhalten, um die Reaktion auf erkannte Cybersicherheitsvorf\xE4\
+            lle zu gew\xE4hrleisten."
+        fr:
+          name: "Plan d\u2019intervention (Response Planning RS.RP)"
+          description: "\xC9laborez un plan d\u2019intervention pour traiter les incidents\
+            \ de cybers\xE9curit\xE9 d\xE9tect\xE9s. Assurez-vous qu\u2019en cas d\u2019\
+            incident ce plan d\u2019intervention est ex\xE9cut\xE9 correctement et\
+            \ en temps utile."
+        it:
+          name: Piano di reazione (Response planning RS.RP)
+          description: Definite un piano di reazione per indirizzare gli eventi di
+            cybersicurezza individuati. Assicuratevi che il piano di reazione venga
+            applicato correttamente e tempestivamente nel caso di un evento.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.rp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.rp
+      ref_id: RS.RP-1
+      description: Ensure that the response plan is executed promptly and properly
+        during or after a detected incident.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass der Reaktionsplan w\xE4hrend oder\
+            \ nach einem detektierten Cyber-securityvorfall korrekt und zeitnah durchgef\xFC\
+            hrt wird."
+        fr:
+          name: null
+          description: "Assurez-vous que le plan d\u2019intervention est correctement\
+            \ suivi et rapidement ex\xE9cut\xE9 si un incident de cybers\xE9curit\xE9\
+            \ est d\xE9tect\xE9."
+        it:
+          name: null
+          description: Assicuratevi che il piano di reazione venga applicato correttamente
+            e immediatamente durante o dopo un evento di cybersicurezza intercettato.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.co
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs
+      ref_id: RS.CO
+      name: 'Communications '
+      description: Ensure that your response procedures are coordinated with internal
+        and external stakeholders. Ensure that, should an event occur, you receive
+        support from public-sector bodies if necessary and appropriate.
+      translations:
+        de:
+          name: 'Kommunikation (Communications RS.CO):'
+          description: "Reaktionsma\xDFnahmen werden mit internen und externen Akteuren\
+            \ koordiniert (z. B. externe Unterst\xFCtzung im Ereignisfall durch Strafverfolgungsbeh\xF6\
+            rden)."
+        fr:
+          name: Communications (Communications RS.CO)
+          description: "Contr\xF4lez que vos processus de r\xE9action soient coordonn\xE9\
+            s avec ceux des parties prenantes, internes et externes. Selon le type\
+            \ d\u2019incident, veillez \xE0 pouvoir b\xE9n\xE9ficier du soutien des\
+            \ autorit\xE9s si la situation l\u2019exige."
+        it:
+          name: Comunicazione (Communications RS.CO)
+          description: "Assicuratevi che le procedure di reazione siano coordinate\
+            \ con i gruppi di riferimento interni ed esterni. Assicuratevi di poter\
+            \ contare in caso di evento, se necessario e opportuno, sull\u2019appoggio\
+            \ di uffici statali."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.co-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.co
+      ref_id: RS.CO-1
+      description: Ensure that all individuals are familiar with their response and
+        the sequence of their actions if and when a cybersecurity incident occurs.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass alle Personen ihre Aufgaben bez\xFC\
+            glich der Reaktion und der Reihenfolge ihrer Handlungen auf eingetretene\
+            \ Cybersecurityvorf\xE4lle kennen."
+        fr:
+          name: null
+          description: "Assurez-vous que toutes les personnes connaissent leurs t\xE2\
+            ches et la marche \xE0 suivre lorsqu\u2019elles doivent r\xE9agir \xE0\
+            \ un incident de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: "Assicuratevi che tutte le persone conoscano le proprie mansioni\
+            \ in termini di reazione e priorit\xE0 in caso di eventi di cybersicurezza."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.co-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.co
+      ref_id: RS.CO-2
+      description: Define reporting criteria and ensure that cybersecurity incidents
+        are reported and processed in accordance with these criteria.
+      translations:
+        de:
+          name: null
+          description: "Definieren Sie Kriterien f\xFCr Meldungen und stellen Sie\
+            \ sicher, dass Cybersecurityvorf\xE4lle gem\xE4ss diesen Kriterien gemeldet\
+            \ und bearbeitet werden."
+        fr:
+          name: null
+          description: "D\xE9finissez des crit\xE8res pour le signalement des incidents\
+            \ de cybers\xE9curit\xE9 et assurez-vous qu'ils soient signal\xE9s et\
+            \ tait\xE9s conform\xE9ment \xE0 ces crit\xE8res."
+        it:
+          name: null
+          description: "Definite i criteri di segnalazione e assicuratevi che gli\
+            \ eventi di cybersicurezza siano resi noti e gestiti in loro conformit\xE0\
+            ."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.co-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.co
+      ref_id: RS.CO-3
+      description: Share information and findings about detected cybersecurity incidents
+        in accordance with the defined criteria.
+      translations:
+        de:
+          name: null
+          description: "Teilen Sie Informationen und Erkenntnisse zu detektierten\
+            \ Cybersecurityvorf\xE4llen gem\xE4ss den definierten Kriterien."
+        fr:
+          name: null
+          description: "Partagez les informations sur les incidents de cybers\xE9\
+            curit\xE9 relev\xE9s \u2013 ainsi que les enseignements qui en d\xE9coulent\
+            \ \u2013 selon ces crit\xE8res pr\xE9d\xE9finis."
+        it:
+          name: null
+          description: Attribuite agli eventi di cybersicurezza intercettati informazioni
+            e risultati in base ai criteri definiti.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.co-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.co
+      ref_id: RS.CO-4
+      description: Coordination with stakeholders occurs consistent with response
+        plans
+      translations:
+        de:
+          name: null
+          description: "Die Koordinierung mit allen Beteiligten und den Anspruchsgruppen\
+            \ erfolgt im Einklang mit den Reaktionspl\xE4nen gem\xE4ss den vordefinierten\
+            \ Kriterien."
+        fr:
+          name: null
+          description: "La coordination avec toutes les parties prenantes et les groupes\
+            \ d'int\xE9r\xEAt se fait en accord avec les plans de r\xE9action selon\
+            \ les crit\xE8res pr\xE9d\xE9finis."
+        it:
+          name: null
+          description: "Il coordinamento con le parti interessate \xE8 coerente con\
+            \ i piani di risposta."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.co-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.co
+      ref_id: RS.CO-5
+      description: Voluntary information sharing occurs with external stakeholders
+        to achieve broader cybersecurity situational awareness
+      translations:
+        de:
+          name: null
+          description: "Es werden regelm\xE4ssig freiwillig Informationen mit externen\
+            \ Akteuren ausgetauscht, um das Bewusstsein hinsichtlich der aktuellen\
+            \ Cybersicherheitssituation zu steigern."
+        fr:
+          name: null
+          description: "Des informations sont r\xE9guli\xE8rement et volontairement\
+            \ \xE9chang\xE9es avec des acteurs externes afin d'accro\xEEtre la sensibilisation\
+            \ \xE0 la situation actuelle en mati\xE8re de cybers\xE9curit\xE9"
+        it:
+          name: null
+          description: "La condivisione volontaria delle informazioni avviene con\
+            \ gli stakeholder esterni per ottenere una pi\xF9 ampia consapevolezza\
+            \ della situazione della cybersicurezza."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.an
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs
+      ref_id: RS.AN
+      name: 'Analysis '
+      description: Ensure that regular analyses are conducted to permit an effective
+        response to cybersecurity incidents.
+      translations:
+        de:
+          name: 'Analyse (Analysis RS.AN):'
+          description: "Regelm\xE4ssige Analysen, die  eine effektive Reaktion auf\
+            \ Cybersicherheitsvorf\xE4lle erm\xF6glichen, werden durchgef\xFChrt."
+        fr:
+          name: Analyse (Analysis RS.AN)
+          description: "Effectuez r\xE9guli\xE8rement des analyses afin de r\xE9agir\
+            \ correctement en cas d\u2019incidents de cybers\xE9curit\xE9."
+        it:
+          name: Analisi (Analysis RS.AN)
+          description: Assicuratevi che vengano effettuate regolarmente analisi tali
+            da consentirvi di reagire adeguatamente a eventi di cybersicurezza.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.an-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.an
+      ref_id: RS.AN-1
+      description: Ensure that notifications from detection systems are noted and
+        investigated.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Benachrichtigungen aus Detektionssystemen\
+            \ ber\xFCcksichtigt und Nachforschungen ausgel\xF6st werden."
+        fr:
+          name: null
+          description: "Assurez-vous que les alertes \xE9manant de syst\xE8mes de\
+            \ d\xE9tection sont prises en compte et d\xE9clenchent des enqu\xEAtes."
+        it:
+          name: null
+          description: Assicuratevi che le segnalazioni provenienti dai sistemi di
+            intercettamento vengano prese in considerazione e che siano attivate le
+            relative ricerche.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.an-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.an
+      ref_id: RS.AN-2
+      description: Ensure that the impact of a cybersecurity incident is properly
+        understood.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass die Auswirkungen eines Cybersecurityvorfalls
+            bekannt ist und verstanden wird.
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que les impacts d\u2019un incident de s\xE9\
+            curit\xE9 cyber soient connus et compris"
+        it:
+          name: null
+          description: Assicuratevi che le conseguenze di un evento di cybersicurezza
+            siano individuate correttamente.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.an-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.an
+      ref_id: RS.AN-3
+      description: Conduct a forensic analysis after any incident that occurs.
+      translations:
+        de:
+          name: null
+          description: "F\xFChren Sie nach einem eingetretenen Vorfall forensische\
+            \ Analysen durch."
+        fr:
+          name: null
+          description: "Effectuez une analyse forensique apr\xE8s chaque incident"
+        it:
+          name: null
+          description: Dopo il verificarsi di un evento effettuate analisi forensi.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.an-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.an
+      ref_id: RS.AN-4
+      description: Categorise incidents that occur in accordance with the requirements
+        of the response plan.
+      translations:
+        de:
+          name: null
+          description: "Kategorisieren Sie eingetretene Vorf\xE4lle gem\xE4ss den\
+            \ Vorgaben des Reaktionsplans."
+        fr:
+          name: null
+          description: "Classez les incidents selon les exigences du plan de r\xE9\
+            action."
+        it:
+          name: null
+          description: Classificate gli eventi verificatisi in base alle direttive
+            contenute nel piano di reazione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.an-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.an
+      ref_id: RS.AN-5
+      description: Processes are established to receive, analyze and respond to vulnerabilities
+        disclosed to the organization from internal and external sources (e.g. internal
+        testing, security bulletins, or security researchers).
+      translations:
+        de:
+          name: null
+          description: Richten Sie Prozesse ein, um Schwachstellen, die der Organisation
+            aus internen und externen Quellen (z. B. interne Audits, Sicherheitsbulletins
+            oder Sicherheitsforscher) bekannt werden, zu empfangen, zu analysieren
+            und darauf zu reagieren.
+        fr:
+          name: null
+          description: "Mettre en place des processus pour recevoir, analyser et r\xE9\
+            agir aux vuln\xE9rabilit\xE9s port\xE9es \xE0 la connaissance de l'organisation\
+            \ par des sources internes et externes (par exemple, audits internes,\
+            \ bulletins de s\xE9curit\xE9 ou chercheurs en s\xE9curit\xE9)."
+        it:
+          name: null
+          description: "Vengono stabiliti processi per ricevere, analizzare e rispondere\
+            \ alle vulnerabilit\xE0 divulgate all'organizzazione da fonti interne\
+            \ ed esterne (ad esempio, test interni, bollettini di sicurezza o ricercatori\
+            \ di sicurezza)."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs
+      ref_id: RS.MI
+      name: 'Mitigation '
+      description: Act to prevent the further spread of a cybersecurity incident and
+        to limit the potential damage.
+      translations:
+        de:
+          name: 'Mitigation (Mitigation RS.MI):'
+          description: "Es werden Ma\xDFnahmen ergriffen, um die Ausbreitung eines\
+            \ Ereignisses zu verhindern, seine Auswirkungen abzuschw\xE4chen und den\
+            \ Vorfall zu beseitigen."
+        fr:
+          name: Circonscrire les dommages (Mitigation RS.MI)
+          description: "Faites tout pour \xE9viter qu\u2019un incident de cybers\xE9\
+            curit\xE9 se propage afin de limiter les \xE9ventuels dommages."
+        it:
+          name: Diminuzione del danno (Mitigation RS.MI)
+          description: Operate in modo da evitare il propagarsi di un evento di cybersicurezza
+            e ridurre possibili danni.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi
+      ref_id: RS.MI-1
+      description: Ensure that cybersecurity incidents can be contained and their
+        further spread blocked.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Cybersecurityvorf\xE4lle eingegrenzt\
+            \ werden k\xF6nnen und die weitere Ausbreitung unterbrochen wird."
+        fr:
+          name: null
+          description: "Assurez-vous que les incidents de cybers\xE9curit\xE9 peuvent\
+            \ \xEAtre circonscrits et que vous pouvez stopper leur impact."
+        it:
+          name: null
+          description: Assicuratevi che gli eventi di cybersicurezza possano essere
+            circoscritti e che ne venga interrotta la diffusione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi
+      ref_id: RS.MI-2
+      description: Ensure that the impact of cybersecurity incidents can be mitigated.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass die Auswirkungen von Cybersecurityvorf\xE4\
+            llen gemindert werden k\xF6nnen."
+        fr:
+          name: null
+          description: "Assurez-vous de pouvoir r\xE9duire l\u2019impact des incidents\
+            \ de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: Assicuratevi che le conseguenze di un evento di cybersicurezza
+            siano individuate correttamente.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.mi
+      ref_id: RS.MI-3
+      description: Ensure that newly identified vulnerabilities are reduced or documented
+        as accepted risks.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass neu identifizierte Verwundbarkeiten
+            reduziert oder als akzeptierte Risiken dokumentiert werden.
+        fr:
+          name: null
+          description: "Veillez \xE0 r\xE9duire au maximum les failles ainsi d\xE9\
+            couvertes ou r\xE9f\xE9rencez-les comme des risques acceptables."
+        it:
+          name: null
+          description: "Assicuratevi che le nuove vulnerabilit\xE0 individuate vengano\
+            \ ridotte o documentate come rischi accettati."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.im
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs
+      ref_id: RS.IM
+      name: 'Improvements '
+      description: "Ensure that your organisation\u2019s capacity to respond to cybersecurity\
+        \ incidents improves continuously by learning lessons from previous incidents."
+      translations:
+        de:
+          name: 'Verbesserungen (Improvements RS.IM):'
+          description: "Stellen Sie sicher, dass die Reaktionsf\xE4higkeit ihrer Organisation\
+            \ auf eingetretene Cyber Security-Vorf\xE4lle laufend verbessert wird,\
+            \ indem die Lehren aus vorangegangenen Vorf\xE4llen gezogen werden."
+        fr:
+          name: "Am\xE9liorations (Improvements RS.IM)"
+          description: "Am\xE9liorez r\xE9guli\xE8rement la r\xE9activit\xE9 de votre\
+            \ entreprise face aux incidents de cybers\xE9curit\xE9 en tirant les enseignements\
+            \ des incidents pr\xE9c\xE9dents."
+        it:
+          name: Miglioramenti (Improvements RS.IM)
+          description: "Assicuratevi che la capacit\xE0 di reazione del vostro organismo\
+            \ o della vostra impresa in caso di eventi di cybersicurezza venga costantemente\
+            \ migliorata basandovi sulle esperienze precedenti."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.im-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.im
+      ref_id: RS.IM-1
+      description: Ensure that the findings and lessons of previous cybersecurity
+        incidents are incorporated into your response plans.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Erkenntnisse und Lehren aus vorangegangenen\
+            \ Cybersecurityvorf\xE4llen in ihre Reaktionspl\xE4ne einfliessen."
+        fr:
+          name: null
+          description: "Assurez-vous que les enseignements tir\xE9s des pr\xE9c\xE9\
+            dents incidents de cybers\xE9curit\xE9 sont int\xE9gr\xE9s \xE0 vos plans\
+            \ d\u2019intervention."
+        it:
+          name: null
+          description: Assicuratevi che gli elementi e le esperienze raccolti dagli
+            eventi di cybersicurezza vengano recepiti nei vostri piani di reazione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rs.im-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rs.im
+      ref_id: RS.IM-2
+      description: Update your response strategies.
+      translations:
+        de:
+          name: null
+          description: Aktualisieren sie Ihre Reaktionsstrategien.
+        fr:
+          name: null
+          description: "Actualisez vos strat\xE9gies de r\xE9action."
+        it:
+          name: null
+          description: Aggiornate le vostre strategie di reazione.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc
+      assessable: false
+      depth: 1
+      ref_id: RC
+      name: Recover
+      translations:
+        de:
+          name: Wiederherstellen (RC - Recover)
+          description: null
+        fr:
+          name: "R\xE9cup\xE9rer (RC - Recover)"
+          description: null
+        it:
+          name: Ripristinare (RC - Recover)
+          description: null
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.rp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc
+      ref_id: RC.RP
+      name: 'Recovery Planning '
+      description: Ensure that recovery procedures are (can be) maintained and executed
+        to guarantee that systems can be restored swiftly.
+      translations:
+        de:
+          name: 'Wiederherstellungsplanung (Recovery Planning RC.RP):'
+          description: "Wiederherstellungsprozesse und -verfahren werden ausgef\xFC\
+            hrt und aufrechterhalten, um die Wiederherstellung von Systemen oder Anlagen\
+            \ zu gew\xE4hrleisten, die von Cybersicherheitsvorf\xE4llen betroffen\
+            \ sind."
+        fr:
+          name: Plan de restauration (Recovery Planning RC.RP)
+          description: "Contr\xF4lez que les processus de r\xE9cup\xE9ration sont\
+            \ tenus \xE0 jour pour \xEAtre ex\xE9cut\xE9s en tout temps, permettant\
+            \ ainsi une r\xE9cup\xE9ration rapide des syst\xE8mes."
+        it:
+          name: Piano di ripristino (Recovery planning RC.RP)
+          description: Assicuratevi che le procedure di ripristino siano gestite e
+            svolte in modo tale da garantire la tempestiva riattivazione dei sistemi.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.rp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc.rp
+      ref_id: RC.RP-1
+      description: Ensure that recovery plans can be executed properly after any cybersecurity
+        incident.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass der Wiederherstellungsplan nach einem\
+            \ eingetretenen Cybersecurityvorfall korrekt durchgef\xFChrt werden kann."
+        fr:
+          name: null
+          description: "Assurez-vous que le plan de r\xE9cup\xE9ration est suivi \xE0\
+            \ la lettre en cas d\u2019incident de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: Assicuratevi che il piano di ripristino dopo un evento di cybersicurezza
+            venga effettuato correttamente.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.im
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc
+      ref_id: RC.IM
+      name: 'Improvements '
+      description: Ensure that your recovery procedures improve continuously by learning
+        lessons from previous recoveries.
+      translations:
+        de:
+          name: 'Verbesserungen (Improvements RC.IM):'
+          description: "Die Wiederherstellungsplanung und -verfahren werden verbessert,\
+            \ indem die gewonnenen Erkenntnisse in k\xFCnftige Aktivit\xE4ten einflie\xDF\
+            en."
+        fr:
+          name: "Am\xE9liorations (Improvements RC.IM)"
+          description: "Am\xE9liorez constamment vos processus de r\xE9cup\xE9ration\
+            \ apr\xE8s les incidents de cybers\xE9curit\xE9 en tirant les enseignements\
+            \ des incidents pr\xE9c\xE9dents."
+        it:
+          name: Miglioramenti (Improvements RC.IM)
+          description: Assicuratevi che le vostre procedure di ripristino vengano
+            costantemente migliorate avvalendovi di quanto appreso da precedenti esperienze.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.im-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc.im
+      ref_id: RC.IM-1
+      description: Ensure that the findings and lessons of previous cybersecurity
+        incidents are incorporated into your recovery plans.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass Erkenntnisse und Lehren aus fr\xFC\
+            heren Cybersecurityvorf\xE4llen in ihre Wiederherstellungspl\xE4ne einfliessen."
+        fr:
+          name: null
+          description: "Assurez-vous que les enseignements tir\xE9s des pr\xE9c\xE9\
+            dents incidents de cybers\xE9curit\xE9 sont int\xE9gr\xE9s \xE0 vos plans\
+            \ de r\xE9cup\xE9ration."
+        it:
+          name: null
+          description: Assicuratevi che gli elementi e le esperienze raccolti dagli
+            eventi di cybersicurezza vengano recepiti nei piani di ripristino..
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.im-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc.im
+      ref_id: RC.IM-2
+      description: Update your recovery strategy.
+      translations:
+        de:
+          name: null
+          description: Aktualisieren Sie ihre Wiederherstellungsstrategie.
+        fr:
+          name: null
+          description: "Actualisez vos strat\xE9gies de r\xE9cup\xE9ration."
+        it:
+          name: null
+          description: Aggiornate le vostre strategie di ripristino.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.co
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc
+      ref_id: RC.CO
+      name: 'Communications '
+      description: Coordinate your recovery activities with internal and external
+        partners, such as internet service providers, CERT, the authorities, system
+        integrators, etc.
+      translations:
+        de:
+          name: 'Kommunikation (Communications RC.CO):'
+          description: "Die Wiederherstellungsaktivit\xE4ten werden mit internen und\
+            \ externen Parteien koordiniert (z. B. Beh\xF6rden, Internetdienstanbietern,\
+            \ Eigent\xFCmern der angegriffenen Systeme, Opfer, andere CERTs und Anbieter)."
+        fr:
+          name: Communication (Communications RC.CO)
+          description: "Veillez \xE0 coordonner vos actions de r\xE9cup\xE9ration\
+            \ avec vos partenaires internes et externes (fournisseurs de services\
+            \ Internet, CERT, autorit\xE9s, int\xE9grateurs de syst\xE8mes, etc.)."
+        it:
+          name: Comunicazione (Communications RC.CO)
+          description: "Coordinate le attivit\xE0 di ripristino con partner interni\
+            \ ed esterni, p.es. internet service provider, CERT, autorit\xE0, integratori\
+            \ di sistemi ecc."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.co-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc.co
+      ref_id: RC.CO-1
+      description: Ensure that public perceptions of your organisation are addressed
+        actively.
+      translations:
+        de:
+          name: null
+          description: "Stellen Sie sicher, dass ihre \xF6ffentliche Wahrnehmung aktiv\
+            \ angegangen wird."
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que votre perception publique soit activement\
+            \ prise en compte."
+        it:
+          name: null
+          description: Confrontatevi attivamente con la vostra immagine pubblica.
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.co-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc.co
+      ref_id: RC.CO-2
+      description: Ensure that your organisation is perceived positively once again
+        after any cybersecurity incident.
+      translations:
+        de:
+          name: null
+          description: Stellen Sie sicher, dass ihre Organisation nach einem eingetretenen
+            Cybersecurityvorfall wieder positiv wahrgenommen wird (Reputation).
+        fr:
+          name: null
+          description: "Veillez \xE0 ce que votre entreprise retrouve vite une image\
+            \ positive apr\xE8s un incident de cybers\xE9curit\xE9."
+        it:
+          name: null
+          description: "Assicuratevi che dopo l\u2019evento di cybersicurezza l\u2019\
+            immagine del vostro organismo o della vostra impresa torni a essere positiva."
+    - urn: urn:intuitem:risk:req_node:ict-minimal:rc.co-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ict-minimal:rc.co
+      ref_id: RC.CO-3
+      description: Communicate all of your recovery activities to internal stakeholder
+        groups, and especially also to (senior) management.
+      translations:
+        de:
+          name: null
+          description: "Kommunizieren Sie die Wiederherstellungsaktivit\xE4ten an\
+            \ interne und externe Anspruchsgruppen sowie an das F\xFChrungs- und Managementteam."
+        fr:
+          name: null
+          description: "Communiquez aux groupes d\u2019int\xE9r\xEAt internes et externes\
+            \ tout ce que vous avez entrepris en mati\xE8re de r\xE9cup\xE9ration,\
+            \ sans oublier les cadres et la direction."
+        it:
+          name: null
+          description: "Comunicate tutte le attivit\xE0 di ripristino ai gruppi di\
+            \ riferimento interni, in particolare al management/alla direzione."

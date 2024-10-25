@@ -3,6 +3,8 @@ import json
 # from core.models import RequirementNode
 from django.utils.translation import get_language
 
+from typing import Union
+
 
 def get_referential_translation(object, parameter: str, locale=None) -> str:
     # NOTE: put get_language() as default value for locale doesn't work, default locale "en" is always returned.
@@ -36,9 +38,9 @@ def get_referential_translation(object, parameter: str, locale=None) -> str:
     return locale_translations.get(parameter, fallback)
 
 
-def update_translations_in_object(obj, locale=None):
+def update_translations_in_object(obj: Union[dict, list], locale=None):
     """
-    Recursively update the translations of 'name' and 'description' fields in an object.
+    Recursively update the translations of 'name' and 'description' fields in a dict or a list.
 
     Args:
         obj (dict): The object to update.
@@ -57,6 +59,11 @@ def update_translations_in_object(obj, locale=None):
             elif isinstance(value, list):
                 for item in value:
                     update_translations_in_object(item, get_language() or locale)
+
+    elif isinstance(obj, list):
+        for i in range(len(obj)):
+            obj[i] = update_translations_in_object(obj[i])
+
     return obj
 
 
@@ -69,7 +76,7 @@ def update_translations(data_dict_str, locale=None) -> str:
         locale (str): The locale to get the translation for.
 
     Returns:
-        str: The updated dictionary as a JSON string.
+        str: The updated dictionary.
     """
     if isinstance(data_dict_str, str):
         data_dict = json.loads(data_dict_str)
@@ -77,8 +84,22 @@ def update_translations(data_dict_str, locale=None) -> str:
             if isinstance(objects_list, list):
                 for obj in objects_list:
                     update_translations_in_object(obj, get_language() or locale)
+        return data_dict
     elif isinstance(data_dict_str, list):
         for obj in data_dict_str:
             update_translations_in_object(obj, get_language() or locale)
-        return data_dict_str
-    return json.dumps(data_dict)
+    return data_dict_str
+
+
+def update_translations_as_string(data_dict_str, locale=None) -> str:
+    """
+    Update the translations of 'name' and 'description' fields in a dictionary of objects.
+
+    Args:
+        data_dict_str (str): The JSON string of the dict of objects to update.
+        locale (str): The locale to get the translation for.
+
+    Returns:
+        str: The updated dictionary as a JSON string.
+    """
+    return json.dumps(update_translations(data_dict_str, locale))

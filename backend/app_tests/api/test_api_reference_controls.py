@@ -107,7 +107,10 @@ class TestReferenceControlsAuthenticated:
                 "is_published": True,
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {
+                    "id": str(Folder.get_root_folder().id),
+                    "str": Folder.get_root_folder().name,
+                },
             },
             user_group=test.user_group,
             scope="Global",
@@ -157,7 +160,10 @@ class TestReferenceControlsAuthenticated:
                 "provider": "new " + REFERENCE_CONTROL_PROVIDER,
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {
+                    "id": str(Folder.get_root_folder().id),
+                    "str": Folder.get_root_folder().name,
+                },
             },
             user_group=test.user_group,
             scope="Global",

@@ -27,6 +27,7 @@ class FieldsRelatedField(serializers.RelatedField):
         res = {"str": str(value)}
 
         if value == Folder.get_root_folder():
+            res.update({"id": value.id})
             return res
 
         fields = fields or self.fields

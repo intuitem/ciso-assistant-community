@@ -1,0 +1,108 @@
+name: Backend migrations check
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+env:
+  GITHUB_WORKFLOW: github_actions
+  backend-directory: ./backend
+  enterprise-backend-directory: ./enterprise/backend
+  enterprise-backend-settings-module: enterprise_core.settings
+
+jobs:
+  migrations-check:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Install requirements
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Create backend environment variables file
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          touch .env
+          echo DJANGO_DEBUG=True >> .env
+          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
+          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
+          echo DB_HOST=localhost >> .env
+          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
+          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
+          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
+          echo EMAIL_HOST=localhost >> .env
+          echo EMAIL_HOST_USER=user@tests.com >> .env
+          echo EMAIL_HOST_PASSWORD=password >> .env
+          echo EMAIL_PORT=1025 >> .env
+      - name: Check that migrations were made
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          python manage.py makemigrations --check --dry-run --verbosity=3
+
+  enterprise-migrations-check:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Install enterprise backend
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: poetry install
+      - name: Create backend environment variables file
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          touch .env
+          echo DJANGO_DEBUG=True >> .env
+          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
+          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
+          echo DB_HOST=localhost >> .env
+          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
+          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
+          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
+          echo EMAIL_HOST=localhost >> .env
+          echo EMAIL_HOST_USER=user@tests.com >> .env
+          echo EMAIL_HOST_PASSWORD=password >> .env
+          echo EMAIL_PORT=1025 >> .env
+          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
+          echo LICENSE_SEATS=999 >> .env
+      - name: Check that migrations were made
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings=${{ env.enterprise-backend-settings-module }}
+          if [ $? -ne 0 ]; then echo "::error Migrations were not made, please run the makemigrations command." && exit 1; fi

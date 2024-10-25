@@ -7,3 +7,4 @@
 .idea*
 venv/
 env/
+**/node_modules/

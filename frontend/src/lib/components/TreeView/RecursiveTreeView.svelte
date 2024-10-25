@@ -1,79 +1,41 @@
 <script lang="ts">
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { createEventDispatcher, onMount, setContext } from 'svelte';
 
 	// Types
-	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton';
 	import RecursiveTreeViewItem from '$lib/components/TreeView/RecursiveTreeViewItem.svelte';
+	import type { CssClasses, TreeViewNode } from '@skeletonlabs/skeleton';
 
 	// Props (parent)
-	/** Enable tree-view selection. */
 	export let selection = false;
-	/** Enable selection of multiple items. */
 	export let multiple = false;
-	/** Enable relational checking. */
 	export let relational = false;
-	/**
-	 * Provide data-driven nodes.
-	 * @type {TreeViewNode[]}
-	 */
 	export let nodes: TreeViewNode[] = [];
-	/**
-	 * provides id's of expanded nodes
-	 * @type {string[]}
-	 */
 	export let expandedNodes: string[] = [];
-	/**
-	 * provides id's of disabled nodes
-	 * @type {string[]}
-	 */
 	export let disabledNodes: string[] = [];
-	/**
-	 * provides id's of checked nodes
-	 * @type {string[]}
-	 */
 	export let checkedNodes: string[] = [];
-	/**
-	 * provides id's of indeterminate nodes
-	 * @type {string[]}
-	 */
 	export let indeterminateNodes: string[] = [];
-	/** Provide classes to set the tree width. */
 	export let width: CssClasses = 'w-full';
-	/** Provide classes to set the vertical spacing between items. */
 	export let spacing: CssClasses = 'space-y-1';
 
 	// Props (children)
-	/** Set open by default on load. */
 	export let open = false;
-	/** Set the tree disabled state */
 	export let disabled = false;
-	/** Provide classes to set the tree item padding styles. */
 	export let padding: CssClasses = 'py-4 px-4';
-	/** Provide classes to set the tree children indentation */
 	export let indent: CssClasses = 'ml-4';
-	/** Provide classes to set the tree item hover styles. */
 	export let hover: CssClasses = 'hover:variant-soft';
-	/** Provide classes to set the tree item rounded styles. */
 	export let rounded: CssClasses = 'rounded-container-token';
 
 	// Props (symbols)
-	/** Set the rotation of the item caret in the open state. */
 	export let caretOpen: CssClasses = '';
-	/** Set the rotation of the item caret in the closed state. */
 	export let caretClosed: CssClasses = '-rotate-90';
-	/* Set the hyphen symbol opacity for non-expandable rows. */
 	export let hyphenOpacity: CssClasses = 'opacity-10';
 
 	// Props (regions)
-	/** Provide arbitrary classes to the tree item summary region. */
 	export let regionSummary: CssClasses = '';
-	/** Provide arbitrary classes to the symbol icon region. */
 	export let regionSymbol: CssClasses = '';
-	/** Provide arbitrary classes to the children region. */
 	export let regionChildren: CssClasses = '';
 
 	// Props A11y
-	/** Provide the ARIA labelledby value. */
 	export let labelledby = '';
 
 	// Context API
@@ -97,21 +59,21 @@
 	const dispatch = createEventDispatcher();
 
 	function onClick(event: CustomEvent<{ id: string }>) {
-		/** @event {{id:string}} click - Fires on tree item click */
-		dispatch('click', {
-			id: event.detail.id
-		});
+		dispatch('click', { id: event.detail.id });
 	}
 
 	function onToggle(event: CustomEvent<{ id: string }>) {
-		/** @event {{id:string}} toggle - Fires on tree item toggle */
-		dispatch('toggle', {
-			id: event.detail.id
-		});
+		dispatch('toggle', { id: event.detail.id });
 	}
 
 	// Reactive
-	$: classesBase = `${width} ${spacing} ${$$props.class ?? ''}`;
+	let classProp = ''; // Replacing $$props.class
+	$: classesBase = `${width} ${spacing} ${classProp}`;
+
+	let mounted = false;
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <div
@@ -122,7 +84,7 @@
 	aria-label={labelledby}
 	aria-disabled={disabled}
 >
-	{#if nodes && nodes.length > 0}
+	{#if mounted && nodes && nodes.length > 0}
 		<RecursiveTreeViewItem
 			{nodes}
 			bind:expandedNodes
@@ -132,5 +94,7 @@
 			on:click={onClick}
 			on:toggle={onToggle}
 		/>
+	{:else}
+		<div class="placeholder animate-pulse"></div>
 	{/if}
 </div>

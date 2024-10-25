@@ -74,6 +74,10 @@ export class PageDetail extends BasePage {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
 							.toHaveText(new RegExp(key.replaceAll('_', ' ').replace('lc ', ''), 'i'));
+					} else if (key === 'folder') {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText(new RegExp('domain'.replaceAll('_', ' '), 'i'));
 					} else {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
@@ -83,7 +87,7 @@ export class PageDetail extends BasePage {
 					if (this.form.fields.get(key)?.type === FormFieldType.CHECKBOX) {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-value'))
-							.toHaveText(values[key] ? 'true' : '--');
+							.toHaveText(values[key] ? 'true' : 'false');
 					} else if (this.form.fields.get(key)?.type === FormFieldType.DATE) {
 						const displayedValue = await this.page
 							.getByTestId(key.replaceAll('_', '-') + '-field-value')
