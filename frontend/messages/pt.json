@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"addThreat": "Adicionar ameaça",
+	"addVulnerability": "Adicionar vulnerabilidade",
 	"addReferenceControl": "Adicionar controle de referência",
 	"addAppliedControl": "Adicionar controle aplicado",
 	"addAsset": "Adicionar ativo",
@@ -730,7 +731,6 @@
 	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los na aba de risco.",
 	"licenseSeats": "Assentos de licença",
 	"licenseExpiration": "Expiração da licença",
-	"licenseExpiredMessage": "Sua licença expirou. Operações de gravação estão desabilitadas. Entre em contato com seu administrador para renová-la.",
 	"answer": "Responder",
 	"questionnaireMode": "Modo questionário",
 	"assessmentMode": "Modo de avaliação",
@@ -760,6 +760,8 @@
 	"theFollowingControlsWillBeAddedColon": "Os seguintes controles serão adicionados:",
 	"ShowAllNodesMessage": "Mostrar tudo",
 	"ShowOnlyAssessable": "Somente avaliável",
+	"NoPreviewMessage": "Nenhuma pré-visualização disponível.",
+	"licenseExpiredMessage": "Sua licença expirou. Operações de gravação estão desabilitadas. Entre em contato com seu administrador para renová-la.",
 	"experimental": "Experimental",
 	"timeline": "Linha do tempo",
 	"graph": "Gráfico",
@@ -802,5 +804,12 @@
 	"sumpageTitleCurrentRisks": "Riscos atuais",
 	"sumpageTitleResidualRisks": "Riscos residuais",
 	"sumpageSectionCompliance": "conformidade",
-	"sumpageSectionRisk": "risco"
+	"sumpageSectionRisk": "risco",
+	"critical": "Crítico",
+	"vulnerabilities": "Vulnerabilidades",
+	"severity": "Gravidade",
+	"potential": "Potencial",
+	"exploitable": "Explorável",
+	"mitigated": "Mitigado",
+	"fixed": "Fixo"
 }

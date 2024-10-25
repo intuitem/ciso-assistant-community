@@ -13,6 +13,7 @@
 	"hindi": "ہندی",
 	"urdu": "اردو",
 	"addThreat": "خطرہ شامل کریں",
+	"addVulnerability": "کمزوری شامل کریں",
 	"addReferenceControl": "حوالہ کنٹرول شامل کریں",
 	"addAppliedControl": "لاگو کنٹرول شامل کریں",
 	"addAsset": "اثاثہ شامل کریں",
@@ -730,7 +731,6 @@
 	"waitingRiskAcceptances": "ہیلو! آپ کے پاس فی الحال {number} خطرے کی منظوری {s} زیر التواء ہیں۔ آپ انہیں خطرے والے ٹیب میں پا سکتے ہیں۔",
 	"licenseSeats": "لائسنس نشستیں",
 	"licenseExpiration": "لائسنس کی میعاد ختم",
-	"licenseExpiredMessage": "آپ کے لائسنس کی میعاد ختم ہو گئی ہے۔ تحریری کارروائیاں غیر فعال ہیں۔ اس کی تجدید کے لیے براہ کرم اپنے منتظم سے رابطہ کریں۔",
 	"answer": "جواب دیں۔",
 	"questionnaireMode": "سوالنامہ موڈ",
 	"assessmentMode": "تشخیص موڈ",
@@ -760,6 +760,8 @@
 	"theFollowingControlsWillBeAddedColon": "درج ذیل کنٹرولز شامل کیے جائیں گے:",
 	"ShowAllNodesMessage": "سب دکھائیں۔",
 	"ShowOnlyAssessable": "صرف قابل تشخیص",
+	"NoPreviewMessage": "کوئی پیش نظارہ دستیاب نہیں ہے۔",
+	"licenseExpiredMessage": "آپ کے لائسنس کی میعاد ختم ہو گئی ہے۔ تحریری کارروائیاں غیر فعال ہیں۔ اس کی تجدید کے لیے براہ کرم اپنے منتظم سے رابطہ کریں۔",
 	"experimental": "تجرباتی",
 	"timeline": "ٹائم لائن",
 	"graph": "گراف",
@@ -802,5 +804,12 @@
 	"sumpageTitleCurrentRisks": "موجودہ خطرات",
 	"sumpageTitleResidualRisks": "بقایا خطرات",
 	"sumpageSectionCompliance": "تعمیل",
-	"sumpageSectionRisk": "خطرہ"
+	"sumpageSectionRisk": "خطرہ",
+	"critical": "تنقیدی",
+	"vulnerabilities": "کمزوریاں",
+	"severity": "شدت",
+	"potential": "ممکنہ",
+	"exploitable": "استحصال کے قابل",
+	"mitigated": "تخفیف",
+	"fixed": "فکسڈ"
 }

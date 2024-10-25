@@ -222,6 +222,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
@@ -298,6 +299,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'effort' },
 			{ field: 'folder' }
 		]
+	},
+	vulnerabilities: {
+		name: 'vulnerability',
+		localName: 'vulnerability',
+		localNamePlural: 'vulnerabilities',
+		verboseName: 'Vulnerability',
+		verboseNamePlural: 'Vulnerabilities',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'status' }]
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
