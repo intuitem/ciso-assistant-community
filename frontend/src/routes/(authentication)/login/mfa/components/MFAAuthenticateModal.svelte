@@ -4,8 +4,8 @@
 	export let parent: any;
 
 	// Stores
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	import * as m from '$paraglide/messages';
 
@@ -15,8 +15,6 @@
 	export let _form;
 	export let formAction: string;
 
-	import { superForm } from 'sveltekit-superforms';
-
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	// Base Classes
@@ -24,7 +22,7 @@
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { mfaAuthenticateSchema } from '../utils/schemas';
 </script>
@@ -44,18 +42,12 @@
 				class="modal-form {cForm}"
 			>
 				<!-- prettier-ignore -->
-				<TextField {form} field="code" label={m.code()} />
+				<OTPInput {form} field="code" />
 				<footer class="modal-footer {parent.regionFooter}">
-					<button
-						type="button"
-						class="btn {parent.buttonNeutral}"
-						data-testid="delete-cancel-button"
-						on:click={parent.onClose}>{m.cancel()}</button
-					>
 					<button
 						class="btn variant-filled-primary"
 						data-testid="mfa-authenticate-confirm-button"
-						type="submit">{m.submit()}</button
+						type="submit">{m.login()}</button
 					>
 				</footer>
 			</SuperForm>
