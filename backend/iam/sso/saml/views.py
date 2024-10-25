@@ -1,3 +1,4 @@
+from allauth.account.models import EmailAddress
 import structlog
 from allauth.core.exceptions import SignupClosedException
 from allauth.socialaccount.adapter import get_account_adapter
@@ -79,6 +80,7 @@ class FinishACSView(SAMLViewMixin, View):
         auth = build_auth(acs_request, provider)
         error_reason = None
         errors = []
+        user = None
         try:
             # We're doing the check for a valid `InResponeTo` ourselves later on
             # (*) by checking if there is a matching state stashed.
@@ -176,4 +178,10 @@ class FinishACSView(SAMLViewMixin, View):
                     next_url,
                     {"error": error, "error_process": login.state["process"]},
                 )
+            elif user:
+                email_object = EmailAddress.objects.filter(user=user).first()
+                if email_object and not email_object.verified:
+                    email_object.verified = True
+                    email_object.save()
+                    logger.info("Email verified", user=user)
             return HttpResponseRedirect(next_url)
