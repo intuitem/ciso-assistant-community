@@ -63,8 +63,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean((event.params.model === 'entity-assessments'));
-		return defaultWriteFormAction({ event, urlModel: event.params.model!, action: 'create', redirectToWrittenObject: redirectToWrittenObject});
+		const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
+		return defaultWriteFormAction({
+			event,
+			urlModel: event.params.model!,
+			action: 'create',
+			redirectToWrittenObject: redirectToWrittenObject
+		});
 	},
 	delete: async (event) => {
 		return defaultDeleteFormAction({ event, urlModel: event.params.model! });

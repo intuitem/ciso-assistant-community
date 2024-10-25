@@ -46,7 +46,7 @@
 		modalStore.trigger(modal);
 	}
 
-	$: if (form && form.redirect){
+	$: if (form && form.redirect) {
 		goto(getSecureRedirect(form.redirect));
 	}
 </script>

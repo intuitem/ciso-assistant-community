@@ -166,7 +166,7 @@ export async function defaultWriteFormAction({
 export async function nestedWriteFormAction({
 	event,
 	action,
-	redirectToWrittenObject=false,
+	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
 	action: FormAction;
@@ -175,7 +175,13 @@ export async function nestedWriteFormAction({
 	const request = event.request.clone();
 	const formData = await request.formData();
 	const urlModel = formData.get('urlmodel') as string;
-	return defaultWriteFormAction({ event, urlModel, action, doRedirect: false, redirectToWrittenObject });
+	return defaultWriteFormAction({
+		event,
+		urlModel,
+		action,
+		doRedirect: false,
+		redirectToWrittenObject
+	});
 }
 
 export async function defaultDeleteFormAction({

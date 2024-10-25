@@ -99,7 +99,7 @@ export const load = (async ({ fetch, params }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const request = event.request.clone()
+		const request = event.request.clone();
 		const formData = await request.formData();
 		const form = await superValidate(formData, zod(ComplianceAssessmentSchema));
 		const redirectToWrittenObject = Boolean(form.data.baseline);
