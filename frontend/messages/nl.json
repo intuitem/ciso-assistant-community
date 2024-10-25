@@ -786,7 +786,7 @@
 	"critical": "Kritisch",
 	"vulnerabilities": "Kwetsbaarheden",
 	"referenceRefId": "Referentie-ID van de referentie",
-	"vulnerabilityCatalog": "Kwetsbaarheidscatalogus",
+	"referenceVulnerabilityCatalog": "Kwetsbaarheidscatalogus",
 	"severity": "Ernst",
 	"potential": "Potentieel",
 	"exploitable": "Exploiteerbaar",

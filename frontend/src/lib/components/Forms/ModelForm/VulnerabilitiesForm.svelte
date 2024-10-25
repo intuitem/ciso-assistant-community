@@ -37,13 +37,13 @@
 	{form}
 	options={[
 		{ label: '--', value: -1 },
-		{ label: 'Low', value: 0 },
-		{ label: 'Medium', value: 1 },
-		{ label: 'High', value: 2 },
-		{ label: 'Critical', value: 3 }
+		{ label: m.low(), value: 0 },
+		{ label: m.medium(), value: 1 },
+		{ label: m.high(), value: 2 },
+		{ label: m.critical(), value: 3 }
 	]}
 	field="severity"
-	label={'Severity'}
+	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
@@ -59,8 +59,7 @@
 <TextField
 	{form}
 	field="reference_ref_id"
-	label={'Reference Ref ID'}
-	helpText={'Reference Ref ID help text'}
+	label={m.referenceRefId()}
 	cacheLock={cacheLocks['reference_ref_id']}
 	bind:cachedValue={formDataCache['reference_ref_id']}
 />
@@ -74,7 +73,7 @@
 		{ label: 'KEV', value: 'kev' }
 	]}
 	field="vulnerability_catalog"
-	label={'Reference vulnerability catalog'}
+	label={m.referenceVulnerabilityCatalog()}
 	cacheLock={cacheLocks['vulnerability_catalog']}
 	bind:cachedValue={formDataCache['vulnerability_catalog']}
 />

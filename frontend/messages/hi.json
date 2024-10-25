@@ -786,7 +786,7 @@
 	"critical": "गंभीर",
 	"vulnerabilities": "कमजोरियों",
 	"referenceRefId": "संदर्भ की संदर्भ आईडी",
-	"vulnerabilityCatalog": "भेद्यता सूची",
+	"referenceVulnerabilityCatalog": "भेद्यता सूची",
 	"severity": "गंभीरता",
 	"potential": "Potential",
 	"exploitable": "दोहन",
