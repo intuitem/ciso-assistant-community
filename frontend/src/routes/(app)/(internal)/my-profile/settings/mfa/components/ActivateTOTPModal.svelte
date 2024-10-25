@@ -4,8 +4,8 @@
 	export let parent: any;
 
 	// Stores
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	import * as m from '$paraglide/messages';
 
@@ -15,8 +15,6 @@
 	export let _form;
 	export let formAction: string;
 
-	import { superForm } from 'sveltekit-superforms';
-
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	// Base Classes
@@ -24,7 +22,7 @@
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '../utils/schemas';
@@ -72,12 +70,12 @@
 					class="modal-form {cForm}"
 				>
 					<!-- prettier-ignore -->
-					<TextField {form} field="code" label={m.code()} />
+					<OTPInput {form} field="code" />
 					<footer class="modal-footer {parent.regionFooter}">
 						<button
 							class="btn variant-filled-primary w-full"
 							data-testid="activate-totp-confirm-button"
-							type="submit">{m.submit()}</button
+							type="submit">{m.enableTOTP()}</button
 						>
 					</footer>
 				</SuperForm>
