@@ -783,7 +783,7 @@
 	"operations": "آپریشنز",
 	"fillMetadataURL": "آپشن 1: میٹا ڈیٹا یو آر ایل کو بھریں۔",
 	"fillSSOSLOURLx509cert": "اختیار 2: SSO URL، SLO URL اور x509cert پُر کریں۔",
-	"critical": "critical",
+	"critical": "Critical",
 	"vulnerabilities": "vulnerabilities",
 	"referenceRefId": "referenceRefId",
 	"vulnerabilityCatalog": "vulnerabilityCatalog",
