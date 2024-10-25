@@ -230,6 +230,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'expiry_date', type: type.DATE },
 			{ name: 'link', type: type.TEXT },
 			{ name: 'effort', type: type.SELECT },
+			{ name: 'cost', type: type.NUMBER },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
@@ -397,7 +398,7 @@ export class TestContent {
 					name: '',
 					description: '',
 					business_value: '',
-					type: 'Support'
+					type: 'Supporting'
 					//TODO add parent_assets
 				}
 			},
@@ -447,7 +448,7 @@ export class TestContent {
 					},
 					name: vars.appliedControlName,
 					description: vars.description,
-					status: 'Planned',
+					status: 'To do',
 					eta: '2025-01-01',
 					expiry_date: '2025-05-01',
 					link: 'https://intuitem.com/',
@@ -556,11 +557,11 @@ export class TestContent {
 					description: '',
 					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
-					assets: [vars.assetName],
+					assets: [vars.folderName + '/' + vars.assetName],
 					existing_controls: 'Test Existing Controls',
 					current_proba: 'High',
 					current_impact: 'Medium',
-					applied_controls: [vars.appliedControlName],
+					applied_controls: [vars.folderName + '/' + vars.appliedControlName],
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
 					justification: 'Test comments'

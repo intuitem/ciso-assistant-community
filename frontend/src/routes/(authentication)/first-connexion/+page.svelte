@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import CisoLogo from '$lib/assets/ciso.svg';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
@@ -8,6 +7,7 @@
 
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import Logo from '$lib/components/Logo/Logo.svelte';
 
 	export let data: PageData;
 </script>
@@ -15,7 +15,7 @@
 <div class="flex mx-auto justify-center items-center h-screen w-screen bg-slate-200">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row w-full space-x-4 pb-3">
-			<img class="c" height="200" width="200" src={CisoLogo} alt="Ciso-assistant icon" />
+			<Logo />
 		</div>
 	</div>
 	<div class="flex w-full items-center justify-center">

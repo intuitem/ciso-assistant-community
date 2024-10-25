@@ -50,7 +50,7 @@ export const actions: Actions = {
 
 		if (!res.ok) {
 			const response = await res.json();
-			console.log(response.non_field_errors);
+			console.error(response);
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}

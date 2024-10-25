@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    restart: always
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.backend.rule=(Host(`localhost`) && Pathprefix(`/api/`))"
+      - traefik.http.services.backend.loadbalancer.server.port=8000
+      - "traefik.http.middlewares.backendpathstrip.stripprefix.prefixes=/api"
+      - traefik.http.routers.backend.entrypoints=websecure
+      - traefik.http.routers.backend.tls=true
+    environment:
+      - CISO_ASSISTANT_URL=http://localhost
+      - ALLOWED_HOSTS=backend,localhost
+      - DJANGO_DEBUG=True
+      - AUTH_TOKEN_TTL=7200
+    volumes:
+      - ./db:/code/db
+    networks:
+      - front
+
+  frontend:
+    container_name: frontend
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.ciso.rule=(Host(`localhost`) && Pathprefix(`/`))"
+      - "traefik.http.middlewares.cisopathstrip.stripprefix.prefixes=/"
+      - traefik.http.services.ciso.loadbalancer.server.port=3000
+      - traefik.http.routers.ciso.entrypoints=websecure
+      - traefik.http.routers.ciso.tls=true
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:443/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    depends_on:
+      - backend
+    networks:
+      - front
+
+networks:
+  front:
+    external: true

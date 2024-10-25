@@ -11,6 +11,11 @@ export interface User {
 	date_joined: string;
 }
 
+export interface GlobalSettings {
+	name: string;
+	settings: Record<string, any>;
+}
+
 export interface LoginRequestBody {
 	username: string;
 	password: string;
@@ -40,10 +45,18 @@ export const URL_MODEL = [
 	'requirement-assessments',
 	'libraries',
 	'sso-settings',
-	'requirement-mapping-sets'
+	'requirement-mapping-sets',
+	'entities',
+	'entity-assessments',
+	'solutions',
+	'representatives'
 ] as const;
 
+export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+
 export type urlModel = (typeof URL_MODEL)[number];
+
+export type thirdPartyUrlModel = (typeof THIRD_PARTY_URL_MODEL)[number];
 
 export type ModelInfo = ModelMapEntry;
 

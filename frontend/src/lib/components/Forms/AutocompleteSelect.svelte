@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Option {
 		label: string;
@@ -17,8 +17,9 @@
 	export let form;
 	export let multiple = false;
 	export let nullable = false;
+	export let mandatory = false;
 
-	export let hide = false;
+	export let hidden = false;
 	export let translateOptions = true;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
@@ -82,9 +83,9 @@
 	}
 </script>
 
-<div hidden={hide}>
+<div {hidden}>
 	{#if label !== undefined}
-		{#if $constraints?.required}
+		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
 				>{label} <span class="text-red-500">*</span></label
 			>
@@ -119,8 +120,8 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && localItems()[toCamelCase(option.label)]}
-					{localItems()[toCamelCase(option.label)]}
+				{:else if translateOptions}
+					{safeTranslate(option.label)}
 				{:else}
 					{option.label}
 				{/if}

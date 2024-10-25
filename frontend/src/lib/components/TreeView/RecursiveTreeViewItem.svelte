@@ -135,6 +135,7 @@
 {#if nodes && nodes.length > 0}
 	{#each nodes as node, i}
 		<TreeViewItem
+			class={node.contentProps.hidden === true ? 'hidden' : null}
 			bind:this={treeItems[i]}
 			bind:children={children[i]}
 			bind:group
