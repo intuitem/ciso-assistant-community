@@ -128,6 +128,22 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
     pass
 
 
+class VulnerabilityReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    reference_ref_id = serializers.CharField()
+    vulnerability_catalog = serializers.CharField()
+
+    class Meta:
+        model = Vulnerability
+        exclude = ["references", "created_at", "updated_at", "is_published"]
+
+
+class VulnerabilityWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
+
+
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
     # NOTE: This is a workaround to filter the approvers on api view
     #       but it causes some problems in api_tests. Serializers are

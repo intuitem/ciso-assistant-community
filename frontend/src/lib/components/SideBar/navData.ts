@@ -91,6 +91,12 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				},
+				{
+					name: 'vulnerabilities',
+					// What is the best icon between "fa-triangle-exclamation" and "fa-skull-crossbones" for a vulnerability ?
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/vulnerabilities'
 				}
 			]
 		},

@@ -356,6 +356,19 @@ class RiskMatrixViewSet(BaseModelViewSet):
         return Response({"results": used_matrices})
 
 
+class VulnerabilityViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows vulnerabilities to be viewed or edited.
+    """
+
+    model = Vulnerability
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Vulnerability.Status.choices))
+
+
 class RiskAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.
