@@ -92,7 +92,6 @@ export async function defaultWriteFormAction({
 	doRedirect?: boolean;
 }) {
 	const formData = await event.request.formData();
-
 	if (!formData) {
 		return fail(400, { form: null });
 	}
@@ -186,7 +185,7 @@ export async function defaultDeleteFormAction({
 	const endpoint = `${BASE_API_URL}/${urlModel}/${id}/`;
 
 	if (!deleteForm.valid) {
-		console.log(deleteForm.errors);
+		console.error(deleteForm.errors);
 		return fail(400, { form: deleteForm });
 	}
 
@@ -197,7 +196,6 @@ export async function defaultDeleteFormAction({
 		const res = await event.fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();
-			console.log(response);
 			if (response.error) {
 				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 				return fail(403, { form: deleteForm });
