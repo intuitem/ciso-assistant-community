@@ -49,7 +49,8 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
-	'representatives'
+	'representatives',
+	'vulnerabilities'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
