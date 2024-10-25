@@ -273,6 +273,10 @@ export const listViewFields: ListViewFieldsConfig = {
 			folder: DOMAIN_FILTER
 		}
 	},
+	vulnerabilities: {
+		head: ['ref_id', 'name', 'description', 'folder'],
+		body: ['ref_id', 'name', 'description', 'folder']
+	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],

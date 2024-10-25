@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"addThreat": "Add threat",
+	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
 	"addAppliedControl": "Add applied control",
 	"addAsset": "Add asset",
@@ -820,5 +821,12 @@
 	"mfaAuthenticateTitle": "Multi-factor authentication",
 	"successfullyDeactivatedTOTP": "Successfully deactivated TOTP",
 	"successfullyActivatedTOTP": "Successfully activated TOTP",
-	"step": "Step {number}"
+	"step": "Step {number}",
+	"critical": "Critical",
+	"vulnerabilities": "Vulnerabilities",
+	"severity": "Severity",
+	"potential": "Potential",
+	"exploitable": "Exploitable",
+	"mitigated": "Mitigated",
+	"fixed": "Fixed"
 }
