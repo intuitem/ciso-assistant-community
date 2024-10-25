@@ -788,7 +788,7 @@
 	"referenceRefId": "संदर्भ की संदर्भ आईडी",
 	"referenceVulnerabilityCatalog": "संदर्भ की भेद्यता सूची",
 	"severity": "गंभीरता",
-	"potential": "Potential",
+	"potential": "संभावना",
 	"exploitable": "दोहन",
 	"mitigated": "कम",
 	"fixed": "तय"
