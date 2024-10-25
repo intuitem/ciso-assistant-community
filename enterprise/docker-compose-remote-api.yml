@@ -1,0 +1,34 @@
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-enterprise/backend:latest
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,u24.proxmox.lan
+      - CISO_ASSISTANT_URL=https://u24.proxmox.lan:8443
+      - DJANGO_DEBUG=True
+      - AUTH_TOKEN_TTL=7200
+    volumes:
+      - ./db:/code/db
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+
+    image: ghcr.io/intuitem/ciso-assistant-enterprise/frontend:latest
+    depends_on:
+      - backend
+
+  caddy:
+    container_name: caddy
+    image: caddy:2.7.6
+    restart: unless-stopped
+    ports:
+      - 8443:8443
+      - 9443:9443
+    volumes:
+      - ./db:/data
+      - ./Caddyfile:/etc/caddy/Caddyfile

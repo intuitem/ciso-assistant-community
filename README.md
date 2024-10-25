@@ -9,6 +9,8 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
+    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
     <a href="#supported-languages-">Languages</a>
@@ -26,6 +28,7 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/795e9d4203bf469dafcc45a9f3131d57)](https://app.codacy.com/gh/intuitem/ciso-assistant-community/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
@@ -57,7 +60,6 @@ Here is an overview of CISO Assistant features and capabilities:
 
 ![overview](features.png)
 
-
 CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
@@ -87,11 +89,11 @@ and run the starter script
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our developemnt. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ## End-user Documentation
 
-Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant.
+Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistant>.
 
 ## Supported frameworks 🐙
 
@@ -149,17 +151,23 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 52. NCSC Cyber Essentials 🇬🇧
 53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
 54. Part-IS ✈️🇪🇺
+55. ENS Esquema Nacional de seguridad 🇪🇸
+56. Korea ISA ISMS-P 🇰🇷
+57. Swiss ICT minimum standard 🇨🇭
+58. Adobe Common Controls Framework (CCF) 🌐
+59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
+60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 
 ### Community contributions
 
-1. ISO 27001:2022, version Française 🇫🇷🌐
-2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
-3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
-4. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
-5. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-6. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation  🇫🇷
-7. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
-8. New Zealand Information Security Manual (NZISM) ɴᴢ
+1. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
+2. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+3. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+4. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
+5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
+6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
+7. New Zealand Information Security Manual (NZISM) 🇳🇿
+
 <br/>
 
 > [!NOTE]
@@ -171,9 +179,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- ENS Esquema Nacional de seguridad (español)
 - NIST 800-82
-- Korea ISA: ISMS-P
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
@@ -241,8 +247,10 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 
 - Python 3.11+
 - pip 20.3+
+- poetry 1.8+
 - node 18+
 - npm 10.2+
+- pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
 
 ### Running the backend
@@ -313,23 +321,14 @@ export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes)
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
-3. Choose the tool of your choice, either python-venv or virtualenv. For example:
+3. Install poetry
 
-```sh
-# Install python-venv
-sudo apt install python-venv # or python3-venv
-# Create the virtual environment venv
-python -m venv venv # or python3 -m venv venv
-# To enter inside the virtual environment
-source venv/bin/activate
-# If you want to exit the virtual environment once finished
-deactivate
-```
+Visit the poetry website for instructions: https://python-poetry.org/docs/#installation
 
 4. Install required dependencies.
 
 ```sh
-pip install -r requirements.txt
+poetry install
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -353,7 +352,7 @@ pre-commit install
 7. Apply migrations.
 
 ```sh
-python manage.py migrate
+poetry run python manage.py migrate
 ```
 
 8. Create a Django superuser, that will be CISO Assistant administrator.
@@ -361,13 +360,13 @@ python manage.py migrate
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-python manage.py createsuperuser
+poetry run python manage.py createsuperuser
 ```
 
-9.  Run development server.
+9. Run development server.
 
 ```sh
-python manage.py runserver
+poetry run python manage.py runserver
 ```
 
 10. Configure the git hooks for generating the build name.
@@ -389,16 +388,17 @@ cd frontend
 2. Install dependencies
 
 ```bash
-npm install
+npm install -g pnpm
+pnpm install
 ```
 
 3. Start a development server (make sure that the django app is running)
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
-4. Reach the frontend on http://localhost:5173
+4. Reach the frontend on <http://localhost:5173>
 
 > [!NOTE]
 > Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
@@ -407,13 +407,13 @@ npm run dev
 
 All variables in the frontend have handy default values.
 
-If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is http://localhost:8000/api.
+If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
 
-When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. http://localhost:3000).
+When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
 
 ### Managing migrations
 
-The migrations are tracked by version control, https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control
+The migrations are tracked by version control, <https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control>
 
 For the first version of the product, it is recommended to start from a clean migration.
 
@@ -427,8 +427,8 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-python manage.py makemigrations
-python manage.py migrate
+poetry run python manage.py makemigrations
+poetry run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
@@ -449,7 +449,7 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance http://127.0.0.1:8000/api/schema/swagger/
+- The API documentation is available in dev mode on the `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
 
 To interact with it:
 
@@ -458,12 +458,12 @@ To interact with it:
 
 ## Setting CISO Assistant for production
 
-The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
+The docker-compose-prod.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
 Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
-> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "npm run dev", which should not be a worry for production.
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
@@ -480,6 +480,8 @@ Set DJANGO_DEBUG=False for security reason.
 - IT: Italian
 - PL: Polish
 - RO: Romanian
+- HI: Hindi
+- UR: Urdu
 
 ## Built With 💜
 
@@ -496,8 +498,16 @@ Set DJANGO_DEBUG=False for security reason.
 
 ## Security
 
-Great care has been taken to follow security best practices. Please report any issue to security@intuitem.com.
+Great care has been taken to follow security best practices. Please report any issue to <security@intuitem.com>.
 
 ## License
 
-[AGPLv3](https://choosealicense.com/licenses/agpl-3.0/)
+This repository contains the source code for both the Open Source edition of CISO Assistant (Community Edition), released under the AGPL v3, as well as the commercial edition of CISO Assistant (Pro and Enterprise Editions), released under the intuitem Commercial Software License. This mono-repository approach is adopted for simplicity.
+
+All the files within the top-level "enterprise" directory are released under the intuitem Commercial Software License.
+
+All the files outside the top-level "enterprise" directory are released under the [AGPLv3](https://choosealicense.com/licenses/agpl-3.0/).
+
+See [LICENSE.txt](./LICENSE.txt) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
+
+Unless otherwise noted, all files are © intuitem.

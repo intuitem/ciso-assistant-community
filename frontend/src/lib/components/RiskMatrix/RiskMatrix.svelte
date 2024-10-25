@@ -20,11 +20,7 @@
 	// reverse data array to display it in the right order
 	let displayedData: typeof data;
 	if (data) {
-		displayedData = data.some((e) => {
-			return e.length;
-		})
-			? data.slice().reverse()
-			: undefined;
+		displayedData = data.some((e) => e.length > 0) ? data.slice().reverse() : undefined;
 	}
 	let popupHover: PopupSettings[][] = [];
 	popupHover[0] = [];

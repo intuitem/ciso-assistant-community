@@ -7,7 +7,8 @@ export enum FormFieldType {
 	SELECT = 'select',
 	SELECT_AUTOCOMPLETE = 'select-autocomplete',
 	SELECT_MULTIPLE_AUTOCOMPLETE = 'select-multi-autocomplete',
-	TEXT = 'text'
+	TEXT = 'text',
+	NUMBER = 'number'
 }
 
 type FormField = {
@@ -113,6 +114,9 @@ export class FormContent {
 					break;
 				case FormFieldType.DATE:
 					await field.locator.clear();
+				case FormFieldType.NUMBER:
+					await field?.locator.fill(values[key].toString());
+					break;
 				default:
 					await field?.locator.fill(values[key]);
 					break;

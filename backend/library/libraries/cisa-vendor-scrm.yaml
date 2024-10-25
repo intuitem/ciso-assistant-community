@@ -1,0 +1,3898 @@
+urn: urn:intuitem:risk:library:cisa-scrm
+locale: en
+ref_id: cisa-scrm
+name: VENDOR SUPPLY CHAIN RISK MANAGEMENT (SCRM) TEMPLATE
+description: 'The following document is the result of a collaborative effort produced
+  by the Cybersecurity and Infrastructure Security Agency (CISA) Information and Communications
+  Technology (ICT) Supply Chain Risk Management (SCRM) Task Force, Working Group 4
+  (hereinafter WG4), aimed at creating a standardized template of questions as a means
+  to communicate ICT supply chain risk posture in a consistent way among public and
+  private organizations of all sizes. The purpose of this assessment template is to
+  normalize a set of questions regarding an ICT Supplier/Provider implementation and
+  application of industry standards and best practices. This will enable both vendors
+  and customers to communicate in a way that is more consistently understood, predictable,
+  and actionable. These questions provide enhanced visibility and transparency into
+  entity trust and assurance practices and assist in informed decision-making about
+  acceptable risk exposure.
+
+  This assessment may be used to illuminate potential gaps in risk management practices
+  and provides a flexible template that can help guide supply chain risk planning
+  in a standard way. It is meant to be non-prescriptive and no specific use case is
+  being mandated. The suggested use is as a tool for consistently analyzing risk when
+  comparing potential new providers. This template builds upon existing industry standards
+  to provide step-by-step guidance and improved awareness Key categories of vendor
+  SCRM
+
+  compliance are defined within the document, building on a framework of established
+  industry standards and other Task Force efforts, while incorporating inputs from
+  key industry standards and best practices, such as NIST SP 800-161, the Department
+  of Defense (DoD) Cybersecurity Maturity Model Certification (CMMC), and the Outsourcing
+  Network Services Assessment Tool (ONSAT).'
+copyright: CISA
+version: 1
+provider: CISA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cisa-scrm
+    ref_id: cisa-scrm
+    name: VENDOR SUPPLY CHAIN RISK MANAGEMENT (SCRM) TEMPLATE
+    description: 'The following document is the result of a collaborative effort produced
+      by the Cybersecurity and Infrastructure Security Agency (CISA) Information and
+      Communications Technology (ICT) Supply Chain Risk Management (SCRM) Task Force,
+      Working Group 4 (hereinafter WG4), aimed at creating a standardized template
+      of questions as a means to communicate ICT supply chain risk posture in a consistent
+      way among public and private organizations of all sizes. The purpose of this
+      assessment template is to normalize a set of questions regarding an ICT Supplier/Provider
+      implementation and application of industry standards and best practices. This
+      will enable both vendors and customers to communicate in a way that is more
+      consistently understood, predictable, and actionable. These questions provide
+      enhanced visibility and transparency into entity trust and assurance practices
+      and assist in informed decision-making about acceptable risk exposure.
+
+      This assessment may be used to illuminate potential gaps in risk management
+      practices and provides a flexible template that can help guide supply chain
+      risk planning in a standard way. It is meant to be non-prescriptive and no specific
+      use case is being mandated. The suggested use is as a tool for consistently
+      analyzing risk when comparing potential new providers. This template builds
+      upon existing industry standards to provide step-by-step guidance and improved
+      awareness Key categories of vendor SCRM
+
+      compliance are defined within the document, building on a framework of established
+      industry standards and other Task Force efforts, while incorporating inputs
+      from key industry standards and best practices, such as NIST SP 800-161, the
+      Department of Defense (DoD) Cybersecurity Maturity Model Certification (CMMC),
+      and the Outsourcing Network Services Assessment Tool (ONSAT).'
+    implementation_groups_definition:
+    - ref_id: IG1
+      name: Qualifying Questions
+      description: null
+    - ref_id: IG2
+      name: Supply Chain Management and Supplier Governance
+      description: null
+    - ref_id: IG3
+      name: Secure Design and Engineering
+      description: null
+    - ref_id: IG4
+      name: 'Information Security '
+      description: null
+    - ref_id: IG5
+      name: Physical Security
+      description: null
+    - ref_id: IG6
+      name: Personnel Security
+      description: null
+    - ref_id: IG7
+      name: Supply Chain Integrity
+      description: null
+    - ref_id: IG8
+      name: Supply Chain Resilience
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:1
+      assessable: true
+      depth: 1
+      ref_id: '1'
+      name: Qualifying Questions
+      description: If you can provide affirmative responses to the questions below
+        AND supporting, non-expired documentation, you may skip ALL remaining questions.
+      implementation_groups:
+      - IG1
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:1
+      ref_id: '1.1'
+      implementation_groups:
+      - IG1
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:1.1:question:1
+          text: Have you previously provided supply chain risk management information
+            to this organization?
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:1.1:question:2
+          text: "If \u2018Yes,\u2019 please provide an updated revision covering material\
+            \ changes."
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:1
+      name: OR
+      implementation_groups:
+      - IG1
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:1
+      ref_id: '1.2'
+      implementation_groups:
+      - IG1
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:1.2:question:1
+          text: Do you have controls fully aligned to NIST SP 800-161, Supply Chain
+            Risk Management Practices for Federal Information Systems and Organization?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:1.2
+      ref_id: 1.2.1
+      implementation_groups:
+      - IG1
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:1.2.1:question:1
+          text: Please provide proof of the scope of controls implemented and how
+            controls were validated.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:1.2
+      ref_id: 1.2.2
+      implementation_groups:
+      - IG1
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:1.2.2:question:1
+          text: Provide any additional supporting documentation of relevant and current
+            third-party assessments or certification for supply chain risk management,
+            such as ANSI/ASIS SCRM 1.2014, ISO 28000:2007, ISO 31000, ISO 20243, etc.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:1
+      description: If you responded affirmatively to ANY of the questions above, you
+        may attach supporting documentation, skip the remaining questions, and continue
+        to the signature page.
+      implementation_groups:
+      - IG1
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Supply Chain Management and Supplier Governance
+      implementation_groups:
+      - IG2
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2
+      name: General
+      implementation_groups:
+      - IG2
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node10
+      ref_id: '2.1'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: &id001
+        - 'Yes'
+        - 'No'
+        - Alternate
+        - N/A
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.1:question:1
+          text: Do you have policies to ensure timely notification of updated risk
+            management information previously provided to us?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.1
+      ref_id: 2.1.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.1.1:question:1
+          text: How do you notify us of changes?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.1
+      ref_id: 2.1.2
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.1.2:question:1
+          text: What is your customer notification policy?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2
+      name: Information Communications Technology (ICT) Supply Chain Management
+      implementation_groups:
+      - IG2
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node14
+      ref_id: '2.2'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.2:question:1
+          text: Do you have a documented Quality Management System (QMS) for your
+            ICT supply chain operation based on an industry standard or framework?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.2
+      ref_id: 2.2.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.2.1:question:1
+          text: Please provide the document which describes your QMS, including any
+            standards or frameworks to which it is aligned.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node14
+      ref_id: '2.3'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.3:question:1
+          text: Do you have an organization-wide strategy for managing end-to-end
+            supply chain risks (from development, acquisition, life cycle support,
+            and disposal of systems, system components, and to system services)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.3
+      ref_id: 2.3.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.3.1:question:1
+          text: What is your strategy?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.3
+      ref_id: 2.3.2
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.3.2:question:1
+          text: How have you implemented it?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2
+      name: Authentication and Provenance
+      implementation_groups:
+      - IG2
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node20
+      ref_id: '2.4'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.4:question:1
+          text: Do you have a policy or process to ensure that none of your suppliers
+            or third-party components are on any banned list?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node20
+      ref_id: '2.5'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5:question:1
+          text: Do you provide a bill of materials (BOM) for your products, services,
+            and components which includes all logic-bearing (e.g., readable/writable/programmable)
+            hardware, firmware, and software?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.5
+      ref_id: 2.5.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5.1:question:1
+          text: If you provide a BOM that does not include all logic-bearing hardware,
+            firmware, and software, what does your BOM include?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.5
+      ref_id: 2.5.2
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5.2:question:1
+          text: Upon request, are you able to provide your BOM including all logic-bearing
+            hardware, firmware, and software?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.5
+      ref_id: 2.5.3
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.5.3:question:1
+          text: How do you track changes in your products, services, and components
+            and how do you reflect those changes in the applicable BOM(s)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node20
+      ref_id: '2.6'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.6:question:1
+          text: For hardware components included in the product offering, do you only
+            buy from original equipment manufacturers or licensed resellers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node20
+      ref_id: '2.7'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.7:question:1
+          text: Do you have a process for tracking and tracing your product while
+            in development and manufacturing?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.7.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.7
+      ref_id: 2.7.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.7.1:question:1
+          text: How do you keep track of your chain of custody?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.7.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.7
+      ref_id: 2.7.2
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.7.2:question:1
+          text: How do you track and trace components within your product?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node30
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2
+      name: Supplier Governance
+      implementation_groups:
+      - IG2
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node30
+      ref_id: '2.8'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8:question:1
+          text: Do you have written Supply Chain Risk Management (SCRM) requirements
+            in your contracts with your suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.8
+      ref_id: 2.8.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8.1:question:1
+          text: What are your SCRM requirements?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.8
+      ref_id: 2.8.2
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8.2:question:1
+          text: How do you verify that your suppliers are meeting contractual terms
+            and conditions, which may include requirements to be passed down to sub-suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.8
+      ref_id: 2.8.3
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.8.3:question:1
+          text: If violations of contractual SCRM requirements or SCRM-related incidents
+            occur, do you ensure and monitor any remediation activities?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node30
+      ref_id: '2.9'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.9:question:1
+          text: Do you revise your written SCRM requirements regularly to include
+            needed provisions?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node30
+      ref_id: '2.10'
+      implementation_groups:
+      - IG2
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.10:question:1
+          text: Do you have policies for your suppliers to notify you when there are
+            changes to their subcontractors or their offerings (components, products,
+            services, or support activities)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:2.10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:2.10
+      ref_id: 2.10.1
+      implementation_groups:
+      - IG2
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:2.10.1:question:1
+          text: Please describe your policy.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Secure Design and Engineering
+      implementation_groups:
+      - IG3
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node39
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      description: "Note: If your answer to the question below is \u2018Yes,\u2019\
+        \ please continue and complete the remaining questions in this section. If\
+        \ your answer is \u2018No,\u2019 you may skip the remainder of this section\
+        \ and move on to the next section of this questionnaire."
+      implementation_groups:
+      - IG3
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      ref_id: '3.1'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices:
+        - 'Yes'
+        - 'No'
+        - Alternate
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.1:question:1
+          text: Does your organization develop (or integrate) custom hardware or software
+            offerings?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.1
+      ref_id: 3.1.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.1.1:question:1
+          text: List the custom software, hardware, system, or solution offering(s)
+            provided by your organization.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node42
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      name: Product Offering Lifecycle Management and Organization
+      implementation_groups:
+      - IG3
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node42
+      ref_id: '3.2'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.2:question:1
+          text: Do you implement formal organizational roles and governance responsible
+            for the implementation and oversight of Secure Engineering across the
+            development or manufacturing process for product offerings?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.2
+      ref_id: 3.2.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.2.1:question:1
+          text: If so, how are roles, responsibilities, and practices validated?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node42
+      ref_id: '3.3'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.3:question:1
+          text: What security control framework (industry or customized) is used to
+            define product offering security capabilities?
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.3:question:2
+          text: Please describe or 'N/A'
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node42
+      ref_id: '3.4'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.4:question:1
+          text: Does your organization document and communicate security control requirements
+            for your hardware, software, or solution offering?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.4
+      ref_id: 3.4.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.4.1:question:1
+          text: How are security requirements validated as part of the product offering
+            development or manufacturing process?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node42
+      ref_id: '3.5'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.5:question:1
+          text: How does your organization implement development andmanufacturing
+            automation to enforce lifecycle processes and practices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node49
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      name: Protect IP and Product (Supplier) Offering Assets
+      implementation_groups:
+      - IG3
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node49
+      ref_id: '3.6'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.6:question:1
+          text: Does your organization protect all forms of code from unauthorized
+            access and tampering, including patch updates?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.6
+      ref_id: 3.6.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.6.1:question:1
+          text: How does your organization prevent unauthorized changes to code, both
+            inadvertent and intentional, which could circumvent or negate the intended
+            security characteristics of the software?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node49
+      ref_id: '3.7'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.7:question:1
+          text: Does your organization provide a mechanism for verifying software
+            release integrity, including patch updates for your software product offering?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node49
+      ref_id: '3.8'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.8:question:1
+          text: How does your organization prevent malicious and/or counterfeit IP
+            components within your product offering or solution?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node49
+      ref_id: '3.9'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.9:question:1
+          text: Does your organization manage the integrity of IP for its product
+            offering?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.9
+      ref_id: 3.9.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.9.1:question:1
+          text: How does your organization archive assets associated with the product
+            offering development or manufacturing process?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      name: Secure Coding and Manufacturing Practices
+      implementation_groups:
+      - IG3
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      ref_id: '3.10'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10:question:1
+          text: Does your organization define, follow, and validate secure coding
+            and manufacturing practices to mitigate security risks?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.10
+      ref_id: 3.10.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.1:question:1
+          text: How does your organization conduct threat modeling to determine required
+            product offering security requirements?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.10
+      ref_id: 3.10.2
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.2:question:1
+          text: How does your organization determine how identified risks are mitigated
+            in product offering design?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.10
+      ref_id: 3.10.3
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.3:question:1
+          text: How does your organization justify risk-based decisions to relax or
+            waive security requirements or controls?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.10
+      ref_id: 3.10.4
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.10.4:question:1
+          text: How does your organization validate that the offering will meet the
+            security requirements and satisfactorily address the identified threat
+            assessment?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      ref_id: '3.11'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.11:question:1
+          text: Does your organization verify that third-party software provides required
+            security requirements/controls?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.11.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.11
+      ref_id: 3.11.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.11.1:question:1
+          text: How does your organization reduce the risk associated with using acquired
+            software modules and services, which are potential sources of additional
+            vulnerabilities?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      ref_id: '3.12'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.12:question:1
+          text: Does your organization reuse existing, well-secured software and hardware
+            components, when feasible, instead of duplicating functionality?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      ref_id: '3.13'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.13:question:1
+          text: Does your organization configure the compilation and build processes
+            to improve executable security?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.13
+      ref_id: 3.13.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.13.1:question:1
+          text: How does your organization decrease the number of security vulnerabilities
+            in the software and reduce costs by eliminating vulnerabilities before
+            testing occurs?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      ref_id: '3.14'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.14:question:1
+          text: Does your organization implement formal vulnerability and weakness
+            analysis practices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.14.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.14
+      ref_id: 3.14.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.14.1:question:1
+          text: Does your organization automate the identification of security vulnerabilities
+            and weaknesses?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.14.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.14
+      ref_id: 3.14.2
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.14.2:question:1
+          text: Does your organization test executable code or components to identify
+            vulnerabilities and verify compliance with security requirements?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node56
+      ref_id: '3.15'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.15:question:1
+          text: Does your organization configure offerings to implement secure settings
+            by default?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.15.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.15
+      ref_id: 3.15.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.15.1:question:1
+          text: Does your organization test offerings using hardened runtime environments?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node72
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3
+      name: Respond to Vulnerabilities (RV)
+      implementation_groups:
+      - IG3
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node72
+      ref_id: '3.16'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.16:question:1
+          text: Does your organization maintain and manage a Product Security Incident
+            Reporting and Response program (PSRT)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.16.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.16
+      ref_id: 3.16.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.16.1:question:1
+          text: How does your organization assess, prioritize, and remediate reported
+            vulnerabilities?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.16.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.16
+      ref_id: 3.16.2
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.16.2:question:1
+          text: How does your organization ensure that vulnerabilities are remediated
+            in a timely period, reducing the window of opportunity for attackers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node72
+      ref_id: '3.17'
+      implementation_groups:
+      - IG3
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.17:question:1
+          text: Does your organization analyze vulnerabilities to identify root cause?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:3.17.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:3.17
+      ref_id: 3.17.1
+      implementation_groups:
+      - IG3
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:3.17.1:question:1
+          text: Are vulnerability root causes used as input to update secure development
+            process, tools, and training to lower future vulnerabilities?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Information Security
+      implementation_groups:
+      - IG4
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      ref_id: '4.1'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.1:question:1
+          text: Do you hold a valid information security/cybersecurity third-party
+            attestation or certification? (e.g., ISO 27001, SOC 2 Type 2, CMMC Level
+            3-5, Cybersecurity Maturity Assessment, etc.)
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.1:question:2
+          text: '[If yes, please state the program and date that you were certified,
+            and provide a copy of the certification. You may skip the remaining questions
+            of this section and proceed to the following section. If no, continue.]'
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      ref_id: '4.2'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.2:question:1
+          text: Do you follow operational standards or frameworks for managing Information
+            Security/Cyber security? (e.g., NIST CSF 1.1, NIST 800-37, Rev. 2, NIST
+            SP 800-161, ISO IEC 27001, ISO 20243, ISO 27036, SAE AS649)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.2
+      ref_id: 4.2.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.2.1:question:1
+          text: If so, please state which one(s)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      ref_id: '4.3'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3:question:1
+          text: Do you have company-wide, publicly available information security
+            policies in place covering privacy policies?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.3
+      ref_id: 4.3.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.1:question:1
+          text: "If \u2018Yes\u2019, please provide."
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.3
+      ref_id: 4.3.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.2:question:1
+          text: What mechanisms are in place to ensure your policies are enforced
+            within your supply chain?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.2
+      ref_id: 4.3.2.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.3.2.1:question:1
+          text: Do you receive notification of and have a response plan in place for
+            privacy violations of the suppliers in your supply chain?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      name: Asset Management
+      implementation_groups:
+      - IG4
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.4'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.4:question:1
+          text: Do you inventory and audit back-up and/or replacement hardware and
+            software assets to ensure their accountability and integrity?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.4
+      ref_id: 4.4.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.4.1:question:1
+          text: What recognized standards or frameworks do you follow to ensure integrity
+            of back-up assets? (e.g., NIST 800-53, NIST 800- 171 DFARS, ISA/IEC 62443
+            or ISO 27001/2)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.5'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.5:question:1
+          text: Do you have a defined governance scope for asset management, including
+            line of business technology, facilities, devices, and all other data-
+            generating hardware (like Internet of Things devices)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.6'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.6:question:1
+          text: Do you have processes or procedures in place to ensure that devices
+            and software installed by users external to your IT department (e.g.,
+            line of business personnel) are being discovered, properly secured, and
+            managed?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.6
+      ref_id: 4.6.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.6.1:question:1
+          text: What, if any, types of assets are out of scope for your tracking procedures?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.7'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7:question:1
+          text: Do you have an asset management program approved by management for
+            your IT assets that is regularly maintained?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.7
+      ref_id: 4.7.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.1:question:1
+          text: What are your methods to manage IT assets on the network?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.1
+      ref_id: 4.7.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.1.1:question:1
+          text: How do you manage other IT hardware and software assets which are
+            not network connected, regardless of network presence?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.7
+      ref_id: 4.7.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.7.2:question:1
+          text: ' What are your methods of verifying acceptable use of assets, including
+            verified asset return, for your network-connected assets?'
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.8'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8:question:1
+          text: Do you have documented policies or procedures to manage enterprise
+            network-connectable assets throughout their lifecycle?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.8
+      ref_id: 4.8.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8.1:question:1
+          text: What are your processes to manage obsolescence of network-connected
+            assets?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.8
+      ref_id: 4.8.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8.2:question:1
+          text: What are your policies or procedures to ensure your enterprise software
+            platforms and applications, and hardware assets, are classified according
+            to their criticality?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.8
+      ref_id: 4.8.3
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.8.3:question:1
+          text: What are your policies or procedures to ensure appropriate controls
+            are in place for internal or third-party cloud services?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.9'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.9:question:1
+          text: Do you ensure that you are not sourcing assets on a banned listto
+            customers (e.g., ITAR, NDAA Section 889)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.9
+      ref_id: 4.9.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.9.1:question:1
+          text: How do you ensure that you are not providing assets on a banned list
+            to customers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node86
+      ref_id: '4.10'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.10:question:1
+          text: Do you have documented hardware and software policies and practices
+            in place to ensure asset integrity?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.10
+      ref_id: 4.10.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.10.1:question:1
+          text: What recognized standards or frameworks are followed to ensure asset
+            integrity?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.10.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.10.1
+      ref_id: 4.10.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.10.1.1:question:1
+          text: How do you ensure that regular reviews and updates of the asset integrity
+            policies and practices are performed?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node105
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      name: Identify
+      implementation_groups:
+      - IG4
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node105
+      ref_id: '4.11'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11:question:1
+          text: Do you have documented policies or procedures for identification and
+            detection of cyber threats?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.11
+      ref_id: 4.11.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1:question:1
+          text: What processes do you have in place to promptly detect cyber threats?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1
+      ref_id: 4.11.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1.1:question:1
+          text: How do you manage the identification of threats within your supply
+            chain, including suppliers and sub-contractors?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1
+      ref_id: 4.11.1.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.11.1.2:question:1
+          text: What processes are in place to act upon external credible cyber security
+            threat information received?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node105
+      ref_id: '4.12'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12:question:1
+          text: "Do you address the interaction of cybersecurity operational elements\
+            \ (e.g., SOC, CSIRT, etc.) with the physical security operational elements\
+            \ protecting the organization\u2019s physical assets?"
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.12
+      ref_id: 4.12.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12.1:question:1
+          text: How do you ensure that physical security incidents and suspicious
+            events are escalated to cybersecurity operations staff?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.12
+      ref_id: 4.12.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12.2:question:1
+          text: Are cybersecurity vulnerabilities for industrial control systems,
+            including physical access controls and video monitoring systems, tracked?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.12
+      ref_id: 4.12.3
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.12.3:question:1
+          text: What standards or frameworks are followed for management of IT and
+            OT system interactions?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node105
+      ref_id: '4.13'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.13:question:1
+          text: Do you have a policy or procedure for the handling of information
+            thatis consistent with its classification?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.13
+      ref_id: 4.13.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.13.1:question:1
+          text: What is your process to verify that information is classified according
+            to legal, regulatory, or internal sensitivity requirements?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.13.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.13.1
+      ref_id: 4.13.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.13.1.1:question:1
+          text: How do you convey requirements for data retention, destruction, and
+            encryption to your suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node105
+      ref_id: '4.14'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14:question:1
+          text: Do you have documented policies or procedures for internal identification
+            and management of vulnerabilities within your networks and enterprise
+            systems?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.14
+      ref_id: 4.14.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1:question:1
+          text: What industry standards or frameworks are followed for vulnerability
+            management?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1
+      ref_id: 4.14.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1.1:question:1
+          text: How do you identify vulnerabilities in your supply chain (suppliers/sub-contractors)
+            before they pose a risk to your organization?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1
+      ref_id: 4.14.1.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.14.1.2:question:1
+          text: How do you assess and prioritize the mitigation of vulnerabilities
+            discovered on your internal networks and systems? (e.g., asset criticality,
+            exploitability, severity, etc.)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      name: Protect
+      implementation_groups:
+      - IG4
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      ref_id: '4.15'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15:question:1
+          text: Do you have network access control policies and procedures in place
+            for your information systems that are aligned with industry standards
+            or control frameworks?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.15
+      ref_id: 4.15.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.1:question:1
+          text: If Yes, please list any standards or frameworks used.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.15
+      ref_id: 4.15.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2:question:1
+          text: What are your practices for items such as federation, privileged users,
+            and role-based access control for end-user devices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2
+      ref_id: 4.15.2.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2.1:question:1
+          text: How do you ensure remote access is managed for end-user devices or
+            employees and suppliers, including deactivation of accounts? (e.g. Multi-factor
+            authorization, encryption, protection from malware, etc.)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2
+      ref_id: 4.15.2.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.15.2.2:question:1
+          text: How do you identify and correct end-user systems that fall out of
+            compliance?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      ref_id: '4.16'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16:question:1
+          text: Is cybersecurity training required for personnel who have administrative
+            rights to your enterprise computing resources?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.16
+      ref_id: 4.16.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.1:question:1
+          text: What is the frequency for verifying personnel training compliance?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.16
+      ref_id: 4.16.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.2:question:1
+          text: What cybersecurity training is required for your third-party stakeholders
+            (e.g., suppliers, customers, partners, etc.) who have network access?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.2
+      ref_id: 4.16.2.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.16.2.1:question:1
+          text: How is training compliance tracked for third parties with network
+            access?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      ref_id: '4.17'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.17:question:1
+          text: Do you include contractual obligations to protect information and
+            information systems handled by your suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.17.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.17
+      ref_id: 4.17.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.17.1:question:1
+          text: What standard cybersecurity standards or frameworks are the contractual
+            supplier terms for information protection aligned to, if any?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      ref_id: '4.18'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18:question:1
+          text: Do you have an organizational policy on the use of encryption that
+            conforms with industry standards or control frameworks?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.18
+      ref_id: 4.18.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.1:question:1
+          text: What industry standards or controls frameworks are followed for encryption
+            and key management?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.18
+      ref_id: 4.18.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.2:question:1
+          text: What processes or procedures exist to comprehensively manage the use
+            of encryption keys?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.2
+      ref_id: 4.18.2.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.18.2.1:question:1
+          text: What is your process for protecting data at rest and in transit?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      ref_id: '4.19'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19:question:1
+          text: Does your organization have hardening standards in place for network
+            devices (e.g., wireless access points, firewalls, etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.19
+      ref_id: 4.19.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.1:question:1
+          text: What protections exist to provide network segregation where appropriate
+            (e.g., intrusion detection systems)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.19
+      ref_id: 4.19.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.2:question:1
+          text: What controls exist to continuously monitor changes to your network
+            architecture (e.g., NIST 800-53 or related controls)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.19
+      ref_id: 4.19.3
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.3:question:1
+          text: How do you manage prioritization and mitigation of threats discovered
+            on your networks?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.19
+      ref_id: 4.19.4
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.19.4:question:1
+          text: How do you track changes to software versions on your servers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node121
+      ref_id: '4.20'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.20:question:1
+          text: Do you follow an industry standard or framework for your internal
+            or third- party cloud deployments, if applicable?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.20.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.20
+      ref_id: 4.20.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.20.1:question:1
+          text: What protections are in place between your network and cloud service
+            providers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.20.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.20.1
+      ref_id: 4.20.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.20.1.1:question:1
+          text: How to do you convey cloud security requirements to your suppliers/sub-contractors
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node145
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      name: Detect
+      implementation_groups:
+      - IG4
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node145
+      ref_id: '4.21'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.21:question:1
+          text: Do you have defined and documented incident detection practices that
+            outline which actions should be taken in the case of an information security
+            or cybersecurity event?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.21.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.21
+      ref_id: 4.21.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.21.1:question:1
+          text: Are cybersecurity events centrally logged, tracked, and continuously
+            monitored?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.21.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.21
+      ref_id: 4.21.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.21.2:question:1
+          text: Are incident detection practices continuously improved?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node145
+      ref_id: '4.22'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.22:question:1
+          text: Do you require vulnerability scanning of software running within your
+            enterprise prior to acceptance?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.22.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.22
+      ref_id: 4.22.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.22.1:question:1
+          text: What procedures or policies exist, if any, for detecting vulnerabilities
+            in externally obtained software (such as penetration testing of enterprise
+            and non-enterprise software)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.22.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.22
+      ref_id: 4.22.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.22.2:question:1
+          text: What are your procedures to scan for vulnerabilities in supplier-provided
+            software running on your network?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node145
+      ref_id: '4.23'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.23:question:1
+          text: Do you manage updates, version tracking of new releases, and patches
+            (including patching history) for your software and software services offerings?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.23.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.23
+      ref_id: 4.23.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.23.1:question:1
+          text: What is the responsibility of the product end-user (customer) for
+            updating software versions?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node145
+      ref_id: '4.24'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.24:question:1
+          text: Do you deploy anti-malware software?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.24.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.24
+      ref_id: 4.24.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.24.1:question:1
+          text: ' What systems are out of scope for anti-malware software compliance,
+            if any?'
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.24.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.24.1
+      ref_id: 4.24.1.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.24.1.1:question:1
+          text: How do you ensure anti-malware is present on developer platforms?
+            As applicable to your offering?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node157
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4
+      name: Respond & Recover
+      implementation_groups:
+      - IG4
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.25
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node157
+      ref_id: '4.25'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.25:question:1
+          text: Do you have a documented incident response process and a dedicated
+            incident response team (CSIRT - Computer Security Incident Response Team)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.25.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.25
+      ref_id: 4.25.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.25.1:question:1
+          text: What is your process for reviewing and exercising your resiliency
+            plan?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.25.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.25
+      ref_id: 4.25.2
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.25.2:question:1
+          text: What is your process to ensure customers and external entities (such
+            as government agencies) are notified of an incident when their product
+            or service is impacted?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.26
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node157
+      ref_id: '4.26'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.26:question:1
+          text: Do you have processes or procedures to recover full functionality,
+            including integrity verification, following a major cybersecurity incident?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.26.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.26
+      ref_id: 4.26.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.26.1:question:1
+          text: What is the frequency for testing of back-up media?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.27
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node157
+      ref_id: '4.27'
+      implementation_groups:
+      - IG4
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.27:question:1
+          text: Do you insure for financial harm from a major cybersecurity incident
+            (e.g., self-insure, third-party, parent company, etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:4.27.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:4.27
+      ref_id: 4.27.1
+      implementation_groups:
+      - IG4
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:4.27.1:question:1
+          text: Does coverage include financial harm to your customers resulting from
+            a cybersecurity breach which has impacted your company?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Physical Security
+      implementation_groups:
+      - IG5
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.1'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1:question:1
+          text: ' Is the entity (organization, operational unit, facility, etc.) currently
+            covered by an unrestricted/unlimited National Industrial Security Program
+            (NISP) Facility Clearance (FCL) or a related U.S. government program such
+            as C- TPAT that certifies the entity as meeting appropriate physical security
+            standards?'
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1:question:2
+          text: "[If \u2018Yes,\u2019 please state the program that certified you\
+            \ and date of last certification. You may skip the remaining questions\
+            \ of this section and proceed to the next section. If not, continue with\
+            \ this section.]"
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.1
+      ref_id: 5.1.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1.1:question:1
+          text: If the entity is not covered by a NISP FCL but currently has some
+            other US Government or industry attestation, such as TAPA FSR of meeting
+            a physical security code or standard, please identify the standard, the
+            issuing agency, and the most recent date of certification.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.1
+      ref_id: 5.1.2
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1.2:question:1
+          text: Is the entity covered by a limited FCL (in agreement with a foreign
+            government)?
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.1.2:question:2
+          text: Describe.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.2'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2:question:1
+          text: Do you have documented security policies and procedures that address
+            the control of physical access to cyber assets (network devices, data
+            facilities, patch panels, industrial control systems, programmable logic,
+            etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.2
+      ref_id: 5.2.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1:question:1
+          text: To what standards/controls do you adhere? (e.g., NIST publication,
+            ISO, UL, etc.)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1
+      ref_id: 5.2.1.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1.1:question:1
+          text: How often do you review and update to those policies and procedures
+            and what is the most recent review?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1
+      ref_id: 5.2.1.2
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.2.1.2:question:1
+          text: If needed, can you provide these documents for our review?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.3'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3:question:1
+          text: Do you have documented policies addressing staff training which includes
+            procedures to limit physical access to cyber assets to only those with
+            demonstrated need?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.3
+      ref_id: 5.3.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.1:question:1
+          text: What training do all staff receive to address potential physical security
+            threats and how to respond to emergencies (e.g., fire, weather, etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.3
+      ref_id: 5.3.2
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.2:question:1
+          text: What training do cybersecurity staff, physical security staff, and
+            contractors with at least limited access to sensitive areas of a facility
+            receive?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.2
+      ref_id: 5.3.2.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.2.1:question:1
+          text: How does this training address potential threats to the facility and
+            how the physical access controls are integrated with system network interfaces?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.3
+      ref_id: 5.3.3
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.3:question:1
+          text: What standards do you follow, or did you implement (e.g., NIST publication,
+            ISO, UL, etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.3
+      ref_id: 5.3.3.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.3.3.1:question:1
+          text: How is this training documented?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.4'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.4:question:1
+          text: Do you have a documented Security Incident Response process covering
+            physical security incidents? (e.g., potential intruder access, missing
+            equipment, etc.)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.4
+      ref_id: 5.4.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.4.1:question:1
+          text: What processes do you have in place to document the actions taken
+            during and after an actual or suspected physical security incidents (e.g.,
+            security log, formal report to management, police report, etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.4.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.4.1
+      ref_id: 5.4.1.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.4.1.1:question:1
+          text: How do you ensure that your staff understands and complies with procedures
+            (e.g., training, exercises, and actual cases of incident response)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.5'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5:question:1
+          text: For facilities that use an independent contractor for physical security,
+            are physical facilities security policy and procedures incorporated into
+            service level agreements, contracts, policies, regulatory practices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.5
+      ref_id: 5.5.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.1:question:1
+          text: What physical / facilities security policies and practices are subject
+            to audit?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.5
+      ref_id: 5.5.2
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.2:question:1
+          text: For contractors who have access to a critical facility, sensitive
+            assets, or major physical plant systems, what standards are they required
+            to attest to? (e.g., NIST publication, ISO, UL, etc.)
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.2
+      ref_id: 5.5.2.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.5.2.1:question:1
+          text: How is compliance with these standards validated?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.6'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.6:question:1
+          text: Are there enforcement mechanisms (e.g., sanctions, response procedures,
+            technology) for unauthorized physical access to mission/business critical
+            information, functions, services and assets?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.6
+      ref_id: 5.6.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.6.1:question:1
+          text: What type of action or response would be taken for unauthorized physical
+            access to sensitive cyber assets?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      ref_id: '5.7'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.7:question:1
+          text: Do you have evidence that physical security mechanisms are effective
+            and adequate to protect assets? Evidence could include third-party assessment,
+            self-assessment, records of actions taken to enforce rules, etc.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.7
+      ref_id: 5.7.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.7.1:question:1
+          text: What is the date of the last review and update to your enforcement
+            strategy?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node190
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5
+      name: Physical Security In-transit
+      implementation_groups:
+      - IG5
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node190
+      ref_id: '5.8'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.8:question:1
+          text: Do you utilize a controlled bill of materials (BOM) or similar capability
+            to protect assets that are being received, in process, or in-transit?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.8
+      ref_id: 5.8.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.8.1:question:1
+          text: What industry standards or frameworks are followed?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node190
+      ref_id: '5.9'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.9:question:1
+          text: Do you have requirements that all items being shipped have tamper-evident
+            packaging?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.9
+      ref_id: 5.9.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.9.1:question:1
+          text: What industry standards or frameworks are being followed to ensure
+            packaging is tamper-evident?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.9.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.9.1
+      ref_id: 5.9.1.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.9.1.1:question:1
+          text: How are these requirements audited to ensure that they are effective?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node190
+      ref_id: '5.10'
+      implementation_groups:
+      - IG5
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10:question:1
+          text: Do you have processes in place to prevent counterfeit parts from entering
+            your supply chain?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.10
+      ref_id: 5.10.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.1:question:1
+          text: What requirements, if any, are in place to ensure the use of Original
+            Equipment Manufacturer (OEM) or Authorized Distributors for all key components?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.10
+      ref_id: 5.10.2
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.2:question:1
+          text: What are your processes for the detection and disposition of counterfeit
+            electronic components?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.2.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.2
+      ref_id: 5.10.2.1
+      implementation_groups:
+      - IG5
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:5.10.2.1:question:1
+          text: How do you pass on counterfeit prevention requirements to your third-party
+            suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Personnel Security
+      implementation_groups:
+      - IG6
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6
+      ref_id: '6.1'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1:question:1
+          text: Does a formal personnel security program exist?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.1
+      ref_id: 6.1.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1.1:question:1
+          text: Is employee access managed by role?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.1
+      ref_id: 6.1.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1.2:question:1
+          text: Is access to business-critical systems, manufacturing facilities,
+            and assets formally managed and maintained? Please describe.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.1
+      ref_id: 6.1.3
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.1.3:question:1
+          text: Are physical security practices formally governed, documented, maintained,
+            and enforced?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node205
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6
+      name: Onboarding
+      implementation_groups:
+      - IG6
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node205
+      ref_id: '6.2'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2:question:1
+          text: Do you have a process for onboarding personnel?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.2
+      ref_id: 6.2.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.1:question:1
+          text: Does the process include security awareness training?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.2
+      ref_id: 6.2.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.2:question:1
+          text: What is the process to determine the level of access to company identifications
+            (IDs), tokens, documents, applications, etc.?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.2
+      ref_id: 6.2.3
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.3:question:1
+          text: What is the process to distribute company assets?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.2
+      ref_id: 6.2.4
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.4:question:1
+          text: Is the onboarding process documented?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.4.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.4
+      ref_id: 6.2.4.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.2.4.1:question:1
+          text: "If \u2018Yes\u2019, please provide a copy."
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node205
+      ref_id: '6.3'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.3:question:1
+          text: Do you have policies for conducting background checks of your employees
+            as permitted by the country in which you operate?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.3
+      ref_id: 6.3.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.3.1:question:1
+          text: If not permitted by the country, please note that and provide the
+            part of your supply chain for which it is applicable.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.3
+      ref_id: 6.3.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.3.2:question:1
+          text: How do you conduct the background checks and document, validate, and
+            update their responses?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node205
+      ref_id: '6.4'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.4:question:1
+          text: Do you have policies for conducting background checks for your suppliers,
+            as permitted by the country in which you operate?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.4
+      ref_id: 6.4.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.4.1:question:1
+          text: If not permitted by the country, please note that and provide the
+            part of your supply chain for which it is applicable.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.4
+      ref_id: 6.4.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.4.2:question:1
+          text: How do you conduct the background checks and document, validate, and
+            update their responses?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node205
+      ref_id: '6.5'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.5:question:1
+          text: Do you have policies for conducting background checks for any subcontractors,
+            as permitted by the country in which you operate?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.5
+      ref_id: 6.5.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.5.1:question:1
+          text: If not permitted by the country, please note that and provide the
+            part of your supply chain for which it is applicable.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.5
+      ref_id: 6.5.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.5.2:question:1
+          text: How do you conduct the background checks and document, validate, and
+            update their responses?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node221
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6
+      name: Offboarding
+      implementation_groups:
+      - IG6
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node221
+      ref_id: '6.6'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6:question:1
+          text: Do you have a process for offboarding personnel?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.6
+      ref_id: 6.6.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.1:question:1
+          text: Does the process include a process to transfer knowledge to other
+            personnel?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.6
+      ref_id: 6.6.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.2:question:1
+          text: What is the process to remove access to all company documents, applications,
+            assets, etc.?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.6
+      ref_id: 6.6.3
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.3:question:1
+          text: What is the process to recover all company assets?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.6
+      ref_id: 6.6.4
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.6.4:question:1
+          text: Is that process documented?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6
+      name: Awareness and Training (Security-Specific)
+      implementation_groups:
+      - IG6
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.7'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.7:question:1
+          text: Are personnel security practices formally documented and accessible
+            to all employees?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.8'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.8:question:1
+          text: Are Personnel Security practices routinely enforced, audited, and
+            updated?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.9'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.9:question:1
+          text: Are personnel required to complete formal SCRM training annually?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.10'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.10:question:1
+          text: Are all personnel trained in security best practices? This includes,
+            but is not limited to, insider threats, access control, and data protection.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.11'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.11:question:1
+          text: Is there additional security training provided to users with elevated
+            privileges?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.12'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.12:question:1
+          text: Are you aware of security training practices performed by your sub-suppliers
+            to their personnel?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.12.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.12
+      ref_id: 6.12.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.12.1:question:1
+          text: "If \u2018Yes\u2019, does it align with your security practices?"
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node227
+      ref_id: '6.13'
+      implementation_groups:
+      - IG6
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13:question:1
+          text: Do you have a Code of Conduct for your employees, suppliers and subcontractors?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.13
+      ref_id: 6.13.1
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.1:question:1
+          text: Is the Code of Conduct always available and visible to your employees,
+            suppliers, and subcontractors?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.13
+      ref_id: 6.13.2
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.2:question:1
+          text: How [regularly or often] is this Code of Conduct updated? Please describe
+            the frequency.
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.13
+      ref_id: 6.13.3
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.3:question:1
+          text: Do you have personnel designated to address questions or violations
+            to the Code of Conduct?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:6.13
+      ref_id: 6.13.4
+      implementation_groups:
+      - IG6
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:6.13.4:question:1
+          text: Are these employees, suppliers, and subcontractors trained on the
+            Code of Conduct, including privacy and confidentiality requirements, as
+            required by your industry?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Supply Chain Integrity
+      implementation_groups:
+      - IG7
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.1'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.1:question:1
+          text: Do your processes for product integrity conform to any of the following
+            standards (e.g., ISO 27036, SAE AS6171, etc.)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.2'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.2:question:1
+          text: Do you control the integrity of your hardware/software (HW/SW) development
+            practices by using Secure Development Lifecycle practices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.2
+      ref_id: 7.2.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.2.1:question:1
+          text: How do you manage the conformance of your third parties to your procedures?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.3'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3:question:1
+          text: Do you have documented performance and validation procedures for your
+            HW/SW products or services?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.3
+      ref_id: 7.3.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1:question:1
+          text: What is your process to ensure conformance to those procedures?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1
+      ref_id: 7.3.1.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1.1:question:1
+          text: How do you manage HW/SW products or service that are not in compliance
+            with those procedures?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1
+      ref_id: 7.3.1.2
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.1.2:question:1
+          text: How are subcontractors held accountable to performance specifications?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.3
+      ref_id: 7.3.2
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.2:question:1
+          text: What, if any, automated controls are in place for your validation
+            processes?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.2
+      ref_id: 7.3.2.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.3.2.1:question:1
+          text: How do you audit your validation processes?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.4'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.4:question:1
+          text: Do you have processes in place to independently detect anomalous behavior
+            and defects in HW/SW products or services?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.4
+      ref_id: 7.4.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.4.1:question:1
+          text: What means do you provide to allow customers to report anomalies?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.4.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.4.1
+      ref_id: 7.4.1.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.4.1.1:question:1
+          text: How do you monitor and track anomalous product or service behavior?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.5'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.5:question:1
+          text: Do you monitor third-party HW/SW products or services for defects?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.5
+      ref_id: 7.5.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.5.1:question:1
+          text: What are your processes for managing third-party products and component
+            defects throughout their lifecycle?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.6'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.6:question:1
+          text: Does the functional integrity of your product or services rely on
+            cloud services (commercial or hybrid)?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.6
+      ref_id: 7.6.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.6.1:question:1
+          text: What policies and procedures are in place to protect the integrity
+            of the data provided through cloud services?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.6.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.6.1
+      ref_id: 7.6.1.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.6.1.1:question:1
+          text: How do you manage the shared responsibility for cloud service integrity
+            requirements with your suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.7'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.7:question:1
+          text: Do you have required training on quality and product integrity processes
+            for employees, suppliers, and subcontractors?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.7
+      ref_id: 7.7.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.7.1:question:1
+          text: What mechanisms are in place for direct employees and contracted workers
+            to ensure applicable training has been completed?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.7.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.7.1
+      ref_id: 7.7.1.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.7.1.1:question:1
+          text: Do you pass down training requirements to your sub-suppliers, as applicable?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.8'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.8:question:1
+          text: "Do you have processes to evaluate prospective third-party suppliers\u2019\
+            \ product integrity during initial selection?"
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.8
+      ref_id: 7.8.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.8.1:question:1
+          text: What processes or procedures, if any, are in place to ensure that
+            prospective suppliers have met your product integrity requirements?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.8.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.8.1
+      ref_id: 7.8.1.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.8.1.1:question:1
+          text: How do your policies or procedures ensure appropriate management/leadership
+            input on supplier selection decisions?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.9'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.9:question:1
+          text: Do you have regularly scheduled audits to ensure compliance with HW/SW
+            products or services integrity requirements?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.9
+      ref_id: 7.9.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.9.1:question:1
+          text: What provisions for auditing are included within supplier contracts?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.9
+      ref_id: 7.9.2
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.9.2:question:1
+          text: How do you pass down HW/SW products or services integrity requirements
+            to third-party suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.10'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.10:question:1
+          text: Do you have a process for improving integrity of HW/SW products or
+            services?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.10
+      ref_id: 7.10.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.10.1:question:1
+          text: What programs are in place to ensure continuous performance monitoring
+            and improvement of key suppliers?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7
+      ref_id: '7.11'
+      implementation_groups:
+      - IG7
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.11:question:1
+          text: Do you have processes in place for addressing reuse and/or recycle
+            of HW products?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:7.11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:7.11
+      ref_id: 7.11.1
+      implementation_groups:
+      - IG7
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:7.11.1:question:1
+          text: What is your process?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Supply Chain Resilience
+      implementation_groups:
+      - IG8
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node272
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8
+      name: General
+      implementation_groups:
+      - IG8
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node272
+      ref_id: '8.1'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.1:question:1
+          text: Does your organization have a formal process for ensuring supply chain
+            resilience as part of your product offering SCRM practices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8.1
+      ref_id: 8.1.1
+      implementation_groups:
+      - IG8
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.1.1:question:1
+          text: What standards or industry frameworks do you use to help inform those
+            practices?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node272
+      ref_id: '8.2'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.2:question:1
+          text: Do you consider non-technical supply chain resilience threats such
+            as weather, geo-political instability, epidemic outbreak, volcanic, earthquakes,
+            etc.?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node276
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8
+      name: Supply Chain Disruption Risk Management (Business Continuity)
+      implementation_groups:
+      - IG8
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node276
+      ref_id: '8.3'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.3:question:1
+          text: Do you maintain a formal business continuity plan necessary to maintain
+            operations through disruptions and significant loss of staff?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8.3
+      ref_id: 8.3.1
+      implementation_groups:
+      - IG8
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.3.1:question:1
+          text: If illness causes high absenteeism, are personnel cross-trained and
+            able to perform multiple duties?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node276
+      ref_id: '8.4'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.4:question:1
+          text: Do you maintain a formally trained and dedicated crisis management
+            team, including on-call staff, assigned to address catastrophic or systemic
+            risks to your supply chain or manufacturing processes?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8.4
+      ref_id: 8.4.1
+      implementation_groups:
+      - IG8
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.4.1:question:1
+          text: Do you require and audit key suppliers for their ability to be prepared
+            for unexpected supply chain disruptions?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node276
+      ref_id: '8.5'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5:question:1
+          text: Can personnel work remotely?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8.5
+      ref_id: 8.5.1
+      implementation_groups:
+      - IG8
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1:question:1
+          text: Do your service deliverables outline which services can be done remotely
+            and which cannot?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1.1
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1
+      ref_id: 8.5.1.1
+      implementation_groups:
+      - IG8
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1.1:question:1
+          text: Is that documented in Service-level agreement (SLA) or Terms and Conditions?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1.2
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1
+      ref_id: 8.5.1.2
+      implementation_groups:
+      - IG8
+      question:
+        question_type: text
+        question_choices: null
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.5.1.2:question:1
+          text: What infrastructure support is needed to support a shift to an at-home
+            workforce?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:node285
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:8
+      name: Diversity of Supply Base
+      implementation_groups:
+      - IG8
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node285
+      ref_id: '8.6'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.6:question:1
+          text: Does your company consider supplier diversity to avoid single sources
+            and to reduce the occurrence of suppliers being susceptible to the same
+            threats to resilience?
+    - urn: urn:intuitem:risk:req_node:cisa-scrm:8.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cisa-scrm:node285
+      ref_id: '8.7'
+      implementation_groups:
+      - IG8
+      question:
+        question_type: unique_choice
+        question_choices: *id001
+        questions:
+        - urn: urn:intuitem:risk:req_node:cisa-scrm:8.7:question:1
+          text: Does your company consider alternate offering delivery channels to
+            mitigate extended supplier outages to include cloud, network, telecommunication,
+            transportation, and packaging?

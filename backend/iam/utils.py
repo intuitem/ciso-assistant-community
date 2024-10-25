@@ -1,4 +1,4 @@
-from knox.auth import AuthToken
+from knox.models import AuthToken
 
 
 def generate_token(user):

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let name: string;
 	export let s_label = '';
@@ -16,7 +16,7 @@
 
 	for (const index in values) {
 		if (values[index].localName) {
-			values[index].name = m[values[index].localName]();
+			values[index].name = safeTranslate(values[index].localName);
 		}
 	}
 

@@ -1,10 +1,14 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.query import QuerySet
-
+import structlog
 from allauth.socialaccount.models import providers
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models.query import QuerySet
+from django.utils.translation import gettext_lazy as _
+
 from global_settings.models import GlobalSettings
+from iam.sso.saml.defaults import DEFAULT_SAML_SETTINGS
+
+logger = structlog.get_logger(__name__)
 
 
 class SSOSettingsQuerySet(QuerySet):
@@ -15,27 +19,35 @@ class SSOSettingsQuerySet(QuerySet):
 
     def _fetch_all(self):
         if self._result_cache is None:
-            try:
+            if not GlobalSettings.objects.filter(
+                name=GlobalSettings.Names.SSO
+            ).exists():
+                logger.info("SSO settings not found, creating default settings")
+                _settings = GlobalSettings.objects.create(
+                    name=GlobalSettings.Names.SSO,
+                    value={"client_id": "0", "settings": DEFAULT_SAML_SETTINGS},
+                )
+                logger.info("SSO settings created", settings=_settings.value)
+            else:
                 _settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
-                self._result_cache = [
-                    SSOSettings(
-                        id=_settings.id,
-                        name=_settings.name,
-                        created_at=_settings.created_at,
-                        updated_at=_settings.updated_at,
-                        is_published=_settings.is_published,
-                        is_enabled=_settings.value.get("is_enabled"),
-                        provider=_settings.value.get("provider"),
-                        client_id=_settings.value.get("client_id"),
-                        provider_id=_settings.value.get("provider_id"),
-                        provider_name=_settings.value.get("name"),
-                        secret=_settings.value.get("secret"),
-                        key=_settings.value.get("key"),
-                        settings=_settings.value.get("settings"),
-                    )
-                ]
-            except ObjectDoesNotExist:
-                self._result_cache = []
+
+            self._result_cache = [
+                SSOSettings(
+                    id=_settings.id,
+                    name=_settings.name,
+                    created_at=_settings.created_at,
+                    updated_at=_settings.updated_at,
+                    is_published=_settings.is_published,
+                    is_enabled=_settings.value.get("is_enabled"),
+                    provider=_settings.value.get("provider"),
+                    client_id=_settings.value.get("client_id"),
+                    provider_id=_settings.value.get("provider_id"),
+                    provider_name=_settings.value.get("name"),
+                    secret=_settings.value.get("secret"),
+                    key=_settings.value.get("key"),
+                    settings=_settings.value.get("settings"),
+                )
+            ]
 
     def iterator(self):
         self._fetch_all()

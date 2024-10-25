@@ -66,7 +66,6 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = lib_detail_response["framework"]
 
         # Asserts that the library is not already loaded
@@ -99,7 +98,10 @@ class TestLibrariesAuthenticated:
                 "name": lib_detail_response["name"],
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {
+                    "id": str(Folder.get_root_folder().id),
+                    "str": Folder.get_root_folder().name,
+                },
             },
             base_count=1,
             user_group=test.user_group,
@@ -135,7 +137,6 @@ class TestLibrariesAuthenticated:
         )
         lib_detail_response = lib_detail_response.content
         lib_detail_response = json.loads(lib_detail_response)
-        lib_detail_response = json.loads(lib_detail_response)
         lib_detail_response = lib_detail_response["risk_matrix"][0]
 
         # Asserts that the library is not already loaded
@@ -166,7 +167,10 @@ class TestLibrariesAuthenticated:
                 "name": lib_detail_response["name"],
                 "description": lib_detail_response["description"],
                 "urn": lib_detail_response["urn"],
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {
+                    "id": str(Folder.get_root_folder().id),
+                    "str": Folder.get_root_folder().name,
+                },
                 #                                 'json_definition': lib_detail_response  # TODO: restore this test
             },
             base_count=1,

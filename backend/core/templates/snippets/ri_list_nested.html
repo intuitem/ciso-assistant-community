@@ -53,7 +53,7 @@
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                     {% for threat in scenario.threats.all %}
                         <p class="whitespace-no-wrap">
-                            {{ threat }}
+                            {{ threat.get_name_translated }}
                         </p>
                     {% empty %}
                         --
@@ -63,14 +63,10 @@
                     <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_controls|linebreaksbr }}</p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
-                {% for risk in risk_matrix.parse_json.risk %}
-                    {% if risk.name == scenario.get_current_risk.name %}
-                            <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: {{ risk.hexcolor }}">
-                                {{ scenario.get_current_risk.name }}
-                            </p>
-                        </td>
-                    {% endif %}
-                {% endfor %}
+                    <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: {{ scenario.get_current_risk.hexcolor }}">
+                        {{ scenario.get_current_risk.name }}
+                    </p>
+                </td>
                 {% if scenario.get_current_risk.name == '--' %}
                             <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: #808080">
                                 {{ scenario.get_residual_risk.name }}
@@ -78,14 +74,10 @@
                         </td>
                 {% endif %}
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
-                {% for risk in risk_matrix.parse_json.risk %}
-                    {% if risk.name == scenario.get_residual_risk.name %}
-                            <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: {{ risk.hexcolor }}">
-                                {{ scenario.get_residual_risk.name }}
-                            </p>
-                        </td>
-                    {% endif %}
-                {% endfor %}
+                    <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: {{ scenario.get_residual_risk.hexcolor }}">
+                        {{ scenario.get_residual_risk.name }}
+                    </p>
+                </td>
                 {% if scenario.get_residual_risk.name == '--' %}
                             <p class="flex justify-center whitespace-no-wrap rounded" style="background-color: #808080">
                                 {{ scenario.get_residual_risk.name }}

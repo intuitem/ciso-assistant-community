@@ -9,6 +9,7 @@
 	export let helpText: string | undefined = undefined;
 	export let form;
 	export let allowPaste: boolean = false;
+	export let resetSignal: boolean = false; // Reset the form value if set to true
 	// allowPaste should be set to false when we have multiple FileField at the same time (the ideal implementation would be to deduce to which FileInput the paste operation must be forwarded depending on the targetElement of the "paste" event)
 
 	const { errors, constraints } = formFieldProxy(form, field);
@@ -68,6 +69,11 @@
 				break;
 			}
 		}
+	}
+
+	$: if (resetSignal) {
+		const dataTransfer = new DataTransfer();
+		$value = dataTransfer.files; // Empty FileList
 	}
 </script>
 

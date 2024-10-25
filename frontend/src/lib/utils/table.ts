@@ -200,21 +200,57 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	alwaysDisplay: true
 };
 
-/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
-	component: CheckboxFilter,
-	getColumn: row => {
-		return !row.meta.overview.some(
-			line => line.startsWith("risk_matrix")
-		); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
-	},
-	filterProps: (rows: any[],field: string) => new Object(),
-	filter: (builtin: boolean, value: boolean): boolean => {
-		return value ? !builtin : true;
+const OWNER_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const owner = row?.meta?.owner;
+		return owner && owner.length ? owner.map((o) => o.str) : null;
 	},
 	extraProps: {
-		title: "Only display matrix libraries" // Make translations
-	}
+		defaultOptionName: 'owner'
+	},
+	alwaysDisplay: true
+};
+/* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
+  component: CheckboxFilter,
+  getColumn: row => {
+    return !row.meta.overview.some(
+      line => line.startsWith("risk_matrix")
+    ); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
+  },
+  filterProps: (rows: any[],field: string) => new Object(),
+  filter: (builtin: boolean, value: boolean): boolean => {
+    return value ? !builtin : true;
+  },
+  extraProps: {
+    title: "Only display matrix libraries" // Make translations
+  }
 }; */
+
+const LIBRARY_TYPE_FILTER = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		const overviewKeys = new Set(row.overview.map((overviewRow) => overviewRow.split(':')[0]));
+		const libraryDatatypeSet = new Set([
+			'framework',
+			'risk_matrix',
+			'threats',
+			'requirement_mapping_set',
+			'reference_controls'
+		]);
+		const datatypes = [...libraryDatatypeSet].filter((datatype) => overviewKeys.has(datatype));
+		return datatypes;
+	},
+	extraProps: {
+		defaultOptionName: 'objectType',
+		optionLabels: {
+			reference_controls: 'referenceControls',
+			requirement_mapping_set: 'requirementMappingSet',
+			risk_matrix: 'riskMatrix'
+		}
+	},
+	alwaysDisplay: true
+};
 
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
@@ -283,13 +319,32 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'csfFunction', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'category', 'csf_function', 'eta', 'folder', 'reference_control'],
+		head: [
+			'name',
+			'description',
+			'category',
+			'csfFunction',
+			'eta',
+			'owner',
+			'domain',
+			'referenceControl'
+		],
+		body: [
+			'name',
+			'description',
+			'category',
+			'csf_function',
+			'eta',
+			'owner',
+			'folder',
+			'reference_control'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: STATUS_FILTER,
 			category: CATEGORY_FILTER,
-			csf_function: CSF_FUNCTION_FILTER
+			csf_function: CSF_FUNCTION_FILTER,
+			owner: OWNER_FILTER
 		}
 	},
 	policies: {
@@ -306,6 +361,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		filters: {
 			folder: { ...DOMAIN_FILTER, alwaysDisplay: true },
 			category: CATEGORY_FILTER,
+			provider: PROVIDER_FILTER,
 			csf_function: CSF_FUNCTION_FILTER
 		}
 	},
@@ -379,8 +435,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
-			// has_risk_matrix: HAS_RISK_MATRIX_FILTER
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'loaded-libraries': {
@@ -388,7 +444,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES
+			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
 	'sso-settings': {
@@ -398,5 +455,28 @@ export const listViewFields: ListViewFieldsConfig = {
 	'requirement-mapping-sets': {
 		head: ['sourceFramework', 'targetFramework'],
 		body: ['source_framework', 'target_framework']
+	},
+	entities: {
+		head: ['name', 'description', 'domain', 'ownedFolders'],
+		body: ['name', 'description', 'folder', 'owned_folders'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'entity-assessments': {
+		head: ['name', 'description', 'project', 'entity'],
+		body: ['name', 'description', 'project', 'entity'],
+		filters: {
+			project: PROJECT_FILTER,
+			status: STATUS_FILTER
+		}
+	},
+	solutions: {
+		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
+		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality']
+	},
+	representatives: {
+		head: ['email', 'entity', 'role'],
+		body: ['email', 'entity', 'role']
 	}
 };
