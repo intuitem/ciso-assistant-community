@@ -175,7 +175,11 @@ class LicenseStatusView(APIView):
             )
 
         try:
-            expiry_date = datetime.fromisoformat(expiry_date_str)
+            try:
+                expiry_date = datetime.fromisoformat(expiry_date_str)
+            except ValueError:
+                expiry_date = "NoExpiryDateSet"
+                return Response({"status": "active", "message": expiry_date})
         except ValueError as e:
             logger.error("Invalid expiry date format", exc_info=e)
             return Response(
