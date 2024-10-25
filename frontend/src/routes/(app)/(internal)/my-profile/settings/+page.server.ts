@@ -63,7 +63,7 @@ export const actions: Actions = {
 		}
 
 		console.debug('Activated TOTP', data);
-		setFlash({ type: 'success', message: '_successfullyActivatedTOTP' }, event);
+		setFlash({ type: 'success', message: m.successfullyActivatedTOTP() }, event);
 		return { form };
 	},
 	deactivateTOTP: async (event) => {
