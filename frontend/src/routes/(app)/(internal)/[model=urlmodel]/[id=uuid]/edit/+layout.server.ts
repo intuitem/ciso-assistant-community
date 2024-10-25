@@ -11,7 +11,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 
 // This object has been created only to fix the codefactor "complexity" test fail
 const objectFormatters = {
-	'vulnerabilities': (object) => {
+	vulnerabilities: (object) => {
 		// This code must be modified once we support multiple references
 		// This code must also be modified if we ever support new vulnerability catalogs.
 		const reference = object.references[0];
