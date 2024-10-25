@@ -38,7 +38,6 @@ READER_PERMISSIONS_LIST = [
     "view_vulnerability",
     "view_user",
     "view_usergroup",
-
 ]
 
 APPROVER_PERMISSIONS_LIST = [
