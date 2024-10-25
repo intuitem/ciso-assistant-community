@@ -782,5 +782,14 @@
 	"catalog": "Catalog",
 	"operations": "Operațiuni",
 	"fillMetadataURL": "Opțiunea 1: completați adresa URL a metadatelor",
-	"fillSSOSLOURLx509cert": "Opțiunea 2: completați URL-ul SSO, URL-ul SLO și x509cert"
+	"fillSSOSLOURLx509cert": "Opțiunea 2: completați URL-ul SSO, URL-ul SLO și x509cert",
+	"critical": "critical",
+	"vulnerabilities": "vulnerabilities",
+	"referenceRefId": "referenceRefId",
+	"vulnerabilityCatalog": "vulnerabilityCatalog",
+	"severity": "severity",
+	"potential": "potential",
+	"exploitable": "exploitable",
+	"mitigated": "mitigated",
+	"fixed": "fixed"
 }
