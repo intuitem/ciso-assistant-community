@@ -98,7 +98,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     urn = models.CharField(
         max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
     )
-    ref_id = models.CharField(
+    ref_id = models.CharField(  # Should this field be nullable ?
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
     provider = models.CharField(
@@ -876,7 +876,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations_as_string(self.json_definition, "fr")
+        return update_translations_as_string(self.json_definition, "fr")  # Why "fr" ?
 
     def __str__(self) -> str:
         return self.get_name_translated
@@ -1297,7 +1297,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         blank=True,
         verbose_name=_("CSF Function"),
     )
-    status = models.CharField(
+    status = models.CharField(  # Should this field be nullable since there is a default value ?
         max_length=20,
         choices=Status.choices,
         default=Status.UNDEFINED,
@@ -1433,6 +1433,50 @@ class Policy(AppliedControl):
     def save(self, *args, **kwargs):
         self.category = "policy"
         super(Policy, self).save(*args, **kwargs)
+
+
+class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    class Status(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        POTENTIAL = "potential", _("Potential")
+        EXPLOITABLE = "exploitable", _("Exploitable")
+        MITIGATED = "mitigated", _("Mitigated")
+        FIXED = "fixed", _("Fixed")
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.UNDEFINED,
+        verbose_name=_("Status"),
+    )
+    severity = models.IntegerField(
+        default=-1,
+        verbose_name=_("Severity"),
+        help_text=_("The severity of the vulnerability"),
+    )
+    references = models.JSONField(default=list)
+
+    # This descriptor must be deleted once we decide to support multiple references
+    @property
+    def vulnerability_catalog(self) -> str:
+        # This code must be modified if we ever support new vulnerability catalogs.
+        if self.references:
+            reference = self.references[0]
+            if reference.get("is_kev", False):
+                return "kve"
+            elif reference.get("is_cve", False):
+                return "cve"
+        return ""
+
+    # This descriptor must be deleted once we decide to support multiple references
+    @property
+    def reference_ref_id(self) -> str:
+        if self.references:
+            return self.references[0].get("ref_id", "")
+        return ""
 
 
 ########################### Secondary objects #########################

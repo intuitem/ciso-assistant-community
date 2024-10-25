@@ -14,6 +14,22 @@ export const load: LayoutServerLoad = async (event) => {
 	const schema = modelSchema(event.params.model);
 	const objectEndpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
 	const object = await event.fetch(objectEndpoint).then((res) => res.json());
+
+	// The following condition exists because of limitations in the DRF serializers.
+	// Having 2 separate descriptors (@property) to handle a single field (references) is not really feasible.
+	if (URLModel === 'vulnerabilities') {
+		// This code must be modified once we support multiple references
+		// This code must also be modified if we ever support new vulnerability catalogs.
+		const reference = object.references[0];
+		object.reference_ref_id = reference ? reference.ref_id : '';
+		if (!reference || !reference.is_cve) {
+			object.vulnerability_catalog = ''; // Is this an empty string ?
+		} else if (reference.is_kev) {
+			object.vulnerability_catalog = 'kev';
+		} else {
+			object.vulnerability_catalog = 'cve';
+		}
+	}
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(event.params.model!);
 	const foreignKeyFields = model.foreignKeyFields;
@@ -77,6 +93,5 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
-
 	return { form, model, object, foreignKeys, selectOptions, URLModel };
 };
