@@ -786,7 +786,7 @@
 	"critical": "Critic",
 	"vulnerabilities": "Vulnerabilități",
 	"referenceRefId": "ID de referință al referinței",
-	"referenceVulnerabilityCatalog": "Catalogul de vulnerabilități",
+	"referenceVulnerabilityCatalog": "Catalogul de vulnerabilități al referinței",
 	"severity": "Severity",
 	"potential": "Potenţial",
 	"exploitable": "Exploatabil",
