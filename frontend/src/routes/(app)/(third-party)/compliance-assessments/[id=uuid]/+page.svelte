@@ -29,7 +29,6 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
-	import { toCamelCase } from '$lib/utils/locales';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 
@@ -43,9 +42,9 @@
 	import List from '$lib/components/List/List.svelte';
 
 	$: breadcrumbObject.set(data.compliance_assessment);
-	const tree = data.tree;
+	$: tree = data.tree;
 
-	const compliance_assessment_donut_values = data.compliance_assessment_donut_values;
+	$: compliance_assessment_donut_values = data.compliance_assessment_donut_values;
 
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
@@ -83,6 +82,7 @@
 	};
 
 	function transformToTreeView(nodes: Node[]) {
+		if (!tree) return [];
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
 			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
@@ -111,7 +111,10 @@
 			};
 		});
 	}
-	const treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
+	let treeViewNodes: TreeViewNode[];
+	$: if (tree) {
+		treeViewNodes = transformToTreeView(Object.entries(tree));
+	}
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -258,46 +261,48 @@
 				</div>
 			{/each}
 		</div>
-		<div class="flex w-1/3 relative">
-			{#if data.global_score.score >= 0}
-				<div class="absolute font-bold text-sm">{m.maturity()}</div>
-				<div class="flex justify-center items-center w-full">
-					<ProgressRadial
-						stroke={100}
-						meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
-						font={125}
-						value={(data.global_score.score * 100) / data.global_score.max_score}
-						width={'w-52'}
-					>
-						{data.global_score.score}
-					</ProgressRadial>
-				</div>
-			{/if}
-		</div>
-		<div class="w-1/3">
-			<DonutChart
-				s_label="Result"
-				name="compliance_result"
-				title={m.compliance()}
-				orientation="horizontal"
-				values={compliance_assessment_donut_values.result.values}
-				colors={compliance_assessment_donut_values.result.values.map(
-					(object) => object.itemStyle.color
-				)}
-			/>
-		</div>
-		<div class="w-1/3">
-			<DonutChart
-				s_label="Status"
-				name="compliance_status"
-				title={m.progress()}
-				orientation="horizontal"
-				values={compliance_assessment_donut_values.status.values}
-				colors={compliance_assessment_donut_values.status.values.map(
-					(object) => object.itemStyle.color
-				)}
-			/>
-		</div>
+		{#key compliance_assessment_donut_values}
+			<div class="flex w-1/3 relative">
+				{#if data.global_score.score >= 0}
+					<div class="absolute font-bold text-sm">{m.maturity()}</div>
+					<div class="flex justify-center items-center w-full">
+						<ProgressRadial
+							stroke={100}
+							meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
+							font={125}
+							value={(data.global_score.score * 100) / data.global_score.max_score}
+							width={'w-52'}
+						>
+							{data.global_score.score}
+						</ProgressRadial>
+					</div>
+				{/if}
+			</div>
+			<div class="w-1/3">
+				<DonutChart
+					s_label="Result"
+					name="compliance_result"
+					title={m.compliance()}
+					orientation="horizontal"
+					values={compliance_assessment_donut_values.result.values}
+					colors={compliance_assessment_donut_values.result.values.map(
+						(object) => object.itemStyle.color
+					)}
+				/>
+			</div>
+			<div class="w-1/3">
+				<DonutChart
+					s_label="Status"
+					name="compliance_status"
+					title={m.progress()}
+					orientation="horizontal"
+					values={compliance_assessment_donut_values.status.values}
+					colors={compliance_assessment_donut_values.status.values.map(
+						(object) => object.itemStyle.color
+					)}
+				/>
+			</div>
+		{/key}
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
 				<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
@@ -386,7 +391,9 @@
 		<div class=" flex items-center font-semibold">
 			<span class="h4">{m.associatedRequirements()}</span>
 			<span class="badge variant-soft-primary ml-1">
-				{assessableNodesCount(treeViewNodes)}
+				{#if treeViewNodes}
+					{assessableNodesCount(treeViewNodes)}
+				{/if}
 			</span>
 			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
 				{#if $displayOnlyAssessableNodes}
@@ -415,12 +422,14 @@
 			<i class="fa-solid fa-diagram-project" />
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
-		{#key $displayOnlyAssessableNodes}
-			<RecursiveTreeView
-				nodes={transformToTreeView(Object.entries(tree))}
-				bind:expandedNodes
-				hover="hover:bg-initial"
-			/>
+		{#key data}
+			{#key $displayOnlyAssessableNodes}
+				<RecursiveTreeView
+					nodes={transformToTreeView(Object.entries(tree))}
+					bind:expandedNodes
+					hover="hover:bg-initial"
+				/>
+			{/key}
 		{/key}
 	</div>
 </div>
