@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"addThreat": "Add threat",
+	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
 	"addAppliedControl": "Add applied control",
 	"addAsset": "Add asset",
