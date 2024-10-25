@@ -7,6 +7,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
+import { z } from 'zod';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
@@ -48,7 +49,7 @@ export const actions: Actions = {
 		const data = await response.json();
 
 		if (data.status !== 200) {
-			// console.error('Could not activate TOTP', data);
+			console.error('Could not activate TOTP', data);
 			if (Object.hasOwn(data, 'errors')) {
 				data.errors.forEach((error) => {
 					console.log('error', error.param, safeTranslate(error.code));
@@ -63,6 +64,18 @@ export const actions: Actions = {
 		return { form };
 	},
 	deactivateTOTP: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(
+			formData,
+			zod(
+				z.object({
+					any: z.any()
+				})
+			)
+		);
+
 		const endpoint = `${ALLAUTH_API_URL}/account/authenticators/totp`;
 		const requestInitOptions: RequestInit = {
 			method: 'DELETE'
@@ -74,8 +87,9 @@ export const actions: Actions = {
 			return fail(response.status, { error: 'Could not deactivate TOTP' });
 		}
 
+		console.debug('Deactivated TOTP', response);
 		setFlash({ type: 'success', message: m.successfullyDeactivatedTOTP() }, event);
-		return { status: 'success' };
+		return { form };
 	},
 	regenerateRecoveryCodes: async (event) => {
 		throw new Error('Not implemented');
