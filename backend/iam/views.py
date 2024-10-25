@@ -1,11 +1,16 @@
 from base64 import urlsafe_b64decode
+
+import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
+from knox.auth import TokenAuthentication
+from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions, serializers, status, views
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
@@ -13,22 +18,16 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from knox.views import LoginView as KnoxLoginView
 
-from iam.utils import KnoxTokenStrategy
-
+from .models import Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
-    SetPasswordSerializer,
     ResetPasswordConfirmSerializer,
+    SetPasswordSerializer,
 )
-
-from .models import Role, RoleAssignment
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -86,11 +85,30 @@ class CurrentUserView(views.APIView):
         return Response(res_data, status=HTTP_200_OK)
 
 
-class AllauthSessionTokenView(views.APIView):
-    def get(self, request):
-        strategy = KnoxTokenStrategy()
-        allauth_session_token = strategy.create_session_token(request)
-        return Response({"token": allauth_session_token})
+class SessionTokenView(views.APIView):
+    """
+    API Endpoint for getting the session token from an access token
+    This is needed for allauth's authentication flows.
+    """
+
+    def post(self, request):
+        access_token = request.META.get("HTTP_AUTHORIZATION").split(" ")[1]
+        if not access_token:
+            return Response(
+                {"error": "No access token provided"}, status=HTTP_401_UNAUTHORIZED
+            )
+        # Get user from token
+        auth = TokenAuthentication()
+        user, _ = auth.authenticate_credentials(access_token.encode())
+        if not user:
+            return Response(
+                {"error": "Invalid access token"}, status=HTTP_401_UNAUTHORIZED
+            )
+        # Log the user in and get the session token
+        # This token is used for allauth's authentication flows
+        login(request, user)
+        session_token = request.session.session_key
+        return Response({"token": session_token})
 
 
 class PasswordResetView(views.APIView):
