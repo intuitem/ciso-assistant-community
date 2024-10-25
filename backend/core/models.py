@@ -1896,6 +1896,13 @@ class RiskScenario(NameDescriptionMixin):
         help_text=_("Assets impacted by the risk scenario"),
         related_name="risk_scenarios",
     )
+    vulnerabilities = models.ManyToManyField(
+        Vulnerability,
+        verbose_name=_("Vulnerabilities"),
+        blank=True,
+        help_text=_("Vulnerabities exploited by the risk scenario"),
+        related_name="risk_scenarios",
+    )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         verbose_name=_("Applied controls"),

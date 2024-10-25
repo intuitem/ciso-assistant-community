@@ -362,6 +362,8 @@ class VulnerabilityViewSet(BaseModelViewSet):
     """
 
     model = Vulnerability
+    filterset_fields = ["folder", "status", "severity", "risk_scenarios"]
+    search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
