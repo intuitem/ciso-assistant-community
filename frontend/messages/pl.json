@@ -786,7 +786,7 @@
 	"critical": "Krytyczny",
 	"vulnerabilities": "Usterki",
 	"referenceRefId": "Identyfikator referencyjny odniesienia",
-	"referenceVulnerabilityCatalog": "Katalog podatności odniesienia",
+	"vulnerabilityCatalog": "Katalog podatności odniesienia",
 	"severity": "Powaga",
 	"potential": "Potencjał",
 	"exploitable": "Wykorzystywany",
