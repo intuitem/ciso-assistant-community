@@ -782,5 +782,14 @@
 	"catalog": "Catalogare",
 	"operations": "Operazioni",
 	"fillMetadataURL": "Opzione 1: compila l'URL dei metadati",
-	"fillSSOSLOURLx509cert": "Opzione 2: compilare l'URL SSO, l'URL SLO e x509cert"
+	"fillSSOSLOURLx509cert": "Opzione 2: compilare l'URL SSO, l'URL SLO e x509cert",
+	"critical": "critical",
+	"vulnerabilities": "vulnerabilities",
+	"referenceRefId": "referenceRefId",
+	"vulnerabilityCatalog": "vulnerabilityCatalog",
+	"severity": "severity",
+	"potential": "potential",
+	"exploitable": "exploitable",
+	"mitigated": "mitigated",
+	"fixed": "fixed"
 }

@@ -782,5 +782,14 @@
 	"catalog": "الكتالوج",
 	"operations": "العمليات",
 	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
-	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert"
+	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert",
+	"critical": "critical",
+	"vulnerabilities": "vulnerabilities",
+	"referenceRefId": "referenceRefId",
+	"vulnerabilityCatalog": "vulnerabilityCatalog",
+	"severity": "severity",
+	"potential": "potential",
+	"exploitable": "exploitable",
+	"mitigated": "mitigated",
+	"fixed": "fixed"
 }

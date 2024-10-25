@@ -51,8 +51,7 @@
 <TextField
 	{form}
 	field="ref_id"
-	label={'Ref ID'}
-	helpText={'Ref ID help text'}
+	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
