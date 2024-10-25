@@ -130,12 +130,10 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
 
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    reference_ref_id = serializers.CharField()
-    vulnerability_catalog = serializers.CharField()
 
     class Meta:
         model = Vulnerability
-        exclude = ["references", "created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at", "is_published"]
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
