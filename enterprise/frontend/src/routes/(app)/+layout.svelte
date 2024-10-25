@@ -1,5 +1,5 @@
 <script lang="ts">
-	// Most of your app wide CSS should be put in this file
+
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 	import '../../app.postcss';
@@ -11,6 +11,10 @@
 	import { clientSideToast, pageTitle } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 	import type { LayoutData } from './$types';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page } from '$app/stores';
+	import { toastShown } from './sessionStore';
+	import { get } from 'svelte/store';
 
 	export let data: LayoutData;
 
@@ -36,6 +40,35 @@
 				});
 			});
 		}
+	}
+
+	let licenseStatus: Record<string, any>;
+	let warning: boolean = false;
+	let licenseMessage: string;
+
+	const expirationDays = data.LICENSE_EXPIRATION_DAYS;
+
+	licenseStatus = data.licenseStatus;
+	const flash = getFlash(page);
+
+	if (licenseStatus?.status === "active" && licenseStatus?.days_left <= expirationDays) {
+		warning = true;
+	}
+
+	function showMessage() {
+		if (!get(toastShown)) {
+			licenseMessage = m.licenceToast({ days_left: licenseStatus.days_left });
+			$flash = { type: 'info', message: licenseMessage };
+			toastShown.set(true);
+		}
+	}
+
+	if (warning) {
+		showMessage();
+	}
+
+	$: if (warning && !get(toastShown)) {
+		showMessage();
 	}
 </script>
 
