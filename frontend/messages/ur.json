@@ -786,7 +786,7 @@
 	"critical": "تنقیدی",
 	"vulnerabilities": "کمزوریاں",
 	"referenceRefId": "حوالہ کا حوالہ ID",
-	"referenceVulnerabilityCatalog": "کمزوری کا کیٹلاگ",
+	"referenceVulnerabilityCatalog": "حوالہ کی کمزوری کیٹلاگ",
 	"severity": "شدت",
 	"potential": "ممکنہ",
 	"exploitable": "استحصال کے قابل",
