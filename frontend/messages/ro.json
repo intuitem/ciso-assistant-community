@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"addThreat": "Adaugă amenințare",
+	"addVulnerability": "Adăugați vulnerabilitate",
 	"addReferenceControl": "Adaugă control de referință",
 	"addAppliedControl": "Adaugă control aplicat",
 	"addAsset": "Adaugă activ",
@@ -730,7 +731,6 @@
 	"waitingRiskAcceptances": "Buna ziua! În prezent, aveți {number} riscul{s} în așteptare. Le puteți găsi în fila de riscuri.",
 	"licenseSeats": "Scaune de licență",
 	"licenseExpiration": "Expirarea licenței",
-	"licenseExpiredMessage": "Licența dvs. a expirat. Operațiunile de scriere sunt dezactivate. Vă rugăm să contactați administratorul pentru a-l reînnoi.",
 	"answer": "Răspuns",
 	"questionnaireMode": "Modul chestionar",
 	"assessmentMode": "Modul de evaluare",
@@ -760,6 +760,8 @@
 	"theFollowingControlsWillBeAddedColon": "Vor fi adăugate următoarele controale:",
 	"ShowAllNodesMessage": "Arată tot",
 	"ShowOnlyAssessable": "Doar evaluabil",
+	"NoPreviewMessage": "Nicio previzualizare disponibilă.",
+	"licenseExpiredMessage": "Licența dvs. a expirat. Operațiunile de scriere sunt dezactivate. Vă rugăm să contactați administratorul pentru a-l reînnoi.",
 	"experimental": "Experimental",
 	"timeline": "Cronologie",
 	"graph": "Grafic",
@@ -802,5 +804,12 @@
 	"sumpageTitleCurrentRisks": "Riscuri actuale",
 	"sumpageTitleResidualRisks": "Riscuri reziduale",
 	"sumpageSectionCompliance": "conformitate",
-	"sumpageSectionRisk": "risc"
+	"sumpageSectionRisk": "risc",
+	"critical": "Critic",
+	"vulnerabilities": "Vulnerabilități",
+	"severity": "Severitate",
+	"potential": "Potenţial",
+	"exploitable": "Exploatabil",
+	"mitigated": "Atenuat",
+	"fixed": "Fix"
 }
