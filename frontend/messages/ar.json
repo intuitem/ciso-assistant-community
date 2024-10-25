@@ -786,7 +786,7 @@
 	"critical": "شديد الأهمية",
 	"vulnerabilities": "نقاط الضعف",
 	"referenceRefId": "معرف المرجع للمرجع",
-	"referenceVulnerabilityCatalog": "كتالوج نقاط الضعف للمرجع",
+	"vulnerabilityCatalog": "كتالوج نقاط الضعف للمرجع",
 	"severity": "خطورة",
 	"potential": "محتمل",
 	"exploitable": "قابلة للاستغلال",
