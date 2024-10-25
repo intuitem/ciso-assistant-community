@@ -69,7 +69,9 @@
 	$: displayDelete = canDeleteObject && deleteForm !== undefined;
 </script>
 
-<span class="space-x-2 whitespace-nowrap flex flex-row items-center text-surface-700 justify-end">
+<span
+	class="space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end"
+>
 	<slot name="head" />
 	<slot name="body" />
 	{#if !hasBody}
