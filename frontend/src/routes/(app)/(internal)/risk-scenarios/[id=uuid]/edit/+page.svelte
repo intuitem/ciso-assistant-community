@@ -164,15 +164,13 @@
 						</p>
 					</div>
 					<div class=" px-2 w-2/4">
-						<p class="text-sm font-semibold">
-							<AutocompleteSelect
-								{form}
-								multiple
-								options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
-								field="owner"
-								label={m.owner()}
-							/>
-						</p>
+						<AutocompleteSelect
+							{form}
+							multiple
+							options={getOptions({ objects: data.foreignKeys['owner'], label: 'email' })}
+							field="owner"
+							label={m.owner()}
+						/>
 					</div>
 					<div class=" w-1/4">
 						<Select
