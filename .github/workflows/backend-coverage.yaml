@@ -73,7 +73,7 @@ jobs:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: |
           export $(grep -v '^#' .env | xargs)
-          find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m poetry run pytest
+          find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m pytest
       - name: Display coverage report
         working-directory: ${{env.backend-directory}}
         env:
