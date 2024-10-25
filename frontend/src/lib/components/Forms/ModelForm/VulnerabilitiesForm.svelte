@@ -73,7 +73,7 @@
 		{ label: 'KEV', value: 'kev' }
 	]}
 	field="vulnerability_catalog"
-	label={m.referenceVulnerabilityCatalog()}
+	label={m.vulnerabilityCatalog()}
 	cacheLock={cacheLocks['vulnerability_catalog']}
 	bind:cachedValue={formDataCache['vulnerability_catalog']}
 />
