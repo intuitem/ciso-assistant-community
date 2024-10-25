@@ -783,7 +783,7 @@
 	"operations": "Operațiuni",
 	"fillMetadataURL": "Opțiunea 1: completați adresa URL a metadatelor",
 	"fillSSOSLOURLx509cert": "Opțiunea 2: completați URL-ul SSO, URL-ul SLO și x509cert",
-	"critical": "critical",
+	"critical": "Critical",
 	"vulnerabilities": "vulnerabilities",
 	"referenceRefId": "referenceRefId",
 	"vulnerabilityCatalog": "vulnerabilityCatalog",

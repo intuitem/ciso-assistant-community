@@ -783,7 +783,7 @@
 	"operations": "Operazioni",
 	"fillMetadataURL": "Opzione 1: compila l'URL dei metadati",
 	"fillSSOSLOURLx509cert": "Opzione 2: compilare l'URL SSO, l'URL SLO e x509cert",
-	"critical": "critical",
+	"critical": "Critical",
 	"vulnerabilities": "vulnerabilities",
 	"referenceRefId": "referenceRefId",
 	"vulnerabilityCatalog": "vulnerabilityCatalog",

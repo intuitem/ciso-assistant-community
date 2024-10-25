@@ -783,7 +783,7 @@
 	"operations": "العمليات",
 	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
 	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert",
-	"critical": "critical",
+	"critical": "Critical",
 	"vulnerabilities": "vulnerabilities",
 	"referenceRefId": "referenceRefId",
 	"vulnerabilityCatalog": "vulnerabilityCatalog",
