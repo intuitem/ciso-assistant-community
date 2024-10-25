@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { loginSchema } from '$lib/utils/schemas';
-	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import { loginSchema } from '$lib/utils/schemas';
 
+	import { page } from '$app/stores';
+	import { redirectToProvider } from '$lib/allauth.js';
 	import * as m from '$paraglide/messages.js';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { redirectToProvider } from '$lib/allauth.js';
 
 	export let data: any;
 </script>
@@ -31,7 +32,7 @@
 				dataType="form"
 				let:form
 				validators={zod(loginSchema)}
-				action="?/login"
+				action="?/login&next={$page.url.searchParams.get('next') || '/'}"
 			>
 				<TextField type="email" {form} field="username" label={m.email()} />
 				<TextField type="password" {form} field="password" label={m.password()} />

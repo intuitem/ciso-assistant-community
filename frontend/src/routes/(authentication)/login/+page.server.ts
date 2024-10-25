@@ -117,10 +117,8 @@ export const actions: Actions = {
 			secure: true
 		});
 
-		redirect(
-			302,
-			getSecureRedirect(getSecureRedirect(url.searchParams.get('next')) || '/analytics')
-		);
+		const next = url.searchParams.get('next') || '/';
+		redirect(302, getSecureRedirect(next));
 	},
 	mfaAuthenticate: async (event) => {
 		const formData = await event.request.formData();
