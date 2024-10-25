@@ -40,6 +40,7 @@
 				validators={zod(mfaAuthenticateSchema)}
 				let:form
 				class="modal-form {cForm}"
+				validationMethod="onsubmit"
 			>
 				<!-- prettier-ignore -->
 				<OTPInput {form} field="code" />
