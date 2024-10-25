@@ -805,8 +805,6 @@
 	"sumpageSectionRisk": "risico",
 	"critical": "Kritisch",
 	"vulnerabilities": "Kwetsbaarheden",
-	"referenceRefId": "Referentie-ID van de referentie",
-	"vulnerabilityCatalog": "Kwetsbaarheidscatalogus van de referentie",
 	"severity": "Ernst",
 	"potential": "Potentieel",
 	"exploitable": "Exploiteerbaar",

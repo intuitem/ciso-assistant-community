@@ -115,22 +115,6 @@ export async function defaultWriteFormAction({
 		form.data[key] = undefined;
 	});
 
-	if (urlModel === 'vulnerabilities') {
-		form.data.references = [];
-		if (form.data.reference_ref_id) {
-			const isKev = form.data.vulnerability_catalog === 'kev';
-			const isCve = form.data.vulnerability_catalog === 'cve' || isKev;
-			// There is only one reference for now, this code will have to be adapted to handle multiple references in the future.
-			form.data.references[0] = {
-				ref_id: form.data.reference_ref_id,
-				is_cve: isCve,
-				is_kev: isKev
-			};
-			delete form.data['reference_ref_id'];
-			delete form.data['vulnerability_catalog'];
-		}
-	}
-
 	const requestInitOptions: RequestInit = {
 		method: getHTTPMethod({ action, fileFields }),
 		body: JSON.stringify(form.data)

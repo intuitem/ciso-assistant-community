@@ -35,8 +35,10 @@ READER_PERMISSIONS_LIST = [
     "view_solution",
     "view_storedlibrary",
     "view_threat",
+    "view_vulnerability",
     "view_user",
     "view_usergroup",
+
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -49,6 +51,7 @@ APPROVER_PERMISSIONS_LIST = [
     "approve_riskacceptance",
     "view_asset",
     "view_threat",
+    "view_vulnerability",
     "view_referencecontrol",
     "view_folder",
     "view_usergroup",

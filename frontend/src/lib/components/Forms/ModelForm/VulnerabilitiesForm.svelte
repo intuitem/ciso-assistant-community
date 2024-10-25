@@ -55,25 +55,3 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-
-<TextField
-	{form}
-	field="reference_ref_id"
-	label={m.referenceRefId()}
-	cacheLock={cacheLocks['reference_ref_id']}
-	bind:cachedValue={formDataCache['reference_ref_id']}
-/>
-
-<Select
-	{form}
-	disabled={!formDataCache['reference_ref_id']}
-	options={[
-		{ label: '--', value: '' },
-		{ label: 'CVE', value: 'cve' },
-		{ label: 'KEV', value: 'kev' }
-	]}
-	field="vulnerability_catalog"
-	label={m.vulnerabilityCatalog()}
-	cacheLock={cacheLocks['vulnerability_catalog']}
-	bind:cachedValue={formDataCache['vulnerability_catalog']}
-/>
