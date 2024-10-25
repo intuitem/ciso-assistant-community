@@ -13,6 +13,9 @@
 		TreeViewNode
 	} from '@skeletonlabs/skeleton';
 
+	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { goto } from '$app/navigation';
+
 	import { getModalStore, getToastStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
@@ -39,7 +42,7 @@
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import List from '$lib/components/List/List.svelte';
 
-	breadcrumbObject.set(data.compliance_assessment);
+	$: breadcrumbObject.set(data.compliance_assessment);
 	const tree = data.tree;
 
 	const compliance_assessment_donut_values = data.compliance_assessment_donut_values;
@@ -186,6 +189,10 @@
 			}
 		};
 		modalStore.trigger(modal);
+	}
+
+	$: if (form && form.redirect){
+		goto(getSecureRedirect(form.redirect));
 	}
 
 	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
