@@ -327,6 +327,15 @@ export const representativeSchema = z.object({
 	description: z.string().optional()
 });
 
+export const vulnerabilitySchema = baseNamedObject({
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	status: z.string().default('--'),
+	severity: z.number().default(-1),
+	reference_ref_id: z.string().optional(),
+	vulnerability_catalog: z.string().optional().default('')
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -348,7 +357,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
-	solutions: solutionSchema
+	solutions: solutionSchema,
+	vulnerabilities: vulnerabilitySchema
 };
 
 export const modelSchema = (model: string) => {

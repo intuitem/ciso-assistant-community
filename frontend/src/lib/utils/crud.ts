@@ -299,6 +299,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' }
 		]
 	},
+	vulnerabilities: {
+		name: 'vulnerability',
+		localName: 'vulnerability',
+		localNamePlural: 'vulnerabilities',
+		verboseName: 'Vulnerability',
+		verboseNamePlural: 'Vulnerabilities',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'status' }]
+	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
 		localName: 'riskAcceptance',
