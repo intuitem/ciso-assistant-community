@@ -6,6 +6,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;
@@ -44,18 +45,13 @@ export const actions: Actions = {
 		console.debug('requestInitOptions', requestInitOptions);
 
 		const response = await event.fetch(endpoint, requestInitOptions);
-		if (!response.ok) {
-			const data = await response.json();
-			console.error('Could not activate TOTP', data);
-			return fail(data.status, { error: data });
-		}
-
 		const data = await response.json();
 
 		if (data.status !== 200) {
-			console.error('Could not activate TOTP', data);
+			// console.error('Could not activate TOTP', data);
 			if (Object.hasOwn(data, 'errors')) {
 				data.errors.forEach((error) => {
+					console.log('error', error.param, safeTranslate(error.code));
 					setError(form, error.param, error.message);
 				});
 			}
