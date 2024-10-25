@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 export const actions: Actions = {
 	create: async (event) => {
 		const redirectToWrittenObject = Boolean(
-			event.params.model === 'entity-assessments' || 'risk-assessments'
+			event.params.model === 'entity-assessments'
 		);
 		return defaultWriteFormAction({
 			event,
