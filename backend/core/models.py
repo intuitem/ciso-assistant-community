@@ -1457,26 +1457,6 @@ class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin)
         verbose_name=_("Severity"),
         help_text=_("The severity of the vulnerability"),
     )
-    references = models.JSONField(default=list)
-
-    # This descriptor must be deleted once we decide to support multiple references
-    @property
-    def vulnerability_catalog(self) -> str:
-        # This code must be modified if we ever support new vulnerability catalogs.
-        if self.references:
-            reference = self.references[0]
-            if reference.get("is_kev", False):
-                return "kve"
-            elif reference.get("is_cve", False):
-                return "cve"
-        return ""
-
-    # This descriptor must be deleted once we decide to support multiple references
-    @property
-    def reference_ref_id(self) -> str:
-        if self.references:
-            return self.references[0].get("ref_id", "")
-        return ""
 
 
 ########################### Secondary objects #########################

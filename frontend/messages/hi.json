@@ -805,8 +805,6 @@
 	"sumpageSectionRisk": "जोखिम",
 	"critical": "गंभीर",
 	"vulnerabilities": "कमजोरियों",
-	"referenceRefId": "संदर्भ की संदर्भ आईडी",
-	"vulnerabilityCatalog": "संदर्भ की भेद्यता सूची",
 	"severity": "गंभीरता",
 	"potential": "संभावना",
 	"exploitable": "दोहन",

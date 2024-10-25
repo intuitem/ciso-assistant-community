@@ -805,8 +805,6 @@
 	"sumpageSectionRisk": "rischio",
 	"critical": "Critica",
 	"vulnerabilities": "Vulnerabilità",
-	"referenceRefId": "ID di riferimento del riferimento",
-	"vulnerabilityCatalog": "Catalogo delle vulnerabilità del riferimento",
 	"severity": "Gravità",
 	"potential": "Potenziale",
 	"exploitable": "Sfruttabile",

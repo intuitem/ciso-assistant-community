@@ -806,8 +806,6 @@
 	"sumpageSectionRisk": "خطرہ",
 	"critical": "تنقیدی",
 	"vulnerabilities": "کمزوریاں",
-	"referenceRefId": "حوالہ کا حوالہ ID",
-	"vulnerabilityCatalog": "حوالہ کی کمزوری کیٹلاگ",
 	"severity": "شدت",
 	"potential": "ممکنہ",
 	"exploitable": "استحصال کے قابل",
