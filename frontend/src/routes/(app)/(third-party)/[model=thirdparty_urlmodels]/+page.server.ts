@@ -66,12 +66,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'compliance-assessments');
+		// const redirectToWrittenObject = Boolean(event.params.model === 'compliance-assessments');
 		return defaultWriteFormAction({
 			event,
 			urlModel: event.params.model as string,
 			action: 'create',
-			redirectToWrittenObject: redirectToWrittenObject
+			redirectToWrittenObject: false
 		});
 	},
 	delete: async (event) => {
