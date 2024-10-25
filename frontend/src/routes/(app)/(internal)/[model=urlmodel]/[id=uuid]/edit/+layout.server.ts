@@ -9,15 +9,9 @@ import { modelSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
 import { zod } from 'sveltekit-superforms/adapters';
 
-export const load: LayoutServerLoad = async (event) => {
-	const URLModel = event.params.model!;
-	const schema = modelSchema(event.params.model);
-	const objectEndpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
-	const object = await event.fetch(objectEndpoint).then((res) => res.json());
-
-	// The following condition exists because of limitations in the DRF serializers.
-	// Having 2 separate descriptors (@property) to handle a single field (references) is not really feasible.
-	if (URLModel === 'vulnerabilities') {
+// This object has been created only to fix the codefactor "complexity" test fail
+const objectFormatters = {
+	'vulnerabilities': (object) => {
 		// This code must be modified once we support multiple references
 		// This code must also be modified if we ever support new vulnerability catalogs.
 		const reference = object.references[0];
@@ -30,6 +24,19 @@ export const load: LayoutServerLoad = async (event) => {
 			object.vulnerability_catalog = 'cve';
 		}
 	}
+};
+
+export const load: LayoutServerLoad = async (event) => {
+	const URLModel = event.params.model!;
+	const schema = modelSchema(event.params.model);
+	const objectEndpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
+	const object = await event.fetch(objectEndpoint).then((res) => res.json());
+
+	const formatter = objectFormatters[URLModel];
+	if (formatter) {
+		formatter(object);
+	}
+
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(event.params.model!);
 	const foreignKeyFields = model.foreignKeyFields;
