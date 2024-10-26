@@ -54,6 +54,8 @@
 	}
 
 	let tabSet = 0;
+
+	$: hasTOTP = data.authenticators.some((auth) => auth.type === 'totp');
 </script>
 
 <TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
@@ -73,16 +75,23 @@
 				<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 					<dt class="font-medium">{m.multiFactorAuthentication()}</dt>
 					<dd class="text-surface-900 sm:col-span-2">
-						<div class="card p-4 bg-inherit w-1/2 flex flex-col space-y-3">
-							<div>
-								<i class="fa-solid fa-mobile-screen-button"></i>
+						<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
+							<div class="flex flex-col space-y-2">
+								<span class="flex flex-row justify-between text-xl">
+									<i class="fa-solid fa-mobile-screen-button"></i>
+									{#if hasTOTP}
+										<i class="fa-solid fa-circle-check text-success-500-400-token"></i>
+									{/if}
+								</span>
 								<span class="flex flex-row space-x-2">
 									<h6 class="h6 text-token">{m.authenticatorApps()}</h6>
-									<p class="badge variant-soft-secondary">{m.recommended()}</p>
+									<p class="badge h-fit variant-soft-secondary">{m.recommended()}</p>
 								</span>
-								<p class="text-sm text-surface-800">{m.authenticatorAppsDescription()}</p>
+								<p class="text-sm text-surface-800 max-w-[50ch]">
+									{m.authenticatorAppsDescription()}
+								</p>
 							</div>
-							{#if data.authenticators.length > 0}
+							{#if hasTOTP}
 								<button
 									class="btn variant-ringed-surface w-fit"
 									on:click={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
