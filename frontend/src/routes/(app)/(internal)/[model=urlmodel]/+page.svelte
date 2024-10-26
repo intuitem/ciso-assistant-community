@@ -5,11 +5,14 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import * as m from '$paraglide/messages';
 	import { checkConstraints } from '$lib/utils/crud';
+	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
+	export let form: ActionData;
 	$: URLModel = data.URLModel;
 
 	const modalStore: ModalStore = getModalStore();
@@ -41,6 +44,10 @@
 			};
 		}
 		modalStore.trigger(modal);
+	}
+
+	$: if (form && form.redirect) {
+		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 
