@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ciso-assistant
+description: A Helm chart for CISO Assistant k8s's deployment
+type: application
+version: 0.1.0
+appVersion: "v1.9.3"
