@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"addThreat": "Agregar amenaza",
+	"addVulnerability": "Agregar vulnerabilidad",
 	"addReferenceControl": "Agregar control de referencia",
 	"addAppliedControl": "Agregar control aplicado",
 	"addAsset": "Agregar activo",
@@ -730,7 +731,6 @@
 	"waitingRiskAcceptances": "Hola! Actualmente tienes {number} riesgo{s} aceptación pendiente. Puedes encontrarlos en la pestaña de riesgo.",
 	"licenseSeats": "Asientos de licencia",
 	"licenseExpiration": "Caducidad de la licencia",
-	"licenseExpiredMessage": "Su licencia ha expirado. Las operaciones de escritura están deshabilitadas. Comuníquese con su administrador para renovarla.",
 	"answer": "Respuesta",
 	"questionnaireMode": "Modo cuestionario",
 	"assessmentMode": "Modo de evaluación",
@@ -760,6 +760,8 @@
 	"theFollowingControlsWillBeAddedColon": "Se agregarán los siguientes controles:",
 	"ShowAllNodesMessage": "Mostrar todo",
 	"ShowOnlyAssessable": "Solo evaluable",
+	"NoPreviewMessage": "No hay vista previa disponible.",
+	"licenseExpiredMessage": "Su licencia ha expirado. Las operaciones de escritura están deshabilitadas. Comuníquese con su administrador para renovarla.",
 	"experimental": "Experimental",
 	"timeline": "Cronología",
 	"graph": "Gráfico",
@@ -802,5 +804,12 @@
 	"sumpageTitleCurrentRisks": "Riesgos actuales",
 	"sumpageTitleResidualRisks": "Riesgos residuales",
 	"sumpageSectionCompliance": "cumplimiento",
-	"sumpageSectionRisk": "riesgo"
+	"sumpageSectionRisk": "riesgo",
+	"critical": "Crítica",
+	"vulnerabilities": "Vulnerabilidades",
+	"severity": "Gravedad",
+	"potential": "Potencial",
+	"exploitable": "Explotable",
+	"mitigated": "Mitigada",
+	"fixed": "Fija"
 }
