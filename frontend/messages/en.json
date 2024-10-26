@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"addThreat": "Add threat",
+	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
 	"addAppliedControl": "Add applied control",
 	"addAsset": "Add asset",
@@ -802,5 +803,12 @@
 	"sumpageTitleCurrentRisks": "Current risks",
 	"sumpageTitleResidualRisks": "Residual risks",
 	"sumpageSectionCompliance": "compliance",
-	"sumpageSectionRisk": "risk"
+	"sumpageSectionRisk": "risk",
+	"critical": "Critical",
+	"vulnerabilities": "Vulnerabilities",
+	"severity": "Severity",
+	"potential": "Potential",
+	"exploitable": "Exploitable",
+	"mitigated": "Mitigated",
+	"fixed": "Fixed"
 }
