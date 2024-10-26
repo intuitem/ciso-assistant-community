@@ -171,6 +171,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
 6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 7. New Zealand Information Security Manual (NZISM) 🇳🇿
+8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
 
 <br/>
 
