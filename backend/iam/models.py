@@ -281,7 +281,7 @@ class UserManager(BaseUserManager):
         EmailAddress.objects.create(
             user=user,
             email=user.email,
-            verified=False,
+            verified=True,
             primary=True,
         )
 
