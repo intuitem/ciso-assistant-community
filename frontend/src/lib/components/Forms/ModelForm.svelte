@@ -10,6 +10,7 @@
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
+	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
 	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
 	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
 	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
@@ -203,6 +204,8 @@
 			{schema}
 			{initialData}
 		/>
+	{:else if URLModel === 'vulnerabilities'}
+		<VulnerabilitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'risk-acceptances'}
 		<RiskAcceptancesForm
 			{form}
