@@ -81,9 +81,13 @@ and run the starter script
 ./docker-compose.sh
 ```
 
+If you are looking for other installation options, you might want to check the [docs](https://intuitem.gitbook.io/ciso-assistant).
+
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
 > If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
 
 > [!WARNING]
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
