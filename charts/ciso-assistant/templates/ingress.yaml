@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: ciso-assistant-{{ .Values.clientName }}
+  labels:
+    client: {{ .Values.clientName }}
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.clientName }}.{{ .Values.clusterDomain }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: ciso-assistant-{{ .Values.clientName }}
+            port:
+              number: 443
+        path: /
+        pathType: Prefix
