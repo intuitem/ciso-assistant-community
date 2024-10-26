@@ -84,11 +84,11 @@
 									{/if}
 								</span>
 								<span class="flex flex-row space-x-2">
-									<h6 class="h6 text-token">{m.authenticatorApps()}</h6>
+									<h6 class="h6 text-token">{m.authenticatorApp()}</h6>
 									<p class="badge h-fit variant-soft-secondary">{m.recommended()}</p>
 								</span>
 								<p class="text-sm text-surface-800 max-w-[50ch]">
-									{m.authenticatorAppsDescription()}
+									{m.authenticatorAppDescription()}
 								</p>
 							</div>
 							{#if hasTOTP}
