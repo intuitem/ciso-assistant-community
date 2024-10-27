@@ -161,6 +161,10 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 58. Adobe Common Controls Framework (CCF) 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
+61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
+62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
+63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
+64. Annex to the Implementing Regulation of NIS 2 on Technical and methodological requirements 🇪🇺
 
 ### Community contributions
 
