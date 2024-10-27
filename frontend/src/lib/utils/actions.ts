@@ -84,15 +84,16 @@ export async function defaultWriteFormAction({
 	event,
 	urlModel,
 	action,
-	doRedirect = true
+	doRedirect = true,
+	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
 	urlModel: string;
 	action: FormAction;
 	doRedirect?: boolean;
+	redirectToWrittenObject?: boolean;
 }) {
 	const formData = await event.request.formData();
-
 	if (!formData) {
 		return fail(400, { form: null });
 	}
@@ -155,20 +156,31 @@ export async function defaultWriteFormAction({
 	const next = getSecureRedirect(event.url.searchParams.get('next'));
 	if (next && doRedirect) redirect(302, next);
 
+	if (redirectToWrittenObject) {
+		return { form, redirect: `/${urlModel}/${writtenObject.id}` };
+	}
 	return { form };
 }
 
 export async function nestedWriteFormAction({
 	event,
-	action
+	action,
+	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
 	action: FormAction;
+	redirectToWrittenObject: boolean;
 }) {
 	const request = event.request.clone();
 	const formData = await request.formData();
 	const urlModel = formData.get('urlmodel') as string;
-	return defaultWriteFormAction({ event, urlModel, action, doRedirect: false });
+	return defaultWriteFormAction({
+		event,
+		urlModel,
+		action,
+		doRedirect: false,
+		redirectToWrittenObject
+	});
 }
 
 export async function defaultDeleteFormAction({
@@ -186,7 +198,7 @@ export async function defaultDeleteFormAction({
 	const endpoint = `${BASE_API_URL}/${urlModel}/${id}/`;
 
 	if (!deleteForm.valid) {
-		console.log(deleteForm.errors);
+		console.error(deleteForm.errors);
 		return fail(400, { form: deleteForm });
 	}
 
@@ -197,7 +209,6 @@ export async function defaultDeleteFormAction({
 		const res = await event.fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();
-			console.log(response);
 			if (response.error) {
 				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
 				return fail(403, { form: deleteForm });

@@ -56,12 +56,12 @@
 	$: result = currentRequirementAssessment.result;
 
 	// Function to update the result of the current item
-	function updateResult(event) {
-		currentRequirementAssessment.result = event.target.value;
+	function updateResult(newResult: string | null) {
+		currentRequirementAssessment.result = newResult;
 		const form = document.getElementById('flashModeForm');
 		const formData = {
 			id: currentRequirementAssessment.id,
-			result: event.target.value
+			result: newResult
 		};
 		fetch(form.action, {
 			method: 'POST',
@@ -114,8 +114,13 @@
 										bind:group={result}
 										name="result"
 										style="border-color: {color}"
-										on:change={updateResult}>{option.label}</RadioItem
+										on:click={() => {
+											const newResult = result === option.id ? 'not_assessed' : option.id;
+											updateResult(newResult);
+										}}
 									>
+										{option.label}
+									</RadioItem>
 								{/each}
 							</RadioGroup>
 						</ul>
