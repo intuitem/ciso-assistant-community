@@ -52,6 +52,7 @@ erDiagram
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
+    ROOT_FOLDER           ||--o{ LABEL                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
@@ -111,6 +112,7 @@ erDiagram
     RISK_ACCEPTANCE              }o--o{ RISK_SCENARIO         : covers
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
+    VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
 
     PROJECT {
         string ref_id
@@ -118,7 +120,6 @@ erDiagram
         string description
         string internal_reference
         string status
-        json   tags
     }
 
     FRAMEWORK {
@@ -149,7 +150,6 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        json        tags
         string      observation
 
         string[]    selected_implementation_groups
@@ -169,7 +169,6 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        json        tags
         string      observation
     }
 
@@ -228,7 +227,6 @@ erDiagram
         url      link
         string   effort
         float    cost
-        json     tags
     }
 
     VULNERABILITY {
@@ -283,7 +281,6 @@ erDiagram
         string type
         asset  parent_asset
         url    reference_link
-        json   tags
     }
 
     RISK_SCENARIO {
@@ -355,6 +352,25 @@ erDiagram
 
 
 ```
+
+### Labels
+
+All objects can be linked to user-defined labels. Labels are simple strings with no blank, regex r"\w{0:36}".
+
+Labels are attached to the root folder. They can be read by everyone, added by any contributor, and modified or deleted only by global administrators. 
+
+```mermaid
+erDiagram
+    ANY_USER_DEFINED_OBJECT   }o--o{ LABEL : has_label
+ 
+    LABEL {
+        string  label
+    }
+```
+
+In all views and analytics, a filter on label shall be displayed.
+
+Note: in MVP, labels are attached only to vulnerabilities.
 
 ## Class diagram for IAM objects
 
@@ -808,7 +824,6 @@ A applied  control has the following specific fields:
 - an effort (--/S/M/L/XL)
 - a cost (--/float value)
 - a url link
-- a list of user-defined tags
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
@@ -825,7 +840,6 @@ Both types of assessments have common fields:
 - a status: (--/planned/in progress/in review/done/deprecated) that facilitates reporting.
 - a list of authors
 - a list of reviewers
-- a list of user-defined tags
 
 An assessment review can be asked. When at least one principal is defined, the *done* status can only be set if a representant of each principal has reviewed and validated the assessment.
 
@@ -1208,7 +1222,6 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        string[]    tags
         string      observation
 
         string      conclusion
@@ -1415,7 +1428,6 @@ erDiagram
         string   type
         asset    parent_asset
         url      reference_link
-        json     tags
         int      confidentiality
         int      integrity
         int      availability
