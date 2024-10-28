@@ -7,9 +7,15 @@
 	export let data: PageData;
 	export let form: ActionData;
 
+	let displaySecurityObjective = false;
+
+	if (data.urlModel === 'assets') {
+		displaySecurityObjective = true;
+	}
+
 	$: if (form && form.redirect) {
 		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 
-<DetailView {data} />
+<DetailView {data}  {displaySecurityObjective}/>
