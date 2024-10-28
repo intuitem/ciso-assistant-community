@@ -247,6 +247,10 @@ export const EvidenceSchema = baseNamedObject({
 	link: z.string().url().optional().or(z.literal(''))
 });
 
+export const globalSettingsSchema = z.object({
+	security_objective_standard: z.string().optional().nullable()
+});
+
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
 	provider: z.string().default('saml'),
