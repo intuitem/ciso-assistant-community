@@ -824,5 +824,7 @@
 	"fixed": "Fixed",
 	"global": "Global",
 	"globalSettingsDescription": "Configure your global settings here.",
-	"securityObjectiveStandard": "Security objective standard"
+	"securityObjectiveStandard": "Security objective standard",
+	"globalSettingsupdated": "Global settings updated",
+	"securityObjectiveStandardHelpText": "Choose your standard for security objectives (1 to 4 by default)"
 }

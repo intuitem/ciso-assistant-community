@@ -3,11 +3,18 @@
 	import * as m from '$paraglide/messages';
 	import { ProgressRadial, RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
+	import { page } from '$app/stores';
+	import { SECURITY_OBJECTIVE_STANDARD_MAP } from '$lib/utils/constants';
+
+	function securityObjectiveDisplay(level: number){
+		return SECURITY_OBJECTIVE_STANDARD_MAP[$page.data.settings.security_objective_standard][level];
+	}
 
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let fullDonut: boolean = false;
 	export let inversedColors: boolean = false;
+	export let security_objective: boolean = false;
 
 	export let min_score = 0;
 	export let max_score = 100;
@@ -109,14 +116,25 @@
 								{/if}
 							{/each}
 						{/if}
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor($value, max_score, inversedColors)}
-							value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
-							font={150}
-							class="shrink-0"
-							width={'w-12'}>{isScored ? $value : '--'}</ProgressRadial
-						>
+						{#if security_objective}
+							<ProgressRadial
+								stroke={100}
+								meter={displayScoreColor($value, max_score, inversedColors)}
+								value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
+								font={115}
+								class="shrink-0"
+								width={'w-12'}>{securityObjectiveDisplay($value) ?? (isScored ? $value : '--')}</ProgressRadial
+							>
+						{:else}
+							<ProgressRadial
+								stroke={100}
+								meter={displayScoreColor($value, max_score, inversedColors)}
+								value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
+								font={150}
+								class="shrink-0"
+								width={'w-12'}>{isScored ? $value : '--'}</ProgressRadial
+							>
+						{/if}
 					</div>
 				</RangeSlider>
 			</div>
