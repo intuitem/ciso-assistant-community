@@ -113,7 +113,7 @@
 						<ProgressRadial
 							stroke={100}
 							meter={displayScoreColor($value, max_score, inversedColors)}
-							value={isScored ? formatScoreValue($value, max_score, fullDonut) : 0}
+							value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
 							font={150}
 							class="shrink-0"
 							width={'w-12'}>{isScored ? $value : '--'}</ProgressRadial
