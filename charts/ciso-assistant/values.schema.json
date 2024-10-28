@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "global": {
+      "properties": {
+        "appVersion": {
+          "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    }
+  }
+}

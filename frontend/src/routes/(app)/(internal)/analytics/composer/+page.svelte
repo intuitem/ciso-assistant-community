@@ -4,12 +4,16 @@
 	import * as m from '$paraglide/messages';
 	import type { AppliedControlStatus } from '$lib/utils/types';
 
+	// Props
 	export let data;
-	data.risk_assessment_objects.forEach((risk_assessment: Record<string, any>) => {
+
+	// Make a reactive copy of data to track changes properly
+	let riskData = { ...data };
+	riskData.risk_assessment_objects.forEach((risk_assessment: Record<string, any>) => {
 		risk_assessment.show = false;
 	});
 
-	let applied_control_status: AppliedControlStatus = data.applied_control_status;
+	let applied_control_status: AppliedControlStatus = riskData.applied_control_status;
 </script>
 
 <div class="flex flex-col space-y-4 p-2">
@@ -21,9 +25,9 @@
 	</div>
 	<div class="card p-4 bg-white shadow">
 		<div class="p-2 font-semibold text-lg">
-			{data.risk_assessment_objects.length <= 1
+			{riskData.risk_assessment_objects.length <= 1
 				? m.composerTitle()
-				: m.composerTitlePlural({ number: data.risk_assessment_objects.length })}:
+				: m.composerTitlePlural({ number: riskData.risk_assessment_objects.length })}:
 		</div>
 		<div class="flex space-x-2">
 			<div class="w-1/3">
@@ -34,8 +38,8 @@
 						<DonutChart
 							name="current_risk_level"
 							s_label={m.currentRiskLevelPerScenario()}
-							values={data.current_level}
-							colors={data.current_level.map((object) => object.color)}
+							values={riskData.current_level}
+							colors={riskData.current_level.map((object) => object.color)}
 						/>
 					</div>
 				</div>
@@ -46,8 +50,8 @@
 					<div class="items-center justify-center h-96">
 						<BarChart
 							name="composer"
-							labels={data.applied_control_status.labels}
-							values={data.applied_control_status.values}
+							labels={riskData.applied_control_status.labels}
+							values={riskData.applied_control_status.values}
 						/>
 					</div>
 				</div>
@@ -58,8 +62,8 @@
 					<DonutChart
 						name="residual_risk_level"
 						s_label={m.residualRiskLevelPerScenario()}
-						values={data.residual_level}
-						colors={data.residual_level.map((object) => object.color)}
+						values={riskData.residual_level}
+						colors={riskData.residual_level.map((object) => object.color)}
 					/>
 				</div>
 			</div>
@@ -73,22 +77,22 @@
 			<ul class="list-disc px-6">
 				<li>
 					{m.untreatedRiskScenarios({
-						count: data.counters.untreated,
-						s: data.counters.untreated > 1 ? 's' : ''
+						count: riskData.counters.untreated,
+						s: riskData.counters.untreated > 1 ? 's' : ''
 					})}
 					<ul class="list-circle ml-4">
-						{#each data.riskscenarios.untreated as scenario}
+						{#each riskData.riskscenarios.untreated as scenario}
 							<li>{scenario.name}</li>
 						{/each}
 					</ul>
 				</li>
 				<li>
 					{m.acceptedRiskScenarios({
-						count: data.counters.accepted,
-						s: data.counters.accepted > 1 ? 's' : ''
+						count: riskData.counters.accepted,
+						s: riskData.counters.accepted > 1 ? 's' : ''
 					})}
 					<ul class="list-circle ml-4">
-						{#each data.riskscenarios.accepted as scenario}
+						{#each riskData.riskscenarios.accepted as scenario}
 							<li>{scenario.name}</li>
 						{/each}
 					</ul>
@@ -98,7 +102,7 @@
 	</div>
 	<!-- SECOND PART -->
 	<div class="flex flex-col space-y-2">
-		{#each data.risk_assessment_objects as item}
+		{#each riskData.risk_assessment_objects as item}
 			<div>
 				<div class="card bg-white overflow-hidden shadow" id="headingOne">
 					<div
@@ -108,7 +112,9 @@
 						}}
 						role="button"
 						tabindex="0"
-						on:keypress
+						on:keydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') item.show = !item.show;
+						}}
 					>
 						<div class="text-gray-700">
 							{#if item.show}
@@ -117,7 +123,7 @@
 								<i class="fas fa-angle-down" />
 							{/if}
 						</div>
-						<button class=" text-gray-700 font-semibold focus:outline-none" type="button">
+						<button class="text-gray-700 font-semibold focus:outline-none" type="button">
 							{item.risk_assessment.project.str}/{item.risk_assessment.name}
 						</button>
 						<div>
@@ -134,7 +140,8 @@
 						<div class="border-t px-10 py-4 bg-white flex flex-row space-x-4">
 							<div>
 								<div class="pb-2">
-									{#if item.risk_assessment.quality_check.count > 0}➡️ <span class="text-sm"
+									{#if item.risk_assessment.quality_check.count > 0}
+										➡️ <span class="text-sm"
 											>{m.inconsistenciesFoundComposer({
 												count: item.risk_assessment.quality_check.count,
 												s: item.risk_assessment.quality_check.count > 1 ? 's' : '',
@@ -148,18 +155,23 @@
 								</div>
 								<div>
 									<table class="border border-collapse my-2 p-2 rounded">
-										<tr class="">
-											<th class="border p-2 bg-gray-200" />
-											<th class="border p-2 bg-gray-200">{m.current()}</th>
-											<th class="border p-2 bg-gray-200">{m.residual()}</th>
-										</tr>
-										{#each item.synth_table as lvl}
+										<thead>
 											<tr>
-												<td class="border p-2" style="background-color: {lvl.color}">{lvl.lvl}</td>
-												<td class="border p-2 text-center">{lvl.current}</td>
-												<td class="border p-2 text-center">{lvl.residual}</td>
+												<th class="border p-2 bg-gray-200" />
+												<th class="border p-2 bg-gray-200">{m.current()}</th>
+												<th class="border p-2 bg-gray-200">{m.residual()}</th>
 											</tr>
-										{/each}
+										</thead>
+										<tbody>
+											{#each item.synth_table as lvl}
+												<tr>
+													<td class="border p-2" style="background-color: {lvl.color}">{lvl.lvl}</td
+													>
+													<td class="border p-2 text-center">{lvl.current}</td>
+													<td class="border p-2 text-center">{lvl.residual}</td>
+												</tr>
+											{/each}
+										</tbody>
 									</table>
 								</div>
 
