@@ -77,6 +77,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 	<Score
 		{form}
@@ -86,6 +87,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 	<Score
 		{form}
@@ -95,6 +97,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 	<Score
 		{form}
@@ -104,6 +107,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 	<Score
 		{form}
@@ -113,6 +117,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 	<Score
 		{form}
@@ -122,6 +127,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 	<Score
 		{form}
@@ -131,6 +137,7 @@
 		inversedColors
 		fullDonut
 		max_score={3}
+		security_objective={true}
 	/>
 </Dropdown>
 <Dropdown

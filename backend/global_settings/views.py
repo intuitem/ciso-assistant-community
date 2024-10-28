@@ -61,9 +61,9 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get security objective standards")
     def security_objective_standard(self, request):
         choices = {
-            "standard": "1-4",
+            "default": "--",
             "0-3": "0-3",
-            "fips-199": "FIPS 199",
+            "fips-199": "fips-199",
         }
         return Response(choices)
 

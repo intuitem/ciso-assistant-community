@@ -15,5 +15,6 @@
     cacheLock={cacheLocks['security_objective_standard']}
     bind:cachedValue={formDataCache['security_objective_standard']}
     options={model.selectOptions['security_objective_standard']}
+    helpText={m.securityObjectiveStandardHelpText()}
     label={m.securityObjectiveStandard()}
 />

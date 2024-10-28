@@ -24,6 +24,7 @@
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import List from '$lib/components/List/List.svelte';
+	import { SECURITY_OBJECTIVE_STANDARD_MAP } from '$lib/utils/constants';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -34,6 +35,7 @@
 	export let mailing = false;
 	export let fields: string[] = [];
 	export let exclude: string[] = [];
+	export let displaySecurityObjective = false;
 
 	exclude = [...exclude, ...defaultExcludes];
 
@@ -277,6 +279,8 @@
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
 											{safeTranslate((value.str || value.name) ?? value)}
+										{:else if displaySecurityObjective && SECURITY_OBJECTIVE_STANDARD_MAP[$page.data.settings.security_objective_standard][value]}
+											{SECURITY_OBJECTIVE_STANDARD_MAP[$page.data.settings.security_objective_standard][value]}
 										{:else}
 											{(value.str || value.name) ?? value}
 										{/if}
