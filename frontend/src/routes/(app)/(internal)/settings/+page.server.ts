@@ -10,14 +10,14 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const settings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
+	const ssoSettings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
 
 	const selectOptions: Record<string, any> = {};
 
-	const model = getModelInfo('sso-settings');
+	const ssoModel = getModelInfo('sso-settings');
 
-	if (model.selectFields) {
-		for (const selectField of model.selectFields) {
+	if (ssoModel.selectFields) {
+		for (const selectField of ssoModel.selectFields) {
 			const url = `${BASE_API_URL}/settings/sso/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
@@ -33,10 +33,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		}
 	}
 
-	model.selectOptions = selectOptions;
+	ssoModel.selectOptions = selectOptions;
 
-	const form = await superValidate(settings, zod(SSOSettingsSchema), { errors: false });
-	return { settings, form, model };
+	const ssoForm = await superValidate(ssoSettings, zod(SSOSettingsSchema), { errors: false });
+	return { ssoSettings, ssoForm, ssoModel };
 };
 
 export const actions: Actions = {

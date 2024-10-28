@@ -821,5 +821,7 @@
 	"potential": "Potential",
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
-	"fixed": "Fixed"
+	"fixed": "Fixed",
+	"global": "Global",
+	"globalSettingsDescription": "Configure your global settings here."
 }
