@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0030_appliedcontrol_start_date"),
+        ("core", "0031_vulnerability_riskscenario_vulnerabilities"),
     ]
 
     operations = [

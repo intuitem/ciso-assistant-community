@@ -464,6 +464,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'SSO settings',
 		selectFields: [{ field: 'provider' }]
 	},
+	'general-settings': {
+		name: 'generalSettings',
+		localName: 'generalSettings',
+		localNamePlural: 'generalSettings',
+		verboseName: 'General settings',
+		verboseNamePlural: 'General settings',
+		selectFields: [{ field: 'security_objective_standard' }]
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',
