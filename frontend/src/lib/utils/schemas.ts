@@ -244,7 +244,7 @@ export const EvidenceSchema = baseNamedObject({
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
-	link: z.string().url().optional().or(z.literal(''))
+	link: z.string().optional().nullable()
 });
 
 export const GeneralSettingsSchema = z.object({
