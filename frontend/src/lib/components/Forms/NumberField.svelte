@@ -4,7 +4,6 @@
 	import type { CacheLock } from '$lib/utils/types';
 
 	let _class = '';
-
 	export { _class as class };
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -16,14 +15,15 @@
 	};
 	export let form;
 	export let positiveOnly: boolean = false; // Nouveau paramètre pour accepter uniquement les valeurs positives
+	export let hidden = false;
+	export let disabled = false;
+	export let required = false;
 
 	label = label ?? field;
-
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$: cachedValue = $value;
-
-	$: if ($$restProps.type === 'date' && $value === '') {
+	$: if ($value === '') {
 		$value = null;
 	}
 
@@ -33,13 +33,13 @@
 	});
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
-	$: classesDisabled = (disabled: boolean) => (disabled ? 'opacity-50' : '');
+	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
 </script>
 
 <div>
-	<div class={classesDisabled($$props.disabled)}>
-		{#if label !== undefined && !$$props.hidden}
-			{#if $constraints?.required || $$props.required}
+	<div class={classesDisabled(disabled)}>
+		{#if label !== undefined && !hidden}
+			{#if $constraints?.required || required}
 				<label class="text-sm font-semibold" for={field}
 					>{label} <span class="text-red-500">*</span></label
 				>
@@ -67,6 +67,8 @@
 			{...$constraints}
 			{...$$restProps}
 			{...positiveOnly ? { min: 0 } : {}}
+			{disabled}
+			{required}
 		/>
 	</div>
 	{#if helpText}
