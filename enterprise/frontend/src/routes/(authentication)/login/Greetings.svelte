@@ -1,17 +1,14 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages.js';
 	import Typewriter from 'svelte-typewriter';
-	import { onMount } from 'svelte';
+	import Logo from '$lib/components/Logo/Logo.svelte';
+	import { page } from '$app/stores';
 
-	let clientSettings: Record<string, any>;
-
-	onMount(async () => {
-		clientSettings = await fetch('/settings/client-settings').then((res) => res.json());
-	});
+	const clientSettings = $page.data.clientSettings;
 </script>
 
 <div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-gray-900">
-	{#if !clientSettings?.name}
+	{#if !clientSettings?.settings.name}
 		<Typewriter mode="loopOnce" cursor={false} interval={50}>
 			<div class="text-2xl unstyled text-center pb-4">
 				<span class="text-2xl text-center">{m.helloThere()} </span>
@@ -25,5 +22,7 @@
 				<span> {m.forComplianceRiskManagement()} </span>
 			</div>
 		</Typewriter>
+	{:else}
+		<Logo width={400} height={400} />
 	{/if}
 </div>
