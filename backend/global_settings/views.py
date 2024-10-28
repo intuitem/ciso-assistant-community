@@ -32,8 +32,8 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
             {"detail": "Global settings can only be updated through data migrations."},
             status=405,
         )
-    
-  
+
+
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = GeneralSettingsSerializer
@@ -53,12 +53,15 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         return self.model.objects.get(name="general")
-    
+
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
-        GlobalSettings.objects.get_or_create(name="general", defaults={"value": {"security_objective_standard": "default"}})
+        GlobalSettings.objects.get_or_create(
+            name="general",
+            defaults={"value": {"security_objective_standard": "default"}},
+        )
         return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
-    
+
     @action(detail=True, name="Get security objective standards")
     def security_objective_standard(self, request):
         choices = {
@@ -67,6 +70,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "fips-199": "fips-199",
         }
         return Response(choices)
+
 
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
