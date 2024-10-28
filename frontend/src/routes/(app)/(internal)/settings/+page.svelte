@@ -10,7 +10,9 @@
 </script>
 
 <TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
-	<Tab bind:group={tabSet} name="instanceSettings" value={0}><i class="fa-solid fa-globe"></i> {m.global()}</Tab>
+	<Tab bind:group={tabSet} name="instanceSettings" value={0}
+		><i class="fa-solid fa-globe"></i> {m.global()}</Tab
+	>
 	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
 	>
 </TabGroup>
@@ -26,14 +28,14 @@
 		/>
 	</div>
 {:else if tabSet === 0}
-<div>
-	<span class="text-gray-500">{m.globalSettingsDescription()}</span>
-	<ModelForm
-		form={data.generalSettingForm}
-		schema={GeneralSettingsSchema}
-		model={data.generalSettingModel}
-		cancelButton={false}
-		action="?/general"
-	/>
-</div>
+	<div>
+		<span class="text-gray-500">{m.globalSettingsDescription()}</span>
+		<ModelForm
+			form={data.generalSettingForm}
+			schema={GeneralSettingsSchema}
+			model={data.generalSettingModel}
+			cancelButton={false}
+			action="?/general"
+		/>
+	</div>
 {/if}

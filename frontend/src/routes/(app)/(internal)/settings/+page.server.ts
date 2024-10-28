@@ -11,7 +11,9 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const ssoSettings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
-	const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) => res.json());
+	const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
+		res.json()
+	);
 
 	const selectOptions: Record<string, any> = {};
 
@@ -61,7 +63,14 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		errors: false
 	});
 
-	return { ssoSettings, ssoForm, ssoModel, generalSettings, generalSettingForm, generalSettingModel};
+	return {
+		ssoSettings,
+		ssoForm,
+		ssoModel,
+		generalSettings,
+		generalSettingForm,
+		generalSettingModel
+	};
 };
 
 export const actions: Actions = {
@@ -104,7 +113,7 @@ export const actions: Actions = {
 		const requestInitOptions: RequestInit = {
 			method: 'PUT',
 			body: JSON.stringify({
-				"value": form.data
+				value: form.data
 			})
 		};
 

@@ -64,8 +64,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const user = await validateUserSession(event);
 	if (user) {
 		event.locals.user = user;
-		const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, 
-		{
+		const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {
 			credentials: 'include',
 			headers: {
 				'content-type': 'application/json',

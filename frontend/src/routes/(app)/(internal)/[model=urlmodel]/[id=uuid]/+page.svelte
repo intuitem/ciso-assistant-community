@@ -18,4 +18,4 @@
 	}
 </script>
 
-<DetailView {data}  {displaySecurityObjective}/>
+<DetailView {data} {displaySecurityObjective} />

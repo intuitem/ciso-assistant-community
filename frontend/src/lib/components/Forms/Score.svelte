@@ -6,7 +6,7 @@
 	import { page } from '$app/stores';
 	import { SECURITY_OBJECTIVE_STANDARD_MAP } from '$lib/utils/constants';
 
-	function securityObjectiveDisplay(level: number){
+	function securityObjectiveDisplay(level: number) {
 		return SECURITY_OBJECTIVE_STANDARD_MAP[$page.data.settings.security_objective_standard][level];
 	}
 
@@ -123,7 +123,8 @@
 								value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
 								font={115}
 								class="shrink-0"
-								width={'w-12'}>{securityObjectiveDisplay($value) ?? (isScored ? $value : '--')}</ProgressRadial
+								width={'w-12'}
+								>{securityObjectiveDisplay($value) ?? (isScored ? $value : '--')}</ProgressRadial
 							>
 						{:else}
 							<ProgressRadial
