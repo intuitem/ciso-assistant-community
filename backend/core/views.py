@@ -2153,8 +2153,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         for req in RequirementNode.objects.filter(
             framework=mapping_set.source_framework
         ).filter(assessable=True):
-            print(req.ref_id)
-
             nodes.append(
                 {
                     "name": req.ref_id,
@@ -2168,7 +2166,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         for req in RequirementNode.objects.filter(
             framework=mapping_set.target_framework
         ).filter(assessable=True):
-            print(req.ref_id)
             nodes.append(
                 {
                     "name": req.ref_id,
@@ -2184,9 +2181,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 item.source_requirement.assessable
                 and item.target_requirement.assessable
             ):
-                print(
-                    f"Source: {item.source_requirement} ==> Target: {item.target_requirement}"
-                )
                 links.append(
                     {
                         "source": snodes_idx[item.source_requirement.ref_id],
