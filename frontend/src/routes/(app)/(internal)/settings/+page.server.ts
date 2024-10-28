@@ -121,7 +121,7 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
-		setFlash({ type: 'success', message: m.globalSettingsupdated() }, event);
+		setFlash({ type: 'success', message: m.generalSettingsUpdated() }, event);
 
 		return { form };
 	}
