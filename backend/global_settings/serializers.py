@@ -29,13 +29,13 @@ class GlobalSettingsSerializer(serializers.ModelSerializer):
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
-        for key, value in validated_data['value'].items():
+        for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
-            setattr(instance, "value", validated_data['value'])
+            setattr(instance, "value", validated_data["value"])
         instance.save()
         return instance
-    
+
     class Meta:
         model = GlobalSettings
         exclude = ["is_published", "folder"]
