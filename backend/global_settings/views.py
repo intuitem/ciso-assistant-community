@@ -40,7 +40,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     queryset = GlobalSettings.objects.filter(name="general")
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.model.objects.get(name="general")
+        instance = self.model.objects.get(name="general")[0]
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -56,6 +56,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
+        GlobalSettings.objects.get_or_create(name="general", defaults={"value": {"security_objective_standard": "default"}})
         return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
     
     @action(detail=True, name="Get security objective standards")
