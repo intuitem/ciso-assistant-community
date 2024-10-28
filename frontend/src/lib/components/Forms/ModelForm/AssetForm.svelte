@@ -69,31 +69,20 @@
 	icon="fa-solid fa-shield-halved"
 	header={m.securityObjectives()}
 >
-	<div class="flex flex-row space-x-2">
-		<SlideToggle
-			name="toggle"
-			class="flex flex-row items-center justify-center"
-			active="bg-primary-500"
-			background="bg-green-500"
-			checked={true}
-		>
-		</SlideToggle>
-		<Score
-			{form}
-			cssClass="flex w-full items-center space-x-2"
-			label={m.confidentiality()}
-			field="confidentiality"
-			always_enabled={true}
-			inversedColors
-			fullDonut
-			max_score={3}
-		/>
-	</div>
+	<Score
+		{form}
+		label={m.confidentiality()}
+		field="confidentiality"
+		always_enabled={false}
+		inversedColors
+		fullDonut
+		max_score={3}
+	/>
 	<Score
 		{form}
 		label={m.integrity()}
 		field="integrity"
-		always_enabled={true}
+		always_enabled={false}
 		inversedColors
 		fullDonut
 		max_score={3}
@@ -102,7 +91,7 @@
 		{form}
 		label={m.availability()}
 		field="availability"
-		always_enabled={true}
+		always_enabled={false}
 		inversedColors
 		fullDonut
 		max_score={3}
@@ -111,7 +100,7 @@
 		{form}
 		label={m.proof()}
 		field="proof"
-		always_enabled={true}
+		always_enabled={false}
 		inversedColors
 		fullDonut
 		max_score={3}
@@ -120,7 +109,7 @@
 		{form}
 		label={m.authenticity()}
 		field="authenticity"
-		always_enabled={true}
+		always_enabled={false}
 		inversedColors
 		fullDonut
 		max_score={3}
@@ -129,7 +118,7 @@
 		{form}
 		label={m.privacy()}
 		field="privacy"
-		always_enabled={true}
+		always_enabled={false}
 		inversedColors
 		fullDonut
 		max_score={3}
@@ -138,7 +127,7 @@
 		{form}
 		label={m.safety()}
 		field="safety"
-		always_enabled={true}
+		always_enabled={false}
 		inversedColors
 		fullDonut
 		max_score={3}
