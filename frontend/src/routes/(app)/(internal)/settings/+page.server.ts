@@ -1,7 +1,7 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema } from '$lib/utils/schemas';
+import { SSOSettingsSchema, GeneralSettingsSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -11,10 +11,12 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const ssoSettings = await fetch(`${BASE_API_URL}/settings/sso/object/`).then((res) => res.json());
+	const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) => res.json());
 
 	const selectOptions: Record<string, any> = {};
 
 	const ssoModel = getModelInfo('sso-settings');
+	const generalSettingModel = getModelInfo('general-settings');
 
 	if (ssoModel.selectFields) {
 		for (const selectField of ssoModel.selectFields) {
@@ -35,12 +37,35 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	ssoModel.selectOptions = selectOptions;
 
+	if (generalSettingModel.selectFields) {
+		for (const selectField of generalSettingModel.selectFields) {
+			const url = `${BASE_API_URL}/settings/general/${selectField.field}/`;
+			const response = await fetch(url);
+			if (response.ok) {
+				selectOptions[selectField.field] = await response.json().then((data) =>
+					Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: key
+					}))
+				);
+			} else {
+				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	generalSettingModel.selectOptions = selectOptions;
+
 	const ssoForm = await superValidate(ssoSettings, zod(SSOSettingsSchema), { errors: false });
-	return { ssoSettings, ssoForm, ssoModel };
+	const generalSettingForm = await superValidate(generalSettings, zod(GeneralSettingsSchema), {
+		errors: false
+	});
+
+	return { ssoSettings, ssoForm, ssoModel, generalSettings, generalSettingForm, generalSettingModel};
 };
 
 export const actions: Actions = {
-	default: async (event) => {
+	sso: async (event) => {
 		const formData = await event.request.formData();
 
 		if (!formData) {
@@ -55,6 +80,32 @@ export const actions: Actions = {
 		const requestInitOptions: RequestInit = {
 			method: 'PUT',
 			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.ssoSettingsupdated() }, event);
+
+		return { form };
+	},
+	general: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = GeneralSettingsSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/settings/general/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PUT',
+			body: JSON.stringify({
+				"value": form.data
+			})
 		};
 
 		const response = await event.fetch(endpoint, requestInitOptions);

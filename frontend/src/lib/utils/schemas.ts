@@ -247,7 +247,7 @@ export const EvidenceSchema = baseNamedObject({
 	link: z.string().url().optional().or(z.literal(''))
 });
 
-export const globalSettingsSchema = z.object({
+export const GeneralSettingsSchema = z.object({
 	security_objective_standard: z.string().optional().nullable()
 });
 
@@ -368,6 +368,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
+	'general-settings': GeneralSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

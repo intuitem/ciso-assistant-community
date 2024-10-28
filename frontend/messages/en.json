@@ -823,5 +823,6 @@
 	"mitigated": "Mitigated",
 	"fixed": "Fixed",
 	"global": "Global",
-	"globalSettingsDescription": "Configure your global settings here."
+	"globalSettingsDescription": "Configure your global settings here.",
+	"securityObjectiveStandard": "Security objective standard"
 }
