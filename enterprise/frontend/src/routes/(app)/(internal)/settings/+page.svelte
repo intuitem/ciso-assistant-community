@@ -14,7 +14,7 @@
 
 <TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
 	<Tab bind:group={tabSet} name="instanceSettings" value={0}
-		><i class="fa-solid fa-globe"></i> {m.global()}</Tab
+		><i class="fa-solid fa-globe"></i> {m.general()}</Tab
 	>
 	<Tab bind:group={tabSet} name="ssoSettings" value={1}><i class="fa-solid fa-key" /> {m.sso()}</Tab
 	>
