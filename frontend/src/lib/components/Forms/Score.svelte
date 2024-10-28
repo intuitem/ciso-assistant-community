@@ -42,7 +42,6 @@
 			$value = isScored ? $value || min_score : null;
 		} else {
 			$isScoredField = isScored;
-
 		}
 	}
 
@@ -58,15 +57,15 @@
 
 <div>
 	{#if label !== undefined}
-	<div>
-		{#if $constraints?.required}
-			<label class="text-sm font-semibold" for={field}
-				>{label} <span class="text-red-500">*</span></label
-			>
-		{:else}
-			<label class="text-sm font-semibold" for={field}>{label}</label>
-		{/if}
-	</div>
+		<div>
+			{#if $constraints?.required}
+				<label class="text-sm font-semibold" for={field}
+					>{label} <span class="text-red-500">*</span></label
+				>
+			{:else}
+				<label class="text-sm font-semibold" for={field}>{label}</label>
+			{/if}
+		</div>
 	{/if}
 	{#if $errors && $errors.length > 0}
 		<div>
