@@ -810,5 +810,8 @@
 	"potential": "Potenziale",
 	"exploitable": "Sfruttabile",
 	"mitigated": "Mitigata",
-	"fixed": "Fissa"
+	"fixed": "Fissa",
+	"tags": "Etichette",
+	"addTag": "Aggiungi tag",
+	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra"
 }
