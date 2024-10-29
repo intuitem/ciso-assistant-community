@@ -332,7 +332,8 @@ export const vulnerabilitySchema = baseNamedObject({
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
-	severity: z.number().default(-1)
+	severity: z.number().default(-1),
+	applied_controls: z.string().uuid().optional().array().optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
