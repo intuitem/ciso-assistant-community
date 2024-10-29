@@ -299,6 +299,27 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
+    @action(detail=False, name="Get assets tree")
+    def tree(self, request):
+        tree = {"name": "Global", "children": []}
+
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        folders_list = list()
+        for folder in (
+            Folder.objects.exclude(content_type="GL")
+            .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
+            .distinct()
+        ):
+            entry = {"name": folder.name, "children": get_folder_content(folder)}
+            folders_list.append(entry)
+        tree.update({"children": folders_list})
+
+        return Response(tree)
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
