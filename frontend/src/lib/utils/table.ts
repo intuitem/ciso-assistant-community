@@ -274,8 +274,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'description', 'folder'],
-		body: ['ref_id', 'name', 'description', 'folder']
+		head: ['ref_id', 'name', 'description', 'applied_controls','folder'],
+		body: ['ref_id', 'name', 'description', 'applied_controls','folder']
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],

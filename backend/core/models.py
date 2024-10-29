@@ -1457,6 +1457,12 @@ class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin)
         verbose_name=_("Severity"),
         help_text=_("The severity of the vulnerability"),
     )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        blank=True,
+        verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
 
 
 ########################### Secondary objects #########################
