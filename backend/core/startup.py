@@ -68,6 +68,8 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "add_tag",
+    "view_tag",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -143,6 +145,8 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "add_tag",
+    "view_tag",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",

@@ -172,7 +172,7 @@ class I18nObjectMixin(models.Model):
         abstract = True
 
 
-class Tag(FolderMixin, AbstractBaseModel):
+class Tag(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
     label = models.CharField(max_length=100, verbose_name=_("Label"))
 
     def __str__(self) -> str:
@@ -1481,6 +1481,8 @@ class Vulnerability(
         verbose_name=_("Applied controls"),
         related_name="vulnerabilities",
     )
+
+    fields_to_check = ["name"]
 
 
 ########################### Secondary objects #########################

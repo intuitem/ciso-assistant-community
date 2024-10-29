@@ -53,10 +53,7 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 const TAGS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		if (Array.isArray(row.tags)) {
-			return row.tags.map(tag => tag.str);
-		}
-		return null;
+		return row.tags && row.tags.length > 0 ? row.tags.map((tag) => tag.str) : [''];
 	},
 	alwaysDefined: true,
 	extraProps: {
@@ -278,6 +275,10 @@ export const listViewFields: ListViewFieldsConfig = {
 			folder: DOMAIN_FILTER,
 			lc_status: PROJECT_STATUS_FILTER
 		}
+	},
+	tags: {
+		head: ['label'],
+		body: ['label']
 	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain'],
