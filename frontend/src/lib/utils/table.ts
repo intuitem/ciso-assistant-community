@@ -50,6 +50,20 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const TAGS_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		if (Array.isArray(row.tags)) {
+			return row.tags.map(tag => tag.str);
+		}
+		return null;
+	},
+	alwaysDefined: true,
+	extraProps: {
+		defaultOptionName: 'tags'
+	}
+};
+
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
 	getColumn: (row) => row.meta.folder.str
@@ -277,7 +291,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'tags'],
 		body: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'tags'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			tags: TAGS_FILTER
 		}
 	},
 	'risk-assessments': {
