@@ -804,10 +804,14 @@
 	"sumpageTitleResidualRisks": "Restrisiken",
 	"sumpageSectionCompliance": "Einhaltung",
 	"sumpageSectionRisk": "Risiko",
+	"critical": "Kritisch",
 	"vulnerabilities": "Schwachstellen",
 	"severity": "Schwere",
 	"potential": "Potenzial",
 	"exploitable": "Ausnutzbar",
 	"mitigated": "Mildernd",
-	"fixed": "Behoben"
+	"fixed": "Behoben",
+	"tags": "Schlagwörter",
+	"addTag": "Tag hinzufügen",
+	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen"
 }

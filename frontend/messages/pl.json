@@ -810,5 +810,8 @@
 	"potential": "Potencjał",
 	"exploitable": "Wykorzystywany",
 	"mitigated": "Złagodzony",
-	"fixed": "Naprawił"
+	"fixed": "Naprawił",
+	"tags": "Tagi",
+	"addTag": "Dodaj tag",
+	"tagsHelpText": "Tagi służą do kategoryzowania i filtrowania elementów. Możesz dodać tagi w sekcji Extra"
 }
