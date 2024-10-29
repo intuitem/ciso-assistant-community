@@ -371,6 +371,17 @@ class VulnerabilityViewSet(BaseModelViewSet):
         return Response(dict(Vulnerability.Status.choices))
 
 
+class TagViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows tags to be viewed or edited.
+    """
+
+    model = Tag
+    filterset_fields = ["folder"]
+    search_fields = ["label"]
+    ordering = ["label"]
+
+
 class RiskAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows risk assessments to be viewed or edited.

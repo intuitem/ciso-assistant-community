@@ -61,6 +61,11 @@ router.register(
     RequirementMappingSetViewSet,
     basename="requirement-mapping-sets",
 )
+router.register(
+    r"tags",
+    TagViewSet,
+    basename="tags",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

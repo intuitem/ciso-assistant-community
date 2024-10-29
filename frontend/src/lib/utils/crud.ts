@@ -308,9 +308,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'tags', urlModel: 'tags' }
 		],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'folder' }, { field: 'tags' }]
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',

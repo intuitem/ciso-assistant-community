@@ -331,6 +331,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_entityassessment",
     "view_entityassessment",
     "delete_entityassessment",
+    "add_tag",
+    "view_tag",
+    "change_tag",
+    "delete_tag",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
