@@ -39,6 +39,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
+	import TagForm from './ModelForm/TagForm.svelte';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -248,6 +249,8 @@
 		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} />
 	{:else if URLModel === 'sso-settings'}
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+	{:else if URLModel === 'tags'}
+		<TagForm {form} {model} {cacheLocks} {formDataCache} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

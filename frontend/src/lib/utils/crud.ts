@@ -314,6 +314,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'folder' }, { field: 'tags' }]
 	},
+	tags: {
+		name: 'tag',
+		localName: 'tag',
+		localNamePlural: 'tags',
+		verboseName: 'Tag',
+		verboseNamePlural: 'Tags'
+	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
 		localName: 'riskAcceptance',
