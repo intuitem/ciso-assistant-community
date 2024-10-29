@@ -172,6 +172,10 @@ export const AssetSchema = baseNamedObject({
 	parent_assets: z.string().optional().array().optional()
 });
 
+export const TagSchema = z.object({
+	label: z.string()
+});
+
 export const RequirementAssessmentSchema = z.object({
 	answer: jsonSchema,
 	status: z.string(),
@@ -359,7 +363,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	solutions: solutionSchema,
-	vulnerabilities: vulnerabilitySchema
+	vulnerabilities: vulnerabilitySchema,
+	tags: TagSchema
 };
 
 export const modelSchema = (model: string) => {

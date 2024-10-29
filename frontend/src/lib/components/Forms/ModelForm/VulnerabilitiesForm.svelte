@@ -69,5 +69,6 @@
 	{form}
 	options={getOptions({ objects: model.foreignKeys['tags'], label: 'label' })}
 	field="tags"
+	helpText={m.tagsHelpText()}
 	label={m.tags()}
 />
