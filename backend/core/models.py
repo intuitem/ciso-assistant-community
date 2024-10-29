@@ -172,6 +172,22 @@ class I18nObjectMixin(models.Model):
         abstract = True
 
 
+class Tag(FolderMixin, AbstractBaseModel):
+    label = models.CharField(max_length=100, verbose_name=_("Label"))
+
+    def __str__(self) -> str:
+        return self.label
+
+    fields_to_check = ["label"]
+
+
+class TagMixin(models.Model):
+    tags = models.ManyToManyField(Tag, blank=True, verbose_name=_("Tags"))
+
+    class Meta:
+        abstract = True
+
+
 class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         abstract = True
@@ -1435,7 +1451,9 @@ class Policy(AppliedControl):
         super(Policy, self).save(*args, **kwargs)
 
 
-class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Vulnerability(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, TagMixin
+):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         POTENTIAL = "potential", _("Potential")

@@ -131,6 +131,7 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+    tags = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Vulnerability
@@ -665,3 +666,17 @@ class ComputeMappingSerializer(serializers.Serializer):
     source_assessment = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all()
     )
+
+
+class TagReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Tag
+        fields = "__all__"
+
+
+class TagWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Tag
+        exclude = ["folder", "is_published"]

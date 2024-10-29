@@ -255,6 +255,8 @@
 																	)?.urlModel
 																}/${val.id}`}
 																<a href={itemHref} class="anchor">{val.str}</a>
+															{:else if val.str}
+																{val.str}
 															{:else}
 																{value}
 															{/if}

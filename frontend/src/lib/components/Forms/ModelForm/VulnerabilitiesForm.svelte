@@ -64,3 +64,10 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	options={getOptions({ objects: model.foreignKeys['tags'], label: 'label' })}
+	field="tags"
+	label={m.tags()}
+/>
