@@ -130,6 +130,7 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
 
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = Vulnerability

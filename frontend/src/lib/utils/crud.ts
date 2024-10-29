@@ -307,7 +307,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		],
 		selectFields: [{ field: 'status' }]
 	},

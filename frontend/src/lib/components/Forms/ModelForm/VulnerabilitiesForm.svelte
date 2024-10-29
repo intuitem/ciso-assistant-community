@@ -47,7 +47,16 @@
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
-
+<AutocompleteSelect
+	multiple
+	{form}
+	options={getOptions({
+		objects: model.foreignKeys['applied_controls'],
+		extra_fields: [['folder', 'str']]
+	})}
+	field="applied_controls"
+	label={m.appliedControls()}
+/>
 <TextField
 	{form}
 	field="ref_id"
