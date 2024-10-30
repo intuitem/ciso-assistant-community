@@ -182,7 +182,9 @@ class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
 
 
 class FilteringLabelMixin(models.Model):
-    filtering_labels = models.ManyToManyField(FilteringLabel, blank=True, verbose_name=_("Labels"))
+    filtering_labels = models.ManyToManyField(
+        FilteringLabel, blank=True, verbose_name=_("Labels")
+    )
 
     class Meta:
         abstract = True
