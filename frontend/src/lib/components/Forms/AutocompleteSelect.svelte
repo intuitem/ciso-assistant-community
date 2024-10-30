@@ -87,7 +87,7 @@
 		if (event.key === 'Enter') {
 			const newOption = {
 				label: event.target.value,
-				value: event.target.value,
+				value: event.target.value
 			};
 			options = [...options, newOption];
 			selected = [...selected, newOption];
@@ -144,28 +144,26 @@
 			{:else}
 				<MultiSelect {options} {...multiSelectOptions} on:keyup={(event) => addOption(event)} />
 			{/if}
+		{:else if options.length > 0}
+			<MultiSelect
+				bind:selected
+				{options}
+				{...multiSelectOptions}
+				disabled={disabled || $$restProps.disabled}
+				{...$$restProps}
+				let:option
+			>
+				{#if option.suggested}
+					<span class="text-indigo-600">{option.label}</span>
+					<span class="text-sm text-gray-500"> (suggested)</span>
+				{:else if translateOptions}
+					{safeTranslate(option.label)}
+				{:else}
+					{option.label}
+				{/if}
+			</MultiSelect>
 		{:else}
-			{#if options.length > 0}
-				<MultiSelect
-					bind:selected
-					{options}
-					{...multiSelectOptions}
-					disabled={disabled || $$restProps.disabled}
-					{...$$restProps}
-					let:option
-				>
-					{#if option.suggested}
-						<span class="text-indigo-600">{option.label}</span>
-						<span class="text-sm text-gray-500"> (suggested)</span>
-					{:else if translateOptions}
-						{safeTranslate(option.label)}
-					{:else}
-						{option.label}
-					{/if}
-				</MultiSelect>
-			{:else}
-				<MultiSelect {options} {...multiSelectOptions} disabled />
-			{/if}
+			<MultiSelect {options} {...multiSelectOptions} disabled />
 		{/if}
 	</div>
 	{#if helpText}
