@@ -811,7 +811,9 @@
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
 	"fixed": "Fixed",
-	"tags": "Tags",
-	"addTag": "Add tag",
-	"tagsHelpText": "Tags are used to categorize and filter the items. You can add tags in the Extra section"
+	"labels": "Labels",
+	"addLabel": "Add label",
+	"labelsHelpText": "Labels are used to categorize and filter the items. You can add labels in the Extra section",
+	"filteringLabel": "Label",
+	"filteringLabels": "Labels"
 }

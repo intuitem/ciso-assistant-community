@@ -50,14 +50,14 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const TAGS_FILTER: ListViewFilterConfig = {
+const LABELS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		return row.tags && row.tags.length > 0 ? row.tags.map((tag) => tag.str) : [''];
+		return row.filtering_labels && row.filtering_labels.length > 0 ? row.filtering_labels.map((filtering_label) => filtering_label.str) : [''];
 	},
 	alwaysDefined: true,
 	extraProps: {
-		defaultOptionName: 'tags'
+		defaultOptionName: 'filtering_labels'
 	}
 };
 
@@ -276,7 +276,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			lc_status: PROJECT_STATUS_FILTER
 		}
 	},
-	tags: {
+	'filtering-labels': {
 		head: ['label'],
 		body: ['label']
 	},
@@ -289,11 +289,11 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'tags'],
-		body: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'tags'],
+		head: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'labels'],
+		body: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			tags: TAGS_FILTER
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-assessments': {

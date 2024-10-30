@@ -371,12 +371,12 @@ class VulnerabilityViewSet(BaseModelViewSet):
         return Response(dict(Vulnerability.Status.choices))
 
 
-class TagViewSet(BaseModelViewSet):
+class FilteringLabelViewSet(BaseModelViewSet):
     """
-    API endpoint that allows tags to be viewed or edited.
+    API endpoint that allows labels to be viewed or edited.
     """
 
-    model = Tag
+    model = FilteringLabel
     filterset_fields = ["folder"]
     search_fields = ["label"]
     ordering = ["label"]

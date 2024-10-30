@@ -223,10 +223,10 @@ export const navData = {
 					permissions: ['backup']
 				},
 				{
-					name: 'tags',
+					name: 'labels',
 					fa_icon: 'fa-solid fa-tag',
-					href: '/tags',
-					permissions: ['view_tag']
+					href: '/filtering-labels',
+					permissions: ['view_filteringlabel']
 				},
 				{
 					name: 'settings',
