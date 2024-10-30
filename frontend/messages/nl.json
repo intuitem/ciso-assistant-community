@@ -810,5 +810,8 @@
 	"potential": "Potentieel",
 	"exploitable": "Exploiteerbaar",
 	"mitigated": "Verzacht",
-	"fixed": "Vast"
+	"fixed": "Vast",
+	"tags": "Labels",
+	"addTag": "Tag toevoegen",
+	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra"
 }
