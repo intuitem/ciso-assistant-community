@@ -810,5 +810,8 @@
 	"potential": "Potentielle",
 	"exploitable": "Exploitable",
 	"mitigated": "Atténuée",
-	"fixed": "Fixée"
+	"fixed": "Fixée",
+	"tags": "Étiquettes",
+	"addTag": "Ajouter une étiquette",
+	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra"
 }
