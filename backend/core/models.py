@@ -172,6 +172,24 @@ class I18nObjectMixin(models.Model):
         abstract = True
 
 
+class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+    label = models.CharField(max_length=100, verbose_name=_("Label"))
+
+    def __str__(self) -> str:
+        return self.label
+
+    fields_to_check = ["label"]
+
+
+class FilteringLabelMixin(models.Model):
+    filtering_labels = models.ManyToManyField(
+        FilteringLabel, blank=True, verbose_name=_("Labels")
+    )
+
+    class Meta:
+        abstract = True
+
+
 class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         abstract = True
@@ -1435,7 +1453,9 @@ class Policy(AppliedControl):
         super(Policy, self).save(*args, **kwargs)
 
 
-class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Vulnerability(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         POTENTIAL = "potential", _("Potential")
@@ -1457,6 +1477,14 @@ class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin)
         verbose_name=_("Severity"),
         help_text=_("The severity of the vulnerability"),
     )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        blank=True,
+        verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+
+    fields_to_check = ["name"]
 
 
 ########################### Secondary objects #########################

@@ -810,5 +810,10 @@
 	"potential": "Potential",
 	"exploitable": "Exploitable",
 	"mitigated": "Mitigated",
-	"fixed": "Fixed"
+	"fixed": "Fixed",
+	"labels": "Labels",
+	"addLabel": "Add label",
+	"labelsHelpText": "Labels are used to categorize and filter the items. You can add labels in the Extra section",
+	"filteringLabel": "Label",
+	"filteringLabels": "Labels"
 }

@@ -61,6 +61,11 @@ router.register(
     RequirementMappingSetViewSet,
     basename="requirement-mapping-sets",
 )
+router.register(
+    r"filtering-labels",
+    FilteringLabelViewSet,
+    basename="filtering-labels",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
