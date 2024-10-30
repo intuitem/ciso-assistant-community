@@ -67,8 +67,8 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	options={getOptions({ objects: model.foreignKeys['tags'], label: 'label' })}
-	field="tags"
-	helpText={m.tagsHelpText()}
-	label={m.tags()}
+	options={getOptions({ objects: model.foreignKeys['filtering_labels'], label: 'label' })}
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
 />

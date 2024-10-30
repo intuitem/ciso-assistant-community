@@ -51,7 +51,7 @@ export const URL_MODEL = [
 	'solutions',
 	'representatives',
 	'vulnerabilities',
-	'tags'
+	'filtering-labels'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

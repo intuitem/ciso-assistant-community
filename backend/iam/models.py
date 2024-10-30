@@ -580,7 +580,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
-        add_tag_permission = Permission.objects.get(codename="add_tag")
+        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
             if (
                 (perm == add_tag_permission)
