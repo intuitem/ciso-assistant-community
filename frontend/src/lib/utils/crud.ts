@@ -309,17 +309,17 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'tags', urlModel: 'tags' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'tags' }]
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
 	},
-	tags: {
-		name: 'tag',
-		localName: 'tag',
-		localNamePlural: 'tags',
-		verboseName: 'Tag',
-		verboseNamePlural: 'Tags'
+	'filtering-labels': {
+		name: 'filteringlabel',
+		localName: 'label',
+		localNamePlural: 'labels',
+		verboseName: 'Label',
+		verboseNamePlural: 'Labels'
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',

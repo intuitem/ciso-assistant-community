@@ -62,9 +62,9 @@ router.register(
     basename="requirement-mapping-sets",
 )
 router.register(
-    r"tags",
-    TagViewSet,
-    basename="tags",
+    r"filtering-labels",
+    FilteringLabelViewSet,
+    basename="filtering-labels",
 )
 
 ROUTES = settings.ROUTES
