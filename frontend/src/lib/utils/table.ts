@@ -53,7 +53,9 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 const LABELS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		return row.filtering_labels && row.filtering_labels.length > 0 ? row.filtering_labels.map((filtering_label) => filtering_label.str) : [''];
+		return row.filtering_labels && row.filtering_labels.length > 0
+			? row.filtering_labels.map((filtering_label) => filtering_label.str)
+			: [''];
 	},
 	alwaysDefined: true,
 	extraProps: {

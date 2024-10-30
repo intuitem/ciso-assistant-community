@@ -583,8 +583,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
             if (
-                (perm == add_tag_permission)
-                and perm in ra.role.permissions.all()
+                (perm == add_tag_permission) and perm in ra.role.permissions.all()
             ):  # Allow any user to add tags if he has the permission
                 return True
             f = folder
