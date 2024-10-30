@@ -26,6 +26,7 @@
 		resolve: (x) => x
 	};
 	export let cachedValue: any[] | undefined = undefined;
+	export let createFromSelection = false;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
@@ -81,6 +82,18 @@
 		dispatch('change', $value);
 		dispatch('cache', selected);
 	}
+
+	function addOption(event) {
+		if (event.key === 'Enter') {
+			const newOption = {
+				label: event.target.value,
+				value: event.target.value,
+			};
+			options = [...options, newOption];
+			selected = [...selected, newOption];
+			event.target.value = '';
+		}
+	}
 </script>
 
 <div {hidden}>
@@ -108,26 +121,51 @@
 	{/if}
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		<input type="hidden" name={field} value={$value ? $value : ''} />
-		{#if options.length > 0}
-			<MultiSelect
-				bind:selected
-				{options}
-				{...multiSelectOptions}
-				disabled={disabled || $$restProps.disabled}
-				{...$$restProps}
-				let:option
-			>
-				{#if option.suggested}
-					<span class="text-indigo-600">{option.label}</span>
-					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions}
-					{safeTranslate(option.label)}
-				{:else}
-					{option.label}
-				{/if}
-			</MultiSelect>
+		{#if createFromSelection}
+			{#if options.length > 0}
+				<MultiSelect
+					bind:selected
+					{options}
+					{...multiSelectOptions}
+					disabled={disabled || $$restProps.disabled}
+					{...$$restProps}
+					let:option
+					on:keyup={(event) => addOption(event)}
+				>
+					{#if option.suggested}
+						<span class="text-indigo-600">{option.label}</span>
+						<span class="text-sm text-gray-500"> (suggested)</span>
+					{:else if translateOptions}
+						{safeTranslate(option.label)}
+					{:else}
+						{option.label}
+					{/if}
+				</MultiSelect>
+			{:else}
+				<MultiSelect {options} {...multiSelectOptions} on:keyup={(event) => addOption(event)} />
+			{/if}
 		{:else}
-			<MultiSelect {options} {...multiSelectOptions} disabled />
+			{#if options.length > 0}
+				<MultiSelect
+					bind:selected
+					{options}
+					{...multiSelectOptions}
+					disabled={disabled || $$restProps.disabled}
+					{...$$restProps}
+					let:option
+				>
+					{#if option.suggested}
+						<span class="text-indigo-600">{option.label}</span>
+						<span class="text-sm text-gray-500"> (suggested)</span>
+					{:else if translateOptions}
+						{safeTranslate(option.label)}
+					{:else}
+						{option.label}
+					{/if}
+				</MultiSelect>
+			{:else}
+				<MultiSelect {options} {...multiSelectOptions} disabled />
+			{/if}
 		{/if}
 	</div>
 	{#if helpText}
