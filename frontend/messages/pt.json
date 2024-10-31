@@ -811,6 +811,12 @@
 	"exploitable": "Explorável",
 	"mitigated": "Mitigado",
 	"fixed": "Fixo",
+	"labels": "Etiquetas",
+	"addLabel": "Adicionar rótulo",
+	"labelsHelpText": "Os rótulos são usados para categorizar e filtrar os itens.",
+	"filteringLabel": "Rótulo",
+	"filteringLabels": "Etiquetas",
+	"invalidLabel": "O rótulo deve ser alfanumérico e conter no máximo 36 caracteres",
 	"tags": "Etiquetas",
 	"addTag": "Adicionar etiqueta",
 	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra"

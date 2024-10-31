@@ -811,6 +811,12 @@
 	"exploitable": "Ausnutzbar",
 	"mitigated": "Mildernd",
 	"fixed": "Behoben",
+	"labels": "Labels",
+	"addLabel": "Etikett hinzufügen",
+	"labelsHelpText": "Etiketten dienen zum Kategorisieren und Filtern der Elemente.",
+	"filteringLabel": "Etikett",
+	"filteringLabels": "Labels",
+	"invalidLabel": "Das Etikett muss alphanumerisch sein und darf höchstens 36 Zeichen enthalten",
 	"tags": "Schlagwörter",
 	"addTag": "Tag hinzufügen",
 	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen"
