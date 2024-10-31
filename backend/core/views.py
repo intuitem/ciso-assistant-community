@@ -380,7 +380,9 @@ class VulnerabilityViewSet(BaseModelViewSet):
                 uuid.UUID(label, version=4)
                 new_labels.append(label)
             except ValueError:
-                new_label = FilteringLabel.objects.create(label=label)
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
                 new_labels.append(str(new_label.id))
         return new_labels
 
