@@ -75,7 +75,8 @@ export async function handleErrorResponse({
 		return { form };
 	}
 	Object.entries(res).forEach(([key, value]) => {
-		setError(form, key, value);
+		key = key === "label" ? "filtering_labels" : key;
+		setError(form, key, safeTranslate(value));
 	});
 	return fail(400, { form });
 }
