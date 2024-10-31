@@ -90,7 +90,7 @@
 				value: event.target.value
 			};
 			options = event.target.value !== '' ? [...options, newOption] : options;
-			selected = event.target.value !== '' ? [...selected, newOption]: selected;
+			selected = event.target.value !== '' ? [...selected, newOption] : selected;
 			event.target.value = '';
 		}
 	}
@@ -122,25 +122,25 @@
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		<input type="hidden" name={field} value={$value ? $value : ''} />
 		{#if createFromSelection}
-				<MultiSelect
-					bind:selected
-					{options}
-					{...multiSelectOptions}
-					disabled={disabled || $$restProps.disabled}
-					allowEmpty={true}
-					{...$$restProps}
-					let:option
-					on:keyup={(event) => addOption(event)}
-				>
-					{#if option.suggested}
-						<span class="text-indigo-600">{option.label}</span>
-						<span class="text-sm text-gray-500"> (suggested)</span>
-					{:else if translateOptions}
-						{safeTranslate(option.label)}
-					{:else}
-						{option.label}
-					{/if}
-				</MultiSelect>
+			<MultiSelect
+				bind:selected
+				{options}
+				{...multiSelectOptions}
+				disabled={disabled || $$restProps.disabled}
+				allowEmpty={true}
+				{...$$restProps}
+				let:option
+				on:keyup={(event) => addOption(event)}
+			>
+				{#if option.suggested}
+					<span class="text-indigo-600">{option.label}</span>
+					<span class="text-sm text-gray-500"> (suggested)</span>
+				{:else if translateOptions}
+					{safeTranslate(option.label)}
+				{:else}
+					{option.label}
+				{/if}
+			</MultiSelect>
 		{:else if options.length > 0}
 			<MultiSelect
 				bind:selected
