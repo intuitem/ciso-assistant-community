@@ -127,6 +127,7 @@
 					{options}
 					{...multiSelectOptions}
 					disabled={disabled || $$restProps.disabled}
+					allowEmpty={true}
 					{...$$restProps}
 					let:option
 					on:keyup={(event) => addOption(event)}
