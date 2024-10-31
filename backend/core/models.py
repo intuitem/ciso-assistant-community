@@ -2257,7 +2257,11 @@ class ComplianceAssessment(Assessment):
             requirement
             for requirement in requirements
             if selected_implementation_groups_set
-            & set(requirement.requirement.implementation_groups)
+            & set(
+                requirement.requirement.implementation_groups
+                if requirement.requirement.implementation_groups
+                else []
+            )
         ]
 
         return requirement_assessments_list
