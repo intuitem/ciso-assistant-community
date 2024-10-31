@@ -299,26 +299,58 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
-    @action(detail=False, name="Get assets tree")
-    def tree(self, request):
-        tree = {"name": "Global", "children": []}
+    @action(detail=False, name="Get assets graph")
+    def graph(self, request):
+        nodes = []
+        links = []
+        nodes_idx = dict()
+        categories = []
+        N = 0
+        for domain in Folder.objects.all():
+            categories.append({"name": domain.name})
+            nodes_idx[domain.name] = N
+            nodes.append(
+                {
+                    "name": domain.name,
+                    "category": N,
+                    "symbol": "roundRect",
+                    "symbolSize": 30,
+                    "value": "Domain",
+                }
+            )
+            N += 1
+        for asset in Asset.objects.all():
+            symbol = "circle"
+            if asset.type == "PR":
+                symbol = "diamond"
+            nodes.append(
+                {
+                    "name": asset.name,
+                    "symbol": symbol,
+                    "symbolSize": 25,
+                    "category": nodes_idx[asset.folder.name],
+                    "value": "Primary" if asset.type == "PR" else "Support",
+                }
+            )
+            nodes_idx[asset.name] = N
+            links.append(
+                {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
+            )
+            N += 1
+        for asset in Asset.objects.all():
+            for relationship in asset.parent_assets.all():
+                links.append(
+                    {
+                        "source": nodes_idx[relationship.name],
+                        "target": nodes_idx[asset.name],
+                        "value": "parent",
+                    }
+                )
+        meta = {"display_name": f"toto"}
 
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Folder,
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
-        folders_list = list()
-        for folder in (
-            Folder.objects.exclude(content_type="GL")
-            .filter(id__in=viewable_objects, parent_folder=Folder.get_root_folder())
-            .distinct()
-        ):
-            entry = {"name": folder.name, "children": get_folder_content(folder)}
-            folders_list.append(entry)
-        tree.update({"children": folders_list})
-
-        return Response(tree)
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
