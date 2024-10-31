@@ -346,7 +346,7 @@ class AssetViewSet(BaseModelViewSet):
                         "value": "parent",
                     }
                 )
-        meta = {"display_name": f"toto"}
+        meta = {"display_name": f"Assets Explorer"}
 
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
