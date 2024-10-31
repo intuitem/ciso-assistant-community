@@ -68,6 +68,8 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "add_filteringlabel",
+    "view_filteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -143,6 +145,8 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "add_filteringlabel",
+    "view_filteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -331,6 +335,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_entityassessment",
     "view_entityassessment",
     "delete_entityassessment",
+    "add_filteringlabel",
+    "view_filteringlabel",
+    "change_filteringlabel",
+    "delete_filteringlabel",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
