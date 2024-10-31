@@ -7,6 +7,8 @@
 	export let height = 'h-full';
 	export let classesContainer = '';
 	export let title = '';
+	export let layout = 'force';
+	export let edgeLength = 50;
 	export let name = 'graph';
 
 	let searchQuery = '';
@@ -32,13 +34,13 @@
 		title: {
 			text: title,
 			subtext: 'Force layout',
-			top: 'top',
+			top: '30',
 			left: 'right'
 		},
 		series: [
 			{
 				type: 'graph',
-				layout: 'force',
+				layout: layout,
 				symbolSize: 20,
 				animation: false,
 				animationDurationUpdate: 1500,
@@ -74,7 +76,7 @@
 				},
 				categories: data.categories,
 				force: {
-					edgeLength: 50,
+					edgeLength: edgeLength,
 					repulsion: 50,
 					gravity: 0.1,
 					layoutAnimation: true,
@@ -183,7 +185,7 @@
 		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-sm"
 		bind:value={searchQuery}
 		on:keydown={handleKeyDown}
-		placeholder="Search a requirement by id ..."
+		placeholder="Find a node ..."
 	/>
 	<span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
 		<button

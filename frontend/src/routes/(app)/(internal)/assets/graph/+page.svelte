@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	export let data: PageData;
-	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
+	import { pageTitle } from '$lib/utils/stores';
+	pageTitle.set('Assets graph');
 </script>
 
-<div class="bg-white p-6 shadow flex overflow-x-auto">
+<div class="bg-white shadow flex overflow-x-auto">
 	<div class="w-full h-screen">
-		<TreeChart title="Assets tree" tree={data.data} name="org_tree" />
+		<GraphExplorer title="Assets Explorer" data={data.data} edgeLength={100} />
 	</div>
 </div>
