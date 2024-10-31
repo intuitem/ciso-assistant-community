@@ -423,6 +423,34 @@ class VulnerabilityViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
 
+    def _process_labels(self, labels):
+        """
+        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
+        """
+        new_labels = []
+        for label in labels:
+            try:
+                uuid.UUID(label, version=4)
+                new_labels.append(label)
+            except ValueError:
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
+                new_labels.append(str(new_label.id))
+        return new_labels
+
+    def update(self, request: Request, *args, **kwargs) -> Response:
+        request.data["filtering_labels"] = self._process_labels(
+            request.data["filtering_labels"]
+        )
+        return super().update(request, *args, **kwargs)
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        request.data["filtering_labels"] = self._process_labels(
+            request.data["filtering_labels"]
+        )
+        return super().create(request, *args, **kwargs)
+
 
 class FilteringLabelViewSet(BaseModelViewSet):
     """

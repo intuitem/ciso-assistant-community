@@ -67,6 +67,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
+	createFromSelection={true}
 	options={getOptions({ objects: model.foreignKeys['filtering_labels'], label: 'label' })}
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}

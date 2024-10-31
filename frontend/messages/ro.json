@@ -811,6 +811,12 @@
 	"exploitable": "Exploatabil",
 	"mitigated": "Atenuat",
 	"fixed": "Fix",
+	"labels": "Etichete",
+	"addLabel": "Adăugați o etichetă",
+	"labelsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele.",
+	"filteringLabel": "Eticheta",
+	"filteringLabels": "Etichete",
+	"invalidLabel": "Eticheta trebuie să fie alfanumerice și să conțină cel mult 36 de caractere",
 	"tags": "Etichete",
 	"addTag": "Adăugați etichetă",
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra"
