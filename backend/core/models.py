@@ -173,13 +173,17 @@ class I18nObjectMixin(models.Model):
 
 
 class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
-    label = models.CharField(max_length=100, verbose_name=_("Label"), validators=[
-        RegexValidator(
-            regex=r"^[\w-]{1,36}$",
-            message="invalidLabel",
-            code="invalid_label",
-        )
-    ])
+    label = models.CharField(
+        max_length=100,
+        verbose_name=_("Label"),
+        validators=[
+            RegexValidator(
+                regex=r"^[\w-]{1,36}$",
+                message="invalidLabel",
+                code="invalid_label",
+            )
+        ],
+    )
 
     def __str__(self) -> str:
         return self.label
