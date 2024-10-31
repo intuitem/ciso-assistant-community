@@ -811,6 +811,12 @@
 	"exploitable": "Exploitable",
 	"mitigated": "Atténuée",
 	"fixed": "Fixée",
+	"labels": "Étiquettes",
+	"addLabel": "Ajouter une étiquette",
+	"labelsHelpText": "Les étiquettes sont utilisées pour catégoriser et filtrer les éléments.",
+	"filteringLabel": "Étiquette",
+	"filteringLabels": "Étiquettes",
+	"invalidLabel": "L'étiquette doit être alphanumérique et contenir au maximum 36 caractères",
 	"tags": "Étiquettes",
 	"addTag": "Ajouter une étiquette",
 	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra"
