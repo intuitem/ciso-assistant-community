@@ -8,6 +8,6 @@
 
 <div class="bg-white shadow flex overflow-x-auto">
 	<div class="w-full h-screen">
-		<GraphExplorer title="Mapping Explorer" {data} name="org_tree" />
+		<GraphExplorer title="Mapping Explorer" data={data.data} />
 	</div>
 </div>
