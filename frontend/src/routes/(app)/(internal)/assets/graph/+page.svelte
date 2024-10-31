@@ -3,11 +3,11 @@
 	export let data: PageData;
 	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
 	import { pageTitle } from '$lib/utils/stores';
-	pageTitle.set(data.data.meta.display_name);
+	pageTitle.set('Assets Explorer');
 </script>
 
 <div class="bg-white shadow flex overflow-x-auto">
 	<div class="w-full h-screen">
-		<GraphExplorer title="Mapping Explorer" data={data.data} />
+		<GraphExplorer title="Assets Explorer" data={data.data} edgeLength={100} />
 	</div>
 </div>
