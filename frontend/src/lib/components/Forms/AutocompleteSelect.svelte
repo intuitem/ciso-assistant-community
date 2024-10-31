@@ -89,8 +89,8 @@
 				label: event.target.value,
 				value: event.target.value
 			};
-			options = [...options, newOption];
-			selected = [...selected, newOption];
+			options = event.target.value !== '' ? [...options, newOption] : options;
+			selected = event.target.value !== '' ? [...selected, newOption]: selected;
 			event.target.value = '';
 		}
 	}
@@ -122,7 +122,6 @@
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		<input type="hidden" name={field} value={$value ? $value : ''} />
 		{#if createFromSelection}
-			{#if options.length > 0}
 				<MultiSelect
 					bind:selected
 					{options}
@@ -141,9 +140,6 @@
 						{option.label}
 					{/if}
 				</MultiSelect>
-			{:else}
-				<MultiSelect {options} {...multiSelectOptions} on:keyup={(event) => addOption(event)} />
-			{/if}
 		{:else if options.length > 0}
 			<MultiSelect
 				bind:selected
