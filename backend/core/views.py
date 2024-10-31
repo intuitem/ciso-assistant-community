@@ -2169,6 +2169,71 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     filterset_fields = ["target_framework", "source_framework"]
 
+    @action(detail=True, methods=["get"], url_path="graph_data")
+    def graph_data(self, request, pk=None):
+        mapping_set_id = pk
+        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
+
+        nodes = []
+        links = []
+        snodes_idx = dict()
+        tnodes_idx = dict()
+        categories = [
+            {
+                "name": mapping_set.source_framework.name,
+            },
+            {
+                "name": mapping_set.target_framework.name,
+            },
+        ]
+        N = 0
+        for req in RequirementNode.objects.filter(
+            framework=mapping_set.source_framework
+        ).filter(assessable=True):
+            nodes.append(
+                {
+                    "name": req.ref_id,
+                    "category": 0,
+                    "value": req.name if req.name else req.description,
+                }
+            )
+            snodes_idx[req.ref_id] = N
+            N += 1
+
+        for req in RequirementNode.objects.filter(
+            framework=mapping_set.target_framework
+        ).filter(assessable=True):
+            nodes.append(
+                {
+                    "name": req.ref_id,
+                    "category": 1,
+                    "value": req.name if req.name else req.description,
+                }
+            )
+            tnodes_idx[req.ref_id] = N
+            N += 1
+        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
+        for item in req_mappings:
+            if (
+                item.source_requirement.assessable
+                and item.target_requirement.assessable
+            ):
+                links.append(
+                    {
+                        "source": snodes_idx[item.source_requirement.ref_id],
+                        "target": tnodes_idx[item.target_requirement.ref_id],
+                        "value": item.coverage,
+                    }
+                )
+
+        meta = {
+            "display_name": f"{mapping_set.source_framework.name} ➜ {mapping_set.target_framework.name}"
+        }
+
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
 
 @api_view(["GET"])
 @permission_classes([permissions.AllowAny])
