@@ -2,7 +2,7 @@
 	import Article from '$lib/components/DataViz/Article.svelte';
 </script>
 
-<div class="bg-white grid p-8 grid-cols-3 space-x-8">
+<div class="bg-white grid grid-cols-2 p-4 gap-4">
 	<Article
 		title="Controls Graph"
 		desc="Visualize dependencies and the impact of controls"
@@ -19,6 +19,12 @@
 		title="Frameworks mapping"
 		desc="Visualize applied mapping data as a graph"
 		link="experimental/mapping"
-		tags={['schedule', 'controls']}
+		tags={['analysis', 'mapping']}
+	/>
+	<Article
+		title="Assets explorer"
+		desc="Visualize assets and their relationships"
+		link="assets/graph"
+		tags={['analysis', 'assets']}
 	/>
 </div>
