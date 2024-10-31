@@ -10,7 +10,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.forms.models import model_to_dict
@@ -173,7 +173,13 @@ class I18nObjectMixin(models.Model):
 
 
 class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
-    label = models.CharField(max_length=100, verbose_name=_("Label"))
+    label = models.CharField(max_length=100, verbose_name=_("Label"), validators=[
+        RegexValidator(
+            regex=r"^\w{0,36}$",
+            message="invalidLabel",
+            code="invalid_label",
+        )
+    ])
 
     def __str__(self) -> str:
         return self.label
