@@ -23,7 +23,7 @@ from .serializers import (
     ResetPasswordConfirmSerializer,
 )
 
-from .models import Role, RoleAssignment
+from .models import Folder, Role, RoleAssignment
 
 import structlog
 
@@ -77,6 +77,7 @@ class CurrentUserView(views.APIView):
             "user_groups": request.user.get_user_groups(),
             "roles": request.user.get_roles(),
             "permissions": request.user.permissions,
+            "folders": RoleAssignment.get_permission_folder_tree(request.user),
             "is_third_party": request.user.is_third_party,
             "is_admin": request.user.is_admin(),
         }
