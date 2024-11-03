@@ -252,7 +252,7 @@ export const EvidenceSchema = baseNamedObject({
 });
 
 export const GeneralSettingsSchema = z.object({
-	security_objective_standard: z.string().optional().nullable()
+	security_objective_scale: z.string()
 });
 
 export const SSOSettingsSchema = z.object({

@@ -480,7 +480,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_standard' }]
+		selectFields: [{ field: 'security_objective_scale' }]
 	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',

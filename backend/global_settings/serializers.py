@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import GlobalSettings
 
 GENERAL_SETTINGS_KEYS = [
-    "security_objective_standard",
+    "security_objective_scale",
 ]
 
 

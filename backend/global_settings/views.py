@@ -58,16 +58,16 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     def object(self, request, pk=None):
         GlobalSettings.objects.get_or_create(
             name="general",
-            defaults={"value": {"security_objective_standard": "default"}},
+            defaults={"value": {"security_objective_scale": "1-4"}},
         )
         return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
 
-    @action(detail=True, name="Get security objective standards")
-    def security_objective_standard(self, request):
+    @action(detail=True, name="Get security objective scales")
+    def security_objective_scale(self, request):
         choices = {
-            "default": "--",
+            "1-4": "1-4",
             "0-3": "0-3",
-            "fips-199": "fips-199",
+            "FIPS-199": "FIPS-199",
         }
         return Response(choices)
 
