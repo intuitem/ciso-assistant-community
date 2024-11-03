@@ -11,10 +11,10 @@
 
 <Select
 	{form}
-	field="security_objective_standard"
-	cacheLock={cacheLocks['security_objective_standard']}
-	bind:cachedValue={formDataCache['security_objective_standard']}
-	options={model.selectOptions['security_objective_standard']}
-	helpText={m.securityObjectiveStandardHelpText()}
-	label={m.securityObjectiveStandard()}
+	field="security_objective_scale"
+	cacheLock={cacheLocks['security_objective_scale']}
+	bind:cachedValue={formDataCache['security_objective_scale']}
+	options={model.selectOptions['security_objective_scale']}
+	helpText={m.securityObjectiveScaleHelpText()}
+	label={m.securityObjectiveScale()}
 />
