@@ -826,5 +826,11 @@
 	"generalSettingsDescription": "Configure your general settings here.",
 	"securityObjectiveStandard": "Security objective standard",
 	"generalSettingsUpdated": "General settings updated",
-	"securityObjectiveStandardHelpText": "Choose your standard for security objectives (1 to 4 by default)"
+	"securityObjectiveStandardHelpText": "Choose your standard for security objectives (1 to 4 by default)",
+	"labels": "Labels",
+	"addLabel": "Add label",
+	"labelsHelpText": "Labels are used to categorize and filter the items.",
+	"filteringLabel": "Label",
+	"filteringLabels": "Labels",
+	"invalidLabel": "Label must be alphanumeric and contain at most 36 characters"
 }

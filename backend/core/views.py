@@ -299,6 +299,59 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
+    @action(detail=False, name="Get assets graph")
+    def graph(self, request):
+        nodes = []
+        links = []
+        nodes_idx = dict()
+        categories = []
+        N = 0
+        for domain in Folder.objects.all():
+            categories.append({"name": domain.name})
+            nodes_idx[domain.name] = N
+            nodes.append(
+                {
+                    "name": domain.name,
+                    "category": N,
+                    "symbol": "roundRect",
+                    "symbolSize": 30,
+                    "value": "Domain",
+                }
+            )
+            N += 1
+        for asset in Asset.objects.all():
+            symbol = "circle"
+            if asset.type == "PR":
+                symbol = "diamond"
+            nodes.append(
+                {
+                    "name": asset.name,
+                    "symbol": symbol,
+                    "symbolSize": 25,
+                    "category": nodes_idx[asset.folder.name],
+                    "value": "Primary" if asset.type == "PR" else "Support",
+                }
+            )
+            nodes_idx[asset.name] = N
+            links.append(
+                {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
+            )
+            N += 1
+        for asset in Asset.objects.all():
+            for relationship in asset.parent_assets.all():
+                links.append(
+                    {
+                        "source": nodes_idx[relationship.name],
+                        "target": nodes_idx[asset.name],
+                        "value": "parent",
+                    }
+                )
+        meta = {"display_name": f"Assets Explorer"}
+
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
@@ -369,6 +422,45 @@ class VulnerabilityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
+
+    def _process_labels(self, labels):
+        """
+        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
+        """
+        new_labels = []
+        for label in labels:
+            try:
+                uuid.UUID(label, version=4)
+                new_labels.append(label)
+            except ValueError:
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
+                new_labels.append(str(new_label.id))
+        return new_labels
+
+    def update(self, request: Request, *args, **kwargs) -> Response:
+        request.data["filtering_labels"] = self._process_labels(
+            request.data["filtering_labels"]
+        )
+        return super().update(request, *args, **kwargs)
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        request.data["filtering_labels"] = self._process_labels(
+            request.data["filtering_labels"]
+        )
+        return super().create(request, *args, **kwargs)
+
+
+class FilteringLabelViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows labels to be viewed or edited.
+    """
+
+    model = FilteringLabel
+    filterset_fields = ["folder"]
+    search_fields = ["label"]
+    ordering = ["label"]
 
 
 class RiskAssessmentViewSet(BaseModelViewSet):
@@ -2131,6 +2223,71 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
     filterset_fields = ["target_framework", "source_framework"]
+
+    @action(detail=True, methods=["get"], url_path="graph_data")
+    def graph_data(self, request, pk=None):
+        mapping_set_id = pk
+        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
+
+        nodes = []
+        links = []
+        snodes_idx = dict()
+        tnodes_idx = dict()
+        categories = [
+            {
+                "name": mapping_set.source_framework.name,
+            },
+            {
+                "name": mapping_set.target_framework.name,
+            },
+        ]
+        N = 0
+        for req in RequirementNode.objects.filter(
+            framework=mapping_set.source_framework
+        ).filter(assessable=True):
+            nodes.append(
+                {
+                    "name": req.ref_id,
+                    "category": 0,
+                    "value": req.name if req.name else req.description,
+                }
+            )
+            snodes_idx[req.ref_id] = N
+            N += 1
+
+        for req in RequirementNode.objects.filter(
+            framework=mapping_set.target_framework
+        ).filter(assessable=True):
+            nodes.append(
+                {
+                    "name": req.ref_id,
+                    "category": 1,
+                    "value": req.name if req.name else req.description,
+                }
+            )
+            tnodes_idx[req.ref_id] = N
+            N += 1
+        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
+        for item in req_mappings:
+            if (
+                item.source_requirement.assessable
+                and item.target_requirement.assessable
+            ):
+                links.append(
+                    {
+                        "source": snodes_idx[item.source_requirement.ref_id],
+                        "target": tnodes_idx[item.target_requirement.ref_id],
+                        "value": item.coverage,
+                    }
+                )
+
+        meta = {
+            "display_name": f"{mapping_set.source_framework.name} ➜ {mapping_set.target_framework.name}"
+        }
+
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
 
 
 @api_view(["GET"])

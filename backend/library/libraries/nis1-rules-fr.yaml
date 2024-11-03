@@ -24,7 +24,7 @@ translations:
     provider: French government
 dependencies:
 - urn:intuitem:risk:library:doc-pol
-- urn:intuitem:risk:library:mitre-attack-v14
+- urn:intuitem:risk:library:mitre-attack
 objects:
   framework:
     urn: urn:intuitem:risk:framework:nis1-rules-fr

@@ -66,6 +66,9 @@ export async function handleErrorResponse({
 }) {
 	const res: Record<string, string> = await response.json();
 	console.error(res);
+	if (res.label) {
+		res['filtering_labels'] = res.label;
+	}
 	if (res.warning) {
 		setFlash({ type: 'warning', message: res.warning }, event);
 		return { form };
@@ -75,7 +78,7 @@ export async function handleErrorResponse({
 		return { form };
 	}
 	Object.entries(res).forEach(([key, value]) => {
-		setError(form, key, value);
+		setError(form, key, safeTranslate(value));
 	});
 	return fail(400, { form });
 }
