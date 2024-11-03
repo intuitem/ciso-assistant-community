@@ -282,9 +282,9 @@
 										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
 											{safeTranslate((value.str || value.name) ?? value)}
 										{:else if displaySecurityObjective && SECURITY_OBJECTIVE_SCALE_MAP[$page.data.settings.security_objective_scale][value]}
-											{SECURITY_OBJECTIVE_SCALE_MAP[
-												$page.data.settings.security_objective_scale
-											][value]}
+											{SECURITY_OBJECTIVE_SCALE_MAP[$page.data.settings.security_objective_scale][
+												value
+											]}
 										{:else}
 											{(value.str || value.name) ?? value}
 										{/if}
