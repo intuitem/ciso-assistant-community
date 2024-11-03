@@ -27,7 +27,7 @@ description: "EKSEC est fier de contribuer \xE0 la CISO Assistant Community et \
 copyright: SOUDAKI x KERRAR Sponsored by EKSEC
 version: 1
 provider: EKSEC.net
-packager: Intetum
+packager: EKSEC.net
 objects:
   framework:
     urn: urn:intuitem:risk:framework:RNSI-ALGERIE-2020
