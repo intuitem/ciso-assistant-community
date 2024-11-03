@@ -4,10 +4,10 @@
 	import { ProgressRadial, RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
-	import { SECURITY_OBJECTIVE_STANDARD_MAP } from '$lib/utils/constants';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
 
 	function securityObjectiveDisplay(level: number) {
-		return SECURITY_OBJECTIVE_STANDARD_MAP[$page.data.settings.security_objective_standard][level];
+		return SECURITY_OBJECTIVE_SCALE_MAP[$page.data.settings.security_objective_scale][level];
 	}
 
 	export let label: string | undefined = undefined;

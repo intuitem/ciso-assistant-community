@@ -144,7 +144,7 @@
 	open={false}
 	style="hover:text-indigo-700"
 	icon="fa-regular fa-clock"
-	header={m.timingObjectives()}
+	header={m.disasterRecoveryObjectives()}
 >
 	<NumberField
 		{form}
