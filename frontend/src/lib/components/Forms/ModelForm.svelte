@@ -40,6 +40,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
+	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -251,6 +252,8 @@
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'general-settings'}
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+	{:else if URLModel === 'filtering-labels'}
+		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

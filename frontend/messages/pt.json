@@ -770,7 +770,6 @@
 	"backupLoadingError": "Ocorreu um erro ao carregar o backup.",
 	"backupGreaterVersionError": "Não é possível carregar o backup, a versão do backup é superior à versão atual do seu aplicativo.",
 	"backupLowerVersionError": "Ocorreu um erro, a versão de backup pode ser muito antiga. Se for o caso, ela deve ser atualizada antes de tentar novamente.",
-	"NoPreviewMessage": "Nenhuma pré-visualização disponível.",
 	"entityAssessmentEvidenceHelpText": "Um questionário externo",
 	"associatedEntities": "Entidades associadas",
 	"noMailerConfigured": "Nenhum mailer configurado",
@@ -811,5 +810,14 @@
 	"potential": "Potencial",
 	"exploitable": "Explorável",
 	"mitigated": "Mitigado",
-	"fixed": "Fixo"
+	"fixed": "Fixo",
+	"labels": "Etiquetas",
+	"addLabel": "Adicionar rótulo",
+	"labelsHelpText": "Os rótulos são usados para categorizar e filtrar os itens.",
+	"filteringLabel": "Rótulo",
+	"filteringLabels": "Etiquetas",
+	"invalidLabel": "O rótulo deve ser alfanumérico e conter no máximo 36 caracteres",
+	"tags": "Etiquetas",
+	"addTag": "Adicionar etiqueta",
+	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra"
 }
