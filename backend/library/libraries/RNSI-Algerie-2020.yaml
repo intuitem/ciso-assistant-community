@@ -3,27 +3,26 @@ locale: FR
 ref_id: RNSI-ALGERIE-2020
 name: "R\xE9f\xE9rentiel National\nde S\xE9curit\xE9 de l\u2019Information Alg\xE9\
   rie V2020 Par  EKSEC.net"
-description: "EKSEC est fier de contribuer \xE0 la CISO Assistant Community et \xE0\
+description: "\"EKSEC est fier de contribuer \xE0 la CISO Assistant Community et \xE0\
   \ l\u2019Alg\xE9rie en int\xE9grant le R\xE9f\xE9rentiel National de S\xE9curit\xE9\
-  \ de l\u2019Information (RNSI) de l'Alg\xE9rie.\n\nLe RNSI 2020, con\xE7u par l'Entreprise\
-  \ d'Appui au D\xE9veloppement Num\xE9rique (EADN) selon les normes et standards\
-  \ internationaux et adopt\xE9 par le Minist\xE8re de la Poste et des T\xE9l\xE9\
-  communications (MPT), offre un cadre structur\xE9 et des pr\xE9requis essentiels\
-  \ pour l'\xE9laboration et la mise en \u0153uvre efficace d'une politique de s\xE9\
-  curit\xE9 des syst\xE8mes d\u2019information. Cette initiative vise \xE0 renforcer\
-  \ la conformit\xE9 des organismes aux normes de s\xE9curit\xE9 rigoureuses.\n\n\
-  Dans ce cadre, le R\xE9f\xE9rentiel National de S\xE9curit\xE9 de l\u2019Information\
-  \ (RNSI) \xE9tablit une gouvernance et une approche commune de la s\xE9curit\xE9\
-  \ de l\u2019information au sein des organismes publics. Il d\xE9finit \xE9galement\
-  \ les exigences minimales en mati\xE8re de s\xE9curit\xE9, permettant de g\xE9rer,\
-  \ r\xE9sister et r\xE9duire l\u2019impact des menaces potentielles. Le RNSI propose\
-  \ des contr\xF4les de s\xE9curit\xE9 et des bonnes pratiques pour les organismes\
-  \ publics, tout en mettant l'accent sur la formation et la sensibilisation des usagers\
-  \ aux risques, ainsi que sur l\u2019\xE9valuation p\xE9riodique des contr\xF4les\
-  \ pour garantir le respect des exigences de s\xE9curit\xE9.\n\nEn int\xE9grant le\
-  \ RNSI, EKSEC s'engage \xE0 promouvoir une culture de s\xE9curit\xE9 proactive et\
-  \ \xE0 soutenir les organismes dans leurs efforts pour prot\xE9ger les informations\
-  \ critiques. Plus d'informations sont disponibles ici : https://www.mpt.gov.dz/referentiel-de-securite-des-informations/"
+  \ de l\u2019Information (RNSI) de l'Alg\xE9rie.\n\nLe R\xE9f\xE9rentiel National\
+  \ de S\xE9curit\xE9 de l'Information (RNSI) 2020 est la deuxi\xE8me version du cadre\
+  \ r\xE9glementaire de cybers\xE9curit\xE9 alg\xE9rien, initialement \xE9tabli en\
+  \ 2016 par le Minist\xE8re de la Poste, des T\xE9l\xE9communications, des Technologies\
+  \ et du Num\xE9rique (MPT Alg\xE9rie). Cette version actualis\xE9e vise \xE0 renforcer\
+  \ et harmoniser la s\xE9curit\xE9 de l\u2019information dans les organismes publics\
+  \ en Alg\xE9rie.\n\nDans ce cadre, le R\xE9f\xE9rentiel National de S\xE9curit\xE9\
+  \ de l\u2019Information (RNSI) \xE9tablit une gouvernance et une approche commune\
+  \ de la s\xE9curit\xE9 de l\u2019information au sein des organismes publics. Il\
+  \ d\xE9finit \xE9galement les exigences minimales en mati\xE8re de s\xE9curit\xE9\
+  , permettant de g\xE9rer, r\xE9sister et r\xE9duire l\u2019impact des menaces potentielles.\
+  \ Le RNSI propose des contr\xF4les de s\xE9curit\xE9 et des bonnes pratiques pour\
+  \ les organismes publics, tout en mettant l'accent sur la formation et la sensibilisation\
+  \ des usagers aux risques, ainsi que sur l\u2019\xE9valuation p\xE9riodique des\
+  \ contr\xF4les pour garantir le respect des exigences de s\xE9curit\xE9.\n\nEn int\xE9\
+  grant le RNSI, EKSEC s'engage \xE0 promouvoir une culture de s\xE9curit\xE9 proactive\
+  \ et \xE0 soutenir les organismes dans leurs efforts pour prot\xE9ger les informations\
+  \ critiques. Plus d'informations sont disponibles ici : https://www.mpt.gov.dz/referentiel-de-securite-des-informations/\""
 copyright: SOUDAKI x KERRAR Sponsored by EKSEC
 version: 1
 provider: EKSEC.net
@@ -35,17 +34,16 @@ objects:
     name: RNSI-Algerie-2020
     description: "EKSEC est fier de contribuer \xE0 la CISO Assistant Community et\
       \ \xE0 l\u2019Alg\xE9rie en int\xE9grant le R\xE9f\xE9rentiel National de S\xE9\
-      curit\xE9 de l\u2019Information (RNSI) de l'Alg\xE9rie.\n\nLe RNSI 2020, con\xE7\
-      u par l'Entreprise d'Appui au D\xE9veloppement Num\xE9rique (EADN) selon les\
-      \ normes et standards internationaux et adopt\xE9 par le Minist\xE8re de la\
-      \ Poste et des T\xE9l\xE9communications (MPT), offre un cadre structur\xE9 et\
-      \ des pr\xE9requis essentiels pour l'\xE9laboration et la mise en \u0153uvre\
-      \ efficace d'une politique de s\xE9curit\xE9 des syst\xE8mes d\u2019information.\
-      \ Cette initiative vise \xE0 renforcer la conformit\xE9 des organismes aux normes\
-      \ de s\xE9curit\xE9 rigoureuses.\n\nDans ce cadre, le R\xE9f\xE9rentiel National\
-      \ de S\xE9curit\xE9 de l\u2019Information (RNSI) \xE9tablit une gouvernance\
-      \ et une approche commune de la s\xE9curit\xE9 de l\u2019information au sein\
-      \ des organismes publics. Il d\xE9finit \xE9galement les exigences minimales\
+      curit\xE9 de l\u2019Information (RNSI) de l'Alg\xE9rie.\n\nLe R\xE9f\xE9rentiel\
+      \ National de S\xE9curit\xE9 de l'Information (RNSI) 2020 est la deuxi\xE8me\
+      \ version du cadre r\xE9glementaire de cybers\xE9curit\xE9 alg\xE9rien, initialement\
+      \ \xE9tabli en 2016 par le Minist\xE8re de la Poste, des T\xE9l\xE9communications,\
+      \ des Technologies et du Num\xE9rique (MPT Alg\xE9rie). Cette version actualis\xE9\
+      e vise \xE0 renforcer et harmoniser la s\xE9curit\xE9 de l\u2019information\
+      \ dans les organismes publics en Alg\xE9rie.\n\nDans ce cadre, le R\xE9f\xE9\
+      rentiel National de S\xE9curit\xE9 de l\u2019Information (RNSI) \xE9tablit une\
+      \ gouvernance et une approche commune de la s\xE9curit\xE9 de l\u2019information\
+      \ au sein des organismes publics. Il d\xE9finit \xE9galement les exigences minimales\
       \ en mati\xE8re de s\xE9curit\xE9, permettant de g\xE9rer, r\xE9sister et r\xE9\
       duire l\u2019impact des menaces potentielles. Le RNSI propose des contr\xF4\
       les de s\xE9curit\xE9 et des bonnes pratiques pour les organismes publics, tout\
