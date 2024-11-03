@@ -1,5 +1,5 @@
 urn: urn:intuitem:risk:library:RNSI-ALGERIE-2020
-locale: fr
+locale: FR
 ref_id: RNSI-ALGERIE-2020
 name: "R\xE9f\xE9rentiel National\nde S\xE9curit\xE9 de l\u2019Information Alg\xE9\
   rie V2020 Par  EKSEC.net"
@@ -56,7 +56,7 @@ objects:
       \ et \xE0 soutenir les organismes dans leurs efforts pour prot\xE9ger les informations\
       \ critiques. Plus d'informations sont disponibles ici : https://www.mpt.gov.dz/referentiel-de-securite-des-informations/"
     min_score: 1
-    max_score: 5
+    max_score: 4
     scores_definition:
     - score: 0
       name: "Non effectu\xE9"
@@ -83,9 +83,6 @@ objects:
       name: "Mise a jour p\xE9riodiquement"
       description: "La distinction principale du niveau 3, est que le processus est\
         \ revue et mis \xE0 jour p\xE9riodiquement ou en cas d'incident "
-    - score: 5
-      name: Non Applicable
-      description: "Contr\xF4le non applicable au contexte"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:RNSI-ALGERIE-2020:gov
       assessable: false
