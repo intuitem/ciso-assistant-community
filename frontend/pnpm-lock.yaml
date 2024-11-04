@@ -81,6 +81,9 @@ importers:
       '@storybook/test':
         specifier: ^8.3.6
         version: 8.3.6(storybook@8.3.6)
+      '@svelte-put/copy':
+        specifier: ^3.0.0
+        version: 3.0.2(svelte@4.2.19)
       '@svelte-put/qr':
         specifier: ^1.2.1
         version: 1.2.1(svelte@4.2.19)
@@ -1424,6 +1427,11 @@ packages:
     resolution: {integrity: sha512-LQjUk6GXRW9ELkoBKuqzQKFUW+ajfGPfVELcfs3/VQX61VhthJ4olov4bGPc04wsmmFMgN/qODxT485IwOHfPQ==}
     peerDependencies:
       storybook: ^8.3.6
+
+  '@svelte-put/copy@3.0.2':
+    resolution: {integrity: sha512-BVD464jVZabcVy8yOJ2GpYmNaemysLSLL+bm9/mjFrMDvpNL7Iz6hWMjwRCYQxMODDm5tmi+zoDOynDAZ9ltdQ==}
+    peerDependencies:
+      svelte: ^3.55.0 || ^4.0.0 || ^5.0.0
 
   '@svelte-put/qr@1.2.1':
     resolution: {integrity: sha512-VIAze6mCVWdiyq6xnMFhbD3dbTvz9CDFVN3lVkDvx6SYFcstgHuIyb7Pi3aJIr2ClDc4U+W2U+SGhFuQBskvBg==}
@@ -5965,6 +5973,10 @@ snapshots:
   '@storybook/theming@8.3.6(storybook@8.3.6)':
     dependencies:
       storybook: 8.3.6
+
+  '@svelte-put/copy@3.0.2(svelte@4.2.19)':
+    dependencies:
+      svelte: 4.2.19
 
   '@svelte-put/qr@1.2.1(svelte@4.2.19)':
     dependencies:
