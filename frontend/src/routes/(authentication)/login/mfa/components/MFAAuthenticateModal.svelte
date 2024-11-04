@@ -25,6 +25,9 @@
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { mfaAuthenticateSchema } from '../utils/schemas';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+
+	let useRecoveryCode = false;
 </script>
 
 {#if $modalStore[0]}
@@ -43,8 +46,24 @@
 				validationMethod="onsubmit"
 			>
 				<!-- prettier-ignore -->
+				{#if !useRecoveryCode}
 				<OTPInput {form} field="code" />
+          {:else}
+        <TextField {form} field="code" label={m.recoveryCode()} />
+        {/if}
 				<footer class="modal-footer {parent.regionFooter}">
+					<button
+						type="button"
+						on:click={() => (useRecoveryCode = !useRecoveryCode)}
+						class="btn hover:underline"
+						data-testid="mfa-authenticate-confirm-button"
+					>
+						{#if !useRecoveryCode}
+							{m.loginUsingRecoveryCode()}
+						{:else}
+							{m.loginUsingTOTP()}
+						{/if}
+					</button>
 					<button
 						class="btn variant-filled-primary"
 						data-testid="mfa-authenticate-confirm-button"
