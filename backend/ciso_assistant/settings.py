@@ -124,7 +124,7 @@ ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
 MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
 MEDIA_URL = ""
 
-PAGINATE_BY = os.environ.get("PAGINATE_BY", default=500)
+PAGINATE_BY = os.environ.get("PAGINATE_BY", default=5000)
 
 # Application definition
 

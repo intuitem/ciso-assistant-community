@@ -810,5 +810,14 @@
 	"potential": "Potentieel",
 	"exploitable": "Exploiteerbaar",
 	"mitigated": "Verzacht",
-	"fixed": "Vast"
+	"fixed": "Vast",
+	"labels": "Etiketten",
+	"addLabel": "Label toevoegen",
+	"labelsHelpText": "Labels worden gebruikt om items te categoriseren en te filteren.",
+	"filteringLabel": "Label",
+	"filteringLabels": "Etiketten",
+	"invalidLabel": "Het label moet alfanumeriek zijn en maximaal 36 tekens bevatten",
+	"tags": "Labels",
+	"addTag": "Tag toevoegen",
+	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra"
 }
