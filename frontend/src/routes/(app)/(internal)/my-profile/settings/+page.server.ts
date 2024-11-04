@@ -23,11 +23,9 @@ export const load: PageServerLoad = async (event) => {
 	let totp = null;
 	let recoveryCodes = null;
 
-	if (authenticators.find((auth) => auth.type === 'totp')) {
-		const totpEndpoint = `${authenticatorsEndpoint}/totp`;
-		const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
-		totp = totpResponse.meta;
-	}
+	const totpEndpoint = `${authenticatorsEndpoint}/totp`;
+	const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
+	totp = totpResponse.meta;
 
 	if (authenticators.find((auth) => auth.type === 'recovery_codes')) {
 		const recoveryCodesEndpoint = `${authenticatorsEndpoint}/recovery-codes`;
