@@ -812,6 +812,7 @@
 	"authenticatorAppDescription": "Use an authenticator app to generate a time-based one-time password (TOTP) for two-factor authentication.",
 	"enableTOTP": "Enable 2FA",
 	"disableTOTP": "Disable 2FA",
+	"disableTOTPConfirm": "Are you sure you want to disable two-factor authentication?",
 	"recommended": "Recommended",
 	"activateTOTPTitle": "Activate two-factor authentication",
 	"activateTOTPMessage": "Scan the QR code with your authenticator app to activate two-factor authentication.",
