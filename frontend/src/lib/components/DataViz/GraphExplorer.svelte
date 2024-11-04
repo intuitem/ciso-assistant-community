@@ -77,8 +77,8 @@
 				categories: data.categories,
 				force: {
 					edgeLength: edgeLength,
-					repulsion: 50,
-					gravity: 0.1,
+					repulsion: 200,
+					gravity: 0.05,
 					layoutAnimation: true,
 					friction: 0.1,
 					initLayout: 'circular'
