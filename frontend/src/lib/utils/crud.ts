@@ -307,9 +307,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+	},
+	'filtering-labels': {
+		name: 'filteringlabel',
+		localName: 'label',
+		localNamePlural: 'labels',
+		verboseName: 'Label',
+		verboseNamePlural: 'Labels'
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',

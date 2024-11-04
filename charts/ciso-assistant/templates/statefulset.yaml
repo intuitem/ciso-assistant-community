@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ciso-assistant-{{ .Values.clientName }}
+  labels:
+    app: ciso-assistant
+    client: {{ .Values.clientName }}
+    version: {{ include "ciso-assistant.appVersion" . }}
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ciso-assistant
+  serviceName: svc-ciso-assistant-{{ .Values.clientName }}
+  template:
+    metadata:
+      labels:
+        app: ciso-assistant
+        client: {{ .Values.clientName }}
+    spec:
+      containers:
+      - name: ciso-assistant-backend
+        env:
+        - name: CISO_ASSISTANT_SUPERUSER_EMAIL
+          value: {{ .Values.emailAdmin }}
+        - name: CISO_ASSISTANT_URL
+          value: https://{{ .Values.clientName }}.{{ .Values.clusterDomain }}
+        - name: ALLOWED_HOSTS
+          value: localhost,127.0.0.1,{{ .Values.clientName }}.{{ .Values.clusterDomain }}
+        - name: EMAIL_HOST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: EMAIL_HOST_PASSWORD
+              name: smtp-out
+        - name: EMAIL_HOST_PASSWORD_RESCUE
+          valueFrom:
+            secretKeyRef:
+              key: EMAIL_HOST_PASSWORD_RESCUE
+              name: smtp-out
+        envFrom:
+        - configMapRef:
+            name: ciso-assistant-config
+        image: "{{ .Values.image.backend.repository }}:{{ include "ciso-assistant.appVersion" . }}"
+        imagePullPolicy: {{ .Values.image.backend.pullPolicy }}
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /code/db
+          name: db-data
+      - name: ciso-assistant-frontend
+        env:
+        - name: ORIGIN
+          value: "{{ .Values.frontendOrigin | default (printf "https://%s.%s" .Values.clientName .Values.clusterDomain) }}"
+        - name: PUBLIC_BACKEND_API_EXPOSED_URL
+          value: https://{{ .Values.clientName }}.{{ .Values.clusterDomain }}/api
+        envFrom:
+        - configMapRef:
+            name: ciso-assistant-config
+        image: "{{ .Values.image.frontend.repository }}:{{ include "ciso-assistant.appVersion" . }}"
+        imagePullPolicy: {{ .Values.image.frontend.pullPolicy }}
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+      - name: caddy
+        command:
+        - sh
+        - '-c'
+        - |
+          echo {{ .Values.clientName }}.{{ .Values.clusterDomain }} "{" > Caddyfile
+          echo "reverse_proxy /api/iam/sso/redirect/ localhost:8000" >> Caddyfile
+          echo "reverse_proxy /api/accounts/saml/0/acs/ localhost:8000" >> Caddyfile
+          echo "reverse_proxy /api/accounts/saml/0/acs/finish/ localhost:8000" >> Caddyfile
+          echo "reverse_proxy /* localhost:3000" >> Caddyfile
+          echo "}" >> Caddyfile
+          exec caddy run
+        env:
+        - name: CISO_ASSISTANT_URL
+          value: https://{{ .Values.clientName }}.{{ .Values.clusterDomain }}
+        image: "{{ .Values.image.caddy.repository }}:{{ .Values.image.caddy.tag }}"
+        imagePullPolicy: {{ .Values.image.caddy.pullPolicy }}
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data
+          name: db-data
+          subPath: caddy
+      enableServiceLinks: false
+      imagePullSecrets:
+      - name: registry-secret
+      restartPolicy: Always
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: ciso-assistant
+        client: {{ .Values.clientName }}
+      name: db-data
+    spec:
+      accessModes:
+      - {{ .Values.persistence.accessMode }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size }}
+      volumeMode: Filesystem

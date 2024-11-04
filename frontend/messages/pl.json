@@ -810,5 +810,14 @@
 	"potential": "Potencjał",
 	"exploitable": "Wykorzystywany",
 	"mitigated": "Złagodzony",
-	"fixed": "Naprawił"
+	"fixed": "Naprawił",
+	"labels": "Etykiety",
+	"addLabel": "Dodaj etykietę",
+	"labelsHelpText": "Etykiety służą do kategoryzowania i filtrowania elementów.",
+	"filteringLabel": "Etykieta",
+	"filteringLabels": "Etykiety",
+	"invalidLabel": "Etykieta musi być alfanumeryczna i zawierać maksymalnie 36 znaków",
+	"tags": "Tagi",
+	"addTag": "Dodaj tag",
+	"tagsHelpText": "Tagi służą do kategoryzowania i filtrowania elementów. Możesz dodać tagi w sekcji Extra"
 }

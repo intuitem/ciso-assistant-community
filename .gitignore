@@ -13,3 +13,4 @@ db/
 caddy_data/
 **/dist/
 **/.meta
+charts/custom-values.yaml

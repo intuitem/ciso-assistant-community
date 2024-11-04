@@ -810,5 +810,14 @@
 	"potential": "Potenziale",
 	"exploitable": "Sfruttabile",
 	"mitigated": "Mitigata",
-	"fixed": "Fissa"
+	"fixed": "Fissa",
+	"labels": "Etichette",
+	"addLabel": "Aggiungi etichetta",
+	"labelsHelpText": "Le etichette vengono utilizzate per categorizzare e filtrare gli elementi.",
+	"filteringLabel": "Etichetta",
+	"filteringLabels": "Etichette",
+	"invalidLabel": "L'etichetta deve essere alfanumerica e contenere al massimo 36 caratteri",
+	"tags": "Etichette",
+	"addTag": "Aggiungi tag",
+	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra"
 }
