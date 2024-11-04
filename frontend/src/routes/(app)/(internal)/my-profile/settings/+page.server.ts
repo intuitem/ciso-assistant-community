@@ -20,13 +20,28 @@ export const load: PageServerLoad = async (event) => {
 	}
 	const authenticators = authenticatorsResponse.data;
 
-	const totpEndpoint = `${authenticatorsEndpoint}/totp`;
-	const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
-	const totp = totpResponse.meta;
+	let totp = null;
+	let recoveryCodes = null;
+
+	if (authenticators.find((auth) => auth.type === 'totp')) {
+		const totpEndpoint = `${authenticatorsEndpoint}/totp`;
+		const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
+		totp = totpResponse.meta;
+	}
+
+	if (authenticators.find((auth) => auth.type === 'recovery_codes')) {
+		const recoveryCodesEndpoint = `${authenticatorsEndpoint}/recovery-codes`;
+		const recoveryCodesResponse = await event
+			.fetch(recoveryCodesEndpoint)
+			.then((res) => res.json());
+		if (recoveryCodesResponse.status === 200) {
+			recoveryCodes = recoveryCodesResponse.data;
+		}
+	}
 
 	const activateTOTPForm = await superValidate(zod(activateTOTPSchema));
 
-	return { authenticators, totp, activateTOTPForm };
+	return { authenticators, totp, activateTOTPForm, recoveryCodes };
 };
 
 export const actions: Actions = {
@@ -92,6 +107,21 @@ export const actions: Actions = {
 		return { form };
 	},
 	regenerateRecoveryCodes: async (event) => {
-		throw new Error('Not implemented');
+		const recoveryCodesEndpoint = `${ALLAUTH_API_URL}/account/authenticators/recovery-codes`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST'
+		};
+
+		const response = await event
+			.fetch(recoveryCodesEndpoint, requestInitOptions)
+			.then((res) => res.json());
+
+		if (response.status !== 200) {
+			console.error('Could not regenerate recovery codes', response);
+			setFlash({ type: 'error', message: m.errorRegeneratingRecoveryCodes() }, event);
+			return fail(response.status, { error: 'Could not regenerate recovery codes' });
+		}
+
+		return { recoveryCodes: response.data };
 	}
 };
