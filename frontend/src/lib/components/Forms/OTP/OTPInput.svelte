@@ -2,6 +2,7 @@
 	import { afterUpdate } from 'svelte';
 	import OTPItem from './OTPItem.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let field = 'code';
 	export let form;
@@ -44,7 +45,7 @@
 {#if $errors}
 	<div>
 		{#each $errors as error}
-			<p class="text-error-500 text-xs font-medium">{error}</p>
+			<p class="text-error-500 text-xs font-medium">{safeTranslate(error)}</p>
 		{/each}
 	</div>
 {/if}
