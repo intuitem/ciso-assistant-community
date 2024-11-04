@@ -111,23 +111,25 @@
 									{m.authenticatorAppDescription()}
 								</p>
 							</div>
-							{#if hasTOTP}
-								<button
-									class="btn variant-ringed-surface w-fit"
-									on:click={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
-								>
-								{#if data.recoveryCodes}
+							<div class="flex flex-wrap justify-between gap-2">
+								{#if hasTOTP}
 									<button
 										class="btn variant-ringed-surface w-fit"
-										on:click={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
+										on:click={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
+									>
+									{#if data.recoveryCodes}
+										<button
+											class="btn variant-ringed-surface w-fit"
+											on:click={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
+										>
+									{/if}
+								{:else}
+									<button
+										class="btn variant-ringed-surface w-fit"
+										on:click={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
 									>
 								{/if}
-							{:else}
-								<button
-									class="btn variant-ringed-surface w-fit"
-									on:click={(_) => modalActivateTOTP(data.totp)}>{m.enableTOTP()}</button
-								>
-							{/if}
+							</div>
 						</div>
 					</dd>
 				</div>
