@@ -1,18 +1,22 @@
 <script lang="ts">
 	import {
+		Tab,
+		TabGroup,
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
 	} from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
-	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
 
-	import * as m from '$paraglide/messages';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import * as m from '$paraglide/messages';
+	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
+	import { recoveryCodes } from './mfa/utils/stores';
 
 	export let data: PageData;
+	export let form: ActionData;
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -53,9 +57,25 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalListRecoveryCodes(): void {
+		const recoveryCodesModalComponent: ModalComponent = {
+			ref: ListRecoveryCodesModal
+		};
+		const recoveryCodesModal: ModalSettings = {
+			type: 'component',
+			component: recoveryCodesModalComponent,
+			// Data
+			title: m.recoveryCodes(),
+			body: m.listRecoveryCodesHelpText()
+		};
+		modalStore.trigger(recoveryCodesModal);
+	}
+
 	let tabSet = 0;
 
 	$: hasTOTP = data.authenticators.some((auth) => auth.type === 'totp');
+	$: $recoveryCodes =
+		form && Object.hasOwn(form, 'recoveryCodes') ? form.recoveryCodes : data.recoveryCodes;
 </script>
 
 <TabGroup active="bg-primary-100 text-primary-800 border-b border-primary-800">
@@ -96,6 +116,12 @@
 									class="btn variant-ringed-surface w-fit"
 									on:click={(_) => modalConfirm('?/deactivateTOTP')}>{m.disableTOTP()}</button
 								>
+								{#if data.recoveryCodes}
+									<button
+										class="btn variant-ringed-surface w-fit"
+										on:click={(_) => modalListRecoveryCodes()}>{m.listRecoveryCodes()}</button
+									>
+								{/if}
 							{:else}
 								<button
 									class="btn variant-ringed-surface w-fit"
