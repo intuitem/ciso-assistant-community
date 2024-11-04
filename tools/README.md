@@ -109,3 +109,22 @@ Conventions:
 
 The `prepare_mapping.py` script can be used to create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
 
+## Considerations for URN selection
+
+The recommended format for URNs is: urn:<packager>:risk:<object>:<refid>
+
+the value "intuitem" for packager is reserved for intuitem. Other packagers are kindly asked to use another value.
+
+Object can be:
+- library
+- framework
+- threat
+- reference_control
+- matrix
+- req_mapping_set
+- req_node
+
+For the selection of refid, here are a few considerations:
+- It makes sense to have a version of the source document in refid.
+- However, this version should be generic enough to allow library updates.
+- For example, if the version is v2.0.4, it is probably wise to select v2.0 or even v2. Thus if v2.1.0 is published and it is possible to make a smooth upgrade from v2.0.4, the urn will remain meaningful.
