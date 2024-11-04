@@ -52,7 +52,7 @@
 			component: modalComponent,
 			// Data
 			title: m.confirmModalTitle(),
-			body: `${m.confirmModalMessage()}?`
+			body: m.disableTOTPConfirm()
 		};
 		modalStore.trigger(modal);
 	}
