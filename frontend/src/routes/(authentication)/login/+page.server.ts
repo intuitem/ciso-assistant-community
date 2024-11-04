@@ -133,33 +133,26 @@ export const actions: Actions = {
 			body: JSON.stringify(form.data)
 		};
 
-		const response = await event.fetch(endpoint, requestInitOptions);
-		if (!response.ok) {
-			const data = await response.json();
-			console.error('Could not activate TOTP', data);
-			return fail(data.status, { error: data });
-		}
+		const response = await event.fetch(endpoint, requestInitOptions).then((res) => res.json());
 
-		const data = await response.json();
-
-		if (data.status !== 200) {
-			console.error('Could not activate TOTP', data);
-			if (Object.hasOwn(data, 'errors')) {
-				data.errors.forEach((error) => {
-					setError(form, error.param, error.message);
+		if (response.status !== 200) {
+			console.error('Could not authenticate using TOTP', response);
+			if (Object.hasOwn(response, 'errors')) {
+				response.errors.forEach((error) => {
+					setError(form, error.param, error.code);
 				});
 			}
-			return fail(data.status, { form });
+			return fail(response.status, { form });
 		}
 
-		event.cookies.set('token', data.meta.access_token, {
+		event.cookies.set('token', response.meta.access_token, {
 			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
 			secure: true
 		});
 
-		event.cookies.set('allauth_session_token', data.meta.session_token, {
+		event.cookies.set('allauth_session_token', response.meta.session_token, {
 			httpOnly: true,
 			sameSite: 'lax',
 			path: '/',
