@@ -10,7 +10,6 @@ import pytz
 from typing import Any, Tuple
 from uuid import UUID
 from itertools import cycle
-
 import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 
@@ -18,6 +17,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+
+from django.db.models import Q
 
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
@@ -1410,8 +1411,6 @@ class FolderViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @method_decorator(cache_page(60 * MED_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
@@ -1435,6 +1434,32 @@ class FolderViewSet(BaseModelViewSet):
         tree.update({"children": folders_list})
 
         return Response(tree)
+
+    @action(detail=False, methods=["get"])
+    def assignments(self, request):
+        risk_assessments = RiskAssessment.objects.filter(
+            Q(authors=request.user) | Q(reviewers=request.user)
+        )
+
+        audits = ComplianceAssessment.objects.filter(
+            Q(authors=request.user) | Q(reviewers=request.user)
+        )
+        controls = AppliedControl.objects.filter(owner=request.user)
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user)
+
+        RA_serializer = RiskAssessmentReadSerializer(risk_assessments, many=True)
+        CA_serializer = ComplianceAssessmentReadSerializer(audits, many=True)
+        AC_serializer = AppliedControlReadSerializer(controls, many=True)
+        RS_serializer = RiskScenarioReadSerializer(risk_scenarios, many=True)
+
+        return Response(
+            {
+                "risk_assessments": RA_serializer.data,
+                "audits": CA_serializer.data,
+                "controls": AC_serializer.data,
+                "risk_scenarios": RS_serializer.data,
+            }
+        )
 
 
 @cache_page(60 * SHORT_CACHE_TTL)
