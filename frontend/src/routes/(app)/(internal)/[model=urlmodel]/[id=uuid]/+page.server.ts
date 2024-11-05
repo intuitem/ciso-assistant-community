@@ -20,7 +20,8 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		return nestedWriteFormAction({ event, action: 'create' });
+		const redirectToWrittenObject = Boolean(event.params.model === 'projects');
+		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });

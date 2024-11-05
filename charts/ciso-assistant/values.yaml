@@ -1,0 +1,44 @@
+clientName: octopus
+clusterDomain: foo.bar
+emailAdmin: admin@example.net
+frontendOrigin: "" # Leave empty to use default ORIGIN, or set custom value
+global:
+  # Override appVersion from Chart.yaml if needed
+  appVersion: "v1.9.3" # When empty, will use Chart.yaml's appVersion
+
+email:
+  defaultFrom: no-reply@ciso-assistant.net
+  debug: false
+  primary:
+    host: primary.cool-mailer.net
+    user: apikey
+    password: "primary_password_here"
+    port: 587
+    useTls: true
+  rescue:
+    host: smtp.secondary.mailer.cloud
+    user: username
+    password: "rescue_password_here"
+    port: 587
+    useTls: true
+
+bodySizeLimit: "50000000"
+
+image:
+  backend:
+    repository: ghcr.io/intuitem/ciso-assistant-community/backend
+    # Use .Chart.AppVersion if global.appVersion is not set
+    tag: "{{ default .Chart.AppVersion .Values.global.appVersion }}"
+    pullPolicy: Always
+  frontend:
+    repository: ghcr.io/intuitem/ciso-assistant-community/frontend
+    tag: "{{ default .Chart.AppVersion .Values.global.appVersion }}"
+    pullPolicy: Always
+  caddy:
+    repository: caddy
+    tag: "2.7.6"
+    pullPolicy: IfNotPresent
+
+persistence:
+  size: 5Gi
+  accessMode: ReadWriteOnce

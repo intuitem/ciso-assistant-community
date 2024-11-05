@@ -10,7 +10,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.forms.models import model_to_dict
@@ -98,7 +98,7 @@ class ReferentialObjectMixin(AbstractBaseModel, FolderMixin):
     urn = models.CharField(
         max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
     )
-    ref_id = models.CharField(
+    ref_id = models.CharField(  # Should this field be nullable ?
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
     provider = models.CharField(
@@ -167,6 +167,34 @@ class I18nObjectMixin(models.Model):
         max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
     )
     default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
+
+    class Meta:
+        abstract = True
+
+
+class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+    label = models.CharField(
+        max_length=100,
+        verbose_name=_("Label"),
+        validators=[
+            RegexValidator(
+                regex=r"^[\w-]{1,36}$",
+                message="invalidLabel",
+                code="invalid_label",
+            )
+        ],
+    )
+
+    def __str__(self) -> str:
+        return self.label
+
+    fields_to_check = ["label"]
+
+
+class FilteringLabelMixin(models.Model):
+    filtering_labels = models.ManyToManyField(
+        FilteringLabel, blank=True, verbose_name=_("Labels")
+    )
 
     class Meta:
         abstract = True
@@ -876,7 +904,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_json_translated(self):
-        return update_translations_as_string(self.json_definition, "fr")
+        return update_translations_as_string(self.json_definition, "fr")  # Why "fr" ?
 
     def __str__(self) -> str:
         return self.get_name_translated
@@ -1297,7 +1325,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         blank=True,
         verbose_name=_("CSF Function"),
     )
-    status = models.CharField(
+    status = models.CharField(  # Should this field be nullable since there is a default value ?
         max_length=20,
         choices=Status.choices,
         default=Status.UNDEFINED,
@@ -1433,6 +1461,40 @@ class Policy(AppliedControl):
     def save(self, *args, **kwargs):
         self.category = "policy"
         super(Policy, self).save(*args, **kwargs)
+
+
+class Vulnerability(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
+    class Status(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        POTENTIAL = "potential", _("Potential")
+        EXPLOITABLE = "exploitable", _("Exploitable")
+        MITIGATED = "mitigated", _("Mitigated")
+        FIXED = "fixed", _("Fixed")
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.UNDEFINED,
+        verbose_name=_("Status"),
+    )
+    severity = models.IntegerField(
+        default=-1,
+        verbose_name=_("Severity"),
+        help_text=_("The severity of the vulnerability"),
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        blank=True,
+        verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+
+    fields_to_check = ["name"]
 
 
 ########################### Secondary objects #########################
@@ -1852,6 +1914,13 @@ class RiskScenario(NameDescriptionMixin):
         help_text=_("Assets impacted by the risk scenario"),
         related_name="risk_scenarios",
     )
+    vulnerabilities = models.ManyToManyField(
+        Vulnerability,
+        verbose_name=_("Vulnerabilities"),
+        blank=True,
+        help_text=_("Vulnerabities exploited by the risk scenario"),
+        related_name="risk_scenarios",
+    )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         verbose_name=_("Applied controls"),
@@ -2188,7 +2257,11 @@ class ComplianceAssessment(Assessment):
             requirement
             for requirement in requirements
             if selected_implementation_groups_set
-            & set(requirement.requirement.implementation_groups)
+            & set(
+                requirement.requirement.implementation_groups
+                if requirement.requirement.implementation_groups
+                else []
+            )
         ]
 
         return requirement_assessments_list
