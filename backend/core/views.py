@@ -1447,7 +1447,8 @@ class FolderViewSet(BaseModelViewSet):
 
         sum = 0
         avg_progress = 0
-        if audits:
+        audits_count = audits.count()
+        if audits_count > 0:
             for audit in audits:
                 sum += audit.progress()
             avg_progress = int(sum / audits.count())
@@ -1459,8 +1460,8 @@ class FolderViewSet(BaseModelViewSet):
         risk_scenarios = RiskScenario.objects.filter(owner=request.user)
         controls_progress = 0
         evidences_progress = 0
-        if controls:
-            tot_ac = controls.count()
+        tot_ac = controls.count()
+        if tot_ac > 0:
             alive_ac = controls.filter(
                 Q(status="active") | Q(status="in_progress")
             ).count()
