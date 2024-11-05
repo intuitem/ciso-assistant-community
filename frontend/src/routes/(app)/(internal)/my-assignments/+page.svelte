@@ -6,6 +6,12 @@
 	import { languageTag } from '$paraglide/runtime';
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from './ActivityTracker.svelte';
+
+	const eta_span_class = { true: 'bg-orange-400 text-white' };
+	const status_span_class = {
+		on_hold: 'bg-violet-500 text-white p-1 rounded',
+		deprecated: 'bg-red-400 text-white p-1 rounded'
+	};
 </script>
 
 {@debug data}
@@ -38,10 +44,13 @@
 								<a href="/applied-controls/{ac.id}" class="hover:text-violet-400">{ac.name}</a>
 							</th>
 							<td class="px-6 py-4"> {ac.csf_function ?? '-'} </td>
-							<td class="px-6 py-4"> {safeTranslate(ac.status) ?? '-'} </td>
+							<td class="px-6 py-4"
+								><span class={status_span_class[ac.status]}>{safeTranslate(ac.status) ?? '-'}</span>
+							</td>
 							<td class="px-6 py-4">
-								{formatDateOrDateTime(ac.eta, languageTag()) ?? '-'}
-								{#if ac.eta_missed}⚠️{/if}
+								<span class=" p-1 rounded {eta_span_class[ac.eta_missed]}">
+									{formatDateOrDateTime(ac.eta, languageTag()) ?? '-'}
+								</span>
 							</td>
 						</tr>
 					{/each}
