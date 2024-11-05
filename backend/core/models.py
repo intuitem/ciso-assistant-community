@@ -5,6 +5,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from rest_framework.renderers import status
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -1439,6 +1440,14 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         return RequirementNode.objects.filter(
             requirementassessment__applied_controls=self
         ).count()
+
+    def has_evidences(self):
+        return self.evidences.count() > 0
+
+    def eta_missed(self):
+        return (
+            self.eta < date.today() and self.status != "active" if self.eta else False
+        )
 
 
 class PolicyManager(models.Manager):
