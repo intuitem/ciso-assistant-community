@@ -1443,18 +1443,41 @@ class FolderViewSet(BaseModelViewSet):
 
         audits = ComplianceAssessment.objects.filter(
             Q(authors=request.user) | Q(reviewers=request.user)
-        ).order_by(F("eta").asc(nulls_last=True))[:6]
-        controls = (
-            AppliedControl.objects.filter(owner=request.user)
-            .exclude(status="active")
-            .order_by(F("eta").asc(nulls_last=True))[:10]
-        )
-        risk_scenarios = RiskScenario.objects.filter(owner=request.user)
+        ).order_by(F("eta").asc(nulls_last=True))
 
-        RA_serializer = RiskAssessmentReadSerializer(risk_assessments, many=True)
-        CA_serializer = ComplianceAssessmentReadSerializer(audits, many=True)
-        AC_serializer = AppliedControlReadSerializer(controls, many=True)
-        RS_serializer = RiskScenarioReadSerializer(risk_scenarios, many=True)
+        sum = 0
+        avg_progress = 0
+        if audits:
+            for audit in audits:
+                sum += audit.progress()
+            avg_progress = int(sum / audits.count())
+
+        controls = AppliedControl.objects.filter(owner=request.user).order_by(
+            F("eta").asc(nulls_last=True)
+        )
+        non_active_controls = controls.exclude(status="active")
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user)
+        controls_progress = 0
+        evidences_progress = 0
+        if controls:
+            tot_ac = controls.count()
+            alive_ac = controls.filter(
+                Q(status="active") | Q(status="in_progress")
+            ).count()
+            controls_progress = int((alive_ac / tot_ac) * 100)
+
+            with_evidences = 0
+            for ctl in controls:
+                with_evidences += 1 if ctl.has_evidences() else 0
+
+            evidences_progress = int((with_evidences / tot_ac) * 100)
+
+        RA_serializer = RiskAssessmentReadSerializer(risk_assessments[:10], many=True)
+        CA_serializer = ComplianceAssessmentReadSerializer(audits[:6], many=True)
+        AC_serializer = AppliedControlReadSerializer(
+            non_active_controls[:10], many=True
+        )
+        RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
 
         return Response(
             {
@@ -1462,6 +1485,13 @@ class FolderViewSet(BaseModelViewSet):
                 "audits": CA_serializer.data,
                 "controls": AC_serializer.data,
                 "risk_scenarios": RS_serializer.data,
+                "metrics": {
+                    "progress": {
+                        "audits": avg_progress,
+                        "controls": controls_progress,
+                        "evidences": evidences_progress,
+                    }
+                },
             }
         )
 

@@ -331,6 +331,8 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
+    has_evidences = serializers.BooleanField()
+    eta_missed = serializers.BooleanField()
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
