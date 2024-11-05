@@ -50,7 +50,7 @@
 			}
 		];
 		var option = {
-			color: ['#ea479a', '#7e3bec', '#955df0'],
+			color: ['#B075CC', '#91CC75', '#75BDCC'],
 			series: [
 				{
 					type: 'gauge',
