@@ -4,6 +4,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
 	import AuditCard from './AuditCard.svelte';
 	import ActivityTracker from './ActivityTracker.svelte';
 
@@ -14,12 +15,11 @@
 	};
 </script>
 
-{@debug data}
 <div class=" grid grid-cols-12 p-6 gap-6">
 	<div
 		class="col-span-full text-lg font-black underline underline-offset-4 decoration-4 decoration-pink-500"
 	>
-		Controls
+		{m.controls()}
 	</div>
 	<div class="text-left col-span-8">
 		<div class="relative overflow-x-auto shadow-lg rounded-lg">
@@ -28,10 +28,10 @@
 					class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
 				>
 					<tr>
-						<th scope="col" class="px-6 py-3"> Name </th>
-						<th scope="col" class="px-6 py-3"> Function </th>
-						<th scope="col" class="px-6 py-3"> Status </th>
-						<th scope="col" class="px-6 py-3"> ETA </th>
+						<th scope="col" class="px-6 py-3"> {m.name()} </th>
+						<th scope="col" class="px-6 py-3"> {m.csfFunction()} </th>
+						<th scope="col" class="px-6 py-3"> {m.status()} </th>
+						<th scope="col" class="px-6 py-3"> {m.eta()} </th>
 					</tr>
 				</thead>
 				<tbody>
@@ -77,7 +77,7 @@
 
 	<div class="text-left col-span-6">
 		<div class="text-lg font-black underline underline-offset-4 decoration-4 decoration-orange-300">
-			Risk assessments
+			{m.riskAssessments()}
 		</div>
 		<div class="text-left">
 			<div class="relative overflow-x-auto shadow-lg rounded-lg">
@@ -86,8 +86,8 @@
 						class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
 					>
 						<tr>
-							<th scope="col" class="px-6 py-3"> Name </th>
-							<th scope="col" class="px-6 py-3"> Status </th>
+							<th scope="col" class="px-6 py-3"> {m.name()} </th>
+							<th scope="col" class="px-6 py-3"> {m.status()} </th>
 							<th scope="col" class="px-6 py-3"> ETA </th>
 						</tr>
 					</thead>
@@ -112,7 +112,7 @@
 
 	<div class="text-left col-span-6">
 		<div class="text-lg font-black underline underline-offset-4 decoration-4 decoration-purple-300">
-			Owned risks
+			{m.assignedRisks()}
 		</div>
 		<div class="text-left">
 			<div class="relative overflow-x-auto shadow-lg rounded-lg">
@@ -121,10 +121,10 @@
 						class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
 					>
 						<tr>
-							<th scope="col" class="px-6 py-3"> Name </th>
-							<th scope="col" class="px-6 py-3"> Status </th>
-							<th scope="col" class="px-6 py-3"> Current level </th>
-							<th scope="col" class="px-6 py-3"> Residual level </th>
+							<th scope="col" class="px-6 py-3"> {m.name()} </th>
+							<th scope="col" class="px-6 py-3"> {m.status()} </th>
+							<th scope="col" class="px-6 py-3"> {m.currentLevel()} </th>
+							<th scope="col" class="px-6 py-3"> {m.residualLevel()} </th>
 						</tr>
 					</thead>
 					<tbody>

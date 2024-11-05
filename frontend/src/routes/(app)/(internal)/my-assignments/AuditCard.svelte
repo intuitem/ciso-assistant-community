@@ -2,6 +2,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
 	import HalfGauge from './HalfGauge.svelte';
 
 	export let audit;
@@ -38,7 +39,9 @@
 			</div>
 		</div>
 		<div id="markers" class="col-span-2 grid grid-cols-1 gap-4 align-middle m-auto">
-			<div class="text-xs"><span class="font-semibold">Framework: </span>{audit.framework.str}</div>
+			<div class="text-xs">
+				<span class="font-semibold">{m.framework()}: </span>{audit.framework.str}
+			</div>
 			<div class="text-xs">
 				<span class="font-semibold">ETA: </span>{formatDateOrDateTime(audit.eta, languageTag()) ??
 					'-'}
