@@ -2057,13 +2057,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
-        score = self.get_object()
+        compliance_assessment = self.get_object()
         return Response(
             {
-                "score": score.get_global_score(),
-                "max_score": score.max_score,
-                "min_score": score.min_score,
-                "scores_definition": score.scores_definition,
+                "score": compliance_assessment.get_global_score(),
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+                "scores_definition": get_referential_translation(
+                    compliance_assessment.framework, "scores_definition", get_language()
+                ),
             }
         )
 

@@ -6,7 +6,7 @@ from django.utils.translation import get_language
 from typing import Union
 
 
-def get_referential_translation(object, parameter: str, locale=None) -> str:
+def get_referential_translation(object, parameter: str, locale=None) -> str | list:
     # NOTE: put get_language() as default value for locale doesn't work, default locale "en" is always returned.
     # get_language() needs to be called in the actual thread to get the current language, it could explain that behavior.
     """
@@ -20,15 +20,23 @@ def get_referential_translation(object, parameter: str, locale=None) -> str:
     Returns:
         str: The translation in the specified locale, or the default value if it does not exist
     """
+    _object = object
     fallback = (
-        object.get(parameter)
-        if isinstance(object, dict)
-        else object.__dict__.get(parameter)
+        _object.get(parameter)
+        if isinstance(_object, dict)
+        else _object.__dict__.get(parameter)
     )
+    if isinstance(fallback, list):
+        translations = [t.get("translations", {}) for t in fallback]
+        locale_translations = fallback
+        for i in range(len(locale_translations)):
+            for key in translations[i].get(locale, {}).keys():
+                locale_translations[i][key] = translations[i].get(locale, {}).get(key)
+        return locale_translations or fallback
     translations = (
-        object.get("translations", {})
-        if isinstance(object, dict)
-        else object.translations
+        _object.get("translations", {})
+        if isinstance(_object, dict)
+        else _object.translations
     )
     if not translations:
         return fallback
