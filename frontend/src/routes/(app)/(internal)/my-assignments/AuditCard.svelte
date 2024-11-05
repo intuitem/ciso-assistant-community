@@ -6,7 +6,7 @@
 
 	export let audit;
 	const badge_style = {
-		planned: 'bg-yellow-50',
+		planned: 'bg-yellow-100',
 		in_progress: ' bg-orange-200',
 		in_review: 'text-white bg-blue-500',
 		done: 'text-white bg-cyan-600',

@@ -5,6 +5,7 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { languageTag } from '$paraglide/runtime';
 	import AuditCard from './AuditCard.svelte';
+	import ActivityTracker from './ActivityTracker.svelte';
 </script>
 
 {@debug data}
@@ -38,7 +39,10 @@
 							</th>
 							<td class="px-6 py-4"> {ac.csf_function ?? '-'} </td>
 							<td class="px-6 py-4"> {safeTranslate(ac.status) ?? '-'} </td>
-							<td class="px-6 py-4"> {formatDateOrDateTime(ac.eta, languageTag()) ?? '-'} </td>
+							<td class="px-6 py-4">
+								{formatDateOrDateTime(ac.eta, languageTag()) ?? '-'}
+								{#if ac.eta_missed}⚠️{/if}
+							</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -46,7 +50,9 @@
 		</div>
 	</div>
 
-	<div class="border border-red-50 col-span-4"></div>
+	<div class=" border-red-50 col-span-4 flex justify-center items-center">
+		<ActivityTracker metrics={data.data.metrics} />
+	</div>
 
 	<div
 		class="col-span-full text-lg font-black underline underline-offset-4 decoration-4 decoration-green-300"
@@ -54,7 +60,7 @@
 		Audits
 	</div>
 
-	<div class="col-span-full grid grid-cols-2 xl:grid-cols-3 gap-4">
+	<div class="col-span-full grid grid-cols-2 lg:grid-cols-3 gap-4">
 		{#each data.data.audits as ca}
 			<AuditCard audit={ca} />
 		{/each}
