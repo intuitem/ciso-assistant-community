@@ -846,5 +846,8 @@
 	"labelsHelpText": "Labels are used to categorize and filter the items.",
 	"filteringLabel": "Label",
 	"filteringLabels": "Labels",
-	"invalidLabel": "Label must be alphanumeric and contain at most 36 characters"
+	"invalidLabel": "Label must be alphanumeric and contain at most 36 characters",
+	"myAssignments": "My assignments",
+	"assignedRisks": "Assigned risks",
+	"controls": "Controls"
 }
