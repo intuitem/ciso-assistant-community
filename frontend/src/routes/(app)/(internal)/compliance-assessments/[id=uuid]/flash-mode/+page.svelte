@@ -68,8 +68,16 @@
 			body: JSON.stringify(formData)
 		});
 	}
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'ArrowRight' || event.key === 'l') {
+			nextItem();
+		} else if (event.key === 'ArrowLeft' || event.key === 'h') {
+			previousItem();
+		}
+	}
 </script>
 
+<svelte:window on:keydown={handleKeydown} />
 <div class="flex flex-col h-full justify-center items-center">
 	<div
 		style="border-color: {color}"
