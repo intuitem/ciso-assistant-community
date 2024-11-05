@@ -19,6 +19,7 @@
 	import CounterCard from './CounterCard.svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
+	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 
 	interface Counters {
 		domains: number;
@@ -193,11 +194,7 @@
 						section={m.sumpageSectionControls()}
 					/>
 					<div class="col-span-4 row-span-4 bg-white">
-						<TreemapChart
-							title={m.sumpageTitleComplianceOverview()}
-							tree={metrics.audits_tree}
-							name="sunburst"
-						/>
+						<StackedBarsNormalized />
 					</div>
 					<!---->
 					<Card
