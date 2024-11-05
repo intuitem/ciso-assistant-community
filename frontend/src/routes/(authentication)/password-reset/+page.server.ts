@@ -57,9 +57,6 @@ export const actions: Actions = {
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
-			headers: {
-				'X-CSRFToken': csrfToken
-			},
 			body: JSON.stringify(form.data)
 		};
 
