@@ -27,6 +27,12 @@
 	];
 	let inputs: (null | HTMLInputElement)[] = Array(numOfInputs).fill(null);
 
+	function keyUpHandler(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			form.submit();
+		}
+	}
+
 	afterUpdate(() => {
 		codes = [
 			...$value.slice(0, numOfInputs).split(''),
@@ -49,7 +55,11 @@
 		{/each}
 	</div>
 {/if}
-<div class={`${disableDefaultStyle ? '' : 'wrapper'} ${wrapperClass}`} style={wrapperStyle}>
+<div
+	class={`${disableDefaultStyle ? '' : 'wrapper'} ${wrapperClass}`}
+	style={wrapperStyle}
+	on:keyup={keyUpHandler}
+>
 	{#each codes as value, i (i)}
 		<OTPItem
 			num={numberOnly}
