@@ -18,7 +18,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
-from django.db.models import Q
+from django.db.models import F, Q
 
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
@@ -1436,15 +1436,19 @@ class FolderViewSet(BaseModelViewSet):
         return Response(tree)
 
     @action(detail=False, methods=["get"])
-    def assignments(self, request):
+    def my_assignments(self, request):
         risk_assessments = RiskAssessment.objects.filter(
             Q(authors=request.user) | Q(reviewers=request.user)
         )
 
         audits = ComplianceAssessment.objects.filter(
             Q(authors=request.user) | Q(reviewers=request.user)
+        ).order_by(F("eta").asc(nulls_last=True))[:6]
+        controls = (
+            AppliedControl.objects.filter(owner=request.user)
+            .exclude(status="active")
+            .order_by(F("eta").asc(nulls_last=True))[:10]
         )
-        controls = AppliedControl.objects.filter(owner=request.user)
         risk_scenarios = RiskScenario.objects.filter(owner=request.user)
 
         RA_serializer = RiskAssessmentReadSerializer(risk_assessments, many=True)
