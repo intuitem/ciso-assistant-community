@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let width = 'w-full';
-	export let height = 'h-64';
 	export let classesContainer = '';
 	export let name: string;
 	export let value = 0;
