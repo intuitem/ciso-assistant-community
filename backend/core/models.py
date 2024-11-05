@@ -2564,6 +2564,15 @@ class ComplianceAssessment(Assessment):
                 requirement_assessments.append(requirement_assessment)
         return requirement_assessments
 
+    def progress(self) -> int:
+        requirements_all = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+        total_cnt = requirements_all.count()
+        set_cnt = requirements_all.exclude(result="not_assessed").count()
+        value = int((set_cnt / total_cnt) * 100)
+        return value
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
