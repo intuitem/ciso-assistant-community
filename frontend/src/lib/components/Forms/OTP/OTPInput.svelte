@@ -18,6 +18,7 @@
 	export let numberOnly = true;
 	export let placeholder = '';
 	export let onlyShowMiddleSeparator = false;
+	export let clearOnError = true;
 
 	const { value, errors } = formFieldProxy(form, field);
 
@@ -27,10 +28,22 @@
 	];
 	let inputs: (null | HTMLInputElement)[] = Array(numOfInputs).fill(null);
 
+	function reset() {
+		$value = '';
+		codes = Array(numOfInputs).fill('');
+
+		inputs[0]?.focus();
+	}
+
 	function keyUpHandler(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			form.submit();
 		}
+	}
+
+	$: if ($errors && clearOnError) {
+		console.log('clearing');
+		reset();
 	}
 
 	afterUpdate(() => {
