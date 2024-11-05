@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { afterUpdate } from 'svelte';
 	import OTPItem from './OTPItem.svelte';
-	import { formFieldProxy } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let field = 'code';
-	export let form;
+	export let form: SuperForm<Record<string, string>>;
 	export let numOfInputs: number = 6;
 	export let separator = '';
 	export let disableDefaultStyle = false;
