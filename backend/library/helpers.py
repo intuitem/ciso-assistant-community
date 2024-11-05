@@ -26,11 +26,6 @@ def get_referential_translation(object, parameter: str, locale=None) -> str | li
         if isinstance(_object, dict)
         else _object.__dict__.get(parameter)
     )
-    translations = (
-        _object.get("translations", {})
-        if isinstance(_object, dict)
-        else _object.translations
-    )
     if isinstance(fallback, list):
         translations = [t.get("translations", {}) for t in fallback]
         locale_translations = fallback
@@ -38,6 +33,11 @@ def get_referential_translation(object, parameter: str, locale=None) -> str | li
             for key in translations[i].get(locale, {}).keys():
                 locale_translations[i][key] = translations[i].get(locale, {}).get(key)
         return locale_translations or fallback
+    translations = (
+        _object.get("translations", {})
+        if isinstance(_object, dict)
+        else _object.translations
+    )
     if not translations:
         return fallback
     locale_translations = (
