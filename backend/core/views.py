@@ -10,7 +10,6 @@ import pytz
 from typing import Any, Tuple
 from uuid import UUID
 from itertools import cycle
-
 import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 
@@ -18,6 +17,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+
+from django.db.models import F, Q
 
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
@@ -1410,8 +1411,6 @@ class FolderViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @method_decorator(cache_page(60 * MED_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
@@ -1435,6 +1434,67 @@ class FolderViewSet(BaseModelViewSet):
         tree.update({"children": folders_list})
 
         return Response(tree)
+
+    @action(detail=False, methods=["get"])
+    def my_assignments(self, request):
+        risk_assessments = RiskAssessment.objects.filter(
+            Q(authors=request.user) | Q(reviewers=request.user)
+        )
+
+        audits = ComplianceAssessment.objects.filter(
+            Q(authors=request.user) | Q(reviewers=request.user)
+        ).order_by(F("eta").asc(nulls_last=True))
+
+        sum = 0
+        avg_progress = 0
+        audits_count = audits.count()
+        if audits_count > 0:
+            for audit in audits:
+                sum += audit.progress()
+            avg_progress = int(sum / audits.count())
+
+        controls = AppliedControl.objects.filter(owner=request.user).order_by(
+            F("eta").asc(nulls_last=True)
+        )
+        non_active_controls = controls.exclude(status="active")
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user)
+        controls_progress = 0
+        evidences_progress = 0
+        tot_ac = controls.count()
+        if tot_ac > 0:
+            alive_ac = controls.filter(
+                Q(status="active") | Q(status="in_progress")
+            ).count()
+            controls_progress = int((alive_ac / tot_ac) * 100)
+
+            with_evidences = 0
+            for ctl in controls:
+                with_evidences += 1 if ctl.has_evidences() else 0
+
+            evidences_progress = int((with_evidences / tot_ac) * 100)
+
+        RA_serializer = RiskAssessmentReadSerializer(risk_assessments[:10], many=True)
+        CA_serializer = ComplianceAssessmentReadSerializer(audits[:6], many=True)
+        AC_serializer = AppliedControlReadSerializer(
+            non_active_controls[:10], many=True
+        )
+        RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
+
+        return Response(
+            {
+                "risk_assessments": RA_serializer.data,
+                "audits": CA_serializer.data,
+                "controls": AC_serializer.data,
+                "risk_scenarios": RS_serializer.data,
+                "metrics": {
+                    "progress": {
+                        "audits": avg_progress,
+                        "controls": controls_progress,
+                        "evidences": evidences_progress,
+                    }
+                },
+            }
+        )
 
 
 @cache_page(60 * SHORT_CACHE_TTL)
