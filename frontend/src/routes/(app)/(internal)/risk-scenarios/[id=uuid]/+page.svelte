@@ -93,7 +93,7 @@
 					<span class=" text-sm text-gray-400 font-semibold">{m.owner()}</span>
 					<ul>
 						{#each data.scenario.owner as owner}
-							<li class="text-xs">{owner.str}</li>
+							<li class="text-xs font-semibold">{owner.str}</li>
 						{/each}
 					</ul>
 				</div>

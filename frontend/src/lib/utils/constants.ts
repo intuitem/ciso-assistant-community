@@ -6,6 +6,8 @@ export const BASE_API_URL = `${
 		: 'http://localhost:8000/api'
 }`;
 
+export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;
+
 export const BACKEND_API_EXPOSED_URL = `${
 	Object.hasOwn(env, 'PUBLIC_BACKEND_API_EXPOSED_URL')
 		? env.PUBLIC_BACKEND_API_EXPOSED_URL
