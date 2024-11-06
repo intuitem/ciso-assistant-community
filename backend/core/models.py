@@ -5,6 +5,7 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from rest_framework.renderers import status
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -1508,6 +1509,14 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             requirementassessment__applied_controls=self
         ).count()
 
+    def has_evidences(self):
+        return self.evidences.count() > 0
+
+    def eta_missed(self):
+        return (
+            self.eta < date.today() and self.status != "active" if self.eta else False
+        )
+
 
 class PolicyManager(models.Manager):
     def get_queryset(self):
@@ -2347,6 +2356,19 @@ class ComplianceAssessment(Assessment):
             )
         return requirements_status_count
 
+    def get_requirements_result_count(self):
+        requirements_result_count = []
+        for rs in RequirementAssessment.Result:
+            requirements_result_count.append(
+                (
+                    RequirementAssessment.objects.filter(result=rs)
+                    .filter(compliance_assessment=self)
+                    .count(),
+                    rs,
+                )
+            )
+        return requirements_result_count
+
     def get_measures_status_count(self):
         measures_status_count = []
         measures_list = []
@@ -2631,6 +2653,15 @@ class ComplianceAssessment(Assessment):
                 }
                 requirement_assessments.append(requirement_assessment)
         return requirement_assessments
+
+    def progress(self) -> int:
+        requirements_all = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+        total_cnt = requirements_all.count()
+        set_cnt = requirements_all.exclude(result="not_assessed").count()
+        value = int((set_cnt / total_cnt) * 100) if total_cnt > 0 else 0
+        return value
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):

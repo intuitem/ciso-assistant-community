@@ -1,10 +1,42 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import Logo from '$lib/components/Logo/Logo.svelte';
 	import Greetings from './Greetings.svelte';
 	import FormCard from './FormCard.svelte';
+	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '@skeletonlabs/skeleton';
+
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
+	export let form: ActionData;
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalMFAAuthenticate(): void {
+		const modalComponent: ModalComponent = {
+			ref: MfaAuthenticateModal,
+			props: {
+				_form: data.mfaAuthenticateForm,
+				formAction: '?/mfaAuthenticate'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.mfaAuthenticateTitle(),
+			body: m.enterCodeGeneratedByApp()
+		};
+		modalStore.trigger(modal);
+	}
+
+	$: form && form.mfaFlow ? modalMFAAuthenticate() : null;
 </script>
 
 <div class="relative h-screen w-screen bg-slate-200">

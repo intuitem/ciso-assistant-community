@@ -25,6 +25,18 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment'
 					]
+				},
+				{
+					name: 'myAssignments',
+					fa_icon: 'fa-solid fa-list-check',
+					href: '/my-assignments',
+					permissions: [
+						'view_project',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_assessment',
+						'view_riskassessment'
+					]
 				}
 			]
 		},
