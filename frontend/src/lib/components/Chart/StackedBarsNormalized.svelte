@@ -50,9 +50,8 @@
 				barWidth: '60%',
 				label: {
 					show: true,
-					formatter: (params) => Math.round(params.value * 1000) / 10 + '%'
+					formatter: (params) => Math.round(params.value * 100) + '%'
 				},
-				// For each audit, get this category's value divided by audit total
 				data: rawData.map((audit, auditIdx) =>
 					auditTotals[auditIdx] <= 0 ? 0 : audit[categoryIdx] / auditTotals[auditIdx]
 				)
@@ -64,19 +63,16 @@
 				selectedMode: false
 			},
 			grid,
-			yAxis: {
+			xAxis: {
 				type: 'value'
 			},
-			xAxis: {
+			yAxis: {
 				type: 'category',
 				data: ['audit 1', 'audit 2']
 			},
 			series
 		};
 
-		// console.debug(option);
-
-		// use configuration item and data specified to show chart
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {
