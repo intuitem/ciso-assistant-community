@@ -20,41 +20,45 @@
 
 		// specify chart configuration item and data
 		const rawData = [
-			[100, 302, 301, 334, 390, 330, 320],
-			[320, 132, 101, 134, 90, 230, 210],
-			[220, 182, 191, 234, 290, 330, 310],
-			[150, 212, 201, 154, 190, 330, 410],
-			[820, 832, 901, 934, 1290, 1330, 1320]
+			[12, 3, 22, 111, 33],
+			[22, 11, 33, 11, 22]
 		];
-		const totalData = [];
-		for (let i = 0; i < rawData[0].length; ++i) {
-			let sum = 0;
-			for (let j = 0; j < rawData.length; ++j) {
-				sum += rawData[j][i];
-			}
-			totalData.push(sum);
-		}
+
+		// Calculate row totals (total for each audit)
+		const auditTotals = rawData.map((audit) => audit.reduce((sum, val) => sum + val, 0));
+
 		const grid = {
 			left: 100,
 			right: 100,
 			top: 50,
 			bottom: 50
 		};
-		const series = ['Direct', 'Mail Ad', 'Affiliate Ad', 'Video Ad', 'Search Engine'].map(
-			(name, sid) => {
-				return {
-					name,
-					type: 'bar',
-					stack: 'total',
-					barWidth: '60%',
-					label: {
-						show: true,
-						formatter: (params) => Math.round(params.value * 1000) / 10 + '%'
-					},
-					data: rawData[sid].map((d, did) => (totalData[did] <= 0 ? 0 : d / totalData[did]))
-				};
-			}
-		);
+
+		const seriesNames = [
+			'not assessed',
+			'not applicable',
+			'non compliant',
+			'partially compliant',
+			'compliant'
+		];
+
+		const series = seriesNames.map((name, categoryIdx) => {
+			return {
+				name,
+				type: 'bar',
+				stack: 'total',
+				barWidth: '60%',
+				label: {
+					show: true,
+					formatter: (params) => Math.round(params.value * 1000) / 10 + '%'
+				},
+				// For each audit, get this category's value divided by audit total
+				data: rawData.map((audit, auditIdx) =>
+					auditTotals[auditIdx] <= 0 ? 0 : audit[categoryIdx] / auditTotals[auditIdx]
+				)
+			};
+		});
+
 		var option = {
 			legend: {
 				selectedMode: false
@@ -65,7 +69,7 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+				data: ['audit 1', 'audit 2']
 			},
 			series
 		};
