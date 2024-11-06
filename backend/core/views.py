@@ -1439,11 +1439,15 @@ class FolderViewSet(BaseModelViewSet):
     def my_assignments(self, request):
         risk_assessments = RiskAssessment.objects.filter(
             Q(authors=request.user) | Q(reviewers=request.user)
-        )
+        ).distinct()
 
-        audits = ComplianceAssessment.objects.filter(
-            Q(authors=request.user) | Q(reviewers=request.user)
-        ).order_by(F("eta").asc(nulls_last=True))
+        audits = (
+            ComplianceAssessment.objects.filter(
+                Q(authors=request.user) | Q(reviewers=request.user)
+            )
+            .order_by(F("eta").asc(nulls_last=True))
+            .distinct()
+        )
 
         sum = 0
         avg_progress = 0
@@ -1453,11 +1457,13 @@ class FolderViewSet(BaseModelViewSet):
                 sum += audit.progress()
             avg_progress = int(sum / audits.count())
 
-        controls = AppliedControl.objects.filter(owner=request.user).order_by(
-            F("eta").asc(nulls_last=True)
+        controls = (
+            AppliedControl.objects.filter(owner=request.user)
+            .order_by(F("eta").asc(nulls_last=True))
+            .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(owner=request.user)
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
