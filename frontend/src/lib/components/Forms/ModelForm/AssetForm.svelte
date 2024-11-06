@@ -1,16 +1,17 @@
 <script lang="ts">
-	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import Select from '../Select.svelte';
-	import Score from '../Score.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import { page } from '$app/stores';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
 	import { getOptions } from '$lib/utils/crud';
-	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import type { SuperValidated } from 'sveltekit-superforms';
+	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import RadioGroupInput from '../RadioGroupInput.svelte';
+	import Select from '../Select.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -19,6 +20,32 @@
 	export let initialData: Record<string, any> = {};
 	export let object: any = {};
 	export let data: any = {};
+
+	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
+	const scale: SecurityObjectiveScale = $page.data.settings.security_objective_scale;
+	const securityObjectiveScaleMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+
+	interface Option {
+		label: string;
+		value: number;
+		suggested?: boolean;
+	}
+
+	const createOption = (label: string, value: number): Option => ({
+		label,
+		value
+	});
+
+	// Helper function to filter duplicate consecutive labels
+	const filterDuplicateLabels = (options: Option[]): Option[] =>
+		options.map((option, index, arr) => ({
+			...option,
+			label: index > 0 && option.label === arr[index - 1].label ? '' : option.label
+		}));
+
+	const securityObjectiveOptions: Option[] = filterDuplicateLabels(
+		securityObjectiveScaleMap.map(createOption)
+	);
 </script>
 
 <TextArea
@@ -69,76 +96,33 @@
 	icon="fa-solid fa-shield-halved"
 	header={m.securityObjectives()}
 >
-	<Score
+	<RadioGroupInput
 		{form}
 		label={m.confidentiality()}
 		field="confidentiality"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
+		options={securityObjectiveOptions}
 	/>
-	<Score
+	<RadioGroupInput
 		{form}
 		label={m.integrity()}
 		field="integrity"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
+		options={securityObjectiveOptions}
 	/>
-	<Score
+	<RadioGroupInput
 		{form}
 		label={m.availability()}
 		field="availability"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
+		options={securityObjectiveOptions}
 	/>
-	<Score
-		{form}
-		label={m.proof()}
-		field="proof"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
-	/>
-	<Score
+	<RadioGroupInput {form} label={m.proof()} field="proof" options={securityObjectiveOptions} />
+	<RadioGroupInput
 		{form}
 		label={m.authenticity()}
 		field="authenticity"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
+		options={securityObjectiveOptions}
 	/>
-	<Score
-		{form}
-		label={m.privacy()}
-		field="privacy"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
-	/>
-	<Score
-		{form}
-		label={m.safety()}
-		field="safety"
-		always_enabled={false}
-		inversedColors
-		fullDonut
-		max_score={3}
-		security_objective={true}
-	/>
+	<RadioGroupInput {form} label={m.privacy()} field="privacy" options={securityObjectiveOptions} />
+	<RadioGroupInput {form} label={m.safety()} field="safety" options={securityObjectiveOptions} />
 </Dropdown>
 <Dropdown
 	open={false}
