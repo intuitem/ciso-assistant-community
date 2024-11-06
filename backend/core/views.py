@@ -1468,9 +1468,7 @@ class FolderViewSet(BaseModelViewSet):
         evidences_progress = 0
         tot_ac = controls.count()
         if tot_ac > 0:
-            alive_ac = controls.filter(
-                Q(status="active") | Q(status="in_progress")
-            ).count()
+            alive_ac = controls.filter(status="active").count()
             controls_progress = int((alive_ac / tot_ac) * 100)
 
             with_evidences = 0
