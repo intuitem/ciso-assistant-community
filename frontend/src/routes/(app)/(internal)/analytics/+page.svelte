@@ -122,6 +122,7 @@
 	] as const;
 </script>
 
+{@debug data}
 <TabGroup class="">
 	<Tab bind:group={tabSet} on:click={() => handleTabChange(0)} name="summary" value={0}
 		>{m.summary()}</Tab
@@ -194,7 +195,11 @@
 						section={m.sumpageSectionControls()}
 					/>
 					<div class="col-span-4 row-span-4 bg-white">
-						<StackedBarsNormalized />
+						<StackedBarsNormalized
+							names={metrics.audits_stats.names}
+							data={metrics.audits_stats.data}
+							uuids={metrics.audits_stats.uuids}
+						/>
 					</div>
 					<!---->
 					<Card
