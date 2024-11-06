@@ -1789,19 +1789,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
-    @method_decorator(cache_page(60 * MED_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
-    @action(detail=True, name="Get implementation group choices")
-    def selected_implementation_groups(self, request, pk):
-        compliance_assessment = self.get_object()
-        _framework = compliance_assessment.framework
-        implementation_groups_definiition = _framework.implementation_groups_definition
-        implementation_group_choices = {
-            group["ref_id"]: group["name"]
-            for group in implementation_groups_definiition
-        }
-        return Response(implementation_group_choices)
-
     @action(detail=True, methods=["get"], name="Get action plan data")
     def action_plan(self, request, pk):
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
