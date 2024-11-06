@@ -56,6 +56,7 @@
 
 		var option = {
 			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+			//color: ['#D2D5DB', '#FDE048', '#F87171', '#86EFAC', '#000'],
 			legend: {
 				selectedMode: false
 			},
