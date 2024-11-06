@@ -3,6 +3,7 @@ from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
 
+# from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
 from django.db.models import Count
@@ -842,6 +843,20 @@ def build_audits_tree_metrics(user):
     return tree
 
 
+def build_audits_stats(user):
+    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, ComplianceAssessment
+    )
+    data = list()
+    names = list()
+    uuids = dict()
+    for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
+        data.append([rs[0] for rs in audit.get_requirements_result_count()])
+        names.append(audit.name)
+        uuids[audit.name] = audit.id
+    return {"data": data, "names": names, "uuids": uuids}
+
+
 def csf_functions(user):
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
@@ -905,7 +920,7 @@ def get_metrics(user: User):
             .filter(result="non_compliant")
             .count(),
         },
-        "audits_tree": build_audits_tree_metrics(user),
+        "audits_stats": build_audits_stats(user),
         "csf_functions": csf_functions(user),
     }
     return data

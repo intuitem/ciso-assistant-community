@@ -2288,6 +2288,19 @@ class ComplianceAssessment(Assessment):
             )
         return requirements_status_count
 
+    def get_requirements_result_count(self):
+        requirements_result_count = []
+        for rs in RequirementAssessment.Result:
+            requirements_result_count.append(
+                (
+                    RequirementAssessment.objects.filter(result=rs)
+                    .filter(compliance_assessment=self)
+                    .count(),
+                    rs,
+                )
+            )
+        return requirements_result_count
+
     def get_measures_status_count(self):
         measures_status_count = []
         measures_list = []
