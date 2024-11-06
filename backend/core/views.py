@@ -1508,8 +1508,6 @@ def get_counters_view(request):
     return Response({"results": get_counters(request.user)})
 
 
-@cache_page(60 * SHORT_CACHE_TTL)
-@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_metrics_view(request):
