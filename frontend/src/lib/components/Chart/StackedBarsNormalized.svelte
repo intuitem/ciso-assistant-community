@@ -3,43 +3,36 @@
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
-	export let title = '';
-	export let name = '';
+	export let data;
+	export let names;
+	export let uuids;
 
-	interface sankeyData {
-		source: string;
-		target: string;
-		value: number;
-	}
-	export let values: sankeyData[]; // Set the types for these variables later on
-
-	const chart_id = `${name}_div`;
+	const chart_id = `stacked_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
-
-		// specify chart configuration item and data
-		const rawData = [
-			[12, 3, 22, 111, 33],
-			[22, 11, 33, 11, 22]
-		];
-
-		// Calculate row totals (total for each audit)
+		const rawData = data;
 		const auditTotals = rawData.map((audit) => audit.reduce((sum, val) => sum + val, 0));
-
+		const uuidMap = uuids;
+		chart.on('click', function (params) {
+			if (uuidMap[params.name]) {
+				window.open(`/compliance-assessments/${uuidMap[params.name]}`, '_blank');
+				//window.location.href = `/compliance-assessments/${uuidMap[params.name]}`;
+			}
+		});
 		const grid = {
-			left: 100,
-			right: 100,
+			left: 150,
+			right: 50,
 			top: 50,
 			bottom: 50
 		};
 
 		const seriesNames = [
 			'not assessed',
-			'not applicable',
-			'non compliant',
 			'partially compliant',
-			'compliant'
+			'non compliant',
+			'compliant',
+			'not applicable'
 		];
 
 		const series = seriesNames.map((name, categoryIdx) => {
@@ -47,10 +40,13 @@
 				name,
 				type: 'bar',
 				stack: 'total',
-				barWidth: '60%',
+				barWidth: '70%',
 				label: {
 					show: true,
-					formatter: (params) => Math.round(params.value * 100) + '%'
+					formatter: (params) => {
+						const percentage = Math.round(params.value * 100);
+						return percentage < 1 ? '' : percentage + '%';
+					}
 				},
 				data: rawData.map((audit, auditIdx) =>
 					auditTotals[auditIdx] <= 0 ? 0 : audit[categoryIdx] / auditTotals[auditIdx]
@@ -59,16 +55,24 @@
 		});
 
 		var option = {
+			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
 			legend: {
 				selectedMode: false
 			},
 			grid,
 			xAxis: {
-				type: 'value'
+				type: 'value',
+				show: false
 			},
 			yAxis: {
 				type: 'category',
-				data: ['audit 1', 'audit 2']
+				data: names,
+				axisTick: {
+					show: false
+				},
+				axisLine: {
+					show: false
+				}
 			},
 			series
 		};
@@ -81,4 +85,12 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+{#if data.length > 0}
+	<div id={chart_id} class="{width} {height} {classesContainer}" />
+{:else}
+	<div class="flex justify-center items-center h-full">
+		<div class="font-semibold">
+			Nothing to show yet. Charts will be updated once you've started your audits.
+		</div>
+	</div>
+{/if}
