@@ -15,7 +15,7 @@ def fix_libraries_objects_meta(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0031_vulnerability_riskscenario_vulnerabilities'),
+        ('core', '0033_fix_mitre_lib_version'),
     ]
 
     operations = [migrations.RunPython(fix_libraries_objects_meta)]
