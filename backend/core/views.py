@@ -1909,7 +1909,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "on_hold": list(),
                 "active": list(),
                 "deprecated": list(),
-                "no status": list(),
+                "--": list(),
             }
             color_map = {
                 "to_do": "#FFF8F0",
@@ -1917,7 +1917,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "on_hold": "#F4D06F",
                 "active": "#9DD9D2",
                 "deprecated": "#ff8811",
-                "no status": "#e5e7eb",
+                "--": "#e5e7eb",
             }
             status = AppliedControl.Status.choices
             compliance_assessment_object = self.get_object()
