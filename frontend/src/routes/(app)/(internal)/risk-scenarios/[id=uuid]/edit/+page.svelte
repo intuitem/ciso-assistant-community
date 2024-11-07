@@ -122,6 +122,7 @@
 	const impactColorMap = data.riskMatrix.impact.map((impact) => impact.hexcolor);
 </script>
 
+{@debug data}
 <div>
 	<SuperForm
 		class="flex flex-col space-y-3"
@@ -133,37 +134,25 @@
 		{...$$restProps}
 	>
 		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
-				<h4 class="h4 font-semibold">{m.scope()}</h4>
-				<div class="flex flex-row justify-between">
-					<span>
+			<div class="card p-2 bg-white shadow-lg w-1/2">
+				<div class="flex justify-between p-2">
+					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
 						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
 							>{data.scenario.project.str}</a
 						>
-					</span>
-					<AutocompleteSelect
-						{form}
-						options={getOptions({ objects: data.foreignKeys['risk_assessment'] })}
-						field="risk_assessment"
-						label={m.riskAssessment()}
-					/>
-					<span>
-						<p class="text-sm font-semibold text-gray-400">{m.version()}</p>
-						<p class="text-sm font-semibold">{data.scenario.version}</p>
-					</span>
+					</div>
+					<div>
+						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
+						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+							>{data.scenario.risk_assessment.name}</a
+						>
+					</div>
 				</div>
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
-				<h4 class="h4 font-semibold">{m.status()}</h4>
 				<div class="flex flex-row justify-between">
-					<div class="w-1/4">
-						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
-						<p class="text-sm font-semibold">
-							{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
-						</p>
-					</div>
-					<div class=" px-2 w-2/4">
+					<div class=" px-2 w-2/3">
 						<AutocompleteSelect
 							{form}
 							multiple
@@ -172,8 +161,9 @@
 							label={m.owner()}
 						/>
 					</div>
-					<div class=" w-1/4">
+					<div class="w-1/3">
 						<Select
+							class="h-14"
 							{form}
 							options={data.treatmentChoices}
 							field="treatment"
@@ -185,7 +175,11 @@
 		</div>
 
 		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5">
+			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-5/12">
+				<TextField {form} field="name" label={m.name()} />
+				<TextArea {form} field="description" label={m.description()} />
+			</div>
+			<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-scroll">
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -197,10 +191,6 @@
 					field="threats"
 					label={m.threats()}
 				/>
-				<TextField {form} field="name" label={m.name()} />
-				<TextArea {form} field="description" label={m.description()} />
-			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
 				<AutocompleteSelect
 					multiple
 					{form}
@@ -213,25 +203,19 @@
 					label={m.assets()}
 					helpText={m.riskScenarioAssetHelpText()}
 				/>
-				<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
+				<AutocompleteSelect
+					multiple
+					{form}
+					options={getOptions({
+						objects: data.foreignKeys['vulnerabilities'],
+						extra_fields: [['folder', 'str']],
+						label: 'auto'
+					})}
+					field="vulnerabilities"
+					label={m.vulnerabilities()}
+				/>
 			</div>
 		</div>
-		<AutocompleteSelect
-			multiple
-			{form}
-			options={getOptions({
-				objects: data.foreignKeys['vulnerabilities'],
-				extra_fields: [['folder', 'str']],
-				label: 'auto'
-			})}
-			field="vulnerabilities"
-			label={m.vulnerabilities()}
-		/>
-		<ModelTable
-			source={data.tables['vulnerabilities']}
-			hideFilters={true}
-			URLModel="vulnerabilities"
-		/>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
@@ -298,11 +282,6 @@
 						})}
 						field="applied_controls"
 						label={m.appliedControls()}
-					/>
-					<ModelTable
-						source={data.tables['applied-controls']}
-						hideFilters={true}
-						URLModel="applied-controls"
 					/>
 				</div>
 				<div class="flex flex-col">
