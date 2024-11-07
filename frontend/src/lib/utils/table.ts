@@ -256,11 +256,6 @@ const LIBRARY_TYPE_FILTER = {
 	},
 	extraProps: {
 		defaultOptionName: 'objectType',
-		optionLabels: {
-			reference_controls: 'referenceControls',
-			requirement_mapping_set: 'requirementMappingSet',
-			risk_matrix: 'riskMatrix'
-		}
 	},
 	alwaysDisplay: true
 };
