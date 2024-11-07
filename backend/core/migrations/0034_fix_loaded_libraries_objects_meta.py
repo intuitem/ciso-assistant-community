@@ -12,12 +12,10 @@ def fix_libraries_objects_meta(apps, schema_editor):
             objects_meta["framework"] = objects_meta.pop("frameworks")
             library.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0033_fix_mitre_lib_version'),
+        ("core", "0033_fix_mitre_lib_version"),
     ]
 
     operations = [migrations.RunPython(fix_libraries_objects_meta)]
-
-

@@ -255,7 +255,7 @@ const LIBRARY_TYPE_FILTER = {
 		return datatypes;
 	},
 	extraProps: {
-		defaultOptionName: 'objectType',
+		defaultOptionName: 'objectType'
 	},
 	alwaysDisplay: true
 };
