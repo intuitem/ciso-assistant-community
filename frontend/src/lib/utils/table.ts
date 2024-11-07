@@ -307,7 +307,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: PROVIDER_FILTER
 		}
 	},
 	'risk-scenarios': {
