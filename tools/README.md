@@ -9,7 +9,7 @@ Have a look to the given examples.
 To launch it, open a shell in a command line, and type:
 
 ```bash
-python convert-library.py your_library_file.xlsx
+python convert_library.py your_library_file.xlsx
 ```
 
 This will produce a file name your_library_file.yaml
