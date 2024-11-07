@@ -429,7 +429,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
+		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
@@ -527,11 +527,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [
-			{ field: 'status' },
-			{ field: 'selected_implementation_groups', detail: true },
-			{ field: 'conclusion' }
-		],
+		selectFields: [{ field: 'status' }, { field: 'conclusion' }],
 		filters: [{ field: 'status' }]
 	},
 	solutions: {

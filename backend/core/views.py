@@ -1439,11 +1439,15 @@ class FolderViewSet(BaseModelViewSet):
     def my_assignments(self, request):
         risk_assessments = RiskAssessment.objects.filter(
             Q(authors=request.user) | Q(reviewers=request.user)
-        )
+        ).distinct()
 
-        audits = ComplianceAssessment.objects.filter(
-            Q(authors=request.user) | Q(reviewers=request.user)
-        ).order_by(F("eta").asc(nulls_last=True))
+        audits = (
+            ComplianceAssessment.objects.filter(
+                Q(authors=request.user) | Q(reviewers=request.user)
+            )
+            .order_by(F("eta").asc(nulls_last=True))
+            .distinct()
+        )
 
         sum = 0
         avg_progress = 0
@@ -1453,18 +1457,18 @@ class FolderViewSet(BaseModelViewSet):
                 sum += audit.progress()
             avg_progress = int(sum / audits.count())
 
-        controls = AppliedControl.objects.filter(owner=request.user).order_by(
-            F("eta").asc(nulls_last=True)
+        controls = (
+            AppliedControl.objects.filter(owner=request.user)
+            .order_by(F("eta").asc(nulls_last=True))
+            .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(owner=request.user)
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
         if tot_ac > 0:
-            alive_ac = controls.filter(
-                Q(status="active") | Q(status="in_progress")
-            ).count()
+            alive_ac = controls.filter(status="active").count()
             controls_progress = int((alive_ac / tot_ac) * 100)
 
             with_evidences = 0
@@ -1785,19 +1789,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
-    @method_decorator(cache_page(60 * MED_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
-    @action(detail=True, name="Get implementation group choices")
-    def selected_implementation_groups(self, request, pk):
-        compliance_assessment = self.get_object()
-        _framework = compliance_assessment.framework
-        implementation_groups_definiition = _framework.implementation_groups_definition
-        implementation_group_choices = {
-            group["ref_id"]: group["name"]
-            for group in implementation_groups_definiition
-        }
-        return Response(implementation_group_choices)
-
     @action(detail=True, methods=["get"], name="Get action plan data")
     def action_plan(self, request, pk):
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -1918,7 +1909,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "on_hold": list(),
                 "active": list(),
                 "deprecated": list(),
-                "no status": list(),
+                "--": list(),
             }
             color_map = {
                 "to_do": "#FFF8F0",
@@ -1926,7 +1917,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "on_hold": "#F4D06F",
                 "active": "#9DD9D2",
                 "deprecated": "#ff8811",
-                "no status": "#e5e7eb",
+                "--": "#e5e7eb",
             }
             status = AppliedControl.Status.choices
             compliance_assessment_object = self.get_object()
