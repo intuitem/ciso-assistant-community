@@ -220,42 +220,49 @@
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
-			<div class="flex flex-row space-x-4 justify-between">
-				<TextArea
-					{form}
-					field="existing_controls"
-					label={m.existingControls()}
-					helpText={m.riskScenarioMeasureHelpText()}
-					regionContainer="w-1/2"
-				/>
-				<div class="flex flex-col">
-					<h5 class="h5 font-medium">{m.currentAssessment()}</h5>
+			<div class="flex flex-row space-x-8 justify-between">
+				<div class="w-1/2">
+					<TextArea
+						{form}
+						field="existing_controls"
+						label={m.existingControls()}
+						helpText="Current controls to manage this risk"
+						regionContainer="w-1/2"
+					/>
+				</div>
+				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">
-						<Select
-							{form}
-							options={data.probabilityChoices}
-							color_map={probabilityColorMap}
-							field="current_proba"
-							label={m.currentProba()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.probabilityChoices}
+								color_map={probabilityColorMap}
+								field="current_proba"
+								label={m.currentProba()}
+							/>
+						</div>
 						<i class="fa-solid fa-xmark mt-8" />
-						<Select
-							{form}
-							options={data.impactChoices}
-							color_map={impactColorMap}
-							field="current_impact"
-							label={m.currentImpact()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.impactChoices}
+								color_map={impactColorMap}
+								field="current_impact"
+								label={m.currentImpact()}
+							/>
+						</div>
 						<i class="fa-solid fa-equals mt-8" />
-						<RiskLevel
-							{form}
-							field="current_risk_level"
-							label={m.currentRiskLevel()}
-							riskMatrix={data.riskMatrix}
-							probabilityField="current_proba"
-							impactField="current_impact"
-							helpText={m.currentRiskLevelHelpText()}
-						/>
+						<div class="min-w-38">
+							<RiskLevel
+								{form}
+								field="current_risk_level"
+								label={m.currentRiskLevel()}
+								riskMatrix={data.riskMatrix}
+								probabilityField="current_proba"
+								impactField="current_impact"
+								helpText={m.currentRiskLevelHelpText()}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -263,7 +270,7 @@
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
-			<div class="flex flex-row space-x-4 justify-between">
+			<div class="flex flex-row space-x-8">
 				<div class="flex flex-col space-y-4 w-1/2">
 					<span class="flex flex-row justify-between items-center">
 						<h5 class="h5 font-medium">{m.associatedAppliedControls()}</h5>
@@ -282,36 +289,42 @@
 						})}
 						field="applied_controls"
 						label={m.appliedControls()}
+						helpText="Extra controls to mitigate this risk"
 					/>
 				</div>
-				<div class="flex flex-col">
-					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>
+				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">
-						<Select
-							{form}
-							options={data.probabilityChoices}
-							color_map={probabilityColorMap}
-							field="residual_proba"
-							label={m.residualProba()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.probabilityChoices}
+								color_map={probabilityColorMap}
+								field="residual_proba"
+								label={m.residualProba()}
+							/>
+						</div>
 						<i class="fa-solid fa-xmark mt-8" />
-						<Select
-							{form}
-							options={data.impactChoices}
-							color_map={impactColorMap}
-							field="residual_impact"
-							label={m.residualImpact()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.impactChoices}
+								color_map={impactColorMap}
+								field="residual_impact"
+								label={m.residualImpact()}
+							/>
+						</div>
 						<i class="fa-solid fa-equals mt-8" />
-						<RiskLevel
-							{form}
-							field="current_risk_level"
-							label={m.residualRiskLevel()}
-							riskMatrix={data.riskMatrix}
-							probabilityField="residual_proba"
-							impactField="residual_impact"
-							helpText={m.residualRiskLevelHelpText()}
-						/>
+						<div class="min-w-38">
+							<RiskLevel
+								{form}
+								field="current_risk_level"
+								label={m.residualRiskLevel()}
+								riskMatrix={data.riskMatrix}
+								probabilityField="residual_proba"
+								impactField="residual_impact"
+								helpText={m.residualRiskLevelHelpText()}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
