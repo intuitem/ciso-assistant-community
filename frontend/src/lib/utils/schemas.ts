@@ -170,13 +170,15 @@ export const AssetSchema = baseNamedObject({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
-	confidentiality: z.number().optional().nullable(),
-	integrity: z.number().optional().nullable(),
-	availability: z.number().optional().nullable(),
-	proof: z.number().optional().nullable(),
-	authenticity: z.number().optional().nullable(),
-	privacy: z.number().optional().nullable(),
-	safety: z.number().optional().nullable(),
+	security_objectives: z.object({
+		objectives: z.record(
+			z.string(),
+			z.object({
+				value: z.number().nonnegative(),
+				is_enabled: z.boolean().default(false)
+			})
+		)
+	}),
 	rto: z.number().nonnegative().optional().nullable(),
 	rpo: z.number().nonnegative().optional().nullable(),
 	mtd: z.number().nonnegative().optional().nullable(),
