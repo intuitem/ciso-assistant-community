@@ -32,7 +32,11 @@ from library.helpers import (
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from .utils import camel_case, sha256
-from .validators import validate_file_name, validate_file_size
+from .validators import (
+    validate_file_name,
+    validate_file_size,
+    validate_jsonschema_instance,
+)
 
 logger = get_logger(__name__)
 
@@ -1202,6 +1206,43 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         TWO = 2, "2"
         THREE = 3, "3"
 
+    DEFAULT_SECURITY_OBJECTIVES = (
+        "confidentiality",
+        "integrity",
+        "availability",
+        "proof",
+        "authenticity",
+        "privacy",
+        "safety",
+    )
+
+    SECURITY_OBJECTIVES_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/assets/security_objectives.schema.json",
+        "title": "Security objectives",
+        "description": "The security objectives of the asset",
+        "type": "object",
+        "properties": {
+            "objectives": {
+                "type": "object",
+                "patternProperties": {
+                    "^[a-z_]+$": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "integer",
+                                "minimum": 0,
+                            },
+                            "is_enabled": {
+                                "type": "boolean",
+                            },
+                        },
+                    },
+                },
+            }
+        },
+    }
+
     business_value = models.CharField(
         max_length=200, blank=True, verbose_name=_("business value")
     )
@@ -1218,38 +1259,12 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         help_text=_("External url for action follow-up (eg. Jira ticket)"),
         verbose_name=_("Link"),
     )
-    confidentiality = models.PositiveIntegerField(
-        null=True,
+    security_objectives = models.JSONField(
+        default=dict,
         blank=True,
-        verbose_name=_("confidentiality"),
-        choices=IntegerChoices.choices,
-    )
-    integrity = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_("integrity"),
-        choices=IntegerChoices.choices,
-    )
-    availability = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_("availability"),
-        choices=IntegerChoices.choices,
-    )
-    proof = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("proof"), choices=IntegerChoices.choices
-    )
-    authenticity = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_("authenticity"),
-        choices=IntegerChoices.choices,
-    )
-    privacy = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("privacy"), choices=IntegerChoices.choices
-    )
-    safety = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name=_("safety"), choices=IntegerChoices.choices
+        verbose_name=_("Security objectives"),
+        help_text=_("The security objectives of the asset"),
+        validators=[validate_jsonschema_instance(SECURITY_OBJECTIVES_JSONSCHEMA)],
     )
     rto = models.PositiveIntegerField(
         null=True,
@@ -1296,6 +1311,20 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         for x in self.parent_assets.all():
             result.update(x.ancestors_plus_self())
         return list(result)
+
+    # @classmethod
+    # def build_default_security_objectives(cls):
+    #     """
+    #     Build the default security objectives.
+    #     """
+    #     return {
+    #         objective: {"value": 0, "is_enabled": False}
+    #         for objective in cls.DEFAULT_SECURITY_OBJECTIVES
+    #     }
+
+    def save(self, *args, **kwargs) -> None:
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
 
 class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
