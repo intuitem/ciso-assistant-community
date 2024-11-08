@@ -255,12 +255,7 @@ const LIBRARY_TYPE_FILTER = {
 		return datatypes;
 	},
 	extraProps: {
-		defaultOptionName: 'objectType',
-		optionLabels: {
-			reference_controls: 'referenceControls',
-			requirement_mapping_set: 'requirementMappingSet',
-			risk_matrix: 'riskMatrix'
-		}
+		defaultOptionName: 'objectType'
 	},
 	alwaysDisplay: true
 };
@@ -312,7 +307,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: PROVIDER_FILTER
 		}
 	},
 	'risk-scenarios': {
