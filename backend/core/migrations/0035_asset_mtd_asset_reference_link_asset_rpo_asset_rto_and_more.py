@@ -5,35 +5,60 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0034_fix_loaded_libraries_objects_meta'),
+        ("core", "0034_fix_loaded_libraries_objects_meta"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='asset',
-            name='mtd',
-            field=models.PositiveIntegerField(blank=True, help_text='Maximum Tolerable Downtime in seconds', null=True, verbose_name='mtd'),
+            model_name="asset",
+            name="mtd",
+            field=models.PositiveIntegerField(
+                blank=True,
+                help_text="Maximum Tolerable Downtime in seconds",
+                null=True,
+                verbose_name="mtd",
+            ),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='reference_link',
-            field=models.URLField(blank=True, help_text='External url for action follow-up (eg. Jira ticket)', max_length=2048, null=True, verbose_name='Link'),
+            model_name="asset",
+            name="reference_link",
+            field=models.URLField(
+                blank=True,
+                help_text="External url for action follow-up (eg. Jira ticket)",
+                max_length=2048,
+                null=True,
+                verbose_name="Link",
+            ),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='rpo',
-            field=models.PositiveIntegerField(blank=True, help_text='Recovery Point Objective in seconds', null=True, verbose_name='rpo'),
+            model_name="asset",
+            name="rpo",
+            field=models.PositiveIntegerField(
+                blank=True,
+                help_text="Recovery Point Objective in seconds",
+                null=True,
+                verbose_name="rpo",
+            ),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='rto',
-            field=models.PositiveIntegerField(blank=True, help_text='Recovery Time Objective in seconds', null=True, verbose_name='rto'),
+            model_name="asset",
+            name="rto",
+            field=models.PositiveIntegerField(
+                blank=True,
+                help_text="Recovery Time Objective in seconds",
+                null=True,
+                verbose_name="rto",
+            ),
         ),
         migrations.AddField(
-            model_name='asset',
-            name='security_objectives',
-            field=models.JSONField(default=dict, help_text='The security objectives of the asset', validators=[core.validators.validate_jsonschema_instance], verbose_name='Security objectives'),
+            model_name="asset",
+            name="security_objectives",
+            field=models.JSONField(
+                default=dict,
+                help_text="The security objectives of the asset",
+                validators=[core.validators.validate_jsonschema_instance],
+                verbose_name="Security objectives",
+            ),
         ),
     ]
