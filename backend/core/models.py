@@ -35,7 +35,7 @@ from .utils import camel_case, sha256
 from .validators import (
     validate_file_name,
     validate_file_size,
-    validate_jsonschema_instance,
+    JSONSchemaInstanceValidator,
 )
 
 logger = get_logger(__name__)
@@ -1264,7 +1264,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         blank=True,
         verbose_name=_("Security objectives"),
         help_text=_("The security objectives of the asset"),
-        validators=[validate_jsonschema_instance(SECURITY_OBJECTIVES_JSONSCHEMA)],
+        validators=[JSONSchemaInstanceValidator(SECURITY_OBJECTIVES_JSONSCHEMA)],
     )
     rto = models.PositiveIntegerField(
         null=True,
