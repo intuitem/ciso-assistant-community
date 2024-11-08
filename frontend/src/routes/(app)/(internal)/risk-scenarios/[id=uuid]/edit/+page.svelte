@@ -144,8 +144,10 @@
 					</div>
 					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
-						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
-							>{data.scenario.risk_assessment.name}</a
+						<a
+							class="anchor text-sm font-semibold"
+							href="/risk-assessments/{data.scenario.risk_assessment.id}"
+							>{data.scenario.risk_assessment.name} {data.scenario.version}</a
 						>
 					</div>
 				</div>
@@ -330,19 +332,26 @@
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<AutocompleteSelect
-				{form}
-				options={data.qualificationChoices}
-				multiple={true}
-				field="qualifications"
-				label={m.qualification()}
-			/>
-			<Select
-				{form}
-				options={strengthOfKnowledgeFormChoices}
-				field="strength_of_knowledge"
-				label={m.strengthOfKnowledge()}
-			/>
+			<div class="flex space-x-4 mb-1">
+				<div class="w-1/2">
+					<AutocompleteSelect
+						{form}
+						options={data.qualificationChoices}
+						multiple={true}
+						field="qualifications"
+						label={m.qualification()}
+					/>
+				</div>
+				<div class="w-1/2">
+					<Select
+						{form}
+						options={strengthOfKnowledgeFormChoices}
+						field="strength_of_knowledge"
+						label={m.strengthOfKnowledge()}
+						class="h-14"
+					/>
+				</div>
+			</div>
 			<TextArea {form} field="justification" label={m.justification()} />
 		</div>
 		<div class="flex flex-row justify-between space-x-4">
