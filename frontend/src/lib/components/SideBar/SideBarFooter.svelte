@@ -58,7 +58,7 @@
 	};
 
 	async function modalBuildInfo() {
-		const res = await fetch('/api/build').then((res) => res.json());
+		const res = await fetch('/fe-api/build').then((res) => res.json());
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'displayJSONModal',
