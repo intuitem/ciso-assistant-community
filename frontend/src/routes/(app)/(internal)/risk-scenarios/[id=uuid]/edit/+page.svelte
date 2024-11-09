@@ -221,15 +221,34 @@
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
+			<h4 class="h4 font-black mb-2">{m.currentRisk()}</h4>
 			<div class="flex flex-row space-x-8 justify-between">
 				<div class="w-1/2">
+					<div class="flex flex-row-reverse -mb-4">
+						<button
+							class="btn variant-filled-secondary z-0"
+							on:click={modalMeasureCreateForm}
+							type="button"><i class="fa-solid fa-plus text-sm" /></button
+						>
+					</div>
+					<AutocompleteSelect
+						multiple
+						{form}
+						options={getOptions({
+							objects: data.foreignKeys['applied_controls'],
+							extra_fields: [['folder', 'str']]
+						})}
+						field="existing_applied_controls"
+						label="Existing controls"
+						helpText="Current measures to manage this risk"
+					/>
 					<TextArea
 						{form}
 						field="existing_controls"
-						label={m.existingControls()}
-						helpText="Current controls to manage this risk"
+						label="context"
+						helpText="Description of the existing mitigations ( ℹ️ this field will be deprecated soon)"
 						regionContainer="w-1/2"
+						rows={3}
 					/>
 				</div>
 				<div class="flex w-1/2">
@@ -271,17 +290,16 @@
 		</div>
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
+			<h4 class="h4 font-black mb-2">{m.residualRisk()}</h4>
 			<div class="flex flex-row space-x-8">
 				<div class="flex flex-col space-y-4 w-1/2">
-					<span class="flex flex-row justify-between items-center">
-						<h5 class="h5 font-medium">{m.associatedAppliedControls()}</h5>
+					<div class="flex flex-row-reverse -mb-8">
 						<button
-							class="btn variant-filled-primary self-end"
+							class="btn variant-filled-secondary z-0"
 							on:click={modalMeasureCreateForm}
-							type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
+							type="button"><i class="fa-solid fa-plus text-sm" /></button
 						>
-					</span>
+					</div>
 					<AutocompleteSelect
 						multiple
 						{form}
@@ -290,8 +308,8 @@
 							extra_fields: [['folder', 'str']]
 						})}
 						field="applied_controls"
-						label={m.appliedControls()}
-						helpText="Extra controls to mitigate this risk"
+						label="Additional controls"
+						helpText="Extra measures needed to mitigate this risk"
 					/>
 				</div>
 				<div class="flex w-1/2">
