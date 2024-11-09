@@ -852,5 +852,6 @@
 	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra",
 	"myAssignments": "Mes affectations",
 	"assignedRisks": "Risques affectés",
-	"controls": "Mesures"
+	"controls": "Mesures",
+	"exploreButton": "Explorer"
 }
