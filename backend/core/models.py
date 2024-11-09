@@ -1950,6 +1950,12 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Existing controls"),
         blank=True,
     )
+    existing_applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name=_("Existing Applied controls"),
+        blank=True,
+        related_name="risk_scenarios_e",
+    )
 
     owner = models.ManyToManyField(
         User,
