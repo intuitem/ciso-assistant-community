@@ -58,6 +58,13 @@ Conventions:
         tab                             | <tab_name> | risk_matrix
         tab                             | <tab_name> | mappings
 
+    
+    For libraries:
+        - library_provider is the entity that provides the reference document (e.g. ANSSI, NIST). 
+        - library_packager is the entity that converts the reference document in a library for CISO Assistant (e.g. intuitem). the value "intuitem" for packager is reserved for intuitem. Other packagers are kindly asked to use another descriptive value.
+        - library_description shall be sufficiently detailed, and shall contain a link to the reference document.
+        - framework_ref_id, framework_name and framework_description are generally identical to their corresponding values for library.
+
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
@@ -111,9 +118,7 @@ The `prepare_mapping.py` script can be used to create an Excel file based on two
 
 ## Considerations for URN selection
 
-The recommended format for URNs is: urn:<packager>:risk:<object>:<refid>
-
-the value "intuitem" for packager is reserved for intuitem. Other packagers are kindly asked to use another value.
+The recommended format for URNs is: urn:\<packager\>:risk:\<object\>:\<refid\>
 
 Object can be:
 - library
