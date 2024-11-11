@@ -847,6 +847,10 @@
 	"filteringLabel": "Label",
 	"filteringLabels": "Etiketten",
 	"invalidLabel": "Het label moet alfanumeriek zijn en maximaal 36 tekens bevatten",
+	"myAssignments": "Mijn opdrachten",
+	"assignedRisks": "Toegewezen risico's",
+	"controls": "Bedieningselementen",
+	"exploreButton": "Ontdekken",
 	"tags": "Labels",
 	"addTag": "Tag toevoegen",
 	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra"
