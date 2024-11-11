@@ -847,11 +847,11 @@
 	"filteringLabel": "Étiquette",
 	"filteringLabels": "Étiquettes",
 	"invalidLabel": "L'étiquette doit être alphanumérique et contenir au maximum 36 caractères",
-	"tags": "Étiquettes",
-	"addTag": "Ajouter une étiquette",
-	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra",
 	"myAssignments": "Mes affectations",
 	"assignedRisks": "Risques affectés",
 	"controls": "Mesures",
-	"exploreButton": "Explorer"
+	"exploreButton": "Explorer",
+	"tags": "Étiquettes",
+	"addTag": "Ajouter une étiquette",
+	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra"
 }
