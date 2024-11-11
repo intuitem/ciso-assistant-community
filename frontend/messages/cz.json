@@ -31,5 +31,10 @@
 	"associatedAppliedControls": "Související použité kontroly",
 	"associatedAssets": "Související aktiva",
 	"associatedRiskAssessments": "Související hodnocení rizik",
-	"associatedRiskScenarios": "Související rizikové scénáře"
+	"associatedRiskScenarios": "Související rizikové scénáře",
+	"associatedRiskAcceptances": "Související akceptace rizik",
+	"associatedComplianceAssessments": "Související audity",
+	"associatedEvidences": "Související důkazy",
+	"associatedDomains": "Související domény",
+	"associatedProjects": "Související projekty"
 }
