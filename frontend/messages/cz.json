@@ -5,5 +5,21 @@
 	"arabic": "Arabsky",
 	"portuguese": "Portugalsky",
 	"spanish": "Španělsky",
-	"german": "Německy"
+	"german": "Německy",
+	"dutch": "Holandsky",
+	"italian": "Italsky",
+	"polish": "Polsky",
+	"romanian": "Rumunsky",
+	"hindi": "Hindi",
+	"urdu": "Urdu",
+	"addThreat": "Přidat hrozbu",
+	"addVulnerability": "Přidat zranitelnost",
+	"addReferenceControl": "Přidat referenční kontrolu",
+	"addAppliedControl": "Aplikovat kontrolu",
+	"addAsset": "Přidat aktivum",
+	"addRiskAssessment": "Přidat hodnocení rizik",
+	"addRiskScenario": "Přidát rizikový scénář",
+	"addRiskAcceptance": "Přidat akceptaci rizik",
+	"addComplianceAssessment": "Nový audit",
+	"addEvidence": "Přidat důkazy"
 }
