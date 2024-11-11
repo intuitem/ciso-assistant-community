@@ -850,5 +850,8 @@
 	"myAssignments": "My assignments",
 	"assignedRisks": "Assigned risks",
 	"controls": "Controls",
-	"exploreButton": "Explore"
+	"exploreButton": "Explore",
+	"tags": "Labels",
+	"addTag": "Add tag",
+	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu."
 }

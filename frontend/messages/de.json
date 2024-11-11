@@ -847,6 +847,10 @@
 	"filteringLabel": "Etikett",
 	"filteringLabels": "Labels",
 	"invalidLabel": "Das Etikett muss alphanumerisch sein und darf höchstens 36 Zeichen enthalten",
+	"myAssignments": "Meine Aufgaben",
+	"assignedRisks": "Zugewiesene Risiken",
+	"controls": "Bedienelemente",
+	"exploreButton": "Erkunden",
 	"tags": "Schlagwörter",
 	"addTag": "Tag hinzufügen",
 	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen"
