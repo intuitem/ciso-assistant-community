@@ -501,6 +501,12 @@ Set DJANGO_DEBUG=False for security reason.
 - HI: Hindi
 - UR: Urdu
 
+## Contributors 🤝
+
+<a href="https://github.com/intuitem/ciso-assistant-community/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community" />
+</a>
+
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
