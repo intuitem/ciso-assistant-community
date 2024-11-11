@@ -847,6 +847,10 @@
 	"filteringLabel": "Etykieta",
 	"filteringLabels": "Etykiety",
 	"invalidLabel": "Etykieta musi być alfanumeryczna i zawierać maksymalnie 36 znaków",
+	"myAssignments": "Moje zadania",
+	"assignedRisks": "Przypisane ryzyko",
+	"controls": "Sterownica",
+	"exploreButton": "Badać",
 	"tags": "Tagi",
 	"addTag": "Dodaj tag",
 	"tagsHelpText": "Tagi służą do kategoryzowania i filtrowania elementów. Możesz dodać tagi w sekcji Extra"
