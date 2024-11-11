@@ -183,6 +183,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 7. New Zealand Information Security Manual (NZISM) 🇳🇿
 8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
 9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
+10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
+11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
 
 <br/>
 
