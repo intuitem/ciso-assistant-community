@@ -21,5 +21,11 @@
 	"addRiskScenario": "Přidát rizikový scénář",
 	"addRiskAcceptance": "Přidat akceptaci rizik",
 	"addComplianceAssessment": "Nový audit",
-	"addEvidence": "Přidat důkazy"
+	"addEvidence": "Přidat důkazy",
+	"addDomain": "Přidat doménu",
+	"addProject": "Přidat projekt",
+	"addUser": "Přidat uživatele",
+	"addPolicy": "Přidat politiku",
+	"associatedThreats": "Související hrozby",
+	"associatedReferenceControls": "Související referenční kontroly"
 }
