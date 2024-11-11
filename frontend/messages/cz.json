@@ -27,5 +27,9 @@
 	"addUser": "Přidat uživatele",
 	"addPolicy": "Přidat politiku",
 	"associatedThreats": "Související hrozby",
-	"associatedReferenceControls": "Související referenční kontroly"
+	"associatedReferenceControls": "Související referenční kontroly",
+	"associatedAppliedControls": "Související použité kontroly",
+	"associatedAssets": "Související aktiva",
+	"associatedRiskAssessments": "Související hodnocení rizik",
+	"associatedRiskScenarios": "Související rizikové scénáře"
 }
