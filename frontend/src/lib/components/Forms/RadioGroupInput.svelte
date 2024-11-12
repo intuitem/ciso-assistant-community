@@ -11,6 +11,7 @@
 		suggested?: boolean;
 	}
 
+	export let valuePath = ''; // the place where the value is stored in the form. This is useful for nested objects
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -25,16 +26,16 @@
 	};
 	export let cachedValue: any[] | undefined = undefined;
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath ?? field);
 
 	export let options: Option[] = [];
-
-	$: cachedValue = $value;
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult) $value = cacheResult;
 	});
+
+	$: cachedValue = $value;
 </script>
 
 <div {hidden}>
