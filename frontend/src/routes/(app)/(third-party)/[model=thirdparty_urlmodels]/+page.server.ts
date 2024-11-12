@@ -5,8 +5,6 @@ import {
 	urlParamModelSelectFields,
 	urlParamModelVerboseName
 } from '$lib/utils/crud';
-import { safeTranslate } from '$lib/utils/i18n';
-import { localItems } from '$lib/utils/locales';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
@@ -68,10 +66,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
+		const redirectToWrittenObject = Boolean(event.params.model === 'compliance-assessments');
 		return defaultWriteFormAction({
 			event,
 			urlModel: event.params.model as string,
-			action: 'create'
+			action: 'create',
+			redirectToWrittenObject: redirectToWrittenObject
 		});
 	},
 	delete: async (event) => {

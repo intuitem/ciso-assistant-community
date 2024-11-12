@@ -1,15 +1,21 @@
-import magic
+from datetime import datetime
+from django.utils.formats import date_format
 
+import magic
 import structlog
+from core.views import BaseModelViewSet
+from django.conf import settings
+from iam.models import User
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.decorators import (
     action,
     api_view,
     permission_classes,
 )
 from rest_framework.parsers import FileUploadParser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from django.conf import settings
 
@@ -199,6 +205,35 @@ class ClientSettingsViewSet(BaseModelViewSet):
         return response
 
 
+class LicenseStatusView(APIView):
+    def get(self, request):
+        expiry_date_str = settings.LICENSE_EXPIRATION
+
+        if not expiry_date_str:
+            return Response(
+                {"status": "unknown", "message": "No expiry date set"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            expiry_date = datetime.fromisoformat(expiry_date_str)
+        except ValueError as e:
+            logger.error("Invalid expiry date format", exc_info=e)
+            return Response(
+                {"status": "error", "message": "Invalid expiry date format"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        now = datetime.now()
+
+        if expiry_date > now:
+            days_left = (expiry_date - now).days
+            return Response({"status": "active", "days_left": days_left})
+        else:
+            days_expired = (now - expiry_date).days
+            return Response({"status": "expired", "days_expired": days_expired})
+
+
 @api_view(["GET"])
 def get_build(request):
     """
@@ -208,12 +243,18 @@ def get_build(request):
     BUILD = settings.BUILD
     LICENSE_SEATS = settings.LICENSE_SEATS
     LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
+    try:
+        expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
+        license_expiration = date_format(expiration_iso, use_l10n=True)
+    except ValueError:
+        logger.error("Invalid expiry date format", exc_info=True)
+        license_expiration = LICENSE_EXPIRATION
     return Response(
         {
             "version": VERSION,
             "build": BUILD,
             "license_seats": LICENSE_SEATS,
             "available_seats": LICENSE_SEATS - len(User.get_editors()),
-            "license_expiration": LICENSE_EXPIRATION,
+            "license_expiration": license_expiration,
         }
     )
