@@ -18,3 +18,4 @@ db/pg_password.txt
 .coverage
 pytest-report.html
 enterprise/
+*.log

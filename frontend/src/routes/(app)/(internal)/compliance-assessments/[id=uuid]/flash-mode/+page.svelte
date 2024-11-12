@@ -56,20 +56,28 @@
 	$: result = currentRequirementAssessment.result;
 
 	// Function to update the result of the current item
-	function updateResult(event) {
-		currentRequirementAssessment.result = event.target.value;
+	function updateResult(newResult: string | null) {
+		currentRequirementAssessment.result = newResult;
 		const form = document.getElementById('flashModeForm');
 		const formData = {
 			id: currentRequirementAssessment.id,
-			result: event.target.value
+			result: newResult
 		};
 		fetch(form.action, {
 			method: 'POST',
 			body: JSON.stringify(formData)
 		});
 	}
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'ArrowRight' || event.key === 'l') {
+			nextItem();
+		} else if (event.key === 'ArrowLeft' || event.key === 'h') {
+			previousItem();
+		}
+	}
 </script>
 
+<svelte:window on:keydown={handleKeydown} />
 <div class="flex flex-col h-full justify-center items-center">
 	<div
 		style="border-color: {color}"
@@ -114,8 +122,13 @@
 										bind:group={result}
 										name="result"
 										style="border-color: {color}"
-										on:change={updateResult}>{option.label}</RadioItem
+										on:click={() => {
+											const newResult = result === option.id ? 'not_assessed' : option.id;
+											updateResult(newResult);
+										}}
 									>
+										{option.label}
+									</RadioItem>
 								{/each}
 							</RadioGroup>
 						</ul>

@@ -6,7 +6,7 @@ from django.db.models.signals import post_migrate
 from structlog import get_logger
 
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
-from core.utils import RoleCodename
+from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
 
@@ -35,6 +35,7 @@ READER_PERMISSIONS_LIST = [
     "view_solution",
     "view_storedlibrary",
     "view_threat",
+    "view_vulnerability",
     "view_user",
     "view_usergroup",
 ]
@@ -49,6 +50,7 @@ APPROVER_PERMISSIONS_LIST = [
     "approve_riskacceptance",
     "view_asset",
     "view_threat",
+    "view_vulnerability",
     "view_referencecontrol",
     "view_folder",
     "view_usergroup",
@@ -66,6 +68,8 @@ APPROVER_PERMISSIONS_LIST = [
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "add_filteringlabel",
+    "view_filteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -77,6 +81,7 @@ ANALYST_PERMISSIONS_LIST = [
     "add_riskscenario",
     "add_solution",
     "add_threat",
+    "add_vulnerability",
     "change_appliedcontrol",
     "change_asset",
     "change_complianceassessment",
@@ -86,6 +91,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_policy",
     "change_project",
     "change_referencecontrol",
+    "change_vulnerability",
     "change_representative",
     "change_requirementassessment",
     "change_riskacceptance",
@@ -102,6 +108,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_policy",
     "delete_project",
     "delete_referencecontrol",
+    "delete_vulnerability",
     "delete_representative",
     "delete_riskacceptance",
     "delete_riskassessment",
@@ -120,6 +127,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_policy",
     "view_project",
     "view_referencecontrol",
+    "view_vulnerability",
     "view_representative",
     "view_requirementassessment",
     "view_requirementmapping",
@@ -137,6 +145,8 @@ ANALYST_PERMISSIONS_LIST = [
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "add_filteringlabel",
+    "view_filteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -184,6 +194,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_riskacceptance",
     "delete_riskassessment",
     "delete_riskmatrix",
+    "add_vulnerability",
+    "view_vulnerability",
+    "change_vulnerability",
+    "delete_vulnerability",
     "delete_riskscenario",
     "delete_solution",
     "delete_threat",
@@ -240,6 +254,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_referencecontrol",
     "change_referencecontrol",
     "delete_referencecontrol",
+    "add_vulnerability",
+    "view_vulnerability",
+    "change_vulnerability",
+    "delete_vulnerability",
     "add_folder",
     "change_folder",
     "view_folder",
@@ -317,6 +335,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_entityassessment",
     "view_entityassessment",
     "delete_entityassessment",
+    "add_filteringlabel",
+    "view_filteringlabel",
+    "change_filteringlabel",
+    "delete_filteringlabel",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -417,6 +439,22 @@ def startup(sender: AppConfig, **kwargs):
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_readers.folder)
+    if not UserGroup.objects.filter(
+        name=UserGroupCodename.ANALYST.value, folder=Folder.get_root_folder()
+    ).exists():
+        analysts = UserGroup.objects.create(
+            name=UserGroupCodename.ANALYST.value,
+            folder=Folder.get_root_folder(),
+            builtin=True,
+        )
+        ra2 = RoleAssignment.objects.create(
+            user_group=analysts,
+            role=Role.objects.get(name=RoleCodename.ANALYST.value),
+            is_recursive=True,
+            builtin=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra2.perimeter_folders.add(analysts.folder)
     # if global approvers user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-GAP", folder=Folder.get_root_folder()

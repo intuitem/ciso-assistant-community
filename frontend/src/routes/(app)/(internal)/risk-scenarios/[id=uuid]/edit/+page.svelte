@@ -27,7 +27,7 @@
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';
-	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { languageTag } from '$paraglide/runtime';
 	import { zod } from 'sveltekit-superforms/adapters';
 
@@ -72,7 +72,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -216,6 +216,22 @@
 				<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 			</div>
 		</div>
+		<AutocompleteSelect
+			multiple
+			{form}
+			options={getOptions({
+				objects: data.foreignKeys['vulnerabilities'],
+				extra_fields: [['folder', 'str']],
+				label: 'auto'
+			})}
+			field="vulnerabilities"
+			label={m.vulnerabilities()}
+		/>
+		<ModelTable
+			source={data.tables['vulnerabilities']}
+			hideFilters={true}
+			URLModel="vulnerabilities"
+		/>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		<div class="card px-4 py-2 bg-white shadow-lg">

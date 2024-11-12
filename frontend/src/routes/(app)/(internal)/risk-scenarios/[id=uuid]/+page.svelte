@@ -6,7 +6,8 @@
 
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { isDark } from '$lib/utils/helpers';
@@ -92,14 +93,14 @@
 					<span class=" text-sm text-gray-400 font-semibold">{m.owner()}</span>
 					<ul>
 						{#each data.scenario.owner as owner}
-							<li class="text-xs">{owner.str}</li>
+							<li class="text-xs font-semibold">{owner.str}</li>
 						{/each}
 					</ul>
 				</div>
 				<div>
 					<p class="text-sm font-semibold text-gray-400">{m.treatmentStatus()}</p>
 					<p class="text-sm font-semibold">
-						{localItems()[toCamelCase(data.scenario.treatment)]}
+						{safeTranslate(data.scenario.treatment)}
 					</p>
 				</div>
 			</div>
@@ -114,6 +115,14 @@
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
 			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 		</div>
+	</div>
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-scroll">
+		<h4 class="h4 font-semibold">{m.vulnerabilities()}</h4>
+		<ModelTable
+			source={data.tables['vulnerabilities']}
+			hideFilters={true}
+			URLModel="vulnerabilities"
+		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
 		<div class="flex flex-col w-fit">
@@ -134,11 +143,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_proba]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_proba.name)]}
-						{localItems()[toCamelCase(data.scenario.current_proba.name)]}
-					{:else}
-						{data.scenario.current_proba.name}
-					{/if}
+					{safeTranslate(data.scenario.current_proba.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-xmark mt-5" />
@@ -148,11 +153,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.current_impact]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_impact.name)]}
-						{localItems()[toCamelCase(data.scenario.current_impact.name)]}
-					{:else}
-						{data.scenario.current_impact.name}
-					{/if}
+					{safeTranslate(data.scenario.current_impact.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-equals mt-5" />
@@ -166,11 +167,7 @@
 					)}"
 					style="background-color: {data.scenario.current_level.hexcolor}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.current_level.name)]}
-						{localItems()[toCamelCase(data.scenario.current_level.name)]}
-					{:else}
-						{data.scenario.current_level.name}
-					{/if}
+					{safeTranslate(data.scenario.current_level.name)}
 				</span>
 			</p>
 		</div>
@@ -192,11 +189,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_proba]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_proba.name)]}
-						{localItems()[toCamelCase(data.scenario.residual_proba.name)]}
-					{:else}
-						{data.scenario.residual_proba.name}
-					{/if}
+					{safeTranslate(data.scenario.residual_proba.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-xmark mt-5" />
@@ -206,11 +199,7 @@
 					class="text-sm text-center font-semibold p-2 rounded-md w-20"
 					style="background-color: {color_map[data.scenario.residual_impact]}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_impact.name)]}
-						{localItems()[toCamelCase(data.scenario.residual_impact.name)]}
-					{:else}
-						{data.scenario.residual_impact.name}
-					{/if}
+					{safeTranslate(data.scenario.residual_impact.name)}
 				</span>
 			</p>
 			<i class="fa-solid fa-equals mt-5" />
@@ -224,11 +213,7 @@
 					)}"
 					style="background-color: {data.scenario.residual_level.hexcolor}"
 				>
-					{#if localItems()[toCamelCase(data.scenario.residual_level.name)]}
-						{localItems()[toCamelCase(data.scenario.residual_level.name)]}
-					{:else}
-						{data.scenario.residual_level.name}
-					{/if}
+					{safeTranslate(data.scenario.residual_level.name)}
 				</span>
 			</p>
 		</div>
@@ -240,7 +225,7 @@
 				<span class="font-semibold">
 					{#each data.scenario.qualifications as qualification, i}
 						{#if i > 0},{/if}
-						{localItems()[toCamelCase(qualification)] || qualification || localItems()['undefined']}
+						{safeTranslate(qualification) || m.undefined()}
 					{/each}
 				</span>
 			</p>
@@ -252,11 +237,7 @@
 					{data.scenario.strength_of_knowledge.symbol}
 				{/if}
 				<span class="font-semibold">
-					{#if localItems()[toCamelCase(data.scenario.strength_of_knowledge.name)]}
-						{localItems()[toCamelCase(data.scenario.strength_of_knowledge.name)]}
-					{:else}
-						{localItems()['undefined']}
-					{/if}
+					{safeTranslate(data.scenario.strength_of_knowledge.name) || m.undefined()}
 				</span>
 			</p>
 		</div>

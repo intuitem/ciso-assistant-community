@@ -5,12 +5,14 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { checkConstraints } from '$lib/utils/crud';
+	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
+	export let form: ActionData;
 	$: URLModel = data.URLModel;
 
 	const modalStore: ModalStore = getModalStore();
@@ -27,7 +29,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add' + capitalizeFirstLetter(data.model.localName))
+			title: safeTranslate('add-' + data.model.localName)
 		};
 		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -37,11 +39,15 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: safeTranslate('add' + capitalizeFirstLetter(data.model.localName)).toLowerCase(),
+				body: safeTranslate('add-' + data.model.localName).toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
 		modalStore.trigger(modal);
+	}
+
+	$: if (form && form.redirect) {
+		goto(getSecureRedirect(form.redirect));
 	}
 </script>
 
@@ -50,35 +56,62 @@
 		{#key URLModel}
 			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				<div slot="addButton">
-					{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
-						<button
-							class="btn variant-filled-primary self-end"
-							data-testid="add-button"
-							on:click={modalCreateForm}
-							><i class="fa-solid fa-plus mr-2" />
-							{safeTranslate('add' + capitalizeFirstLetter(data.model.localName))}
-						</button>
-						{#if URLModel === 'applied-controls'}
+					<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
+						{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
+							<button
+								class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+								data-testid="add-button"
+								title={safeTranslate('add-' + data.model.localName)}
+								on:click={modalCreateForm}
+								><i class="fa-solid fa-file-circle-plus"></i>
+							</button>
+							{#if URLModel === 'applied-controls'}
+								<a
+									href="{URLModel}/export/"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									title={m.exportButton()}
+									data-testid="export-button"><i class="fa-solid fa-download mr-2" /></a
+								>
+							{/if}
+							{#if URLModel === 'assets'}
+								<a
+									href="assets/graph/"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									title={m.exploreButton()}
+									data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
+								>
+							{/if}
+							{#if URLModel === 'folders'}
+								<a
+									href="x-rays/inspect"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									title={m.exploreButton()}
+									data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
+								>
+							{/if}
+						{:else if URLModel === 'risk-matrices'}
 							<a
-								href="{URLModel}/export/"
-								class="btn variant-filled-surface"
-								data-testid="export-button"
-								><i class="fa-solid fa-download mr-2" />{m.exportButton()}</a
+								href="/libraries"
+								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+								data-testid="add-button"
+								title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2" /></a
+							>
+						{:else if URLModel === 'frameworks'}
+							<a
+								href="/libraries"
+								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+								data-testid="add-button"
+								title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
+							>
+						{:else if URLModel === 'requirement-mapping-sets'}
+							<a
+								href="/libraries"
+								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+								data-testid="add-button"
+								title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{/if}
-					{:else if URLModel === 'risk-matrices'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-							><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
-						>
-					{:else if URLModel === 'frameworks'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-							><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
-						>
-					{:else if URLModel === 'requirement-mapping-sets'}
-						<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-							><i class="fa-solid fa-file-import mr-2" />{m.importMappings()}</a
-						>
-					{/if}
+					</span>
 				</div>
 			</ModelTable>
 		{/key}
