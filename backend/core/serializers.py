@@ -128,6 +128,22 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
     pass
 
 
+class VulnerabilityReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
+
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
+
+
+class VulnerabilityWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
+
+
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
     # NOTE: This is a workaround to filter the approvers on api view
     #       but it causes some problems in api_tests. Serializers are
@@ -315,6 +331,8 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
+    has_evidences = serializers.BooleanField()
+    eta_missed = serializers.BooleanField()
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
@@ -554,6 +572,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    progress = serializers.ReadOnlyField()
 
     class Meta:
         model = ComplianceAssessment
@@ -650,3 +669,17 @@ class ComputeMappingSerializer(serializers.Serializer):
     source_assessment = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all()
     )
+
+
+class FilteringLabelReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = FilteringLabel
+        fields = "__all__"
+
+
+class FilteringLabelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FilteringLabel
+        exclude = ["folder", "is_published"]

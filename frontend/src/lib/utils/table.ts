@@ -50,6 +50,19 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const LABELS_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		return row.filtering_labels && row.filtering_labels.length > 0
+			? row.filtering_labels.map((filtering_label) => filtering_label.str)
+			: [''];
+	},
+	alwaysDefined: true,
+	extraProps: {
+		defaultOptionName: 'filtering_labels'
+	}
+};
+
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
 	getColumn: (row) => row.meta.folder.str
@@ -242,12 +255,7 @@ const LIBRARY_TYPE_FILTER = {
 		return datatypes;
 	},
 	extraProps: {
-		defaultOptionName: 'objectType',
-		optionLabels: {
-			reference_controls: 'referenceControls',
-			requirement_mapping_set: 'requirementMappingSet',
-			risk_matrix: 'riskMatrix'
-		}
+		defaultOptionName: 'objectType'
 	},
 	alwaysDisplay: true
 };
@@ -265,12 +273,24 @@ export const listViewFields: ListViewFieldsConfig = {
 			lc_status: PROJECT_STATUS_FILTER
 		}
 	},
+	'filtering-labels': {
+		head: ['label'],
+		body: ['label']
+	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain'],
 		body: ['name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER
+		}
+	},
+	vulnerabilities: {
+		head: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'labels'],
+		body: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'filtering_labels'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -287,7 +307,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: PROVIDER_FILTER
 		}
 	},
 	'risk-scenarios': {
