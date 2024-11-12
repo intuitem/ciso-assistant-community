@@ -46,26 +46,28 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['assets', 'applied-controls'] as urlModel[]) {
-		const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
-		const response = await fetch(keyEndpoint);
-		if (response.ok) {
-			const data = await response.json().then((data) => data.results);
+	await Promise.all(
+		['assets', 'applied-controls', 'vulnerabilities'].map(async (key) => {
+			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
+			const response = await fetch(keyEndpoint);
+			if (response.ok) {
+				const data = await response.json().then((data) => data.results);
 
-			const metaData = tableSourceMapper(data, ['id', 'status']);
+				const metaData = tableSourceMapper(data, ['id', 'status']);
 
-			const bodyData = tableSourceMapper(data, listViewFields[key].body);
+				const bodyData = tableSourceMapper(data, listViewFields[key].body);
 
-			const table: TableSource = {
-				head: listViewFields[key].head,
-				body: bodyData,
-				meta: metaData
-			};
-			tables[key] = table;
-		} else {
-			console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-		}
-	}
+				const table: TableSource = {
+					head: listViewFields[key].head,
+					body: bodyData,
+					meta: metaData
+				};
+				tables[key] = table;
+			} else {
+				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
+			}
+		})
+	);
 
 	const selectOptions: Record<string, any> = {};
 

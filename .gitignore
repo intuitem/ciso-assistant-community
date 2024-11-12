@@ -6,10 +6,11 @@
 *.sqlite3
 django_secret_key
 temp/
-./db/
+db/
 .dccache
 /backend/profiles
 ./backend/ciso_assistant/.meta
 caddy_data/
 **/dist/
 **/.meta
+charts/custom-values.yaml

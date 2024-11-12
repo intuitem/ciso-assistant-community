@@ -2,7 +2,8 @@
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
-	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { toCamelCase } from '$lib/utils/locales';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { isDark } from '$lib/utils/helpers';
 
 	export let label: string | undefined = undefined;
@@ -60,11 +61,7 @@
 			)}"
 			style="background-color: {riskLevel.hexcolor}"
 		>
-			{#if localItems()[toCamelCase(riskLevel.name)]}
-				{localItems()[toCamelCase(riskLevel.name)]}
-			{:else}
-				{riskLevel.name}
-			{/if}
+			{safeTranslate(riskLevel.name)}
 		</div>
 	{:else}
 		<div class="flex font-medium w-32 justify-center p-2 rounded-token bg-gray-300">--</div>

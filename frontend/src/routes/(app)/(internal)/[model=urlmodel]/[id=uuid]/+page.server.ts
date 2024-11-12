@@ -1,7 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 
-import { localItems, toCamelCase } from '$lib/utils/locales';
+import { toCamelCase } from '$lib/utils/locales';
+import { safeTranslate } from '$lib/utils/i18n';
 import * as m from '$paraglide/messages';
 
 import { fail, type Actions } from '@sveltejs/kit';
@@ -19,7 +20,8 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		return nestedWriteFormAction({ event, action: 'create' });
+		const redirectToWrittenObject = Boolean(event.params.model === 'projects');
+		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
@@ -53,7 +55,7 @@ export const actions: Actions = {
 		return message(
 			rejectForm,
 			m.successfullyRejectedObject({
-				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})
 		);
@@ -87,7 +89,7 @@ export const actions: Actions = {
 		return message(
 			acceptForm,
 			m.successfullyValidatedObject({
-				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})
 		);
@@ -121,7 +123,7 @@ export const actions: Actions = {
 		return message(
 			revokeForm,
 			m.successfullyRevokedObject({
-				object: localItems()[toCamelCase(model.toLowerCase())].toLowerCase(),
+				object: safeTranslate(model).toLowerCase(),
 				id: id
 			})
 		);

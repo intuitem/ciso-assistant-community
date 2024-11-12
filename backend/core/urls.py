@@ -25,6 +25,7 @@ router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
 router.register(r"projects", ProjectViewSet, basename="projects")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
+router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
 router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios")
@@ -59,6 +60,11 @@ router.register(
     r"requirement-mapping-sets",
     RequirementMappingSetViewSet,
     basename="requirement-mapping-sets",
+)
+router.register(
+    r"filtering-labels",
+    FilteringLabelViewSet,
+    basename="filtering-labels",
 )
 
 ROUTES = settings.ROUTES

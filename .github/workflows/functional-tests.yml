@@ -49,11 +49,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-      - name: Install requirements
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        run: poetry install
       - name: Install dependencies
         working-directory: ${{ env.frontend-directory }}
         run: |
@@ -72,6 +75,8 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo LOG_LEVEL=DEBUG >> .env
+          echo LOG_OUTFILE=ciso-assistant.log >> .env
           echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
@@ -90,14 +95,14 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py makemigrations
-          python manage.py migrate
+          poetry run python manage.py makemigrations
+          poetry run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          python manage.py createsuperuser --noinput
-          nohup python manage.py runserver &
+          poetry run python manage.py createsuperuser --noinput
+          nohup poetry run python manage.py runserver &
       - name: Build frontend
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
@@ -111,6 +116,7 @@ jobs:
         with:
           name: functional-tests-report-${{ matrix.playwright-browser }}
           path: |
+            ${{ env.backend-directory }}/*.log
             ${{ env.frontend-directory }}/tests/results/
             ${{ env.frontend-directory }}/tests/reports/
           retention-days: 5
@@ -173,6 +179,8 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
+          echo LOG_LEVEL=DEBUG >> .env
+          echo LOG_OUTFILE=ciso-assistant.log >> .env
           echo DJANGO_DEBUG=True >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
@@ -198,7 +206,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py createsuperuser --noinput
+          poetry run python manage.py createsuperuser  --noinput --settings=${{ env.enterprise-backend-settings-module }}
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
@@ -210,6 +218,7 @@ jobs:
         with:
           name: enterprise-functional-tests-report-${{ matrix.playwright-browser }}
           path: |
+            ${{ env.backend-directory }}/*.log
             ${{ env.enterprise-frontend-build-directory }}/tests/results/
             ${{ env.enterprise-frontend-build-directory }}/tests/reports/
           retention-days: 5
