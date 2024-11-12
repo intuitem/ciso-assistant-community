@@ -93,7 +93,7 @@
 					<span class=" text-sm text-gray-400 font-semibold">{m.owner()}</span>
 					<ul>
 						{#each data.scenario.owner as owner}
-							<li class="text-xs">{owner.str}</li>
+							<li class="text-xs font-semibold">{owner.str}</li>
 						{/each}
 					</ul>
 				</div>
@@ -115,6 +115,14 @@
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
 			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 		</div>
+	</div>
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-scroll">
+		<h4 class="h4 font-semibold">{m.vulnerabilities()}</h4>
+		<ModelTable
+			source={data.tables['vulnerabilities']}
+			hideFilters={true}
+			URLModel="vulnerabilities"
+		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
 		<div class="flex flex-col w-fit">
