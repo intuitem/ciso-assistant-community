@@ -100,29 +100,51 @@
 		{form}
 		label={m.confidentiality()}
 		field="confidentiality"
+		valuePath="security_objectives.objectives.confidentiality.value"
 		options={securityObjectiveOptions}
 	/>
 	<RadioGroupInput
 		{form}
 		label={m.integrity()}
 		field="integrity"
+		valuePath="security_objectives.objectives.integrity.value"
 		options={securityObjectiveOptions}
 	/>
 	<RadioGroupInput
 		{form}
 		label={m.availability()}
 		field="availability"
+		valuePath="security_objectives.objectives.availability.value"
 		options={securityObjectiveOptions}
 	/>
-	<RadioGroupInput {form} label={m.proof()} field="proof" options={securityObjectiveOptions} />
+	<RadioGroupInput
+		{form}
+		label={m.proof()}
+		field="proof"
+		valuePath="security_objectives.objectives.proof.value"
+		options={securityObjectiveOptions}
+	/>
 	<RadioGroupInput
 		{form}
 		label={m.authenticity()}
+		valuePath="security_objectives.objectives.authenticity.value"
 		field="authenticity"
 		options={securityObjectiveOptions}
 	/>
-	<RadioGroupInput {form} label={m.privacy()} field="privacy" options={securityObjectiveOptions} />
-	<RadioGroupInput {form} label={m.safety()} field="safety" options={securityObjectiveOptions} />
+	<RadioGroupInput
+		{form}
+		label={m.privacy()}
+		field="privacy"
+		valuePath="security_objectives.objectives.privacy.value"
+		options={securityObjectiveOptions}
+	/>
+	<RadioGroupInput
+		{form}
+		label={m.safety()}
+		field="safety"
+		valuePath="security_objectives.objectives.safety.value"
+		options={securityObjectiveOptions}
+	/>
 </Dropdown>
 <Dropdown
 	open={false}
