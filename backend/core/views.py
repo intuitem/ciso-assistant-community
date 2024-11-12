@@ -181,7 +181,7 @@ class ProjectViewSet(BaseModelViewSet):
 
     model = Project
     filterset_fields = ["folder", "lc_status"]
-    search_fields = ["name", "internal_reference", "description"]
+    search_fields = ["name", "ref_id", "internal_reference", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
