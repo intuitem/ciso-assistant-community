@@ -275,7 +275,7 @@
 											<a href={itemHref} class="anchor">{value.str}</a>
 										{:else if isURL(value) && !value.startsWith('urn')}
 											<a href={value} target="_blank" class="anchor">{value}</a>
-										{:else if ISO_8601_REGEX.test(value)}
+										{:else if ISO_8601_REGEX.test(value) && !/^\d+$/.test(value)}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
 											{safeTranslate((value.str || value.name) ?? value)}
