@@ -14,6 +14,7 @@ export const load: LayoutServerLoad = async (event) => {
 	const schema = modelSchema(event.params.model);
 	const objectEndpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
 	const object = await event.fetch(objectEndpoint).then((res) => res.json());
+
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(event.params.model!);
 	const foreignKeyFields = model.foreignKeyFields;
@@ -77,6 +78,5 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
-
 	return { form, model, object, foreignKeys, selectOptions, URLModel };
 };

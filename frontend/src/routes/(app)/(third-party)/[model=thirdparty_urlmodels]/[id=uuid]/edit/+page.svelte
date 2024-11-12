@@ -8,11 +8,13 @@
 	breadcrumbObject.set(data.data);
 </script>
 
-<ModelForm
-	form={data.form}
-	object={data.object}
-	selectOptions={data.selectOptions}
-	foreignKeys={data.foreignKeys}
-	model={data.model}
-	context="edit"
-/>
+<div class="card p-4 bg-white shadow-lg">
+	<ModelForm
+		form={data.form}
+		object={data.object}
+		selectOptions={data.selectOptions}
+		foreignKeys={data.foreignKeys}
+		model={data.model}
+		context="edit"
+	/>
+</div>

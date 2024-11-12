@@ -116,6 +116,7 @@ export const RiskScenarioSchema = baseNamedObject({
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional()
 });
 
@@ -169,6 +170,10 @@ export const AssetSchema = baseNamedObject({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional()
+});
+
+export const FilteringLabelSchema = z.object({
+	label: z.string()
 });
 
 export const RequirementAssessmentSchema = z.object({
@@ -327,6 +332,15 @@ export const representativeSchema = z.object({
 	description: z.string().optional()
 });
 
+export const vulnerabilitySchema = baseNamedObject({
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	status: z.string().default('--'),
+	severity: z.number().default(-1),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -348,7 +362,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
-	solutions: solutionSchema
+	solutions: solutionSchema,
+	vulnerabilities: vulnerabilitySchema,
+	'filtering-labels': FilteringLabelSchema
 };
 
 export const modelSchema = (model: string) => {
