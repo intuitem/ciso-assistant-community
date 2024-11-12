@@ -70,6 +70,7 @@ export const FolderSchema = baseNamedObject({
 export const ProjectSchema = baseNamedObject({
 	folder: z.string(),
 	internal_reference: z.string().optional().nullable(),
+	ref_id: z.string().optional().nullable(),
 	lc_status: z.string().optional().default('in_design')
 });
 
