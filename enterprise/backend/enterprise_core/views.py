@@ -162,7 +162,7 @@ class ClientSettingsViewSet(BaseModelViewSet):
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
 
-    @action(methods=["post"], detail=True, url_path="logo/delete")
+    @action(methods=["put"], detail=True, url_path="logo/delete")
     def delete_logo(self, request, pk):
         (
             object_ids_view,
@@ -176,7 +176,24 @@ class ClientSettingsViewSet(BaseModelViewSet):
             settings = self.get_object()
             if settings.logo:
                 settings.logo.delete()
-                settings.logo = None
+                settings.save()
+                response = Response(status=status.HTTP_200_OK)
+        return response
+
+    @action(methods=["put"], detail=True, url_path="favicon/delete")
+    def delete_favicon(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ClientSettings
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            settings = self.get_object()
+            if settings.favicon:
+                settings.favicon.delete()
                 settings.save()
                 response = Response(status=status.HTTP_200_OK)
         return response

@@ -64,12 +64,14 @@
 				: m.logoHelpText()}
 			accept="image/*"
 		/>
+		{#if data.settings.logo != null}
 		<button
-			class="btn variant-filled-primary font-semibold w-full"
-			on:click={(_) => modalConfirm(data.settings.id, data.settings.logo, '?/deleteLogo')}
+			class="btn variant-filled-primary font-semibold w-full" type="button"
+			on:click={(_) => modalConfirm(data.settings.id, data.settings.logo, 'settings/client-settings?/deleteLogo')}
 			>
-			Reset logo
+			{m.resetLogo()}
 		</button>
+		{/if}
 		<FileInput
 			{form}
 			field="favicon"
@@ -79,6 +81,14 @@
 				: m.faviconHelpText()}
 			accept="image/*"
 		/>
+		{#if data.settings.favicon != null}
+		<button
+			class="btn variant-filled-primary font-semibold w-full" type="button"
+			on:click={(_) => modalConfirm(data.settings.id, data.settings.favicon, 'settings/client-settings?/deleteFavicon')}
+			>
+			{m.resetFavicon()}
+		</button>
+		{/if}
 		<Checkbox
 			{form}
 			field="show_images_unauthenticated"
