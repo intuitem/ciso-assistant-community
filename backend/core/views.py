@@ -10,7 +10,6 @@ import pytz
 from typing import Any, Tuple
 from uuid import UUID
 from itertools import cycle
-
 import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 
@@ -18,6 +17,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
+
+from django.db.models import F, Q
 
 from django.contrib.auth.models import Permission
 from django.contrib.auth import get_user_model
@@ -303,6 +304,59 @@ class AssetViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Asset.Type.choices))
 
+    @action(detail=False, name="Get assets graph")
+    def graph(self, request):
+        nodes = []
+        links = []
+        nodes_idx = dict()
+        categories = []
+        N = 0
+        for domain in Folder.objects.all():
+            categories.append({"name": domain.name})
+            nodes_idx[domain.name] = N
+            nodes.append(
+                {
+                    "name": domain.name,
+                    "category": N,
+                    "symbol": "roundRect",
+                    "symbolSize": 30,
+                    "value": "Domain",
+                }
+            )
+            N += 1
+        for asset in Asset.objects.all():
+            symbol = "circle"
+            if asset.type == "PR":
+                symbol = "diamond"
+            nodes.append(
+                {
+                    "name": asset.name,
+                    "symbol": symbol,
+                    "symbolSize": 25,
+                    "category": nodes_idx[asset.folder.name],
+                    "value": "Primary" if asset.type == "PR" else "Support",
+                }
+            )
+            nodes_idx[asset.name] = N
+            links.append(
+                {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
+            )
+            N += 1
+        for asset in Asset.objects.all():
+            for relationship in asset.parent_assets.all():
+                links.append(
+                    {
+                        "source": nodes_idx[relationship.name],
+                        "target": nodes_idx[asset.name],
+                        "value": "parent",
+                    }
+                )
+        meta = {"display_name": f"Assets Explorer"}
+
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
@@ -358,6 +412,60 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 .count()
             )
         return Response({"results": used_matrices})
+
+
+class VulnerabilityViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows vulnerabilities to be viewed or edited.
+    """
+
+    model = Vulnerability
+    filterset_fields = ["folder", "status", "severity", "risk_scenarios"]
+    search_fields = ["name", "description"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Vulnerability.Status.choices))
+
+    def _process_labels(self, labels):
+        """
+        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
+        """
+        new_labels = []
+        for label in labels:
+            try:
+                uuid.UUID(label, version=4)
+                new_labels.append(label)
+            except ValueError:
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
+                new_labels.append(str(new_label.id))
+        return new_labels
+
+    def update(self, request: Request, *args, **kwargs) -> Response:
+        request.data["filtering_labels"] = self._process_labels(
+            request.data["filtering_labels"]
+        )
+        return super().update(request, *args, **kwargs)
+
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        request.data["filtering_labels"] = self._process_labels(
+            request.data["filtering_labels"]
+        )
+        return super().create(request, *args, **kwargs)
+
+
+class FilteringLabelViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows labels to be viewed or edited.
+    """
+
+    model = FilteringLabel
+    filterset_fields = ["folder"]
+    search_fields = ["label"]
+    ordering = ["label"]
 
 
 class RiskAssessmentViewSet(BaseModelViewSet):
@@ -1348,8 +1456,6 @@ class FolderViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @method_decorator(cache_page(60 * MED_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
@@ -1374,6 +1480,71 @@ class FolderViewSet(BaseModelViewSet):
 
         return Response(tree)
 
+    @action(detail=False, methods=["get"])
+    def my_assignments(self, request):
+        risk_assessments = RiskAssessment.objects.filter(
+            Q(authors=request.user) | Q(reviewers=request.user)
+        ).distinct()
+
+        audits = (
+            ComplianceAssessment.objects.filter(
+                Q(authors=request.user) | Q(reviewers=request.user)
+            )
+            .order_by(F("eta").asc(nulls_last=True))
+            .distinct()
+        )
+
+        sum = 0
+        avg_progress = 0
+        audits_count = audits.count()
+        if audits_count > 0:
+            for audit in audits:
+                sum += audit.progress()
+            avg_progress = int(sum / audits.count())
+
+        controls = (
+            AppliedControl.objects.filter(owner=request.user)
+            .order_by(F("eta").asc(nulls_last=True))
+            .distinct()
+        )
+        non_active_controls = controls.exclude(status="active")
+        risk_scenarios = RiskScenario.objects.filter(owner=request.user).distinct()
+        controls_progress = 0
+        evidences_progress = 0
+        tot_ac = controls.count()
+        if tot_ac > 0:
+            alive_ac = controls.filter(status="active").count()
+            controls_progress = int((alive_ac / tot_ac) * 100)
+
+            with_evidences = 0
+            for ctl in controls:
+                with_evidences += 1 if ctl.has_evidences() else 0
+
+            evidences_progress = int((with_evidences / tot_ac) * 100)
+
+        RA_serializer = RiskAssessmentReadSerializer(risk_assessments[:10], many=True)
+        CA_serializer = ComplianceAssessmentReadSerializer(audits[:6], many=True)
+        AC_serializer = AppliedControlReadSerializer(
+            non_active_controls[:10], many=True
+        )
+        RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
+
+        return Response(
+            {
+                "risk_assessments": RA_serializer.data,
+                "audits": CA_serializer.data,
+                "controls": AC_serializer.data,
+                "risk_scenarios": RS_serializer.data,
+                "metrics": {
+                    "progress": {
+                        "audits": avg_progress,
+                        "controls": controls_progress,
+                        "evidences": evidences_progress,
+                    }
+                },
+            }
+        )
+
 
 @cache_page(60 * SHORT_CACHE_TTL)
 @vary_on_cookie
@@ -1386,8 +1557,6 @@ def get_counters_view(request):
     return Response({"results": get_counters(request.user)})
 
 
-@cache_page(60 * SHORT_CACHE_TTL)
-@vary_on_cookie
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_metrics_view(request):
@@ -1665,19 +1834,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
-    @method_decorator(cache_page(60 * MED_CACHE_TTL))
-    @method_decorator(vary_on_cookie)
-    @action(detail=True, name="Get implementation group choices")
-    def selected_implementation_groups(self, request, pk):
-        compliance_assessment = self.get_object()
-        _framework = compliance_assessment.framework
-        implementation_groups_definiition = _framework.implementation_groups_definition
-        implementation_group_choices = {
-            group["ref_id"]: group["name"]
-            for group in implementation_groups_definiition
-        }
-        return Response(implementation_group_choices)
-
     @action(detail=True, methods=["get"], name="Get action plan data")
     def action_plan(self, request, pk):
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -1798,7 +1954,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "on_hold": list(),
                 "active": list(),
                 "deprecated": list(),
-                "no status": list(),
+                "--": list(),
             }
             color_map = {
                 "to_do": "#FFF8F0",
@@ -1806,7 +1962,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "on_hold": "#F4D06F",
                 "active": "#9DD9D2",
                 "deprecated": "#ff8811",
-                "no status": "#e5e7eb",
+                "--": "#e5e7eb",
             }
             status = AppliedControl.Status.choices
             compliance_assessment_object = self.get_object()
@@ -1935,13 +2091,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
-        score = self.get_object()
+        compliance_assessment = self.get_object()
         return Response(
             {
-                "score": score.get_global_score(),
-                "max_score": score.max_score,
-                "min_score": score.min_score,
-                "scores_definition": score.scores_definition,
+                "score": compliance_assessment.get_global_score(),
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+                "scores_definition": get_referential_translation(
+                    compliance_assessment.framework, "scores_definition", get_language()
+                ),
             }
         )
 
@@ -2059,7 +2217,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = ["folder", "evidences"]
+    filterset_fields = ["folder", "evidences", "compliance_assessment"]
     search_fields = ["name", "description"]
 
     def update(self, request, *args, **kwargs):
@@ -2161,6 +2319,71 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     model = RequirementMappingSet
 
     filterset_fields = ["target_framework", "source_framework"]
+
+    @action(detail=True, methods=["get"], url_path="graph_data")
+    def graph_data(self, request, pk=None):
+        mapping_set_id = pk
+        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
+
+        nodes = []
+        links = []
+        snodes_idx = dict()
+        tnodes_idx = dict()
+        categories = [
+            {
+                "name": mapping_set.source_framework.name,
+            },
+            {
+                "name": mapping_set.target_framework.name,
+            },
+        ]
+        N = 0
+        for req in RequirementNode.objects.filter(
+            framework=mapping_set.source_framework
+        ).filter(assessable=True):
+            nodes.append(
+                {
+                    "name": req.ref_id,
+                    "category": 0,
+                    "value": req.name if req.name else req.description,
+                }
+            )
+            snodes_idx[req.ref_id] = N
+            N += 1
+
+        for req in RequirementNode.objects.filter(
+            framework=mapping_set.target_framework
+        ).filter(assessable=True):
+            nodes.append(
+                {
+                    "name": req.ref_id,
+                    "category": 1,
+                    "value": req.name if req.name else req.description,
+                }
+            )
+            tnodes_idx[req.ref_id] = N
+            N += 1
+        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
+        for item in req_mappings:
+            if (
+                item.source_requirement.assessable
+                and item.target_requirement.assessable
+            ):
+                links.append(
+                    {
+                        "source": snodes_idx[item.source_requirement.ref_id],
+                        "target": tnodes_idx[item.target_requirement.ref_id],
+                        "value": item.coverage,
+                    }
+                )
+
+        meta = {
+            "display_name": f"{mapping_set.source_framework.name} ➜ {mapping_set.target_framework.name}"
+        }
+
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
 
 
 @api_view(["GET"])

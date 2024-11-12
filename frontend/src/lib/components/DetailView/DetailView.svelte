@@ -254,6 +254,15 @@
 										{#if key === 'library'}
 											{@const itemHref = `/libraries/${value.id}?loaded`}
 											<a href={itemHref} class="anchor">{value.name}</a>
+										{:else if key === 'severity'}
+											<!-- We must add translations for the following severity levels -->
+											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
+											{@const stringifiedSeverity =
+												value < 0
+													? '--'
+													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
+														m.undefined())}
+											{stringifiedSeverity}
 										{:else if Array.isArray(value)}
 											{#if Object.keys(value).length > 0}
 												<ul>
@@ -266,6 +275,8 @@
 																	)?.urlModel
 																}/${val.id}`}
 																<a href={itemHref} class="anchor">{val.str}</a>
+															{:else if val.str}
+																{val.str}
 															{:else}
 																{value}
 															{/if}
@@ -301,7 +312,7 @@
 				{/each}
 			</dl>
 		</div>
-		<div class="">
+		<div class="flex flex-col space-y-2 ml-4">
 			{#if mailing}
 				<button
 					class="btn variant-filled-primary h-fit"

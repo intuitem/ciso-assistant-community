@@ -10,6 +10,7 @@
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
+	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
 	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
 	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
 	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
@@ -38,6 +39,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
+	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -204,6 +206,8 @@
 			{schema}
 			{initialData}
 		/>
+	{:else if URLModel === 'vulnerabilities'}
+		<VulnerabilitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'risk-acceptances'}
 		<RiskAcceptancesForm
 			{form}
@@ -246,6 +250,8 @@
 		<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} />
 	{:else if URLModel === 'sso-settings'}
 		<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
+	{:else if URLModel === 'filtering-labels'}
+		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

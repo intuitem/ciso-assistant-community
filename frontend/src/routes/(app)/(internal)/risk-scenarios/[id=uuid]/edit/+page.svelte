@@ -216,6 +216,22 @@
 				<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 			</div>
 		</div>
+		<AutocompleteSelect
+			multiple
+			{form}
+			options={getOptions({
+				objects: data.foreignKeys['vulnerabilities'],
+				extra_fields: [['folder', 'str']],
+				label: 'auto'
+			})}
+			field="vulnerabilities"
+			label={m.vulnerabilities()}
+		/>
+		<ModelTable
+			source={data.tables['vulnerabilities']}
+			hideFilters={true}
+			URLModel="vulnerabilities"
+		/>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		<div class="card px-4 py-2 bg-white shadow-lg">

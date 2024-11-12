@@ -99,7 +99,11 @@ export const load = (async ({ fetch, params }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
-		return nestedWriteFormAction({ event, action: 'create' });
+		const request = event.request.clone();
+		const formData = await request.formData();
+		const form = await superValidate(formData, zod(ComplianceAssessmentSchema));
+		const redirectToWrittenObject = Boolean(form.data.baseline);
+		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
 	},
 	createSuggestedControls: async (event) => {
 		const formData = await event.request.formData();

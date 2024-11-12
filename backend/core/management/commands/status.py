@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from core.models import *
 from iam.models import User, Folder
+from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -21,6 +22,9 @@ class Command(BaseCommand):
         nb_risk_assessments = RiskAssessment.objects.all().count()
         nb_risk_scenarios = RiskScenario.objects.all().count()
         nb_risk_acceptances = RiskAcceptance.objects.all().count()
+        nb_seats_available = getattr(settings, "LICENSE_SEATS", 0)
+        nb_expiry_date = getattr(settings, "LICENSE_EXPIRATION", "")
+
         created_at = Folder.get_root_folder().created_at
         last_login = max(
             [
@@ -36,5 +40,6 @@ class Command(BaseCommand):
             + f"domains={nb_domains} projects={nb_projects} assets={nb_assets} "
             + f"threats={nb_threats} functions={nb_functions} measures={nb_measures} "
             + f"evidences={nb_evidences} compliance={nb_compliance_assessments} risk={nb_risk_assessments} "
-            + f"scenarios={nb_risk_scenarios} acceptances={nb_risk_acceptances}"
+            + f"scenarios={nb_risk_scenarios} acceptances={nb_risk_acceptances} "
+            + f"number_of_seats={nb_seats_available} expiry_date={nb_expiry_date}"
         )

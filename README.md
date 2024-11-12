@@ -9,6 +9,8 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
+    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
     <a href="#supported-languages-">Languages</a>
@@ -54,6 +56,12 @@ The decoupling allows you to save a considerable amount of time:
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+Here is an illustration of the **decoupling** principle and its advantages:
+
+https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
+
+## Features
+
 Here is an overview of CISO Assistant features and capabilities:
 
 ![overview](features.png)
@@ -79,9 +87,13 @@ and run the starter script
 ./docker-compose.sh
 ```
 
+If you are looking for other installation options, you might want to check the [docs](https://intuitem.gitbook.io/ciso-assistant).
+
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
 > If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
 
 > [!WARNING]
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
@@ -154,6 +166,11 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
+60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
+61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
+62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
+63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
+64. Annex to the Implementing Regulation of NIS 2 on Technical and methodological requirements 🇪🇺
 
 ### Community contributions
 
@@ -164,6 +181,10 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
 6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 7. New Zealand Information Security Manual (NZISM) 🇳🇿
+8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
+9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
+10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
+11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
 
 <br/>
 
@@ -479,6 +500,12 @@ Set DJANGO_DEBUG=False for security reason.
 - RO: Romanian
 - HI: Hindi
 - UR: Urdu
+
+## Contributors 🤝
+
+<a href="https://github.com/intuitem/ciso-assistant-community/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community" />
+</a>
 
 ## Built With 💜
 
