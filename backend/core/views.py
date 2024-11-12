@@ -441,14 +441,18 @@ class VulnerabilityViewSet(BaseModelViewSet):
         return new_labels
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
+        request.data["filtering_labels"] = process_autocomplete_creation(
+            items=request.data["filtering_labels"], 
+            object_class=FilteringLabel, 
+            attribute_name='label'
         )
         return super().update(request, *args, **kwargs)
 
     def create(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
+        request.data["filtering_labels"] = process_autocomplete_creation(
+            items=request.data["filtering_labels"], 
+            object_class=FilteringLabel, 
+            attribute_name='label'
         )
         return super().create(request, *args, **kwargs)
 
@@ -1140,6 +1144,19 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get risk scenarios count per status")
     def per_status(self, request):
         return Response({"results": risk_per_status(request.user)})
+    
+    def update(self, request: Request, *args, **kwargs) -> Response:
+        request.data["existing_applied_controls"] = process_autocomplete_creation(
+            items=request.data["existing_applied_controls"], 
+            object_class=AppliedControl,
+            base_object=self.get_object(),
+        )
+        request.data["applied_controls"] = process_autocomplete_creation(
+            items=request.data["applied_controls"], 
+            object_class=AppliedControl,
+            base_object=self.get_object(),
+        )
+        return super().update(request, *args, **kwargs)
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
