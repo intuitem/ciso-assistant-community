@@ -359,7 +359,7 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value)}
+										{:else if ISO_8601_REGEX.test(value) && !/^\d+$/.test(value)}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else}
 											{safeTranslate(value ?? '-')}
