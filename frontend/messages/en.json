@@ -778,5 +778,7 @@
 	"librariesCanOnlyBeLoadedByAdmin": "Libraries can only be loaded by an administrator",
 	"catalog": "Catalog",
 	"actions": "Actions",
-	"operations": "Operations"
+	"operations": "Operations",
+	"resetLogo": "Reset logo",
+	"resetFavicon": "Reset favicon"
 }
