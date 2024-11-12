@@ -8,7 +8,7 @@ description: 'Adobe Common Controls Framework (CCF) version 5
 
   '
 copyright: Creative Commons
-version: 1
+version: 2
 provider: Adobe
 packager: intuitem
 objects:
@@ -9680,7 +9680,7 @@ objects:
         question_choices: *id001
         questions:
         - urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20:question:1
-          text: 1. Inspect and valudate whether a process has been defined and documented
+          text: 1. Inspect and validate whether a process has been defined and documented
             to engage qualified managed service providers for performing independent
             information security assessments.
         - urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20:question:2
