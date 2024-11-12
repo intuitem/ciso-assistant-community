@@ -351,7 +351,8 @@ export const representativeSchema = z.object({
 	description: z.string().optional()
 });
 
-export const vulnerabilitySchema = baseNamedObject({
+export const vulnerabilitySchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
