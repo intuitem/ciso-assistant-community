@@ -99,6 +99,7 @@ export interface Project {
 	name: string;
 	description?: string;
 	internal_reference?: string;
+	ref_id?: string;
 	compliance_assessments: Record<string, any>[];
 }
 

@@ -1146,6 +1146,9 @@ class Project(NameDescriptionMixin, FolderMixin):
     internal_reference = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
     )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
     lc_status = models.CharField(
         max_length=20,
         default="in_design",

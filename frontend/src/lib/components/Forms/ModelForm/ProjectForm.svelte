@@ -14,6 +14,14 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
+<TextField
+	{form}
+	field="ref_id"
+	label={'reference id'}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+
 <AutocompleteSelect
 	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}
