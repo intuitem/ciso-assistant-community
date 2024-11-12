@@ -503,6 +503,7 @@
 	"successfullyRejectedObject": "The {object} object has been successfully rejected",
 	"successfullyRevokedObject": "The {object} object has been successfully revoked",
 	"successfullyImportedObject": "The {object} object has been successfully imported",
+	"userHasNoRightsWarning": "but has no rights. Consider editing user's groups",
 	"anErrorOccurred": "An error has occurred",
 	"attachmentDeleted": "The attachment has been successfully deleted",
 	"librarySuccessfullyLoaded": "The library has been successfully loaded",
