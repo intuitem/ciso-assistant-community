@@ -353,6 +353,10 @@ class AssetViewSet(BaseModelViewSet):
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
 
+    @action(detail=False, name="Get security objectives")
+    def security_objectives(self, request):
+        return Response({"results": Asset.DEFAULT_SECURITY_OBJECTIVES})
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
