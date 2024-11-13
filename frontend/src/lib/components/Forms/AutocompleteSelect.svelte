@@ -83,18 +83,6 @@
 		dispatch('cache', selected);
 	}
 
-	function addOption(event) {
-		if (event.key === 'Enter') {
-			const newOption = {
-				label: event.target.value,
-				value: event.target.value
-			};
-			options = event.target.value !== '' ? [...options, newOption] : options;
-			selected = event.target.value !== '' ? [...selected, newOption] : selected;
-			event.target.value = '';
-		}
-	}
-
 	$: {
 		selected = selected.map((option) => {
 			const newOption = {
