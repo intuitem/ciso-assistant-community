@@ -94,6 +94,17 @@
 			event.target.value = '';
 		}
 	}
+
+	$: {
+		selected = selected.map((option) => {
+			const newOption = {
+				label: option.label || option.value,
+				value: option.value || option.label
+			};
+			selected = [...selected, newOption];
+			return newOption;
+		});
+	}
 </script>
 
 <div {hidden}>
@@ -130,7 +141,7 @@
 				allowEmpty={true}
 				{...$$restProps}
 				let:option
-				on:keyup={(event) => addOption(event)}
+				allowUserOptions="append"
 			>
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
