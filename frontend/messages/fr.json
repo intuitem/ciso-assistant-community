@@ -784,6 +784,7 @@
 	"questionPlural": "Questions",
 	"fillMetadataURL": "Option 1 : Remplissez l'URL des métadonnées",
 	"fillSSOSLOURLx509cert": "Option 2 : Remplissez l'URL SSO, l'URL SLO et le certificat x509",
+	"noExpirationDateSet": "Aucune date d'expiration définie",
 	"sumpageTotal": "total",
 	"sumpageActive": "actif",
 	"sumpageDeprecated": "obsolète",
