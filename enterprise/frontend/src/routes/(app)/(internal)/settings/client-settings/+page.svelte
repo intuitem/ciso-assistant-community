@@ -55,40 +55,48 @@
 	>
 		<HiddenInput {form} field="id" />
 		<TextField {form} field="name" label={m.name()} />
-		<FileInput
-			{form}
-			field="logo"
-			label={m.logo()}
-			helpText={data.settings.logo
-				? `${m.attachmentWarningText()}: ${data.settings.logo}`
-				: m.logoHelpText()}
-			accept="image/*"
-		/>
-		{#if data.settings.logo != null}
-		<button
-			class="btn variant-filled-primary font-semibold w-full" type="button"
-			on:click={(_) => modalConfirm(data.settings.id, data.settings.logo, 'settings/client-settings?/deleteLogo')}
-			>
-			{m.resetLogo()}
-		</button>
-		{/if}
-		<FileInput
-			{form}
-			field="favicon"
-			label={m.favicon()}
-			helpText={data.settings.favicon
-				? `${m.attachmentWarningText()}: ${data.settings.favicon}`
-				: m.faviconHelpText()}
-			accept="image/*"
-		/>
+		<div class="flex items-center space-x-1">
+			<div class="w-full">
+				<FileInput
+					{form}
+					field="logo"
+					label={m.logo()}
+					helpText={data.settings.logo
+						? `${m.attachmentWarningText()}: ${data.settings.logo}`
+						: m.logoHelpText()}
+					accept="image/*"
+				/>
+			</div>
+			{#if data.settings.logo != null}
+			<button
+				class="btn variant-filled-tertiary h-full" type="button"
+				on:click={(_) => modalConfirm(data.settings.id, data.settings.logo, 'settings/client-settings?/deleteLogo')}
+				>
+				<i class="fa-solid fa-trash" />
+			</button>
+			{/if}
+		</div>
+		<div class="flex items-center space-x-1">
+			<div class="w-full">
+				<FileInput
+					{form}
+					field="favicon"
+					label={m.favicon()}
+					helpText={data.settings.favicon
+						? `${m.attachmentWarningText()}: ${data.settings.favicon}`
+						: m.faviconHelpText()}
+					accept="image/*"
+				/>
+			</div>
 		{#if data.settings.favicon != null}
 		<button
-			class="btn variant-filled-primary font-semibold w-full" type="button"
+			class="btn variant-filled-tertiary h-full" type="button"
 			on:click={(_) => modalConfirm(data.settings.id, data.settings.favicon, 'settings/client-settings?/deleteFavicon')}
 			>
-			{m.resetFavicon()}
+			<i class="fa-solid fa-trash" />
 		</button>
 		{/if}
+		</div>
 		<Checkbox
 			{form}
 			field="show_images_unauthenticated"
