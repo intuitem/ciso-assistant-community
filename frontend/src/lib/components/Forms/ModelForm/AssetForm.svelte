@@ -12,6 +12,8 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import RadioGroupInput from '../RadioGroupInput.svelte';
 	import Select from '../Select.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { onMount } from 'svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -24,6 +26,19 @@
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
 	const scale: SecurityObjectiveScale = $page.data.settings.security_objective_scale;
 	const securityObjectiveScaleMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+
+	async function fetchSecurityObjectives(): Promise<string[]> {
+		const endpoint = '/assets/security-objectives/';
+		const objectives = await fetch(endpoint).then((res) => res.json());
+		return objectives;
+	}
+
+	let securityObjectives: string[] = [];
+
+	onMount(async () => {
+		securityObjectives = await fetchSecurityObjectives();
+		console.log(securityObjectives);
+	});
 
 	interface Option {
 		label: string;
@@ -92,59 +107,19 @@
 />
 <Dropdown
 	open={false}
-	style="hover:text-indigo-700"
+	style="hover:text-primary-700"
 	icon="fa-solid fa-shield-halved"
 	header={m.securityObjectives()}
 >
-	<RadioGroupInput
-		{form}
-		label={m.confidentiality()}
-		field="confidentiality"
-		valuePath="security_objectives.objectives.confidentiality.value"
-		options={securityObjectiveOptions}
-	/>
-	<RadioGroupInput
-		{form}
-		label={m.integrity()}
-		field="integrity"
-		valuePath="security_objectives.objectives.integrity.value"
-		options={securityObjectiveOptions}
-	/>
-	<RadioGroupInput
-		{form}
-		label={m.availability()}
-		field="availability"
-		valuePath="security_objectives.objectives.availability.value"
-		options={securityObjectiveOptions}
-	/>
-	<RadioGroupInput
-		{form}
-		label={m.proof()}
-		field="proof"
-		valuePath="security_objectives.objectives.proof.value"
-		options={securityObjectiveOptions}
-	/>
-	<RadioGroupInput
-		{form}
-		label={m.authenticity()}
-		valuePath="security_objectives.objectives.authenticity.value"
-		field="authenticity"
-		options={securityObjectiveOptions}
-	/>
-	<RadioGroupInput
-		{form}
-		label={m.privacy()}
-		field="privacy"
-		valuePath="security_objectives.objectives.privacy.value"
-		options={securityObjectiveOptions}
-	/>
-	<RadioGroupInput
-		{form}
-		label={m.safety()}
-		field="safety"
-		valuePath="security_objectives.objectives.safety.value"
-		options={securityObjectiveOptions}
-	/>
+	{#each securityObjectives as objective}
+		<RadioGroupInput
+			{form}
+			label={safeTranslate(objective)}
+			field={objective}
+			valuePath="security_objectives.objectives.{objective}.value"
+			options={securityObjectiveOptions}
+		/>
+	{/each}
 </Dropdown>
 <Dropdown
 	open={false}
