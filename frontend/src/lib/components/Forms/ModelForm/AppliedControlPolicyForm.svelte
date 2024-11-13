@@ -16,6 +16,13 @@
 	export let initialData: Record<string, any> = {};
 </script>
 
+<TextField
+	{form}
+	field="ref_id"
+	label={'reference id'}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 {#if schema.shape.category}
 	<Select
 		{form}
