@@ -20,9 +20,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { page } from '$app/stores';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -105,7 +103,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName))
+			title: safeTranslate('add-' + data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -214,8 +212,12 @@
 												value={option.id}
 												bind:group={requirementAssessment.status}
 												name="status"
-												on:change={() => update(requirementAssessment, 'status', option.id)}
-												>{option.label}</RadioItem
+												on:click={() => {
+													const newStatus =
+														requirementAssessment.status === option.id ? 'to_do' : option.id;
+													requirementAssessment.status = newStatus;
+													update(requirementAssessment, 'status', newStatus);
+												}}>{option.label}</RadioItem
 											>
 										{/each}
 									</RadioGroup>
@@ -234,9 +236,14 @@
 												value={option.id}
 												bind:group={requirementAssessment.result}
 												name="result"
-												on:change={() => update(requirementAssessment, 'result', option.id)}
-												>{option.label}</RadioItem
-											>
+												on:click={() => {
+													const newResult =
+														requirementAssessment.result === option.id ? 'not_assessed' : option.id;
+													requirementAssessment.result = newResult;
+													update(requirementAssessment, 'result', newResult); // Update result for both select and deselect
+												}}
+												>{option.label}
+											</RadioItem>
 										{/each}
 									</RadioGroup>
 								</div>
@@ -266,10 +273,13 @@
 														bind:group={question.answer}
 														name="question"
 														value={option}
-														on:change={() =>
-															update(requirementAssessment, 'answer', option, question)}
-														>{option}</RadioItem
-													>
+														on:click={() => {
+															const newAnswer = question.answer === option ? null : option;
+															question.answer = newAnswer;
+															update(requirementAssessment, 'answer', newAnswer, question);
+														}}
+														>{option}
+													</RadioItem>
 												{/each}
 											</RadioGroup>
 										{:else if question.type === 'date'}

@@ -25,7 +25,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.7.6
+    image: caddy:2.8.4
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     depends_on:

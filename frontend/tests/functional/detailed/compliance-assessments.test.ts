@@ -44,6 +44,9 @@ test('compliance assessments scoring is working properly', async ({
 			testObjectsData[requirement].build,
 			'dependency' in testObjectsData[requirement] ? testObjectsData[requirement].dependency : null
 		);
+
+		await requiredPage.goto();
+		await requiredPage.hasUrl();
 	}
 
 	await complianceAssessmentsPage.viewItemDetail(
