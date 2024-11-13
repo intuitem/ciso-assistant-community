@@ -11,7 +11,7 @@ import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { Library } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
-import { localItems } from '$lib/utils/locales';
+import { safeTranslate } from '$lib/utils/i18n';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load = (async ({ fetch }) => {
@@ -95,7 +95,7 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const translate_error = localItems()[response.error];
+				const translate_error = safeTranslate(response.error);
 				const toast_error_message =
 					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
 

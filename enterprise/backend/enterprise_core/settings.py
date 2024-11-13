@@ -26,6 +26,7 @@ BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
+LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
@@ -58,6 +59,16 @@ LOGGING = {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
     },
 }
+
+if LOG_OUTFILE:
+    LOGGING["handlers"]["file"] = {
+        "level": LOG_LEVEL,
+        "class": "logging.handlers.WatchedFileHandler",
+        "filename": "ciso-assistant.log",
+        "formatter": "json",
+    }
+    LOGGING["loggers"][""]["handlers"].append("file")
+
 
 structlog.configure(
     processors=[
@@ -116,7 +127,7 @@ ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 10)
 MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
 MEDIA_URL = ""
 
-PAGINATE_BY = os.environ.get("PAGINATE_BY", default=500)
+PAGINATE_BY = os.environ.get("PAGINATE_BY", default=5000)
 
 # Application definition
 
@@ -144,6 +155,7 @@ INSTALLED_APPS = [
     "allauth.headless",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
+    "allauth.mfa",
 ]
 
 MIDDLEWARE = [
@@ -198,6 +210,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
         "core.permissions.RBACPermissions",
+        "enterprise_core.permissions.LicensePermission",
     ],
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
@@ -364,6 +377,10 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 
+# NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
+# It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
+ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 ACCOUNT_ADAPTER = "iam.adapter.AccountAdapter"
@@ -373,6 +390,8 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 HEADLESS_ONLY = True
+
+HEADLESS_TOKEN_STRATEGY = "iam.utils.KnoxTokenStrategy"
 
 HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
@@ -396,10 +415,14 @@ MODULES["enterprise_core"] = {
 }
 
 logger.info(
-    "Enterprise startup info", feature_flags=FEATURE_FLAGS, module_paths=MODULE_PATHS
+    "Enterprise startup information",
+    feature_flags=FEATURE_FLAGS,
+    module_paths=MODULE_PATHS,
 )
 
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
+
+logger.info("License information", seats=LICENSE_SEATS, expiration=LICENSE_EXPIRATION)
 
 INSTALLED_APPS.append("enterprise_core")
