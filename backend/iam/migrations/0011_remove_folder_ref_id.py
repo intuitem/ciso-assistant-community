@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0010_folder_ref_id'),
+        ("iam", "0010_folder_ref_id"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='folder',
-            name='ref_id',
+            model_name="folder",
+            name="ref_id",
         ),
     ]
