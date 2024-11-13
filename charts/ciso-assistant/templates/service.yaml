@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ciso-assistant-{{ .Values.clientName }}
+  labels:
+    client: {{ .Values.clientName }}
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: ciso-assistant
+    client: {{ .Values.clientName }}
+  type: ClusterIP

@@ -17,7 +17,7 @@ export interface GlobalSettings {
 }
 
 export interface LoginRequestBody {
-	username: string;
+	email: string;
 	password: string;
 }
 
@@ -49,7 +49,9 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
-	'representatives'
+	'representatives',
+	'vulnerabilities',
+	'filtering-labels'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

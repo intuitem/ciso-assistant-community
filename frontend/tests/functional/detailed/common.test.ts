@@ -49,6 +49,8 @@ for (const key of testPages) {
 					items[key].build,
 					'dependency' in items[key] ? items[key].dependency : null
 				);
+				await pages[key].goto();
+				await expect(page).toHaveURL(pages[key].url);
 
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
 					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);

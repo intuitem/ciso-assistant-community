@@ -4,6 +4,7 @@ Inspired from Azure IAM model"""
 from collections import defaultdict
 from typing import Any, List, Self, Tuple
 import uuid
+from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -274,6 +275,16 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)
+
+        # create an EmailAddress object for the newly created user
+        # this is required by allauth
+        EmailAddress.objects.create(
+            user=user,
+            email=user.email,
+            verified=True,
+            primary=True,
+        )
+
         logger.info("user created sucessfully", user=user)
 
         if mailing:
@@ -580,7 +591,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
+        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
+            if (
+                (perm == add_tag_permission) and perm in ra.role.permissions.all()
+            ):  # Allow any user to add tags if he has the permission
+                return True
             f = folder
             while f is not None:
                 if (
