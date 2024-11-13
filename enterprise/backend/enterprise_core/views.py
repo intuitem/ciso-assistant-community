@@ -170,30 +170,30 @@ class LicenseStatusView(APIView):
 
         if not expiry_date_str:
             return Response(
-                {"status": "unknown", "message": "No expiry date set"},
+                {"status": "active", "message": "No expiratiion date set"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
             try:
-                expiry_date = datetime.fromisoformat(expiry_date_str)
+                expiration_date = datetime.fromisoformat(expiry_date_str)
             except ValueError:
-                expiry_date = "NoExpiryDateSet"
-                return Response({"status": "active", "message": expiry_date})
+                expiration_date = "noExpirationDateSet"
+                return Response({"status": "active", "message": expiration_date})
         except ValueError as e:
-            logger.error("Invalid expiry date format", exc_info=e)
+            logger.error("Invalid expiration date format", exc_info=e)
             return Response(
-                {"status": "error", "message": "Invalid expiry date format"},
+                {"status": "error", "message": "Invalid expiration date format"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         now = datetime.now()
 
-        if expiry_date > now:
-            days_left = (expiry_date - now).days
+        if expiration_date > now:
+            days_left = (expiration_date - now).days
             return Response({"status": "active", "days_left": days_left})
         else:
-            days_expired = (now - expiry_date).days
+            days_expired = (now - expiration_date).days
             return Response({"status": "expired", "days_expired": days_expired})
 
 
@@ -211,7 +211,7 @@ def get_build(request):
             expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
             license_expiration = date_format(expiration_iso, use_l10n=True)
         except ValueError:
-            license_expiration = "NoExpirationDateSet"
+            license_expiration = "noExpirationDateSet"
     except ValueError:
         logger.error("Invalid expiry date format", exc_info=True)
         license_expiration = LICENSE_EXPIRATION
