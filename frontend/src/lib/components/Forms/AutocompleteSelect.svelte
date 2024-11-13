@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Option {
 		label: string;
@@ -26,6 +26,7 @@
 		resolve: (x) => x
 	};
 	export let cachedValue: any[] | undefined = undefined;
+	export let createFromSelection = false;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
@@ -81,6 +82,18 @@
 		dispatch('change', $value);
 		dispatch('cache', selected);
 	}
+
+	function addOption(event) {
+		if (event.key === 'Enter') {
+			const newOption = {
+				label: event.target.value,
+				value: event.target.value
+			};
+			options = event.target.value !== '' ? [...options, newOption] : options;
+			selected = event.target.value !== '' ? [...selected, newOption] : selected;
+			event.target.value = '';
+		}
+	}
 </script>
 
 <div {hidden}>
@@ -108,7 +121,27 @@
 	{/if}
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		<input type="hidden" name={field} value={$value ? $value : ''} />
-		{#if options.length > 0}
+		{#if createFromSelection}
+			<MultiSelect
+				bind:selected
+				{options}
+				{...multiSelectOptions}
+				disabled={disabled || $$restProps.disabled}
+				allowEmpty={true}
+				{...$$restProps}
+				let:option
+				on:keyup={(event) => addOption(event)}
+			>
+				{#if option.suggested}
+					<span class="text-indigo-600">{option.label}</span>
+					<span class="text-sm text-gray-500"> (suggested)</span>
+				{:else if translateOptions}
+					{safeTranslate(option.label)}
+				{:else}
+					{option.label}
+				{/if}
+			</MultiSelect>
+		{:else if options.length > 0}
 			<MultiSelect
 				bind:selected
 				{options}
@@ -120,8 +153,8 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions && localItems()[toCamelCase(option.label)]}
-					{localItems()[toCamelCase(option.label)]}
+				{:else if translateOptions}
+					{safeTranslate(option.label)}
 				{:else}
 					{option.label}
 				{/if}
