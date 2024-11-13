@@ -262,12 +262,12 @@ const LIBRARY_TYPE_FILTER = {
 
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
-		head: ['name', 'description', 'parentDomain'],
-		body: ['name', 'description', 'parent_folder']
+		head: ['ref_id', 'name', 'description', 'parentDomain'],
+		body: ['ref_id', 'name', 'description', 'parent_folder']
 	},
 	projects: {
-		head: ['name', 'description', 'domain'],
-		body: ['name', 'description', 'folder'],
+		head: ['ref_id', 'name', 'description', 'domain'],
+		body: ['ref_id', 'name', 'description', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PROJECT_STATUS_FILTER
@@ -294,8 +294,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'risk-assessments': {
-		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		head: ['ref_id', 'name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
+		body: ['ref_id', 'str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
@@ -341,6 +341,7 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'applied-controls': {
 		head: [
+			'ref_id',
 			'name',
 			'description',
 			'category',
@@ -351,6 +352,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			'referenceControl'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'category',
@@ -421,8 +423,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['name', 'framework', 'description', 'project'],
-		body: ['name', 'framework', 'description', 'project'],
+		head: ['ref_id', 'name', 'framework', 'description', 'project'],
+		body: ['ref_id', 'name', 'framework', 'description', 'project'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,

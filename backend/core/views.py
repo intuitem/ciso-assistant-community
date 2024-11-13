@@ -1351,6 +1351,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
+    search_fields = ["ref_id"]
 
     def perform_create(self, serializer):
         """
@@ -1781,7 +1782,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = ["framework", "project", "status"]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
