@@ -4,50 +4,65 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0039_alter_framework_ref_id_alter_loadedlibrary_ref_id_and_more'),
+        ("core", "0039_alter_framework_ref_id_alter_loadedlibrary_ref_id_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='framework',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="framework",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='loadedlibrary',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="loadedlibrary",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='referencecontrol',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="referencecontrol",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='requirementmappingset',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="requirementmappingset",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='requirementnode',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="requirementnode",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='riskmatrix',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="riskmatrix",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='storedlibrary',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="storedlibrary",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='threat',
-            name='ref_id',
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Reference ID'),
+            model_name="threat",
+            name="ref_id",
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="Reference ID"
+            ),
         ),
     ]
