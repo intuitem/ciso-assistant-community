@@ -19,6 +19,14 @@
 	// export let updated_fields: Set<string> = new Set();
 </script>
 
+<TextField
+	{form}
+	field="ref_id"
+	label={'reference id'}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+
 <AutocompleteSelect
 	{form}
 	options={getOptions({

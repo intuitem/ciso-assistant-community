@@ -1299,6 +1299,9 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         ("L", _("Large")),
         ("XL", _("Extra Large")),
     ]
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
 
     MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
     # todo: think about a smarter model for ranking
@@ -1570,6 +1573,9 @@ class RiskAssessment(Assessment):
         on_delete=models.PROTECT,
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
+    )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
 
     class Meta:
@@ -2155,6 +2161,9 @@ class ComplianceAssessment(Assessment):
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
     # score system is suggested by the framework, but can be changed at the start of the assessment
     min_score = models.IntegerField(null=True, verbose_name=_("Minimum score"))
