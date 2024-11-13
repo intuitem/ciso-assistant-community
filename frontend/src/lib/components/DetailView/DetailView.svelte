@@ -17,7 +17,7 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import { toCamelCase } from '$lib/utils/locales.js';
 	import { checkConstraints } from '$lib/utils/crud';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
@@ -85,7 +85,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
+			title: safeTranslate('add-' + model.info.localName)
 		};
 		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -95,7 +95,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: safeTranslate('add' + capitalizeFirstLetter(model.info.localName)).toLowerCase(),
+				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
 				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
 			};
 		}
@@ -234,6 +234,15 @@
 										{#if key === 'library'}
 											{@const itemHref = `/libraries/${value.id}?loaded`}
 											<a href={itemHref} class="anchor">{value.name}</a>
+										{:else if key === 'severity'}
+											<!-- We must add translations for the following severity levels -->
+											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
+											{@const stringifiedSeverity =
+												value < 0
+													? '--'
+													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
+														m.undefined())}
+											{stringifiedSeverity}
 										{:else if Array.isArray(value)}
 											{#if Object.keys(value).length > 0}
 												<ul>
@@ -246,6 +255,8 @@
 																	)?.urlModel
 																}/${val.id}`}
 																<a href={itemHref} class="anchor">{val.str}</a>
+															{:else if val.str}
+																{val.str}
 															{:else}
 																{value}
 															{/if}
@@ -281,7 +292,7 @@
 				{/each}
 			</dl>
 		</div>
-		<div class="">
+		<div class="flex flex-col space-y-2 ml-4">
 			{#if mailing}
 				<button
 					class="btn variant-filled-primary h-fit"
@@ -330,7 +341,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{safeTranslate('associated' + capitalizeFirstLetter(model.info.localNamePlural))}
+								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
 						{#if model.table}
@@ -340,7 +351,7 @@
 									class="btn variant-filled-primary self-end my-auto"
 									on:click={(_) => modalCreateForm(model)}
 									><i class="fa-solid fa-plus mr-2 lowercase" />{safeTranslate(
-										'add' + capitalizeFirstLetter(model.info.localName)
+										'add-' + model.info.localName
 									)}</button
 								>
 							</ModelTable>

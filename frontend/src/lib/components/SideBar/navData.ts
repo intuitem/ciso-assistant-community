@@ -25,6 +25,18 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment'
 					]
+				},
+				{
+					name: 'myAssignments',
+					fa_icon: 'fa-solid fa-list-check',
+					href: '/my-assignments',
+					permissions: [
+						'view_project',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_assessment',
+						'view_riskassessment'
+					]
 				}
 			]
 		},
@@ -156,6 +168,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-star-half-stroke',
 					href: '/scoring-assistant',
 					permissions: ['view_riskmatrix']
+				},
+				{
+					name: 'vulnerabilities',
+					// What is the best icon between "fa-triangle-exclamation" and "fa-skull-crossbones" for a vulnerability ?
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/vulnerabilities'
 				}
 			]
 		},
@@ -215,6 +233,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-floppy-disk',
 					href: '/backup-restore',
 					permissions: ['backup']
+				},
+				{
+					name: 'labels',
+					fa_icon: 'fa-solid fa-tag',
+					href: '/filtering-labels',
+					permissions: ['view_filteringlabel']
 				},
 				{
 					name: 'settings',

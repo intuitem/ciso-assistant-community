@@ -43,7 +43,7 @@ Conventions:
         tab                             | <tab_name> | answers
 
         variables can also have a translation in the form "variable[locale]"
-        
+
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
@@ -170,6 +170,7 @@ questions = []
 risk_matrix = {}
 requirement_mappings = []
 
+
 def error(message):
     print("Error:", message)
     exit(1)
@@ -185,7 +186,7 @@ def read_header(row):
     grid_count = 0
     for v in row:
         v = str(v.value).lower()
-        if v == 'grid':
+        if v == "grid":
             v = f"{v}{grid_count}"
             grid_count += 1
         header[v] = i
@@ -204,6 +205,7 @@ def get_translations(header, row):
                 result[lang] = {}
             result[lang][v] = row[i].value
     return result
+
 
 def get_translations_content(library_vars, prefix):
     """read available translations in library_vars"""
@@ -325,6 +327,7 @@ def get_color(wb, cell):
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
 
+
 def get_question(tab):
     print("processing answers")
     found_answers = {}
@@ -335,17 +338,37 @@ def get_question(tab):
             is_header = False
             assert "id" in header
         if any(c.value for c in row):
-            row_id = str(row[header["id"]].value).strip() if row[header["id"]].value else None
-            question_type = row[header.get("question_type")].value if "question_type" in header else None
-            question_choices = (
-                row[header.get("question_choices")].value.split('\n') if "question_choices" in header and row[header["question_choices"]].value 
+            row_id = (
+                str(row[header["id"]].value).strip()
+                if row[header["id"]].value
                 else None
             )
-            found_answers[row_id] = {"question_type": question_type, "question_choices": question_choices}
-    
+            question_type = (
+                row[header.get("question_type")].value
+                if "question_type" in header
+                else None
+            )
+            question_choices = (
+                row[header.get("question_choices")].value.split("\n")
+                if "question_choices" in header
+                and row[header["question_choices"]].value
+                else None
+            )
+            found_answers[row_id] = {
+                "question_type": question_type,
+                "question_choices": question_choices,
+            }
+
     return found_answers
 
+
 ################################################################
+def build_ids_set(tab_name):
+    output = set()
+    raw = dataframe[tab_name]["A"]
+    output = {cell.value for cell in raw if cell.value is not None}
+    return output
+
 
 for tab in dataframe:
     print("parsing tab", tab.title)
@@ -477,7 +500,15 @@ for tab in dataframe:
                     if "reference_controls" in header
                     else None
                 )
-                questions = (row[header["questions"]].value.split('\n') if row[header["questions"]].value else [""]) if "questions" in header else None
+                questions = (
+                    (
+                        row[header["questions"]].value.split("\n")
+                        if row[header["questions"]].value
+                        else [""]
+                    )
+                    if "questions" in header
+                    else None
+                )
                 answer = row[header["answer"]].value if "answer" in header else None
                 threat_urns = []
                 function_urns = []
@@ -487,9 +518,9 @@ for tab in dataframe:
                         prefix = parts.pop(0)
                         part_name = ":".join(parts)
                         part_name = part_name.lower().replace(" ", "-")
-                        urn_prefix = library_vars_dict_reverse[
-                            "threat_base_urn"
-                        ][prefix]
+                        urn_prefix = library_vars_dict_reverse["threat_base_urn"][
+                            prefix
+                        ]
                         threat_urns.append(f"{urn_prefix}:{part_name}")
                 if req_reference_controls:
                     for element in re.split(r"[\s,]+", req_reference_controls):
@@ -501,10 +532,15 @@ for tab in dataframe:
                         ][prefix]
                         function_urns.append(f"{urn_prefix}:{part_name}")
                 if answer and questions:
-                    question = {"questions": [
-                        {"urn": f"{req_node['urn']}:question:{i + 1}", "text": question}
-                        for i, question in enumerate(questions)
-                    ]}
+                    question = {
+                        "questions": [
+                            {
+                                "urn": f"{req_node['urn']}:question:{i + 1}",
+                                "text": question,
+                            }
+                            for i, question in enumerate(questions)
+                        ]
+                    }
                     req_node["question"] = {**answers[answer], **question}
                 if threat_urns:
                     req_node["threats"] = threat_urns
@@ -542,7 +578,9 @@ for tab in dataframe:
                     row[header["category"]].value if "category" in header else None
                 )
                 csf_function = (
-                    row[header["csf_function"]].value if "csf_function" in header else None
+                    row[header["csf_function"]].value
+                    if "csf_function" in header
+                    else None
                 )
                 annotation = (
                     row[header["annotation"]].value if "annotation" in header else None
@@ -620,7 +658,11 @@ for tab in dataframe:
                 name = row[header["name"]].value
                 description = row[header["description"]].value
                 translations = get_translations(header, row)
-                current_score = {"score": score, "name": name, "description": description}
+                current_score = {
+                    "score": score,
+                    "name": name,
+                    "description": description,
+                }
                 if translations:
                     current_score["translations"] = translations
                 scores_definition.append(current_score)
@@ -639,7 +681,11 @@ for tab in dataframe:
                 name = row[header["name"]].value
                 description = row[header["description"]].value
                 translations = get_translations(header, row)
-                current_def = {"ref_id": ref_id, "name": name, "description": description}
+                current_def = {
+                    "ref_id": ref_id,
+                    "name": name,
+                    "description": description,
+                }
                 if translations:
                     current_def["translations"] = translations
                 implementation_groups_definition.append(current_def)
@@ -689,7 +735,7 @@ for tab in dataframe:
                     object["hexcolor"] = color
                 risk_matrix[ctype].append(object)
                 if ctype == "probability":
-                    grid[id] = [c.value for c in row[6:6+size_grid]]
+                    grid[id] = [c.value for c in row[6 : 6 + size_grid]]
                     grid_color[id] = [get_color(dataframe, c) for c in row[6:]]
         risk_matrix["grid"] = [grid[id] for id in sorted(grid)]
         for id in grid:
@@ -707,8 +753,8 @@ for tab in dataframe:
     elif library_vars_dict["tab"][title] == "mappings":
         print("processing mappings")
         is_header = True
-        source_prefix=library_vars["mapping_source_node_base_urn"]
-        target_prefix=library_vars["mapping_target_node_base_urn"]
+        source_prefix = library_vars["mapping_source_node_base_urn"]
+        target_prefix = library_vars["mapping_target_node_base_urn"]
         for row in tab:
             if is_header:
                 header = read_header(row)
@@ -717,18 +763,39 @@ for tab in dataframe:
                 assert "target_node_id" in header
                 assert "relationship" in header
             elif any([c.value for c in row]):
-                source_requirement_urn = source_prefix + ":" + row[header["source_node_id"]].value
-                target_requirement_urn = target_prefix + ":" + row[header["target_node_id"]].value
+                # check if source_node_id and target_node_id exist in the supported values
+                src_ids_set = build_ids_set("source")
+                tgt_ids_set = build_ids_set("target")
+                src_node_id = row[header["source_node_id"]].value
+                tgt_node_id = row[header["target_node_id"]].value
+                if src_node_id not in src_ids_set:
+                    print(
+                        f"WARNING: this source node id: {src_node_id} is not recognized. Fix it and try again before uploading your file."
+                    )
+
+                if tgt_node_id not in tgt_ids_set:
+                    print(
+                        f"WARNING: this target node id: {tgt_node_id} is not recognized. Fix it and try again before uploading your file."
+                    )
+                source_requirement_urn = source_prefix + ":" + src_node_id
+                target_requirement_urn = target_prefix + ":" + tgt_node_id
                 relationship = row[header["relationship"]].value
-                rationale = row[header["rationale"]].value if "rationale" in header else None
-                stregth_of_relationship = row[header["stregth_of_relationship"]].value if "stregth_of_relationship" in header else None
+                rationale = (
+                    row[header["rationale"]].value if "rationale" in header else None
+                )
+                stregth_of_relationship = (
+                    row[header["stregth_of_relationship"]].value
+                    if "stregth_of_relationship" in header
+                    else None
+                )
                 requirement_mappings.append(
-                    {"source_requirement_urn": source_requirement_urn, 
-                     "target_requirement_urn": target_requirement_urn, 
-                     "relationship": relationship,
-                     "rationale": rationale,
-                     "stregth_of_relationship": stregth_of_relationship,
-                     }
+                    {
+                        "source_requirement_urn": source_requirement_urn,
+                        "target_requirement_urn": target_requirement_urn,
+                        "relationship": relationship,
+                        "rationale": rationale,
+                        "stregth_of_relationship": stregth_of_relationship,
+                    }
                 )
 
 has_framework = "requirements" in [
@@ -785,7 +852,9 @@ if has_mappings:
     translations = get_translations_content(library_vars, "mapping")
     if translations:
         library["objects"]["requirement_mapping_set"]["translations"] = translations
-    library["objects"]["requirement_mapping_set"]["requirement_mappings"] = requirement_mappings
+    library["objects"]["requirement_mapping_set"]["requirement_mappings"] = (
+        requirement_mappings
+    )
 
 
 if has_framework:
