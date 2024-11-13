@@ -406,15 +406,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "ref_id",
-                    models.CharField(
-                        blank=True,
-                        max_length=100,
-                        null=True,
-                        verbose_name="reference id",
-                    ),
-                ),
-                (
                     "lc_status",
                     models.CharField(
                         choices=[
