@@ -31,13 +31,7 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
-<TextField
-	{form}
-	field="internal_reference"
-	label={m.internalReference()}
-	cacheLock={cacheLocks['internal_reference']}
-	bind:cachedValue={formDataCache['internal_reference']}
-/>
+
 <Select
 	{form}
 	options={model.selectOptions['lc_status']}

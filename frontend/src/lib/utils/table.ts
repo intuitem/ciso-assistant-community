@@ -262,8 +262,8 @@ const LIBRARY_TYPE_FILTER = {
 
 export const listViewFields: ListViewFieldsConfig = {
 	folders: {
-		head: ['ref_id', 'name', 'description', 'parentDomain'],
-		body: ['ref_id', 'name', 'description', 'parent_folder']
+		head: ['name', 'description', 'parentDomain'],
+		body: ['name', 'description', 'parent_folder']
 	},
 	projects: {
 		head: ['ref_id', 'name', 'description', 'domain'],
