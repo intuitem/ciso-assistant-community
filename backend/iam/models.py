@@ -57,10 +57,6 @@ class Folder(NameDescriptionMixin):
     Folders are the base perimeter for role assignments
     """
 
-    ref_id = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("reference id")
-    )
-
     @staticmethod
     def get_root_folder() -> Self:
         """class function for general use"""
