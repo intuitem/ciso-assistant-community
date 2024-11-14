@@ -48,7 +48,7 @@
 	</div>
 {:else if tabSet === 0}
 	<div>
-		<span class="text-gray-500">{m.globalSettingsDescription()}</span>
+		<span class="text-gray-500">{m.generalSettingsDescription()}</span>
 		<ModelForm
 			form={data.generalSettingForm}
 			schema={GeneralSettingsSchema}
