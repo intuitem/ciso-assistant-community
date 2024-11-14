@@ -113,6 +113,9 @@ erDiagram
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
     VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
+    USER                         }o--o{ RISK_SCENARIO         : owns
+    USER                         }o--o{ APPLIED_CONTROL       : owns
+    USER                         }o--o{ ASSET                 : owns
 
     PROJECT {
         string ref_id
@@ -281,6 +284,7 @@ erDiagram
         string type
         asset  parent_asset
         url    reference_link
+        json   security_objectives
     }
 
     RISK_SCENARIO {
@@ -298,8 +302,7 @@ erDiagram
         string strength_of_knowledge
         string justification
         json   qualifications
-
-        principal[] owner
+        json   undermined_security_objectives
     }
 
     RISK_ACCEPTANCE {
@@ -1360,6 +1363,58 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
 
+## Security objectives
+
+Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its assets.
+
+There is a global parameter that defines a list of security objectives with a corresponding scale and a corresponding boolean allowing to select or hide a security objective. The following security objectives are pre-defined: 
+
+ ref_id | Name                       | Description | default scale | default select value
+--------|----------------------------|-------------|---------------|---------------------
+ C      | Confidentiality            | ...         | 1-4           | True
+ I      | Integrity                  | ...         | 1-4           | True
+ A      | Availability               | ...         | 1-4           | True
+ P      | Proof                      | ...         | 1-4           | True
+ Auth   | Authenticity               | ...         | 1-4           | False
+ Priv   | Privacy                    | ...         | 1-4           | False
+ Safe   | Safety                     | ...         | 1-4           | False
+ RTO    | Recovery Time Objective    | ...         | duration      | True
+ RPO    | Recovery Point Objetive    | ...         | duration      | True
+ MTD    | Maximum Tolerable Downtime | ...         | duration      | False
+
+In a future version, users will be able to define custom security objectives.
+
+Security objectives are measured using a specifc scale. For now, the following scales are defined:
+- 0-3: coded as 0-3
+- 1-4: coded as 0-3
+- FIPS-199: coded as 0-3
+- duration: coded as seconds
+
+There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+
+scale    | internal value | scale value
+---------|----------------|---------------
+0-3      | 0              | 0
+0-3      | 1              | 1
+0-3      | 2              | 2
+0-3      | 3              | 3
+1-4      | 0              | 1
+1-4      | 1              | 2
+1-4      | 2              | 3
+1-4      | 3              | 4
+FIPS-199 | 0              | low
+FIPS-199 | 1              | moderate
+FIPS-199 | 2              | moderate
+FIPS-199 | 3              | high
+
+Security objectives can be evaluated for each asset. The default value is Null. The corresponding json field is composed of a list of tuples {security_objective_ref_id, value}.
+
+Security objectives can be mentioned in a risk scenario as "undermined security objectives". The corresponding json field is composed of a list of security objectives, identified by their ref_id.
+
+When a security objective is hidden in the global parameters, it is simply not proposed for new edition. However, a security objective that is already used in an asset or risk scenario is kept and editable even if it is hidden globally. Thus, when selecting or hiding a security objective, no value is changed in asset or risk scenario.
+
+In the global parameters, a matrix with 4 impact levels can be selected to describe the values for the discrete scales.
+
 ## EBIOS-RM evolution
 
 ### Mapping of essential concepts
@@ -1386,31 +1441,7 @@ Risk treatment        | Traitement du risque    | Applied controls in a risk ana
 
 Assets can be referred in a risk analysis. In addition, we add a new field in an asset called "feared events" to refer to zero, one or several risk analyses defining the feared events for this asset.
 
-A new field is added to a risk scenario, precising the security objective that is threatened, among the values Confidentiality/Integrity/Availability/Proof/Authenticity.
-
 The security "CIA" or "AICP" score of an asset can now be clearly defined as the highest impact for corresponding scenarios for analyses selected in "feared events", when a scenario points to the asset for one or several security objective. This can be calculated dynamically, after selection of the security objective model to use. This solves the issue of multiple conventions for security objectives.
-
-The following fields are added to assets: Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety, with a integer value. This value is comprised between 0 and 3 in the database, but can be displayed differently depending on the selected scale system.
-For the MVP, the scale system is global, and defined in the global parameters, with 1-4 as the default value.
-
-standard | internal value | standard value
----------|----------------|---------------
-0-3      | 0              | 0
-0-3      | 1              | 1
-0-3      | 2              | 2
-0-3      | 3              | 3
-1-4      | 0              | 1
-1-4      | 1              | 2
-1-4      | 2              | 3
-1-4      | 3              | 4
-FIPS-199 | 0              | low
-FIPS-199 | 1              | moderate
-FIPS-199 | 2              | moderate
-FIPS-199 | 3              | high
-
-There is also a global parameter to define which security objectives are considered, among Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety. Non-considered security objectives are hidden. The default value is Confidentiality, Integrity, Availability, Proof.
-
-The following fields are also added to assets: RTO, RPO, MTD (Maximum Tolerable Downtime).
 
 The following schematic illustrates this evolution of the data model.
 
@@ -1421,27 +1452,8 @@ erDiagram
     RISK_SCENARIO         }o--o{ ASSET                 : threatens
     RISK_ASSESSMENT       ||--o{ RISK_SCENARIO         : contains
     
-    ASSET {
-        string   name
-        string   description
-        string   business_value
-        string   type
-        asset    parent_asset
-        url      reference_link
-        int      confidentiality
-        int      integrity
-        int      availability
-        int      proof
-        int      authenticity
-        int      privacy
-        int      safety
-        duration rto
-        duration rpo
-        duration mtd
-    }
 
 ```
-
 
 ### Risk study
 
@@ -1466,4 +1478,92 @@ The DSL allows to create a custom "story" that guides the user to fill compoment
     - "operational scenarios" is a risk assessment with no impact.
     - "risk treatment" is a risk assessment is a risk assessment with current risk read-only
 
+### Linear view
+
+#### Atelier 1 - cadrage et socle de sécurité
+
+- définir les valeurs métiers
+  - ref_id/nom/description
+  - propriétaire
+  - nature (processus ou information)
+- définir les biens supports associés
+  - ref_id/nom/description
+  - propriétaire
+
+- Définir les événements redoutés pour chaque valeur métier
+  - nom/description
+  - catégorie(s) d'impact : --/mission/humain/matériel/environnemental/gouvernance/financier/juridique/image-confiance
+  - gravité : G1-mineur, G2-significatif, G3-important, G4-Critique
+
+- Définir le socle de sécurité
+  - liste de référentiels considérés
+    - nom / description
+    - dénomination dans CISO Assistant si disponible
+    - applicable (oui/non)
+    - Justification
+
+#### Atelier 2 - sources de risque
+
+- Définir les sources de risque et objectifs visés
+  - liste des sr/ov
+    - source de risque
+      - nom/description
+    - objectif visé
+      - description
+    - motivation (--/très peu/peu/assez/fortement motivé)
+    - ressources (--/limitées/significatives/importantes/illimitées)
+    - pertinence (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) (suggéré par la matrice standard)
+
+- Scénarios
+  - source de risque
+  - objectif visé
+  - événement redouté
+  - valeur métier
+  - bien support
+  - impacts
+
+### Atelier 3 - scénarios stratégiques
+
+- Criticité des parties-prenantes
+    - catégorie
+    - Nom
+    - Dépendance
+    - Pénétration
+    - maturité cyber
+    - confiance
+    - niveau de menace (calculé)
+
+On en déduit la cartographie de menace de l'écosystème
+
+- Scénarios stratégiques
+  - source de risque
+  - objectif visé
+  - événement redouté
+  - chemin d'attaque stratégique
+  - Mesures de sécurité
+  - Menace initiale
+  - Menace résiduelle
+
+### Atelier 4 - scénarios opérationnels
+
+- scénarios opérationnels et vraisemblance
+  - scénario stratégique (fournit la gravité via événement redouté)
+  - chemins d'attaque (connaitre / rentrer / trouver / exploiter)
+  - vraisemblance
+  
+On en déduit la matrice de risque.
+
+### Atelier 5 - traitement du risque
+
+- Plan de traitement : liste
+  - mesure de sécurité
+  - Risque associé
+  - Responsable
+  - Freins et difficultés de mise en oeuvre
+  - Coût/complexité (--/+/++/+++)
+  - Charge estimée
+  - Echéance
+  - Priorité
+  - Statut
+  - Risque résiduel
 
