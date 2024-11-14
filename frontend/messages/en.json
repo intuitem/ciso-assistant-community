@@ -12,6 +12,7 @@
 	"romanian": "Romanian",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Czech",
 	"addThreat": "Add threat",
 	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
@@ -866,5 +867,8 @@
 	"myAssignments": "My assignments",
 	"assignedRisks": "Assigned risks",
 	"controls": "Controls",
-	"exploreButton": "Explore"
+	"exploreButton": "Explore",
+	"tags": "Labels",
+	"addTag": "Add tag",
+	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu."
 }
