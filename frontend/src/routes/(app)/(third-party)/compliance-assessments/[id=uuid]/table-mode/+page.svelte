@@ -253,7 +253,7 @@
 							<div class="flex flex-col w-full space-y-2">
 								{#each requirementAssessment.answer.questions as question}
 									<li class="flex flex-col space-y-2 rounded-xl">
-										<p class="font-medium px-2">{question.text}</p>
+										<p>{question.text}</p>
 										{#if shallow}
 											{#if question.answer}
 												<p class="text-primary-500 font-semibold">{question.answer}</p>

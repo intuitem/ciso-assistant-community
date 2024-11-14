@@ -37,7 +37,7 @@
 	<div class="control">
 		{#each $value.questions as question}
 			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
-				<p class="font-medium p-2">{question.text}</p>
+				<p class="font-semibold p-2">{question.text}</p>
 				{#if question.type === 'unique_choice'}
 					<RadioGroup
 						class="flex-col"
