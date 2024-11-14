@@ -253,7 +253,7 @@
 							<div class="flex flex-col w-full space-y-2">
 								{#each requirementAssessment.answer.questions as question}
 									<li class="flex flex-col space-y-2 rounded-xl">
-										<p>{question.text}</p>
+										<p class="font-medium px-2">{question.text}</p>
 										{#if shallow}
 											{#if question.answer}
 												<p class="text-primary-500 font-semibold">{question.answer}</p>
@@ -262,14 +262,13 @@
 											{/if}
 										{:else if question.type === 'unique_choice'}
 											<RadioGroup
-												class="w-fit"
+												class="flex-col"
 												active="variant-filled-primary"
 												hover="hover:variant-soft-primary"
-												flexDirection="flex-col"
 											>
 												{#each question.options as option}
 													<RadioItem
-														class="flex justify-start"
+														class="shadow-md"
 														bind:group={question.answer}
 														name="question"
 														value={option}
