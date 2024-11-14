@@ -2242,7 +2242,7 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
-    def get_requirement_assessments(self, include_non_assessable=False):
+    def get_requirement_assessments(self, include_non_assessable: bool):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
