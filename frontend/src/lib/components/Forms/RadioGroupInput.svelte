@@ -3,7 +3,8 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { RadioGroup } from '@skeletonlabs/skeleton';
+	import RadioItem from '$lib/components/Forms/RadioItem.svelte';
 
 	interface Option {
 		label: string;
@@ -58,9 +59,16 @@
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		{#if options.length > 0}
 			<RadioGroup>
-				{#each options as option}
+				{#each options as option, index}
 					{#if option.label}
-						<RadioItem bind:group={$value} name={field} value={option.value}
+						<RadioItem
+							bind:group={$value}
+							name={field}
+							value={option.value}
+							displayChecked={(index < options.length - 1 &&
+								$value === options[index + 1].value &&
+								!options[index + 1].label) ||
+								undefined}
 							>{translateOptions === true ? safeTranslate(option.label) : option.label}</RadioItem
 						>
 					{/if}
