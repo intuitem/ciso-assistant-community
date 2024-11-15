@@ -144,7 +144,6 @@
 			{form}
 			field="rto"
 			label={m.rto()}
-			positiveOnly
 			helpText={m.rtoHelpText()}
 			cacheLock={cacheLocks['rto']}
 			bind:cachedValue={formDataCache['rto']}
@@ -153,7 +152,6 @@
 			{form}
 			field="rpo"
 			label={m.rpo()}
-			positiveOnly
 			helpText={m.rpoHelpText()}
 			cacheLock={cacheLocks['rpo']}
 			bind:cachedValue={formDataCache['rpo']}
@@ -162,7 +160,6 @@
 			{form}
 			field="mtd"
 			label={m.mtd()}
-			positiveOnly
 			helpText={m.mtdHelpText()}
 			cacheLock={cacheLocks['mtd']}
 			bind:cachedValue={formDataCache['mtd']}

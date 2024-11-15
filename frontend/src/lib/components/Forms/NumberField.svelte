@@ -14,7 +14,6 @@
 		resolve: (x) => x
 	};
 	export let form;
-	export let positiveOnly: boolean = false; // Nouveau paramètre pour accepter uniquement les valeurs positives
 	export let hidden = false;
 	export let disabled = false;
 	export let required = false;
@@ -66,7 +65,6 @@
 			bind:value={$value}
 			{...$constraints}
 			{...$$restProps}
-			{...positiveOnly ? { min: 0 } : {}}
 			{disabled}
 			{required}
 		/>
