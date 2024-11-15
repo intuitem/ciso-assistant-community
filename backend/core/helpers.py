@@ -2,7 +2,6 @@ import json
 from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
-import uuid
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
@@ -1281,33 +1280,3 @@ def duplicate_related_objects(
             field_name,
             model_class,
         )
-
-def process_autocomplete_creation(items, object_class, attribute_name="name", base_object=None, id_version=4):
-    """
-    Creates an instance of `object_class` for each item in `items` if it is not a valid UUID.
-    Replaces the item with the ID of the newly created or existing object.
-
-    Parameters:
-    - items: list of strings to process
-    - object_class: the class to use for creating objects if items are not UUIDs
-    - attribute_name: the name of the attribute on `object_class` to set with the item's value
-    - id_version: the UUID version to check against (default is version 4)
-
-    Returns:
-    - List of UUID strings for the processed objects
-    """
-    new_ids = []
-    for item in items:
-        try:
-            # Check if the item is a valid UUID
-            uuid.UUID(item, version=id_version)
-            new_ids.append(item)
-        except ValueError:
-            # Create a new instance of `object_class` if item is not a valid UUID
-            new_object = object_class(**{attribute_name: item})
-            if base_object:
-                new_object.folder = Folder.get_folder(base_object)
-            new_object.full_clean()
-            new_object.save()
-            new_ids.append(str(new_object.id))
-    return new_ids
