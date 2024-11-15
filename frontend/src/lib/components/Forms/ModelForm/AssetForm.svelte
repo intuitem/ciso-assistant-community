@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -15,6 +14,7 @@
 	import Select from '../Select.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
+	import Duration from '../Duration.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -139,31 +139,33 @@
 	icon="fa-regular fa-clock"
 	header={m.disasterRecoveryObjectives()}
 >
-	<NumberField
-		{form}
-		field="rto"
-		label={m.rto()}
-		positiveOnly
-		helpText={m.rtoHelpText()}
-		cacheLock={cacheLocks['rto']}
-		bind:cachedValue={formDataCache['rto']}
-	/>
-	<NumberField
-		{form}
-		field="rpo"
-		label={m.rpo()}
-		positiveOnly
-		helpText={m.rpoHelpText()}
-		cacheLock={cacheLocks['rpo']}
-		bind:cachedValue={formDataCache['rpo']}
-	/>
-	<NumberField
-		{form}
-		field="mtd"
-		label={m.mtd()}
-		positiveOnly
-		helpText={m.mtdHelpText()}
-		cacheLock={cacheLocks['mtd']}
-		bind:cachedValue={formDataCache['mtd']}
-	/>
+	<div class="flex flex-col space-y-4">
+		<Duration
+			{form}
+			field="rto"
+			label={m.rto()}
+			positiveOnly
+			helpText={m.rtoHelpText()}
+			cacheLock={cacheLocks['rto']}
+			bind:cachedValue={formDataCache['rto']}
+		/>
+		<Duration
+			{form}
+			field="rpo"
+			label={m.rpo()}
+			positiveOnly
+			helpText={m.rpoHelpText()}
+			cacheLock={cacheLocks['rpo']}
+			bind:cachedValue={formDataCache['rpo']}
+		/>
+		<Duration
+			{form}
+			field="mtd"
+			label={m.mtd()}
+			positiveOnly
+			helpText={m.mtdHelpText()}
+			cacheLock={cacheLocks['mtd']}
+			bind:cachedValue={formDataCache['mtd']}
+		/>
+	</div>
 </Dropdown>
