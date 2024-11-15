@@ -20,6 +20,8 @@
 	export let form;
 
 	export let hidden = false;
+	export let disabled = false;
+
 	export let translateOptions = true;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
@@ -69,6 +71,7 @@
 								$value === options[index + 1].value &&
 								!options[index + 1].label) ||
 								undefined}
+							{disabled}
 							>{translateOptions === true ? safeTranslate(option.label) : option.label}</RadioItem
 						>
 					{/if}
