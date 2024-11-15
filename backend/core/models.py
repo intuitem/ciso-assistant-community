@@ -1196,16 +1196,6 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         PRIMARY = "PR", _("Primary")
         SUPPORT = "SP", _("Support")
 
-    class IntegerChoices(models.IntegerChoices):
-        """
-        The integer choices for the security attributes.
-        """
-
-        ZERO = 0, "0"
-        ONE = 1, "1"
-        TWO = 2, "2"
-        THREE = 3, "3"
-
     DEFAULT_SECURITY_OBJECTIVES = (
         "confidentiality",
         "integrity",
