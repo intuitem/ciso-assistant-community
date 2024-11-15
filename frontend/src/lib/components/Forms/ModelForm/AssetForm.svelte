@@ -4,6 +4,7 @@
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
 	import { getOptions } from '$lib/utils/crud';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
@@ -111,15 +112,26 @@
 	icon="fa-solid fa-shield-halved"
 	header={m.securityObjectives()}
 >
-	{#each securityObjectives as objective}
-		<RadioGroupInput
-			{form}
-			label={safeTranslate(objective)}
-			field={objective}
-			valuePath="security_objectives.objectives.{objective}.value"
-			options={securityObjectiveOptions}
-		/>
-	{/each}
+	<div class="flex flex-col space-y-4">
+		{#each securityObjectives as objective}
+			<span class="flex flex-row items-center space-x-4">
+				<Checkbox
+					{form}
+					field={objective}
+					label={m.enabled()}
+					valuePath="security_objectives.objectives.{objective}.is_enabled"
+				/>
+				<RadioGroupInput
+					{form}
+					label={safeTranslate(objective)}
+					field={objective}
+					valuePath="security_objectives.objectives.{objective}.value"
+					options={securityObjectiveOptions}
+					disabled={data.security_objectives?.objectives[objective]?.is_enabled === false}
+				/></span
+			>
+		{/each}
+	</div>
 </Dropdown>
 <Dropdown
 	open={false}
