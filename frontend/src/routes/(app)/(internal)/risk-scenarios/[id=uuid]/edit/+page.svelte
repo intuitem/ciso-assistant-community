@@ -224,24 +224,30 @@
 			<h4 class="h4 font-black mb-2">{m.currentRisk()}</h4>
 			<div class="flex flex-row space-x-8 justify-between">
 				<div class="w-1/2">
-					<div class="flex flex-row-reverse -mb-4">
-						<button
-							class="btn variant-filled-secondary z-0"
-							on:click={modalMeasureCreateForm}
-							type="button"><i class="fa-solid fa-plus text-sm" /></button
-						>
+					<div class="flex">
+						<div class="w-full mr-2">
+							<AutocompleteSelect
+								multiple
+								{form}
+								options={getOptions({
+									objects: data.foreignKeys['applied_controls'],
+									extra_fields: [['folder', 'str']]
+								})}
+								field="existing_applied_controls"
+								label="Existing controls"
+								helpText="Current measures to manage this risk"
+							/>
+						</div>
+						<div class="flex items-center justify-center">
+							<div class="">
+								<button
+									class="btn variant-filled-secondary z-0"
+									on:click={modalMeasureCreateForm}
+									type="button"><i class="fa-solid fa-plus text-sm" /></button
+								>
+							</div>
+						</div>
 					</div>
-					<AutocompleteSelect
-						multiple
-						{form}
-						options={getOptions({
-							objects: data.foreignKeys['applied_controls'],
-							extra_fields: [['folder', 'str']]
-						})}
-						field="existing_applied_controls"
-						label="Existing controls"
-						helpText="Current measures to manage this risk"
-					/>
 					<TextArea
 						{form}
 						field="existing_controls"
@@ -292,25 +298,29 @@
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-black mb-2">{m.residualRisk()}</h4>
 			<div class="flex flex-row space-x-8">
-				<div class="flex flex-col space-y-4 w-1/2">
-					<div class="flex flex-row-reverse -mb-8">
-						<button
-							class="btn variant-filled-secondary z-0"
-							on:click={modalMeasureCreateForm}
-							type="button"><i class="fa-solid fa-plus text-sm" /></button
-						>
+				<div class="flex w-1/2">
+					<div class="w-full mr-2">
+						<AutocompleteSelect
+							multiple
+							{form}
+							options={getOptions({
+								objects: data.foreignKeys['applied_controls'],
+								extra_fields: [['folder', 'str']]
+							})}
+							field="applied_controls"
+							label="Additional controls"
+							helpText="Extra measures needed to mitigate this risk"
+						/>
 					</div>
-					<AutocompleteSelect
-						multiple
-						{form}
-						options={getOptions({
-							objects: data.foreignKeys['applied_controls'],
-							extra_fields: [['folder', 'str']]
-						})}
-						field="applied_controls"
-						label="Additional controls"
-						helpText="Extra measures needed to mitigate this risk"
-					/>
+					<div class="flex items-center justify-center">
+						<div class="">
+							<button
+								class="btn variant-filled-secondary z-0"
+								on:click={modalMeasureCreateForm}
+								type="button"><i class="fa-solid fa-plus text-sm" /></button
+							>
+						</div>
+					</div>
 				</div>
 				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">
@@ -349,6 +359,7 @@
 				</div>
 			</div>
 		</div>
+
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<div class="flex space-x-4 mb-1">
 				<div class="w-1/2">
