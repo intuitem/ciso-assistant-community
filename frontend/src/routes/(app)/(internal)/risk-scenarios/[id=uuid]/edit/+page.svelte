@@ -238,7 +238,6 @@
 							objects: data.foreignKeys['applied_controls'],
 							extra_fields: [['folder', 'str']]
 						})}
-						createFromSelection={true}
 						field="existing_applied_controls"
 						label="Existing controls"
 						helpText="Current measures to manage this risk"
@@ -308,7 +307,6 @@
 							objects: data.foreignKeys['applied_controls'],
 							extra_fields: [['folder', 'str']]
 						})}
-						createFromSelection={true}
 						field="applied_controls"
 						label="Additional controls"
 						helpText="Extra measures needed to mitigate this risk"

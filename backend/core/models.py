@@ -1374,7 +1374,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     )
     cost = models.FloatField(
         null=True,
-        blank=True,
         help_text=_("Cost of the measure (using globally-chosen currency)"),
         verbose_name=_("Cost"),
     )
