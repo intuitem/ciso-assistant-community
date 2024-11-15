@@ -36,13 +36,17 @@
 	{/if}
 	<div class="control">
 		{#each $value.questions as question}
-			<li class="flex justify-between items-center border rounded-xl p-2">
-				{question.text}
+			<li class="flex flex-col justify-between border rounded-xl px-2 pb-2">
+				<p class="font-semibold p-2">{question.text}</p>
 				{#if question.type === 'unique_choice'}
-					<RadioGroup active="variant-filled-primary" hover="hover:variant-soft-primary">
+					<RadioGroup
+						class="flex-col"
+						active="variant-filled-primary"
+						hover="hover:variant-soft-primary"
+					>
 						{#each question.options as option}
 							<RadioItem
-								class="whitespace-nowrap"
+								class="shadow-md"
 								bind:group={question.answer}
 								name="question"
 								value={option}
