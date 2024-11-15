@@ -871,5 +871,10 @@
 	"tags": "Labels",
 	"addTag": "Add tag",
 	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu.",
-	"enabled": "Enabled"
+	"enabled": "Enabled",
+	"hours": "Hours",
+	"minutes": "Minutes",
+	"seconds": "Seconds",
+	"days": "Days",
+	"milliseconds": "Milliseconds"
 }
