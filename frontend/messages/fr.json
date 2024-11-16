@@ -685,7 +685,7 @@
 	"clientSettings": "Paramètres du client",
 	"invalidFileType": "Type de fichier non valide",
 	"logoHelpText": "Le logo sera affiché dans l'en-tête de l'application. Les formats acceptés sont PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "Le favicon s'affichera dans l'onglet du navigateur. Les formats acceptés sont ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "Le favicon s'affichera dans l'onglet du navigateur. Les formats acceptés sont ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entité",
 	"entities": "Entités",
 	"addEntity": "Ajouter une entité",
