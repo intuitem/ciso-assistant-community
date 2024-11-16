@@ -94,7 +94,7 @@
 			faviconB64.set({ data: newfavicon.data, hash: faviconHash, mimeType: newfavicon.mime_type });
 		}
 		favicon = clientSettings.settings.favicon
-			? `data:${$faviconB64.mimeType}charset=utf-8;base64, ${$faviconB64.data}`
+			? `data:${$faviconB64.mimeType};base64, ${$faviconB64.data}`
 			: favicon;
 	});
 </script>
