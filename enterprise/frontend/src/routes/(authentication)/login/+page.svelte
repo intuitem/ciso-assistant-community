@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import Logo from '$lib/components/Logo/Logo.svelte';
 	import Greetings from './Greetings.svelte';
 	import FormCard from './FormCard.svelte';
 
 	export let data: PageData;
+	export let form: ActionData;
 </script>
 
 <div class="relative h-screen w-screen bg-slate-200">
@@ -19,7 +20,7 @@
 		<div class="flex flex-row w-full pr-8">
 			<Greetings />
 			<div class="flex justify-center pr-5 items-center space-y-4 w-2/5">
-				<FormCard {data} />
+				<FormCard {data} {form} />
 			</div>
 		</div>
 	</div>
