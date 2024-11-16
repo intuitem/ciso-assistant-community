@@ -683,7 +683,7 @@
 	"clientSettings": "Configurações do cliente",
 	"invalidFileType": "Tipo de arquivo inválido",
 	"logoHelpText": "O logotipo será exibido no cabeçalho do aplicativo. Os formatos aceitos são PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "O favicon será exibido na aba do navegador. Os formatos aceitos são ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "O favicon será exibido na aba do navegador. Os formatos aceitos são ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entidade",
 	"entities": "Entidades",
 	"addEntity": "Adicionar entidade",

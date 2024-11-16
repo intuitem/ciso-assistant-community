@@ -683,7 +683,7 @@
 	"clientSettings": "क्लाइंट सेटिंग्स",
 	"invalidFileType": "अमान्य फ़ाइल प्रकार",
 	"logoHelpText": "लोगो को एप्लीकेशन के हेडर में प्रदर्शित किया जाएगा। स्वीकृत प्रारूप PNG, JPEG, WEBP, SVG हैं।",
-	"faviconHelpText": "फ़ेविकॉन ब्राउज़र टैब में प्रदर्शित किया जाएगा। स्वीकृत प्रारूप ICO, PNG, JPEG, WEBP हैं",
+	"faviconHelpText": "फ़ेविकॉन ब्राउज़र टैब में प्रदर्शित किया जाएगा। स्वीकृत प्रारूप ICO, PNG, JPEG, WEBP, SVG हैं",
 	"entity": "इकाई",
 	"entities": "इकाइयां,",
 	"addEntity": "इकाई जोड़ें",

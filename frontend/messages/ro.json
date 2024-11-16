@@ -683,7 +683,7 @@
 	"clientSettings": "Setări client",
 	"invalidFileType": "Tip de fișier nevalid",
 	"logoHelpText": "Logo-ul va fi afișat în antetul aplicației. Formatele acceptate sunt PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "Favicon-ul va fi afișat în fila browser. Formatele acceptate sunt ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "Favicon-ul va fi afișat în fila browser. Formatele acceptate sunt ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entitate",
 	"entities": "Entități",
 	"addEntity": "Adăugați entitate",
