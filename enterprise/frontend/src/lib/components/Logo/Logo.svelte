@@ -28,7 +28,7 @@
 			logoB64.set({ data: newLogo.data, hash: logoHash, mimeType: newLogo.mime_type });
 		}
 		logo = clientSettings.settings.logo
-			? `data:${$logoB64.mimeType}charset=utf-8;base64, ${$logoB64.data}`
+			? `data:${$logoB64.mimeType};base64, ${$logoB64.data}`
 			: ciso;
 	});
 </script>
