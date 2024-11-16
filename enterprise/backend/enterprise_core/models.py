@@ -22,13 +22,15 @@ class ClientSettings(AbstractBaseModel, FolderMixin):
         upload_to="client_logos",
         null=True,
         blank=True,
-        validators=[FileExtensionValidator(["png", "jpeg", "jpg"])],
+        validators=[FileExtensionValidator(["png", "jpeg", "jpg", "webp", "svg"])],
     )
     favicon = models.ImageField(
         upload_to="client_favicons",
         null=True,
         blank=True,
-        validators=[FileExtensionValidator(["ico", "png", "jpeg", "jpg"])],
+        validators=[
+            FileExtensionValidator(["ico", "png", "jpeg", "jpg", "webp", "svg"])
+        ],
     )
     show_images_unauthenticated = models.BooleanField(
         default=True, help_text=_("Show logo and favicon to unauthenticated users")
