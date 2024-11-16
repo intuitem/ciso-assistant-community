@@ -176,7 +176,7 @@
 			</div>
 		</div>
 
-		<div class="flex flex-row space-x-2 h-72">
+		<div class="flex flex-row space-x-2 min-h-72">
 			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-5/12">
 				<TextField {form} field="name" label={m.name()} />
 				<TextArea {form} field="description" rows={6} label={m.description()} />
