@@ -97,24 +97,6 @@
 		</button>
 		{/if}
 		</div>
-		<FileInput
-			{form}
-			field="logo"
-			label={m.logo()}
-			helpText={data.settings.logo
-				? `${m.attachmentWarningText()}: ${data.settings.logo}`
-				: m.logoHelpText()}
-			allowedExtensions={['png', 'jpeg', 'jpg', 'svg']}
-		/>
-		<FileInput
-			{form}
-			field="favicon"
-			label={m.favicon()}
-			helpText={data.settings.favicon
-				? `${m.attachmentWarningText()}: ${data.settings.favicon}`
-				: m.faviconHelpText()}
-			allowedExtensions={['png', 'jpeg', 'jpg', 'svg', 'ico']}
-		/>
 		<Checkbox	
 			{form}
 			field="show_images_unauthenticated"
