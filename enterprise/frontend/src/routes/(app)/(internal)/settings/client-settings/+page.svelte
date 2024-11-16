@@ -31,7 +31,7 @@
 			helpText={data.settings.logo
 				? `${m.attachmentWarningText()}: ${data.settings.logo}`
 				: m.logoHelpText()}
-			allowedExtensions={['png', 'jpeg', 'jpg']}
+			accept="image/*"
 		/>
 		<FileInput
 			{form}
@@ -40,7 +40,7 @@
 			helpText={data.settings.favicon
 				? `${m.attachmentWarningText()}: ${data.settings.favicon}`
 				: m.faviconHelpText()}
-			allowedExtensions={['png', 'jpeg', 'jpg', 'ico']}
+			accept="image/*"
 		/>
 		<Checkbox
 			{form}
