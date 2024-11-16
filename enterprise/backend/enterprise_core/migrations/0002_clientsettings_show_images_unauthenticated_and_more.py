@@ -6,21 +6,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('enterprise_core', '0001_initial'),
-        ('iam', '0008_user_is_third_party'),
+        ("enterprise_core", "0001_initial"),
+        ("iam", "0008_user_is_third_party"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='clientsettings',
-            name='show_images_unauthenticated',
-            field=models.BooleanField(default=True, help_text='Show logo and favicon to unauthenticated users'),
+            model_name="clientsettings",
+            name="show_images_unauthenticated",
+            field=models.BooleanField(
+                default=True, help_text="Show logo and favicon to unauthenticated users"
+            ),
         ),
         migrations.AlterField(
-            model_name='clientsettings',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="clientsettings",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
     ]
