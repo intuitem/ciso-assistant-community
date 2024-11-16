@@ -847,6 +847,10 @@
 	"filteringLabel": "Eticheta",
 	"filteringLabels": "Etichete",
 	"invalidLabel": "Eticheta trebuie să fie alfanumerice și să conțină cel mult 36 de caractere",
+	"myAssignments": "Sarcinile mele",
+	"assignedRisks": "Riscuri atribuite",
+	"controls": "Controale",
+	"exploreButton": "Explora",
 	"tags": "Etichete",
 	"addTag": "Adăugați etichetă",
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra"

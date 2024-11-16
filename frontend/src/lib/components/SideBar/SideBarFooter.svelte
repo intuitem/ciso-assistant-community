@@ -20,7 +20,8 @@
 		polish: m.polish(),
 		romanian: m.romanian(),
 		hindi: m.hindi(),
-		urdu: m.urdu()
+		urdu: m.urdu(),
+		czech: m.czech()
 	};
 
 	const modalStore = getModalStore();
@@ -37,7 +38,8 @@
 		pl: 'Polski',
 		ro: 'Română',
 		hi: 'हिंदी',
-		ur: 'اردو'
+		ur: 'اردو',
+		cz: 'Český'
 	};
 
 	let value = languageTag();
@@ -58,7 +60,7 @@
 	};
 
 	async function modalBuildInfo() {
-		const res = await fetch('/api/build').then((res) => res.json());
+		const res = await fetch('/fe-api/build').then((res) => res.json());
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'displayJSONModal',
