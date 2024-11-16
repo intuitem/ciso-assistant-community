@@ -37,12 +37,10 @@ export const load = (async ({ fetch, params }) => {
 				}
 			);
 			const observationBuffer = requirementAssessment.observation;
-			const assessable = true;
 			return {
 				...requirementAssessment,
 				evidenceCreateForm,
-				observationBuffer,
-				assessable
+				observationBuffer
 			};
 		})
 	);
