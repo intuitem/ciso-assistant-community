@@ -64,7 +64,7 @@
 					helpText={data.settings.logo
 						? `${m.attachmentWarningText()}: ${data.settings.logo}`
 						: m.logoHelpText()}
-					accept="image/*"
+					allowedExtensions={['png', 'jpeg', 'jpg', 'svg']}
 				/>
 			</div>
 			{#if data.settings.logo != null}
@@ -85,9 +85,10 @@
 					helpText={data.settings.favicon
 						? `${m.attachmentWarningText()}: ${data.settings.favicon}`
 						: m.faviconHelpText()}
-					accept="image/*"
+					allowedExtensions={['png', 'jpeg', 'jpg', 'svg', 'ico']}
 				/>
 			</div>
+		</div>
 		{#if data.settings.favicon != null}
 		<button
 			class="btn variant-filled-tertiary h-full" type="button"
@@ -96,7 +97,6 @@
 			<i class="fa-solid fa-trash" />
 		</button>
 		{/if}
-		</div>
 		<Checkbox	
 			{form}
 			field="show_images_unauthenticated"
