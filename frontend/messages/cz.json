@@ -683,7 +683,7 @@
 	"clientSettings": "Nastavení klienta",
 	"invalidFileType": "Neplatný typ souboru",
 	"logoHelpText": "Logo bude zobrazeno v záhlaví aplikace. Přijatelné formáty jsou PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "Favicon bude zobrazen v záložce prohlížeče. Přijatelné formáty jsou ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "Favicon bude zobrazen v záložce prohlížeče. Přijatelné formáty jsou ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entita",
 	"entities": "Entity",
 	"addEntity": "Přidat entitu",

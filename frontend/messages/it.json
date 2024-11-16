@@ -683,7 +683,7 @@
 	"clientSettings": "Impostazioni del client",
 	"invalidFileType": "Tipo di file non valido",
 	"logoHelpText": "Il logo verrà visualizzato nell'intestazione dell'applicazione. I formati accettati sono PNG, JPEG, WEBP, SVG",
-	"faviconHelpText": "La favicon verrà visualizzata nella scheda del browser. I formati accettati sono ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "La favicon verrà visualizzata nella scheda del browser. I formati accettati sono ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Ente",
 	"entities": "Enti",
 	"addEntity": "Aggiungi Ente",
