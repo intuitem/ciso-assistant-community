@@ -683,7 +683,7 @@
 	"clientSettings": "کلائنٹ کی ترتیبات",
 	"invalidFileType": "غلط فائل کی قسم",
 	"logoHelpText": "لوگو ایپلی کیشن کے ہیڈر میں دکھایا جائے گا۔ منظور شدہ فارمیٹس PNG، JPEG، WEBP، SVG ہیں۔",
-	"faviconHelpText": "فیویکن براؤزر کے ٹیب میں ظاہر ہوگا۔ قبول شدہ فارمیٹس ICO, PNG, JPEG, WEBP ہیں۔",
+	"faviconHelpText": "فیویکن براؤزر کے ٹیب میں ظاہر ہوگا۔ قبول شدہ فارمیٹس ICO, PNG, JPEG, WEBP, SVG ہیں۔",
 	"entity": "ہستی",
 	"entities": "اداروں",
 	"addEntity": "ہستی شامل کریں۔",

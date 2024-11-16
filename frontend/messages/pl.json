@@ -683,7 +683,7 @@
 	"clientSettings": "Ustawienia klienta",
 	"invalidFileType": "Nieprawidłowy typ pliku",
 	"logoHelpText": "Logo będzie wyświetlane w nagłówku aplikacji. Akceptowalne formaty to PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "Favicon będzie wyświetlany w karcie przeglądarki. Akceptowane formaty to ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "Favicon będzie wyświetlany w karcie przeglądarki. Akceptowane formaty to ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Podmiot",
 	"entities": "Podmioty",
 	"addEntity": "Dodaj jednostkę",
