@@ -59,6 +59,8 @@
 	"referenceControls": "Reference controls",
 	"referenceControlsColon": "Reference controls:",
 	"appliedControls": "Applied controls",
+	"existingAppliedControls": "Existing controls",
+	"extraAppliedControls": "Extra controls",
 	"assets": "Assets",
 	"asset": "Asset",
 	"policy": "Policy",
