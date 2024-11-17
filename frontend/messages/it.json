@@ -12,6 +12,8 @@
 	"romanian": "Rumeno",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Ceco",
+	"swedish": "Svedese",
 	"addThreat": "Aggiungi minaccia",
 	"addVulnerability": "Aggiungi vulnerabilità",
 	"addReferenceControl": "Aggiungi controllo di riferimento",
@@ -853,5 +855,6 @@
 	"exploreButton": "Esplorare",
 	"tags": "Etichette",
 	"addTag": "Aggiungi tag",
-	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra"
+	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra",
+	"forgotPassword": "Ha dimenticato la password"
 }

@@ -12,6 +12,8 @@
 	"romanian": "Română",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Ceh",
+	"swedish": "Suedez",
 	"addThreat": "Adaugă amenințare",
 	"addVulnerability": "Adăugați vulnerabilitate",
 	"addReferenceControl": "Adaugă control de referință",
@@ -853,5 +855,6 @@
 	"exploreButton": "Explora",
 	"tags": "Etichete",
 	"addTag": "Adăugați etichetă",
-	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra"
+	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
+	"forgotPassword": "Aţi uitat parola"
 }
