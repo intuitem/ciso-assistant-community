@@ -122,7 +122,6 @@
 	const impactColorMap = data.riskMatrix.impact.map((impact) => impact.hexcolor);
 </script>
 
-{@debug data}
 <div>
 	<SuperForm
 		class="flex flex-col space-y-3"
