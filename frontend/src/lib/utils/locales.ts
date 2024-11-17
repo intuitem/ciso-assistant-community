@@ -49,6 +49,9 @@ export const LOCALE_MAP = {
 	},
 	cz: {
 		name: 'czech'
+	},
+	sv: {
+		name: 'swedish'
 	}
 };
 
