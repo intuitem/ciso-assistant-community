@@ -12,6 +12,8 @@
 	"romanian": "Roumain",
 	"hindi": "Hindi",
 	"urdu": "Ourdou",
+	"czech": "Tchèque",
+	"swedish": "Suédois",
 	"addThreat": "Ajouter une menace",
 	"addVulnerability": "Ajouter une vulnérabilité",
 	"addReferenceControl": "Ajouter une mesure de référence",
@@ -58,6 +60,8 @@
 	"referenceControls": "Mesures de référence",
 	"referenceControlsColon": "Mesures de référence :",
 	"appliedControls": "Mesures appliquées",
+	"existingAppliedControls": "Mesures existantes",
+	"extraAppliedControls": "Mesures additionnelles",
 	"assets": "Biens sensibles",
 	"asset": "Bien sensible",
 	"policy": "Politique",
@@ -855,5 +859,9 @@
 	"exploreButton": "Explorer",
 	"tags": "Étiquettes",
 	"addTag": "Ajouter une étiquette",
-	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra"
+	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra",
+	"existingMeasures": "Mesures existantes",
+	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
+	"forgotPassword": "Mot de passe oublié",
+	"ssoSettingsUpdated": "Paramètres SSO mis à jour"
 }
