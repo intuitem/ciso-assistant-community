@@ -13,6 +13,7 @@
 	"hindi": "Hindi",
 	"urdu": "Urdu",
 	"czech": "Czech",
+	"swedish": "Swedish",
 	"addThreat": "Add threat",
 	"addVulnerability": "Add vulnerability",
 	"addReferenceControl": "Add reference control",
@@ -858,5 +859,9 @@
 	"exploreButton": "Explore",
 	"tags": "Labels",
 	"addTag": "Add tag",
-	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu."
+	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu.",
+	"existingMeasures": "Existing measures",
+	"youCanSetPasswordHere": "You can set your password here",
+	"forgotPassword": "Forgot password",
+	"ssoSettingsUpdated": "SSO settings updated"
 }

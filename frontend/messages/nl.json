@@ -12,6 +12,8 @@
 	"romanian": "Roemeens",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Tsjechisch",
+	"swedish": "Zweeds",
 	"addThreat": "Bedreiging toevoegen",
 	"addVulnerability": "Kwetsbaarheid toevoegen",
 	"addReferenceControl": "Referentiecontrole toevoegen",
@@ -853,5 +855,6 @@
 	"exploreButton": "Ontdekken",
 	"tags": "Labels",
 	"addTag": "Tag toevoegen",
-	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra"
+	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra",
+	"forgotPassword": "Wachtwoord vergeten"
 }

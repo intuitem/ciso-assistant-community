@@ -12,6 +12,8 @@
 	"romanian": "الرومانية",
 	"hindi": "هندية",
 	"urdu": "أردية",
+	"czech": "التشيكية",
+	"swedish": "السويدية",
 	"addThreat": "أضف تهديدًا",
 	"addVulnerability": "إضافة الضعف",
 	"addReferenceControl": "أضف تحكمًا مرجعيًا",
@@ -58,6 +60,7 @@
 	"referenceControls": "التحكمات المرجعية",
 	"referenceControlsColon": "ضوابط المرجع:",
 	"appliedControls": "التحكمات المطبقة",
+	"existingAppliedControls": "الضوابط الموجودة",
 	"assets": "الأصول",
 	"asset": "الأصل",
 	"policy": "السياسة",
@@ -853,5 +856,6 @@
 	"exploreButton": "يستكشف",
 	"tags": "العلامات",
 	"addTag": "إضافة علامة",
-	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\""
+	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
+	"forgotPassword": "هل نسيت كلمة السر"
 }
