@@ -268,7 +268,6 @@
 	"cancel": "Avbryt",
 	"save": "Spara",
 	"assetsImpactedByTheRiskScenario": "Tillgångar påverkade av riskscenariot",
-	"existingMeasures": "Befintliga kontroller",
 	"theExistingAppliedControlsToManageThisRisk": "De befintliga tillämpade kontrollerna för att hantera denna risk",
 	"currentRiskLevelGivenCurrentMeasures": "Nuvarande risknivå givet de aktuella tillämpade kontrollerna",
 	"riskLevelWhenAllExtraMeasuresDone": "Risknivå när alla extra åtgärder är klara",
@@ -445,11 +444,9 @@
 	"yourStreamlined": "Din strömlinjeformade",
 	"oneStopShop": "allt-i-ett-plattform",
 	"forComplianceRiskManagement": "för efterlevnad och riskhantering.",
-	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här",
 	"setPassword": "Ställ in lösenord",
 	"logIntoYourAccount": "Logga in på ditt konto",
 	"youNeedToLogIn": "Du måste logga in för att få tillgång till alla funktioner",
-	"forgotPassword": "Glömt lösenord",
 	"login": "Logga in",
 	"password": "Lösenord",
 	"enterYourEmail": "Ange din e-postadress nedan, så skickar vi instruktioner för att ställa in ett nytt",
@@ -649,7 +646,6 @@
 	"or": "eller",
 	"errorImportingLibrary": "Fel vid import av bibliotek",
 	"libraryImportError": "Ett fel inträffade under import av bibliotek",
-	"ssoSettingsUpdated": "SSO-inställningar uppdaterade",
 	"ssoSettings": "SSO-inställningar",
 	"ssoSettingsDescription": "Konfigurera dina SSO-inställningar här.",
 	"sso": "SSO",
@@ -858,5 +854,9 @@
 	"exploreButton": "Utforska",
 	"tags": "Etiketter",
 	"addTag": "Lägg till etikett",
-	"tagsHelpText": "Etiketter hjälper till att kategorisera och filtrera flera objekt. Du kan hantera dem i menyn Extra."
+	"tagsHelpText": "Etiketter hjälper till att kategorisera och filtrera flera objekt. Du kan hantera dem i menyn Extra.",
+	"existingMeasures": "Befintliga kontroller",
+	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här",
+	"forgotPassword": "Glömt lösenord",
+	"ssoSettingsUpdated": "SSO-inställningar uppdaterade"
 }

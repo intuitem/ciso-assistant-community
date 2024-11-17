@@ -859,5 +859,8 @@
 	"exploreButton": "Explore",
 	"tags": "Labels",
 	"addTag": "Add tag",
-	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu."
+	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu.",
+	"existingMeasures": "Existing measures",
+	"forgotPassword": "Forgot password",
+	"ssoSettingsUpdated": "SSO settings updated"
 }

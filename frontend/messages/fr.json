@@ -855,5 +855,8 @@
 	"exploreButton": "Explorer",
 	"tags": "Étiquettes",
 	"addTag": "Ajouter une étiquette",
-	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra"
+	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra",
+	"existingMeasures": "Mesures existantes",
+	"forgotPassword": "Mot de passe oublié",
+	"ssoSettingsUpdated": "Paramètres SSO mis à jour"
 }
