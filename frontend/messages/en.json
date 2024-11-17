@@ -861,6 +861,7 @@
 	"addTag": "Add tag",
 	"tagsHelpText": "Labels help categorize and filter multiple objects. You can manage them on the Extra menu.",
 	"existingMeasures": "Existing measures",
+	"youCanSetPasswordHere": "You can set your password here",
 	"forgotPassword": "Forgot password",
 	"ssoSettingsUpdated": "SSO settings updated"
 }
