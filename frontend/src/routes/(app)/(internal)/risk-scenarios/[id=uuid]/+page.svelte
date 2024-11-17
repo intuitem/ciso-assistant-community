@@ -31,7 +31,6 @@
 	};
 </script>
 
-{@debug data}
 <div class="flex flex-col space-y-3">
 	<div class="flex flex-row card justify-between px-4 py-2 bg-white shadow-lg">
 		<div class="flex flex-col space-y-4">
