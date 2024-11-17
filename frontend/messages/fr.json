@@ -857,6 +857,7 @@
 	"addTag": "Ajouter une étiquette",
 	"tagsHelpText": "Les étiquettes sont utilisées pour classer et filtrer les éléments. Vous pouvez ajouter des étiquettes dans la section Extra",
 	"existingMeasures": "Mesures existantes",
+	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
 	"forgotPassword": "Mot de passe oublié",
 	"ssoSettingsUpdated": "Paramètres SSO mis à jour"
 }
