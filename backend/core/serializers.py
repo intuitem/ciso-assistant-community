@@ -223,6 +223,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    security_objectives = serializers.JSONField(source="get_security_objectives")
 
     type = serializers.CharField(source="get_type_display")
 
