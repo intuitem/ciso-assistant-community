@@ -1297,9 +1297,6 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         ("L", _("Large")),
         ("XL", _("Extra Large")),
     ]
-    ref_id = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("reference id")
-    )
 
     MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
     # todo: think about a smarter model for ranking
@@ -1309,6 +1306,9 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         null=True,
         blank=True,
         verbose_name=_("Reference Control"),
+    )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
     evidences = models.ManyToManyField(
         Evidence,
