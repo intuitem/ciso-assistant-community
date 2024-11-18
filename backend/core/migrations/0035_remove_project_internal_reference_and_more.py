@@ -27,13 +27,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="project",
-            name="ref_id",
-            field=models.CharField(
-                blank=True, max_length=100, null=True, verbose_name="reference id"
-            ),
-        ),
-        migrations.AddField(
             model_name="riskassessment",
             name="ref_id",
             field=models.CharField(
