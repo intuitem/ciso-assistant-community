@@ -786,6 +786,7 @@
 	"questionPlural": "Vragen",
 	"fillMetadataURL": "Optie 1: Vul de metadata-url in",
 	"fillSSOSLOURLx509cert": "Optie 2: Vul de SSO-URL, SLO-URL en x509cert in",
+	"noExpirationDateSet": "Geen vervaldatum ingesteld",
 	"sumpageTotal": "totaal",
 	"sumpageActive": "actief",
 	"sumpageDeprecated": "afgekeurd",

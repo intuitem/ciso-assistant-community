@@ -790,6 +790,7 @@
 	"questionPlural": "Questions",
 	"fillMetadataURL": "Option 1: Fill the metadata url",
 	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert",
+	"noExpirationDateSet": "No expiration date set",
 	"sumpageTotal": "total",
 	"sumpageActive": "active",
 	"sumpageDeprecated": "deprecated",

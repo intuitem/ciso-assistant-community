@@ -787,6 +787,7 @@
 	"questionPlural": "أسئلة",
 	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
 	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert",
+	"noExpirationDateSet": "لم يتم تحديد تاريخ انتهاء الصلاحية",
 	"sumpageTotal": "المجموع",
 	"sumpageActive": "نشيط",
 	"sumpageDeprecated": "مُسْتَهْلَك",
