@@ -1144,9 +1144,6 @@ class Project(NameDescriptionMixin, FolderMixin):
         ("dropped", _("Dropped")),
     ]
 
-    internal_reference = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
-    )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )

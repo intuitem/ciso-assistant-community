@@ -80,6 +80,11 @@ class Folder(NameDescriptionMixin):
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
