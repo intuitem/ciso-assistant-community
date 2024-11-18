@@ -72,4 +72,5 @@
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
+	allowUserOptions="append"
 />

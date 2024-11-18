@@ -21,6 +21,9 @@
 
 	export let hidden = false;
 	export let translateOptions = true;
+
+	export let allowUserOptions: boolean | 'append' = false;
+
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
@@ -86,7 +89,7 @@
 	$: {
 		selected = selected.map((option) => {
 			const newOption = {
-				label: option.label || option.value,
+				label: option.label,
 				value: option.value || option.label
 			};
 			selected = [...selected, newOption];
@@ -128,7 +131,7 @@
 			allowEmpty={true}
 			{...$$restProps}
 			let:option
-			allowUserOptions="append"
+			{allowUserOptions}
 		>
 			{#if option.suggested}
 				<span class="text-indigo-600">{option.label}</span>
