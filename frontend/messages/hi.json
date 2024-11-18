@@ -786,6 +786,7 @@
 	"questionPlural": "प्रश्न",
 	"fillMetadataURL": "विकल्प 1: मेटाडेटा यूआरएल भरें",
 	"fillSSOSLOURLx509cert": "विकल्प 2: SSO URL, SLO URL और x509cert भरें",
+	"noExpirationDateSet": "कोई समाप्ति तिथि निर्धारित नहीं",
 	"sumpageTotal": "कुल",
 	"sumpageActive": "सक्रिय",
 	"sumpageDeprecated": "पदावनत",

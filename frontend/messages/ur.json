@@ -786,6 +786,7 @@
 	"questionPlural": "سوالات",
 	"fillMetadataURL": "آپشن 1: میٹا ڈیٹا یو آر ایل کو بھریں۔",
 	"fillSSOSLOURLx509cert": "اختیار 2: SSO URL، SLO URL اور x509cert پُر کریں۔",
+	"noExpirationDateSet": "میعاد ختم ہونے کی کوئی تاریخ مقرر نہیں ہے۔",
 	"sumpageTotal": "کل",
 	"sumpageActive": "فعال",
 	"sumpageDeprecated": "فرسودہ",
