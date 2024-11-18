@@ -796,6 +796,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "effort",
         "cost",
         "risk_scenarios",
+        "risk_scenarios_e",
         "requirement_assessments",
         "evidences",
     ]
