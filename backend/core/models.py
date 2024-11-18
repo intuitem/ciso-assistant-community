@@ -1321,11 +1321,11 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         """
         return self.type == Asset.Type.SUPPORT
 
-    def ancestors_plus_self(self) -> list[Self]:
+    def ancestors_plus_self(self) -> set[Self]:
         result = {self}
         for x in self.parent_assets.all():
             result.update(x.ancestors_plus_self())
-        return list(result)
+        return set(result)
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
