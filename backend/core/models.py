@@ -5,6 +5,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from auditlog.registry import auditlog
+
 from rest_framework.renderers import status
 import yaml
 from django.apps import apps
@@ -1971,6 +1973,12 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Existing controls"),
         blank=True,
     )
+    existing_applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name=_("Existing Applied controls"),
+        blank=True,
+        related_name="risk_scenarios_e",
+    )
 
     owner = models.ManyToManyField(
         User,
@@ -2263,7 +2271,7 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
-    def get_requirement_assessments(self, include_non_assessable=False):
+    def get_requirement_assessments(self, include_non_assessable: bool):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
@@ -2853,3 +2861,10 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+auditlog.register(AppliedControl, m2m_fields={"evidences", "owner"})
+auditlog.register(RequirementAssessment, m2m_fields={"applied_controls"})
+auditlog.register(RiskScenario)
+auditlog.register(RiskAcceptance)
+auditlog.register(Evidence)
