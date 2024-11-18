@@ -30,7 +30,11 @@
 		const [mainType, preciseType] = mimeType.toLocaleLowerCase().split('/');
 		const shortPreciseType = getShortenPreciseType(preciseType);
 
-		if (mainType === 'image' && allowedExtensions.has(shortPreciseType)) return shortPreciseType;
+		if (
+			mainType === 'image' &&
+			(allowedExtensions === '*' || allowedExtensions.includes(shortPreciseType))
+		)
+			return shortPreciseType;
 		return null;
 	}
 
