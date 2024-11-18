@@ -12,6 +12,8 @@
 	"romanian": "रोमानियाई",
 	"hindi": "हिंदी",
 	"urdu": "उर्दू",
+	"czech": "चेक",
+	"swedish": "स्वीडिश",
 	"addThreat": "खतरा जोड़ें",
 	"addVulnerability": "भेद्यता जोड़ें",
 	"addReferenceControl": "संदर्भ नियंत्रण जोड़ें",
@@ -683,7 +685,7 @@
 	"clientSettings": "क्लाइंट सेटिंग्स",
 	"invalidFileType": "अमान्य फ़ाइल प्रकार",
 	"logoHelpText": "लोगो को एप्लीकेशन के हेडर में प्रदर्शित किया जाएगा। स्वीकृत प्रारूप PNG, JPEG, WEBP, SVG हैं।",
-	"faviconHelpText": "फ़ेविकॉन ब्राउज़र टैब में प्रदर्शित किया जाएगा। स्वीकृत प्रारूप ICO, PNG, JPEG, WEBP हैं",
+	"faviconHelpText": "फ़ेविकॉन ब्राउज़र टैब में प्रदर्शित किया जाएगा। स्वीकृत प्रारूप ICO, PNG, JPEG, WEBP, SVG हैं",
 	"entity": "इकाई",
 	"entities": "इकाइयां,",
 	"addEntity": "इकाई जोड़ें",
@@ -784,6 +786,7 @@
 	"questionPlural": "प्रश्न",
 	"fillMetadataURL": "विकल्प 1: मेटाडेटा यूआरएल भरें",
 	"fillSSOSLOURLx509cert": "विकल्प 2: SSO URL, SLO URL और x509cert भरें",
+	"noExpirationDateSet": "कोई समाप्ति तिथि निर्धारित नहीं",
 	"sumpageTotal": "कुल",
 	"sumpageActive": "सक्रिय",
 	"sumpageDeprecated": "पदावनत",
@@ -853,5 +856,6 @@
 	"exploreButton": "अन्वेषण करना",
 	"tags": "टैग",
 	"addTag": "टैग जोड़ें",
-	"tagsHelpText": "टैग का उपयोग आइटम को वर्गीकृत और फ़िल्टर करने के लिए किया जाता है। आप अतिरिक्त अनुभाग में टैग जोड़ सकते हैं"
+	"tagsHelpText": "टैग का उपयोग आइटम को वर्गीकृत और फ़िल्टर करने के लिए किया जाता है। आप अतिरिक्त अनुभाग में टैग जोड़ सकते हैं",
+	"forgotPassword": "पासवर्ड भूल गए"
 }

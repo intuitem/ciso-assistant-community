@@ -89,6 +89,7 @@
 					field="file"
 					label={m.addYourLibrary()}
 					resetSignal={fileResetSignal}
+					allowedExtensions={['yaml', 'yml']}
 				/>
 
 				<button
