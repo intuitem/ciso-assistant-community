@@ -27,7 +27,7 @@ translations:
       \ Richtlinie (EU) 2016/1148 (NIS-2-Richtlinie)"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
-- urn:intuitem:risk:library:mitre-attack-v14
+- urn:intuitem:risk:library:mitre-attack
 objects:
   framework:
     urn: urn:intuitem:risk:framework:nis2-directive

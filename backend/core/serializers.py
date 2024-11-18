@@ -130,6 +130,8 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
 
 class VulnerabilityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:
         model = Vulnerability
@@ -302,6 +304,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
+    existing_applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
 
     owner = FieldsRelatedField(many=True)
@@ -329,6 +332,8 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
+    has_evidences = serializers.BooleanField()
+    eta_missed = serializers.BooleanField()
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
@@ -568,6 +573,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    progress = serializers.ReadOnlyField()
 
     class Meta:
         model = ComplianceAssessment
@@ -599,6 +605,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assessable = serializers.BooleanField(source="requirement.assessable")
 
     class Meta:
         model = RequirementAssessment
@@ -664,3 +671,17 @@ class ComputeMappingSerializer(serializers.Serializer):
     source_assessment = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all()
     )
+
+
+class FilteringLabelReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = FilteringLabel
+        fields = "__all__"
+
+
+class FilteringLabelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FilteringLabel
+        exclude = ["folder", "is_published"]

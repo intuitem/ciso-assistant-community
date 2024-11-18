@@ -5,12 +5,15 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from auditlog.registry import auditlog
+
+from rest_framework.renderers import status
 import yaml
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, RegexValidator
 from django.db import models, transaction
 from django.db.models import Q
 from django.forms.models import model_to_dict
@@ -167,6 +170,34 @@ class I18nObjectMixin(models.Model):
         max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
     )
     default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
+
+    class Meta:
+        abstract = True
+
+
+class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+    label = models.CharField(
+        max_length=100,
+        verbose_name=_("Label"),
+        validators=[
+            RegexValidator(
+                regex=r"^[\w-]{1,36}$",
+                message="invalidLabel",
+                code="invalid_label",
+            )
+        ],
+    )
+
+    def __str__(self) -> str:
+        return self.label
+
+    fields_to_check = ["label"]
+
+
+class FilteringLabelMixin(models.Model):
+    filtering_labels = models.ManyToManyField(
+        FilteringLabel, blank=True, verbose_name=_("Labels")
+    )
 
     class Meta:
         abstract = True
@@ -529,16 +560,37 @@ class LibraryUpdater:
                             else {},
                         )
                 else:
+                    question = requirement_node.get("question")
+                    question_type = question["question_type"] if question else None
+
                     for ra in RequirementAssessment.objects.filter(
                         requirement=new_requirement_node
                     ):
                         ra.name = new_requirement_node.name
                         ra.description = new_requirement_node.description
-                        ra.answer = (
-                            transform_question_to_answer(new_requirement_node.question)
-                            if new_requirement_node.question
-                            else {}
-                        )
+                        if not question:
+                            ra.save()
+                            continue
+
+                        answers = ra.answer["questions"]
+                        if any(answer["type"] != question_type for answer in answers):
+                            ra.answer = transform_question_to_answer(
+                                new_requirement_node.question
+                            )
+                            ra.save()
+                            continue
+
+                        if question_type == "unique_choice":
+                            for answer in answers:
+                                if answer["answer"] not in question["question_choices"]:
+                                    answer["answer"] = ""
+
+                        elif question_type != "text":
+                            raise NotImplementedError(
+                                f"The question type '{question_type}' hasn't been implemented !"
+                            )
+
+                        ra.answer = {"questions": answers}
                         ra.save()
 
                 for threat_urn in requirement_node_dict.get("threats", []):
@@ -605,7 +657,7 @@ class LoadedLibrary(LibraryMixin):
     )
 
     @transaction.atomic
-    def update(self):
+    def update(self) -> Union[str, None]:
         new_libraries = [
             *StoredLibrary.objects.filter(
                 urn=self.urn, locale=self.locale, version__gt=self.version
@@ -1412,6 +1464,14 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             requirementassessment__applied_controls=self
         ).count()
 
+    def has_evidences(self):
+        return self.evidences.count() > 0
+
+    def eta_missed(self):
+        return (
+            self.eta < date.today() and self.status != "active" if self.eta else False
+        )
+
 
 class PolicyManager(models.Manager):
     def get_queryset(self):
@@ -1435,7 +1495,9 @@ class Policy(AppliedControl):
         super(Policy, self).save(*args, **kwargs)
 
 
-class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Vulnerability(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         UNDEFINED = "--", _("Undefined")
         POTENTIAL = "potential", _("Potential")
@@ -1457,6 +1519,14 @@ class Vulnerability(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin)
         verbose_name=_("Severity"),
         help_text=_("The severity of the vulnerability"),
     )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        blank=True,
+        verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+
+    fields_to_check = ["name"]
 
 
 ########################### Secondary objects #########################
@@ -1903,6 +1973,12 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Existing controls"),
         blank=True,
     )
+    existing_applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name=_("Existing Applied controls"),
+        blank=True,
+        related_name="risk_scenarios_e",
+    )
 
     owner = models.ManyToManyField(
         User,
@@ -2195,7 +2271,7 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
-    def get_requirement_assessments(self, include_non_assessable=False):
+    def get_requirement_assessments(self, include_non_assessable: bool):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
@@ -2219,7 +2295,11 @@ class ComplianceAssessment(Assessment):
             requirement
             for requirement in requirements
             if selected_implementation_groups_set
-            & set(requirement.requirement.implementation_groups)
+            & set(
+                requirement.requirement.implementation_groups
+                if requirement.requirement.implementation_groups
+                else []
+            )
         ]
 
         return requirement_assessments_list
@@ -2236,6 +2316,19 @@ class ComplianceAssessment(Assessment):
                 )
             )
         return requirements_status_count
+
+    def get_requirements_result_count(self):
+        requirements_result_count = []
+        for rs in RequirementAssessment.Result:
+            requirements_result_count.append(
+                (
+                    RequirementAssessment.objects.filter(result=rs)
+                    .filter(compliance_assessment=self)
+                    .count(),
+                    rs,
+                )
+            )
+        return requirements_result_count
 
     def get_measures_status_count(self):
         measures_status_count = []
@@ -2522,6 +2615,15 @@ class ComplianceAssessment(Assessment):
                 requirement_assessments.append(requirement_assessment)
         return requirement_assessments
 
+    def progress(self) -> int:
+        requirements_all = RequirementAssessment.objects.filter(
+            compliance_assessment=self, requirement__assessable=True
+        )
+        total_cnt = requirements_all.count()
+        set_cnt = requirements_all.exclude(result="not_assessed").count()
+        value = int((set_cnt / total_cnt) * 100) if total_cnt > 0 else 0
+        return value
+
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Status(models.TextChoices):
@@ -2759,3 +2861,10 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+auditlog.register(AppliedControl, m2m_fields={"evidences", "owner"})
+auditlog.register(RequirementAssessment, m2m_fields={"applied_controls"})
+auditlog.register(RiskScenario)
+auditlog.register(RiskAcceptance)
+auditlog.register(Evidence)

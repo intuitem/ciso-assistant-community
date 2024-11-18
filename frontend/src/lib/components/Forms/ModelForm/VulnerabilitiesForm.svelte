@@ -47,11 +47,30 @@
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
-
+<AutocompleteSelect
+	multiple
+	{form}
+	options={getOptions({
+		objects: model.foreignKeys['applied_controls'],
+		extra_fields: [['folder', 'str']]
+	})}
+	field="applied_controls"
+	label={m.appliedControls()}
+/>
 <TextField
 	{form}
 	field="ref_id"
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	options={getOptions({ objects: model.foreignKeys['filtering_labels'], label: 'label' })}
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
 />

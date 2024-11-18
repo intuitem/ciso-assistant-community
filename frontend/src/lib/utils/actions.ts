@@ -66,6 +66,9 @@ export async function handleErrorResponse({
 }) {
 	const res: Record<string, string> = await response.json();
 	console.error(res);
+	if (res.label) {
+		res['filtering_labels'] = res.label;
+	}
 	if (res.warning) {
 		setFlash({ type: 'warning', message: res.warning }, event);
 		return { form };
@@ -75,7 +78,7 @@ export async function handleErrorResponse({
 		return { form };
 	}
 	Object.entries(res).forEach(([key, value]) => {
-		setError(form, key, value);
+		setError(form, key, safeTranslate(value));
 	});
 	return fail(400, { form });
 }
@@ -145,13 +148,15 @@ export async function defaultWriteFormAction({
 		}
 	}
 
-	setFlash(
-		{
-			type: 'success',
-			message: getSuccessMessage({ urlModel, action }) as string
-		},
-		event
-	);
+	let flashParams = {
+		type: 'success',
+		message: getSuccessMessage({ urlModel, action }) as string
+	};
+
+	if (urlModel == 'users') {
+		(flashParams.type = 'warning'), (flashParams.message += safeTranslate('userHasNoRights'));
+	}
+	setFlash(flashParams, event);
 
 	const next = getSecureRedirect(event.url.searchParams.get('next'));
 	if (next && doRedirect) redirect(302, next);
@@ -168,6 +173,7 @@ export async function nestedWriteFormAction({
 	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
+
 	action: FormAction;
 	redirectToWrittenObject: boolean;
 }) {

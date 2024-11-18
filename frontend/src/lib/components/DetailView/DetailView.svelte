@@ -255,6 +255,8 @@
 																	)?.urlModel
 																}/${val.id}`}
 																<a href={itemHref} class="anchor">{val.str}</a>
+															{:else if val.str}
+																{val.str}
 															{:else}
 																{value}
 															{/if}
@@ -290,7 +292,7 @@
 				{/each}
 			</dl>
 		</div>
-		<div class="">
+		<div class="flex flex-col space-y-2 ml-4">
 			{#if mailing}
 				<button
 					class="btn variant-filled-primary h-fit"

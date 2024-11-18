@@ -59,7 +59,7 @@
 					<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
 						{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
 							<button
-								class="inline-block border-e p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								title={safeTranslate('add-' + data.model.localName)}
 								on:click={modalCreateForm}
@@ -68,29 +68,45 @@
 							{#if URLModel === 'applied-controls'}
 								<a
 									href="{URLModel}/export/"
-									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 									title={m.exportButton()}
 									data-testid="export-button"><i class="fa-solid fa-download mr-2" /></a
+								>
+							{/if}
+							{#if URLModel === 'assets'}
+								<a
+									href="assets/graph/"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									title={m.exploreButton()}
+									data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
+								>
+							{/if}
+							{#if URLModel === 'folders'}
+								<a
+									href="x-rays/inspect"
+									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+									title={m.exploreButton()}
+									data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
 								>
 							{/if}
 						{:else if URLModel === 'risk-matrices'}
 							<a
 								href="/libraries"
-								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{:else if URLModel === 'frameworks'}
 							<a
 								href="/libraries"
-								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
 							>
 						{:else if URLModel === 'requirement-mapping-sets'}
 							<a
 								href="/libraries"
-								class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 								data-testid="add-button"
 								title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
 							>

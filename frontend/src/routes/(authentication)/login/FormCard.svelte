@@ -1,13 +1,45 @@
 <script lang="ts">
-	import { loginSchema } from '$lib/utils/schemas';
-	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import { loginSchema } from '$lib/utils/schemas';
 
-	import * as m from '$paraglide/messages.js';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { page } from '$app/stores';
 	import { redirectToProvider } from '$lib/allauth.js';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '@skeletonlabs/skeleton';
+
+	import * as m from '$paraglide/messages';
 
 	export let data: any;
+	export let form: any;
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalMFAAuthenticate(): void {
+		const modalComponent: ModalComponent = {
+			ref: MfaAuthenticateModal,
+			props: {
+				_form: data.mfaAuthenticateForm,
+				formAction: '?/mfaAuthenticate'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.mfaAuthenticateTitle(),
+			body: m.enterCodeGeneratedByApp()
+		};
+		modalStore.trigger(modal);
+	}
+
+	$: form && form.mfaFlow ? modalMFAAuthenticate() : null;
 </script>
 
 <div class="flex flex-col w-3/4 p-10 rounded-lg shadow-lg bg-white bg-opacity-[.90]">
@@ -31,6 +63,7 @@
 				dataType="form"
 				let:form
 				validators={zod(loginSchema)}
+				action="?/login&next={$page.url.searchParams.get('next') || '/'}"
 			>
 				<TextField type="email" {form} field="username" label={m.email()} />
 				<TextField type="password" {form} field="password" label={m.password()} />

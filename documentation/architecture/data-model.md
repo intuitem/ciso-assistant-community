@@ -7,6 +7,10 @@
 ```mermaid
 erDiagram
 
+    USER }o--o{ RISK_SCENARIO  : owns
+    USER }o--o{ APPLIED_CONTROL: owns
+    USER }o--o{ ASSET          : owns
+
     USER_GROUP      ||--o{ USER      : contains
     ROLE            }o--|{ PERMISSION: contains
     ROLE_ASSIGNMENT }o--o| USER_GROUP: contains
@@ -1197,7 +1201,7 @@ erDiagram
     ENTITY {
         string  name
         string  description
-        string  missions  
+        string  missions
         url     reference_link
     }
 
@@ -1320,7 +1324,7 @@ There is no link between representatives (modeling of the ecosystem) and users o
 - add the following fields:
   - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
 
-#### Requirement node 
+#### Requirement node
 
 - Add the following fields:
   - question: a json field describing a form.

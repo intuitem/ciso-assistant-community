@@ -56,6 +56,12 @@ The decoupling allows you to save a considerable amount of time:
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+Here is an illustration of the **decoupling** principle and its advantages:
+
+https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
+
+## Features
+
 Here is an overview of CISO Assistant features and capabilities:
 
 ![overview](features.png)
@@ -176,6 +182,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 7. New Zealand Information Security Manual (NZISM) 🇳🇿
 8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
+9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
+10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
+11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
 
 <br/>
 
@@ -491,6 +500,12 @@ Set DJANGO_DEBUG=False for security reason.
 - RO: Romanian
 - HI: Hindi
 - UR: Urdu
+
+## Contributors 🤝
+
+<a href="https://github.com/intuitem/ciso-assistant-community/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community" />
+</a>
 
 ## Built With 💜
 

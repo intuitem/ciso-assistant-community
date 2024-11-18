@@ -307,9 +307,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+	},
+	'filtering-labels': {
+		name: 'filteringlabel',
+		localName: 'label',
+		localNamePlural: 'labels',
+		verboseName: 'Label',
+		verboseNamePlural: 'Labels'
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
@@ -419,7 +429,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
+		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
@@ -509,11 +519,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		],
-		selectFields: [
-			{ field: 'status' },
-			{ field: 'selected_implementation_groups', detail: true },
-			{ field: 'conclusion' }
-		],
+		selectFields: [{ field: 'status' }, { field: 'conclusion' }],
 		filters: [{ field: 'status' }]
 	},
 	solutions: {
