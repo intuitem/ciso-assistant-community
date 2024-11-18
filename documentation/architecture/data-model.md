@@ -1485,15 +1485,24 @@ The DSL allows to create a custom "story" that guides the user to fill compoment
 - définir les valeurs métiers
   - ref_id/nom/description
   - propriétaire
-  - nature (processus ou information)
+  - nature (processus ou information)  -> tag
 - définir les biens supports associés
   - ref_id/nom/description
   - propriétaire
 
-- Définir les événements redoutés pour chaque valeur métier
+- Définir les événements redoutés pour chaque valeur métier -> analyse de risque "événéments redoutés"
   - nom/description
-  - catégorie(s) d'impact : --/mission/humain/matériel/environnemental/gouvernance/financier/juridique/image-confiance
-  - gravité : G1-mineur, G2-significatif, G3-important, G4-Critique
+  - catégorie(s) d'impact : --/mission/humain/matériel/environnemental/gouvernance/financier/juridique/image-confiance -> qualification à compléter
+  - gravité : G1-mineur, G2-significatif, G3-important, G4-Critique -> choisir une matrice de référence
+
+On ne garde dans l'analyse que :
+- scénarios renommés "événement redouté" (ER=nom du scénario)
+  - asset renommé "valeur métier"
+  - qualification (catégorie d'impact)
+  - conséquences renommé "gravité"
+
+On en déduit une liste de tuples valeur métier/ER/catégorie d'impact/gravité (premier livrable)
+
 
 - Définir le socle de sécurité
   - liste de référentiels considérés
