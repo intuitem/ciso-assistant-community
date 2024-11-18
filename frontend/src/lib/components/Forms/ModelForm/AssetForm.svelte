@@ -106,33 +106,35 @@
 	cacheLock={cacheLocks['reference_link']}
 	bind:cachedValue={formDataCache['reference_link']}
 />
-<Dropdown
-	open={false}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-shield-halved"
-	header={m.securityObjectives()}
->
-	<div class="flex flex-col space-y-4">
-		{#each securityObjectives as objective}
-			<span class="flex flex-row items-center space-x-4">
-				<Checkbox
-					{form}
-					field={objective}
-					label={m.enabled()}
-					valuePath="security_objectives.objectives.{objective}.is_enabled"
-				/>
-				<RadioGroupInput
-					{form}
-					label={safeTranslate(objective)}
-					field={objective}
-					valuePath="security_objectives.objectives.{objective}.value"
-					options={securityObjectiveOptions}
-					disabled={data.security_objectives?.objectives[objective]?.is_enabled === false}
-				/></span
-			>
-		{/each}
-	</div>
-</Dropdown>
+{#if data.type === 'PR'}
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-shield-halved"
+		header={m.securityObjectives()}
+	>
+		<div class="flex flex-col space-y-4">
+			{#each securityObjectives as objective}
+				<span class="flex flex-row items-center space-x-4">
+					<Checkbox
+						{form}
+						field={objective}
+						label={m.enabled()}
+						valuePath="security_objectives.objectives.{objective}.is_enabled"
+					/>
+					<RadioGroupInput
+						{form}
+						label={safeTranslate(objective)}
+						field={objective}
+						valuePath="security_objectives.objectives.{objective}.value"
+						options={securityObjectiveOptions}
+						disabled={data.security_objectives?.objectives[objective]?.is_enabled === false}
+					/></span
+				>
+			{/each}
+		</div>
+	</Dropdown>
+{/if}
 <Dropdown
 	open={false}
 	style="hover:text-indigo-700"
