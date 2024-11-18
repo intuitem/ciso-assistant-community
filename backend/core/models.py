@@ -1224,7 +1224,12 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     parent_assets = models.ManyToManyField(
         "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
     )
-
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="assets",
+    )
     fields_to_check = ["name"]
 
     class Meta:
