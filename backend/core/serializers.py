@@ -304,6 +304,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
+    existing_applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
 
     owner = FieldsRelatedField(many=True)
@@ -604,6 +605,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assessable = serializers.BooleanField(source="requirement.assessable")
 
     class Meta:
         model = RequirementAssessment

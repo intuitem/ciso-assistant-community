@@ -7,6 +7,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
+import { z } from 'zod';
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	const settings = await fetch(`${BASE_API_URL}/client-settings/`)
@@ -24,7 +25,18 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const form = await superValidate(settings, zod(ClientSettingsSchema), {
 		errors: false
 	});
-	return { settings, form, model };
+
+	const URLModel = 'client-settings';
+	const attachmentDeleteSchema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+	const attachmentDeleteForm = await superValidate(
+		{
+			urlmodel: URLModel,
+			id: settings.id
+		},
+		zod(attachmentDeleteSchema)
+	);
+
+	return { settings, form, model, attachmentDeleteForm};
 };
 
 export const actions: Actions = {
@@ -105,6 +117,31 @@ export const actions: Actions = {
 				message: m.successfullyUpdatedClientSettings()
 			},
 			event
+
 		);
-	}
+	},
+
+	deleteLogo: async (event) => {
+		const formData = await event.request.formData();
+		const schema = ClientSettingsSchema;
+		const form = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/logo/delete/`;
+
+		await event.fetch(endpoint, { method: 'PUT' });
+		return { success: true , form };
+	  },
+
+	deleteFavicon: async (event) => {
+		const formData = await event.request.formData();
+		const schema = ClientSettingsSchema;
+		const form = await superValidate(formData, zod(schema));
+
+		const endpoint = `${BASE_API_URL}/client-settings/${form.data.id}/favicon/delete/`;
+
+		await event.fetch(endpoint, { method: 'PUT' });
+		return { success: true , form };
+	  }
+
+
 };

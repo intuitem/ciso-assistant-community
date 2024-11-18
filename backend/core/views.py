@@ -792,6 +792,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "effort",
         "cost",
         "risk_scenarios",
+        "risk_scenarios_e",
         "requirement_assessments",
         "evidences",
     ]
@@ -1805,9 +1806,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "active": [],
                 "deprecated": [],
             }
-            compliance_assessment_object = self.get_object()
+            compliance_assessment_object: ComplianceAssessment = self.get_object()
             requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments()
+                compliance_assessment_object.get_requirement_assessments(
+                    include_non_assessable=True
+                )
             )
             applied_controls = [
                 {
@@ -1920,9 +1923,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "--": "#e5e7eb",
             }
             status = AppliedControl.Status.choices
-            compliance_assessment_object = self.get_object()
+            compliance_assessment_object: ComplianceAssessment = self.get_object()
             requirement_assessments_objects = (
-                compliance_assessment_object.get_requirement_assessments()
+                compliance_assessment_object.get_requirement_assessments(
+                    include_non_assessable=True
+                )
             )
             applied_controls = (
                 AppliedControl.objects.filter(
@@ -2090,8 +2095,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk):
         """Returns the list of requirement assessments for the different audit modes"""
-        requirement_assessments_objects = (
-            self.get_object().get_requirement_assessments()
+        requirement_assessments_objects = self.get_object().get_requirement_assessments(
+            include_non_assessable=True
         )
         requirements_objects = RequirementNode.objects.filter(
             framework=self.get_object().framework
