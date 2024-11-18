@@ -1307,12 +1307,14 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def __str__(self) -> str:
         return str(self.name)
 
+    @property
     def is_primary(self) -> bool:
         """
         Returns True if the asset is a primary asset.
         """
         return self.type == Asset.Type.PRIMARY
 
+    @property
     def is_support(self) -> bool:
         """
         Returns True if the asset is a support asset.
@@ -1324,16 +1326,6 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         for x in self.parent_assets.all():
             result.update(x.ancestors_plus_self())
         return list(result)
-
-    # @classmethod
-    # def build_default_security_objectives(cls):
-    #     """
-    #     Build the default security objectives.
-    #     """
-    #     return {
-    #         objective: {"value": 0, "is_enabled": False}
-    #         for objective in cls.DEFAULT_SECURITY_OBJECTIVES
-    #     }
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
