@@ -133,37 +133,27 @@
 		{...$$restProps}
 	>
 		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
-				<h4 class="h4 font-semibold">{m.scope()}</h4>
-				<div class="flex flex-row justify-between">
-					<span>
+			<div class="card p-2 bg-white shadow-lg w-1/2">
+				<div class="flex justify-between p-2">
+					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
 						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
 							>{data.scenario.project.str}</a
 						>
-					</span>
-					<AutocompleteSelect
-						{form}
-						options={getOptions({ objects: data.foreignKeys['risk_assessment'] })}
-						field="risk_assessment"
-						label={m.riskAssessment()}
-					/>
-					<span>
-						<p class="text-sm font-semibold text-gray-400">{m.version()}</p>
-						<p class="text-sm font-semibold">{data.scenario.version}</p>
-					</span>
+					</div>
+					<div>
+						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
+						<a
+							class="anchor text-sm font-semibold"
+							href="/risk-assessments/{data.scenario.risk_assessment.id}"
+							>{data.scenario.risk_assessment.name} {data.scenario.version}</a
+						>
+					</div>
 				</div>
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
-				<h4 class="h4 font-semibold">{m.status()}</h4>
 				<div class="flex flex-row justify-between">
-					<div class="w-1/4">
-						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
-						<p class="text-sm font-semibold">
-							{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
-						</p>
-					</div>
-					<div class=" px-2 w-2/4">
+					<div class=" px-2 w-2/3">
 						<AutocompleteSelect
 							{form}
 							multiple
@@ -172,8 +162,9 @@
 							label={m.owner()}
 						/>
 					</div>
-					<div class=" w-1/4">
+					<div class="w-1/3">
 						<Select
+							class="h-14"
 							{form}
 							options={data.treatmentChoices}
 							field="treatment"
@@ -184,23 +175,12 @@
 			</div>
 		</div>
 
-		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5">
-				<AutocompleteSelect
-					{form}
-					multiple
-					options={getOptions({
-						objects: data.foreignKeys['threats'],
-						extra_fields: [['folder', 'str']],
-						label: 'auto'
-					})}
-					field="threats"
-					label={m.threats()}
-				/>
+		<div class="flex flex-row space-x-2 min-h-72">
+			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-5/12">
 				<TextField {form} field="name" label={m.name()} />
-				<TextArea {form} field="description" label={m.description()} />
+				<TextArea {form} field="description" rows={6} label={m.description()} />
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
+			<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-scroll">
 				<AutocompleteSelect
 					multiple
 					{form}
@@ -213,144 +193,195 @@
 					label={m.assets()}
 					helpText={m.riskScenarioAssetHelpText()}
 				/>
-				<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
+				<AutocompleteSelect
+					{form}
+					multiple
+					options={getOptions({
+						objects: data.foreignKeys['threats'],
+						extra_fields: [['folder', 'str']],
+						label: 'auto'
+					})}
+					field="threats"
+					label={m.threats()}
+				/>
+				<AutocompleteSelect
+					multiple
+					{form}
+					options={getOptions({
+						objects: data.foreignKeys['vulnerabilities'],
+						extra_fields: [['folder', 'str']],
+						label: 'auto'
+					})}
+					field="vulnerabilities"
+					label={m.vulnerabilities()}
+				/>
 			</div>
 		</div>
-		<AutocompleteSelect
-			multiple
-			{form}
-			options={getOptions({
-				objects: data.foreignKeys['vulnerabilities'],
-				extra_fields: [['folder', 'str']],
-				label: 'auto'
-			})}
-			field="vulnerabilities"
-			label={m.vulnerabilities()}
-		/>
-		<ModelTable
-			source={data.tables['vulnerabilities']}
-			hideFilters={true}
-			URLModel="vulnerabilities"
-		/>
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
-			<div class="flex flex-row space-x-4 justify-between">
-				<TextArea
-					{form}
-					field="existing_controls"
-					label={m.existingControls()}
-					helpText={m.riskScenarioMeasureHelpText()}
-					regionContainer="w-1/2"
-				/>
-				<div class="flex flex-col">
-					<h5 class="h5 font-medium">{m.currentAssessment()}</h5>
+			<h4 class="h4 font-black mb-2">{m.currentRisk()}</h4>
+			<div class="flex flex-row space-x-8 justify-between">
+				<div class="w-1/2">
+					<div class="flex mb-2">
+						<div class="w-full mr-2">
+							<AutocompleteSelect
+								multiple
+								{form}
+								options={getOptions({
+									objects: data.foreignKeys['applied_controls'],
+									extra_fields: [['folder', 'str']]
+								})}
+								field="existing_applied_controls"
+								label="Existing controls"
+								helpText="Current measures to manage this risk"
+							/>
+						</div>
+						<div class="flex items-center justify-center">
+							<div class="">
+								<button
+									class="btn bg-gray-300 h-10 w-10"
+									on:click={modalMeasureCreateForm}
+									type="button"><i class="fa-solid fa-plus text-sm" /></button
+								>
+							</div>
+						</div>
+					</div>
+					<TextArea
+						{form}
+						field="existing_controls"
+						label="context"
+						helpText="Description of the existing mitigations ( ℹ️ this field will be deprecated soon)"
+						regionContainer="w-1/2"
+						rows={3}
+					/>
+				</div>
+				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">
-						<Select
-							{form}
-							options={data.probabilityChoices}
-							color_map={probabilityColorMap}
-							field="current_proba"
-							label={m.currentProba()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.probabilityChoices}
+								color_map={probabilityColorMap}
+								field="current_proba"
+								label={m.currentProba()}
+							/>
+						</div>
 						<i class="fa-solid fa-xmark mt-8" />
-						<Select
-							{form}
-							options={data.impactChoices}
-							color_map={impactColorMap}
-							field="current_impact"
-							label={m.currentImpact()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.impactChoices}
+								color_map={impactColorMap}
+								field="current_impact"
+								label={m.currentImpact()}
+							/>
+						</div>
 						<i class="fa-solid fa-equals mt-8" />
-						<RiskLevel
-							{form}
-							field="current_risk_level"
-							label={m.currentRiskLevel()}
-							riskMatrix={data.riskMatrix}
-							probabilityField="current_proba"
-							impactField="current_impact"
-							helpText={m.currentRiskLevelHelpText()}
-						/>
+						<div class="min-w-38">
+							<RiskLevel
+								{form}
+								field="current_risk_level"
+								label={m.currentRiskLevel()}
+								riskMatrix={data.riskMatrix}
+								probabilityField="current_proba"
+								impactField="current_impact"
+								helpText={m.currentRiskLevelHelpText()}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
-			<div class="flex flex-row space-x-4 justify-between">
-				<div class="flex flex-col space-y-4 w-1/2">
-					<span class="flex flex-row justify-between items-center">
-						<h5 class="h5 font-medium">{m.associatedAppliedControls()}</h5>
-						<button
-							class="btn variant-filled-primary self-end"
-							on:click={modalMeasureCreateForm}
-							type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
-						>
-					</span>
-					<AutocompleteSelect
-						multiple
-						{form}
-						options={getOptions({
-							objects: data.foreignKeys['applied_controls'],
-							extra_fields: [['folder', 'str']]
-						})}
-						field="applied_controls"
-						label={m.appliedControls()}
-					/>
-					<ModelTable
-						source={data.tables['applied-controls']}
-						hideFilters={true}
-						URLModel="applied-controls"
-					/>
+			<h4 class="h4 font-black mb-2">{m.residualRisk()}</h4>
+			<div class="flex flex-row space-x-8">
+				<div class="w-1/2">
+					<div class="flex">
+						<div class="w-full mr-2">
+							<AutocompleteSelect
+								multiple
+								{form}
+								options={getOptions({
+									objects: data.foreignKeys['applied_controls'],
+									extra_fields: [['folder', 'str']]
+								})}
+								field="applied_controls"
+								label="Additional controls"
+								helpText="Extra measures needed to mitigate this risk"
+							/>
+						</div>
+						<div class="flex items-center justify-center">
+							<div class="">
+								<button
+									class="btn bg-gray-300 h-10 w-10"
+									on:click={modalMeasureCreateForm}
+									type="button"><i class="fa-solid fa-plus text-sm" /></button
+								>
+							</div>
+						</div>
+					</div>
 				</div>
-				<div class="flex flex-col">
-					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>
+				<div class="flex w-1/2">
 					<div class="flex flex-row space-x-4 my-auto">
-						<Select
-							{form}
-							options={data.probabilityChoices}
-							color_map={probabilityColorMap}
-							field="residual_proba"
-							label={m.residualProba()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.probabilityChoices}
+								color_map={probabilityColorMap}
+								field="residual_proba"
+								label={m.residualProba()}
+							/>
+						</div>
 						<i class="fa-solid fa-xmark mt-8" />
-						<Select
-							{form}
-							options={data.impactChoices}
-							color_map={impactColorMap}
-							field="residual_impact"
-							label={m.residualImpact()}
-						/>
+						<div class="min-w-36">
+							<Select
+								{form}
+								options={data.impactChoices}
+								color_map={impactColorMap}
+								field="residual_impact"
+								label={m.residualImpact()}
+							/>
+						</div>
 						<i class="fa-solid fa-equals mt-8" />
-						<RiskLevel
-							{form}
-							field="current_risk_level"
-							label={m.residualRiskLevel()}
-							riskMatrix={data.riskMatrix}
-							probabilityField="residual_proba"
-							impactField="residual_impact"
-							helpText={m.residualRiskLevelHelpText()}
-						/>
+						<div class="min-w-38">
+							<RiskLevel
+								{form}
+								field="current_risk_level"
+								label={m.residualRiskLevel()}
+								riskMatrix={data.riskMatrix}
+								probabilityField="residual_proba"
+								impactField="residual_impact"
+								helpText={m.residualRiskLevelHelpText()}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<AutocompleteSelect
-				{form}
-				options={data.qualificationChoices}
-				multiple={true}
-				field="qualifications"
-				label={m.qualification()}
-			/>
-			<Select
-				{form}
-				options={strengthOfKnowledgeFormChoices}
-				field="strength_of_knowledge"
-				label={m.strengthOfKnowledge()}
-			/>
+			<div class="flex space-x-4 mb-1">
+				<div class="w-1/2">
+					<AutocompleteSelect
+						{form}
+						options={data.qualificationChoices}
+						multiple={true}
+						field="qualifications"
+						label={m.qualification()}
+					/>
+				</div>
+				<div class="w-1/2">
+					<Select
+						{form}
+						options={strengthOfKnowledgeFormChoices}
+						field="strength_of_knowledge"
+						label={m.strengthOfKnowledge()}
+						class="h-14"
+					/>
+				</div>
+			</div>
 			<TextArea {form} field="justification" label={m.justification()} />
 		</div>
 		<div class="flex flex-row justify-between space-x-4">

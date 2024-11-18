@@ -26,7 +26,7 @@
 				{#each Object.entries(JSON.parse(body)) as [key, value]}
 					<div>
 						<div data-testid="{key}-key" class="font-bold">{safeTranslate(key)}:</div>
-						<div data-testid="{key}-value">{value}</div>
+						<div data-testid="{key}-value">{safeTranslate(value)}</div>
 					</div>
 				{/each}
 			</div>

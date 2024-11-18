@@ -21,7 +21,8 @@
 		romanian: m.romanian(),
 		hindi: m.hindi(),
 		urdu: m.urdu(),
-		czech: m.czech()
+		czech: m.czech(),
+		swedish: m.swedish()
 	};
 
 	const modalStore = getModalStore();
@@ -39,7 +40,8 @@
 		ro: 'Română',
 		hi: 'हिंदी',
 		ur: 'اردو',
-		cz: 'Český'
+		cz: 'Český',
+		sv: 'Svenska'
 	};
 
 	let value = languageTag();
