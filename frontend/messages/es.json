@@ -12,6 +12,8 @@
 	"romanian": "Rumano",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Checo",
+	"swedish": "Sueco",
 	"addThreat": "Agregar amenaza",
 	"addVulnerability": "Agregar vulnerabilidad",
 	"addReferenceControl": "Agregar control de referencia",
@@ -683,7 +685,7 @@
 	"clientSettings": "Configuración del cliente",
 	"invalidFileType": "Tipo de archivo no válido",
 	"logoHelpText": "El logotipo se mostrará en el encabezado de la aplicación. Los formatos aceptados son PNG, JPEG, WEBP y SVG.",
-	"faviconHelpText": "El favicon se mostrará en la pestaña del navegador. Los formatos aceptados son ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "El favicon se mostrará en la pestaña del navegador. Los formatos aceptados son ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entidad",
 	"entities": "Entidades",
 	"addEntity": "Agregar entidad",
@@ -784,6 +786,7 @@
 	"questionPlural": "Preguntas",
 	"fillMetadataURL": "Opción 1: Completar la URL de metadatos",
 	"fillSSOSLOURLx509cert": "Opción 2: Complete la URL de SSO, la URL de SLO y el certificado x509",
+	"noExpirationDateSet": "No hay fecha de caducidad establecida",
 	"sumpageTotal": "total",
 	"sumpageActive": "activo",
 	"sumpageDeprecated": "obsoleto",
@@ -853,5 +856,6 @@
 	"exploreButton": "Explorar",
 	"tags": "Etiquetas",
 	"addTag": "Agregar etiqueta",
-	"tagsHelpText": "Las etiquetas se utilizan para categorizar y filtrar los elementos. Puedes agregar etiquetas en la sección Extra"
+	"tagsHelpText": "Las etiquetas se utilizan para categorizar y filtrar los elementos. Puedes agregar etiquetas en la sección Extra",
+	"forgotPassword": "Has olvidado tu contraseña"
 }

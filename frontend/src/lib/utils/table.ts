@@ -312,13 +312,22 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'risk-scenarios': {
-		head: ['name', 'threats', 'riskAssessment', 'appliedControls', 'currentLevel', 'residualLevel'],
+		head: [
+			'name',
+			'threats',
+			'riskAssessment',
+			'existingAppliedControls',
+			'currentLevel',
+			'extraAppliedControls',
+			'residualLevel'
+		],
 		body: [
 			'name',
 			'threats',
 			'risk_assessment',
-			'applied_controls',
+			'existing_applied_controls',
 			'current_level',
+			'applied_controls',
 			'residual_level'
 		],
 		filters: {

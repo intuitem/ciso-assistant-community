@@ -51,3 +51,6 @@
 {#if shape.is_active}
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
+<span class="text-gray-500 pt-5">
+	⚠️ {m.createdUserWillHaveNoRights()}
+</span>
