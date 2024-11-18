@@ -26,6 +26,7 @@
 		: m.attachmentHelpText()}
 	field="attachment"
 	label={m.attachment()}
+	allowedExtensions={'*'}
 />
 {#if !(initialData.applied_controls || initialData.requirement_assessments)}
 	<AutocompleteSelect

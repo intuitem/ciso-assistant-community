@@ -5,6 +5,8 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
+from auditlog.registry import auditlog
+
 from rest_framework.renderers import status
 import yaml
 from django.apps import apps
@@ -558,16 +560,37 @@ class LibraryUpdater:
                             else {},
                         )
                 else:
+                    question = requirement_node.get("question")
+                    question_type = question["question_type"] if question else None
+
                     for ra in RequirementAssessment.objects.filter(
                         requirement=new_requirement_node
                     ):
                         ra.name = new_requirement_node.name
                         ra.description = new_requirement_node.description
-                        ra.answer = (
-                            transform_question_to_answer(new_requirement_node.question)
-                            if new_requirement_node.question
-                            else {}
-                        )
+                        if not question:
+                            ra.save()
+                            continue
+
+                        answers = ra.answer["questions"]
+                        if any(answer["type"] != question_type for answer in answers):
+                            ra.answer = transform_question_to_answer(
+                                new_requirement_node.question
+                            )
+                            ra.save()
+                            continue
+
+                        if question_type == "unique_choice":
+                            for answer in answers:
+                                if answer["answer"] not in question["question_choices"]:
+                                    answer["answer"] = ""
+
+                        elif question_type != "text":
+                            raise NotImplementedError(
+                                f"The question type '{question_type}' hasn't been implemented !"
+                            )
+
+                        ra.answer = {"questions": answers}
                         ra.save()
 
                 for threat_urn in requirement_node_dict.get("threats", []):
@@ -634,7 +657,7 @@ class LoadedLibrary(LibraryMixin):
     )
 
     @transaction.atomic
-    def update(self):
+    def update(self) -> Union[str, None]:
         new_libraries = [
             *StoredLibrary.objects.filter(
                 urn=self.urn, locale=self.locale, version__gt=self.version
@@ -1957,6 +1980,12 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Existing controls"),
         blank=True,
     )
+    existing_applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name=_("Existing Applied controls"),
+        blank=True,
+        related_name="risk_scenarios_e",
+    )
 
     owner = models.ManyToManyField(
         User,
@@ -2252,7 +2281,7 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
-    def get_requirement_assessments(self, include_non_assessable=False):
+    def get_requirement_assessments(self, include_non_assessable: bool):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
@@ -2842,3 +2871,10 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
+
+
+auditlog.register(AppliedControl, m2m_fields={"evidences", "owner"})
+auditlog.register(RequirementAssessment, m2m_fields={"applied_controls"})
+auditlog.register(RiskScenario)
+auditlog.register(RiskAcceptance)
+auditlog.register(Evidence)
