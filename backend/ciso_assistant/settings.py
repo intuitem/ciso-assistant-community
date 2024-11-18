@@ -153,7 +153,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
-    "auditlog",
 ]
 
 MIDDLEWARE = [
@@ -167,7 +166,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "auditlog.middleware.AuditlogMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
