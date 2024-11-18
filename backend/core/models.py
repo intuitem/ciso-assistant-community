@@ -1327,6 +1327,35 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             result.update(x.ancestors_plus_self())
         return set(result)
 
+    def get_security_objectives(self) -> dict[str, int | bool]:
+        """
+        Gets the security objectives of a given asset.
+        If the asset is a primary asset, the security objectives are directly stored in the asset.
+        If the asset is a supporting asset, the security objectives are the union of the security objectives of all the primary assets it supports.
+        If multiple ancestors share the same security objective, its value in the result is its highest value among the ancestors.
+        """
+        if self.is_primary:
+            return self.security_objectives
+
+        ancestors = self.ancestors_plus_self()
+        primary_assets = {asset for asset in ancestors if asset.is_primary}
+        if not primary_assets:
+            return {}
+
+        security_objectives = {}
+        for asset in primary_assets:
+            for key, content in asset.security_objectives["objectives"].items():
+                if not content.get("is_enabled", False):
+                    continue
+                if key not in security_objectives:
+                    security_objectives[key] = content
+                else:
+                    security_objectives[key]["value"] = max(
+                        security_objectives[key]["value"], content.get("value", 0)
+                    )
+
+        return security_objectives
+
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
         return super().save(*args, **kwargs)
