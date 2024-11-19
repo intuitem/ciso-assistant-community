@@ -1314,14 +1314,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         UNDEFINED = "--", _("Undefined")
 
     PRIORITY = [
-        ("P1", _("P1")),
-        ("P2", _("P2")),
-        ("P3", _("P3")),
-        ("P4", _("P4")),
+        (1, _("P1")),
+        (2, _("P2")),
+        (3, _("P3")),
+        (4, _("P4")),
     ]
 
-    priority = models.CharField(
-        max_length=20,
+    priority = models.PositiveSmallIntegerField(
         choices=PRIORITY,
         null=True,
         blank=True,
