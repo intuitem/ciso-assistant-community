@@ -360,10 +360,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Assets',
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
 		selectFields: [{ field: 'type' }],
-		filters: [{ field: 'parent_assets' }, { field: 'folder' }, { field: 'type' }]
+		filters: [
+			{ field: 'parent_assets' },
+			{ field: 'folder' },
+			{ field: 'type' },
+			{ field: 'owner' }
+		]
 	},
 	users: {
 		name: 'user',
