@@ -1310,6 +1310,21 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         DEPRECATED = "deprecated", _("Deprecated")
         UNDEFINED = "--", _("Undefined")
 
+    PRIORITY = [
+        ("P1", _("P1")),
+        ("P2", _("P2")),
+        ("P3", _("P3")),
+        ("P4", _("P4")),
+    ]
+
+    priority = models.CharField(
+        max_length=20,
+        choices=PRIORITY,
+        null=True,
+        blank=True,
+        verbose_name=_("Priority"),
+    )
+
     CATEGORY = ReferenceControl.CATEGORY
     CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
 
