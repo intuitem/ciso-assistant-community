@@ -1355,7 +1355,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
         security_objectives = {}
         for asset in primary_assets:
-            for key, content in asset.security_objectives["objectives"].items():
+            for key, content in asset.security_objectives.items():
                 if not content.get("is_enabled", False):
                     continue
                 if key not in security_objectives:
@@ -1366,6 +1366,45 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                     )
 
         return security_objectives
+
+    def get_disaster_recovery_objectives(self) -> dict[str, int]:
+        """
+        Gets the disaster recovery objectives of a given asset.
+        If the asset is a primary asset, the disaster recovery objectives are directly stored in the asset.
+        If the asset is a supporting asset, the disaster recovery objectives are the union of the disaster recovery objectives of all the primary assets it supports.
+        If multiple ancestors share the same disaster recovery objective, its value in the result is its lowest value among the ancestors.
+        """
+        if self.is_primary:
+            return {
+                key: value
+                for key, value in {
+                    "rto": self.rto,
+                    "rpo": self.rpo,
+                    "mtd": self.mtd,
+                }.items()
+                if value is not None
+            }
+        ancestors = self.ancestors_plus_self()
+        primary_assets = {asset for asset in ancestors if asset.is_primary}
+        if not primary_assets:
+            return {}
+
+        disaster_recovery_objectives = {}
+        for asset in primary_assets:
+            for key, value in {
+                "rto": asset.rto,
+                "rpo": asset.rpo,
+                "mtd": asset.mtd,
+            }.items():
+                print(asset, key, value)
+                if value is not None:
+                    if key not in disaster_recovery_objectives:
+                        disaster_recovery_objectives[key] = value
+                    else:
+                        disaster_recovery_objectives[key] = min(
+                            disaster_recovery_objectives[key], value
+                        )
+        return disaster_recovery_objectives
 
     def get_security_objectives_display(self) -> list[dict[str, str]]:
         """
@@ -1389,14 +1428,15 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         """
         Gets the disaster recovery objectives of a given asset as strings.
         """
+        disaster_recovery_objectives = self.get_disaster_recovery_objectives()
         return [
             {
                 "str": f"{key}: {value}",
             }
             for key, value in {
-                "RTO": self.rto,
-                "RPO": self.rpo,
-                "MTD": self.mtd,
+                "RTO": disaster_recovery_objectives.get("rto"),
+                "RPO": disaster_recovery_objectives.get("rpo"),
+                "MTD": disaster_recovery_objectives.get("mtd"),
             }.items()
             if value is not None
         ]

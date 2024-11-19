@@ -147,37 +147,37 @@
 			{/each}
 		</div>
 	</Dropdown>
+	<Dropdown
+		open={false}
+		style="hover:text-indigo-700"
+		icon="fa-regular fa-clock"
+		header={m.disasterRecoveryObjectives()}
+	>
+		<div class="flex flex-col space-y-4">
+			<Duration
+				{form}
+				field="rto"
+				label={m.rto()}
+				helpText={m.rtoHelpText()}
+				cacheLock={cacheLocks['rto']}
+				bind:cachedValue={formDataCache['rto']}
+			/>
+			<Duration
+				{form}
+				field="rpo"
+				label={m.rpo()}
+				helpText={m.rpoHelpText()}
+				cacheLock={cacheLocks['rpo']}
+				bind:cachedValue={formDataCache['rpo']}
+			/>
+			<Duration
+				{form}
+				field="mtd"
+				label={m.mtd()}
+				helpText={m.mtdHelpText()}
+				cacheLock={cacheLocks['mtd']}
+				bind:cachedValue={formDataCache['mtd']}
+			/>
+		</div>
+	</Dropdown>
 {/if}
-<Dropdown
-	open={false}
-	style="hover:text-indigo-700"
-	icon="fa-regular fa-clock"
-	header={m.disasterRecoveryObjectives()}
->
-	<div class="flex flex-col space-y-4">
-		<Duration
-			{form}
-			field="rto"
-			label={m.rto()}
-			helpText={m.rtoHelpText()}
-			cacheLock={cacheLocks['rto']}
-			bind:cachedValue={formDataCache['rto']}
-		/>
-		<Duration
-			{form}
-			field="rpo"
-			label={m.rpo()}
-			helpText={m.rpoHelpText()}
-			cacheLock={cacheLocks['rpo']}
-			bind:cachedValue={formDataCache['rpo']}
-		/>
-		<Duration
-			{form}
-			field="mtd"
-			label={m.mtd()}
-			helpText={m.mtdHelpText()}
-			cacheLock={cacheLocks['mtd']}
-			bind:cachedValue={formDataCache['mtd']}
-		/>
-	</div>
-</Dropdown>
