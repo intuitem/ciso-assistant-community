@@ -275,7 +275,7 @@
 											<a href={itemHref} class="anchor">{value.str}</a>
 										{:else if isURL(value) && !value.startsWith('urn')}
 											<a href={value} target="_blank" class="anchor">{value}</a>
-										{:else if ISO_8601_REGEX.test(value) && !/^\d+$/.test(value)}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
 											{safeTranslate((value.str || value.name) ?? value)}
