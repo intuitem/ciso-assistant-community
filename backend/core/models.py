@@ -1296,6 +1296,12 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         help_text=_("Maximum Tolerable Downtime in seconds"),
     )
 
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="assets",
+    )
     fields_to_check = ["name"]
 
     class Meta:
