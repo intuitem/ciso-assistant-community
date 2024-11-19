@@ -29,6 +29,7 @@ from library.helpers import (
     update_translations_as_string,
     update_translations_in_object,
 )
+from global_settings.models import GlobalSettings
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from .utils import camel_case, sha256
@@ -1254,6 +1255,12 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     }
 
+    SECURITY_OBJECTIVES_SCALES = {
+        "1-4": range(1, 5),
+        "0-3": range(0, 4),
+        "FIPS-199": ["low", "moderate", "moderate", "high"],
+    }
+
     business_value = models.CharField(
         max_length=200, blank=True, verbose_name=_("business value")
     )
@@ -1359,6 +1366,40 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                     )
 
         return security_objectives
+
+    def get_security_objectives_display(self) -> list[dict[str, str]]:
+        """
+        Gets the security objectives of a given asset as strings.
+        """
+        security_objectives = self.get_security_objectives()
+        if len(security_objectives) == 0:
+            return []
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale = general_settings.value.get("security_objective_scale", "1-4")
+        return [
+            {
+                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
+            }
+            for key, content in security_objectives.get("objectives", {}).items()
+            if content.get("is_enabled", False)
+            and content.get("value", -1) in range(0, 5)
+        ]
+
+    def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
+        """
+        Gets the disaster recovery objectives of a given asset as strings.
+        """
+        return [
+            {
+                "str": f"{key}: {value}",
+            }
+            for key, value in {
+                "RTO": self.rto,
+                "RPO": self.rpo,
+                "MTD": self.mtd,
+            }.items()
+            if value is not None
+        ]
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
