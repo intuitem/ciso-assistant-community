@@ -34,6 +34,16 @@
 	cacheLock={cacheLocks['csf_function']}
 	bind:cachedValue={formDataCache['csf_function']}
 />
+
+<Select
+	{form}
+	options={model.selectOptions['priority']}
+	field="priority"
+	label={m.priority()}
+	cacheLock={cacheLocks['priority']}
+	bind:cachedValue={formDataCache['priority']}
+/>
+
 <AutocompleteSelect
 	{form}
 	multiple
