@@ -1369,7 +1369,7 @@ The objects manipulated by the third party (compliance assessment and evidences)
 
 ## Security objectives
 
-Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its assets.
+Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets.
 
 There is a global parameter that defines a list of security objectives with a corresponding scale and a corresponding boolean allowing to select or hide a security objective. The following security objectives are pre-defined: 
 
