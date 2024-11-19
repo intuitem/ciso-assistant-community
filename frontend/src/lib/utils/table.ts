@@ -402,6 +402,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			'businessValue',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
+			'owner',
 			'domain'
 		],
 		body: [
@@ -410,6 +411,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			'business_value',
 			'security_objectives',
 			'disaster_recovery_objectives',
+			'owner',
 			'folder'
 		],
 		filters: {
