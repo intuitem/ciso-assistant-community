@@ -309,7 +309,11 @@
 										{@const tagData = tag.key?.[tagKey]?.[tagValue]}
 										{#if tagData && tags}
 											{@const { text, cssClasses } = tagData}
-											<span class={cssClasses}>{safeTranslate(text)}</span>
+											<span class="space-x-1">
+												<span class={cssClasses}>
+													{safeTranslate(text)}
+												</span>
+											</span>
 										{/if}
 									{/each}
 								{/if}
