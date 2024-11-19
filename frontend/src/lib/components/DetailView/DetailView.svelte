@@ -273,13 +273,13 @@
 												)?.urlModel
 											}/${value.id}`}
 											<a href={itemHref} class="anchor">{value.str}</a>
-										{:else if value === "P1"}
+										{:else if value === 'P1'}
 											<li class="fa-solid fa-flag text-red-500"></li>
-										{:else if value === "P2"}
+										{:else if value === 'P2'}
 											<li class="fa-solid fa-flag text-orange-500"></li>
-										{:else if value === "P3"}
+										{:else if value === 'P3'}
 											<li class="fa-solid fa-flag text-blue-500"></li>
-										{:else if value === "P4"}
+										{:else if value === 'P4'}
 											<li class="fa-solid fa-flag text-gray-500"></li>
 										{:else if isURL(value) && !value.startsWith('urn')}
 											<a href={value} target="_blank" class="anchor">{value}</a>
