@@ -1338,7 +1338,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             result.update(x.ancestors_plus_self())
         return set(result)
 
-    def get_security_objectives(self) -> dict[str, int | bool]:
+    def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
         """
         Gets the security objectives of a given asset.
         If the asset is a primary asset, the security objectives are directly stored in the asset.
@@ -1355,7 +1355,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
         security_objectives = {}
         for asset in primary_assets:
-            for key, content in asset.security_objectives.items():
+            for key, content in asset.security_objectives.get("objectives", {}).items():
                 if not content.get("is_enabled", False):
                     continue
                 if key not in security_objectives:
@@ -1364,8 +1364,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                     security_objectives[key]["value"] = max(
                         security_objectives[key]["value"], content.get("value", 0)
                     )
-
-        return security_objectives
+        return {"objectives": security_objectives}
 
     def get_disaster_recovery_objectives(self) -> dict[str, int]:
         """
@@ -1396,7 +1395,6 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 "rpo": asset.rpo,
                 "mtd": asset.mtd,
             }.items():
-                print(asset, key, value)
                 if value is not None:
                     if key not in disaster_recovery_objectives:
                         disaster_recovery_objectives[key] = value
@@ -1414,7 +1412,11 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         if len(security_objectives) == 0:
             return []
         general_settings = GlobalSettings.objects.filter(name="general").first()
-        scale = general_settings.value.get("security_objective_scale", "1-4")
+        scale = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
         return [
             {
                 "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
