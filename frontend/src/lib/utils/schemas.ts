@@ -187,7 +187,8 @@ export const AssetSchema = baseNamedObject({
 	rto: z.number().nonnegative().optional().nullable(),
 	rpo: z.number().nonnegative().optional().nullable(),
 	mtd: z.number().nonnegative().optional().nullable(),
-	reference_link: z.string().url().optional().or(z.literal(''))
+	reference_link: z.string().url().optional().or(z.literal('')),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({

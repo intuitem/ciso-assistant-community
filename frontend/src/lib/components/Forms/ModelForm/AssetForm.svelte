@@ -38,7 +38,6 @@
 
 	onMount(async () => {
 		securityObjectives = await fetchSecurityObjectives();
-		console.log(securityObjectives);
 	});
 
 	interface Option {
@@ -70,6 +69,15 @@
 	label={m.businessValue()}
 	cacheLock={cacheLocks['business_value']}
 	bind:cachedValue={formDataCache['business_value']}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
 />
 <AutocompleteSelect
 	{form}
@@ -115,6 +123,7 @@
 	>
 		<div class="flex flex-col space-y-4">
 			{#each securityObjectives as objective}
+				{@const objectiveFormData = data.security_objectives?.objectives[objective]}
 				<span class="flex flex-row items-center space-x-4">
 					<Checkbox
 						{form}
@@ -128,7 +137,7 @@
 						field={objective}
 						valuePath="security_objectives.objectives.{objective}.value"
 						options={securityObjectiveOptions}
-						disabled={data.security_objectives?.objectives[objective]?.is_enabled === false}
+						disabled={objectiveFormData && objectiveFormData.is_enabled === false}
 					/></span
 				>
 			{/each}
