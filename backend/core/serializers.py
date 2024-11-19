@@ -223,6 +223,7 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    owner = FieldsRelatedField(many=True)
 
     type = serializers.CharField(source="get_type_display")
 
