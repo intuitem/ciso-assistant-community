@@ -500,6 +500,8 @@ Set DJANGO_DEBUG=False for security reason.
 - RO: Romanian
 - HI: Hindi
 - UR: Urdu
+- CZ: Czech
+- SV: Swedish
 
 ## Contributors 🤝
 
