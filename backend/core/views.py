@@ -14,7 +14,7 @@ import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 
 import shutil
-import os
+from pathlib import Path
 import humanize
 
 from django.utils.decorators import method_decorator
@@ -2361,7 +2361,7 @@ def get_csrf_token(request):
 
 def get_disk_usage():
     try:
-        path = os.path.abspath(os.path.join(settings.BASE_DIR, "db"))
+        path = Path(settings.BASE_DIR) / "db"
         usage = shutil.disk_usage(path)
         return usage
     except PermissionError:
