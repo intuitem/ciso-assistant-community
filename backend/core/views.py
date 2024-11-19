@@ -14,6 +14,7 @@ import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 
 import shutil
+import os
 import humanize
 
 from django.utils.decorators import method_decorator
@@ -2359,8 +2360,20 @@ def get_csrf_token(request):
 
 
 def get_disk_usage():
-    path = "./db/"
-    return shutil.disk_usage(path)
+    try:
+        path = os.path.abspath(os.path.join(settings.BASE_DIR, "db"))
+        usage = shutil.disk_usage(path)
+        return usage
+    except PermissionError:
+        logger.error(
+            "Permission issue: cannot access the path to retrieve the disk_usage info"
+        )
+        return None
+    except FileNotFoundError:
+        logger.error(
+            "Path issue: cannot access the path to retrieve the disk_usage info"
+        )
+        return None
 
 
 @api_view(["GET"])
@@ -2370,15 +2383,21 @@ def get_build(request):
     """
     BUILD = settings.BUILD
     VERSION = settings.VERSION
-    total, used, free = get_disk_usage()
-    return Response(
-        {
-            "version": VERSION,
-            "build": BUILD,
+
+    disk_info = get_disk_usage()
+
+    if disk_info:
+        total, used, free = disk_info
+        disk_response = {
             "Disk space": f"{humanize.naturalsize(total)}",
             "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
         }
-    )
+    else:
+        disk_response = {
+            "Disk space": "Unable to retrieve disk usage",
+        }
+
+    return Response({"version": VERSION, "build": BUILD, **disk_response})
 
 
 # NOTE: Important functions/classes from old views.py, to be reviewed
