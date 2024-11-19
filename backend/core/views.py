@@ -2375,7 +2375,8 @@ def get_build(request):
         {
             "version": VERSION,
             "build": BUILD,
-            "disk_space": f"{humanize.naturalsize(total)}",
+            "Disk space": f"{humanize.naturalsize(total)}",
+            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
         }
     )
 
