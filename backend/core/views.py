@@ -13,6 +13,9 @@ from itertools import cycle
 import django_filters as df
 from ciso_assistant.settings import BUILD, VERSION, EMAIL_HOST, EMAIL_HOST_RESCUE
 
+import shutil
+import humanize
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -2355,6 +2358,11 @@ def get_csrf_token(request):
     return Response({"csrfToken": csrf.get_token(request)})
 
 
+def get_disk_usage():
+    path = "./db/"
+    return shutil.disk_usage(path)
+
+
 @api_view(["GET"])
 def get_build(request):
     """
@@ -2362,7 +2370,14 @@ def get_build(request):
     """
     BUILD = settings.BUILD
     VERSION = settings.VERSION
-    return Response({"version": VERSION, "build": BUILD})
+    total, used, free = get_disk_usage()
+    return Response(
+        {
+            "version": VERSION,
+            "build": BUILD,
+            "disk_space": f"{humanize.naturalsize(total)}",
+        }
+    )
 
 
 # NOTE: Important functions/classes from old views.py, to be reviewed
