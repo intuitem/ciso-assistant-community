@@ -12,9 +12,9 @@
 		suggested?: boolean;
 	}
 
-	export let valuePath = ''; // the place where the value is stored in the form. This is useful for nested objects
 	export let label: string | undefined = undefined;
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 
 	export let form;
@@ -29,7 +29,7 @@
 	};
 	export let cachedValue: any[] | undefined = undefined;
 
-	const { value, errors, constraints } = formFieldProxy(form, valuePath ?? field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	export let options: Option[] = [];
 

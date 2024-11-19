@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms';
 
-	export let valuePath = ''; // the place where the value is stored in the form. This is useful for nested objects
 	export let label: string | undefined = undefined;
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 	// The cachedValue isn't used in the ModelForm because we don't need it yet
 	export let cachedValue: boolean | undefined = undefined;
@@ -13,7 +13,7 @@
 
 	label = label ?? field;
 
-	const { value, errors, constraints } = formFieldProxy(form, valuePath ?? field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	$: if (cachedValue !== undefined) {
 		value.set(cachedValue);
