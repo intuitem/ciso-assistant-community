@@ -170,7 +170,8 @@ export const AssetSchema = baseNamedObject({
 	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
-	parent_assets: z.string().optional().array().optional()
+	parent_assets: z.string().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
