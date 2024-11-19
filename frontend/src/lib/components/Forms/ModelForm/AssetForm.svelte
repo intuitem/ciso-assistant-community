@@ -25,6 +25,15 @@
 />
 <AutocompleteSelect
 	{form}
+	multiple
+	options={getOptions({ objects: model.foreignKeys['owner'], label: 'email' })}
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+<AutocompleteSelect
+	{form}
 	options={getOptions({ objects: model.foreignKeys['folder'] })}
 	field="folder"
 	cacheLock={cacheLocks['folder']}
