@@ -136,12 +136,15 @@
 					Object.hasOwn(data.security_objectives?.objectives, objective)
 						? data.security_objectives.objectives[objective]
 						: {}}
-				<span class="flex flex-row items-center space-x-4">
+				<span class="flex flex-row items-end space-x-4">
 					<Checkbox
 						{form}
 						field={objective}
-						label={m.enabled()}
+						label={''}
 						valuePath="security_objectives.objectives.{objective}.is_enabled"
+						checkboxComponent="switch"
+						class="h-full flex flex-row items-center justify-center my-1"
+						classesContainer="h-full"
 					/>
 					<RadioGroupInput
 						{form}
