@@ -34,10 +34,18 @@
 		return objectives;
 	}
 
+	async function fetchDisasterRecoveryObjectives() {
+		const endpoint = '/assets/disaster-recovery-objectives/';
+		const objectives = await fetch(endpoint).then((res) => res.json());
+		return objectives;
+	}
+
 	let securityObjectives: string[] = [];
+	let disasterRecoveryObjectives: string[] = [];
 
 	onMount(async () => {
 		securityObjectives = await fetchSecurityObjectives();
+		disasterRecoveryObjectives = await fetchDisasterRecoveryObjectives();
 	});
 
 	interface Option {
@@ -154,30 +162,15 @@
 		header={m.disasterRecoveryObjectives()}
 	>
 		<div class="flex flex-col space-y-4">
-			<Duration
-				{form}
-				field="rto"
-				label={m.rto()}
-				helpText={m.rtoHelpText()}
-				cacheLock={cacheLocks['rto']}
-				bind:cachedValue={formDataCache['rto']}
-			/>
-			<Duration
-				{form}
-				field="rpo"
-				label={m.rpo()}
-				helpText={m.rpoHelpText()}
-				cacheLock={cacheLocks['rpo']}
-				bind:cachedValue={formDataCache['rpo']}
-			/>
-			<Duration
-				{form}
-				field="mtd"
-				label={m.mtd()}
-				helpText={m.mtdHelpText()}
-				cacheLock={cacheLocks['mtd']}
-				bind:cachedValue={formDataCache['mtd']}
-			/>
+			{#each disasterRecoveryObjectives as objective}
+				<Duration
+					{form}
+					field={objective}
+					label={safeTranslate(objective)}
+					helpText={Object.hasOwn(m, `${objective}HelpText`) ? m[`${objective}HelpText`]() : ''}
+					valuePath="disaster_recovery_objectives.objectives.{objective}.value"
+				/>
+			{/each}
 		</div>
 	</Dropdown>
 {/if}

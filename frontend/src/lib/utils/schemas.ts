@@ -184,9 +184,18 @@ export const AssetSchema = baseNamedObject({
 				.optional()
 		})
 		.optional(),
-	rto: z.number().nonnegative().optional().nullable(),
-	rpo: z.number().nonnegative().optional().nullable(),
-	mtd: z.number().nonnegative().optional().nullable(),
+	disaster_recovery_objectives: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional()
 });
