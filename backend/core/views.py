@@ -361,6 +361,10 @@ class AssetViewSet(BaseModelViewSet):
     def security_objectives(self, request):
         return Response({"results": Asset.DEFAULT_SECURITY_OBJECTIVES})
 
+    @action(detail=False, name="Get disaster recovery objectives")
+    def disaster_recovery_objectives(self, request):
+        return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
