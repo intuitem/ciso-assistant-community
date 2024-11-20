@@ -592,7 +592,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             ):
                 risk_scenarios = ",".join(
                     [
-                        f"{scenario.rid}: {scenario.name}"
+                        f"{scenario.ref_id}: {scenario.name}"
                         for scenario in mtg.risk_scenarios.all()
                     ]
                 )
@@ -628,7 +628,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             writer = csv.writer(response, delimiter=";")
             columns = [
-                "rid",
+                "ref_id",
                 "threats",
                 "name",
                 "description",
@@ -646,7 +646,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
                 threats = ",".join([t.name for t in scenario.threats.all()])
                 row = [
-                    scenario.rid,
+                    scenario.ref_id,
                     threats,
                     scenario.name,
                     scenario.description,
@@ -1145,6 +1145,22 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get risk scenarios count per status")
     def per_status(self, request):
         return Response({"results": risk_per_status(request.user)})
+
+    @action(detail=False, methods=["get"], name="Get the smallest ref_id available")
+    def default_ref_id(self, request):
+        risk_assessment_id = request.query_params.get("risk_assessment")
+        if not risk_assessment_id:
+            return Response(
+                {"error": "Missing 'risk_assessment' parameter."}, status=400
+            )
+        try:
+            risk_assessment = RiskAssessment.objects.get(pk=risk_assessment_id)
+
+            # Use the class method to compute the default ref_id
+            default_ref_id = RiskScenario.get_default_ref_id(risk_assessment)
+            return Response({"results": default_ref_id})
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
