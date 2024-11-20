@@ -311,7 +311,17 @@ class AssetViewSet(BaseModelViewSet):
         nodes_idx = dict()
         categories = []
         N = 0
-        for domain in Folder.objects.all():
+        (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Asset,
+        )
+        for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
             nodes_idx[domain.name] = N
             nodes.append(
@@ -324,7 +334,7 @@ class AssetViewSet(BaseModelViewSet):
                 }
             )
             N += 1
-        for asset in Asset.objects.all():
+        for asset in Asset.objects.filter(id__in=viewable_assets):
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
@@ -342,7 +352,7 @@ class AssetViewSet(BaseModelViewSet):
                 {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
             )
             N += 1
-        for asset in Asset.objects.all():
+        for asset in Asset.objects.filter(id__in=viewable_assets):
             for relationship in asset.parent_assets.all():
                 links.append(
                     {
