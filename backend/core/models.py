@@ -1440,7 +1440,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 "RPO": disaster_recovery_objectives.get("rpo"),
                 "MTD": disaster_recovery_objectives.get("mtd"),
             }.items()
-            if value is not None
+            if value
         ]
 
     def save(self, *args, **kwargs) -> None:
