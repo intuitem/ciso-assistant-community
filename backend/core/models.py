@@ -2026,6 +2026,18 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
+    @classmethod
+    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
+        """return associated risk assessment id"""
+        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
+        nb_scenarios = len(scenarios_ref_ids) + 1
+        candidates = [f"R.{i}" for i in range(nb_scenarios)]
+        return next(x for x in candidates if x not in scenarios_ref_ids)
+
+    ref_id = models.CharField(
+        max_length=100, blank=False, verbose_name=_("Reference ID")
+    )
+
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
     strength_of_knowledge = models.IntegerField(
@@ -2152,11 +2164,6 @@ class RiskScenario(NameDescriptionMixin):
 
     def __str__(self):
         return str(self.parent_project()) + _(": ") + str(self.name)
-
-    @property
-    def rid(self):
-        """return associated risk assessment id"""
-        return f"R.{self.scoped_id(scope=RiskScenario.objects.filter(risk_assessment=self.risk_assessment))}"
 
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:
