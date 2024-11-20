@@ -1395,7 +1395,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 "rpo": asset.rpo,
                 "mtd": asset.mtd,
             }.items():
-                if value is not None:
+                if value:
                     if key not in disaster_recovery_objectives:
                         disaster_recovery_objectives[key] = value
                     else:
