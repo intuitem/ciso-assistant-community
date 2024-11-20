@@ -28,6 +28,9 @@ from iam.models import RoleAssignment
 from tprm.models import Folder
 from uuid import UUID
 
+import shutil
+from pathlib import Path
+import humanize
 
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
@@ -238,6 +241,23 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+def get_disk_usage():
+    try:
+        path = Path(settings.BASE_DIR) / "db"
+        usage = shutil.disk_usage(path)
+        return usage
+    except PermissionError:
+        logger.error(
+            "Permission issue: cannot access the path to retrieve the disk_usage info"
+        )
+        return None
+    except FileNotFoundError:
+        logger.error(
+            "Path issue: cannot access the path to retrieve the disk_usage info"
+        )
+        return None
+
+
 @api_view(["GET"])
 def get_build(request):
     """
@@ -256,6 +276,19 @@ def get_build(request):
     except ValueError:
         logger.error("Invalid expiry date format", exc_info=True)
         license_expiration = LICENSE_EXPIRATION
+
+    disk_info = get_disk_usage()
+
+    if disk_info:
+        total, used, free = disk_info
+        disk_response = {
+            "Disk space": f"{humanize.naturalsize(total)}",
+            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+        }
+    else:
+        disk_response = {
+            "Disk space": "Unable to retrieve disk usage",
+        }
     return Response(
         {
             "version": VERSION,
@@ -263,5 +296,6 @@ def get_build(request):
             "license_seats": LICENSE_SEATS,
             "available_seats": LICENSE_SEATS - len(User.get_editors()),
             "license_expiration": license_expiration,
+            **disk_response,
         }
     )
