@@ -1255,6 +1255,32 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     }
 
+    DEFAULT_DISASTER_RECOVERY_OBJECTIVES = ("rto", "rpo", "mtd")
+
+    DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/assets/security_objectives.schema.json",
+        "title": "Security objectives",
+        "description": "The security objectives of the asset",
+        "type": "object",
+        "properties": {
+            "objectives": {
+                "type": "object",
+                "patternProperties": {
+                    "^[a-z_]+$": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "integer",
+                                "minimum": 0,
+                            },
+                        },
+                    },
+                },
+            }
+        },
+    }
+
     SECURITY_OBJECTIVES_SCALES = {
         "1-4": range(1, 5),
         "0-3": range(0, 4),
@@ -1284,25 +1310,15 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         help_text=_("The security objectives of the asset"),
         validators=[JSONSchemaInstanceValidator(SECURITY_OBJECTIVES_JSONSCHEMA)],
     )
-    rto = models.PositiveIntegerField(
-        null=True,
+    disaster_recovery_objectives = models.JSONField(
+        default=dict,
         blank=True,
-        verbose_name=_("rto"),
-        help_text=_("Recovery Time Objective in seconds"),
+        verbose_name=_("Disaster recovery objectives"),
+        help_text=_("The disaster recovery objectives of the asset"),
+        validators=[
+            JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
+        ],
     )
-    rpo = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_("rpo"),
-        help_text=_("Recovery Point Objective in seconds"),
-    )
-    mtd = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        verbose_name=_("mtd"),
-        help_text=_("Maximum Tolerable Downtime in seconds"),
-    )
-
     owner = models.ManyToManyField(
         User,
         blank=True,
@@ -1366,7 +1382,7 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                     )
         return {"objectives": security_objectives}
 
-    def get_disaster_recovery_objectives(self) -> dict[str, int]:
+    def get_disaster_recovery_objectives(self) -> dict[str, dict[str, dict[str, int]]]:
         """
         Gets the disaster recovery objectives of a given asset.
         If the asset is a primary asset, the disaster recovery objectives are directly stored in the asset.
@@ -1374,15 +1390,8 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         If multiple ancestors share the same disaster recovery objective, its value in the result is its lowest value among the ancestors.
         """
         if self.is_primary:
-            return {
-                key: value
-                for key, value in {
-                    "rto": self.rto,
-                    "rpo": self.rpo,
-                    "mtd": self.mtd,
-                }.items()
-                if value is not None
-            }
+            return self.disaster_recovery_objectives
+
         ancestors = self.ancestors_plus_self()
         primary_assets = {asset for asset in ancestors if asset.is_primary}
         if not primary_assets:
@@ -1390,19 +1399,17 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
         disaster_recovery_objectives = {}
         for asset in primary_assets:
-            for key, value in {
-                "rto": asset.rto,
-                "rpo": asset.rpo,
-                "mtd": asset.mtd,
-            }.items():
-                if value:
-                    if key not in disaster_recovery_objectives:
-                        disaster_recovery_objectives[key] = value
-                    else:
-                        disaster_recovery_objectives[key] = min(
-                            disaster_recovery_objectives[key], value
-                        )
-        return disaster_recovery_objectives
+            for key, content in asset.disaster_recovery_objectives.get(
+                "objectives", {}
+            ).items():
+                if key not in disaster_recovery_objectives:
+                    disaster_recovery_objectives[key] = content
+                else:
+                    disaster_recovery_objectives[key] = min(
+                        disaster_recovery_objectives[key], content.get("value", 0)
+                    )
+
+        return {"objectives": disaster_recovery_objectives}
 
     def get_security_objectives_display(self) -> list[dict[str, str]]:
         """
@@ -1432,15 +1439,11 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         """
         disaster_recovery_objectives = self.get_disaster_recovery_objectives()
         return [
-            {
-                "str": f"{key}: {value}",
-            }
-            for key, value in {
-                "RTO": disaster_recovery_objectives.get("rto"),
-                "RPO": disaster_recovery_objectives.get("rpo"),
-                "MTD": disaster_recovery_objectives.get("mtd"),
-            }.items()
-            if value
+            {"str": f"{key}: {content.get('value', 0)}"}
+            for key, content in disaster_recovery_objectives.get(
+                "objectives", {}
+            ).items()
+            if content.get("value", 0)
         ]
 
     def save(self, *args, **kwargs) -> None:
