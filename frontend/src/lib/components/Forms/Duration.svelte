@@ -2,7 +2,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
-	import { formFieldProxy } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	let _class = '';
 	export { _class as class };
@@ -10,12 +10,12 @@
 	export let field: string;
 	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
-	export let cachedValue: string | undefined;
+	export let cachedValue: number | undefined;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
 	};
-	export let form;
+	export let form: SuperForm<Record<string, number>>;
 	export let hidden = false;
 	export let disabled = false;
 	export let required = false;
@@ -49,7 +49,7 @@
 		return units;
 	}
 
-	const timeUnits = setInitialTimeUnitValues($value, _timeUnits);
+	const timeUnits = setInitialTimeUnitValues($value || 0, _timeUnits);
 
 	onMount(async () => {
 		const cacheResult = await cacheLock.promise;
@@ -62,9 +62,6 @@
 		return timeUnit.enabled ? acc + timeUnit.value * timeUnit.secondsMultiplier : acc;
 	}, 0);
 	$: cachedValue = $value;
-	$: if ($value === '') {
-		$value = null;
-	}
 </script>
 
 <div>
