@@ -2612,6 +2612,8 @@ class ComplianceAssessment(Assessment):
                         "str": str(ref),
                         "id": str(ref.id),
                         "coverage": mapping.coverage,
+                        "score": ref.score,
+                        "observation": ref.observation
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
