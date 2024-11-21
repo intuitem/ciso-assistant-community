@@ -327,7 +327,9 @@
 							<i class="fa-solid fa-link" />
 							{m.mappingInference()}
 						</p>
-						<span class="text-xs text-gray-500"><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span>
+						<span class="text-xs text-gray-500"
+							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
+						>
 						<ul class="list-disc ml-4">
 							<li>
 								<p>
@@ -357,16 +359,16 @@
 								{#if mappingInference.sourceRequirementAssessment.score}
 									<p class="whitespace-pre-line py-1">
 										<span class="italic">{m.scoreSemiColon()}</span>
-										<span
-											class="badge {classesText} h-fit"
-										>
+										<span class="badge {classesText} h-fit">
 											{mappingInference.sourceRequirementAssessment.score}
 										</span>
 									</p>
 								{/if}
 								{#if mappingInference.sourceRequirementAssessment.observation}
-									<p class="whitespace
-									-pre-line py-1">
+									<p
+										class="whitespace
+									-pre-line py-1"
+									>
 										<span class="italic">{m.observationSemiColon()}</span>
 										{mappingInference.sourceRequirementAssessment.observation}
 									</p>
