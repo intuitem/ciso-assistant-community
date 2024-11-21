@@ -864,5 +864,10 @@
 	"existingMeasures": "Existing measures",
 	"youCanSetPasswordHere": "You can set your password here",
 	"forgotPassword": "Forgot password",
-	"ssoSettingsUpdated": "SSO settings updated"
+	"ssoSettingsUpdated": "SSO settings updated",
+	"priority": "Priority",
+	"p1": "P1",
+	"p2": "P2",
+	"p3": "P3",
+	"p4": "P4"
 }
