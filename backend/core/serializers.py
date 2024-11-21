@@ -320,7 +320,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
-
+    priority = serializers.CharField(source="get_priority_display")
     category = serializers.CharField(
         source="get_category_display"
     )  # type : get_type_display

@@ -63,6 +63,15 @@ const LABELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const PRIORITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.priority,
+	alwaysDisplay: true,
+	extraProps: {
+		defaultOptionName: 'priority'
+	}
+};
+
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
 	getColumn: (row) => row.meta.folder.str
@@ -374,7 +383,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			status: STATUS_FILTER,
 			category: CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			priority: PRIORITY_FILTER
 		}
 	},
 	policies: {
