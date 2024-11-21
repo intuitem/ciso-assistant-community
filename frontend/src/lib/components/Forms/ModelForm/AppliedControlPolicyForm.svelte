@@ -14,6 +14,10 @@
 	export let formDataCache: Record<string, any> = {};
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
+	
+	model.selectOptions['priority'].forEach(element => {
+		element.value = parseInt(element.value);
+	});
 </script>
 
 {#if schema.shape.category}
