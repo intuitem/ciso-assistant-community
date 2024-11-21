@@ -545,7 +545,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'representatives',
 		verboseName: 'Representative',
 		verboseNamePlural: 'Representatives',
-		foreignKeyFields: [{ field: 'entity', urlModel: 'entities' }]
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'user', urlModel: 'users' }
+		]
 	}
 };
 
