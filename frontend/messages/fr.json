@@ -864,5 +864,7 @@
 	"existingMeasures": "Mesures existantes",
 	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
 	"forgotPassword": "Mot de passe oublié",
-	"ssoSettingsUpdated": "Paramètres SSO mis à jour"
+	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
+	"scoreSemiColon": "Score:",
+	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source."
 }

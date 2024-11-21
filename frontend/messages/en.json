@@ -866,5 +866,5 @@
 	"forgotPassword": "Forgot password",
 	"ssoSettingsUpdated": "SSO settings updated",
 	"scoreSemiColon": "Score:",
-	"mappingInferenceHelpText": "These variables are fixed and will not change according to the source requirement"
+	"mappingInferenceHelpText": "These variables are fixed and will not change depending on the source."
 }
