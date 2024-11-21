@@ -5,6 +5,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { BASE_API_URL } from '$lib/utils/constants';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -17,9 +18,10 @@
 	async function fetchDefaultRefId(riskAssessmentId: string) {
 		try {
 			const response = await fetch(
-				`/risk-scenarios/default-ref-id/?risk_assessment=${riskAssessmentId}`
+				`${BASE_API_URL}/risk-scenarios/default_ref_id/?risk_assessment=${riskAssessmentId}`
 			);
 			const result = await response.json();
+			console.log(result);
 			if (response.ok && result.results) {
 				form.form.update((currentData) => {
 					updated_fields.add('ref_id');
