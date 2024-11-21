@@ -143,6 +143,10 @@
 		return value.includes(stringify(entry));
 	}
 
+	// Initialize filter values from URL search params
+	for (const field of filteredFields)
+		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+
 	$: {
 		for (const field of filteredFields) {
 			handler.filter(
