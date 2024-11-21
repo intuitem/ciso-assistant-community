@@ -154,7 +154,14 @@
 					? filters[field].filter
 					: defaultFilterFunction
 			);
+			$page.url.searchParams.delete(field);
+			if (filterValues[field] && filterValues[field].length > 0) {
+				for (const value of filterValues[field]) {
+					$page.url.searchParams.append(field, value.value);
+				}
+			}
 		}
+		if (browser) goto($page.url);
 	}
 
 	let allowOptionsUpdate = true;
@@ -205,6 +212,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { popup } from '@skeletonlabs/skeleton';
+	import { browser } from '$app/environment';
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
