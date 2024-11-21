@@ -51,6 +51,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
 
 from weasyprint import HTML
 
@@ -1146,7 +1148,9 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def per_status(self, request):
         return Response({"results": risk_per_status(request.user)})
 
-    @action(detail=False, methods=["get"], name="Get the smallest ref_id available")
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
     def default_ref_id(self, request):
         risk_assessment_id = request.query_params.get("risk_assessment")
         if not risk_assessment_id:
