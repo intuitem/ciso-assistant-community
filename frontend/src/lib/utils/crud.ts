@@ -665,10 +665,10 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
 				},
 				priority: {
-					1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
-					2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
-					3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
-					4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					'P1': { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
+					'P2': { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
+					'P3': { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
+					'P4': { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
 					'--': { text: '', cssClasses: '' }
 				}
 			}
