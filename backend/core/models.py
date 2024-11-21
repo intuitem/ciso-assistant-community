@@ -527,7 +527,7 @@ class LibraryUpdater:
             order_id = 0
             for requirement_node in requirement_nodes:
                 requirement_node_dict = {**requirement_node}
-                for key in ["maturity", "depth", "reference_controls", "threats"]:
+                for key in ["depth", "reference_controls", "threats"]:
                     requirement_node_dict.pop(key, None)
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
