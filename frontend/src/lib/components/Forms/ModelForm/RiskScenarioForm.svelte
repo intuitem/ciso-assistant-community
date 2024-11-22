@@ -18,7 +18,7 @@
 	async function fetchDefaultRefId(riskAssessmentId: string) {
 		try {
 			const response = await fetch(
-				`${BASE_API_URL}/risk-scenarios/default_ref_id/?risk_assessment=${riskAssessmentId}`
+				`/risk-scenarios/default-ref-id/?risk_assessment=${riskAssessmentId}`
 			);
 			const result = await response.json();
 			console.log(result);
@@ -58,7 +58,7 @@
 <TextField
 	{form}
 	field="ref_id"
-	label="ref_id"
+	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
