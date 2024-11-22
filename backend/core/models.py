@@ -1836,8 +1836,37 @@ class RiskAssessment(Assessment):
         verbose_name = _("Risk assessment")
         verbose_name_plural = _("Risk assessments")
 
+    def upsert_daily_metrics(self):
+        per_treatment = self.get_per_treatment()
+
+        total = RiskScenario.objects.filter(risk_assessment=self).count()
+        data = {
+            "scenarios": {
+                "total": total,
+                "per_treatment": per_treatment,
+            },
+        }
+
+        HistoricalMetric.update_daily_metric(
+            model=self.__class__.__name__, object_id=self.id, data=data
+        )
+
     def __str__(self) -> str:
         return f"{self.name} - {self.version}"
+
+    def get_per_treatment(self) -> dict:
+        output = dict()
+        for treatment in RiskScenario.TREATMENT_OPTIONS:
+            output[treatment[0]] = (
+                RiskScenario.objects.filter(risk_assessment=self)
+                .filter(treatment=treatment[0])
+                .count()
+            )
+        return output
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
 
     @property
     def path_display(self) -> str:
@@ -2413,6 +2442,7 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        self.risk_assessment.upsert_daily_metrics()
 
 
 class ComplianceAssessment(Assessment):
