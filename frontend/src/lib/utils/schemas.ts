@@ -88,8 +88,8 @@ export const RiskAssessmentSchema = baseNamedObject({
 	project: z.string(),
 	status: z.string().optional().nullable(),
 	risk_matrix: z.string(),
-	eta: z.string().optional().nullable(),
-	due_date: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable()
@@ -125,11 +125,12 @@ export const RiskScenarioSchema = baseNamedObject({
 export const AppliedControlSchema = baseNamedObject({
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
+	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
-	eta: z.string().optional().nullable(),
-	start_date: z.string().optional().nullable(),
-	expiry_date: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	cost: z.number().multipleOf(0.000001).optional().nullable(),
@@ -142,8 +143,8 @@ export const PolicySchema = baseNamedObject({
 	csf_function: z.string().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
-	eta: z.string().optional().nullable(),
-	expiry_date: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	link: z.string().url().optional().or(z.literal('')),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
@@ -152,7 +153,7 @@ export const PolicySchema = baseNamedObject({
 
 export const RiskAcceptanceSchema = baseNamedObject({
 	folder: z.string(),
-	expiry_date: z.string().optional().nullable(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	justification: z.string().optional().nullable(),
 	approver: z.string(),
 	risk_scenarios: z.array(z.string())
@@ -172,6 +173,32 @@ export const AssetSchema = baseNamedObject({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
+	security_objectives: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional(),
+						is_enabled: z.boolean().default(false)
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	disaster_recovery_objectives: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	reference_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional()
 });
 
@@ -226,8 +253,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
-	eta: z.string().optional().nullable(),
-	due_date: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	baseline: z.string().optional().nullable(),
@@ -241,6 +268,10 @@ export const EvidenceSchema = baseNamedObject({
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	link: z.string().optional().nullable()
+});
+
+export const GeneralSettingsSchema = z.object({
+	security_objective_scale: z.string()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -290,7 +321,7 @@ export const SSOSettingsSchema = z.object({
 export const EntitiesSchema = baseNamedObject({
 	folder: z.string(),
 	mission: z.string().optional(),
-	reference_link: z.string().optional()
+	reference_link: z.string().url().optional().or(z.literal(''))
 });
 
 export const EntityAssessmentSchema = baseNamedObject({
@@ -300,8 +331,8 @@ export const EntityAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional().nullable(),
-	eta: z.string().optional().nullable(),
-	due_date: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	representatives: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
@@ -362,6 +393,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
+	'general-settings': GeneralSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

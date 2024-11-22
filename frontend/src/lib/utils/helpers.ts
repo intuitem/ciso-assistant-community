@@ -26,13 +26,13 @@ export function getRequirementTitle(ref_id: string, name: string) {
 export function displayScoreColor(value: number, max_score: number, inversedColors = false) {
 	value = (value * 100) / max_score;
 	if (inversedColors) {
-		if (value < 35) {
+		if (value < 25) {
 			return 'stroke-green-300';
 		}
-		if (value < 60) {
+		if (value < 50) {
 			return 'stroke-yellow-300';
 		}
-		if (value < 80) {
+		if (value < 75) {
 			return 'stroke-orange-400';
 		}
 		return 'stroke-red-400';
