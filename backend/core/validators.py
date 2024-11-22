@@ -1,6 +1,23 @@
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.validators import BaseValidator
 from django.utils.text import get_valid_filename, slugify
+import jsonschema
+
+
+class JSONSchemaInstanceValidator(BaseValidator):
+    """
+    Validate a JSON schema instance
+    """
+
+    def __init__(self, schema):
+        self.schema = schema
+
+    def __call__(self, value):
+        try:
+            jsonschema.validate(value, self.schema)
+        except jsonschema.exceptions.ValidationError as e:
+            raise ValidationError(e.message)
 
 
 def validate_file_size(value):

@@ -2,10 +2,11 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from ciso_assistant.settings import CISO_ASSISTANT_URL
+from rest_framework.decorators import action
 
 from iam.sso.models import SSOSettings
 
-from .serializers import GlobalSettingsSerializer
+from .serializers import GlobalSettingsSerializer, GeneralSettingsSerializer
 
 from .models import GlobalSettings
 
@@ -31,6 +32,44 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
             {"detail": "Global settings can only be updated through data migrations."},
             status=405,
         )
+
+
+class GeneralSettingsViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = GeneralSettingsSerializer
+    queryset = GlobalSettings.objects.filter(name="general")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.model.objects.get(name="general")[0]
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.model.objects.get(name="general")
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        return self.model.objects.get(name="general")
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk=None):
+        GlobalSettings.objects.get_or_create(
+            name="general",
+            defaults={"value": {"security_objective_scale": "1-4"}},
+        )
+        return Response(GeneralSettingsSerializer(self.get_object()).data.get("value"))
+
+    @action(detail=True, name="Get security objective scales")
+    def security_objective_scale(self, request):
+        choices = {
+            "1-4": "1-4",
+            "0-3": "0-3",
+            "FIPS-199": "FIPS-199",
+        }
+        return Response(choices)
 
 
 @api_view(["GET"])

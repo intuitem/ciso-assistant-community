@@ -12,6 +12,8 @@
 	"romanian": "Română",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Ceh",
+	"swedish": "Suedez",
 	"addThreat": "Adaugă amenințare",
 	"addVulnerability": "Adăugați vulnerabilitate",
 	"addReferenceControl": "Adaugă control de referință",
@@ -683,7 +685,7 @@
 	"clientSettings": "Setări client",
 	"invalidFileType": "Tip de fișier nevalid",
 	"logoHelpText": "Logo-ul va fi afișat în antetul aplicației. Formatele acceptate sunt PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "Favicon-ul va fi afișat în fila browser. Formatele acceptate sunt ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "Favicon-ul va fi afișat în fila browser. Formatele acceptate sunt ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entitate",
 	"entities": "Entități",
 	"addEntity": "Adăugați entitate",
@@ -784,6 +786,7 @@
 	"questionPlural": "Întrebări",
 	"fillMetadataURL": "Opțiunea 1: completați adresa URL a metadatelor",
 	"fillSSOSLOURLx509cert": "Opțiunea 2: completați URL-ul SSO, URL-ul SLO și x509cert",
+	"noExpirationDateSet": "Nu a fost stabilită o dată de expirare",
 	"sumpageTotal": "total",
 	"sumpageActive": "activ",
 	"sumpageDeprecated": "depreciat",
@@ -853,5 +856,6 @@
 	"exploreButton": "Explora",
 	"tags": "Etichete",
 	"addTag": "Adăugați etichetă",
-	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra"
+	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
+	"forgotPassword": "Aţi uitat parola"
 }

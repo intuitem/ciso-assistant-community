@@ -12,6 +12,8 @@
 	"romanian": "الرومانية",
 	"hindi": "هندية",
 	"urdu": "أردية",
+	"czech": "التشيكية",
+	"swedish": "السويدية",
 	"addThreat": "أضف تهديدًا",
 	"addVulnerability": "إضافة الضعف",
 	"addReferenceControl": "أضف تحكمًا مرجعيًا",
@@ -58,6 +60,7 @@
 	"referenceControls": "التحكمات المرجعية",
 	"referenceControlsColon": "ضوابط المرجع:",
 	"appliedControls": "التحكمات المطبقة",
+	"existingAppliedControls": "الضوابط الموجودة",
 	"assets": "الأصول",
 	"asset": "الأصل",
 	"policy": "السياسة",
@@ -784,6 +787,7 @@
 	"questionPlural": "أسئلة",
 	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
 	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert",
+	"noExpirationDateSet": "لم يتم تحديد تاريخ انتهاء الصلاحية",
 	"sumpageTotal": "المجموع",
 	"sumpageActive": "نشيط",
 	"sumpageDeprecated": "مُسْتَهْلَك",
@@ -853,5 +857,6 @@
 	"exploreButton": "يستكشف",
 	"tags": "العلامات",
 	"addTag": "إضافة علامة",
-	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\""
+	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
+	"forgotPassword": "هل نسيت كلمة السر"
 }

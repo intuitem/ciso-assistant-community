@@ -148,13 +148,15 @@ export async function defaultWriteFormAction({
 		}
 	}
 
-	setFlash(
-		{
-			type: 'success',
-			message: getSuccessMessage({ urlModel, action }) as string
-		},
-		event
-	);
+	let flashParams = {
+		type: 'success',
+		message: getSuccessMessage({ urlModel, action }) as string
+	};
+
+	if (urlModel == 'users') {
+		(flashParams.type = 'warning'), (flashParams.message += safeTranslate('userHasNoRights'));
+	}
+	setFlash(flashParams, event);
 
 	const next = getSecureRedirect(event.url.searchParams.get('next'));
 	if (next && doRedirect) redirect(302, next);
@@ -171,6 +173,7 @@ export async function nestedWriteFormAction({
 	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
+
 	action: FormAction;
 	redirectToWrittenObject: boolean;
 }) {

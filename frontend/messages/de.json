@@ -12,6 +12,8 @@
 	"romanian": "Rumänisch",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Tschechisch",
+	"swedish": "Schwedisch",
 	"addThreat": "Bedrohung hinzufügen",
 	"addVulnerability": "Schwachstellen hinzufügen",
 	"addReferenceControl": "Referenzkontrolle hinzufügen",
@@ -784,6 +786,7 @@
 	"questionPlural": "Fragen",
 	"fillMetadataURL": "Option 1: Füllen Sie die Metadaten-URL aus",
 	"fillSSOSLOURLx509cert": "Option 2: Füllen Sie die SSO-URL, SLO-URL und x509cert aus",
+	"noExpirationDateSet": "Kein Ablaufdatum festgelegt",
 	"sumpageTotal": "gesamt",
 	"sumpageActive": "aktiv",
 	"sumpageDeprecated": "veraltet",
@@ -853,5 +856,6 @@
 	"exploreButton": "Erkunden",
 	"tags": "Schlagwörter",
 	"addTag": "Tag hinzufügen",
-	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen"
+	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen",
+	"forgotPassword": "Passwort vergessen"
 }
