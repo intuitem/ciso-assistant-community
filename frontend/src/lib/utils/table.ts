@@ -388,10 +388,14 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	policies: {
-		head: ['name', 'description', 'csfFunction', 'eta', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'csf_function', 'eta', 'folder', 'reference_control'],
+		head: ['name', 'description', 'csfFunction', 'eta', 'owner', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'csf_function', 'eta', 'owner', 'folder', 'reference_control'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: STATUS_FILTER,
+			csf_function: CSF_FUNCTION_FILTER,
+			owner: OWNER_FILTER,
+			priority: PRIORITY_FILTER
 		}
 	},
 	'reference-controls': {
