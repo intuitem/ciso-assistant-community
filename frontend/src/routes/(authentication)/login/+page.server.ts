@@ -132,7 +132,6 @@ export const actions: Actions = {
 
 		const next = url.searchParams.get('next') || '/';
 		const redirectURL = getSecureRedirect(next) + '?refresh=1';
-		[0, 0, 0, 0, 0].forEach(() => console.log(redirectURL));
 		redirect(302, redirectURL);
 	},
 	mfaAuthenticate: async (event) => {
