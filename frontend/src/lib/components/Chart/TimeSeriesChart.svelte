@@ -1,0 +1,89 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+
+	export let width = 'w-auto';
+	export let height = 'h-full';
+	export let classesContainer = '';
+	export let title = '';
+	export let name = '';
+	export let timeseries = [];
+	const chart_id = `${name}_div`;
+	onMount(async () => {
+		const echarts = await import('echarts');
+		let chart_t = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		// specify chart configuration item and data
+
+		var option = {
+			title: {
+				text: 'Assessment progress'
+			},
+			tooltip: {
+				trigger: 'axis',
+				formatter: function (params) {
+					return (
+						new Date(params[0].value[0]).toLocaleDateString() +
+						'<br/>' +
+						params[0].marker +
+						params[0].seriesName +
+						': ' +
+						params[0].value[1]
+					);
+				}
+			},
+			xAxis: {
+				type: 'time',
+				boundaryGap: false,
+				splitNumber: 3, // Approximate number of splits to show
+				axisPointer: {
+					snap: true
+				}
+			},
+			yAxis: {
+				type: 'value',
+				boundaryGap: [0, '30%']
+			},
+			series: [
+				{
+					name: 'Requirements assessed',
+					type: 'line',
+					areaStyle: {
+						opacity: 1,
+						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+							{
+								offset: 0,
+								color: 'rgb(55, 162, 255)'
+							},
+							{
+								offset: 1,
+								color: 'rgba(55, 162, 255, 0.1)'
+							}
+						])
+					},
+					smooth: true,
+					data: [
+						[new Date('2024-01-01'), 0],
+						[new Date('2024-01-02'), 1],
+						[new Date('2024-01-03'), 4],
+						[new Date('2024-02-15'), 23],
+						[new Date('2024-03-01'), 41],
+						[new Date('2024-03-03'), 51],
+						[new Date('2024-03-10'), 60],
+						[new Date('2024-04-03'), 51]
+					]
+				}
+			]
+		};
+
+		chart_t.setOption(option);
+
+		window.addEventListener('resize', function () {
+			chart_t.resize();
+		});
+	});
+</script>
+
+<div
+	id={chart_id}
+	class="{height} {width} {classesContainer}"
+	style="width: 400px; height:400px;"
+/>
