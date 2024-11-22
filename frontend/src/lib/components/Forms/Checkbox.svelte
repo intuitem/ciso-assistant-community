@@ -1,18 +1,22 @@
 <script lang="ts">
-	import { formFieldProxy } from 'sveltekit-superforms';
+	import { SlideToggle, type CssClasses } from '@skeletonlabs/skeleton';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
+	export let valuePath = field; // the place where the value is stored in the form. This is useful for nested objects
 	export let helpText: string | undefined = undefined;
 	// The cachedValue isn't used in the ModelForm because we don't need it yet
 	export let cachedValue: boolean | undefined = undefined;
-	export let form;
+	export let form: SuperForm<Record<string, boolean | undefined>>;
 	export let hidden = false;
 	export let disabled = false;
+	export let checkboxComponent: 'checkbox' | 'switch' = 'checkbox';
+	export let classesContainer: CssClasses = '';
 
 	label = label ?? field;
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	$: if (cachedValue !== undefined) {
 		value.set(cachedValue);
@@ -24,7 +28,7 @@
 	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
 </script>
 
-<div>
+<div class={classesContainer}>
 	<div
 		class="flex flex-row space-x-2 items-center {classesHidden(hidden)} {classesDisabled(disabled)}"
 	>
@@ -38,16 +42,28 @@
 			{/if}
 		{/if}
 		<div class="control">
-			<input
-				name={field}
-				type="checkbox"
-				class="checkbox"
-				data-testid="form-input-{field.replaceAll('_', '-')}"
-				bind:checked={cachedValue}
-				{...$constraints}
-				{...$$restProps}
-				{disabled}
-			/>
+			{#if checkboxComponent === 'checkbox'}
+				<input
+					name={field}
+					type="checkbox"
+					class="checkbox"
+					data-testid="form-input-{field.replaceAll('_', '-')}"
+					bind:checked={cachedValue}
+					{...$constraints}
+					{...$$restProps}
+					{disabled}
+				/>
+			{:else if checkboxComponent === 'switch'}
+				<SlideToggle
+					name={field}
+					type="checkbox"
+					data-testid="form-input-{field.replaceAll('_', '-')}"
+					bind:checked={cachedValue}
+					{...$constraints}
+					{...$$restProps}
+					{disabled}
+				/>
+			{/if}
 		</div>
 	</div>
 	{#if $errors}

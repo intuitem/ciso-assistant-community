@@ -24,6 +24,7 @@
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import List from '$lib/components/List/List.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -273,6 +274,19 @@
 												)?.urlModel
 											}/${value.id}`}
 											<a href={itemHref} class="anchor">{value.str}</a>
+											<!-- Shortcut before DetailView refactoring -->
+										{:else if value === 'P1'}
+											<li class="fa-solid fa-flag text-red-500"></li>
+											{m.p1()}
+										{:else if value === 'P2'}
+											<li class="fa-solid fa-flag text-orange-500"></li>
+											{m.p2()}
+										{:else if value === 'P3'}
+											<li class="fa-solid fa-flag text-blue-500"></li>
+											{m.p3()}
+										{:else if value === 'P4'}
+											<li class="fa-solid fa-flag text-gray-500"></li>
+											{m.p4()}
 										{:else if isURL(value) && !value.startsWith('urn')}
 											<a href={value} target="_blank" class="anchor">{value}</a>
 										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
