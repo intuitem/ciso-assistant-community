@@ -367,6 +367,14 @@ class AssetViewSet(BaseModelViewSet):
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
 
+    @action(detail=False, name="Get security objectives")
+    def security_objectives(self, request):
+        return Response({"results": Asset.DEFAULT_SECURITY_OBJECTIVES})
+
+    @action(detail=False, name="Get disaster recovery objectives")
+    def disaster_recovery_objectives(self, request):
+        return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
+
 
 class ReferenceControlViewSet(BaseModelViewSet):
     """
@@ -586,6 +594,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "measure_desc",
                 "category",
                 "csf_function",
+                "priority",
                 "reference_control",
                 "eta",
                 "effort",
@@ -616,6 +625,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
+                    mtg.priority,
                     mtg.cost,
                     mtg.link,
                     mtg.status,
@@ -801,6 +811,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "folder",
         "category",
         "csf_function",
+        "priority",
         "status",
         "reference_control",
         "effort",
@@ -826,6 +837,11 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get priority choices")
+    def priority(self, request):
+        return Response(dict(AppliedControl.PRIORITY))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
@@ -2539,6 +2555,7 @@ def export_mp_csv(request):
         "csf_function",
         "reference_control",
         "eta",
+        "priority",
         "effort",
         "cost",
         "link",
@@ -2559,6 +2576,7 @@ def export_mp_csv(request):
             mtg.description,
             mtg.category,
             mtg.csf_function,
+            mtg.priority,
             mtg.reference_control,
             mtg.eta,
             mtg.effort,
