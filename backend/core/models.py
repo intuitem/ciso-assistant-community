@@ -1660,7 +1660,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             if current >= 0 and residual >= 0:
                 value += (1 + current - residual) * (current + 1)
         return (
-            abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else None
+            abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else 0
         )
 
     @property
