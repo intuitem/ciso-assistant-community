@@ -117,7 +117,6 @@
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
 	$: hasRows = data.length > 0;
-	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters =
 		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
@@ -168,15 +167,14 @@
 		if (browser) goto($page.url);
 	}
 
-	let allowOptionsUpdate = true;
-	allRows.subscribe((rows) => {
-		if (!allowOptionsUpdate) return;
+	$: {
 		for (const key of filteredFields) {
-			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
+				Object.values(source.meta),
+				key
+			);
 		}
-		if (rows.length > 0) allowOptionsUpdate = false;
-	});
-
+	}
 	const rows = handler.getRows();
 	const _filters = handler.getFilters();
 

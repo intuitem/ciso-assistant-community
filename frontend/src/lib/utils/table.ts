@@ -34,7 +34,7 @@ interface ListViewFieldsConfig {
 
 const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.lc_status,
+	getColumn: (row) => row.lc_status,
 	extraProps: {
 		defaultOptionName: 'status'
 	},
@@ -65,7 +65,7 @@ const LABELS_FILTER: ListViewFilterConfig = {
 
 const PRIORITY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.priority,
+	getColumn: (row) => row.priority,
 	alwaysDisplay: true,
 	extraProps: {
 		defaultOptionName: 'priority'
@@ -74,12 +74,12 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.meta.folder.str
+	getColumn: (row) => row.folder.str
 };
 
 const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.meta.project.folder.str
+	getColumn: (row) => row.project.folder.str
 };
 
 const PROJECT_FILTER: ListViewFilterConfig = {
@@ -92,12 +92,12 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 
 const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
 	...PROJECT_FILTER,
-	getColumn: (row) => row.meta.project.str
+	getColumn: (row) => row.project.str
 };
 
 const STATUS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.status,
+	getColumn: (row) => row.status,
 	extraProps: {
 		defaultOptionName: 'status'
 	},
@@ -107,7 +107,7 @@ const STATUS_FILTER: ListViewFilterConfig = {
 const TREATMENT_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: (row) => row.meta.treatment,
+	getColumn: (row) => row.treatment,
 	extraProps: {
 		defaultOptionName: 'treatment'
 	}
@@ -116,7 +116,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 const STATE_FILTER: ListViewFilterConfig = {
 	// I could make a function just make the code less repeatitive and long for nothing
 	component: SelectFilter,
-	getColumn: (row) => row.meta.state,
+	getColumn: (row) => row.state,
 	extraProps: {
 		defaultOptionName: 'state'
 	}
@@ -128,7 +128,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		if (row.first_name && row.last_name) {
 			return `${row.first_name} ${row.last_name}`;
 		}
-		return row.meta.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
+		return row.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
 		defaultOptionName: 'approver'
@@ -137,7 +137,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 
 const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.risk_assessment.name,
+	getColumn: (row) => row.risk_assessment.name,
 	extraProps: {
 		defaultOptionName: 'riskAssessment'
 	}
@@ -156,14 +156,14 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
 	...PROVIDER_FILTER,
 	getColumn: (row) => {
-		return row.meta.provider;
+		return row.provider;
 	},
 	alwaysDisplay: true
 };
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.meta.threats.length ? row.meta.threats.map((t) => t.str) : null),
+	getColumn: (row) => (row.threats.length ? row.threats.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'threat'
 	}
@@ -171,7 +171,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.meta.assets.length ? row.meta.assets.map((t) => t.str) : null),
+	getColumn: (row) => (row.assets.length ? row.assets.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'asset'
 	},
@@ -197,7 +197,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 
 const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.type,
+	getColumn: (row) => row.type,
 	extraProps: {
 		defaultOptionName: 'type' // Make translations
 	},
@@ -206,7 +206,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 
 const CATEGORY_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.category,
+	getColumn: (row) => row.category,
 	extraProps: {
 		defaultOptionName: 'category' // Make translations
 	},
@@ -215,7 +215,7 @@ const CATEGORY_FILTER: ListViewFilterConfig = {
 
 const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.meta.csf_function,
+	getColumn: (row) => row.csf_function,
 	extraProps: {
 		defaultOptionName: 'csfFunction' // Make translations
 	},
@@ -236,7 +236,7 @@ const OWNER_FILTER: ListViewFilterConfig = {
 /* const HAS_RISK_MATRIX_FILTER: ListViewFilterConfig = {
   component: CheckboxFilter,
   getColumn: row => {
-    return !row.meta.overview.some(
+    return !row.overview.some(
       line => line.startsWith("risk_matrix")
     ); // It would be better to directly have a boolean given by the library data which is set to True when the library has a risk matrix or false otherwise.
   },
@@ -252,7 +252,7 @@ const OWNER_FILTER: ListViewFilterConfig = {
 const LIBRARY_TYPE_FILTER = {
 	component: SelectFilter,
 	getColumn: (row) => {
-		const overviewKeys = new Set(row.overview.map((overviewRow) => overviewRow.split(':')[0]));
+		const overviewKeys = new Set(row.overview?.map((overviewRow) => overviewRow.split(':')[0]));
 		const libraryDatatypeSet = new Set([
 			'framework',
 			'risk_matrix',
@@ -495,7 +495,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			provider: PROVIDER_FILTER,
 			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
@@ -504,7 +504,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['provider', 'name', 'description', 'locales', 'overview'],
 		filters: {
 			locales: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER_FOR_LIBRARIES,
+			provider: PROVIDER_FILTER,
 			objectType: LIBRARY_TYPE_FILTER
 		}
 	},
