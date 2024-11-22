@@ -309,7 +309,11 @@
 										{@const tagData = tag.key?.[tagKey]?.[tagValue]}
 										{#if tagData && tags}
 											{@const { text, cssClasses } = tagData}
-											<span class={cssClasses}>{safeTranslate(text)}</span>
+											<span class="space-x-1">
+												<span class={cssClasses}>
+													{safeTranslate(text)}
+												</span>
+											</span>
 										{/if}
 									{/each}
 								{/if}
@@ -359,7 +363,7 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value)}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else}
 											{safeTranslate(value ?? '-')}
