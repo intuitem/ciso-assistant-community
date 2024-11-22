@@ -93,7 +93,7 @@
 					<span class=" text-sm text-gray-400 font-semibold">{m.owner()}</span>
 					<ul>
 						{#each data.scenario.owner as owner}
-							<li class="text-xs">{owner.str}</li>
+							<li class="text-xs font-semibold">{owner.str}</li>
 						{/each}
 					</ul>
 				</div>
@@ -107,28 +107,40 @@
 		</div>
 	</div>
 	<div class="flex flex-row space-x-2">
-		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5 max-h-96 overflow-y-scroll">
-			<h4 class="h4 font-semibold">{m.threats()}</h4>
-			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
-		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg w-2/5 max-h-96 overflow-y-scroll">
 			<h4 class="h4 font-semibold">{m.assets()}</h4>
 			<ModelTable source={data.tables['assets']} hideFilters={true} URLModel="assets" />
 		</div>
+		<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-3/5 max-h-96 overflow-y-scroll">
+			<h4 class="h4 font-semibold">{m.threats()}</h4>
+			<ModelTable source={data.tables['threats']} hideFilters={true} URLModel="threats" />
+		</div>
+	</div>
+	<div class="card px-4 py-2 bg-white shadow-lg max-w-full max-h-96 overflow-y-scroll">
+		<h4 class="h4 font-semibold">{m.vulnerabilities()}</h4>
+		<ModelTable
+			source={data.tables['vulnerabilities']}
+			hideFilters={true}
+			URLModel="vulnerabilities"
+		/>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
-		<div class="flex flex-col w-fit">
+		<div class="flex flex-col w-1/2">
 			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
-			<p class="text-sm font-semibold text-gray-400">{m.existingControls()}</p>
 			{#if data.scenario.existing_controls}
-				<p>
+				<p class="text-sm font-semibold text-gray-400">{m.context()}</p>
+				<p class="mt-1 mb-2">
 					{data.scenario.existing_controls}
 				</p>
-			{:else}
-				<p class="text-gray-400 italic text-sm">{m.noExistingControls()}</p>
 			{/if}
+			<p class="text-sm font-semibold text-gray-400">{m.existingControls()}</p>
+			<ModelTable
+				source={data.tables['risk_scenarios_e']}
+				hideFilters={true}
+				URLModel="applied-controls"
+			/>
 		</div>
-		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-fit h-full">
+		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
@@ -165,16 +177,16 @@
 		</div>
 	</div>
 	<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
-		<div class="flex flex-col w-fit">
+		<div class="flex flex-col w-1/2">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<p class="text-sm font-semibold text-gray-400">{m.appliedControls()}</p>
 			<ModelTable
-				source={data.tables['applied-controls']}
+				source={data.tables['risk_scenarios']}
 				hideFilters={true}
 				URLModel="applied-controls"
 			/>
 		</div>
-		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-fit">
+		<div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
 				<span
