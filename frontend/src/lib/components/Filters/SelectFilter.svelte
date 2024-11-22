@@ -17,7 +17,7 @@
 	export let translateOptions = true;
 
 	export let options: string[];
-	options = [...new Set(options.flat())];
+	options = [...new Set(options ? options.flat() : [])];
 	options = options.filter((option) => option !== '');
 
 	const selectOptions = options
