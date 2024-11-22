@@ -342,6 +342,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     first_name = models.CharField(_("first name"), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
+    preferences = models.JSONField(default=dict)
     is_sso = models.BooleanField(default=False)
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(

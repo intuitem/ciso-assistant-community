@@ -1,7 +1,6 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -9,7 +8,6 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
-import { setFlash } from 'sveltekit-flash-message/server';
 
 interface AuthenticationFlow {
 	id:
@@ -117,8 +115,25 @@ export const actions: Actions = {
 			secure: true
 		});
 
+		const preferencesRes = await fetch(`${BASE_API_URL}/user-preferences/`);
+		const preferences = await preferencesRes.json();
+
+		const currentLang = cookies.get('ciso_lang') || 'en';
+		const preferedLang = preferences.lang;
+
+		if (preferedLang && currentLang !== preferedLang) {
+			cookies.set('ciso_lang', preferedLang, {
+				httpOnly: false,
+				sameSite: 'lax',
+				path: '/',
+				secure: true
+			});
+		}
+
 		const next = url.searchParams.get('next') || '/';
-		redirect(302, getSecureRedirect(next));
+		const redirectURL = getSecureRedirect(next) + '?refresh=1';
+		[0, 0, 0, 0, 0].forEach(() => console.log(redirectURL));
+		redirect(302, redirectURL);
 	},
 	mfaAuthenticate: async (event) => {
 		const formData = await event.request.formData();

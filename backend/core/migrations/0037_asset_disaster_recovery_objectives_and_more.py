@@ -96,4 +96,14 @@ class Migration(migrations.Migration):
                 verbose_name="Security objectives",
             ),
         ),
+        migrations.AddField(
+            model_name="appliedcontrol",
+            name="priority",
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                choices=[(1, "P1"), (2, "P2"), (3, "P3"), (4, "P4")],
+                null=True,
+                verbose_name="Priority",
+            ),
+        ),
     ]
