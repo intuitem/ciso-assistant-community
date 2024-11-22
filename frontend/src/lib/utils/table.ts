@@ -406,8 +406,24 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	assets: {
-		head: ['name', 'description', 'businessValue', 'owner', 'domain'],
-		body: ['name', 'description', 'business_value', 'owner', 'folder'],
+		head: [
+			'name',
+			'description',
+			'businessValue',
+			'securityObjectives',
+			'disasterRecoveryObjectives',
+			'owner',
+			'domain'
+		],
+		body: [
+			'name',
+			'description',
+			'business_value',
+			'security_objectives',
+			'disaster_recovery_objectives',
+			'owner',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER

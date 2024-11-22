@@ -224,6 +224,12 @@ class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
+    security_objectives = serializers.JSONField(
+        source="get_security_objectives_display"
+    )
+    disaster_recovery_objectives = serializers.JSONField(
+        source="get_disaster_recovery_objectives_display"
+    )
 
     type = serializers.CharField(source="get_type_display")
 
