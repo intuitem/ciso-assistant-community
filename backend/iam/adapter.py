@@ -11,8 +11,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
@@ -27,6 +32,22 @@ class AccountAdapter(DefaultAccountAdapter):
             url = url.replace(":" + str(urlparse(url).port), "")
 
         return url_has_allowed_host_and_scheme(url, allowed_hosts=allowed_hosts)
+
+    def is_open_for_signup(self, request):
+        return False
+
+    def authenticate(self, request, **credentials):
+        try:
+            serializer = AuthTokenSerializer(
+                data={
+                    "username": credentials.get("email"),
+                    "password": credentials.get("password"),
+                }
+            )
+            serializer.is_valid(raise_exception=True)
+            return serializer.validated_data["user"]
+        except Exception:
+            return None
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
