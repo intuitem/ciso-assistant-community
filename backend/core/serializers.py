@@ -613,6 +613,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
     assessable = serializers.BooleanField(source="requirement.assessable")
+    requirement = FieldsRelatedField(["urn", "parent_urn"])
 
     class Meta:
         model = RequirementAssessment
