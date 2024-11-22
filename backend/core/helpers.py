@@ -3,6 +3,7 @@ from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
 
+# from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
 from django.db.models import Count
@@ -797,18 +798,17 @@ def build_audits_tree_metrics(user):
             block_prj = {"name": project.name, "domain": domain.name, "children": []}
             children = []
             for audit in ComplianceAssessment.objects.filter(project=project):
-                cnt_reqs = RequirementAssessment.objects.filter(
-                    compliance_assessment=audit
-                ).count()
                 cnt_res = {}
                 for result in RequirementAssessment.Result.choices:
-                    cnt_res[result[0]] = (
-                        RequirementAssessment.objects.filter(
-                            requirement__assessable=True
-                        )
-                        .filter(compliance_assessment=audit)
-                        .filter(result=result[0])
-                        .count()
+                    requirement_assessments = audit.get_requirement_assessments(
+                        include_non_assessable=False
+                    )
+                    cnt_res[result[0]] = len(
+                        [
+                            requirement
+                            for requirement in requirement_assessments
+                            if requirement.result == result[0]
+                        ]
                     )
                 blk_audit = {
                     "name": audit.name,
@@ -841,6 +841,20 @@ def build_audits_tree_metrics(user):
         block_domain["children"] = domain_prj_children
         tree.append(block_domain)
     return tree
+
+
+def build_audits_stats(user):
+    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, ComplianceAssessment
+    )
+    data = list()
+    names = list()
+    uuids = dict()
+    for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
+        data.append([rs[0] for rs in audit.get_requirements_result_count()])
+        names.append(audit.name)
+        uuids[audit.name] = audit.id
+    return {"data": data, "names": names, "uuids": uuids}
 
 
 def csf_functions(user):
@@ -906,7 +920,7 @@ def get_metrics(user: User):
             .filter(result="non_compliant")
             .count(),
         },
-        "audits_tree": build_audits_tree_metrics(user),
+        "audits_stats": build_audits_stats(user),
         "csf_functions": csf_functions(user),
     }
     return data

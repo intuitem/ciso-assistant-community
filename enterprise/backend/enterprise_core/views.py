@@ -24,6 +24,14 @@ from core.utils import MAIN_ENTITY_DEFAULT_NAME
 from iam.models import User
 from tprm.models import Entity
 
+from iam.models import RoleAssignment
+from tprm.models import Folder
+from uuid import UUID
+
+import shutil
+from pathlib import Path
+import humanize
+
 from .models import ClientSettings
 from .serializers import ClientSettingsReadSerializer
 
@@ -163,6 +171,42 @@ class ClientSettingsViewSet(BaseModelViewSet):
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
 
+    @action(methods=["put"], detail=True, url_path="logo/delete")
+    def delete_logo(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ClientSettings
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            settings = self.get_object()
+            if settings.logo:
+                settings.logo.delete()
+                settings.save()
+                response = Response(status=status.HTTP_200_OK)
+        return response
+
+    @action(methods=["put"], detail=True, url_path="favicon/delete")
+    def delete_favicon(self, request, pk):
+        (
+            object_ids_view,
+            _,
+            _,
+        ) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ClientSettings
+        )
+        response = Response(status=status.HTTP_403_FORBIDDEN)
+        if UUID(pk) in object_ids_view:
+            settings = self.get_object()
+            if settings.favicon:
+                settings.favicon.delete()
+                settings.save()
+                response = Response(status=status.HTTP_200_OK)
+        return response
+
 
 class LicenseStatusView(APIView):
     def get(self, request):
@@ -170,27 +214,48 @@ class LicenseStatusView(APIView):
 
         if not expiry_date_str:
             return Response(
-                {"status": "unknown", "message": "No expiry date set"},
+                {"status": "active", "message": "No expiratiion date set"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            expiry_date = datetime.fromisoformat(expiry_date_str)
+            try:
+                expiration_date = datetime.fromisoformat(expiry_date_str)
+            except ValueError:
+                expiration_date = "noExpirationDateSet"
+                return Response({"status": "active", "message": expiration_date})
         except ValueError as e:
-            logger.error("Invalid expiry date format", exc_info=e)
+            logger.error("Invalid expiration date format", exc_info=e)
             return Response(
-                {"status": "error", "message": "Invalid expiry date format"},
+                {"status": "error", "message": "Invalid expiration date format"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         now = datetime.now()
 
-        if expiry_date > now:
-            days_left = (expiry_date - now).days
+        if expiration_date > now:
+            days_left = (expiration_date - now).days
             return Response({"status": "active", "days_left": days_left})
         else:
-            days_expired = (now - expiry_date).days
+            days_expired = (now - expiration_date).days
             return Response({"status": "expired", "days_expired": days_expired})
+
+
+def get_disk_usage():
+    try:
+        path = Path(settings.BASE_DIR) / "db"
+        usage = shutil.disk_usage(path)
+        return usage
+    except PermissionError:
+        logger.error(
+            "Permission issue: cannot access the path to retrieve the disk_usage info"
+        )
+        return None
+    except FileNotFoundError:
+        logger.error(
+            "Path issue: cannot access the path to retrieve the disk_usage info"
+        )
+        return None
 
 
 @api_view(["GET"])
@@ -203,11 +268,27 @@ def get_build(request):
     LICENSE_SEATS = settings.LICENSE_SEATS
     LICENSE_EXPIRATION = settings.LICENSE_EXPIRATION
     try:
-        expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
-        license_expiration = date_format(expiration_iso, use_l10n=True)
+        try:
+            expiration_iso = datetime.fromisoformat(LICENSE_EXPIRATION)
+            license_expiration = date_format(expiration_iso, use_l10n=True)
+        except ValueError:
+            license_expiration = "noExpirationDateSet"
     except ValueError:
         logger.error("Invalid expiry date format", exc_info=True)
         license_expiration = LICENSE_EXPIRATION
+
+    disk_info = get_disk_usage()
+
+    if disk_info:
+        total, used, free = disk_info
+        disk_response = {
+            "Disk space": f"{humanize.naturalsize(total)}",
+            "Used": f"{humanize.naturalsize(used)} ({int((used/total)*100)} %)",
+        }
+    else:
+        disk_response = {
+            "Disk space": "Unable to retrieve disk usage",
+        }
     return Response(
         {
             "version": VERSION,
@@ -215,5 +296,6 @@ def get_build(request):
             "license_seats": LICENSE_SEATS,
             "available_seats": LICENSE_SEATS - len(User.get_editors()),
             "license_expiration": license_expiration,
+            **disk_response,
         }
     )

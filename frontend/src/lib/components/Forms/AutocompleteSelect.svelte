@@ -21,11 +21,15 @@
 
 	export let hidden = false;
 	export let translateOptions = true;
+
+	export let allowUserOptions: boolean | 'append' = false;
+
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x
 	};
 	export let cachedValue: any[] | undefined = undefined;
+	export let createFromSelection = false;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
@@ -81,6 +85,17 @@
 		dispatch('change', $value);
 		dispatch('cache', selected);
 	}
+
+	$: {
+		selected = selected.map((option) => {
+			const newOption = {
+				label: option.label,
+				value: option.value || option.label
+			};
+			selected = [...selected, newOption];
+			return newOption;
+		});
+	}
 </script>
 
 <div {hidden}>
@@ -108,27 +123,25 @@
 	{/if}
 	<div class="control overflow-x-clip" data-testid="form-input-{field.replaceAll('_', '-')}">
 		<input type="hidden" name={field} value={$value ? $value : ''} />
-		{#if options.length > 0}
-			<MultiSelect
-				bind:selected
-				{options}
-				{...multiSelectOptions}
-				disabled={disabled || $$restProps.disabled}
-				{...$$restProps}
-				let:option
-			>
-				{#if option.suggested}
-					<span class="text-indigo-600">{option.label}</span>
-					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if translateOptions}
-					{safeTranslate(option.label)}
-				{:else}
-					{option.label}
-				{/if}
-			</MultiSelect>
-		{:else}
-			<MultiSelect {options} {...multiSelectOptions} disabled />
-		{/if}
+		<MultiSelect
+			bind:selected
+			{options}
+			{...multiSelectOptions}
+			disabled={disabled || $$restProps.disabled}
+			allowEmpty={true}
+			{...$$restProps}
+			let:option
+			{allowUserOptions}
+		>
+			{#if option.suggested}
+				<span class="text-indigo-600">{option.label}</span>
+				<span class="text-sm text-gray-500"> (suggested)</span>
+			{:else if translateOptions}
+				{safeTranslate(option.label)}
+			{:else}
+				{option.label}
+			{/if}
+		</MultiSelect>
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500">{helpText}</p>

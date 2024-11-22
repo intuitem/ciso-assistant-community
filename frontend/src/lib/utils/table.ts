@@ -50,6 +50,28 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const LABELS_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => {
+		return row.filtering_labels && row.filtering_labels.length > 0
+			? row.filtering_labels.map((filtering_label) => filtering_label.str)
+			: [''];
+	},
+	alwaysDefined: true,
+	extraProps: {
+		defaultOptionName: 'filtering_labels'
+	}
+};
+
+const PRIORITY_FILTER: ListViewFilterConfig = {
+	component: SelectFilter,
+	getColumn: (row) => row.meta.priority,
+	alwaysDisplay: true,
+	extraProps: {
+		defaultOptionName: 'priority'
+	}
+};
+
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
 	getColumn: (row) => row.meta.folder.str
@@ -242,12 +264,7 @@ const LIBRARY_TYPE_FILTER = {
 		return datatypes;
 	},
 	extraProps: {
-		defaultOptionName: 'objectType',
-		optionLabels: {
-			reference_controls: 'referenceControls',
-			requirement_mapping_set: 'requirementMappingSet',
-			risk_matrix: 'riskMatrix'
-		}
+		defaultOptionName: 'objectType'
 	},
 	alwaysDisplay: true
 };
@@ -265,12 +282,24 @@ export const listViewFields: ListViewFieldsConfig = {
 			lc_status: PROJECT_STATUS_FILTER
 		}
 	},
+	'filtering-labels': {
+		head: ['label'],
+		body: ['label']
+	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain'],
 		body: ['name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER
+		}
+	},
+	vulnerabilities: {
+		head: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'labels'],
+		body: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'filtering_labels'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-assessments': {
@@ -287,17 +316,27 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			provider: PROVIDER_FILTER
 		}
 	},
 	'risk-scenarios': {
-		head: ['name', 'threats', 'riskAssessment', 'appliedControls', 'currentLevel', 'residualLevel'],
+		head: [
+			'name',
+			'threats',
+			'riskAssessment',
+			'existingAppliedControls',
+			'currentLevel',
+			'extraAppliedControls',
+			'residualLevel'
+		],
 		body: [
 			'name',
 			'threats',
 			'risk_assessment',
-			'applied_controls',
+			'existing_applied_controls',
 			'current_level',
+			'applied_controls',
 			'residual_level'
 		],
 		filters: {
@@ -344,7 +383,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			status: STATUS_FILTER,
 			category: CATEGORY_FILTER,
 			csf_function: CSF_FUNCTION_FILTER,
-			owner: OWNER_FILTER
+			owner: OWNER_FILTER,
+			priority: PRIORITY_FILTER
 		}
 	},
 	policies: {
@@ -366,8 +406,24 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	assets: {
-		head: ['name', 'description', 'businessValue', 'domain'],
-		body: ['name', 'description', 'business_value', 'folder'],
+		head: [
+			'name',
+			'description',
+			'businessValue',
+			'securityObjectives',
+			'disasterRecoveryObjectives',
+			'owner',
+			'domain'
+		],
+		body: [
+			'name',
+			'description',
+			'business_value',
+			'security_objectives',
+			'disaster_recovery_objectives',
+			'owner',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER

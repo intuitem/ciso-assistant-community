@@ -26,9 +26,23 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	return csrfToken;
 }
 
+function logoutUser(event: RequestEvent) {
+	event.cookies.delete('token', {
+		path: '/'
+	});
+	const allauthSessionToken = event.cookies.get('allauth_session_token');
+	if (allauthSessionToken) {
+		event.cookies.delete('allauth_session_token', { path: '/' });
+	}
+	redirect(302, `/login?next=${event.url.pathname}`);
+}
+
 async function validateUserSession(event: RequestEvent): Promise<User | null> {
 	const token = event.cookies.get('token');
 	if (!token) return null;
+
+	const allauthSessionToken = event.cookies.get('allauth_session_token');
+	if (!allauthSessionToken) logoutUser(event);
 
 	const res = await fetch(`${BASE_API_URL}/iam/current-user/`, {
 		credentials: 'include',
@@ -38,12 +52,8 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 		}
 	});
 
-	if (!res.ok) {
-		event.cookies.delete('token', {
-			path: '/'
-		});
-		redirect(302, `/login?next=${event.url.pathname}`);
-	}
+	if (!res.ok) logoutUser(event);
+
 	return res.json();
 }
 
@@ -64,6 +74,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const user = await validateUserSession(event);
 	if (user) {
 		event.locals.user = user;
+		const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {
+			credentials: 'include',
+			headers: {
+				'content-type': 'application/json',
+				Authorization: `Token ${event.cookies.get('token')}`
+			}
+		});
+		event.locals.settings = await generalSettings.json();
 	}
 
 	return await resolve(event);
@@ -86,6 +104,13 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookie
 		if (unsafeMethods.has(request.method) && csrfToken) {
 			request.headers.append('X-CSRFToken', csrfToken);
 			request.headers.append('Cookie', `csrftoken=${csrfToken}`);
+		}
+	}
+
+	if (request.url.startsWith(`${BASE_API_URL}/_allauth/app`)) {
+		const allauthSessionToken = cookies.get('allauth_session_token');
+		if (allauthSessionToken) {
+			request.headers.append('X-Session-Token', allauthSessionToken);
 		}
 	}
 

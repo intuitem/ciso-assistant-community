@@ -22,5 +22,5 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 		}
 	}
 	setLanguageTag(cookies.get('ciso_lang') || sourceLanguageTag);
-	return { user: locals.user };
+	return { user: locals.user, settings: locals.settings };
 }) satisfies LayoutServerLoad;

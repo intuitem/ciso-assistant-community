@@ -128,6 +128,22 @@ class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
     pass
 
 
+class VulnerabilityReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
+
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
+
+
+class VulnerabilityWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Vulnerability
+        exclude = ["created_at", "updated_at", "is_published"]
+
+
 class RiskAcceptanceWriteSerializer(BaseModelSerializer):
     # NOTE: This is a workaround to filter the approvers on api view
     #       but it causes some problems in api_tests. Serializers are
@@ -207,6 +223,13 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    owner = FieldsRelatedField(many=True)
+    security_objectives = serializers.JSONField(
+        source="get_security_objectives_display"
+    )
+    disaster_recovery_objectives = serializers.JSONField(
+        source="get_disaster_recovery_objectives_display"
+    )
 
     type = serializers.CharField(source="get_type_display")
 
@@ -288,6 +311,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
+    existing_applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
 
     owner = FieldsRelatedField(many=True)
@@ -302,7 +326,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
-
+    priority = serializers.CharField(source="get_priority_display")
     category = serializers.CharField(
         source="get_category_display"
     )  # type : get_type_display
@@ -315,6 +339,8 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
+    has_evidences = serializers.BooleanField()
+    eta_missed = serializers.BooleanField()
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
@@ -554,6 +580,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    progress = serializers.ReadOnlyField()
 
     class Meta:
         model = ComplianceAssessment
@@ -585,6 +612,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assessable = serializers.BooleanField(source="requirement.assessable")
 
     class Meta:
         model = RequirementAssessment
@@ -650,3 +678,17 @@ class ComputeMappingSerializer(serializers.Serializer):
     source_assessment = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all()
     )
+
+
+class FilteringLabelReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = FilteringLabel
+        fields = "__all__"
+
+
+class FilteringLabelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = FilteringLabel
+        exclude = ["folder", "is_published"]

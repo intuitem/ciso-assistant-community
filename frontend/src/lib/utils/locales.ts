@@ -46,6 +46,12 @@ export const LOCALE_MAP = {
 	},
 	ur: {
 		name: 'urdu'
+	},
+	cz: {
+		name: 'czech'
+	},
+	sv: {
+		name: 'swedish'
 	}
 };
 
