@@ -679,21 +679,6 @@ socialaccount = ["pyjwt[crypto] (>=1.7)", "requests (>=2.0.0)", "requests-oauthl
 steam = ["python3-openid (>=3.0.8)"]
 
 [[package]]
-name = "django-auditlog"
-version = "3.0.0"
-description = "Audit log app for Django"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "django-auditlog-3.0.0.tar.gz", hash = "sha256:9de49f80a4911135d136017123cd73461f869b4947eec14d5e76db4b88182f3f"},
-    {file = "django_auditlog-3.0.0-py3-none-any.whl", hash = "sha256:92db1cf4a51ceca5c26b3ff46997d9e3305a02da1bd435e2efb5b8b6d300ce1f"},
-]
-
-[package.dependencies]
-Django = ">=3.2"
-python-dateutil = ">=2.7.0"
-
-[[package]]
 name = "django-filter"
 version = "24.3"
 description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
@@ -998,6 +983,20 @@ all = ["chardet (>=2.2)", "genshi", "lxml"]
 chardet = ["chardet (>=2.2)"]
 genshi = ["genshi"]
 lxml = ["lxml"]
+
+[[package]]
+name = "humanize"
+version = "4.11.0"
+description = "Python humanize utilities"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "humanize-4.11.0-py3-none-any.whl", hash = "sha256:b53caaec8532bcb2fff70c8826f904c35943f8cecaca29d272d9df38092736c0"},
+    {file = "humanize-4.11.0.tar.gz", hash = "sha256:e66f36020a2d5a974c504bd2555cf770621dbdbb6d82f94a6857c0b1ea2608be"},
+]
+
+[package.extras]
+tests = ["freezegun", "pytest", "pytest-cov"]
 
 [[package]]
 name = "identify"
@@ -1733,20 +1732,6 @@ pytest = ">=7.0.0"
 test = ["black (>=22.1.0)", "flake8 (>=4.0.1)", "pre-commit (>=2.17.0)", "tox (>=3.24.5)"]
 
 [[package]]
-name = "python-dateutil"
-version = "2.9.0.post0"
-description = "Extensions to the standard Python datetime module"
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-files = [
-    {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
-    {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
-]
-
-[package.dependencies]
-six = ">=1.5"
-
-[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -2411,4 +2396,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "ff8ea2b122da9085438362801d6688d06592c226d9a9acd39ea8cb7f15334b78"
+content-hash = "5f38fdc11bf9e530472b19a6527ef3a33008ab252e82e8e78fbd86414065f10a"

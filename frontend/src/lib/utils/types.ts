@@ -45,6 +45,7 @@ export const URL_MODEL = [
 	'requirement-assessments',
 	'libraries',
 	'sso-settings',
+	'general-settings',
 	'requirement-mapping-sets',
 	'entities',
 	'entity-assessments',

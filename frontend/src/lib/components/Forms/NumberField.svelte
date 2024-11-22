@@ -8,7 +8,7 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
-	export let cachedValue: string | undefined; // = '';
+	export let cachedValue: string | undefined;
 	export let cacheLock: CacheLock = {
 		promise: new Promise((res) => res(null)),
 		resolve: (x) => x

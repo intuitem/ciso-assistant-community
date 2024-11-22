@@ -31,7 +31,7 @@ django-allauth = { version = "65.0.2", extras = [
 python-magic = "0.4.27"
 pytz = "2024.2"
 fido2 = "^1.1.3"
-django-auditlog = "^3.0.0"
+humanize = "^4.11.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
