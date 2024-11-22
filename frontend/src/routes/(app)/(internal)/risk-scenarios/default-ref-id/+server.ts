@@ -2,12 +2,14 @@ import { BASE_API_URL } from '$lib/utils/constants';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-export const GET: RequestHandler = async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/client-settings/logo/`;
+export const GET: RequestHandler = async ({ fetch, url }) => {
+	console.log(url);
+	const riskAssessmentId = url.searchParams.get('risk_assessment');
+	const endpoint = `${BASE_API_URL}/risk-scenarios/default_ref_id/?risk_assessment=${riskAssessmentId}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Failed to fetch default ref_id');
+		error(400, 'Error fetching logo');
 	}
 	const logo = await res.json();
 
