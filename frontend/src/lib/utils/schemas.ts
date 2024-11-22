@@ -172,6 +172,32 @@ export const AssetSchema = baseNamedObject({
 	type: z.string().default('PR'),
 	folder: z.string(),
 	parent_assets: z.string().optional().array().optional(),
+	security_objectives: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional(),
+						is_enabled: z.boolean().default(false)
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	disaster_recovery_objectives: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	reference_link: z.string().url().optional().or(z.literal('')),
 	owner: z.string().uuid().optional().array().optional()
 });
 
@@ -243,6 +269,10 @@ export const EvidenceSchema = baseNamedObject({
 	link: z.string().optional().nullable()
 });
 
+export const GeneralSettingsSchema = z.object({
+	security_objective_scale: z.string()
+});
+
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().optional(),
 	provider: z.string().default('saml'),
@@ -290,7 +320,7 @@ export const SSOSettingsSchema = z.object({
 export const EntitiesSchema = baseNamedObject({
 	folder: z.string(),
 	mission: z.string().optional(),
-	reference_link: z.string().optional()
+	reference_link: z.string().url().optional().or(z.literal(''))
 });
 
 export const EntityAssessmentSchema = baseNamedObject({
@@ -362,6 +392,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	evidences: EvidenceSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
+	'general-settings': GeneralSettingsSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
