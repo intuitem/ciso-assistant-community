@@ -313,7 +313,17 @@ class AssetViewSet(BaseModelViewSet):
         nodes_idx = dict()
         categories = []
         N = 0
-        for domain in Folder.objects.all():
+        (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Asset,
+        )
+        for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
             nodes_idx[domain.name] = N
             nodes.append(
@@ -326,7 +336,7 @@ class AssetViewSet(BaseModelViewSet):
                 }
             )
             N += 1
-        for asset in Asset.objects.all():
+        for asset in Asset.objects.filter(id__in=viewable_assets):
             symbol = "circle"
             if asset.type == "PR":
                 symbol = "diamond"
@@ -344,7 +354,7 @@ class AssetViewSet(BaseModelViewSet):
                 {"source": nodes_idx[asset.folder.name], "target": N, "value": "scope"}
             )
             N += 1
-        for asset in Asset.objects.all():
+        for asset in Asset.objects.filter(id__in=viewable_assets):
             for relationship in asset.parent_assets.all():
                 links.append(
                     {
@@ -358,6 +368,14 @@ class AssetViewSet(BaseModelViewSet):
         return Response(
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
+
+    @action(detail=False, name="Get security objectives")
+    def security_objectives(self, request):
+        return Response({"results": Asset.DEFAULT_SECURITY_OBJECTIVES})
+
+    @action(detail=False, name="Get disaster recovery objectives")
+    def disaster_recovery_objectives(self, request):
+        return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
@@ -578,6 +596,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "measure_desc",
                 "category",
                 "csf_function",
+                "priority",
                 "reference_control",
                 "eta",
                 "effort",
@@ -608,6 +627,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
+                    mtg.priority,
                     mtg.cost,
                     mtg.link,
                     mtg.status,
@@ -793,6 +813,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "folder",
         "category",
         "csf_function",
+        "priority",
         "status",
         "reference_control",
         "effort",
@@ -818,6 +839,11 @@ class AppliedControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
         return Response(dict(AppliedControl.CSF_FUNCTION))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get priority choices")
+    def priority(self, request):
+        return Response(dict(AppliedControl.PRIORITY))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
@@ -2549,6 +2575,7 @@ def export_mp_csv(request):
         "csf_function",
         "reference_control",
         "eta",
+        "priority",
         "effort",
         "cost",
         "link",
@@ -2569,6 +2596,7 @@ def export_mp_csv(request):
             mtg.description,
             mtg.category,
             mtg.csf_function,
+            mtg.priority,
             mtg.reference_control,
             mtg.eta,
             mtg.effort,

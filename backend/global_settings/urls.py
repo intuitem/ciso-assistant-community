@@ -3,7 +3,7 @@ from rest_framework import routers
 
 from iam.sso.views import SSOSettingsViewSet
 
-from .views import GlobalSettingsViewSet, get_sso_info
+from .views import GlobalSettingsViewSet, get_sso_info, GeneralSettingsViewSet
 from .routers import DefaultSettingsRouter
 
 
@@ -15,6 +15,11 @@ settings_router.register(
     r"sso",
     SSOSettingsViewSet,
     basename="sso-settings",
+)
+settings_router.register(
+    r"general",
+    GeneralSettingsViewSet,
+    basename="general-settings",
 )
 
 
