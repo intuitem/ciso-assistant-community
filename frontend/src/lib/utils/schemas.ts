@@ -138,17 +138,7 @@ export const AppliedControlSchema = baseNamedObject({
 	owner: z.string().uuid().optional().array().optional()
 });
 
-export const PolicySchema = baseNamedObject({
-	csf_function: z.string().optional().nullable(),
-	status: z.string().optional().default('--'),
-	evidences: z.string().optional().array().optional(),
-	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	link: z.string().url().optional().or(z.literal('')),
-	effort: z.string().optional().nullable(),
-	folder: z.string(),
-	reference_control: z.string().optional().nullable()
-});
+export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
 export const RiskAcceptanceSchema = baseNamedObject({
 	folder: z.string(),
