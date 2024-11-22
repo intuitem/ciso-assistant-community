@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0035_riskscenario_existing_applied_controls"),
+        ("core", "0038_asset_disaster_recovery_objectives_and_more"),
     ]
 
     operations = [
