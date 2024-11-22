@@ -24,6 +24,7 @@
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import List from '$lib/components/List/List.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
