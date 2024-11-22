@@ -1190,7 +1190,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
             default_ref_id = RiskScenario.get_default_ref_id(risk_assessment)
             return Response({"results": default_ref_id})
         except Exception as e:
-            return Response({"error": str(e)}, status=400)
+            logger.error("Error in default_ref_id: %s", str(e))
+            return Response(
+                {"error": "Error in default_ref_id has occurred."}, status=400
+            )
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
