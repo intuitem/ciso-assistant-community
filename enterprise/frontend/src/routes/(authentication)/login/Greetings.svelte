@@ -4,7 +4,6 @@
 	import Logo from '$lib/components/Logo/Logo.svelte';
 	import { page } from '$app/stores';
 
-
 	const clientSettings = $page.data.clientSettings;
 </script>
 
