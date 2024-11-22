@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def create_emailaddress_objects(apps, schema_editor):
     try:
         from allauth.account.models import EmailAddress
@@ -16,6 +17,7 @@ def create_emailaddress_objects(apps, schema_editor):
             )
     finally:
         pass
+
 
 class Migration(migrations.Migration):
     dependencies = [

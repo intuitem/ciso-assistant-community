@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0008_user_is_third_party'),
+        ("iam", "0008_user_is_third_party"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='preferences',
+            model_name="user",
+            name="preferences",
             field=models.JSONField(default=dict),
         ),
     ]
