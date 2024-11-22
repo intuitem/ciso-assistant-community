@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching logo');
+		error(400, 'Failed to fetch default ref_id');
 	}
 	const logo = await res.json();
 

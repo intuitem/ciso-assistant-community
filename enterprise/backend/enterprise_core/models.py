@@ -19,7 +19,7 @@ class ClientSettings(AbstractBaseModel, FolderMixin):
 
     name = models.CharField(max_length=255, blank=True)
     logo = models.ImageField(
-        upload_to="",
+        upload_to="client_logos",
         null=True,
         blank=True,
         validators=[FileExtensionValidator(["png", "jpeg", "jpg", "webp", "svg"])],
