@@ -5,7 +5,7 @@ import { expect, type Locator, type Page } from './test-utils.js';
  *
  * @param {string} string - The string to escape.
  * @returns {string} The escaped string.
-*/
+ */
 function escapeRegex(string: string): string {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -41,13 +41,13 @@ export abstract class BasePage {
 	/**
 	 * Check whether the browser's URL match the `this.url` value.
 	 *
-	 * @param {boolean} [strict=true] - Determines the URL matching mode. 
+	 * @param {boolean} [strict=true] - Determines the URL matching mode.
 	 * If `strict` is `true`, the function checks if `this.url` is strictly equal to the browser's URL.
 	 * Otherwise, it checks if the browser's URL starts with `this.url`.
 	 * @returns {void}
-	*/
-	async hasUrl(strict: boolean=true) {
-		const URLPattern = strict ? this.url : new RegExp(escapeRegex(this.url) + ".*");
+	 */
+	async hasUrl(strict: boolean = true) {
+		const URLPattern = strict ? this.url : new RegExp(escapeRegex(this.url) + '.*');
 		await expect(this.page).toHaveURL(URLPattern);
 	}
 
