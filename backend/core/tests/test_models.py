@@ -849,6 +849,71 @@ class TestAsset:
         assert asset1.folder == root_folder
         assert asset2.folder == folder
 
+    def test_asset_creation_valid_security_objectives(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        security_objectives = {
+            "objectives": {
+                "confidentiality": {
+                    "value": 1,
+                    "is_enabled": True,
+                },
+                "integrity": {
+                    "value": 0,
+                    "is_enabled": False,
+                },
+                "availability": {
+                    "value": 2,
+                    "is_enabled": True,
+                },
+                "proof": {
+                    "value": 0,
+                    "is_enabled": True,
+                },
+            }
+        }
+
+        asset = Asset.objects.create(
+            name="Asset",
+            description="Asset description",
+            folder=root_folder,
+            security_objectives=security_objectives,
+        )
+
+        assert asset.security_objectives == security_objectives
+
+    def test_asset_creation_invalid_security_objectives(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        security_objectives = {
+            "objectives": {
+                "confidentiality": {
+                    "value": "toto",
+                    "is_enabled": True,
+                },
+                "integrity": {
+                    "value": 0,
+                    "is_enabled": False,
+                },
+                "availability": {
+                    "value": 2,
+                    "is_enabled": True,
+                },
+                "proof": {
+                    "value": 0,
+                    "is_enabled": True,
+                },
+            }
+        }
+
+        with pytest.raises(ValidationError):
+            Asset.objects.create(
+                name="Asset",
+                description="Asset description",
+                folder=root_folder,
+                security_objectives=security_objectives,
+            )
+
 
 @pytest.mark.django_db
 class TestLibrary:
