@@ -151,7 +151,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'internal_reference', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
 			{ name: 'lc_status', type: type.SELECT }
 		]);
 		await use(pPage);
@@ -375,13 +375,13 @@ export class TestContent {
 					name: vars.projectName,
 					description: vars.description,
 					folder: vars.folderName,
-					internal_reference: 'Test internal reference',
+					ref_id: 'ref id',
 					lc_status: 'Production'
 				},
 				editParams: {
 					name: '',
 					description: '',
-					internal_reference: '',
+					ref_id: '',
 					lc_status: 'End of life'
 				}
 			},
