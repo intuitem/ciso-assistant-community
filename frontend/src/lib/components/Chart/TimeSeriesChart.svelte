@@ -14,9 +14,7 @@
 		// specify chart configuration item and data
 
 		var option = {
-			title: {
-				text: 'Assessment progress'
-			},
+			grid: { show: false },
 			tooltip: {
 				trigger: 'axis',
 				formatter: function (params) {
@@ -32,22 +30,23 @@
 			},
 			xAxis: {
 				type: 'time',
-				boundaryGap: false,
-				splitNumber: 3, // Approximate number of splits to show
+				splitNumber: 3,
 				axisPointer: {
 					snap: true
 				}
 			},
 			yAxis: {
 				type: 'value',
-				boundaryGap: [0, '30%']
+				boundaryGap: [0, '5%'],
+				splitLine: { show: false }
 			},
 			series: [
 				{
 					name: 'Requirements assessed',
 					type: 'line',
+					symbol: 'none',
 					areaStyle: {
-						opacity: 1,
+						opacity: 0.8,
 						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
 							{
 								offset: 0,
@@ -62,13 +61,8 @@
 					smooth: true,
 					data: [
 						[new Date('2024-01-01'), 0],
-						[new Date('2024-01-02'), 1],
-						[new Date('2024-01-03'), 4],
-						[new Date('2024-02-15'), 23],
-						[new Date('2024-03-01'), 41],
-						[new Date('2024-03-03'), 51],
-						[new Date('2024-03-10'), 60],
-						[new Date('2024-04-03'), 51]
+						[new Date('2024-01-02'), 10],
+						[new Date('2024-01-03'), 14]
 					]
 				}
 			]

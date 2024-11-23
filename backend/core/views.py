@@ -17,6 +17,8 @@ import shutil
 from pathlib import Path
 import humanize
 
+from icecream import ic
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -2198,6 +2200,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_assessments = compliance_assessment.requirement_assessments.all()
         for requirement_assessment in requirement_assessments:
             requirement_assessment.create_applied_controls_from_suggestions()
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"], url_path="progress_ts")
+    def progress_ts(self, request, pk):
+        data = HistoricalMetric.objects.filter(
+            model="ComplianceAssessment", object_id=pk
+        )
+        ic(data)
         return Response(status=status.HTTP_200_OK)
 
 
