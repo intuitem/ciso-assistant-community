@@ -300,6 +300,7 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'risk-scenarios': {
 		head: [
+			'ref_id',
 			'name',
 			'threats',
 			'riskAssessment',
@@ -309,6 +310,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			'residualLevel'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'threats',
 			'risk_assessment',
