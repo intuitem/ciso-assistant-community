@@ -2235,15 +2235,7 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    @classmethod
-    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
-        """return associated risk assessment id"""
-        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
-        nb_scenarios = len(scenarios_ref_ids) + 1
-        candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
-        return next(x for x in candidates if x not in scenarios_ref_ids)
-
-    ref_id = models.CharField(max_length=8, blank=False, verbose_name=_("Reference ID"))
+    ref_id = models.CharField(max_length=8, blank=True, verbose_name=_("Reference ID"))
 
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
@@ -2265,6 +2257,14 @@ class RiskScenario(NameDescriptionMixin):
     # def get_rating_options(self, field: str) -> list[tuple]:
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
+
+    @classmethod
+    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
+        """return associated risk assessment id"""
+        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
+        nb_scenarios = len(scenarios_ref_ids) + 1
+        candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
+        return next(x for x in candidates if x not in scenarios_ref_ids)
 
     def parent_project(self):
         return self.risk_assessment.project
