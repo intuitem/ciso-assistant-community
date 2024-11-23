@@ -17,8 +17,8 @@ export const load: LayoutServerLoad = async ({ fetch, locals }) => {
     clientSettings.settings.favicon_hash = '';
     clientSettings.settings.name = '';
   }
-  const LICENSE_EXPIRATION_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_DAYS')
-    ? env.PUBLIC_LICENSE_EXPIRATION_DAYS
+  const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
+    ? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
     : 30;
-	return { featureFlags: locals.featureFlags, clientSettings, licenseStatus, LICENSE_EXPIRATION_DAYS };
+	return { featureFlags: locals.featureFlags, clientSettings, licenseStatus, LICENSE_EXPIRATION_NOTIFY_DAYS };
 };
