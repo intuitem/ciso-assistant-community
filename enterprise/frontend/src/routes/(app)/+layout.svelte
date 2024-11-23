@@ -1,20 +1,18 @@
 <script lang="ts">
-
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 	import '../../app.postcss';
 
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
 	import { clientSideToast, pageTitle } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
-	import type { LayoutData } from './$types';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
-	import { toastShown } from './sessionStore';
-	import { get } from 'svelte/store';
+	import type { LayoutData } from './$types';
+	import { licenseAboutToExpireToastShown } from './stores';
 
 	export let data: LayoutData;
 
@@ -42,32 +40,24 @@
 		}
 	}
 
-	let licenseStatus: Record<string, any>;
-	let warning: boolean = false;
-	let licenseMessage: string;
-
-	const expirationDays = data.LICENSE_EXPIRATION_DAYS;
-
-	licenseStatus = data.licenseStatus;
+	const licenseExpirationNotifyDays = data.LICENSE_EXPIRATION_NOTIFY_DAYS;
+	const licenseStatus: Record<string, any> = data.licenseStatus;
 	const flash = getFlash(page);
 
-	if (licenseStatus?.status === "active" && licenseStatus?.days_left <= expirationDays) {
-		warning = true;
-	}
+	const licenseAboutToExpire =
+		licenseStatus?.status === 'active' && licenseStatus?.days_left <= licenseExpirationNotifyDays;
 
 	function showMessage() {
-		if (!get(toastShown)) {
-			licenseMessage = m.licenceToast({ days_left: licenseStatus.days_left });
-			$flash = { type: 'info', message: licenseMessage };
-			toastShown.set(true);
+		if (!$licenseAboutToExpireToastShown) {
+			$flash = {
+				type: 'info',
+				message: m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })
+			};
+			$licenseAboutToExpireToastShown = true;
 		}
 	}
 
-	if (warning) {
-		showMessage();
-	}
-
-	$: if (warning && !get(toastShown)) {
+	$: if (licenseAboutToExpire && !$licenseAboutToExpireToastShown) {
 		showMessage();
 	}
 </script>
