@@ -1663,9 +1663,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             residual = risk_scenario.residual_level
             if current >= 0 and residual >= 0:
                 value += (1 + current - residual) * (current + 1)
-        return (
-            abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else None
-        )
+        return abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else 0
 
     @property
     def get_html_url(self):
