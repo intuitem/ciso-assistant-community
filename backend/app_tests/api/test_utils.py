@@ -805,7 +805,7 @@ class EndpointTestsQueries:
                 if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                     # User has permission to update the object
                     assert update_response.status_code == expected_status, (
-                        f"{verbose_name} can not be updated with authentication"
+                        f"{verbose_name} can not be updated with authentication.\nResponse: {update_response.json()}"
                         if expected_status == status.HTTP_200_OK
                         else f"{verbose_name} should not be updated (expected status: {expected_status})"
                     )
