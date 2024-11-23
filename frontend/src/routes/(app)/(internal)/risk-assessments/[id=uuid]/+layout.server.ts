@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	).then((res) => res.json());
 
 	const headFields = [
-		'rid',
+		'ref_id',
 		'name',
 		'threats',
 		'existingControls',
@@ -31,7 +31,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	];
 
 	const bodyFields = [
-		'rid',
+		'ref_id',
 		'name',
 		'threats',
 		'existing_applied_controls',
