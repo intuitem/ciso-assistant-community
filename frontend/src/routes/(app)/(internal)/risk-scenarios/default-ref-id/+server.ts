@@ -3,7 +3,6 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, url }) => {
-	console.log(url);
 	const riskAssessmentId = url.searchParams.get('risk_assessment');
 	const endpoint = `${BASE_API_URL}/risk-scenarios/default_ref_id/?risk_assessment=${riskAssessmentId}`;
 
