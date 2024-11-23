@@ -21,7 +21,6 @@
 				`/risk-scenarios/default-ref-id/?risk_assessment=${riskAssessmentId}`
 			);
 			const result = await response.json();
-			console.log(result);
 			if (response.ok && result.results) {
 				form.form.update((currentData) => {
 					updated_fields.add('ref_id');
