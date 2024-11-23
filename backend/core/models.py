@@ -2243,9 +2243,7 @@ class RiskScenario(NameDescriptionMixin):
         candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
 
-    ref_id = models.CharField(
-        max_length=100, blank=False, verbose_name=_("Reference ID")
-    )
+    ref_id = models.CharField(max_length=8, blank=False, verbose_name=_("Reference ID"))
 
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
