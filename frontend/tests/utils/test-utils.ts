@@ -375,7 +375,7 @@ export class TestContent {
 					name: vars.projectName,
 					description: vars.description,
 					folder: vars.folderName,
-					ref_id: 'ref id',
+					ref_id: 'R.1234',
 					lc_status: 'Production'
 				},
 				editParams: {
