@@ -139,14 +139,6 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
-	...PROVIDER_FILTER,
-	getColumn: (row) => {
-		return row.provider;
-	},
-	alwaysDisplay: true
-};
-
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => (row.threats?.length ? row.threats.map((t) => t.str) : null),
