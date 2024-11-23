@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             model_name="riskscenario",
             name="ref_id",
             field=models.CharField(
-                default="", max_length=100, verbose_name="Reference ID"
+                default="", max_length=8, verbose_name="Reference ID"
             ),
             preserve_default=False,
         ),
