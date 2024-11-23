@@ -1,13 +1,9 @@
 // description of the columns for each ListView
 
 import SelectFilter from '$lib/components/Filters/SelectFilter.svelte';
-import CheckboxFilter from '$lib/components/Filters/CheckboxFilter.svelte';
 import type { ComponentType } from 'svelte';
 import { LOCALE_DISPLAY_MAP } from './constants';
 import type { Row } from '@vincjo/datatables';
-import * as m from '$paraglide/messages';
-
-type JSONObject = { [key: string]: JSONObject } | JSONObject[] | string | number | boolean | null;
 
 interface ListViewFilterConfig {
 	component: ComponentType;
@@ -43,7 +39,7 @@ const PROJECT_STATUS_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.folder.str,
+	getColumn: (row) => row.folder?.str,
 	alwaysDefined: true,
 	extraProps: {
 		defaultOptionName: 'domain'
@@ -54,7 +50,7 @@ const LABELS_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
 	getColumn: (row) => {
 		return row.filtering_labels && row.filtering_labels.length > 0
-			? row.filtering_labels.map((filtering_label) => filtering_label.str)
+			? row.filtering_labels?.map((filtering_label) => filtering_label.str)
 			: [''];
 	},
 	alwaysDefined: true,
@@ -74,17 +70,17 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 
 const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.folder.str
+	getColumn: (row) => row.folder?.str
 };
 
 const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
-	getColumn: (row) => row.project.folder.str
+	getColumn: (row) => row.project?.folder.str
 };
 
 const PROJECT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => row.project.str,
+	getColumn: (row) => row.project?.str,
 	extraProps: {
 		defaultOptionName: 'project' // Make translations
 	}
@@ -92,7 +88,7 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 
 const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
 	...PROJECT_FILTER,
-	getColumn: (row) => row.project.str
+	getColumn: (row) => row.project?.str
 };
 
 const STATUS_FILTER: ListViewFilterConfig = {
@@ -128,7 +124,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 		if (row.first_name && row.last_name) {
 			return `${row.first_name} ${row.last_name}`;
 		}
-		return row.approver.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
+		return row.approver?.str; // This display the email in the approver filter, is this a problem because of email leak risks ?
 	},
 	extraProps: {
 		defaultOptionName: 'approver'
@@ -163,7 +159,7 @@ const PROVIDER_FILTER_FOR_LIBRARIES: ListViewFilterConfig = {
 
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.threats.length ? row.threats.map((t) => t.str) : null),
+	getColumn: (row) => (row.threats?.length ? row.threats.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'threat'
 	}
@@ -171,7 +167,7 @@ const THREAT_FILTER: ListViewFilterConfig = {
 
 const ASSET_FILTER: ListViewFilterConfig = {
 	component: SelectFilter,
-	getColumn: (row) => (row.assets.length ? row.assets.map((t) => t.str) : null),
+	getColumn: (row) => (row.assets?.length ? row.assets.map((t) => t.str) : null),
 	extraProps: {
 		defaultOptionName: 'asset'
 	},
