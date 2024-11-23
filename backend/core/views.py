@@ -2204,11 +2204,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
-        data = HistoricalMetric.objects.filter(
-            model="ComplianceAssessment", object_id=pk
-        )
-        ic(data)
-        return Response(status=status.HTTP_200_OK)
+        try:
+            raw = (
+                HistoricalMetric.objects.filter(
+                    model="ComplianceAssessment", object_id=pk
+                )
+                .annotate(progress=F("data__reqs__progress_perc"))
+                .values("date", "progress")
+                .order_by("date")
+            )
+
+            # Transform the data into the required format
+            formatted_data = [
+                [entry["date"].isoformat(), entry["progress"]] for entry in raw
+            ]
+
+            return Response({"data": formatted_data})
+
+        except HistoricalMetric.DoesNotExist:
+            return Response(
+                {"error": "No metrics found for this assessment"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
