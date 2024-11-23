@@ -68,12 +68,7 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const DOMAIN_FILTER_FROM_META: ListViewFilterConfig = {
-	...DOMAIN_FILTER,
-	getColumn: (row) => row.folder?.str
-};
-
-const DOMAIN_FILTER_FROM_META_PROJECT: ListViewFilterConfig = {
+const DOMAIN_FILTER_FROM_PROJECT: ListViewFilterConfig = {
 	...DOMAIN_FILTER,
 	getColumn: (row) => row.project?.folder.str
 };
@@ -84,11 +79,6 @@ const PROJECT_FILTER: ListViewFilterConfig = {
 	extraProps: {
 		defaultOptionName: 'project' // Make translations
 	}
-};
-
-const PROJECT_FILTER_FROM_META: ListViewFilterConfig = {
-	...PROJECT_FILTER,
-	getColumn: (row) => row.project?.str
 };
 
 const STATUS_FILTER: ListViewFilterConfig = {
@@ -302,7 +292,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
 			status: { ...STATUS_FILTER, alwaysDisplay: true }
 		}
@@ -336,8 +326,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			'residual_level'
 		],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true },
-			project: { ...PROJECT_FILTER_FROM_META, alwaysDisplay: true },
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
+			project: { ...PROJECT_FILTER, alwaysDisplay: true },
 			treatment: { ...TREATMENT_FILTER, alwaysDisplay: true },
 			risk_assessment: RISK_ASSESSMENT_FILTER,
 			threats: THREAT_FILTER,
@@ -348,7 +338,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios'],
 		filters: {
-			folder: DOMAIN_FILTER_FROM_META,
+			folder: DOMAIN_FILTER,
 			state: STATE_FILTER,
 			approver: APPROVER_FILTER
 		}
@@ -459,7 +449,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
+			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
 			framework: FRAMEWORK_FILTER,
 			status: STATUS_FILTER
@@ -474,7 +464,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: ['name', 'file', 'size', 'description'],
 		body: ['name', 'attachment', 'size', 'description'],
 		filters: {
-			folder: { ...DOMAIN_FILTER_FROM_META, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
+			folder: { ...DOMAIN_FILTER, alwaysDisplay: true } // This filter should also be displayed even without alwaysDisplay
 		}
 	},
 	requirements: {
