@@ -23,7 +23,7 @@ def populate_default_ref_ids(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0038_asset_disaster_recovery_objectives_and_more"),
+        ("core", "0039_make_urn_lowercase"),
     ]
 
     operations = [
