@@ -1095,6 +1095,7 @@ Bundles have the following fields
 - string Status: 
   - for projects: --/Design/Development/Production/End of life/Dropped
   - for others:  --/planned/in progress/in review/done/deprecated
+- labels
 - json specific_content
 
 For each content type, there will be a specific frontend application to guide the user. The "specific_content" field is used to store specific content in a flexible way.
