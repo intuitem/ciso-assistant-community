@@ -10,7 +10,6 @@
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
 	import { clientSideToast, pageTitle } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
-	import { getFlash } from 'sveltekit-flash-message';
 	import type { LayoutData } from './$types';
 	import { licenseAboutToExpireToastShown } from './stores';
 
@@ -42,24 +41,10 @@
 
 	const licenseExpirationNotifyDays = data.LICENSE_EXPIRATION_NOTIFY_DAYS;
 	const licenseStatus: Record<string, any> = data.licenseStatus;
-	const flash = getFlash(page);
 
 	const licenseAboutToExpire =
 		licenseStatus?.status === 'active' && licenseStatus?.days_left <= licenseExpirationNotifyDays;
 
-	function showMessage() {
-		if (!$licenseAboutToExpireToastShown) {
-			$flash = {
-				type: 'info',
-				message: m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })
-			};
-			$licenseAboutToExpireToastShown = true;
-		}
-	}
-
-	$: if (licenseAboutToExpire && !$licenseAboutToExpireToastShown) {
-		showMessage();
-	}
 </script>
 
 <!-- App Shell -->
@@ -74,6 +59,11 @@
 		{#if data.licenseStatus.status === 'expired'}
 			<aside class="variant-soft-warning text-center w-full items-center py-2">
 				{m.licenseExpiredMessage()}
+			</aside>
+		{/if}
+		{#if licenseAboutToExpire }
+			<aside class="variant-soft-warning text-center w-full items-center py-2">
+				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
 			</aside>
 		{/if}
 		<AppBar background="bg-white" padding="py-2 px-4">
