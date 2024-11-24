@@ -4,14 +4,12 @@
 	import '../../app.postcss';
 
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
 	import { clientSideToast, pageTitle } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 	import type { LayoutData } from './$types';
-	import { licenseAboutToExpireToastShown } from './stores';
 
 	export let data: LayoutData;
 
@@ -44,7 +42,6 @@
 
 	const licenseAboutToExpire =
 		licenseStatus?.status === 'active' && licenseStatus?.days_left <= licenseExpirationNotifyDays;
-
 </script>
 
 <!-- App Shell -->
@@ -56,16 +53,13 @@
 		<SideBar bind:open={sidebarOpen} />
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
-		{#if data.licenseStatus.status === 'expired'}
-			<aside class="variant-soft-warning text-center w-full items-center py-2">
+		<aside class="variant-soft-warning text-center w-full items-center py-2">
+			{#if data.licenseStatus.status === 'expired'}
 				{m.licenseExpiredMessage()}
-			</aside>
-		{/if}
-		{#if licenseAboutToExpire }
-			<aside class="variant-soft-warning text-center w-full items-center py-2">
+			{:else if licenseAboutToExpire}
 				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
-			</aside>
-		{/if}
+			{/if}
+		</aside>
 		<AppBar background="bg-white" padding="py-2 px-4">
 			<span
 				class="text-2xl font-bold pb-1 bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
