@@ -1081,6 +1081,7 @@ We need to pack various objects for various reasons. To avoid complexifying the 
 - EBIOS-RM study
 - Audit campaign
 - Third-party campaign
+- Pentest follow-up
 
 The content-type shall be evolutive (json-based). Once a bundle is created, the content-type is immutable.
 
