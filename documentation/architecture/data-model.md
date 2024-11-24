@@ -289,6 +289,7 @@ erDiagram
         asset  parent_asset
         url    reference_link
         json   security_objectives
+        json   disaster_recovery_objectives
     }
 
     RISK_SCENARIO {
@@ -379,354 +380,6 @@ In all views and analytics, a filter on label shall be displayed.
 
 Note: in MVP, labels are attached only to vulnerabilities.
 
-## Class diagram for IAM objects
-
-```mermaid
-classDiagram
-direction RL
-
-AbstractBaseModel    <|-- NameDescriptionMixin
-NameDescriptionMixin <|-- Folder
-NameDescriptionMixin <|-- UserGroup
-FolderMixin          <|-- UserGroup
-FolderMixin          <|-- User
-AbstractBaseModel    <|-- User
-AbstractBaseUser     <|-- User
-NameDescriptionMixin <|-- Role
-FolderMixin          <|-- Role
-NameDescriptionMixin <|-- RoleAssignment
-FolderMixin          <|-- RoleAssignment
-
-class AbstractBaseModel{
-    +UUIDField id
-    +DateTimeField created_at
-    +DateTimeField updated_at
-    +BooleanField is_published
-    +scoped_id() UUID
-    +display_path() str
-    +display_name() str
-    +edit_url() str
-    +get_scope() Folder
-    +clean()
-    +save()
-}
-
-class NameDescriptionMixin{
-    +CharField name
-    +CharField description
-}
-
-class Folder {
-    +CharField content_type
-    +Folder parent_folder
-    +booleanField builtin
-    +subfolders() Folder[]
-    +get_parent_folders() Folder[]
-    +get_folder() Folder$
-}
-
-class FolderMixin {
-    +Folder folder
-}
-
-class UserGroup {
-    +booleanField builtin
-    +get_name_display() str
-}
-
-class User {
-    +CharField last_name
-    +CharField first_name
-    +CharField email
-    +BooleanField first_login
-    +BooleanField is_active
-    +DateTimeField date_joined
-    +BooleanField is_superuser
-    +UserGroup[] user_groups
-    +get_full_name() str
-    +get_short_name() str
-    +mailing()
-    +has_backup_permission() bool
-    +edit_url() str
-    +username() str
-    +permissions()
-}
-
-class Role {
-    +Permission[] permissions
-    +booleanField builtin
-}
-
-class RoleAssignment {
-    +Folder[] perimeter_folders
-    +User user
-    +UserGroup user_group
-    +Role role
-    +BooleanField is_recursive
-    +BooleanField builtin
-
-    +is_access_allowed(user, perm, folder) bool$
-    +get_accessible_folders(folder, user, content_tupe, codename) Folder[]$
-    +get_accessible_object_ids(folder, user, object_type) UUID[]$
-    +is_user_assigned(user) bool
-    +get_role_assignments(user) RoleAssignment[]$
-    +get_permissions(user) Permission[]$
-    +has_role(user, role) bool$
-}
-
-```
-
-## Class diagram for general objects
-
-```mermaid
-classDiagram
-direction RL
-
-NameDescriptionMixin   <|-- RiskScenario
-AbstractBaseModel      <|-- NameDescriptionMixin
-NameDescriptionMixin   <|-- ReferentialObjectMixin
-FolderMixin            <|-- ReferentialObjectMixin
-ReferentialObjectMixin <|-- Threat
-ReferentialObjectMixin <|-- ReferenceControl
-ReferentialObjectMixin <|-- RiskMatrix
-ReferentialObjectMixin <|-- Framework
-ReferentialObjectMixin <|-- RequirementNode
-ReferentialObjectMixin <|-- Mapping
-ReferentialObjectMixin <|-- LibraryMixin
-LibraryMixin           <|-- StoredLibrary
-LibraryMixin           <|-- LoadedLibrary
-NameDescriptionMixin   <|-- Assessment
-FolderMixin            <|-- Project
-NameDescriptionMixin   <|-- Project
-FolderMixin            <|-- Asset
-NameDescriptionMixin   <|-- Asset
-FolderMixin            <|-- Evidence
-NameDescriptionMixin   <|-- Evidence
-FolderMixin            <|-- AppliedControl
-NameDescriptionMixin   <|-- AppliedControl
-FolderMixin            <|-- RiskAcceptance
-NameDescriptionMixin   <|-- RiskAcceptance
-AppliedControl         <|-- Policy
-Assessment             <|-- RiskAssessment
-Assessment             <|-- ComplianceAssessment
-AbstractBaseModel      <|-- RequirementAssessment
-FolderMixin            <|-- RequirementAssessment
-
-namespace ReferentialObjects {
-    class ReferentialObjectMixin {
-        +CharField urn
-        +CharField ref_id
-        +CharField locale
-        +CharField provider
-        +CharField annotation
-        +display_short() str
-        +display_long() str
-    }
-
-    class LibraryMixin {
-        +CharField copyright
-        +IntegerField version
-        +CharField provider
-        +CharField packager
-        +JsonField dependencies
-        +BooleanField builtin
-        +JSONField objects_meta
-    }
-
-    class StoredLibrary {
-        +BooleanField is_loaded
-        +CharField hash_checksum
-        +TextField content
-    }
-
-    class LoadedLibrary {
-        +LoadedLibrary[] dependencies
-        +reference_count() int
-    }
-
-    class Threat {
-        +LoadedLibrary library
-        +is_deletable() bool
-        +frameworks() Framework[]
-    }
-
-    class ReferenceControl {
-        +LoadedLibrary library
-        +CharField category
-        +CharField csf_function
-        +JSONField typical_evidence
-        +is_deletable() bool
-        +frameworks() Framework[]
-    }
-
-    class RiskMatrix {
-        +LoadedLibrary library
-        +JSONField json_definition
-        +BooleanField is_enabled
-        +CharField provider
-        +is_used() bool
-        +risk_assessments() RiskAssessment[]
-        +projects() Project[]
-        +parse_json()
-        +get_detailed_grid()
-        +render_grid_as_colors()
-    }
-
-    class Framework {
-        +LoadedLibrary library
-        +int get_next_order_id(obj_type, _parent_urn)
-        +is_deletable() bool
-    }
-
-    class RequirementNode {
-        +Threat[] threats
-        +ReferenceControl[] REFERENCE_CONTROLs
-        +Framework framework
-        +CharField parent_urn
-        +IntegerField order_id
-        +json implementation_groups
-        +BooleanField assessable
-    }
-
-    class Mapping {
-        +CharField    reference_urn
-        +CharField    target_urn
-        +CharField    rationale
-        +CharField    relationship
-        +BooleanField fulfilled_by
-        +IntegerField strength
-    }
-}
-
-namespace DomainObjects {
-
-    class Project {
-        +CharField internal_reference
-        +CharField lc_status
-        +overall_compliance()
-    }
-
-    class Asset {
-        +CharField business_value
-        +CharField type
-        +Asset[] parent_assets
-        +is_primary() bool
-        +is_support() bool
-        +ancestors_plus_self() Asset[]
-    }
-
-    class Evidence {
-        +FileField attachment
-        +URLField link
-        +get_folder() Folder
-        +filename() str
-        +preview()
-    }
-
-    class AppliedControl {
-        +ReferenceControl REFERENCE_CONTROL
-        +Evidence[] evidences
-        +CharField category
-        +CharField csf_function
-        +CharField status
-        +DateField eta
-        +DateField expiry_date
-        +CharField link
-        +CharField effort
-        +Decimal   cost
-
-        +RiskScenario[] risk_scenarios()
-        +RiskAssessments[] risk_assessments()
-        +Project[] projects()
-        +Project parent_project()
-        +mid()
-        +csv_value()
-        +get_ranking_score() int
-        +get_html_url() str
-        +get_linked_requirements_count() int
-    }
-
-    class RiskAcceptance {
-        +RiskScenario[] risk_scenarios
-        +User approver
-        +CharField state
-        +DateField expiry_date
-        +DateTimeField accepted_at
-        +DateTimeField rejected_at
-        +DateTimeField revoked_at
-        +CharField justification
-        +get_html_url() str
-        +set_state(state)
-    }
-}
-
-class Assessment {
-    +TextChoices Status
-    +Project project
-    +CharField version
-    +CharField status
-    +CharField authors
-    +CharField reviewers
-    +DateField eta
-    +DateField due_date
-}
-
-class RiskAssessment {
-    +RiskMatrix risk_matrix
-    +path_display() str
-    +get_scenario_count() int
-    +quality_check()
-    +risk_scoring(probability, impact, risk_matrix) int
-}
-
-
-class ComplianceAssessment {
-    +Framework framework
-    +CharField result
-    +get_requirements_status_count() int
-    +get_measures_status_count() int
-    +donut_render()
-    +quality_check()
-}
-
-class RequirementAssessment {
-    +CharField status
-    +Evidence[] evidences
-    +TextField observation
-    +ComplianceAssessment compliance_assessment
-    +RequirementNode requirement
-    +AppliedControl[] APPLIED_CONTROLs
-}
-
-class RiskScenario {
-    +RiskAssessment risk_assessment
-    +Asset[] assets
-    +AppliedControl[] APPLIED_CONTROLs
-    +Threat[] threats
-    +TextField existing_controls
-    +SmallIntegerField current_proba
-    +SmallIntegerField current_impact
-    +SmallIntegerField current_level
-    +SmallIntegerField residual_proba
-    +SmallIntegerField residual_impact
-    +SmallIntegerField residual_level
-    +CharField treatment
-    +CharField strength_of_knowledge
-    +CharField justification
-
-    +Project parent_project()
-    +RiskMatrix get_matrix()
-    +get_current_risk(s) int
-    +get_current_impact() int
-    +get_current_proba() int
-    +get_residual_risk() int
-    +get_residual_impact() int
-    +get_residual_proba() int
-    +rid()
-}
-
-```
-
 ## Global fields
 
 All models have the following fields:
@@ -745,16 +398,68 @@ Note: the IAM model is based on folders. A folder has a type among:
 - ENCLAVE: a invisible folder used to confine the actions of a third party.
 
 Projects have the following fields:
+- ref_id (ex internal reference)
 - Name
 - Description
-- Internal reference
 - Status: --/Design/Development/Production/End of life/Dropped
 
-## Assets
+## Assets, security and disaster recovery objectives
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
 Assets are of type primary or supporting. A primary asset has no parent, a supporting asset can have parent assets (primary or supporting), but not itself.
+
+Primary assets have security objectives that are evolutive, so they are catched in a json field.
+
+Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets.
+
+There is a global parameter that defines a list of security objectives with a corresponding scale and a corresponding boolean allowing to select or hide a security objective. The following security objectives are pre-defined: 
+
+ ref_id | Name                       | Description | default scale | default select value
+--------|----------------------------|-------------|---------------|---------------------
+ C      | Confidentiality            | ...         | 1-4           | True
+ I      | Integrity                  | ...         | 1-4           | True
+ A      | Availability               | ...         | 1-4           | True
+ P      | Proof                      | ...         | 1-4           | True
+ Auth   | Authenticity               | ...         | 1-4           | False
+ Priv   | Privacy                    | ...         | 1-4           | False
+ Safe   | Safety                     | ...         | 1-4           | False
+
+The following disaster recovery objectives (measured in seconds) are pre-defined:
+
+ ref_id | Name                       | Description
+--------|----------------------------|------------
+ RTO    | Recovery Time Objective    | ...         
+ RPO    | Recovery Point Objetive    | ...         
+ MTD    | Maximum Tolerable Downtime | ...
+
+In a future version, users will be able to define custom security objectives.
+
+Security objectives are measured using a specifc scale. For now, the following scales are defined:
+- 0-3: coded as 0-3
+- 1-4: coded as 0-3
+- FIPS-199: coded as 0-3
+
+There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+
+scale    | internal value | scale value
+---------|----------------|---------------
+0-3      | 0              | 0
+0-3      | 1              | 1
+0-3      | 2              | 2
+0-3      | 3              | 3
+1-4      | 0              | 1
+1-4      | 1              | 2
+1-4      | 2              | 3
+1-4      | 3              | 4
+FIPS-199 | 0              | low
+FIPS-199 | 1              | moderate
+FIPS-199 | 2              | moderate
+FIPS-199 | 3              | high
+
+Security objectives can be evaluated for each asset. The default value is Null. The corresponding json field is composed of a list of tuples {security_objective_ref_id, value}.
+
+When a security objective is hidden in the global parameters, it is simply not proposed for new edition. However, a security objective that is already used in an asset is kept and editable even if it is hidden globally. Thus, when selecting or hiding a security objective, no value is changed in asset.
 
 ## Frameworks
 
@@ -822,7 +527,7 @@ Reference controls have a csf_function within the following possibilities: --/Go
 
 Applied controls are fundamental objects for compliance and remediation. They can derive from a reference control, which provides better consistency, or be independent.
 
-A applied  control has the following specific fields:
+A applied control has the following specific fields:
 - a category (same as reference controls)
 - a csf_function (same as reference controls)
 - a status (--/planned/active/inactive)
@@ -917,7 +622,9 @@ A risk scenario contains a treatment option with the values --/open/mitigate/acc
 
 A risk scenario also contains a "strength of knowledge", within the values --/0 (Low)/1 (Medium)/2 (High). This can be used to represent a third dimension of risk, as recommended by the Society for Risk Analysis. The field "justification" can be used to expose the knowledge.
 
-A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Authenticity, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
+A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
+
+Note: the list of qualifications is a superset of security objectives.
 
 The risk evaluation is automatically done based on the selected risk matrix.
 
@@ -1367,57 +1074,38 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
 
-## Security objectives
+## Bundles
 
-Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets.
+We need to pack various objects for various reasons. To avoid complexifying the data-model, we introduce the notion of bundle to allow packing virtually any type of objects. As is the case for folder, the bundle notion is invisible to the users, and there is a content_type field to distinguish the various types of bundles. The following content types are supported for the moment:
+- project
+- EBIOS-RM study
+- Audit campaign
+- Third-party campaign
 
-There is a global parameter that defines a list of security objectives with a corresponding scale and a corresponding boolean allowing to select or hide a security objective. The following security objectives are pre-defined: 
+The content-type shall be evolutive (json-based). Once a bundle is created, the content-type is immutable.
 
- ref_id | Name                       | Description | default scale | default select value
---------|----------------------------|-------------|---------------|---------------------
- C      | Confidentiality            | ...         | 1-4           | True
- I      | Integrity                  | ...         | 1-4           | True
- A      | Availability               | ...         | 1-4           | True
- P      | Proof                      | ...         | 1-4           | True
- Auth   | Authenticity               | ...         | 1-4           | False
- Priv   | Privacy                    | ...         | 1-4           | False
- Safe   | Safety                     | ...         | 1-4           | False
- RTO    | Recovery Time Objective    | ...         | duration      | True
- RPO    | Recovery Point Objetive    | ...         | duration      | True
- MTD    | Maximum Tolerable Downtime | ...         | duration      | False
+Bundles are attached to a domain, and can only contain objects from this domain or its subdomains.
 
-In a future version, users will be able to define custom security objectives.
+Bundles have the following fields
+- json content_type
+- string ref_id
+- string name
+- string description
+- string Status: 
+  - for projects: --/Design/Development/Production/End of life/Dropped
+  - for others:  --/planned/in progress/in review/done/deprecated
+- json specific_content
 
-Security objectives are measured using a specifc scale. For now, the following scales are defined:
-- 0-3: coded as 0-3
-- 1-4: coded as 0-3
-- FIPS-199: coded as 0-3
-- duration: coded as seconds
+For each content type, there will be a specific frontend application to guide the user. The "specific_content" field is used to store specific content in a flexible way.
 
-There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+Objects will progressively be compatible with bundles, as required.
 
-scale    | internal value | scale value
----------|----------------|---------------
-0-3      | 0              | 0
-0-3      | 1              | 1
-0-3      | 2              | 2
-0-3      | 3              | 3
-1-4      | 0              | 1
-1-4      | 1              | 2
-1-4      | 2              | 3
-1-4      | 3              | 4
-FIPS-199 | 0              | low
-FIPS-199 | 1              | moderate
-FIPS-199 | 2              | moderate
-FIPS-199 | 3              | high
+Current projects will need a migration to be transformed in bundles. This should be transperent from user side, except that projects will become optional. A current project can contain assessments.
 
-Security objectives can be evaluated for each asset. The default value is Null. The corresponding json field is composed of a list of tuples {security_objective_ref_id, value}.
-
-Security objectives can be mentioned in a risk scenario as "undermined security objectives". The corresponding json field is composed of a list of security objectives, identified by their ref_id.
-
-When a security objective is hidden in the global parameters, it is simply not proposed for new edition. However, a security objective that is already used in an asset or risk scenario is kept and editable even if it is hidden globally. Thus, when selecting or hiding a security objective, no value is changed in asset or risk scenario.
-
-In the global parameters, a matrix with 4 impact levels can be selected to describe the values for the discrete scales.
+```mermaid
+erDiagram
+    BUNDLE              }o--o{ OBJECT                   : contains
+```
 
 ## EBIOS-RM evolution
 
@@ -1425,9 +1113,9 @@ In the global parameters, a matrix with 4 impact levels can be selected to descr
 
 EBIOS-RM (english)    | EBIOS-RM (french)       |  CISO Assistant
 ----------------------|-------------------------|----------------
-Study                 | Etude                   | Project
-Studied object        | Objet de l'étude        | Description of the project
-Mission               | Mission                 | Mission of an entity
+Study                 | Etude                   | Bundle
+Studied object        | Objet de l'étude        | Description of the bundle
+Mission               | Mission                 | Mission of the reference entity added to the bundle
 Business asset        | Valeurs métier          | Primary asset
 Supporting asset      | Bien support            | Supporting asset
 Feared event          | Evénement redouté       | Risk analysis at asset level
@@ -1441,142 +1129,83 @@ Security controls     | Mesures de sécurité     | Reference/applied controls
 Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability)
 Risk treatment        | Traitement du risque    | Applied controls in a risk analysis
 
-### Assets and Feared events
+### Threat landscape
 
-Assets can be referred in a risk analysis. In addition, we add a new field in an asset called "feared events" to refer to zero, one or several risk analyses defining the feared events for this asset.
+The threat object is not sufficient to describe the threat landscape. We need add the concept of risk source and target objectives.
 
-The security "CIA" or "AICP" score of an asset can now be clearly defined as the highest impact for corresponding scenarios for analyses selected in "feared events", when a scenario points to the asset for one or several security objective. This can be calculated dynamically, after selection of the security objective model to use. This solves the issue of multiple conventions for security objectives.
+A risk scenario can refer to zero, one or several risk source.
 
-The following schematic illustrates this evolution of the data model.
-
-```mermaid
-erDiagram
-
-    RISK_ASSESSMENT       }o--o| ASSET                 : defines_feared_events
-    RISK_SCENARIO         }o--o{ ASSET                 : threatens
-    RISK_ASSESSMENT       ||--o{ RISK_SCENARIO         : contains
-    
-
-```
+A risk scenario can refer to zero, one or several target objectives.
 
 ### Risk study
 
-A risk study is sophisticated object able to address advanced risk analysis methodologies like EBIOS-RM.
+A risk study is sophisticated object able to address advanced risk analysis methodologies like EBIOS-RM. It is defined as a bundle with the following content:
+- a reference entity (the "studied object"), with its mission.
+- a list of primary assets and secondary assets
+- a list of ecosystem entities
+- a reference risk matrix
+- a risk assessment of type "feared events"
+- a risk assessment of type "strategic scenarios"
+- a risk assessment of type "operational scenarios"
+- a list of compliance assessments
 
-It is based on a Domain-Specific Language that allows to describe the datamodel of the target methodology, based on components provided by CISO Assistant.
-
-The following components can be used:
-- entity
-- asset
-- Matrix
-- Risk assessment with parameters:
-  - show probability
-  - show impact
-  - show remediations
-- Framework
-- Compliance assessment
-
-The DSL allows to create a custom "story" that guides the user to fill compoments. Each component can have a custom name and description. E.g.:
-    - "feared events" is a risk assessment with no probability nor remediations
-    - "strategic scenarios" is a risk assessment with no probability.
-    - "operational scenarios" is a risk assessment with no impact.
-    - "risk treatment" is a risk assessment is a risk assessment with current risk read-only
-
-### Linear view
-
-#### Atelier 1 - cadrage et socle de sécurité
-
-- définir les valeurs métiers
-  - ref_id/nom/description
-  - propriétaire
-  - nature (processus ou information)  -> tag
-- définir les biens supports associés
-  - ref_id/nom/description
-  - propriétaire
-
-- Définir les événements redoutés pour chaque valeur métier -> analyse de risque "événéments redoutés"
-  - nom/description
-  - catégorie(s) d'impact : --/mission/humain/matériel/environnemental/gouvernance/financier/juridique/image-confiance -> qualification à compléter
-  - gravité : G1-mineur, G2-significatif, G3-important, G4-Critique -> choisir une matrice de référence
-
-On ne garde dans l'analyse que :
-- scénarios renommés "événement redouté" (ER=nom du scénario)
-  - asset renommé "valeur métier"
-  - qualification (catégorie d'impact)
-  - conséquences renommé "gravité"
-
-On en déduit une liste de tuples valeur métier/ER/catégorie d'impact/gravité (premier livrable)
-
-
-- Définir le socle de sécurité
-  - liste de référentiels considérés
-    - nom / description
-    - dénomination dans CISO Assistant si disponible
-    - applicable (oui/non)
-    - Justification
-
-#### Atelier 2 - sources de risque
-
-- Définir les sources de risque et objectifs visés
-  - liste des sr/ov
-    - source de risque
-      - nom/description
-    - objectif visé
-      - description
+The frontend for risk study shall propose the following steps:
+- workshop 1: framing and security baseline (cadrage et socle de sécurité)
+  - select/define the reference entity
+  - select/define primary assets ("valeurs métier")
+    - the nature "process" or "information" can be defined as a label
+  - select/define secondary assets ("biens support")
+  - make a feared event risk analysis (scenarios with assets and impact only)
+  - list of considered referentials (in specific_content)
+    - name
+    - description
+    - urn in CISO Assistant if available
+    - applicable (yes/no)
+    - justification
+  - The first deliverable is a table of primary asset/feared event/qualification/impact level
+- workshop 2: risk sources (sources de risque)
+  - define risk sources
+    - name
+    - description
     - motivation (--/très peu/peu/assez/fortement motivé)
     - ressources (--/limitées/significatives/importantes/illimitées)
-    - pertinence (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) (suggéré par la matrice standard)
-
-- Scénarios
-  - source de risque
-  - objectif visé
-  - événement redouté
-  - valeur métier
-  - bien support
-  - impacts
-
-### Atelier 3 - scénarios stratégiques
-
-- Criticité des parties-prenantes
-    - catégorie
-    - Nom
+    - pertinence (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+  - define targeet objectives
+    - name
+    - description
+  - define retained RO/TO couples
+  - "risk source" risk assessemnt, based of retained RO/TO
+  - This risk assessment provides the main deliverable for this part, in the form of a list of:
+    - Risk source
+    - Target objectives
+    - Primary assets
+    - Secondary assets
+    - Feared events
+    - impact
+- workshop 3:
+  - list of ecosystem entities
+  - qualification of entities:
+    - catégory
     - Dépendance
     - Pénétration
     - maturité cyber
     - confiance
     - niveau de menace (calculé)
-
-On en déduit la cartographie de menace de l'écosystème
-
-- Scénarios stratégiques
-  - source de risque
-  - objectif visé
-  - événement redouté
-  - chemin d'attaque stratégique
-  - Mesures de sécurité
-  - Menace initiale
-  - Menace résiduelle
-
-### Atelier 4 - scénarios opérationnels
-
-- scénarios opérationnels et vraisemblance
-  - scénario stratégique (fournit la gravité via événement redouté)
-  - chemins d'attaque (connaitre / rentrer / trouver / exploiter)
-  - vraisemblance
-  
-On en déduit la matrice de risque.
-
-### Atelier 5 - traitement du risque
-
-- Plan de traitement : liste
-  - mesure de sécurité
-  - Risque associé
-  - Responsable
-  - Freins et difficultés de mise en oeuvre
-  - Coût/complexité (--/+/++/+++)
-  - Charge estimée
-  - Echéance
-  - Priorité
-  - Statut
-  - Risque résiduel
-
+  - This provides the map of ecosystem threat 
+  - strategic risk analysis
+    - TO/TO
+    - feared event
+    - chemin d'attaque stratégique
+    - Mesures de sécurité
+    - Menace initiale
+    - Menace résiduelle
+- workshop 4: operational scenarios
+  - operational risk analysis
+    - each scenario must have a parent scenario selected in the strategic risk analysis, which provides the impact
+    - the description of the scenario provides the attack path (connaitre / rentrer / trouver / exploiter)
+    - probability
+  - the main deliverable is the filled risk matrix
+- workshop 5: risk treatment
+  - treatment risk analysis
+    - derived from the operational risk analysis
+    - only adding controls and recalculating the impact.
