@@ -290,7 +290,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	threats: {
-		head: ['ref', 'name', 'description', 'provider', 'domain'],
+		head: ['ref_id', 'name', 'description', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
@@ -381,7 +381,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'reference-controls': {
-		head: ['ref', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
+		head: ['ref_id', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
@@ -464,7 +464,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	requirements: {
-		head: ['ref', 'name', 'description', 'framework'],
+		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
 		meta: ['id', 'urn']
 	},
