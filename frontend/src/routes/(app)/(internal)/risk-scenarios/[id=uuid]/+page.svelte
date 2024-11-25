@@ -34,10 +34,16 @@
 <div class="flex flex-col space-y-3">
 	<div class="flex flex-row card justify-between px-4 py-2 bg-white shadow-lg">
 		<div class="flex flex-col space-y-4">
-			<div>
-				<p class="text-sm font-semibold text-gray-400">{m.name()}</p>
-				<p class="font-semibold">{data.scenario.name}</p>
-			</div>
+			<span class="flex flex-row space-x-8">
+				<div>
+					<p class="text-sm font-semibold text-gray-400">{m.refId()}</p>
+					<p class="font-semibold">{data.scenario.ref_id}</p>
+				</div>
+				<div>
+					<p class="text-sm font-semibold text-gray-400">{m.name()}</p>
+					<p class="font-semibold">{data.scenario.name}</p>
+				</div>
+			</span>
 			<div>
 				<p class="text-sm font-semibold text-gray-400">{m.description()}</p>
 				{#if data.scenario.description}
