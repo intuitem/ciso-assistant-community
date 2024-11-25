@@ -303,7 +303,7 @@ LANGUAGES = [
     ("es", "Spanish"),
     ("de", "German"),
     ("it", "Italian"),
-    ("nd", "Dutch"),
+    ("nl", "Dutch"),
     ("pl", "Polish"),
     ("pt", "Portuguese"),
     ("ar", "Arabic"),
