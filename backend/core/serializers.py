@@ -312,7 +312,6 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     applied_controls = FieldsRelatedField(many=True)
     existing_applied_controls = FieldsRelatedField(many=True)
-    rid = serializers.CharField()
 
     owner = FieldsRelatedField(many=True)
 
