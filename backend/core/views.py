@@ -1546,6 +1546,9 @@ class UserPreferencesView(APIView):
         if new_language is None or new_language not in (
             lang[0] for lang in settings.LANGUAGES
         ):
+            logger.error(
+                f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
+            )
             return Response(
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
