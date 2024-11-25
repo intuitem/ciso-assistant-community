@@ -223,23 +223,6 @@
 										{safeTranslate(mappingInference.result)}
 									</span>
 								</p>
-								{#if mappingInference.sourceRequirementAssessment.score}
-									<p class="whitespace-pre-line py-1">
-										<span class="italic">{m.scoreSemiColon()}</span>
-										<span class="badge {classesText} h-fit">
-											{mappingInference.sourceRequirementAssessment.score}
-										</span>
-									</p>
-								{/if}
-								{#if mappingInference.sourceRequirementAssessment.observation}
-									<p
-										class="whitespace
-									-pre-line py-1"
-									>
-										<span class="italic">{m.observationSemiColon()}</span>
-										{mappingInference.sourceRequirementAssessment.observation}
-									</p>
-								{/if}
 								{#if mappingInference.annotation}
 									<p class="whitespace-pre-line py-1">
 										<span class="italic">{m.annotationColon()}</span>
