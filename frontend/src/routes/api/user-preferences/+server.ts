@@ -16,10 +16,10 @@ export const GET: RequestHandler = async ({ fetch, request }) => {
 };
 
 export const PATCH: RequestHandler = async ({ fetch, request }) => {
-	const newPreferences = await request.json();
+	const newPreferences = await request.text();
 	const requestInitOptions: RequestInit = {
 		method: 'PATCH',
-		body: JSON.stringify(newPreferences)
+		body: newPreferences
 	};
 
 	const endpoint = `${BASE_API_URL}/user-preferences/`;
