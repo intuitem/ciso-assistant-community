@@ -17,7 +17,7 @@ import shutil
 from pathlib import Path
 import humanize
 
-from icecream import ic
+# from icecream import ic
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
