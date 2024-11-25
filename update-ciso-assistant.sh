@@ -77,4 +77,4 @@ else
     exit 1
 fi
 
-echo "Update and restoration process completed 
+echo "Update process completed 
