@@ -857,5 +857,7 @@
 	"tags": "Tagi",
 	"addTag": "Dodaj tag",
 	"tagsHelpText": "Tagi służą do kategoryzowania i filtrowania elementów. Możesz dodać tagi w sekcji Extra",
-	"forgotPassword": "Zapomniałem hasła"
+	"forgotPassword": "Zapomniałem hasła",
+	"scoreSemiColon": "Wynik:",
+	"mappingInferenceHelpText": "Te zmienne są stałe i nie zmieniają się w zależności od źródła."
 }
