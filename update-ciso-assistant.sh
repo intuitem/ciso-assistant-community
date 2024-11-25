@@ -77,18 +77,4 @@ else
     exit 1
 fi
 
-# Restore the database
-if [ -f "$BACKUP_FILE" ]; then
-    echo "Restoring the database file..."
-    if cp "$BACKUP_FILE" "$DB_FILE"; then
-        echo "Database restored to $DB_FILE."
-    else
-        echo "Error: Failed to restore the database file."
-        exit 1
-    fi
-else
-    echo "Error: Backup file $BACKUP_FILE does not exist. Unable to restore the database."
-    exit 1
-fi
-
 echo "Update and restoration process completed 
