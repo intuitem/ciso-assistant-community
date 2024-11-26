@@ -22,17 +22,6 @@
 	});
 </script>
 
-{#if schema.shape.category}
-	<Select
-		{form}
-		options={model.selectOptions['category']}
-		field="category"
-		label={m.category()}
-		cacheLock={cacheLocks['category']}
-		bind:cachedValue={formDataCache['category']}
-	/>
-{/if}
-
 {#if !duplicate}
 	{#if schema.shape.category}
 		<Select

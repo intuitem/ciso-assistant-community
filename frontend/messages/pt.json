@@ -12,6 +12,8 @@
 	"romanian": "Romeno",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Checo",
+	"swedish": "Sueco",
 	"addThreat": "Adicionar ameaça",
 	"addVulnerability": "Adicionar vulnerabilidade",
 	"addReferenceControl": "Adicionar controle de referência",
@@ -397,7 +399,6 @@
 	"medium": "Médio",
 	"large": "Grande",
 	"extraLarge": "Extra grande",
-	"rid": "RID",
 	"scope": "Escopo",
 	"reader": "Leitor",
 	"lastUpdate": "Última atualização",
@@ -684,7 +685,7 @@
 	"clientSettings": "Configurações do cliente",
 	"invalidFileType": "Tipo de arquivo inválido",
 	"logoHelpText": "O logotipo será exibido no cabeçalho do aplicativo. Os formatos aceitos são PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "O favicon será exibido na aba do navegador. Os formatos aceitos são ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "O favicon será exibido na aba do navegador. Os formatos aceitos são ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entidade",
 	"entities": "Entidades",
 	"addEntity": "Adicionar entidade",
@@ -785,6 +786,7 @@
 	"questionPlural": "Questões",
 	"fillMetadataURL": "Opção 1: Preencha a URL dos metadados",
 	"fillSSOSLOURLx509cert": "Opção 2: Preencha a URL do SSO, a URL do SLO e o x509cert",
+	"noExpirationDateSet": "Nenhuma data de validade definida",
 	"sumpageTotal": "total",
 	"sumpageActive": "ativo",
 	"sumpageDeprecated": "obsoleto",
@@ -854,5 +856,6 @@
 	"exploreButton": "Explorar",
 	"tags": "Etiquetas",
 	"addTag": "Adicionar etiqueta",
-	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra"
+	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra",
+	"forgotPassword": "Esqueceu sua senha"
 }

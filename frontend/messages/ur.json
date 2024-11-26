@@ -12,6 +12,8 @@
 	"romanian": "رومانی",
 	"hindi": "ہندی",
 	"urdu": "اردو",
+	"czech": "چیک",
+	"swedish": "سویڈش",
 	"addThreat": "خطرہ شامل کریں",
 	"addVulnerability": "کمزوری شامل کریں",
 	"addReferenceControl": "حوالہ کنٹرول شامل کریں",
@@ -397,7 +399,6 @@
 	"medium": "درمیانہ",
 	"large": "بڑا",
 	"extraLarge": "انتہائی بڑا",
-	"rid": "RID",
 	"scope": "حدود",
 	"reader": "ریڈر",
 	"lastUpdate": "آخری اپ ڈیٹ",
@@ -684,7 +685,7 @@
 	"clientSettings": "کلائنٹ کی ترتیبات",
 	"invalidFileType": "غلط فائل کی قسم",
 	"logoHelpText": "لوگو ایپلی کیشن کے ہیڈر میں دکھایا جائے گا۔ منظور شدہ فارمیٹس PNG، JPEG، WEBP، SVG ہیں۔",
-	"faviconHelpText": "فیویکن براؤزر کے ٹیب میں ظاہر ہوگا۔ قبول شدہ فارمیٹس ICO, PNG, JPEG, WEBP ہیں۔",
+	"faviconHelpText": "فیویکن براؤزر کے ٹیب میں ظاہر ہوگا۔ قبول شدہ فارمیٹس ICO, PNG, JPEG, WEBP, SVG ہیں۔",
 	"entity": "ہستی",
 	"entities": "اداروں",
 	"addEntity": "ہستی شامل کریں۔",
@@ -785,6 +786,7 @@
 	"questionPlural": "سوالات",
 	"fillMetadataURL": "آپشن 1: میٹا ڈیٹا یو آر ایل کو بھریں۔",
 	"fillSSOSLOURLx509cert": "اختیار 2: SSO URL، SLO URL اور x509cert پُر کریں۔",
+	"noExpirationDateSet": "میعاد ختم ہونے کی کوئی تاریخ مقرر نہیں ہے۔",
 	"sumpageTotal": "کل",
 	"sumpageActive": "فعال",
 	"sumpageDeprecated": "فرسودہ",
@@ -854,5 +856,6 @@
 	"exploreButton": "دریافت کریں۔",
 	"tags": "ٹیگز",
 	"addTag": "ٹیگ شامل کریں۔",
-	"tagsHelpText": "ٹیگز اشیاء کی درجہ بندی اور فلٹر کرنے کے لیے استعمال ہوتے ہیں۔ آپ اضافی سیکشن میں ٹیگ شامل کر سکتے ہیں۔"
+	"tagsHelpText": "ٹیگز اشیاء کی درجہ بندی اور فلٹر کرنے کے لیے استعمال ہوتے ہیں۔ آپ اضافی سیکشن میں ٹیگ شامل کر سکتے ہیں۔",
+	"forgotPassword": "پاس ورڈ بھول گئے۔"
 }

@@ -223,6 +223,13 @@ class AssetWriteSerializer(BaseModelSerializer):
 class AssetReadSerializer(AssetWriteSerializer):
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    owner = FieldsRelatedField(many=True)
+    security_objectives = serializers.JSONField(
+        source="get_security_objectives_display"
+    )
+    disaster_recovery_objectives = serializers.JSONField(
+        source="get_disaster_recovery_objectives_display"
+    )
 
     type = serializers.CharField(source="get_type_display")
 
@@ -304,7 +311,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
     applied_controls = FieldsRelatedField(many=True)
-    rid = serializers.CharField()
+    existing_applied_controls = FieldsRelatedField(many=True)
 
     owner = FieldsRelatedField(many=True)
 
@@ -318,7 +325,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
-
+    priority = serializers.CharField(source="get_priority_display")
     category = serializers.CharField(
         source="get_category_display"
     )  # type : get_type_display
@@ -610,6 +617,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assessable = serializers.BooleanField(source="requirement.assessable")
 
     class Meta:
         model = RequirementAssessment

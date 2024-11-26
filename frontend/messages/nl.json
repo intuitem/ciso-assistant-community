@@ -12,6 +12,8 @@
 	"romanian": "Roemeens",
 	"hindi": "Hindi",
 	"urdu": "Urdu",
+	"czech": "Tsjechisch",
+	"swedish": "Zweeds",
 	"addThreat": "Bedreiging toevoegen",
 	"addVulnerability": "Kwetsbaarheid toevoegen",
 	"addReferenceControl": "Referentiecontrole toevoegen",
@@ -397,7 +399,6 @@
 	"medium": "Medium",
 	"large": "Groot",
 	"extraLarge": "Extra groot",
-	"rid": "RID",
 	"scope": "Reikwijdte",
 	"reader": "Lezer",
 	"lastUpdate": "Laatste update",
@@ -684,7 +685,7 @@
 	"clientSettings": "Clientinstellingen",
 	"invalidFileType": "Ongeldig bestandstype",
 	"logoHelpText": "Het logo wordt weergegeven in de header van de applicatie. Geaccepteerde formaten zijn PNG, JPEG, WEBP, SVG.",
-	"faviconHelpText": "Het favicon wordt weergegeven in het browsertabblad. Geaccepteerde formaten zijn ICO, PNG, JPEG, WEBP",
+	"faviconHelpText": "Het favicon wordt weergegeven in het browsertabblad. Geaccepteerde formaten zijn ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entiteit",
 	"entities": "Entiteiten",
 	"addEntity": "Entiteit toevoegen",
@@ -785,6 +786,7 @@
 	"questionPlural": "Vragen",
 	"fillMetadataURL": "Optie 1: Vul de metadata-url in",
 	"fillSSOSLOURLx509cert": "Optie 2: Vul de SSO-URL, SLO-URL en x509cert in",
+	"noExpirationDateSet": "Geen vervaldatum ingesteld",
 	"sumpageTotal": "totaal",
 	"sumpageActive": "actief",
 	"sumpageDeprecated": "afgekeurd",
@@ -854,5 +856,6 @@
 	"exploreButton": "Ontdekken",
 	"tags": "Labels",
 	"addTag": "Tag toevoegen",
-	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra"
+	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra",
+	"forgotPassword": "Wachtwoord vergeten"
 }

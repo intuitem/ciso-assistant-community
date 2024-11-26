@@ -585,22 +585,25 @@ class TestRiskScenario:
         scenario = RiskScenario.objects.create(
             name="test scenario",
             description="test scenario description",
+            ref_id="R.1",
             risk_assessment=risk_assessment,
         )
         scenario2 = RiskScenario.objects.create(
             name="test scenario 2",
             description="test scenario description",
+            ref_id="R.2",
             risk_assessment=risk_assessment,
         )
         scenario3 = RiskScenario.objects.create(
             name="test scenario 3",
             description="test scenario description",
+            ref_id="R.3",
             risk_assessment=risk_assessment,
         )
 
-        assert scenario.rid == "R.1"
-        assert scenario2.rid == "R.2"
-        assert scenario3.rid == "R.3"
+        assert scenario.ref_id == "R.1"
+        assert scenario2.ref_id == "R.2"
+        assert scenario3.ref_id == "R.3"
 
 
 @pytest.mark.django_db
@@ -848,6 +851,71 @@ class TestAsset:
         assert asset2.type == Asset.Type.SUPPORT
         assert asset1.folder == root_folder
         assert asset2.folder == folder
+
+    def test_asset_creation_valid_security_objectives(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        security_objectives = {
+            "objectives": {
+                "confidentiality": {
+                    "value": 1,
+                    "is_enabled": True,
+                },
+                "integrity": {
+                    "value": 0,
+                    "is_enabled": False,
+                },
+                "availability": {
+                    "value": 2,
+                    "is_enabled": True,
+                },
+                "proof": {
+                    "value": 0,
+                    "is_enabled": True,
+                },
+            }
+        }
+
+        asset = Asset.objects.create(
+            name="Asset",
+            description="Asset description",
+            folder=root_folder,
+            security_objectives=security_objectives,
+        )
+
+        assert asset.security_objectives == security_objectives
+
+    def test_asset_creation_invalid_security_objectives(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        security_objectives = {
+            "objectives": {
+                "confidentiality": {
+                    "value": "toto",
+                    "is_enabled": True,
+                },
+                "integrity": {
+                    "value": 0,
+                    "is_enabled": False,
+                },
+                "availability": {
+                    "value": 2,
+                    "is_enabled": True,
+                },
+                "proof": {
+                    "value": 0,
+                    "is_enabled": True,
+                },
+            }
+        }
+
+        with pytest.raises(ValidationError):
+            Asset.objects.create(
+                name="Asset",
+                description="Asset description",
+                folder=root_folder,
+                security_objectives=security_objectives,
+            )
 
 
 @pytest.mark.django_db

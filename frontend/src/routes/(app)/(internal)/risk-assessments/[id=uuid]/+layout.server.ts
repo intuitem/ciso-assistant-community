@@ -21,20 +21,20 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	).then((res) => res.json());
 
 	const headFields = [
-		'rid',
+		'ref_id',
 		'name',
 		'threats',
 		'existingControls',
 		'currentLevel',
-		'appliedControls',
+		'extraAppliedControls',
 		'residualLevel'
 	];
 
 	const bodyFields = [
-		'rid',
+		'ref_id',
 		'name',
 		'threats',
-		'existing_controls',
+		'existing_applied_controls',
 		'current_level',
 		'applied_controls',
 		'residual_level'

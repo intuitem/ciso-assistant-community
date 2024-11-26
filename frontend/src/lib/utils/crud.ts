@@ -243,6 +243,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_control' },
 			{ field: 'category' },
 			{ field: 'csf_function' },
+			{ field: 'priority' },
 			{ field: 'effort' },
 			{ field: 'cost' },
 			{ field: 'status' },
@@ -266,7 +267,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'category' },
 			{ field: 'csf_function' },
-			{ field: 'effort' }
+			{ field: 'effort' },
+			{ field: 'priority' }
 		],
 		filters: [
 			{ field: 'reference_control' },
@@ -275,7 +277,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'csf_function' },
 			{ field: 'effort' },
 			{ field: 'folder' },
-			{ field: 'owner' }
+			{ field: 'owner' },
+			{ field: 'priority' }
 		]
 	},
 	'applied-controls_duplicate': {
@@ -295,19 +298,26 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
-			{ field: 'reference_control', urlModel: 'reference-controls' },
+			{ field: 'reference_control', urlModel: 'reference-controls', urlParams: 'category=policy' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
-		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'csf_function' },
+			{ field: 'effort' },
+			{ field: 'priority' }
+		],
 		filters: [
 			{ field: 'reference_control' },
-			{ field: 'csf_function' },
 			{ field: 'status' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'folder' }
+			{ field: 'folder' },
+			{ field: 'owner' },
+			{ field: 'priority' }
 		]
 	},
 	vulnerabilities: {
@@ -368,10 +378,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Assets',
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'owner', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
 		selectFields: [{ field: 'type' }],
-		filters: [{ field: 'parent_assets' }, { field: 'folder' }, { field: 'type' }]
+		filters: [
+			{ field: 'parent_assets' },
+			{ field: 'folder' },
+			{ field: 'type' },
+			{ field: 'owner' }
+		]
 	},
 	users: {
 		name: 'user',
@@ -484,6 +500,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'SSO settings',
 		selectFields: [{ field: 'provider' }]
 	},
+	'general-settings': {
+		name: 'generalSettings',
+		localName: 'generalSettings',
+		localNamePlural: 'generalSettings',
+		verboseName: 'General settings',
+		verboseNamePlural: 'General settings',
+		selectFields: [{ field: 'security_objective_scale' }]
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',
@@ -549,7 +573,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'representatives',
 		verboseName: 'Representative',
 		verboseNamePlural: 'Representatives',
-		foreignKeyFields: [{ field: 'entity', urlModel: 'entities' }]
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'user', urlModel: 'users' }
+		]
 	}
 };
 
@@ -603,6 +630,13 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
 					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				},
+				priority: {
+					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
+					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
+					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					'--': { text: '', cssClasses: '' }
 				}
 			}
 		}
@@ -665,6 +699,13 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
 					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				},
+				priority: {
+					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
+					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
+					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					'--': { text: '', cssClasses: '' }
 				}
 			}
 		}
