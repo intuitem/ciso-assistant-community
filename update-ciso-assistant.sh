@@ -1,5 +1,57 @@
 #!/bin/bash
 
+# ---------------------------------------------------------------------------
+# Manual: Database Backup and Update Script for CISO Assistant
+# ---------------------------------------------------------------------------
+# This script is used to backup, restore, and update the CISO Assistant database
+# and Docker containers. It supports database backup and restoration, 
+# version migration, and Docker image management. Below is a detailed guide 
+# on how the script works and how to use it.
+#
+# Usage:
+#   ./update-ciso-assistant.sh [OPTIONS]
+#
+# Options:
+#   --help, -h       Display this help message
+#   [version]        Specify the version of CISO Assistant to update to (default: 'latest')
+#
+# Example:
+#   ./update-ciso-assistant.sh 1.0.0
+#   This will update CISO Assistant to version 1.0.0, backing up and restoring 
+#   the database as needed.
+#
+# Prerequisites:
+# - Docker should be installed and running
+# - Docker Compose should be available
+# - Poetry (if used for the backend) should be available in the Docker container
+#
+# ---------------------------------------------------------------------------
+
+# Display help message if --help or -h is passed as an argument
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    cat <<EOF
+This script automates the process of backing up, updating, and restoring the 
+CISO Assistant database and Docker containers. The following steps will be executed:
+
+1. Back up the current database (if available).
+2. Optionally, restore a backup for a specific version.
+3. Remove current Docker containers and images related to CISO Assistant.
+4. Pull and run the new Docker images for the specified version.
+5. Run Django migrations and set up the superuser account (if the database is new).
+
+Usage:
+  ./update-ciso-assistant.sh [version]
+
+Options:
+  [version]      Specify the version of CISO Assistant to update to (default is 'latest').
+  -h, --help     Show this help message.
+
+Example:
+  ./update-ciso-assistant.sh latest
+EOF
+    exit 0
+fi
+
 # Variables
 DB_FILE="db/ciso-assistant.sqlite3"
 BACKUP_DIR="../ciso-assistant-backups"
