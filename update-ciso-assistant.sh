@@ -96,7 +96,7 @@ if [ -f "$RESTORE_BACKUP_FILE" ]; then
         echo "Database restored from $RESTORE_BACKUP_FILE."
     else
         echo "Skipping database restoration."
-        if [ "$(echo -e "$VERSION\n$CURRENT_VERSION" | sort -V | head -n 1)" == "$CURRENT_VERSION" ] && ["$VERSION" != "$CURRENT_VERSION"]; then
+        if [ "$(echo -e "$VERSION\n$CURRENT_VERSION" | sort -V | head -n 1)" == "$CURRENT_VERSION" ] && [ "$VERSION" != "$CURRENT_VERSION" ]; then
             NEW_DB=true
         fi
     fi
