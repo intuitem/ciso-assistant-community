@@ -18,6 +18,7 @@ RISK_SCENARIO_NAME = "Test scenario"
 RISK_SCENARIO_DESCRIPTION = "Test Description"
 RISK_SCENARIO_existing_controls = "Test Existing Controls"
 RISK_SCENARIO_existing_controls2 = "Test New Existing Controls"
+RISK_SCENARIO_REF_ID = "Ref ID"
 RISK_SCENARIO_CURRENT_PROBABILITIES = {
     "value": 2,
     "abbreviation": "H",
@@ -223,6 +224,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
@@ -280,6 +282,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
@@ -349,6 +352,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
+                "ref_id": RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES["value"],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT["value"],
@@ -364,6 +368,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": "new " + RISK_SCENARIO_NAME,
                 "description": "new " + RISK_SCENARIO_DESCRIPTION,
+                "ref_id": "n" + RISK_SCENARIO_REF_ID,
                 "existing_controls": RISK_SCENARIO_existing_controls2[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2["value"],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT2["value"],
