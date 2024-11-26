@@ -120,6 +120,7 @@ erDiagram
     USER                         }o--o{ RISK_SCENARIO         : owns
     USER                         }o--o{ APPLIED_CONTROL       : owns
     USER                         }o--o{ ASSET                 : owns
+    RISK_SCENARIO                }o--o{ RISK_SCENARIO         : is_antecedent_of
 
     PROJECT {
         string ref_id
@@ -1074,40 +1075,16 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
 
-## Bundles
+## Near-term evolutions
 
-We need to pack various objects for various reasons. To avoid complexifying the data-model, we introduce the notion of bundle to allow packing virtually any type of objects. As is the case for folder, the bundle notion is invisible to the users, and there is a content_type field to distinguish the various types of bundles. The following content types are supported for the moment:
-- project
+We need to add in the near term the follwoing objects:
 - EBIOS-RM study
 - Audit campaign
 - Third-party campaign
 - Pentest follow-up
+- Incident follow-up
 
-The content-type shall be evolutive (json-based). Once a bundle is created, the content-type is immutable.
-
-Bundles are attached to a domain, and can only contain objects from this domain or its subdomains.
-
-Bundles have the following fields
-- json content_type
-- string ref_id
-- string name
-- string description
-- string Status: 
-  - for projects: --/Design/Development/Production/End of life/Dropped
-  - for others:  --/planned/in progress/in review/done/deprecated
-- labels
-- json specific_content
-
-For each content type, there will be a specific frontend application to guide the user. The "specific_content" field is used to store specific content in a flexible way.
-
-Objects will progressively be compatible with bundles, as required.
-
-Current projects will need a migration to be transformed in bundles. This should be transperent from user side, except that projects will become optional. A current project can contain assessments.
-
-```mermaid
-erDiagram
-    BUNDLE              }o--o{ OBJECT                   : contains
-```
+Each of these objects will have its specific datamodel. Factoring will be done ad-hoc.
 
 ## EBIOS-RM evolution
 
@@ -1133,9 +1110,9 @@ Risk treatment        | Traitement du risque    | Applied controls in a risk ana
 
 ### Threat landscape
 
-The threat object is not sufficient to describe the threat landscape. We need add the concept of risk source and target objectives.
+The threat object is not sufficient to describe the threat landscape. We need add the concept of threat actor ("source de risque") and target objectives (objectifs visés).
 
-A risk scenario can refer to zero, one or several risk source.
+A risk scenario can refer to zero, one or several threat actors.
 
 A risk scenario can refer to zero, one or several target objectives.
 
@@ -1157,55 +1134,55 @@ The frontend for risk study shall propose the following steps:
   - select/define primary assets ("valeurs métier")
     - the nature "process" or "information" can be defined as a label
   - select/define secondary assets ("biens support")
-  - make a feared event risk analysis (scenarios with assets and impact only)
-  - list of considered referentials (in specific_content)
+  - make a feared event risk analysis (scenarios with primary assets and impact only)
+  - list of considered referentials (in json)
     - name
     - description
     - urn in CISO Assistant if available
     - applicable (yes/no)
     - justification
   - The first deliverable is a table of primary asset/feared event/qualification/impact level
-- workshop 2: risk sources (sources de risque)
-  - define risk sources
+- workshop 2: threat actors (sources de risque)
+  - define threat actors
     - name
     - description
     - motivation (--/très peu/peu/assez/fortement motivé)
     - ressources (--/limitées/significatives/importantes/illimitées)
     - pertinence (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
-  - define targeet objectives
+  - define target objectives
     - name
     - description
-  - define retained RO/TO couples
-  - "risk source" risk assessemnt, based of retained RO/TO
+  - define retained TA/TO couples -> json
+  - threat-based risk assessment, based of retained TA/TO and feared event, using antecedents
   - This risk assessment provides the main deliverable for this part, in the form of a list of:
-    - Risk source
+    - Threat actor
     - Target objectives
-    - Primary assets
-    - Secondary assets
-    - Feared events
-    - impact
+    - Primary assets (from antecedent)
+    - Secondary assets (from antecedent)
+    - Feared events (from antecedent)
+    - impact (from antecedent)
 - workshop 3:
   - list of ecosystem entities
-  - qualification of entities:
-    - catégory
-    - Dépendance
-    - Pénétration
-    - maturité cyber
-    - confiance
-    - niveau de menace (calculé)
+  - qualification of entities -> json
+    - category (provider/partner/client/...)
+    - Dependence
+    - Penetration
+    - Cyber maturity
+    - trust
+    - threat level (calculated)
   - This provides the map of ecosystem threat 
-  - strategic risk analysis
-    - TO/TO
+  - strategic risk analysis based on previous threat-based risk analysis
+    - TA/TO
     - feared event
-    - chemin d'attaque stratégique
-    - Mesures de sécurité
-    - Menace initiale
-    - Menace résiduelle
+    - stategic attack path
+    - Controls
+    - intial threat
+    - residual threat
 - workshop 4: operational scenarios
-  - operational risk analysis
+  - operational risk analysis based on strategic risk analysis
     - each scenario must have a parent scenario selected in the strategic risk analysis, which provides the impact
     - the description of the scenario provides the attack path (connaitre / rentrer / trouver / exploiter)
-    - probability
+    - probability ("vraisemblance")
   - the main deliverable is the filled risk matrix
 - workshop 5: risk treatment
   - treatment risk analysis
