@@ -99,7 +99,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				const selectOptions: Record<string, any> = {};
 
 				if (info.selectFields) {
-					for (const selectField of info.selectFields) {
+					await Promise.all(info.selectFields.map(async (selectField) => {
 						const url = `${BASE_API_URL}/${urlModel}/${selectField.field}/`;
 						const response = await event.fetch(url);
 						if (response.ok) {
@@ -114,7 +114,7 @@ export const loadDetail = async ({ event, model, id }) => {
 								`Failed to fetch data for ${selectField.field}: ${response.statusText}`
 							);
 						}
-					}
+					}));
 				}
 				relatedModels[e.urlModel] = {
 					urlModel,
