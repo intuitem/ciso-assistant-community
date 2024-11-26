@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>;
 const scenario = {
 	id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
 	name: 'RS1',
-	rid: 'R.1',
+	ref_id: 'R.1',
 	strength_of_knowledge: {
 		name: 'Very High',
 		description: 'The strength of the knowledge supporting the assessment is very high',

@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -9,56 +8,65 @@ export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
 	try {
 		const attachmentResponse = await fetch(endpoint);
 
+		// Early validation with proper error handling
+		if (!attachmentResponse.ok) {
+			throw new Error(`Fetch failed with status ${attachmentResponse.status}`);
+		}
+
+		const contentType =
+			attachmentResponse.headers.get('Content-Type') || 'application/octet-stream';
+		const contentDisposition = attachmentResponse.headers.get('Content-Disposition');
+
+		if (!contentDisposition) {
+			throw new Error('Missing Content-Disposition header');
+		}
+
+		const fileName = contentDisposition.split('filename=')[1]?.replace(/"/g, '').trim();
+		if (!fileName) {
+			throw new Error('Invalid filename in Content-Disposition');
+		}
+
 		if (!attachmentResponse.body) {
 			throw new Error('No response body');
 		}
 
-		const contentType = attachmentResponse.headers.get('Content-Type');
-		if (!contentType) {
-			return new Response('No Content-Type header', { status: 400 });
-		}
-
-		const contentDisposition = attachmentResponse.headers.get('Content-Disposition');
-		if (!contentDisposition) {
-			return new Response('No Content-Disposition header', { status: 400 });
-		}
-
-		const fileName = contentDisposition?.split('filename=')[1];
-		if (!fileName) {
-			return new Response('No filename in Content-Disposition header', { status: 400 });
-		}
-
 		const reader = attachmentResponse.body.getReader();
-		let readerTerminated = false;
+
 		const stream = new ReadableStream({
 			start(controller) {
 				function push() {
-					if (readerTerminated) {
-						return;
-					}
-					reader.read().then(({ done, value }) => {
-						if (done) {
-							controller.close();
-							return;
-						}
-						controller.enqueue(value);
-						push();
-					});
+					reader
+						.read()
+						.then(({ done, value }) => {
+							if (done) {
+								controller.close();
+								return;
+							}
+							controller.enqueue(value);
+							push();
+						})
+						.catch((err) => {
+							console.error('Stream reading error:', err);
+							controller.error(err);
+						});
 				}
 				push();
 			},
 			cancel() {
-				readerTerminated = true;
+				reader.cancel().catch(() => {});
 			}
 		});
 
 		setHeaders({
-			'Content-Type': contentType ?? 'application/octet-stream',
+			'Content-Type': contentType,
 			'Content-Disposition': `attachment; filename="${fileName}"`
 		});
-		return new Response(stream, { status: attachmentResponse.status });
+
+		return new Response(stream, {
+			status: attachmentResponse.status
+		});
 	} catch (err) {
-		console.error(err);
-		return error(400, 'Error fetching attachment');
+		console.error('Attachment fetch error:', err);
+		return error(500, 'Failed to fetch attachment');
 	}
 };

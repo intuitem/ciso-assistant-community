@@ -585,22 +585,25 @@ class TestRiskScenario:
         scenario = RiskScenario.objects.create(
             name="test scenario",
             description="test scenario description",
+            ref_id="R.1",
             risk_assessment=risk_assessment,
         )
         scenario2 = RiskScenario.objects.create(
             name="test scenario 2",
             description="test scenario description",
+            ref_id="R.2",
             risk_assessment=risk_assessment,
         )
         scenario3 = RiskScenario.objects.create(
             name="test scenario 3",
             description="test scenario description",
+            ref_id="R.3",
             risk_assessment=risk_assessment,
         )
 
-        assert scenario.rid == "R.1"
-        assert scenario2.rid == "R.2"
-        assert scenario3.rid == "R.3"
+        assert scenario.ref_id == "R.1"
+        assert scenario2.ref_id == "R.2"
+        assert scenario3.ref_id == "R.3"
 
 
 @pytest.mark.django_db
