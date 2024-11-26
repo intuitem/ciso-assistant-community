@@ -146,18 +146,7 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean()
 });
 
-export const PolicySchema = z.object({
-	...NameDescriptionMixin,
-	csf_function: z.string().optional().nullable(),
-	status: z.string().optional().default('--'),
-	evidences: z.string().optional().array().optional(),
-	eta: z.string().optional().nullable(),
-	expiry_date: z.string().optional().nullable(),
-	link: z.string().url().optional().or(z.literal('')),
-	effort: z.string().optional().nullable(),
-	folder: z.string(),
-	reference_control: z.string().optional().nullable()
-});
+export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
