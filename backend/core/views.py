@@ -53,6 +53,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
 
 from weasyprint import HTML
 
@@ -613,7 +615,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             ):
                 risk_scenarios = ",".join(
                     [
-                        f"{scenario.rid}: {scenario.name}"
+                        f"{scenario.ref_id}: {scenario.name}"
                         for scenario in mtg.risk_scenarios.all()
                     ]
                 )
@@ -650,7 +652,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             writer = csv.writer(response, delimiter=";")
             columns = [
-                "rid",
+                "ref_id",
                 "threats",
                 "name",
                 "description",
@@ -668,7 +670,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
                 threats = ",".join([t.name for t in scenario.threats.all()])
                 row = [
-                    scenario.rid,
+                    scenario.ref_id,
                     threats,
                     scenario.name,
                     scenario.description,
@@ -1109,6 +1111,19 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "applied_controls",
     ]
 
+    def _perform_write(self, serializer):
+        if not serializer.validated_data.get("ref_id"):
+            risk_assessment = serializer.validated_data["risk_assessment"]
+            ref_id = RiskScenario.get_default_ref_id(risk_assessment)
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
+
+    def perform_create(self, serializer):
+        return self._perform_write(serializer)
+
+    def perform_update(self, serializer):
+        return self._perform_write(serializer)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
@@ -1173,6 +1188,27 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get risk scenarios count per status")
     def per_status(self, request):
         return Response({"results": risk_per_status(request.user)})
+
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def default_ref_id(self, request):
+        risk_assessment_id = request.query_params.get("risk_assessment")
+        if not risk_assessment_id:
+            return Response(
+                {"error": "Missing 'risk_assessment' parameter."}, status=400
+            )
+        try:
+            risk_assessment = RiskAssessment.objects.get(pk=risk_assessment_id)
+
+            # Use the class method to compute the default ref_id
+            default_ref_id = RiskScenario.get_default_ref_id(risk_assessment)
+            return Response({"results": default_ref_id})
+        except Exception as e:
+            logger.error("Error in default_ref_id: %s", str(e))
+            return Response(
+                {"error": "Error in default_ref_id has occurred."}, status=400
+            )
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
