@@ -87,7 +87,7 @@
 
 	const user = $page.data.user;
 
-	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
+	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { listViewFields } from '$lib/utils/table';

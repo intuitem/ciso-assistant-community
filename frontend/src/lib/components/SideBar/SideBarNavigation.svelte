@@ -28,14 +28,15 @@
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
 				if (subItem.exclude) {
-					return subItem.exclude.some((role) => !user.roles.includes(role));
+					return subItem.exclude.some((role) => user?.roles && !user.roles.includes(role));
 				} else if (subItem.permissions) {
-					return subItem.permissions.some((permission) =>
-						Object.hasOwn(user.permissions, permission)
+					return subItem.permissions?.some(
+						(permission) => user?.permissions && Object.hasOwn(user.permissions, permission)
 					);
 				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1])) {
 					const model = URL_MODEL_MAP[subItem.href.split('/')[1]];
-					const canViewObject = Object.hasOwn(user.permissions, `view_${model.name}`);
+					const canViewObject =
+						user?.permissions && Object.hasOwn(user.permissions, `view_${model.name}`);
 					return canViewObject;
 				}
 				return false;

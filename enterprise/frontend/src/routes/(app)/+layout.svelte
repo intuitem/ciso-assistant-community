@@ -1,5 +1,4 @@
 <script lang="ts">
-	// Most of your app wide CSS should be put in this file
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppBar, AppShell } from '@skeletonlabs/skeleton';
 	import '../../app.postcss';
@@ -37,6 +36,12 @@
 			});
 		}
 	}
+
+	const licenseExpirationNotifyDays = data.LICENSE_EXPIRATION_NOTIFY_DAYS;
+	const licenseStatus: Record<string, any> = data.licenseStatus;
+
+	const licenseAboutToExpire =
+		licenseStatus?.status === 'active' && licenseStatus?.days_left <= licenseExpirationNotifyDays;
 </script>
 
 <!-- App Shell -->
@@ -48,11 +53,13 @@
 		<SideBar bind:open={sidebarOpen} />
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
-		{#if data.licenseStatus.status === 'expired'}
-			<aside class="variant-soft-warning text-center w-full items-center py-2">
+		<aside class="variant-soft-warning text-center w-full items-center py-2">
+			{#if data.licenseStatus.status === 'expired'}
 				{m.licenseExpiredMessage()}
-			</aside>
-		{/if}
+			{:else if licenseAboutToExpire}
+				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
+			{/if}
+		</aside>
 		<AppBar background="bg-white" padding="py-2 px-4">
 			<span
 				class="text-2xl font-bold pb-1 bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"

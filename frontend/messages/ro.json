@@ -856,5 +856,7 @@
 	"tags": "Etichete",
 	"addTag": "Adăugați etichetă",
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
-	"forgotPassword": "Aţi uitat parola"
+	"forgotPassword": "Aţi uitat parola",
+	"scoreSemiColon": "Scor:",
+	"mappingInferenceHelpText": "Aceste variabile sunt fixe și nu se vor modifica în funcție de sursă."
 }

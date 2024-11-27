@@ -789,6 +789,7 @@
 	"questionPlural": "Questions",
 	"fillMetadataURL": "Option 1 : Remplissez l'URL des métadonnées",
 	"fillSSOSLOURLx509cert": "Option 2 : Remplissez l'URL SSO, l'URL SLO et le certificat x509",
+	"licenseAboutToExpireWarning": "Il reste {days_left} jours avant l'expiration de votre licence.",
 	"noExpirationDateSet": "Aucune date d'expiration définie",
 	"sumpageTotal": "total",
 	"sumpageActive": "actif",
@@ -863,5 +864,7 @@
 	"existingMeasures": "Mesures existantes",
 	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
 	"forgotPassword": "Mot de passe oublié",
-	"ssoSettingsUpdated": "Paramètres SSO mis à jour"
+	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
+	"scoreSemiColon": "Score:",
+	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source."
 }
