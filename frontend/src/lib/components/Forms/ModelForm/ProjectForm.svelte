@@ -25,10 +25,10 @@
 />
 <TextField
 	{form}
-	field="internal_reference"
-	label={m.internalReference()}
-	cacheLock={cacheLocks['internal_reference']}
-	bind:cachedValue={formDataCache['internal_reference']}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
 />
 <Select
 	{form}

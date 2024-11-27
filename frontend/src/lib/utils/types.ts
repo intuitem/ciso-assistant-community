@@ -99,7 +99,7 @@ export interface Project {
 	is_published: boolean;
 	name: string;
 	description?: string;
-	internal_reference?: string;
+	ref_id?: string;
 	compliance_assessments: Record<string, any>[];
 }
 
