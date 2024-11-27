@@ -2954,21 +2954,25 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self, mapping: RequirementMapping, source_requirement_assessment: Self
     ) -> dict | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-                if (source_requirement_assessment.compliance_assessment.min_score == self.compliance_assessment.min_score and
-                    source_requirement_assessment.compliance_assessment.max_score == self.compliance_assessment.max_score):
-                    return {
-                        "result": source_requirement_assessment.result,
-                        "status": source_requirement_assessment.status,
-                        "score": source_requirement_assessment.score,
-                        "is_scored": source_requirement_assessment.is_scored,
-                        "observation": source_requirement_assessment.observation,
-                    }
-                else:
-                    return {
-                        "result": source_requirement_assessment.result,
-                        "status": source_requirement_assessment.status,
-                        "observation": source_requirement_assessment.observation,
-                    }
+            if (
+                source_requirement_assessment.compliance_assessment.min_score
+                == self.compliance_assessment.min_score
+                and source_requirement_assessment.compliance_assessment.max_score
+                == self.compliance_assessment.max_score
+            ):
+                return {
+                    "result": source_requirement_assessment.result,
+                    "status": source_requirement_assessment.status,
+                    "score": source_requirement_assessment.score,
+                    "is_scored": source_requirement_assessment.is_scored,
+                    "observation": source_requirement_assessment.observation,
+                }
+            else:
+                return {
+                    "result": source_requirement_assessment.result,
+                    "status": source_requirement_assessment.status,
+                    "observation": source_requirement_assessment.observation,
+                }
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
             if source_requirement_assessment.result in (
                 RequirementAssessment.Result.COMPLIANT,
