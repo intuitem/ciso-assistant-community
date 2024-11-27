@@ -860,5 +860,7 @@
 	"existingMeasures": "Befintliga kontroller",
 	"youCanSetPasswordHere": "Du kan ställa in ditt lösenord här",
 	"forgotPassword": "Glömt lösenord",
-	"ssoSettingsUpdated": "SSO-inställningar uppdaterade"
+	"ssoSettingsUpdated": "SSO-inställningar uppdaterade",
+	"bringTheEvidences": "Bring the evidences",
+	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
 }

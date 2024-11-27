@@ -892,5 +892,7 @@
 	"p1": "P1",
 	"p2": "P2",
 	"p3": "P3",
-	"p4": "P4"
+	"p4": "P4",
+	"bringTheEvidences": "Bring the evidences",
+	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
 }

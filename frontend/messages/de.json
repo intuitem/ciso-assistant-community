@@ -857,5 +857,7 @@
 	"tags": "Schlagwörter",
 	"addTag": "Tag hinzufügen",
 	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen",
-	"forgotPassword": "Passwort vergessen"
+	"forgotPassword": "Passwort vergessen",
+	"bringTheEvidences": "Bring the evidences",
+	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
 }

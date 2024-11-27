@@ -858,5 +858,7 @@
 	"tags": "العلامات",
 	"addTag": "إضافة علامة",
 	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
-	"forgotPassword": "هل نسيت كلمة السر"
+	"forgotPassword": "هل نسيت كلمة السر",
+	"bringTheEvidences": "Bring the evidences",
+	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
 }

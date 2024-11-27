@@ -857,5 +857,7 @@
 	"tags": "Etiquetas",
 	"addTag": "Adicionar etiqueta",
 	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra",
-	"forgotPassword": "Esqueceu sua senha"
+	"forgotPassword": "Esqueceu sua senha",
+	"bringTheEvidences": "Bring the evidences",
+	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
 }

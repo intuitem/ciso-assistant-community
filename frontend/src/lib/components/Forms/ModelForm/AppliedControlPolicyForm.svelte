@@ -135,14 +135,11 @@
 {/if}
 
 {#if duplicate}
-	<!-- We must set the right translation for this checkbox -->
-	<!-- Duplicate the evidences -->
-	<!-- If disabled, the applied control will be duplicated without its evidences -->
 	<Checkbox
 		{form}
 		field="duplicate_evidences"
-		label={m.showImagesUnauthenticated()}
-		helpText={m.showImagesUnauthenticatedHelpText()}
+		label={m.bringTheEvidences()}
+		helpText={m.bringTheEvidencesHelpText()}
 	/>
 {/if}
 
