@@ -95,12 +95,12 @@ export const actions: Actions = {
 				const response = await req.json();
 				const errorData = response.error;
 
-				const errorTraceback = errorData[2].map((field) => `[${field}]`).join("");
+				const errorTraceback = errorData[2].map((field) => `[${field}]`).join('');
 				let errorMessage = unsafeTranslate(errorData[0], errorData[1]);
 				if (errorMessage === undefined) {
-					errorMessage = `${errorData[0]} ${JSON.stringify(errorData[1])}`
+					errorMessage = `${errorData[0]} ${JSON.stringify(errorData[1])}`;
 				}
-				errorMessage = `${errorTraceback} ${errorMessage}`
+				errorMessage = `${errorTraceback} ${errorMessage}`;
 
 				setFlash({ type: 'error', message: errorMessage }, event);
 				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)

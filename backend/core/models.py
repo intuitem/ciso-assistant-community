@@ -266,23 +266,30 @@ class StoredLibrary(LibraryMixin):
         """
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
-            return None # We do not store the library if its hash checksum is in the database.
+            return None  # We do not store the library if its hash checksum is in the database.
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
-                return ("LibraryErrorBadType", {
-                    "value": repr(library_data)[:100]
-                    "type": type(library_data).__name__,
-                    "expected_type": "dict"
-                }, [])
+                return (
+                    "LibraryErrorBadType",
+                    {
+                        "value": repr(library_data)[:100],
+                        "type": type(library_data).__name__,
+                        "expected_type": "dict",
+                    },
+                    [],
+                )
         except yaml.YAMLError as e:
             logger.error("Error while loading library content", error=e)
             return ("LibraryErrorInvalidYamlFormat", {}, [])
 
-        from library.utils import LibraryFormatChecker # Should this really be imported within the function ?
+        from library.utils import (
+            LibraryFormatChecker,
+        )  # Should this really be imported within the function ?
+
         library_format_checker = LibraryFormatChecker(library_data)
         error_msg = library_format_checker.run()
-        if error_msg is not None :
+        if error_msg is not None:
             return error_msg
 
         urn = library_data["urn"].lower()
@@ -342,7 +349,9 @@ class StoredLibrary(LibraryMixin):
         return StoredLibrary.store_library_content(library_content, builtin)
 
     def load(self) -> Union[str, None]:
-        from library.utils import LibraryImporter # Should this really be imported within the function ?
+        from library.utils import (
+            LibraryImporter,
+        )  # Should this really be imported within the function ?
 
         if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale):
             return "This library has already been loaded."
