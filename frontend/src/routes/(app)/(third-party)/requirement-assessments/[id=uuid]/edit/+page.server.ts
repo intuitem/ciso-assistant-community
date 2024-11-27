@@ -36,7 +36,7 @@ export const load = (async ({ fetch, params }) => {
 		`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
 	);
 
-	const parent = requirementAssessment.requirement.parent_requirement
+	const parent = requirementAssessment.requirement.parent_requirement;
 
 	const model = getModelInfo(URLModel);
 	const object = { ...requirementAssessment };
