@@ -10,7 +10,7 @@ description: 'Implementing the Health Insurance Portability and Accountability A
   '
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: '1'
+version: 1
 provider: NIST
 packager: intuitem
 objects:
