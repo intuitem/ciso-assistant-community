@@ -120,7 +120,6 @@ erDiagram
     USER                         }o--o{ RISK_SCENARIO         : owns
     USER                         }o--o{ APPLIED_CONTROL       : owns
     USER                         }o--o{ ASSET                 : owns
-    RISK_SCENARIO                }o--o{ RISK_SCENARIO         : is_antecedent_of
 
     PROJECT {
         string ref_id
@@ -1111,11 +1110,11 @@ Risk treatment        | Traitement du risque    | Applied controls in a risk ana
 ### EBIOS-RM study
 
 The type EBIOS-RM study is a sort of assessment. It contains the following specific fields:
-- reference risk matrix (immutable after creation)
+- reference risk matrix (chosen at creation and immutable after creation)
 - ref_id
 - name of the study
-- description of the study/reference entity
-- misison of the reference entity
+- description of the study
+- reference entity
 - a list of primary assets and corresponding secondary assets (workshop 1)
 - a list of audits for the security baseline (workshop 1)
 - a list of feared events (workshop 1)
@@ -1133,20 +1132,19 @@ The object feared events (workshop 1) contains the following fields:
 - list of impact qualifications
 - gravity (from the risk matrix impact scale)
 - selected
+- justification
 
 The object risk_origin_target_objective (workshop 2) contains the following fields:
 - risk origin (--/state/organized crime/terrorist/activist/professional/amateur/avenger/pathological/)
 - target objective (text)
 - motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
 - resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
-- pertience (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
 - activity (--/1/2/3/4)
 - selected
+- justification
 
-The object ecosystem entity (workshop 3) contains the following fields (plus the common fields for assessments):
-- ref_if
-- name
-- description
+The object ecosystem entity (workshop 3) links to a TPRM entity, and contains the following fields:
 - category (provider/partner/client/...)
 - third-party entity from TPRM (optional)
 - Dependence
@@ -1154,14 +1152,17 @@ The object ecosystem entity (workshop 3) contains the following fields (plus the
 - Cyber maturity
 - trust
 - selected
+- justification
 
-The object strategic attack path (workshop 3) contains the following field
+The object strategic attack path (workshop 3) contains the following fields:
 - risk_origin_target_objective
 - description
+- affected ecosystem entities
 - intial threat level
 - Controls
 - residual threat level
 - selected
+- justification
 
 THe object operational scenario (workshop 4) contains the following fields:
 - strategic attack path
@@ -1169,6 +1170,7 @@ THe object operational scenario (workshop 4) contains the following fields:
 - description
 - likelihood
 - selected
+- justification
 
 The frontend for risk study shall propose the following steps:
 - workshop 1: framing and security baseline (cadrage et socle de sécurité)
@@ -1188,6 +1190,100 @@ The frontend for risk study shall propose the following steps:
 - workshop 5: risk treatment
   - The risk assessment is generated from workshop 4
   - risk treatment is based on existing risk assessment object
+
+
+```mermaid
+erDiagram
+    DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
+    DOMAIN                ||--o{ ECOSYSTEM_ENTITY     : contains
+    DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
+    DOMAIN                ||--o{ FEARED_EVENT         : contains
+    DOMAIN                ||--o{ RO_TO                : contains
+    DOMAIN                ||--o{ STRATEGIC_ATTACK_PATH: contains
+
+```
+
+```mermaid
+erDiagram
+
+    STRATEGIC_ATTACK_PATH }o--|| RO_TO                : derives
+    RO_TO                 }o--|{ FEARED_EVENT         : corresponds_to
+    EBIOS_RM_STUDY        }o--o{ RO_TO                : contains
+    EBIOS_RM_STUDY        }o--o{ ECOSYSTEM_ENTITY     : contains
+    EBIOS_RM_STUDY        }o--o{ OPERATIONAL_SCENARIO : contains
+    EBIOS_RM_STUDY        }o--o{ FEARED_EVENT         : contains
+    EBIOS_RM_STUDY        }o--o{ STRATEGIC_ATTACK_PATH: contains
+    EBIOS_RM_STUDY        }o--o| ENTITY               : studies
+    EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
+    EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
+    EBIOS_RM_STUDY        }o--|| RISK_ASSESSMENT      : generates
+    OPERATIONAL_SCENARIO  }o--|| STRATEGIC_ATTACK_PATH: derives
+    OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
+    STRATEGIC_ATTACK_PATH }o--o{ ECOSYSTEM_ENTITY     : uses
+    STRATEGIC_ATTACK_PATH }o--o{ APPLIED_CONTROL      : mitigated_by
+    ECOSYSTEM_ENTITY      }o--|| ENTITY               : qualifies
+
+    EBIOS_RM_STUDY {
+        string      ref_id
+        string      name
+        string      description
+
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string      observation
+    }
+
+    FEARED_EVENT {
+        string ref_id
+        string name
+        string description
+        json   qualifications
+        int    gravity
+        bool   selected
+        bool   justification
+    }
+
+    RO_TO {
+        string risk_origin
+        string target_objective
+        int    motivation
+        int    resources
+        int    pertinence
+        int    activity
+        bool   selected
+        bool   justification
+    }
+
+    ECOSYSTEM_ENTITY {
+        string category
+        int    dependence
+        int    penetration
+        int    maturity
+        int    trust
+        bool   selected
+        bool   justification
+    }
+
+    STRATEGIC_ATTACK_PATH {
+        string description
+        int    intial_threat_level
+        int    residual threat level
+        bool   selected
+        bool   justification
+    }
+
+    OPERATIONAL_SCENARIO {
+        string description
+        int    likelihood
+        bool   selected
+        string justification
+    }
+
+```
 
 ### Implementation
 
