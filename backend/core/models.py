@@ -213,7 +213,7 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
 
     # Why is the library URN nullable and blank ?
     # An URN is mandatory for a library
-    urn = models.CharField(max_length=255, null=False, verbose_name=_("URN"))
+    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
