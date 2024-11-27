@@ -11,7 +11,7 @@ import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { Library } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { unsafeTranslate } from '$lib/utils/i18n';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load = (async ({ fetch }) => {
@@ -93,13 +93,16 @@ export const actions: Actions = {
 			});
 			if (!req.ok) {
 				const response = await req.json();
-				console.error(response);
+				const errorData = response.error;
 
-				const translate_error = safeTranslate(response.error);
-				const toast_error_message =
-					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
+				const errorTraceback = errorData[2].map((field) => `[${field}]`).join("");
+				let errorMessage = unsafeTranslate(errorData[0], errorData[1]);
+				if (errorMessage === undefined) {
+					errorMessage = `${errorData[0]} ${JSON.stringify(errorData[1])}`
+				}
+				errorMessage = `${errorTraceback} ${errorMessage}`
 
-				setFlash({ type: 'error', message: toast_error_message }, event);
+				setFlash({ type: 'error', message: errorMessage }, event);
 				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}

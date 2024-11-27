@@ -3,7 +3,7 @@ import os
 import re
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Type, Union
+from typing import Self, Type, Union, List, Tuple
 
 from rest_framework.renderers import status
 import yaml
@@ -211,7 +211,9 @@ class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
         abstract = True
         unique_together = [["urn", "locale", "version"]]
 
-    urn = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("URN"))
+    # Why is the library URN nullable and blank ?
+    # An URN is mandatory for a library
+    urn = models.CharField(max_length=255, null=False, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -256,31 +258,34 @@ class StoredLibrary(LibraryMixin):
     @classmethod
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False
-    ) -> "StoredLibrary | None":
+    ) -> Union[Self, None, Tuple[str, dict, List[str]]]:
+        """
+        If this function succeed it will return a StoredLibrary object.
+        If the provided library is already stored in the database it will return None.
+        If an error occurs while storing the libary content/checking the validity of the libary content an error will return as a tuple (error_name, error_data, error_traceback).
+        """
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
-            return None  # We do not store the library if its hash checksum is in the database.
+            return None # We do not store the library if its hash checksum is in the database.
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
-                raise yaml.YAMLError(
-                    f"The YAML content must be a dictionary but it's been interpreted as a {type(library_data).__name__} !"
-                )
+                return ("LibraryErrorBadType", {
+                    "value": repr(library_data)[:100]
+                    "type": type(library_data).__name__,
+                    "expected_type": "dict"
+                }, [])
         except yaml.YAMLError as e:
             logger.error("Error while loading library content", error=e)
-            raise e
-        missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
+            return ("LibraryErrorInvalidYamlFormat", {}, [])
 
-        if missing_fields:
-            err = "The following fields are missing : {}".format(
-                ", ".join(repr(field) for field in missing_fields)
-            )
-            logger.error("Error while loading library content", error=err)
-            raise ValueError(err)
+        from library.utils import LibraryFormatChecker # Should this really be imported within the function ?
+        library_format_checker = LibraryFormatChecker(library_data)
+        error_msg = library_format_checker.run()
+        if error_msg is not None :
+            return error_msg
 
         urn = library_data["urn"].lower()
-        if not match_urn(urn):
-            raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
@@ -337,7 +342,7 @@ class StoredLibrary(LibraryMixin):
         return StoredLibrary.store_library_content(library_content, builtin)
 
     def load(self) -> Union[str, None]:
-        from library.utils import LibraryImporter
+        from library.utils import LibraryImporter # Should this really be imported within the function ?
 
         if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale):
             return "This library has already been loaded."

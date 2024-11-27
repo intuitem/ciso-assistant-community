@@ -164,10 +164,15 @@ class StoredLibraryViewSet(BaseModelViewSet):
             validate_file_extension(attachment)
             # Use safe_load to prevent arbitrary code execution.
 
-            content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
+            content = attachment.read() # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
 
             try:
-                StoredLibrary.store_library_content(content)
+                result = StoredLibrary.store_library_content(content)
+                if isinstance(result, tuple) :
+                    return HttpResponse(
+                        json.dumps({"error": result}),
+                        status=HTTP_400_BAD_REQUEST,
+                    )
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
                 return HttpResponse(
@@ -181,7 +186,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyLoadedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except:
+        except Exception as e :
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
