@@ -420,7 +420,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Evidences',
 		fileFields: ['attachment'],
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL&content_type=EN' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		]
 	},
