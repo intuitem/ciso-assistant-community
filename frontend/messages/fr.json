@@ -866,6 +866,6 @@
 	"youCanSetPasswordHere": "Vous pouvez définir votre mot de passe ici",
 	"forgotPassword": "Mot de passe oublié",
 	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
-	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
+	"bringTheEvidences": "Apportez les preuves",
+	"bringTheEvidencesHelpText": "Si désactivé, l'objet sera dupliqué sans ses preuves"
 }

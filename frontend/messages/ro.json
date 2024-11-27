@@ -858,6 +858,6 @@
 	"addTag": "Adăugați etichetă",
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
 	"forgotPassword": "Aţi uitat parola",
-	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
+	"bringTheEvidences": "Aduceți dovezile",
+	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale"
 }

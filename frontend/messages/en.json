@@ -894,5 +894,5 @@
 	"p3": "P3",
 	"p4": "P4",
 	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
+	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences"
 }

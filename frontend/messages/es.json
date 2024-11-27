@@ -858,6 +858,6 @@
 	"addTag": "Agregar etiqueta",
 	"tagsHelpText": "Las etiquetas se utilizan para categorizar y filtrar los elementos. Puedes agregar etiquetas en la sección Extra",
 	"forgotPassword": "Has olvidado tu contraseña",
-	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
+	"bringTheEvidences": "Traer las evidencias",
+	"bringTheEvidencesHelpText": "Si está deshabilitado, el objeto se duplicará sin sus evidencias."
 }

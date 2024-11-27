@@ -858,6 +858,6 @@
 	"addTag": "Tag toevoegen",
 	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra",
 	"forgotPassword": "Wachtwoord vergeten",
-	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
+	"bringTheEvidences": "Breng de bewijzen",
+	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen"
 }

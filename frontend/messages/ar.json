@@ -651,7 +651,6 @@
 	"ssoSettingsDescription": "قم بتكوين إعدادات تسجيل الدخول الموحد هنا.",
 	"sso": "SSO",
 	"isSso": "هل هو SSO",
-	"duplicateAppliedControl": "تكرار عنصر التحكم المطبق",
 	"suggestion": "اقتراح",
 	"suggestionColon": "اقتراح:",
 	"annotationColon": "ملاحظة:",
@@ -680,6 +679,7 @@
 	"back": "خلف",
 	"duplicate": "ينسخ",
 	"duplicateRiskAssessment": "تكرار تقييم المخاطر",
+	"duplicateAppliedControl": "تكرار عنصر التحكم المطبق",
 	"size": "الحجم",
 	"favicon": "الرمز المفضل",
 	"logo": "الشعار",
@@ -859,6 +859,6 @@
 	"addTag": "إضافة علامة",
 	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
 	"forgotPassword": "هل نسيت كلمة السر",
-	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the applied control will be duplicated without its evidences"
+	"bringTheEvidences": "أحضر الأدلة",
+	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته"
 }
