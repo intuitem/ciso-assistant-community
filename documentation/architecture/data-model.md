@@ -177,6 +177,7 @@ erDiagram
         principal[] author
         principal[] reviewer
         string      observation
+        boolean     embedded
     }
 
     THREAT {
@@ -1188,8 +1189,9 @@ The frontend for risk study shall propose the following steps:
 - workshop 4: operational scenarios
   - list of operational scenarios
 - workshop 5: risk treatment
-  - The risk assessment is generated from workshop 4
-  - risk treatment is based on existing risk assessment object
+  - The risk assessment is generated from workshop 4, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
+  - After generation, a risk assessment is fully editable, to allow customisation, and the risk assessment can be managed normally as any other risk assessment.
+  - risk treatment is based on the risk assessment.
 
 
 ```mermaid
@@ -1216,7 +1218,7 @@ erDiagram
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
-    EBIOS_RM_STUDY        }o--|| RISK_ASSESSMENT      : generates
+    EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
     OPERATIONAL_SCENARIO  }o--|| STRATEGIC_ATTACK_PATH: derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
     STRATEGIC_ATTACK_PATH }o--o{ ECOSYSTEM_ENTITY     : uses
@@ -1288,3 +1290,4 @@ erDiagram
 ### Implementation
 
 EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
+
