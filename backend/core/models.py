@@ -1169,8 +1169,9 @@ class Project(NameDescriptionMixin, FolderMixin):
         ("eol", _("EndOfLife")),
         ("dropped", _("Dropped")),
     ]
-    internal_reference = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
     lc_status = models.CharField(
         max_length=20,
@@ -1541,6 +1542,9 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         blank=True,
         verbose_name=_("Reference Control"),
     )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
     evidences = models.ManyToManyField(
         Evidence,
         blank=True,
@@ -1802,6 +1806,9 @@ class RiskAssessment(Assessment):
         on_delete=models.PROTECT,
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
+    )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
 
     class Meta:
@@ -2398,6 +2405,9 @@ class ComplianceAssessment(Assessment):
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
     # score system is suggested by the framework, but can be changed at the start of the assessment
     min_score = models.IntegerField(null=True, verbose_name=_("Minimum score"))

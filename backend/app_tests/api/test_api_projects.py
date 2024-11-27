@@ -90,7 +90,7 @@ class TestProjectsAuthenticated:
                 "name": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
                 "folder": test.folder,
-                "internal_reference": PROJECT_REFERENCE,
+                "ref_id": PROJECT_REFERENCE,
                 "lc_status": PROJECT_STATUS[0],
             },
             {
@@ -112,7 +112,7 @@ class TestProjectsAuthenticated:
                 "name": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
                 "folder": str(test.folder.id),
-                "internal_reference": PROJECT_REFERENCE,
+                "ref_id": PROJECT_REFERENCE,
                 "lc_status": PROJECT_STATUS[0],
             },
             {
@@ -137,14 +137,14 @@ class TestProjectsAuthenticated:
                 "name": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
                 "folder": test.folder,
-                "internal_reference": PROJECT_REFERENCE,
+                "ref_id": PROJECT_REFERENCE,
                 "lc_status": PROJECT_STATUS[0],
             },
             {
                 "name": "new " + PROJECT_NAME,
                 "description": "new " + PROJECT_DESCRIPTION,
                 "folder": str(folder.id),
-                "internal_reference": "new " + PROJECT_REFERENCE,
+                "ref_id": "new " + PROJECT_REFERENCE,
                 "lc_status": status[0],
             },
             {

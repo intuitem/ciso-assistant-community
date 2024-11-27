@@ -187,7 +187,7 @@ class ProjectViewSet(BaseModelViewSet):
 
     model = Project
     filterset_fields = ["folder", "lc_status"]
-    search_fields = ["name", "internal_reference", "description"]
+    search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -1418,6 +1418,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
+    search_fields = ["ref_id"]
 
     def perform_create(self, serializer):
         """
@@ -1848,7 +1849,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = ["framework", "project", "status"]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
