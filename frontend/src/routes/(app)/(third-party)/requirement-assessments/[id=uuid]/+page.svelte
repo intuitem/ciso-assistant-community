@@ -192,6 +192,9 @@
 							<i class="fa-solid fa-link" />
 							{m.mappingInference()}
 						</p>
+						<span class="text-xs text-gray-500"
+							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
+						>
 						<ul class="list-disc ml-4">
 							<li>
 								<p>
@@ -205,7 +208,7 @@
 								</p>
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
-									<span class="badge {classesText} h-fit">
+									<span class="badge h-fit">
 										{safeTranslate(
 											toCamelCase(mappingInference.sourceRequirementAssessment.coverage)
 										)}

@@ -2778,48 +2778,71 @@ class ComplianceAssessment(Assessment):
     ) -> list["RequirementAssessment"]:
         requirement_assessments: list[RequirementAssessment] = []
         result_order = (
+            RequirementAssessment.Result.NOT_ASSESSED,
+            RequirementAssessment.Result.NOT_APPLICABLE,
             RequirementAssessment.Result.NON_COMPLIANT,
             RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             RequirementAssessment.Result.COMPLIANT,
         )
+
+        def assign_attributes(target, attributes):
+            """
+            Helper function to assign attributes to a target object.
+            Only assigns if the attribute is not None.
+            """
+            keys = ["result", "status", "score", "is_scored", "observation"]
+            for key, value in zip(keys, attributes):
+                if value is not None:
+                    setattr(target, key, value)
+
         for requirement_assessment in self.requirement_assessments.all():
             mappings = mapping_set.mappings.filter(
                 target_requirement=requirement_assessment.requirement
             )
             inferences = []
             refs = []
+
+            # Filter for full coverage relationships if applicable
             if mappings.filter(
                 relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
             ).exists():
                 mappings = mappings.filter(
                     relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
                 )
+
             for mapping in mappings:
                 source_requirement_assessment = RequirementAssessment.objects.get(
                     compliance_assessment=source_assessment,
                     requirement=mapping.source_requirement,
                 )
-                inferred_result, inferred_status = requirement_assessment.infer_result(
+                inferred_result = requirement_assessment.infer_result(
                     mapping=mapping,
                     source_requirement_assessment=source_requirement_assessment,
                 )
-                if inferred_result in result_order:
-                    inferences.append((inferred_result, inferred_status))
+                if inferred_result.get("result") in result_order:
+                    inferences.append(
+                        (
+                            inferred_result.get("result"),
+                            inferred_result.get("status"),
+                            inferred_result.get("score"),
+                            inferred_result.get("is_scored"),
+                            inferred_result.get("observation"),
+                        )
+                    )
                     refs.append(source_requirement_assessment)
+
             if inferences:
                 if len(inferences) == 1:
-                    requirement_assessment.result = inferences[0][0]
-                    if inferences[0][1]:
-                        requirement_assessment.status = inferences[0][1]
+                    selected_inference = inferences[0]
                     ref = refs[0]
                 else:
-                    lowest_result = min(
+                    selected_inference = min(
                         inferences, key=lambda x: result_order.index(x[0])
                     )
-                    requirement_assessment.result = lowest_result[0]
-                    if lowest_result[1]:
-                        requirement_assessment.status = lowest_result[1]
-                    ref = refs[inferences.index(lowest_result)]
+                    ref = refs[inferences.index(selected_inference)]
+
+                assign_attributes(requirement_assessment, selected_inference)
+
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
                     "source_requirement_assessment": {
@@ -2829,7 +2852,9 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
+
                 requirement_assessments.append(requirement_assessment)
+
         return requirement_assessments
 
     def progress(self) -> int:
@@ -2927,24 +2952,39 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
-    ) -> str | None:
+    ) -> dict | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-            return (
-                source_requirement_assessment.result,
-                source_requirement_assessment.status,
-            )
+            if (
+                source_requirement_assessment.compliance_assessment.min_score
+                == self.compliance_assessment.min_score
+                and source_requirement_assessment.compliance_assessment.max_score
+                == self.compliance_assessment.max_score
+            ):
+                return {
+                    "result": source_requirement_assessment.result,
+                    "status": source_requirement_assessment.status,
+                    "score": source_requirement_assessment.score,
+                    "is_scored": source_requirement_assessment.is_scored,
+                    "observation": source_requirement_assessment.observation,
+                }
+            else:
+                return {
+                    "result": source_requirement_assessment.result,
+                    "status": source_requirement_assessment.status,
+                    "observation": source_requirement_assessment.observation,
+                }
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
             if source_requirement_assessment.result in (
                 RequirementAssessment.Result.COMPLIANT,
                 RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             ):
-                return (RequirementAssessment.Result.PARTIALLY_COMPLIANT, None)
+                return {"result": RequirementAssessment.Result.PARTIALLY_COMPLIANT}
             if (
                 source_requirement_assessment.result
                 == RequirementAssessment.Result.NON_COMPLIANT
             ):
-                return (RequirementAssessment.Result.NON_COMPLIANT, None)
-        return (None, None)
+                return {"result": RequirementAssessment.Result.NON_COMPLIANT}
+        return {}
 
     def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
