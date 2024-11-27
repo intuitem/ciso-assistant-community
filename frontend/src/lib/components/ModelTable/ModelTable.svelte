@@ -1,26 +1,25 @@
 <script lang="ts">
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import {
+		CUSTOM_ACTIONS_COMPONENT,
 		FIELD_COLORED_TAG_MAP,
-		FIELD_COMPONENT_MAP,
-		CUSTOM_ACTIONS_COMPONENT
+		FIELD_COMPONENT_MAP
 	} from '$lib/utils/crud';
-	import { createEventDispatcher, onMount } from 'svelte';
 	import { stringify } from '$lib/utils/helpers';
+	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
 	// Types
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import type { urlModel } from '$lib/utils/types.js';
+	import * as m from '$paraglide/messages';
+	import { languageTag } from '$paraglide/runtime';
 	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
-	import * as m from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	// Event Dispatcher
 	type TableEvent = {
 		selected: string[];
@@ -88,7 +87,7 @@
 
 	const user = $page.data.user;
 
-	$: canCreateObject = Object.hasOwn(user.permissions, `add_${model?.name}`);
+	$: canCreateObject = user?.permissions && Object.hasOwn(user.permissions, `add_${model?.name}`);
 
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { listViewFields } from '$lib/utils/table';
@@ -100,6 +99,7 @@
 	$: classesTable = `${element} ${text} ${color}`;
 
 	import { goto } from '$app/navigation';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { DataHandler } from '@vincjo/datatables';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -107,7 +107,6 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
 
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
@@ -118,7 +117,6 @@
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
 	$: hasRows = data.length > 0;
-	const allRows = handler.getAllRows();
 	const tableURLModel = source.meta?.urlmodel ?? URLModel;
 	const filters =
 		tableURLModel && Object.hasOwn(listViewFields[tableURLModel], 'filters')
@@ -144,6 +142,10 @@
 		return value.includes(stringify(entry));
 	}
 
+	// Initialize filter values from URL search params
+	for (const field of filteredFields)
+		filterValues[field] = $page.url.searchParams.getAll(field).map((value) => ({ value }));
+
 	$: {
 		for (const field of filteredFields) {
 			handler.filter(
@@ -155,18 +157,24 @@
 					? filters[field].filter
 					: defaultFilterFunction
 			);
+			$page.url.searchParams.delete(field);
+			if (filterValues[field] && filterValues[field].length > 0) {
+				for (const value of filterValues[field]) {
+					$page.url.searchParams.append(field, value.value);
+				}
+			}
 		}
+		if (browser) goto($page.url);
 	}
 
-	let allowOptionsUpdate = true;
-	allRows.subscribe((rows) => {
-		if (!allowOptionsUpdate) return;
+	$: {
 		for (const key of filteredFields) {
-			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(rows, key);
+			filterProps[key] = (filters[key].filterProps ?? defaultFilterProps)(
+				Object.values(source.meta),
+				key
+			);
 		}
-		if (rows.length > 0) allowOptionsUpdate = false;
-	});
-
+	}
 	const rows = handler.getRows();
 	const _filters = handler.getFilters();
 
@@ -203,9 +211,10 @@
 		(URLModel !== 'libraries' && Object.hasOwn(row.meta, 'urn') && row.meta.urn) ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 
-	import { popup } from '@skeletonlabs/skeleton';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { isDark } from '$lib/utils/helpers';
+	import type { PopupSettings } from '@skeletonlabs/skeleton';
+	import { popup } from '@skeletonlabs/skeleton';
+	import { browser } from '$app/environment';
 
 	const popupFilter: PopupSettings = {
 		event: 'click',
@@ -309,7 +318,11 @@
 										{@const tagData = tag.key?.[tagKey]?.[tagValue]}
 										{#if tagData && tags}
 											{@const { text, cssClasses } = tagData}
-											<span class={cssClasses}>{safeTranslate(text)}</span>
+											<span class="space-x-1">
+												<span class={cssClasses}>
+													{safeTranslate(text)}
+												</span>
+											</span>
 										{/if}
 									{/each}
 								{/if}
@@ -359,7 +372,7 @@
 											>
 												{safeTranslate(value.name ?? value.str) ?? '-'}
 											</p>
-										{:else if ISO_8601_REGEX.test(value)}
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
 											{formatDateOrDateTime(value, languageTag())}
 										{:else}
 											{safeTranslate(value ?? '-')}

@@ -5,8 +5,6 @@ from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Type, Union
 
-from auditlog.registry import auditlog
-
 from rest_framework.renderers import status
 import yaml
 from django.apps import apps
@@ -31,10 +29,15 @@ from library.helpers import (
     update_translations_as_string,
     update_translations_in_object,
 )
+from global_settings.models import GlobalSettings
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from .utils import camel_case, sha256
-from .validators import validate_file_name, validate_file_size
+from .validators import (
+    validate_file_name,
+    validate_file_size,
+    JSONSchemaInstanceValidator,
+)
 
 logger = get_logger(__name__)
 
@@ -529,7 +532,7 @@ class LibraryUpdater:
             order_id = 0
             for requirement_node in requirement_nodes:
                 requirement_node_dict = {**requirement_node}
-                for key in ["maturity", "depth", "reference_controls", "threats"]:
+                for key in ["depth", "reference_controls", "threats"]:
                     requirement_node_dict.pop(key, None)
                 requirement_node_dict["order_id"] = order_id
                 order_id += 1
@@ -1215,6 +1218,75 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         PRIMARY = "PR", _("Primary")
         SUPPORT = "SP", _("Support")
 
+    DEFAULT_SECURITY_OBJECTIVES = (
+        "confidentiality",
+        "integrity",
+        "availability",
+        "proof",
+        "authenticity",
+        "privacy",
+        "safety",
+    )
+
+    SECURITY_OBJECTIVES_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/assets/security_objectives.schema.json",
+        "title": "Security objectives",
+        "description": "The security objectives of the asset",
+        "type": "object",
+        "properties": {
+            "objectives": {
+                "type": "object",
+                "patternProperties": {
+                    "^[a-z_]+$": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "integer",
+                                "minimum": 0,
+                            },
+                            "is_enabled": {
+                                "type": "boolean",
+                            },
+                        },
+                    },
+                },
+            }
+        },
+    }
+
+    DEFAULT_DISASTER_RECOVERY_OBJECTIVES = ("rto", "rpo", "mtd")
+
+    DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://ciso-assistant.com/schemas/assets/security_objectives.schema.json",
+        "title": "Security objectives",
+        "description": "The security objectives of the asset",
+        "type": "object",
+        "properties": {
+            "objectives": {
+                "type": "object",
+                "patternProperties": {
+                    "^[a-z_]+$": {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "type": "integer",
+                                "minimum": 0,
+                            },
+                        },
+                    },
+                },
+            }
+        },
+    }
+
+    SECURITY_OBJECTIVES_SCALES = {
+        "1-4": range(1, 5),
+        "0-3": range(0, 4),
+        "FIPS-199": ["low", "moderate", "moderate", "high"],
+    }
+
     business_value = models.CharField(
         max_length=200, blank=True, verbose_name=_("business value")
     )
@@ -1224,7 +1296,35 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     parent_assets = models.ManyToManyField(
         "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
     )
-
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        help_text=_("External url for action follow-up (eg. Jira ticket)"),
+        verbose_name=_("Link"),
+    )
+    security_objectives = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Security objectives"),
+        help_text=_("The security objectives of the asset"),
+        validators=[JSONSchemaInstanceValidator(SECURITY_OBJECTIVES_JSONSCHEMA)],
+    )
+    disaster_recovery_objectives = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Disaster recovery objectives"),
+        help_text=_("The disaster recovery objectives of the asset"),
+        validators=[
+            JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
+        ],
+    )
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="assets",
+    )
     fields_to_check = ["name"]
 
     class Meta:
@@ -1234,23 +1334,121 @@ class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def __str__(self) -> str:
         return str(self.name)
 
+    @property
     def is_primary(self) -> bool:
         """
         Returns True if the asset is a primary asset.
         """
         return self.type == Asset.Type.PRIMARY
 
+    @property
     def is_support(self) -> bool:
         """
         Returns True if the asset is a support asset.
         """
         return self.type == Asset.Type.SUPPORT
 
-    def ancestors_plus_self(self) -> list[Self]:
+    def ancestors_plus_self(self) -> set[Self]:
         result = {self}
         for x in self.parent_assets.all():
             result.update(x.ancestors_plus_self())
-        return list(result)
+        return set(result)
+
+    def get_security_objectives(self) -> dict[str, dict[str, dict[str, int | bool]]]:
+        """
+        Gets the security objectives of a given asset.
+        If the asset is a primary asset, the security objectives are directly stored in the asset.
+        If the asset is a supporting asset, the security objectives are the union of the security objectives of all the primary assets it supports.
+        If multiple ancestors share the same security objective, its value in the result is its highest value among the ancestors.
+        """
+        if self.is_primary:
+            return self.security_objectives
+
+        ancestors = self.ancestors_plus_self()
+        primary_assets = {asset for asset in ancestors if asset.is_primary}
+        if not primary_assets:
+            return {}
+
+        security_objectives = {}
+        for asset in primary_assets:
+            for key, content in asset.security_objectives.get("objectives", {}).items():
+                if not content.get("is_enabled", False):
+                    continue
+                if key not in security_objectives:
+                    security_objectives[key] = content
+                else:
+                    security_objectives[key]["value"] = max(
+                        security_objectives[key]["value"], content.get("value", 0)
+                    )
+        return {"objectives": security_objectives}
+
+    def get_disaster_recovery_objectives(self) -> dict[str, dict[str, dict[str, int]]]:
+        """
+        Gets the disaster recovery objectives of a given asset.
+        If the asset is a primary asset, the disaster recovery objectives are directly stored in the asset.
+        If the asset is a supporting asset, the disaster recovery objectives are the union of the disaster recovery objectives of all the primary assets it supports.
+        If multiple ancestors share the same disaster recovery objective, its value in the result is its lowest value among the ancestors.
+        """
+        if self.is_primary:
+            return self.disaster_recovery_objectives
+
+        ancestors = self.ancestors_plus_self()
+        primary_assets = {asset for asset in ancestors if asset.is_primary}
+        if not primary_assets:
+            return {}
+
+        disaster_recovery_objectives = {}
+        for asset in primary_assets:
+            for key, content in asset.disaster_recovery_objectives.get(
+                "objectives", {}
+            ).items():
+                if key not in disaster_recovery_objectives:
+                    disaster_recovery_objectives[key] = content
+                else:
+                    disaster_recovery_objectives[key] = min(
+                        disaster_recovery_objectives[key], content.get("value", 0)
+                    )
+
+        return {"objectives": disaster_recovery_objectives}
+
+    def get_security_objectives_display(self) -> list[dict[str, str]]:
+        """
+        Gets the security objectives of a given asset as strings.
+        """
+        security_objectives = self.get_security_objectives()
+        if len(security_objectives) == 0:
+            return []
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
+        return [
+            {
+                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
+            }
+            for key, content in security_objectives.get("objectives", {}).items()
+            if content.get("is_enabled", False)
+            and content.get("value", -1) in range(0, 5)
+        ]
+
+    def get_disaster_recovery_objectives_display(self) -> list[dict[str, str]]:
+        """
+        Gets the disaster recovery objectives of a given asset as strings.
+        """
+        disaster_recovery_objectives = self.get_disaster_recovery_objectives()
+        return [
+            {"str": f"{key}: {content.get('value', 0)}"}
+            for key, content in disaster_recovery_objectives.get(
+                "objectives", {}
+            ).items()
+            if content.get("value", 0)
+        ]
+
+    def save(self, *args, **kwargs) -> None:
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
 
 class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -1309,6 +1507,20 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         ACTIVE = "active", _("Active")
         DEPRECATED = "deprecated", _("Deprecated")
         UNDEFINED = "--", _("Undefined")
+
+    PRIORITY = [
+        (1, _("P1")),
+        (2, _("P2")),
+        (3, _("P3")),
+        (4, _("P4")),
+    ]
+
+    priority = models.PositiveSmallIntegerField(
+        choices=PRIORITY,
+        null=True,
+        blank=True,
+        verbose_name=_("Priority"),
+    )
 
     CATEGORY = ReferenceControl.CATEGORY
     CSF_FUNCTION = ReferenceControl.CSF_FUNCTION
@@ -1447,7 +1659,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             residual = risk_scenario.residual_level
             if current >= 0 and residual >= 0:
                 value += (1 + current - residual) * (current + 1)
-        return abs(round(value / self.MAP_EFFORT[self.effort], 4))
+        return abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else 0
 
     @property
     def get_html_url(self):
@@ -2023,6 +2235,8 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
+    ref_id = models.CharField(max_length=8, blank=True, verbose_name=_("Reference ID"))
+
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
     strength_of_knowledge = models.IntegerField(
@@ -2043,6 +2257,14 @@ class RiskScenario(NameDescriptionMixin):
     # def get_rating_options(self, field: str) -> list[tuple]:
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
+
+    @classmethod
+    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
+        """return associated risk assessment id"""
+        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
+        nb_scenarios = len(scenarios_ref_ids) + 1
+        candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
+        return next(x for x in candidates if x not in scenarios_ref_ids)
 
     def parent_project(self):
         return self.risk_assessment.project
@@ -2149,11 +2371,6 @@ class RiskScenario(NameDescriptionMixin):
 
     def __str__(self):
         return str(self.parent_project()) + _(": ") + str(self.name)
-
-    @property
-    def rid(self):
-        """return associated risk assessment id"""
-        return f"R.{self.scoped_id(scope=RiskScenario.objects.filter(risk_assessment=self.risk_assessment))}"
 
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:
@@ -2861,10 +3078,3 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
-
-
-auditlog.register(AppliedControl, m2m_fields={"evidences", "owner"})
-auditlog.register(RequirementAssessment, m2m_fields={"applied_controls"})
-auditlog.register(RiskScenario)
-auditlog.register(RiskAcceptance)
-auditlog.register(Evidence)
