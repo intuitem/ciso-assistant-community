@@ -615,6 +615,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     assessable = serializers.BooleanField(source="requirement.assessable")
     requirement = FieldsRelatedField(
         [
+            "id",
             "urn",
             "annotation",
             "name",
