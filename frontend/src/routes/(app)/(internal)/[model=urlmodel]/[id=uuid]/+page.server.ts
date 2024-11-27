@@ -88,7 +88,7 @@ export const actions: Actions = {
 		const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/duplicate/`;
 
 		if (!form.valid) {
-			console.log(form.errors);
+			console.error(form.errors);
 			return fail(400, { form: form });
 		}
 

@@ -1101,6 +1101,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             folder=new_folder,
             category=applied_control.category,
             csf_function=applied_control.csf_function,
+            priority=applied_control.priority,
             status=applied_control.status,
             start_date=applied_control.start_date,
             eta=applied_control.eta,
@@ -1115,7 +1116,9 @@ class AppliedControlViewSet(BaseModelViewSet):
             )
             duplicate_applied_control.save()
 
-        return Response({"results": "applied control duplicated"})
+        return Response(
+            {"results": AppliedControlReadSerializer(duplicate_applied_control).data}
+        )
 
 
 class PolicyViewSet(AppliedControlViewSet):

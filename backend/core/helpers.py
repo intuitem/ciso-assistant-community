@@ -1264,7 +1264,7 @@ def duplicate_related_objects(
 
     # Get parent and sub-folders of the target folder
     target_parent_folders = target_folder.get_parent_folders()
-    sub_folders = target_folder.sub_folders()
+    sub_folders = target_folder.get_sub_folders()
 
     # Get all related objects for the specified field
     related_objects = getattr(source_object, field_name).all()

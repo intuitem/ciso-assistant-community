@@ -17,9 +17,11 @@
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
 
-	model.selectOptions['priority'].forEach((element) => {
-		element.value = parseInt(element.value);
-	});
+	if (model.selectOptions && 'priority' in model.selectOptions) {
+		model.selectOptions['priority'].forEach((element) => {
+			element.value = parseInt(element.value);
+		});
+	}
 </script>
 
 {#if !duplicate}
