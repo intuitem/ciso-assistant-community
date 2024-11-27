@@ -1,0 +1,1 @@
+./update-ciso-assistant.sh enterprise
