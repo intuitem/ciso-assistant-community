@@ -308,7 +308,7 @@ erDiagram
         string strength_of_knowledge
         string justification
         json   qualifications
-        json   undermined_security_objectives
+        string threat_actor
     }
 
     RISK_ACCEPTANCE {
@@ -1108,83 +1108,87 @@ Security controls     | Mesures de sécurité     | Reference/applied controls
 Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability)
 Risk treatment        | Traitement du risque    | Applied controls in a risk analysis
 
-### Threat landscape
+### EBIOS-RM study
 
-The threat object is not sufficient to describe the threat landscape. We need add the concept of threat actor ("source de risque") and target objectives (objectifs visés).
+The type EBIOS-RM study is a sort of assessment. It contains the following specific fields:
+- reference risk matrix (immutable after creation)
+- ref_id
+- name of the study
+- description of the study/reference entity
+- misison of the reference entity
+- a list of primary assets and corresponding secondary assets (workshop 1)
+- a list of audits for the security baseline (workshop 1)
+- a list of feared events (workshop 1)
+- a list of risk_origin_target_objective (workshop 2)
+- a list of ecosystem entities (workshop 3)
+- a list of strategic scenarios/attack paths (workshop 3)
+- a list of opeating scenarios (workshop 4)
+- a resulting risk assessment (workshop 5)
 
-A risk scenario can refer to zero, one or several threat actors.
+The object feared events (workshop 1) contains the following fields:
+- primary asset
+- ref_id
+- name
+- description
+- list of impact qualifications
+- gravity (from the risk matrix impact scale)
+- selected
 
-A risk scenario can refer to zero, one or several target objectives.
+The object risk_origin_target_objective (workshop 2) contains the following fields:
+- risk origin (--/state/organized crime/terrorist/activist/professional/amateur/avenger/pathological/)
+- target objective (text)
+- motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
+- resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
+- pertience (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+- activity (--/1/2/3/4)
+- selected
 
-### Risk study
+The object ecosystem entity (workshop 3) contains the following fields (plus the common fields for assessments):
+- ref_if
+- name
+- description
+- category (provider/partner/client/...)
+- third-party entity from TPRM (optional)
+- Dependence
+- Penetration
+- Cyber maturity
+- trust
+- selected
 
-A risk study is sophisticated object able to address advanced risk analysis methodologies like EBIOS-RM. It is defined as a bundle with the following content:
-- a reference entity (the "studied object"), with its mission.
-- a list of primary assets and secondary assets
-- a list of ecosystem entities
-- a reference risk matrix
-- a risk assessment of type "feared events"
-- a risk assessment of type "strategic scenarios"
-- a risk assessment of type "operational scenarios"
-- a list of compliance assessments
+The object strategic attack path (workshop 3) contains the following field
+- risk_origin_target_objective
+- description
+- intial threat level
+- Controls
+- residual threat level
+- selected
+
+THe object operational scenario (workshop 4) contains the following fields:
+- strategic attack path
+- list of techniques/threats (typically from Mitre Att@ck)
+- description
+- likelihood
+- selected
 
 The frontend for risk study shall propose the following steps:
 - workshop 1: framing and security baseline (cadrage et socle de sécurité)
-  - select/define the reference entity
+  - define the study, the reference entity and its mission
   - select/define primary assets ("valeurs métier")
     - the nature "process" or "information" can be defined as a label
   - select/define secondary assets ("biens support")
-  - make a feared event risk analysis (scenarios with primary assets and impact only)
-  - list of considered referentials (in json)
-    - name
-    - description
-    - urn in CISO Assistant if available
-    - applicable (yes/no)
-    - justification
-  - The first deliverable is a table of primary asset/feared event/qualification/impact level
-- workshop 2: threat actors (sources de risque)
-  - define threat actors
-    - name
-    - description
-    - motivation (--/très peu/peu/assez/fortement motivé)
-    - ressources (--/limitées/significatives/importantes/illimitées)
-    - pertinence (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
-  - define target objectives
-    - name
-    - description
-  - define retained TA/TO couples -> json
-  - threat-based risk assessment, based of retained TA/TO and feared event, using antecedents
-  - This risk assessment provides the main deliverable for this part, in the form of a list of:
-    - Threat actor
-    - Target objectives
-    - Primary assets (from antecedent)
-    - Secondary assets (from antecedent)
-    - Feared events (from antecedent)
-    - impact (from antecedent)
+  - define feared events
+  - list of reference audits
+- workshop 2: risk origin/target objectives (sources de risque)
+  - define risk_origin_target_objective objects
 - workshop 3:
   - list of ecosystem entities
-  - qualification of entities -> json
-    - category (provider/partner/client/...)
-    - Dependence
-    - Penetration
-    - Cyber maturity
-    - trust
-    - threat level (calculated)
-  - This provides the map of ecosystem threat 
-  - strategic risk analysis based on previous threat-based risk analysis
-    - TA/TO
-    - feared event
-    - stategic attack path
-    - Controls
-    - intial threat
-    - residual threat
+  - list of strategic scenarios/attack paths
 - workshop 4: operational scenarios
-  - operational risk analysis based on strategic risk analysis
-    - each scenario must have a parent scenario selected in the strategic risk analysis, which provides the impact
-    - the description of the scenario provides the attack path (connaitre / rentrer / trouver / exploiter)
-    - probability ("vraisemblance")
-  - the main deliverable is the filled risk matrix
+  - list of operational scenarios
 - workshop 5: risk treatment
-  - treatment risk analysis
-    - derived from the operational risk analysis
-    - only adding controls and recalculating the impact.
+  - The risk assessment is generated from workshop 4
+  - risk treatment is based on existing risk assessment object
+
+### Implementation
+
+EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
