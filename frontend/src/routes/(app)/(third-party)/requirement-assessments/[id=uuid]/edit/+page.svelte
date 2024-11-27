@@ -7,7 +7,8 @@
 	export let form: ActionData;
 
 	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
-	const reference_controls = data.requirementAssessment.requirement.associated_reference_controls ?? [];
+	const reference_controls =
+		data.requirementAssessment.requirement.associated_reference_controls ?? [];
 	const annotation = data.requirement.annotation;
 	const typical_evidence = data.requirement.typical_evidence;
 
