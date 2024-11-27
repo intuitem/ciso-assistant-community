@@ -253,8 +253,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description', 'parent_folder']
 	},
 	projects: {
-		head: ['name', 'description', 'domain'],
-		body: ['name', 'description', 'folder'],
+		head: ['ref_id', 'name', 'description', 'domain'],
+		body: ['ref_id', 'name', 'description', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PROJECT_STATUS_FILTER
@@ -281,8 +281,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'risk-assessments': {
-		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
+		head: ['ref_id', 'name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
+		body: ['ref_id', 'str', 'risk_matrix', 'description', 'risk_scenarios_count', 'project'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
 			project: PROJECT_FILTER,
@@ -290,7 +290,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	threats: {
-		head: ['ref', 'name', 'description', 'provider', 'domain'],
+		head: ['ref_id', 'name', 'description', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
@@ -339,6 +339,7 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'applied-controls': {
 		head: [
+			'ref_id',
 			'name',
 			'description',
 			'category',
@@ -349,6 +350,7 @@ export const listViewFields: ListViewFieldsConfig = {
 			'referenceControl'
 		],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'category',
@@ -379,7 +381,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'reference-controls': {
-		head: ['ref', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
+		head: ['ref_id', 'name', 'description', 'category', 'csfFunction', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'csf_function', 'provider', 'folder'],
 		meta: ['id', 'urn'],
 		filters: {
@@ -440,8 +442,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['name', 'framework', 'description', 'project'],
-		body: ['name', 'framework', 'description', 'project'],
+		head: ['ref_id', 'name', 'framework', 'description', 'project'],
+		body: ['ref_id', 'name', 'framework', 'description', 'project'],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true }, // alwaysDisplay shoudln't be mandatory here something is wrong
 			project: PROJECT_FILTER,
@@ -462,7 +464,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	requirements: {
-		head: ['ref', 'name', 'description', 'framework'],
+		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
 		meta: ['id', 'urn']
 	},

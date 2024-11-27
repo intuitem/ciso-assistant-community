@@ -40,7 +40,7 @@ test('user usual routine actions are working correctly', async ({
 			name: vars.projectName,
 			description: vars.description,
 			folder: vars.folderName,
-			internal_reference: 'Test internal reference',
+			ref_id: 'R.1234',
 			lc_status: 'Production'
 		});
 
