@@ -29,14 +29,14 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const requirementAssessment = await fetchJson(endpoint);
+	console.log(endpoint);
+	console.log(requirementAssessment);
 	const requirement = requirementAssessment.requirement;
 	const compliance_assessment_score = await fetchJson(
 		`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
 	);
 
-	const parent = await fetchJson(
-		`${baseUrl}/requirement-nodes/?urn=${requirement.parent_urn}`
-	).then((res) => res.results[0]);
+	const parent = requirementAssessment.requirement.parent_requirement
 
 	const model = getModelInfo(URLModel);
 	const object = { ...requirementAssessment };
