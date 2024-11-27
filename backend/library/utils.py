@@ -791,7 +791,7 @@ class LibraryFormatUtils:
             try:
                 current_library = StoredLibrary.objects.get(urn=urn)
                 minimum_version = str(current_library.version + 1)
-            except:
+            finally:
                 pass
 
         if version < minimum_version:
