@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: backend
-    image: ghcr.io/intuitem/ciso-assistant-community/backend:${VERSION:-latest}
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -19,7 +19,7 @@ services:
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
-    image: ghcr.io/intuitem/ciso-assistant-community/frontend:${VERSION:-latest}
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     depends_on:
       - backend
 
