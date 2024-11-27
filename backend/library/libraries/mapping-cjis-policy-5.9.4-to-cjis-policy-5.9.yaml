@@ -5,7 +5,7 @@ name: CJIS-POLICY-5.9.4 -> CJIS-POLICY-5.9.5
 description: Mapping from Criminal Justice Information Services (CJIS) Security Policy
   to Criminal Justice Information Services (CJIS) Security Policy 5.9.5
 copyright: intuitem
-version: '1'
+version: 1
 provider: intuitem
 packager: intuitem
 dependencies:

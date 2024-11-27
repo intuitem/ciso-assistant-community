@@ -21,7 +21,7 @@ copyright: "Publisher: VERBAND DER AUTOMOBILINDUSTRIE e.\_V. (VDA, German Associ
   \ Creative Commons Attribution - No Derivative Works 4.0 International Public License.\
   \ In addition, You are granted the right to distribute derivatives under certain\
   \ terms."
-version: '1'
+version: 1
 provider: VDA
 packager: intuitem
 objects:
