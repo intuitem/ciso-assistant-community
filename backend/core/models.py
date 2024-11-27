@@ -1048,7 +1048,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
     question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
-    
+
     @property
     def associated_reference_controls(self):
         _reference_controls = self.reference_controls.all()
@@ -1058,7 +1058,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                 {"str": control.display_long, "urn": control.urn, "id": control.id}
             )
         return reference_controls
-    
+
     @property
     def associated_threats(self):
         _threats = self.threats.all()
@@ -1068,7 +1068,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                 {"str": control.display_long, "urn": control.urn, "id": control.id}
             )
         return threats
-    
+
     @property
     def parent_requirement(self):
         parent_requirement = RequirementNode.objects.filter(urn=self.parent_urn).first()
@@ -1080,7 +1080,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             "id": parent_requirement.id,
             "ref_id": parent_requirement.ref_id,
             "name": parent_requirement.name,
-            "description": parent_requirement.description
+            "description": parent_requirement.description,
         }
 
     class Meta:
