@@ -122,14 +122,14 @@
 			let:option
 			{allowUserOptions}
 		>
-		{#if option.suggested}
-			<span class="text-indigo-600">{option.label}</span>
-			<span class="text-sm text-gray-500"> (suggested)</span>
-		{:else if translateOptions && option.label}
-			{safeTranslate(option.label)}
-		{:else}
-			{option.label || option}
-		{/if}
+			{#if option.suggested}
+				<span class="text-indigo-600">{option.label}</span>
+				<span class="text-sm text-gray-500"> (suggested)</span>
+			{:else if translateOptions && option.label}
+				{safeTranslate(option.label)}
+			{:else}
+				{option.label || option}
+			{/if}
 		</MultiSelect>
 	</div>
 	{#if helpText}
