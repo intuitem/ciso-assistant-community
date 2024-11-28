@@ -230,7 +230,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     disaster_recovery_objectives = serializers.JSONField(
         source="get_disaster_recovery_objectives_display"
     )
-
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
 
 
