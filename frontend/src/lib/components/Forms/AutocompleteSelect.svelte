@@ -59,7 +59,7 @@
 
 	let selectedValues: (string | undefined)[] = [];
 
-	$: selectedValues = selected.map((item) => item.value);
+	$: selectedValues = selected.map((item) => item.value || item.label || item);
 
 	const default_value = nullable ? null : selectedValues[0];
 
@@ -84,17 +84,6 @@
 	function handleSelectChange() {
 		dispatch('change', $value);
 		dispatch('cache', selected);
-	}
-
-	$: {
-		selected = selected.map((option) => {
-			const newOption = {
-				label: option.label,
-				value: option.value || option.label
-			};
-			selected = [...selected, newOption];
-			return newOption;
-		});
 	}
 </script>
 
@@ -133,14 +122,14 @@
 			let:option
 			{allowUserOptions}
 		>
-			{#if option.suggested}
-				<span class="text-indigo-600">{option.label}</span>
-				<span class="text-sm text-gray-500"> (suggested)</span>
-			{:else if translateOptions}
-				{safeTranslate(option.label)}
-			{:else}
-				{option.label}
-			{/if}
+		{#if option.suggested}
+			<span class="text-indigo-600">{option.label}</span>
+			<span class="text-sm text-gray-500"> (suggested)</span>
+		{:else if translateOptions && option.label}
+			{safeTranslate(option.label)}
+		{:else}
+			{option.label || option}
+		{/if}
 		</MultiSelect>
 	</div>
 	{#if helpText}
