@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0041_add_ref_id_to_project_appliedcontrol_assessment'),
+        ("core", "0041_add_ref_id_to_project_appliedcontrol_assessment"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='asset',
-            name='filtering_labels',
-            field=models.ManyToManyField(blank=True, to='core.filteringlabel', verbose_name='Labels'),
+            model_name="asset",
+            name="filtering_labels",
+            field=models.ManyToManyField(
+                blank=True, to="core.filteringlabel", verbose_name="Labels"
+            ),
         ),
     ]
