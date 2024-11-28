@@ -125,7 +125,7 @@ erDiagram
         string ref_id
         string name
         string description
-        string internal_reference
+        string ref_id
         string status
     }
 
@@ -384,6 +384,7 @@ Note: in MVP, labels are attached only to vulnerabilities.
 ## Global fields
 
 All models have the following fields:
+
 - created_at: the date when the object has been created.
 - modified_at: the date when the object has been lastly modified.
 
@@ -394,11 +395,13 @@ Projects are fundamental context objects defined by the entity using CISO Assist
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
 
 Note: the IAM model is based on folders. A folder has a type among:
+
 - ROOT: the root folder, which is also called "global domain".
 - DOMAIN: a user-defined domain.
 - ENCLAVE: a invisible folder used to confine the actions of a third party.
 
 Projects have the following fields:
+
 - ref_id (ex internal reference)
 - Name
 - Description
@@ -465,7 +468,7 @@ When a security objective is hidden in the global parameters, it is simply not p
 ## Frameworks
 
 The fundamental object of CISO Assistant for compliance is the framework. It corresponds to a given standard, e.g. ISO27001:2013. It mainly contains requirements nodes. A requirement node can be assessable or not (e.g. title or informational elements are not assessable). Assessable requirement nodes can be simply called "requirements".
-The structure (tree) of requirements is defined by the requirement node objects. The *parent_urn* of a requirement node can either be the URN of another requirement node or null for top-level objects. This allows to simply define the structure of a framework. An assessable requirement node can be the child of another assessable requirement node, which is very convenient for frameworks that have lists of conditions attached to a requirement.
+The structure (tree) of requirements is defined by the requirement node objects. The _parent_urn_ of a requirement node can either be the URN of another requirement node or null for top-level objects. This allows to simply define the structure of a framework. An assessable requirement node can be the child of another assessable requirement node, which is very convenient for frameworks that have lists of conditions attached to a requirement.
 
 The implementation_groups field contains a comma-separated list of implementation groups where the requirement node is found, when this is relevant (e.g. for CMMC or CIS). Implementation groups are identified by their ref_id string. Implementation groups are independent, a requirement can be member of any implementation group. Implementation groups are defined in the implementation_groups_definition json field (None by default), that contains a list of objects containing the following fields (example for CMMC):
 
@@ -518,7 +521,7 @@ Vulnerabilities also have a ref_id (defaults to empty string), a name, a descrip
 
 ## Reference controls
 
-Reference controls are templates for Applied controls. They facilitate the creation of a applied  control, and help to have consistent Applied controls. They are not mandatory to create a applied  control, but recommended.
+Reference controls are templates for Applied controls. They facilitate the creation of a applied control, and help to have consistent Applied controls. They are not mandatory to create a applied control, but recommended.
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
 
@@ -529,6 +532,7 @@ Reference controls have a csf_function within the following possibilities: --/Go
 Applied controls are fundamental objects for compliance and remediation. They can derive from a reference control, which provides better consistency, or be independent.
 
 A applied control has the following specific fields:
+
 - a category (same as reference controls)
 - a csf_function (same as reference controls)
 - a status (--/planned/active/inactive)
@@ -545,6 +549,7 @@ Costs are measured in a global currency/multiple that is defined in global setti
 ## Compliance and risk assessments
 
 Both types of assessments have common fields:
+
 - a name
 - a description
 - a version (defined by the analyst)
@@ -554,9 +559,9 @@ Both types of assessments have common fields:
 - a list of authors
 - a list of reviewers
 
-An assessment review can be asked. When at least one principal is defined, the *done* status can only be set if a representant of each principal has reviewed and validated the assessment.
+An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
 
-When the assessment status goes from *in progress* to *in review*, each defined reviewer is notified of the review request.
+When the assessment status goes from _in progress_ to _in review_, each defined reviewer is notified of the review request.
 A review is deprecated if the assessment is changed. A warning shall be displayed to avoid doing that by error.
 
 The state of a review can be: created/submitted/validated/changes requested/deprecated
@@ -566,10 +571,10 @@ The state of a review can be: created/submitted/validated/changes requested/depr
 When a compliance assessment is created, each requirement of the corresponding framework is linked to a requirement assessment object. To cover a requirement, the assessor shall link it to Applied controls.
 
 Here are the specific fields for requirement assessments:
+
 - result: --/compliant/partially compliant/non-compliant/not applicable
 - score: --/<integer value from min_score to max_score>.
 - a status: (todo/in progress/in review/done) that facilitates reporting.
-
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
@@ -583,6 +588,7 @@ For the sake of performance, when a change is done on the selected implementatio
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
 
 Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
+
 - percentage (0-100%, no score definition)
 - CMMI (1-5, Initial/Managed/Defined/Quantitatively Managed/Optimizing)
 - 0-5 (0-5, no score definition)
@@ -595,6 +601,7 @@ Requirement mapping sets are referential objects that describe relations between
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
 A mapping_rules is a list of elements containing:
+
 - a source requirement URN
 - a target requirement URN
 - a rationale giving the explanation for why a Source Document Element and a Target Document Element are related. This will be syntactic, semantic, or functional.
@@ -604,6 +611,7 @@ A mapping_rules is a list of elements containing:
 Requirement mapping rules are used to automatically generate a draft compliance assessment for a target framework, given existing source assessments.
 
 The following inference rules are used:
+
 - there is an order relation in results: compliant > non-compliant minor > non-compliant major
 - N/A or -- in source makes the mapping not usable.
 - when several mappings exist for a target requirement, the strongest inference result is used to determine the compliance result.
@@ -615,9 +623,12 @@ The following inference rules are used:
 
 A risk assessment is based on scenarios, covered by Applied controls. Gathering the risk scenarios constitutes the "risk identification" phase.
 
+
 The risk matrix cannot be changed once the risk assessment is created.
 
-To analyse the risk, each scenario contains Existing Controls, current probability and impact, proposed controls, residual probability and impact. To facilitate using an assistant to estimate probability and impact, or for advanced methods like openfair, the json fields *current_risk_vector* and *residual_risk_vector* are aimed at keeping the data used to calculate to the estimation.
+A risk assessment has an _risk_assessment_method_ field that can take the following values: 0 (risk matrix)/1 (Open FAIR). This cannot be changed once the risk assessment is created. Similarly, the risk matrix cannot be changed once the risk assessment is created.
+
+To analyse the risk, each scenario contains Existing Controls, current probability and impact, proposed controls, residual probability and impact. To facilitate using an assistant to estimate probability and impact, or for advanced methods like openfair, the json fields _current_risk_vector_ and _residual_risk_vector_ are aimed at keeping the data used to calculate to the estimation.
 
 A risk scenario contains a treatment option with the values --/open/mitigate/accept/avoid/transfer
 
@@ -639,32 +650,56 @@ The definition JSON field has the following format:
 {
   "type": "risk_matrix",
   "fields": {
-        "probability" : [
-            {"abbreviation": "L", "name": "Low", "description": "Unfrequent event"},
-            {"abbreviation": "M", "name": "Medium", "description": "Occasional event"},
-            {"abbreviation": "H", "name": "High", "description": "Frequent event"}
-        ],
-        "impact": [
-            {"abbreviation": "L", "name": "Low", "description": "<100k$"},
-            {"abbreviation": "M", "name": "Medium", "description": "between 100 to 1000k$"},
-            {"abbreviation": "H", "name": "High", "description": ">1000k$"}
-        ],
-        "risk": [
-            {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "hexcolor": "#00FF00"},
-            {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years", "hexcolor": "#FFFF00"},
-            {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "hexcolor": "#FF0000"}
-        ],
-        "grid": [
-            [1, 2, 2],
-            [0, 1, 2],
-            [0, 0, 1]]
+    "probability": [
+      { "abbreviation": "L", "name": "Low", "description": "Unfrequent event" },
+      {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "Occasional event"
+      },
+      { "abbreviation": "H", "name": "High", "description": "Frequent event" }
+    ],
+    "impact": [
+      { "abbreviation": "L", "name": "Low", "description": "<100k$" },
+      {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "between 100 to 1000k$"
+      },
+      { "abbreviation": "H", "name": "High", "description": ">1000k$" }
+    ],
+    "risk": [
+      {
+        "abbreviation": "L",
+        "name": "Low",
+        "description": "acceptable risk",
+        "hexcolor": "#00FF00"
+      },
+      {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "risk requiring mitigation within 2 years",
+        "hexcolor": "#FFFF00"
+      },
+      {
+        "abbreviation": "H",
+        "name": "High",
+        "description": "unacceptable risk",
+        "hexcolor": "#FF0000"
+      }
+    ],
+    "grid": [
+      [1, 2, 2],
+      [0, 1, 2],
+      [0, 0, 1]
+    ]
   }
 }
 ```
 
 ## Risk acceptance
 
-A risk acceptance can be asked on a list of scenarios that are part of validated risk assessments (assessment in the *done* state with at least one reviewer). It is directed to an approver that should be the risk owner.
+A risk acceptance can be asked on a list of scenarios that are part of validated risk assessments (assessment in the _done_ state with at least one reviewer). It is directed to an approver that should be the risk owner.
 
 The state of a risk acceptance can be: created/submitted/accepted/rejected/revoked
 
@@ -675,6 +710,7 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 ## Libraries
 
 Libraries can contain:
+
 - frameworks (including requirement nodes)
 - threats
 - reference controls
@@ -690,9 +726,9 @@ Libraries have a URN to uniquely identify them.
 Libraries have a locale that describes the main locale for the whole content of the library.
 
 Libraries have an integer version that completes the URN. The highest version for a given URN shall always be privileged. So:
+
 - a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn.
 - if a breaking change is necessary, the URN should be changed.
-
 
 Libraries have a provider (which entity produced the original content), and a packager (which entity did the library). Objects in the library inherit their provider from the library's.
 
@@ -707,7 +743,8 @@ Deleting a library is possible only if none of its objects is currently used. Re
 Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
 
 Referential objects can be downloaded from a library. They are called "global referential objects" or "library objects" in that case, and they have the following characteristics:
-- they have a non-null URN identifier *urn* of the form: ```urn:intuitem:<domain>:<object_type>:[<framework>:]<short_id>```. Client-defined URNs are also possible. The framework part is present for items that are part of a framework.
+
+- they have a non-null URN identifier _urn_ of the form: `urn:intuitem:<domain>:<object_type>:[<framework>:]<short_id>`. Client-defined URNs are also possible. The framework part is present for items that are part of a framework.
 - they are read-only in the database once imported. They can be removed only by removing the corresponding library.
 - they are attached to the root folder.
 - Everyone has the right to read them, they are "published" to all domains.
@@ -715,11 +752,13 @@ Referential objects can be downloaded from a library. They are called "global re
 - They have a link to their library.
 
 Conversely, a referential object with a null URN is called a "local referential object" has the following characteristics:
+
 - it is created by a user in a given domain (not in the root folder)
 - it can be edited with proper permission.
 - The URN cannot be edited and is hidden.
 
 Referential objects have the following optional fields:
+
 - ref_id: reference used in the standard for this object (e.g. A.5.5).
 - annotation: provided by the library packager or the user to clarify the meaning of the object. They can be used for search, and are displayed when available.
 - provider: describes where the object comes from, e.g. ISO, NIST, CIS, MITRE ATT&CK...
@@ -737,9 +776,10 @@ The library_manager role will be defined to manage library objects.
 
 ## Referential objects translation
 
-Referential objects translations are contained inside a JSON called previously *translations*. The translation takes place directly inside the yaml at the point where the object is defined.
+Referential objects translations are contained inside a JSON called previously _translations_. The translation takes place directly inside the yaml at the point where the object is defined.
 
 Example:
+
 ```yaml
 {
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
@@ -756,9 +796,10 @@ Example:
 }
 ```
 
-Everything in the library can be translated, from the library itself to the the last object. To specify that the library is available in a language other than the default one, *translations* field has to be filled for the language(s) concerned.
+Everything in the library can be translated, from the library itself to the the last object. To specify that the library is available in a language other than the default one, _translations_ field has to be filled for the language(s) concerned.
 
 Example:
+
 ```yaml
 {
     urn: urn:intuitem:risk:library:iso27001-2022
@@ -790,6 +831,7 @@ All objects in CISO Assistant follow a simple and consistent RBAC IAM model, inc
 There are two dimensions: rights and perimeter.
 
 There granularity of rights is mapped on Django convention:
+
 - Add
 - View
 - Change
@@ -802,6 +844,7 @@ Practically, the Add, Change or Delete permissions require the View permission. 
 The perimeter for access control is based on the folder concept, with all its content, including subfolders. Boolean parameters allow a finer-grain definition of the perimeter, as will be seen later.
 
 Practically, the perimeter is either:
+
 - global, corresponding to the root folder
 - a domain, corresponding to a folder of level 1.
 
@@ -810,17 +853,18 @@ Practically, the perimeter is either:
 For Access Control purpose, CISO Assistant data is organized in a tree of folders, starting from a root folder. The organization of the tree is not hardcoded, it is entirely determined by configuration. Any object in CISO Assistant is attached to a folder (including folders), either directly or indirectly through a parent object that is attached to a folder. The root folder is attached to None.
 
 A folder contains the following attributes:
+
 - name: the short name given to the folder
 - description: a longer description of the folder
 - contentType: an enum representing the type of content. Currently GLOBAL and DOMAIN. This parameter is aimed at adjusting the UI depending of the type of content.
 - folder: the parent folder. None for root folder.
 
 Currently, the folder organization is as follows:
+
 - The root folder has contentType=GLOBAL.
 - The root folder can only contain referential objects.
 - There is only one level of subfolders, each subfolder with contentType=DOMAIN.
 - Folders are not displayed as such, they are visible only to the programmer.
-
 
 ### Roles and role assignments
 
@@ -836,14 +880,15 @@ To simplify access control, we use a RBAC model.
 | Risk approver       | like reader, but with additional capability to approve risk acceptances                                                           |
 | Reviewer            | like reader, but with additional capability to review assessments.                                                                |
 
-
 Note: a DJANGO superuser is given administrator rights automatically on startup.
 
 Principals are either:
+
 - users
 - group of users
 
 Role assignements are described as a table containing the following attributes:
+
 - user: the user that receives the role assignment (can be None)
 - user_group: the group that receives the role assignment (can be None)
 - role: the role assigned to the principal
@@ -878,6 +923,7 @@ The goal of Third-Party Risk Management is to manage the risk incurred by a prov
 ### Retained approach
 
 The following approach has been retained:
+
 - An "entity" model is added to modelize third parties in a generic way.
 - A third party is an entity that is provider of the entity representing the client using CISO Assistant.
 - An evaluation of a third party is based on a compliance assessment, to leverage a huge amount of existing models and code.
@@ -979,6 +1025,7 @@ erDiagram
 #### Entity
 
 An entity represents a legal entity, a corporate body, an administrative body, an association. An entity can be:
+
 - the main subject for the current CISO Assistant instance ("main entity").
 - a subisdiary of another entity.
 - a provider of another entity.
@@ -998,11 +1045,12 @@ An entity assessment is based on a questionnaire/compliance assessment, and/or o
 Typically, the main entity can use the requirement group selector to tailor the questionnaire before sending it to the third-party, then a self-assessment is done by the provider, then a review is done by the main entity.
 
 An entity assessment has the following specific fields:
-  - conclusion: --|blocker|warning|ok|N/A
-  - penetration: as defined by ebios RM
-  - dependency: as defined by ebios RM
-  - maturity: as defined by ebios RM
-  - trust: as defined by ebios RM
+
+- conclusion: --|blocker|warning|ok|N/A
+- penetration: as defined by ebios RM
+- dependency: as defined by ebios RM
+- maturity: as defined by ebios RM
+- trust: as defined by ebios RM
 
 #### Solution
 
@@ -1042,7 +1090,7 @@ There is no link between representatives (modeling of the ecosystem) and users o
 - Add a "contract" category
 - Add a foreign key "contract" to point to a contract
 
-The foreign key contract shall be non-null only if the category is set to  "contract". The UX shall reflect this constraint.
+The foreign key contract shall be non-null only if the category is set to "contract". The UX shall reflect this constraint.
 
 Note: in the future, we will use the same approach for policies.
 
@@ -1051,6 +1099,7 @@ Note: in the future, we will use the same approach for policies.
 The format for question and answer json fields will evolve over time. The initial format is the following:
 
 - question:
+
 ```json
 {
     "question": {

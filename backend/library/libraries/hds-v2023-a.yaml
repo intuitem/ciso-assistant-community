@@ -5,7 +5,7 @@ name: HDS v2023-A
 description: "R\xE9f\xE9rentiel de certification H\xE9bergeur de donn\xE9es de sant\xE9\
   \ (HDS) - Exigences"
 copyright: "Loi fran\xE7aise et europ\xE9enne"
-version: '1'
+version: 1
 provider: "Agence du Num\xE9rique en Sant\xE9"
 packager: intuitem
 objects:

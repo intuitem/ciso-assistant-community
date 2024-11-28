@@ -28,7 +28,7 @@ export class PageDetail extends BasePage {
 		await this.hasTitle('Edit ' + this.item);
 		await this.hasBreadcrumbPath(['Edit'], false);
 
-		let editedValues: { [k: string]: string } = {};
+		const editedValues: { [k: string]: string } = {};
 		for (const key in editParams) {
 			editedValues[key] = editParams[key] === '' ? buildParams[key] + ' edited' : editParams[key];
 		}
@@ -78,6 +78,10 @@ export class PageDetail extends BasePage {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
 							.toHaveText(new RegExp('domain'.replaceAll('_', ' '), 'i'));
+					} else if (key === 'ref_id') {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText('Reference ID');
 					} else {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
