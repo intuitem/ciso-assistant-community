@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let count: string = '0';
 	export let label: string;
-	// export let href: string | undefined = undefined;
+	export let href: string | undefined = undefined;
 	// export let help: string;
 	export let icon: string;
 	export let section: string;
@@ -20,7 +20,7 @@
 		<span>{section}</span>
 	</div>
 	<div class="mt-auto">
-		<div class="text-4xl font-bold text-left">{count}</div>
+		<a class="text-4xl font-bold text-left" {href}>{count}</a>
 		<div class="text-sm">{label}</div>
 	</div>
 </div>
