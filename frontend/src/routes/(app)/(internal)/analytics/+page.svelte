@@ -259,7 +259,7 @@
 					<Card
 						count={metrics.risk.assessments}
 						label={m.sumpageAssessments()}
-						href="#"
+						href="/risk-assessments/"
 						help="this is interesting"
 						emphasis={true}
 						icon="fa-solid fa-biohazard"
@@ -268,7 +268,7 @@
 					<Card
 						count={metrics.risk.scenarios}
 						label={m.sumpageScenarios()}
-						href="#"
+						href="/risk-scenarios/"
 						help="this is interesting"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
@@ -284,7 +284,7 @@
 					<Card
 						count={metrics.risk.threats}
 						label={m.sumpageMappedThreats()}
-						href="#"
+						href="/analytics?tab=2"
 						help="this is interesting"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
@@ -293,7 +293,7 @@
 					<Card
 						count={metrics.risk.acceptances}
 						label={m.sumpageRiskAccepted()}
-						href="#"
+						href="/risk-acceptances"
 						help="this is interesting"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
