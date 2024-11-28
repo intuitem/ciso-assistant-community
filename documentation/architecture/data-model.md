@@ -56,16 +56,19 @@ erDiagram
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
+    ROOT_FOLDER           ||--o{ LABEL                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ VULNERABILITY               : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ COMPLIANCE_ASSESSMENT       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ASSESSMENT             : contains
 
     DOMAIN {
+        string ref_id
         string name
         string description
         int version
@@ -113,8 +116,13 @@ erDiagram
     RISK_ACCEPTANCE              }o--o{ RISK_SCENARIO         : covers
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
+    VULNERABILITY                }o--o{ APPLIED_CONTROL       : is_fixed_by
+    USER                         }o--o{ RISK_SCENARIO         : owns
+    USER                         }o--o{ APPLIED_CONTROL       : owns
+    USER                         }o--o{ ASSET                 : owns
 
     PROJECT {
+        string ref_id
         string name
         string description
         string ref_id
@@ -138,6 +146,7 @@ erDiagram
     }
 
     COMPLIANCE_ASSESSMENT {
+        string      ref_id
         string      name
         string      description
 
@@ -148,16 +157,16 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        string[]    tags
         string      observation
 
         string[]    selected_implementation_groups
-        int     min_score
-        int     max_score
-        json    scores_definition
+        int         min_score
+        int         max_score
+        json        scores_definition
     }
 
     RISK_ASSESSMENT {
+        string      ref_id
         string      name
         string      description
 
@@ -167,10 +176,8 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        string[]    tags
         string      observation
-
-        string      risk_assessment_method
+        boolean     embedded
     }
 
     THREAT {
@@ -182,16 +189,6 @@ erDiagram
         string  annotation
         string  provider
         json    translations
-    }
-
-    VULNERABILITY {
-        string  urn
-        string  locale
-        string  ref_id
-        string  name
-        string  description
-        string  annotation
-        string  provider
     }
 
     REQUIREMENT_NODE {
@@ -226,6 +223,7 @@ erDiagram
     }
 
     APPLIED_CONTROL {
+        string  ref_id
         string   name
         string   description
 
@@ -237,8 +235,17 @@ erDiagram
         url      link
         string   effort
         float    cost
-        string[] tags
     }
+
+    VULNERABILITY {
+        string  ref_id
+        string  name
+        string  description
+        string  status
+        int     severity
+        json    references
+    }
+
 
     REQUIREMENT_ASSESSMENT {
         string status
@@ -278,10 +285,12 @@ erDiagram
     ASSET {
         string name
         string description
-
         string business_value
         string type
         asset  parent_asset
+        url    reference_link
+        json   security_objectives
+        json   disaster_recovery_objectives
     }
 
     RISK_SCENARIO {
@@ -299,8 +308,7 @@ erDiagram
         string strength_of_knowledge
         string justification
         json   qualifications
-
-        principal[] owner
+        string threat_actor
     }
 
     RISK_ACCEPTANCE {
@@ -354,353 +362,24 @@ erDiagram
 
 ```
 
-## Class diagram for IAM objects
+### Labels
+
+All objects can be linked to user-defined labels. Labels are simple strings with no blank, regex r"\w{0:36}".
+
+Labels are attached to the root folder. They can be read by everyone, added by any contributor, and modified or deleted only by global administrators. 
 
 ```mermaid
-classDiagram
-direction RL
-
-AbstractBaseModel    <|-- NameDescriptionMixin
-NameDescriptionMixin <|-- Folder
-NameDescriptionMixin <|-- UserGroup
-FolderMixin          <|-- UserGroup
-FolderMixin          <|-- User
-AbstractBaseModel    <|-- User
-AbstractBaseUser     <|-- User
-NameDescriptionMixin <|-- Role
-FolderMixin          <|-- Role
-NameDescriptionMixin <|-- RoleAssignment
-FolderMixin          <|-- RoleAssignment
-
-class AbstractBaseModel{
-    +UUIDField id
-    +DateTimeField created_at
-    +DateTimeField updated_at
-    +BooleanField is_published
-    +scoped_id() UUID
-    +display_path() str
-    +display_name() str
-    +edit_url() str
-    +get_scope() Folder
-    +clean()
-    +save()
-}
-
-class NameDescriptionMixin{
-    +CharField name
-    +CharField description
-}
-
-class Folder {
-    +CharField content_type
-    +Folder parent_folder
-    +booleanField builtin
-    +subfolders() Folder[]
-    +get_parent_folders() Folder[]
-    +get_folder() Folder$
-}
-
-class FolderMixin {
-    +Folder folder
-}
-
-class UserGroup {
-    +booleanField builtin
-    +get_name_display() str
-}
-
-class User {
-    +CharField last_name
-    +CharField first_name
-    +CharField email
-    +BooleanField first_login
-    +BooleanField is_active
-    +DateTimeField date_joined
-    +BooleanField is_superuser
-    +UserGroup[] user_groups
-    +get_full_name() str
-    +get_short_name() str
-    +mailing()
-    +has_backup_permission() bool
-    +edit_url() str
-    +username() str
-    +permissions()
-}
-
-class Role {
-    +Permission[] permissions
-    +booleanField builtin
-}
-
-class RoleAssignment {
-    +Folder[] perimeter_folders
-    +User user
-    +UserGroup user_group
-    +Role role
-    +BooleanField is_recursive
-    +BooleanField builtin
-
-    +is_access_allowed(user, perm, folder) bool$
-    +get_accessible_folders(folder, user, content_tupe, codename) Folder[]$
-    +get_accessible_object_ids(folder, user, object_type) UUID[]$
-    +is_user_assigned(user) bool
-    +get_role_assignments(user) RoleAssignment[]$
-    +get_permissions(user) Permission[]$
-    +has_role(user, role) bool$
-}
-
+erDiagram
+    ANY_USER_DEFINED_OBJECT   }o--o{ LABEL : has_label
+ 
+    LABEL {
+        string  label
+    }
 ```
 
-## Class diagram for general objects
+In all views and analytics, a filter on label shall be displayed.
 
-```mermaid
-classDiagram
-direction RL
-
-NameDescriptionMixin   <|-- RiskScenario
-AbstractBaseModel      <|-- NameDescriptionMixin
-NameDescriptionMixin   <|-- ReferentialObjectMixin
-FolderMixin            <|-- ReferentialObjectMixin
-ReferentialObjectMixin <|-- Threat
-ReferentialObjectMixin <|-- ReferenceControl
-ReferentialObjectMixin <|-- RiskMatrix
-ReferentialObjectMixin <|-- Framework
-ReferentialObjectMixin <|-- RequirementNode
-ReferentialObjectMixin <|-- Mapping
-ReferentialObjectMixin <|-- LibraryMixin
-LibraryMixin           <|-- StoredLibrary
-LibraryMixin           <|-- LoadedLibrary
-NameDescriptionMixin   <|-- Assessment
-FolderMixin            <|-- Project
-NameDescriptionMixin   <|-- Project
-FolderMixin            <|-- Asset
-NameDescriptionMixin   <|-- Asset
-FolderMixin            <|-- Evidence
-NameDescriptionMixin   <|-- Evidence
-FolderMixin            <|-- AppliedControl
-NameDescriptionMixin   <|-- AppliedControl
-FolderMixin            <|-- RiskAcceptance
-NameDescriptionMixin   <|-- RiskAcceptance
-AppliedControl         <|-- Policy
-Assessment             <|-- RiskAssessment
-Assessment             <|-- ComplianceAssessment
-AbstractBaseModel      <|-- RequirementAssessment
-FolderMixin            <|-- RequirementAssessment
-
-namespace ReferentialObjects {
-    class ReferentialObjectMixin {
-        +CharField urn
-        +CharField ref_id
-        +CharField locale
-        +CharField provider
-        +CharField annotation
-        +display_short() str
-        +display_long() str
-    }
-
-    class LibraryMixin {
-        +CharField copyright
-        +IntegerField version
-        +CharField provider
-        +CharField packager
-        +JsonField dependencies
-        +BooleanField builtin
-        +JSONField objects_meta
-    }
-
-    class StoredLibrary {
-        +BooleanField is_loaded
-        +CharField hash_checksum
-        +TextField content
-    }
-
-    class LoadedLibrary {
-        +LoadedLibrary[] dependencies
-        +reference_count() int
-    }
-
-    class Threat {
-        +LoadedLibrary library
-        +is_deletable() bool
-        +frameworks() Framework[]
-    }
-
-    class ReferenceControl {
-        +LoadedLibrary library
-        +CharField category
-        +CharField csf_function
-        +JSONField typical_evidence
-        +is_deletable() bool
-        +frameworks() Framework[]
-    }
-
-    class RiskMatrix {
-        +LoadedLibrary library
-        +JSONField json_definition
-        +BooleanField is_enabled
-        +CharField provider
-        +is_used() bool
-        +risk_assessments() RiskAssessment[]
-        +projects() Project[]
-        +parse_json()
-        +get_detailed_grid()
-        +render_grid_as_colors()
-    }
-
-    class Framework {
-        +LoadedLibrary library
-        +int get_next_order_id(obj_type, _parent_urn)
-        +is_deletable() bool
-    }
-
-    class RequirementNode {
-        +Threat[] threats
-        +ReferenceControl[] REFERENCE_CONTROLs
-        +Framework framework
-        +CharField parent_urn
-        +IntegerField order_id
-        +json implementation_groups
-        +BooleanField assessable
-    }
-
-    class Mapping {
-        +CharField    reference_urn
-        +CharField    target_urn
-        +CharField    rationale
-        +CharField    relationship
-        +BooleanField fulfilled_by
-        +IntegerField strength
-    }
-}
-
-namespace DomainObjects {
-
-    class Project {
-        +CharField internal_reference
-        +CharField lc_status
-        +overall_compliance()
-    }
-
-    class Asset {
-        +CharField business_value
-        +CharField type
-        +Asset[] parent_assets
-        +is_primary() bool
-        +is_support() bool
-        +ancestors_plus_self() Asset[]
-    }
-
-    class Evidence {
-        +FileField attachment
-        +URLField link
-        +get_folder() Folder
-        +filename() str
-        +preview()
-    }
-
-    class AppliedControl {
-        +ReferenceControl REFERENCE_CONTROL
-        +Evidence[] evidences
-        +CharField category
-        +CharField csf_function
-        +CharField status
-        +DateField eta
-        +DateField expiry_date
-        +CharField link
-        +CharField effort
-        +Decimal   cost
-
-        +RiskScenario[] risk_scenarios()
-        +RiskAssessments[] risk_assessments()
-        +Project[] projects()
-        +Project parent_project()
-        +mid()
-        +csv_value()
-        +get_ranking_score() int
-        +get_html_url() str
-        +get_linked_requirements_count() int
-    }
-
-    class RiskAcceptance {
-        +RiskScenario[] risk_scenarios
-        +User approver
-        +CharField state
-        +DateField expiry_date
-        +DateTimeField accepted_at
-        +DateTimeField rejected_at
-        +DateTimeField revoked_at
-        +CharField justification
-        +get_html_url() str
-        +set_state(state)
-    }
-}
-
-class Assessment {
-    +TextChoices Status
-    +Project project
-    +CharField version
-    +CharField status
-    +CharField authors
-    +CharField reviewers
-    +DateField eta
-    +DateField due_date
-}
-
-class RiskAssessment {
-    +RiskMatrix risk_matrix
-    +path_display() str
-    +get_scenario_count() int
-    +quality_check()
-    +risk_scoring(probability, impact, risk_matrix) int
-}
-
-
-class ComplianceAssessment {
-    +Framework framework
-    +CharField result
-    +get_requirements_status_count() int
-    +get_measures_status_count() int
-    +donut_render()
-    +quality_check()
-}
-
-class RequirementAssessment {
-    +CharField status
-    +Evidence[] evidences
-    +TextField observation
-    +ComplianceAssessment compliance_assessment
-    +RequirementNode requirement
-    +AppliedControl[] APPLIED_CONTROLs
-}
-
-class RiskScenario {
-    +RiskAssessment risk_assessment
-    +Asset[] assets
-    +AppliedControl[] APPLIED_CONTROLs
-    +Threat[] threats
-    +TextField existing_controls
-    +SmallIntegerField current_proba
-    +SmallIntegerField current_impact
-    +SmallIntegerField current_level
-    +SmallIntegerField residual_proba
-    +SmallIntegerField residual_impact
-    +SmallIntegerField residual_level
-    +CharField treatment
-    +CharField strength_of_knowledge
-    +CharField justification
-
-    +Project parent_project()
-    +RiskMatrix get_matrix()
-    +get_current_risk(s) int
-    +get_current_impact() int
-    +get_current_proba() int
-    +get_residual_risk() int
-    +get_residual_impact() int
-    +get_residual_proba() int
-    +rid()
-}
-
-```
+Note: in MVP, labels are attached only to vulnerabilities.
 
 ## Global fields
 
@@ -723,16 +402,68 @@ Note: the IAM model is based on folders. A folder has a type among:
 
 Projects have the following fields:
 
+- ref_id (ex internal reference)
 - Name
 - Description
-- Internal reference
 - Status: --/Design/Development/Production/End of life/Dropped
 
-## Assets
+## Assets, security and disaster recovery objectives
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
-Assets are of type primary or support. A primary asset has no parent, a support asset can have parent assets (primary or support), but not itself.
+Assets are of type primary or supporting. A primary asset has no parent, a supporting asset can have parent assets (primary or supporting), but not itself.
+
+Primary assets have security objectives that are evolutive, so they are catched in a json field.
+
+Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets.
+
+There is a global parameter that defines a list of security objectives with a corresponding scale and a corresponding boolean allowing to select or hide a security objective. The following security objectives are pre-defined: 
+
+ ref_id | Name                       | Description | default scale | default select value
+--------|----------------------------|-------------|---------------|---------------------
+ C      | Confidentiality            | ...         | 1-4           | True
+ I      | Integrity                  | ...         | 1-4           | True
+ A      | Availability               | ...         | 1-4           | True
+ P      | Proof                      | ...         | 1-4           | True
+ Auth   | Authenticity               | ...         | 1-4           | False
+ Priv   | Privacy                    | ...         | 1-4           | False
+ Safe   | Safety                     | ...         | 1-4           | False
+
+The following disaster recovery objectives (measured in seconds) are pre-defined:
+
+ ref_id | Name                       | Description
+--------|----------------------------|------------
+ RTO    | Recovery Time Objective    | ...         
+ RPO    | Recovery Point Objetive    | ...         
+ MTD    | Maximum Tolerable Downtime | ...
+
+In a future version, users will be able to define custom security objectives.
+
+Security objectives are measured using a specifc scale. For now, the following scales are defined:
+- 0-3: coded as 0-3
+- 1-4: coded as 0-3
+- FIPS-199: coded as 0-3
+
+There is a correspondance between the 0-3, 1-4 and FIPS-199 scales (called "discrete scales"):
+
+scale    | internal value | scale value
+---------|----------------|---------------
+0-3      | 0              | 0
+0-3      | 1              | 1
+0-3      | 2              | 2
+0-3      | 3              | 3
+1-4      | 0              | 1
+1-4      | 1              | 2
+1-4      | 2              | 3
+1-4      | 3              | 4
+FIPS-199 | 0              | low
+FIPS-199 | 1              | moderate
+FIPS-199 | 2              | moderate
+FIPS-199 | 3              | high
+
+Security objectives can be evaluated for each asset. The default value is Null. The corresponding json field is composed of a list of tuples {security_objective_ref_id, value}.
+
+When a security objective is hidden in the global parameters, it is simply not proposed for new edition. However, a security objective that is already used in an asset is kept and editable even if it is hidden globally. Thus, when selecting or hiding a security objective, no value is changed in asset.
 
 ## Frameworks
 
@@ -773,7 +504,20 @@ Threats are referential objects used to clarify the aim of a requirement node or
 
 ## Vulnerabilities
 
-Vulnerabilities are referential objects used to clarify a risk scenario and to follow remediations. They are informative, risk assessments can be realised without using them. Well-known providers are NVD and CISA KEV, but custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
+Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE, CISA KEV or any other catalog can be done in the references field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
+
+Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
+
+The format of the references field is list of the following objects (* for mandatory):
+- string ref_id (*)
+- url reference_link
+- boolean is_cve
+- boolean is_kev
+- ...
+
+The UX shall facilitate the proper edition of references.
+
+Vulnerabilities also have a ref_id (defaults to empty string), a name, a description, and a severity within values --/low/medium/high/critical (coded as an integer from -1 to 3).
 
 ## Reference controls
 
@@ -797,7 +541,6 @@ A applied control has the following specific fields:
 - an effort (--/S/M/L/XL)
 - a cost (--/float value)
 - a url link
-- a list of user-defined tags
 
 When a applied control derives from a reference control, the same category and csf_function are proposed, but this can be changed.
 
@@ -815,7 +558,6 @@ Both types of assessments have common fields:
 - a status: (--/planned/in progress/in review/done/deprecated) that facilitates reporting.
 - a list of authors
 - a list of reviewers
-- a list of user-defined tags
 
 An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
 
@@ -881,6 +623,9 @@ The following inference rules are used:
 
 A risk assessment is based on scenarios, covered by Applied controls. Gathering the risk scenarios constitutes the "risk identification" phase.
 
+
+The risk matrix cannot be changed once the risk assessment is created.
+
 A risk assessment has an _risk_assessment_method_ field that can take the following values: 0 (risk matrix)/1 (Open FAIR). This cannot be changed once the risk assessment is created. Similarly, the risk matrix cannot be changed once the risk assessment is created.
 
 To analyse the risk, each scenario contains Existing Controls, current probability and impact, proposed controls, residual probability and impact. To facilitate using an assistant to estimate probability and impact, or for advanced methods like openfair, the json fields _current_risk_vector_ and _residual_risk_vector_ are aimed at keeping the data used to calculate to the estimation.
@@ -889,7 +634,9 @@ A risk scenario contains a treatment option with the values --/open/mitigate/acc
 
 A risk scenario also contains a "strength of knowledge", within the values --/0 (Low)/1 (Medium)/2 (High). This can be used to represent a third dimension of risk, as recommended by the Society for Risk Analysis. The field "justification" can be used to expose the knowledge.
 
-A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Authenticity, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
+A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
+
+Note: the list of qualifications is a superset of security objectives.
 
 The risk evaluation is automatically done based on the selected risk matrix.
 
@@ -966,7 +713,6 @@ Libraries can contain:
 
 - frameworks (including requirement nodes)
 - threats
-- vulnerabilities
 - reference controls
 - risk matrices
 - requirement mapping sets
@@ -994,7 +740,7 @@ Deleting a library is possible only if none of its objects is currently used. Re
 
 ## Referential objects
 
-Frameworks (including requirement nodes), mappings, threats, vulnerabilities, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
+Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
 
 Referential objects can be downloaded from a library. They are called "global referential objects" or "library objects" in that case, and they have the following characteristics:
 
@@ -1213,15 +959,6 @@ erDiagram
         url     reference_link
     }
 
-    ASSET {
-        string      name
-        string      description
-        string      business_value
-        string      type
-        string      security_need
-        asset       parent_asset
-    }
-
     SOLUTION {
         string      name
         string      description
@@ -1246,7 +983,6 @@ erDiagram
         string      status
         principal[] author
         principal[] reviewer
-        string[]    tags
         string      observation
 
         string      conclusion
@@ -1387,3 +1123,220 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - The change in applied control is not retained.
 - implementation_group_selector is not retained.
 - ebios-RM parameters are not retained.
+
+## Near-term evolutions
+
+We need to add in the near term the follwoing objects:
+- EBIOS-RM study
+- Audit campaign
+- Third-party campaign
+- Pentest follow-up
+- Incident follow-up
+
+Each of these objects will have its specific datamodel. Factoring will be done ad-hoc.
+
+## EBIOS-RM evolution
+
+### Mapping of essential concepts
+
+EBIOS-RM (english)    | EBIOS-RM (french)       |  CISO Assistant
+----------------------|-------------------------|----------------
+Study                 | Etude                   | Bundle
+Studied object        | Objet de l'étude        | Description of the bundle
+Mission               | Mission                 | Mission of the reference entity added to the bundle
+Business asset        | Valeurs métier          | Primary asset
+Supporting asset      | Bien support            | Supporting asset
+Feared event          | Evénement redouté       | Risk analysis at asset level
+Impact                | Impact                  | Impact in a risk analysis
+Security baseline     | Socle de sécurité       | Compliance frameworks and audits
+Risk origins          | Sources de risque       | TBD
+Target objectives     | Objectifs visés         | TBD
+Ecosystem             | Ecosystème              | Third Party Risk Management
+Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)
+Security controls     | Mesures de sécurité     | Reference/applied controls
+Operational scenarios | Scénarios opérationnels | Risk analysis at operational level (focus on probability)
+Risk treatment        | Traitement du risque    | Applied controls in a risk analysis
+
+### EBIOS-RM study
+
+The type EBIOS-RM study is a sort of assessment. It contains the following specific fields:
+- reference risk matrix (chosen at creation and immutable after creation)
+- ref_id
+- name of the study
+- description of the study
+- reference entity
+- a list of primary assets and corresponding secondary assets (workshop 1)
+- a list of audits for the security baseline (workshop 1)
+- a list of feared events (workshop 1)
+- a list of risk_origin_target_objective (workshop 2)
+- a list of ecosystem entities (workshop 3)
+- a list of strategic scenarios/attack paths (workshop 3)
+- a list of opeating scenarios (workshop 4)
+- a resulting risk assessment (workshop 5)
+
+The object feared events (workshop 1) contains the following fields:
+- primary asset
+- ref_id
+- name
+- description
+- list of impact qualifications
+- gravity (from the risk matrix impact scale)
+- selected
+- justification
+
+The object risk_origin_target_objective (workshop 2) contains the following fields:
+- risk origin (--/state/organized crime/terrorist/activist/professional/amateur/avenger/pathological/)
+- target objective (text)
+- motivation (--/1 very low/2 low/3 significant/4 strong) (--/très peu/peu/assez/fortement motivé)
+- resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
+- pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent)
+- activity (--/1/2/3/4)
+- selected
+- justification
+
+The object ecosystem entity (workshop 3) links to a TPRM entity, and contains the following fields:
+- category (provider/partner/client/...)
+- third-party entity from TPRM (optional)
+- Dependence
+- Penetration
+- Cyber maturity
+- trust
+- selected
+- justification
+
+The object strategic attack path (workshop 3) contains the following fields:
+- risk_origin_target_objective
+- description
+- affected ecosystem entities
+- intial threat level
+- Controls
+- residual threat level
+- selected
+- justification
+
+THe object operational scenario (workshop 4) contains the following fields:
+- strategic attack path
+- list of techniques/threats (typically from Mitre Att@ck)
+- description
+- likelihood
+- selected
+- justification
+
+The frontend for risk study shall propose the following steps:
+- workshop 1: framing and security baseline (cadrage et socle de sécurité)
+  - define the study, the reference entity and its mission
+  - select/define primary assets ("valeurs métier")
+    - the nature "process" or "information" can be defined as a label
+  - select/define secondary assets ("biens support")
+  - define feared events
+  - list of reference audits
+- workshop 2: risk origin/target objectives (sources de risque)
+  - define risk_origin_target_objective objects
+- workshop 3:
+  - list of ecosystem entities
+  - list of strategic scenarios/attack paths
+- workshop 4: operational scenarios
+  - list of operational scenarios
+- workshop 5: risk treatment
+  - The risk assessment is generated from workshop 4, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
+  - After generation, a risk assessment is fully editable, to allow customisation, and the risk assessment can be managed normally as any other risk assessment.
+  - risk treatment is based on the risk assessment.
+
+
+```mermaid
+erDiagram
+    DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
+    DOMAIN                ||--o{ ECOSYSTEM_ENTITY     : contains
+    DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
+    DOMAIN                ||--o{ FEARED_EVENT         : contains
+    DOMAIN                ||--o{ RO_TO                : contains
+    DOMAIN                ||--o{ STRATEGIC_ATTACK_PATH: contains
+
+```
+
+```mermaid
+erDiagram
+
+    STRATEGIC_ATTACK_PATH }o--|| RO_TO                : derives
+    RO_TO                 }o--|{ FEARED_EVENT         : corresponds_to
+    EBIOS_RM_STUDY        }o--o{ RO_TO                : contains
+    EBIOS_RM_STUDY        }o--o{ ECOSYSTEM_ENTITY     : contains
+    EBIOS_RM_STUDY        }o--o{ OPERATIONAL_SCENARIO : contains
+    EBIOS_RM_STUDY        }o--o{ FEARED_EVENT         : contains
+    EBIOS_RM_STUDY        }o--o{ STRATEGIC_ATTACK_PATH: contains
+    EBIOS_RM_STUDY        }o--o| ENTITY               : studies
+    EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
+    EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
+    EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
+    OPERATIONAL_SCENARIO  }o--|| STRATEGIC_ATTACK_PATH: derives
+    OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
+    STRATEGIC_ATTACK_PATH }o--o{ ECOSYSTEM_ENTITY     : uses
+    STRATEGIC_ATTACK_PATH }o--o{ APPLIED_CONTROL      : mitigated_by
+    ECOSYSTEM_ENTITY      }o--|| ENTITY               : qualifies
+
+    EBIOS_RM_STUDY {
+        string      ref_id
+        string      name
+        string      description
+
+        string      version
+        date        eta
+        date        due_date
+        string      status
+        principal[] author
+        principal[] reviewer
+        string      observation
+    }
+
+    FEARED_EVENT {
+        string ref_id
+        string name
+        string description
+        json   qualifications
+        int    gravity
+        bool   selected
+        bool   justification
+    }
+
+    RO_TO {
+        string risk_origin
+        string target_objective
+        int    motivation
+        int    resources
+        int    pertinence
+        int    activity
+        bool   selected
+        bool   justification
+    }
+
+    ECOSYSTEM_ENTITY {
+        string category
+        int    dependence
+        int    penetration
+        int    maturity
+        int    trust
+        bool   selected
+        bool   justification
+    }
+
+    STRATEGIC_ATTACK_PATH {
+        string description
+        int    intial_threat_level
+        int    residual threat level
+        bool   selected
+        bool   justification
+    }
+
+    OPERATIONAL_SCENARIO {
+        string description
+        int    likelihood
+        bool   selected
+        string justification
+    }
+
+```
+
+### Implementation
+
+EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
+
