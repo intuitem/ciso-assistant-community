@@ -399,7 +399,8 @@ export const listViewFields: ListViewFieldsConfig = {
 			'securityObjectives',
 			'disasterRecoveryObjectives',
 			'owner',
-			'domain'
+			'domain',
+			'labels'
 		],
 		body: [
 			'name',
@@ -408,11 +409,13 @@ export const listViewFields: ListViewFieldsConfig = {
 			'security_objectives',
 			'disaster_recovery_objectives',
 			'owner',
-			'folder'
+			'folder',
+			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			type: ASSET_TYPE_FILTER
+			type: ASSET_TYPE_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	users: {

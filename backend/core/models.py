@@ -1206,7 +1206,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
