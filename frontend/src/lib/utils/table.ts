@@ -301,25 +301,25 @@ export const listViewFields: ListViewFieldsConfig = {
 	'risk-scenarios': {
 		head: [
 			'ref_id',
-			'treatment',
-			'name',
 			'threats',
-			'riskAssessment',
+			'name',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
-			'residualLevel'
+			'residualLevel',
+			'treatment',
+			'riskAssessment'
 		],
 		body: [
 			'ref_id',
-			'treatment',
-			'name',
 			'threats',
-			'risk_assessment',
+			'name',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
-			'residual_level'
+			'residual_level',
+			'treatment',
+			'risk_assessment'
 		],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
