@@ -144,7 +144,7 @@
 					<Card
 						count={metrics.controls.total}
 						label={m.sumpageTotal()}
-						href="#"
+						href="/applied-controls/"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
@@ -153,7 +153,7 @@
 					<Card
 						count={metrics.controls.active}
 						label={m.sumpageActive()}
-						href="#"
+						href="/applied-controls/?status=active"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
@@ -161,7 +161,7 @@
 					<Card
 						count={metrics.controls.deprecated}
 						label={m.sumpageDeprecated()}
-						href="#"
+						href="/applied-controls/?status=deprecated"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
@@ -172,7 +172,7 @@
 					<Card
 						count={metrics.controls.to_do}
 						label={m.sumpageToDo()}
-						href="#"
+						href="/applied-controls/?status=to_do"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
@@ -180,7 +180,7 @@
 					<Card
 						count={metrics.controls.in_progress}
 						label={m.sumpageInProgress()}
-						href="#"
+						href="/applied-controls/?status=in_progress"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
@@ -188,7 +188,7 @@
 					<Card
 						count={metrics.controls.on_hold}
 						label={m.sumpageOnHold()}
-						href="#"
+						href="/applied-controls/?status=on_hold"
 						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
