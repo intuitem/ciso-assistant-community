@@ -202,9 +202,9 @@
 					</div>
 					<!---->
 					<Card
-						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
-						label={m.sumpageActiveAudits()}
-						href="#"
+						count={metrics.compliance.used_frameworks}
+						label={m.usedFrameworks()}
+						href="/frameworks/"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
@@ -212,9 +212,19 @@
 					/>
 					<div></div>
 					<Card
-						count={metrics.compliance.compliant_items}
-						label={m.sumpageCompliantItems()}
-						href="#"
+						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
+						label={m.sumpageActiveAudits()}
+						href="/compliance-assessments/"
+						help="this is interesting"
+						icon="fa-solid fa-list-check"
+						section={m.sumpageSectionCompliance()}
+						emphasis={true}
+					/>
+
+					<Card
+						count="{metrics.compliance.progress_avg}%"
+						label={m.sumpageAvgProgress()}
+						href="/compliance-assessments/"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
@@ -230,7 +240,7 @@
 					<Card
 						count={metrics.compliance.evidences}
 						label={m.sumpageEvidences()}
-						href="#"
+						href="/evidences/"
 						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
