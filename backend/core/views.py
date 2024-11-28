@@ -150,7 +150,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     request.data[field] = request.data[field][0].split(",")
                 elif not request.data[field][0]:
                     request.data[field] = []
-    
+
     def _process_labels(self, labels):
         """
         Creates a FilteringLabel and replaces the value with the ID of the newly created label.
