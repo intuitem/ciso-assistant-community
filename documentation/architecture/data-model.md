@@ -1169,7 +1169,7 @@ The type EBIOS-RM study is a sort of assessment. It contains the following speci
 - a list of audits for the security baseline (workshop 1)
 - a list of feared events (workshop 1)
 - a list of risk_origin_target_objective (workshop 2)
-- a list of ecosystem entities (workshop 3)
+- a list of stakeholders (workshop 3)
 - a list of strategic scenarios/attack paths (workshop 3)
 - a list of opeating scenarios (workshop 4)
 - a resulting risk assessment (workshop 5)
@@ -1207,7 +1207,7 @@ The object ecosystem entity (workshop 3) links to a TPRM entity, and contains th
 The object strategic attack path (workshop 3) contains the following fields:
 - risk_origin_target_objective
 - description
-- affected ecosystem entities
+- affected stakeholders
 - intial threat level
 - Controls
 - residual threat level
@@ -1233,7 +1233,7 @@ The frontend for risk study shall propose the following steps:
 - workshop 2: risk origin/target objectives (sources de risque)
   - define risk_origin_target_objective objects
 - workshop 3:
-  - list of ecosystem entities
+  - list of stakeholders
   - list of strategic scenarios/attack paths
 - workshop 4: operational scenarios
   - list of operational scenarios
@@ -1313,14 +1313,14 @@ erDiagram
 
     STAKEHOLDER {
         string category
-        int    dependence
-        int    penetration
-        int    maturity
-        int    trust_residual
-        int    dependence_residual
-        int    penetration_residual
-        int    maturity_residual
-        int    trust
+        int    current_dependence
+        int    current_penetration
+        int    current_maturity
+        int    current_trust
+        int    residual_dependence
+        int    residual_penetration
+        int    residual_maturity
+        int    residual_trust
         bool   selected
         string justification
     }
@@ -1342,5 +1342,7 @@ erDiagram
 
 ### Implementation
 
-EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
-
+- EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
+- There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
+- the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
+- 
