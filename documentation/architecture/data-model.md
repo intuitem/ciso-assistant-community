@@ -1250,28 +1250,28 @@ erDiagram
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
-    DOMAIN                ||--o{ STRATEGIC_ATTACK_PATH: contains
+    DOMAIN                ||--o{ ATTACK_PATH          : contains
 
 ```
 
 ```mermaid
 erDiagram
 
-    STRATEGIC_ATTACK_PATH }o--|| RO_TO                : derives
+    ATTACK_PATH           }o--|| RO_TO                : derives
     RO_TO                 }o--|{ FEARED_EVENT         : corresponds_to
     EBIOS_RM_STUDY        }o--o{ RO_TO                : contains
     EBIOS_RM_STUDY        }o--o{ ECOSYSTEM_ENTITY     : contains
     EBIOS_RM_STUDY        }o--o{ OPERATIONAL_SCENARIO : contains
     EBIOS_RM_STUDY        }o--o{ FEARED_EVENT         : contains
-    EBIOS_RM_STUDY        }o--o{ STRATEGIC_ATTACK_PATH: contains
+    EBIOS_RM_STUDY        }o--o{ ATTACK_PATH          : contains
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
     EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
-    OPERATIONAL_SCENARIO  }o--|| STRATEGIC_ATTACK_PATH: derives
+    OPERATIONAL_SCENARIO  }o--|| ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
-    STRATEGIC_ATTACK_PATH }o--o{ ECOSYSTEM_ENTITY     : uses
-    STRATEGIC_ATTACK_PATH }o--o{ APPLIED_CONTROL      : mitigated_by
+    ATTACK_PATH           }o--o{ ECOSYSTEM_ENTITY     : uses
+    ATTACK_PATH           }o--o{ APPLIED_CONTROL      : mitigated_by
     ECOSYSTEM_ENTITY      }o--|| ENTITY               : qualifies
 
     EBIOS_RM_STUDY {
@@ -1319,10 +1319,10 @@ erDiagram
         bool   justification
     }
 
-    STRATEGIC_ATTACK_PATH {
+    ATTACK_PATH {
         string description
         int    intial_threat_level
-        int    residual threat level
+        int    residual_threat_level
         bool   selected
         bool   justification
     }
