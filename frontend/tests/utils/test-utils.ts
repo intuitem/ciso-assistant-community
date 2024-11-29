@@ -273,19 +273,8 @@ export const test = base.extend<Fixtures>({
 
 	data: { ...testData },
 
-	populateDatabase: async ({ pages, loginPage, sideBar, data, browser }, use) => {
+	populateDatabase: async ({ pages, loginPage, sideBar, data }, use) => {
 		test.slow();
-
-    const context = await browser.newContext();
-		context.on('requestfailed', request => {
-			console.log('[REQUEST_FAILED] ' + request.url() + ' ' + request.failure().errorText);
-		});
-
-		const start = new Date();
-		await new Promise((resolve) => setTimeout(resolve, 3000));
-		const end = new Date();
-		const diff = end - start
-		console.log(`Sleep time = ${diff}`);
 		await loginPage.goto();
 		await loginPage.login();
 		for (const [page, pageData] of Object.entries(data)) {
@@ -296,7 +285,6 @@ export const test = base.extend<Fixtures>({
 				'dependency' in pageData ? pageData.dependency : null
 			);
 		}
-		await context.close();
 		await sideBar.logout();
 		await use();
 	}
