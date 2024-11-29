@@ -130,7 +130,7 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 60 # give the migrations time to finish (included in the up on the previous step)
+          sleep 120 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
@@ -142,6 +142,7 @@ jobs:
             exit 0
           else
             echo "Failure"
+            echo "Check if migrations are not too long"
             exit 1
           fi
 
@@ -258,7 +259,7 @@ jobs:
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 60 # give the migrations time to finish (included in the up on the previous step)
+          sleep 120 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
@@ -270,5 +271,6 @@ jobs:
             exit 0
           else
             echo "Failure"
+            echo "Check if migrations are not too long"
             exit 1
           fi
