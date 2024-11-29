@@ -131,7 +131,7 @@ export const actions: Actions = {
 		}
 
 		const next = url.searchParams.get('next') || '/';
-		const redirectURL = getSecureRedirect(next) + '?refresh=1';
+		const redirectURL = getSecureRedirect(next) + '';
 		redirect(302, redirectURL);
 	},
 	mfaAuthenticate: async (event) => {
