@@ -307,25 +307,6 @@
 						{#if key !== 'meta'}
 							{@const component = field_component_map[key]}
 							<td class={regionCell} role="gridcell">
-								{#if taggedKeys.has(key)}
-									{@const _tagList = tagMap[key]}
-									{@const tagList = Object.keys(_tagList.keys).map((key) => ({
-										key: { [key]: _tagList.keys[key] }
-									}))}
-									{#each tagList as tag}
-										{@const tagKey = tag.key && Object.keys(tag.key)[0]}
-										{@const tagValue = meta[tagKey]}
-										{@const tagData = tag.key?.[tagKey]?.[tagValue]}
-										{#if tagData && tags}
-											{@const { text, cssClasses } = tagData}
-											<span class="space-x-1">
-												<span class={cssClasses}>
-													{safeTranslate(text)}
-												</span>
-											</span>
-										{/if}
-									{/each}
-								{/if}
 								{#if component}
 									<svelte:component this={component} {meta} cell={value} />
 								{:else}
