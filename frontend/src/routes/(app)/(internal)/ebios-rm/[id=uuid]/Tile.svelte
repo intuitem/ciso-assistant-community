@@ -9,7 +9,7 @@
 <div class="rounded bg-white p-4 flex flex-col justify-between">
 	<div class="flex justify-between mb-2">
 		<div class="font-semibold">{title}</div>
-		<div>
+		<div class="text-xl">
 			{#if status == 'to_do'}
 				<i class="fa-solid fa-exclamation"></i>
 			{:else if status == 'in_progress'}
