@@ -6,7 +6,8 @@ import click
 import pandas as pd
 import requests
 import yaml
-from rich import print
+import json
+from rich import print as rprint
 
 cli_cfg = dict()
 auth_data = dict()
@@ -81,7 +82,6 @@ VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
 
 def check_auth():
     if Path(".tmp.yaml").exists():
-        click.echo("Found auth data. Trying them", err=True)
         with open(".tmp.yaml", "r") as yfile:
             auth_data = yaml.safe_load(yfile)
             return auth_data["token"]
@@ -144,6 +144,36 @@ def get_folders():
 
 
 @click.command()
+def get_projects():
+    """getting projects as a json"""
+    url = f"{API_URL}/projects/"
+    headers = {"Authorization": f"Token {TOKEN}"}
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    if res.status_code == 200:
+        print(json.dumps(res.json(), ensure_ascii=False))
+
+
+@click.command()
+def get_loaded_matrix():
+    """getting loaded matrix as a json"""
+    url = f"{API_URL}/risk-matrices/"
+    headers = {"Authorization": f"Token {TOKEN}"}
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    if res.status_code == 200:
+        print(json.dumps(res.json(), ensure_ascii=False))
+
+
+@click.command()
+@click.option("--file", required=True, help="")
+@click.option("--file", required=True, help="")
+@click.option("--file", required=True, help="")
+@click.option("--file", required=True, help="")
+def import_risk_assessment(file, project, name, matrix):
+    """this will parse the items of a risk assessment and create the assoicated objects"""
+    pass
+
+
+@click.command()
 @click.option("--file", required=True, help="Path of the csv file with assets")
 def import_assets(file):
     """import assets from a csv. Check the samples for format."""
@@ -172,9 +202,9 @@ def import_assets(file):
             )
             if res.status_code != 201:
                 click.echo("❌ something went wrong", err=True)
-                print(res.json())
+                rprint(res.json())
             else:
-                print(f"✅ {name} created", file=sys.stderr)
+                rprint(f"✅ {name} created", file=sys.stderr)
 
 
 @click.command()
@@ -208,9 +238,9 @@ def import_controls(file):
             )
             if res.status_code != 201:
                 click.echo("❌ something went wrong", err=True)
-                print(res.json())
+                rprint(res.json())
             else:
-                print(f"✅ {name} created", file=sys.stderr)
+                rprint(f"✅ {name} created", file=sys.stderr)
 
 
 @click.command()
@@ -240,9 +270,9 @@ def import_evidences(file):
             )
             if res.status_code != 201:
                 click.echo("❌ something went wrong", err=True)
-                print(res.json())
+                rprint(res.json())
             else:
-                print(f"✅ {row['name']} created", file=sys.stderr)
+                rprint(f"✅ {row['name']} created", file=sys.stderr)
 
 
 @click.command()
@@ -260,13 +290,13 @@ def upload_attachment(file, name):
         url, headers=headers, params={"name": name}, verify=VERIFY_CERTIFICATE
     )
     data = res.json()
-    print(data)
+    rprint(data)
     if res.status_code != 200:
-        print(data)
-        print(f"Error: check credentials or filename.", file=sys.stderr)
+        rprint(data)
+        rprint(f"Error: check credentials or filename.", file=sys.stderr)
         return
     if not data["results"]:
-        print(f"Error: No evidence found with name '{name}'", file=sys.stderr)
+        rprint(f"Error: No evidence found with name '{name}'", file=sys.stderr)
         return
 
     evidence_id = data["results"][0]["id"]
@@ -280,16 +310,19 @@ def upload_attachment(file, name):
     }
     with open(file, "rb") as f:
         res = requests.post(url, headers=headers, data=f, verify=VERIFY_CERTIFICATE)
-    print(res)
-    print(res.text)
+    rprint(res)
+    rprint(res.text)
 
 
 cli.add_command(get_folders)
+cli.add_command(get_projects)
 cli.add_command(auth)
 cli.add_command(import_assets)
 cli.add_command(import_controls)
 cli.add_command(import_evidences)
 cli.add_command(init_config)
 cli.add_command(upload_attachment)
+cli.add_command(import_risk_assessment)
+cli.add_command(get_loaded_matrix)
 if __name__ == "__main__":
     cli()
