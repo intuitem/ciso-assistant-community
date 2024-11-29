@@ -140,7 +140,7 @@
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
-				<section id="summary" class=" grid grid-cols-6 gap-4">
+				<section id="summary" class=" grid grid-cols-6 gap-2">
 					<Card
 						count={metrics.controls.total}
 						label={m.sumpageTotal()}
@@ -163,9 +163,6 @@
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
-					<div class="h-64 col-span-3 row-span-2 bg-white">
-						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
-					</div>
 					<Card
 						count={metrics.controls.to_do}
 						label={m.sumpageToDo()}
@@ -173,6 +170,9 @@
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
+					<div class="h-80 col-span-2 row-span-2 bg-white">
+						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
+					</div>
 					<Card
 						count={metrics.controls.in_progress}
 						label={m.sumpageInProgress()}
@@ -187,7 +187,23 @@
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
-					<div class="col-span-4 row-span-4 bg-white">
+					<Card
+						count={metrics.controls.p1}
+						label={m.sumpageP1()}
+						href="/applied-controls/?priority=p1"
+						icon="fa-solid fa-shield-halved"
+						section={m.sumpageSectionControls()}
+						emphasis={true}
+					/>
+					<Card
+						count={metrics.controls.eta_missed}
+						label={m.sumpageEtaMissed()}
+						href="/applied-controls/?status=on_hold"
+						icon="fa-solid fa-shield-halved"
+						section={m.sumpageSectionControls()}
+						emphasis={true}
+					/>
+					<div class="col-span-4 row-span-4 bg-white h-96">
 						<StackedBarsNormalized
 							names={metrics.audits_stats.names}
 							data={metrics.audits_stats.data}
