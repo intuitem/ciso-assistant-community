@@ -301,23 +301,25 @@ export const listViewFields: ListViewFieldsConfig = {
 	'risk-scenarios': {
 		head: [
 			'ref_id',
-			'name',
 			'threats',
-			'riskAssessment',
+			'name',
 			'existingAppliedControls',
 			'currentLevel',
 			'extraAppliedControls',
-			'residualLevel'
+			'residualLevel',
+			'treatment',
+			'riskAssessment'
 		],
 		body: [
 			'ref_id',
-			'name',
 			'threats',
-			'risk_assessment',
+			'name',
 			'existing_applied_controls',
 			'current_level',
 			'applied_controls',
-			'residual_level'
+			'residual_level',
+			'treatment',
+			'risk_assessment'
 		],
 		filters: {
 			folder: { ...DOMAIN_FILTER_FROM_PROJECT, alwaysDisplay: true },
@@ -341,7 +343,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		head: [
 			'ref_id',
 			'name',
-			'description',
+			'priority',
+			'status',
 			'category',
 			'csfFunction',
 			'eta',
@@ -352,7 +355,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: [
 			'ref_id',
 			'name',
-			'description',
+			'priority',
+			'status',
 			'category',
 			'csf_function',
 			'eta',
@@ -394,8 +398,8 @@ export const listViewFields: ListViewFieldsConfig = {
 	assets: {
 		head: [
 			'name',
+			'type',
 			'description',
-			'businessValue',
 			'securityObjectives',
 			'disasterRecoveryObjectives',
 			'owner',
@@ -404,8 +408,8 @@ export const listViewFields: ListViewFieldsConfig = {
 		],
 		body: [
 			'name',
+			'type',
 			'description',
-			'business_value',
 			'security_objectives',
 			'disaster_recovery_objectives',
 			'owner',
