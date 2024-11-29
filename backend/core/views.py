@@ -653,26 +653,38 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "name",
                 "description",
                 "existing_controls",
+                "current_impact",
+                "current_proba",
                 "current_level",
                 "applied_controls",
+                "residual_impact",
+                "residual_proba",
                 "residual_level",
                 "treatment",
             ]
             writer.writerow(columns)
 
-            for scenario in risk_assessment.risk_scenarios.all().order_by("created_at"):
-                applied_controls = ",".join(
+            for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
+                extra_controls = ",".join(
                     [m.csv_value for m in scenario.applied_controls.all()]
                 )
+                existing_controls = ",".join(
+                    [m.csv_value for m in scenario.existing_applied_controls.all()]
+                )
+
                 threats = ",".join([t.name for t in scenario.threats.all()])
                 row = [
                     scenario.ref_id,
                     threats,
                     scenario.name,
                     scenario.description,
-                    scenario.existing_controls,
+                    existing_controls,
+                    scenario.get_current_impact()["name"],
+                    scenario.get_current_proba()["name"],
                     scenario.get_current_risk()["name"],
-                    applied_controls,
+                    extra_controls,
+                    scenario.get_residual_impact()["name"],
+                    scenario.get_residual_proba()["name"],
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
