@@ -33,10 +33,6 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 			mailer,
 			page
 		}) => {
-			console.log("EXPECTED TEST EXECUTED");
-			page.on('requestfailed', request => {
-				console.log(request.url() + ' ' + request.failure().errorText);
-			});
 			await usersPage.goto();
 			await usersPage.editItemButton(vars.user.email).click();
 			await usersPage.form.fill({
