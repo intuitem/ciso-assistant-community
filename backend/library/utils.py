@@ -790,7 +790,7 @@ class LibraryFormatUtils:
         if obj and (urn := obj.get("urn")):
             try:
                 current_library = StoredLibrary.objects.get(urn=urn)
-                minimum_version = str(current_library.version + 1)
+                minimum_version = current_library.version + 1
             finally:
                 pass
 
