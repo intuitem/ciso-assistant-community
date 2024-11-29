@@ -19,7 +19,6 @@
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { toCamelCase } from '$lib/utils/locales.js';
 	import { safeTranslate } from '$lib/utils/i18n.js';
 
 	export let data;
@@ -161,12 +160,16 @@
 				</div>
 				<br />
 				<div class="text-sm">
-					<ul>
-						<li class="pb-1">
-							<span class="font-semibold">{m.status()}:</span>
-							{risk_assessment.status === null ? '--' : safeTranslate(risk_assessment.status)}
+					<ul class="leading-loose">
+						<li>
+							<span class="font-semibold">{m.refId()}:</span>
+							{risk_assessment.ref_id ?? '--'}
 						</li>
-						<li class="pb-1">
+						<li>
+							<span class="font-semibold">{m.status()}:</span>
+							{!risk_assessment.status ? '--' : safeTranslate(risk_assessment.status)}
+						</li>
+						<li>
 							<span class="font-semibold">{m.authors()}:</span>
 							<ul>
 								{#each risk_assessment.authors as author}
@@ -174,11 +177,11 @@
 								{/each}
 							</ul>
 						</li>
-						<li class="pb-1">
+						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
 							{new Date(risk_assessment.created_at).toLocaleString(languageTag())}
 						</li>
-						<li class="pb-1">
+						<li>
 							<span class="font-semibold">{m.updatedAt()}:</span>
 							{new Date(risk_assessment.updated_at).toLocaleString(languageTag())}
 						</li>
@@ -200,7 +203,7 @@
 					>
 				</div>
 				<div class="text-sm" data-testid="description-field-value">
-					{risk_assessment.description ?? '-'}
+					{risk_assessment.description ?? '--'}
 				</div>
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
