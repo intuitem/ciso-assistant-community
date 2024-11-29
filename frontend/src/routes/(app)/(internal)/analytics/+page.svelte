@@ -144,8 +144,7 @@
 					<Card
 						count={metrics.controls.total}
 						label={m.sumpageTotal()}
-						href="#"
-						help="this is interesting"
+						href="/applied-controls/"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 						emphasis={true}
@@ -153,16 +152,14 @@
 					<Card
 						count={metrics.controls.active}
 						label={m.sumpageActive()}
-						href="#"
-						help="this is interesting"
+						href="/applied-controls/?status=active"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.deprecated}
 						label={m.sumpageDeprecated()}
-						href="#"
-						help="this is interesting"
+						href="/applied-controls/?status=deprecated"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -172,24 +169,21 @@
 					<Card
 						count={metrics.controls.to_do}
 						label={m.sumpageToDo()}
-						href="#"
-						help="this is interesting"
+						href="/applied-controls/?status=to_do"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.in_progress}
 						label={m.sumpageInProgress()}
-						href="#"
-						help="this is interesting"
+						href="/applied-controls/?status=in_progress"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.on_hold}
 						label={m.sumpageOnHold()}
-						href="#"
-						help="this is interesting"
+						href="/applied-controls/?status=on_hold"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -202,20 +196,27 @@
 					</div>
 					<!---->
 					<Card
-						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
-						label={m.sumpageActiveAudits()}
-						href="#"
-						help="this is interesting"
+						count={metrics.compliance.used_frameworks}
+						label={m.usedFrameworks()}
+						href="/frameworks/"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 						emphasis={true}
 					/>
 					<div></div>
 					<Card
-						count={metrics.compliance.compliant_items}
-						label={m.sumpageCompliantItems()}
-						href="#"
-						help="this is interesting"
+						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
+						label={m.sumpageActiveAudits()}
+						href="/compliance-assessments/"
+						icon="fa-solid fa-list-check"
+						section={m.sumpageSectionCompliance()}
+						emphasis={true}
+					/>
+
+					<Card
+						count="{metrics.compliance.progress_avg}%"
+						label={m.sumpageAvgProgress()}
+						href="/compliance-assessments/"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 					/>
@@ -223,15 +224,13 @@
 						count={metrics.compliance.non_compliant_items}
 						label={m.sumpageNonCompliantItems()}
 						href="#"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 					/>
 					<Card
 						count={metrics.compliance.evidences}
 						label={m.sumpageEvidences()}
-						href="#"
-						help="this is interesting"
+						href="/evidences/"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 					/>
@@ -249,8 +248,7 @@
 					<Card
 						count={metrics.risk.assessments}
 						label={m.sumpageAssessments()}
-						href="#"
-						help="this is interesting"
+						href="/risk-assessments/"
 						emphasis={true}
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
@@ -258,8 +256,7 @@
 					<Card
 						count={metrics.risk.scenarios}
 						label={m.sumpageScenarios()}
-						href="#"
-						help="this is interesting"
+						href="/risk-scenarios/"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
 					/>
@@ -274,8 +271,7 @@
 					<Card
 						count={metrics.risk.threats}
 						label={m.sumpageMappedThreats()}
-						href="#"
-						help="this is interesting"
+						href="/analytics?tab=2"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
 					/>
@@ -283,8 +279,7 @@
 					<Card
 						count={metrics.risk.acceptances}
 						label={m.sumpageRiskAccepted()}
-						href="#"
-						help="this is interesting"
+						href="/risk-acceptances"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
 					/>
