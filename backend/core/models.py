@@ -1747,6 +1747,34 @@ class Vulnerability(
     fields_to_check = ["name"]
 
 
+## historical data
+class HistoricalMetric(models.Model):
+    date = models.DateField(verbose_name=_("Date"), db_index=True)
+    data = models.JSONField(verbose_name=_("Historical Data"))
+    model = models.TextField(verbose_name=_("Model"), db_index=True)
+    object_id = models.UUIDField(verbose_name=_("Object ID"), db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+
+    class Meta:
+        unique_together = ("model", "object_id", "date")
+        indexes = [
+            models.Index(fields=["model", "object_id", "date"]),
+            models.Index(fields=["date", "model"]),
+        ]
+
+    @classmethod
+    def update_daily_metric(cls, model, object_id, data):
+        """
+        Upsert method to update or create a daily metric. Should be generic enough for other metrics.
+        """
+        return cls.objects.update_or_create(
+            model=model,
+            object_id=object_id,
+            date=now().date(),
+            defaults={"data": data},
+        )
+
+
 ########################### Secondary objects #########################
 
 
@@ -1817,8 +1845,37 @@ class RiskAssessment(Assessment):
         verbose_name = _("Risk assessment")
         verbose_name_plural = _("Risk assessments")
 
+    def upsert_daily_metrics(self):
+        per_treatment = self.get_per_treatment()
+
+        total = RiskScenario.objects.filter(risk_assessment=self).count()
+        data = {
+            "scenarios": {
+                "total": total,
+                "per_treatment": per_treatment,
+            },
+        }
+
+        HistoricalMetric.update_daily_metric(
+            model=self.__class__.__name__, object_id=self.id, data=data
+        )
+
     def __str__(self) -> str:
         return f"{self.name} - {self.version}"
+
+    def get_per_treatment(self) -> dict:
+        output = dict()
+        for treatment in RiskScenario.TREATMENT_OPTIONS:
+            output[treatment[0]] = (
+                RiskScenario.objects.filter(risk_assessment=self)
+                .filter(treatment=treatment[0])
+                .count()
+            )
+        return output
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
 
     @property
     def path_display(self) -> str:
@@ -2114,14 +2171,17 @@ class RiskScenario(NameDescriptionMixin):
     ]
 
     QUALIFICATIONS = [
-        ("Financial", _("Financial")),
-        ("Legal", _("Legal")),
-        ("Reputation", _("Reputation")),
-        ("Operational", _("Operational")),
         ("Confidentiality", _("Confidentiality")),
         ("Integrity", _("Integrity")),
         ("Availability", _("Availability")),
+        ("Proof", _("Proof")),
         ("Authenticity", _("Authenticity")),
+        ("Privacy", _("Privacy")),
+        ("Safety", _("Safety")),
+        ("Reputation", _("Reputation")),
+        ("Operational", _("Operational")),
+        ("Legal", _("Legal")),
+        ("Financial", _("Financial")),
     ]
 
     DEFAULT_SOK_OPTIONS = {
@@ -2399,6 +2459,7 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        self.risk_assessment.upsert_daily_metrics()
 
 
 class ComplianceAssessment(Assessment):
@@ -2422,12 +2483,36 @@ class ComplianceAssessment(Assessment):
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
 
+    def upsert_daily_metrics(self):
+        per_status = dict()
+        per_result = dict()
+        for item in self.get_requirements_status_count():
+            per_status[item[1]] = item[0]
+
+        for item in self.get_requirements_result_count():
+            per_result[item[1]] = item[0]
+        total = RequirementAssessment.objects.filter(compliance_assessment=self).count()
+        data = {
+            "reqs": {
+                "total": total,
+                "per_status": per_status,
+                "per_result": per_result,
+                "progress_perc": self.progress(),
+                "score": self.get_global_score(),
+            },
+        }
+
+        HistoricalMetric.update_daily_metric(
+            model=self.__class__.__name__, object_id=self.id, data=data
+        )
+
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
             self.min_score = self.framework.min_score
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -3036,6 +3121,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Meta:
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.compliance_assessment.upsert_daily_metrics()
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
