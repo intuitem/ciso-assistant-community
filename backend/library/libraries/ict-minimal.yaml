@@ -4,7 +4,7 @@ ref_id: ict-minimal
 name: ICT - Minimum standard
 description: Minimum standard for improving ICT resilience - Version may 2023
 copyright: Creative Commons BY.
-version: '1'
+version: 1
 provider: Swiss FONES
 packager: intuitem
 translations:
