@@ -866,5 +866,13 @@
 	"forgotPassword": "Mot de passe oublié",
 	"ssoSettingsUpdated": "Paramètres SSO mis à jour",
 	"scoreSemiColon": "Score:",
-	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source."
+	"mappingInferenceHelpText": "Ces variables sont fixes et ne changeront pas en fonction de la source.",
+	"ebiosWs1_1": "Atelier 1.1 : Cadrage",
+	"ebiosWs1_2": "Atelier 1.2 : Evenements redoutés",
+	"ebiosWs1_3": "Atelier 1.3 : Socle",
+	"ebiosWs2": "Atelier 2 : Source de risque",
+	"ebiosWs3_1": "Atelier 3.1 : Ecosysteme",
+	"ebiosWs3_2": "Atelier 3.2 : Scenarios stratégiques",
+	"ebiosWs4": "Atelier 4 : Scenarios opértionnels",
+	"ebiosWs5": "Atelier 5 : Traitement du risque"
 }
