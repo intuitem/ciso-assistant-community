@@ -808,6 +808,8 @@
 	"sumpageToDo": "to do",
 	"sumpageInProgress": "in progress",
 	"sumpageOnHold": "on hold",
+	"sumpageP1": "Pending P1",
+	"sumpageEtaMissed": "Missed ETA",
 	"sumpageActiveAudits": "Active audits",
 	"sumpageCompliantItems": "Compliant items",
 	"sumpageNonCompliantItems": "Non compliant items",
