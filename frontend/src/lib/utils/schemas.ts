@@ -64,12 +64,13 @@ const baseNamedObject = (additionalFields: any) =>
 	});
 
 export const FolderSchema = baseNamedObject({
+	ref_id: z.string().optional().nullable(),
 	parent_folder: z.string().optional()
 });
 
 export const ProjectSchema = baseNamedObject({
 	folder: z.string(),
-	internal_reference: z.string().optional().nullable(),
+	ref_id: z.string().optional().nullable(),
 	lc_status: z.string().optional().default('in_design')
 });
 
@@ -87,6 +88,7 @@ export const RiskAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional().nullable(),
+	ref_id: z.string().optional().nullable(),
 	risk_matrix: z.string(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -123,6 +125,7 @@ export const RiskScenarioSchema = baseNamedObject({
 });
 
 export const AppliedControlSchema = baseNamedObject({
+	ref_id: z.string().optional().nullable(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
 	priority: z.number().optional().nullable(),
@@ -189,7 +192,8 @@ export const AssetSchema = baseNamedObject({
 		})
 		.optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
-	owner: z.string().uuid().optional().array().optional()
+	owner: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -239,6 +243,7 @@ export const SetPasswordSchema = z.object({
 
 export const ComplianceAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
+	ref_id: z.string().optional().nullable(),
 	project: z.string(),
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
