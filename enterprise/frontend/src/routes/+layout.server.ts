@@ -1,6 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import type { GlobalSettings } from '$lib/utils/types';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { env } from '$env/dynamic/public';
 
 export const load: LayoutServerLoad = async ({ fetch, locals }) => {
 	let clientSettings: GlobalSettings;
@@ -16,5 +17,8 @@ export const load: LayoutServerLoad = async ({ fetch, locals }) => {
     clientSettings.settings.favicon_hash = '';
     clientSettings.settings.name = '';
   }
-	return { featureFlags: locals.featureFlags, clientSettings, licenseStatus };
+  const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
+    ? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
+    : 7;
+	return { featureFlags: locals.featureFlags, clientSettings, licenseStatus, LICENSE_EXPIRATION_NOTIFY_DAYS };
 };

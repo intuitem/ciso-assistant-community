@@ -399,7 +399,6 @@
 	"medium": "Medio",
 	"large": "Grande",
 	"extraLarge": "Grandissimo",
-	"rid": "RID",
 	"scope": "Ambito",
 	"reader": "Lettore",
 	"lastUpdate": "Ultimo aggiornamento",
@@ -857,5 +856,7 @@
 	"tags": "Etichette",
 	"addTag": "Aggiungi tag",
 	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra",
-	"forgotPassword": "Ha dimenticato la password"
+	"forgotPassword": "Ha dimenticato la password",
+	"scoreSemiColon": "Punto:",
+	"mappingInferenceHelpText": "Queste variabili sono fisse e non cambiano a seconda della fonte."
 }

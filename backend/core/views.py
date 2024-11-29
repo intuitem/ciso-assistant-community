@@ -17,6 +17,8 @@ import shutil
 from pathlib import Path
 import humanize
 
+# from icecream import ic
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -51,6 +53,8 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
 
 from weasyprint import HTML
 
@@ -149,12 +153,36 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 elif not request.data[field][0]:
                     request.data[field] = []
 
+    def _process_labels(self, labels):
+        """
+        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
+        """
+        new_labels = []
+        for label in labels:
+            try:
+                uuid.UUID(label, version=4)
+                new_labels.append(label)
+            except ValueError:
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
+                new_labels.append(str(new_label.id))
+        return new_labels
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        if request.data.get("filtering_labels"):
+            request.data["filtering_labels"] = self._process_labels(
+                request.data["filtering_labels"]
+            )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        if request.data.get("filtering_labels"):
+            request.data["filtering_labels"] = self._process_labels(
+                request.data["filtering_labels"]
+            )
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
@@ -185,7 +213,7 @@ class ProjectViewSet(BaseModelViewSet):
 
     model = Project
     filterset_fields = ["folder", "lc_status"]
-    search_fields = ["name", "internal_reference", "description"]
+    search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -446,34 +474,6 @@ class VulnerabilityViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
 
-    def _process_labels(self, labels):
-        """
-        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
-        """
-        new_labels = []
-        for label in labels:
-            try:
-                uuid.UUID(label, version=4)
-                new_labels.append(label)
-            except ValueError:
-                new_label = FilteringLabel(label=label)
-                new_label.full_clean()
-                new_label.save()
-                new_labels.append(str(new_label.id))
-        return new_labels
-
-    def update(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
-        )
-        return super().update(request, *args, **kwargs)
-
-    def create(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
-        )
-        return super().create(request, *args, **kwargs)
-
 
 class FilteringLabelViewSet(BaseModelViewSet):
     """
@@ -611,7 +611,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             ):
                 risk_scenarios = ",".join(
                     [
-                        f"{scenario.rid}: {scenario.name}"
+                        f"{scenario.ref_id}: {scenario.name}"
                         for scenario in mtg.risk_scenarios.all()
                     ]
                 )
@@ -648,7 +648,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             writer = csv.writer(response, delimiter=";")
             columns = [
-                "rid",
+                "ref_id",
                 "threats",
                 "name",
                 "description",
@@ -666,7 +666,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
                 threats = ",".join([t.name for t in scenario.threats.all()])
                 row = [
-                    scenario.rid,
+                    scenario.ref_id,
                     threats,
                     scenario.name,
                     scenario.description,
@@ -1107,6 +1107,19 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "applied_controls",
     ]
 
+    def _perform_write(self, serializer):
+        if not serializer.validated_data.get("ref_id"):
+            risk_assessment = serializer.validated_data["risk_assessment"]
+            ref_id = RiskScenario.get_default_ref_id(risk_assessment)
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
+
+    def perform_create(self, serializer):
+        return self._perform_write(serializer)
+
+    def perform_update(self, serializer):
+        return self._perform_write(serializer)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get treatment choices")
     def treatment(self, request):
@@ -1171,6 +1184,27 @@ class RiskScenarioViewSet(BaseModelViewSet):
     @action(detail=False, name="Get risk scenarios count per status")
     def per_status(self, request):
         return Response({"results": risk_per_status(request.user)})
+
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
+    def default_ref_id(self, request):
+        risk_assessment_id = request.query_params.get("risk_assessment")
+        if not risk_assessment_id:
+            return Response(
+                {"error": "Missing 'risk_assessment' parameter."}, status=400
+            )
+        try:
+            risk_assessment = RiskAssessment.objects.get(pk=risk_assessment_id)
+
+            # Use the class method to compute the default ref_id
+            default_ref_id = RiskScenario.get_default_ref_id(risk_assessment)
+            return Response({"results": default_ref_id})
+        except Exception as e:
+            logger.error("Error in default_ref_id: %s", str(e))
+            return Response(
+                {"error": "Error in default_ref_id has occurred."}, status=400
+            )
 
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
@@ -1382,6 +1416,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
+    search_fields = ["ref_id"]
 
     def perform_create(self, serializer):
         """
@@ -1812,7 +1847,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = ["framework", "project", "status"]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -2199,6 +2234,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         for requirement_assessment in requirement_assessments:
             requirement_assessment.create_applied_controls_from_suggestions()
         return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"], url_path="progress_ts")
+    def progress_ts(self, request, pk):
+        try:
+            raw = (
+                HistoricalMetric.objects.filter(
+                    model="ComplianceAssessment", object_id=pk
+                )
+                .annotate(progress=F("data__reqs__progress_perc"))
+                .values("date", "progress")
+                .order_by("date")
+            )
+
+            # Transform the data into the required format
+            formatted_data = [
+                [entry["date"].isoformat(), entry["progress"]] for entry in raw
+            ]
+
+            return Response({"data": formatted_data})
+
+        except HistoricalMetric.DoesNotExist:
+            return Response(
+                {"error": "No metrics found for this assessment"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class RequirementAssessmentViewSet(BaseModelViewSet):

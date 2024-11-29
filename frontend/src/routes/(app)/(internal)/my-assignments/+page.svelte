@@ -32,6 +32,7 @@
 						<th scope="col" class="px-6 py-3"> {m.csfFunction()} </th>
 						<th scope="col" class="px-6 py-3"> {m.status()} </th>
 						<th scope="col" class="px-6 py-3"> {m.eta()} </th>
+						<th scope="col" class="px-6 py-3"> {m.folder()} </th>
 					</tr>
 				</thead>
 				<tbody>
@@ -52,6 +53,7 @@
 									{formatDateOrDateTime(ac.eta, languageTag()) ?? '-'}
 								</span>
 							</td>
+							<td class="px-6 py-4">{ac.folder.str} </td>
 						</tr>
 					{/each}
 				</tbody>
