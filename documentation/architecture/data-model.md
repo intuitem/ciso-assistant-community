@@ -1237,8 +1237,8 @@ The frontend for risk study shall propose the following steps:
   - list of strategic scenarios/attack paths
 - workshop 4: operational scenarios
   - list of operational scenarios
+  - The risk assessment is generated automatically, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
 - workshop 5: risk treatment
-  - The risk assessment is generated from workshop 4, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
   - After generation, a risk assessment is fully editable, to allow customisation, and the risk assessment can be managed normally as any other risk assessment.
   - risk treatment is based on the risk assessment.
 
@@ -1246,7 +1246,7 @@ The frontend for risk study shall propose the following steps:
 ```mermaid
 erDiagram
     DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
-    DOMAIN                ||--o{ ECOSYSTEM_ENTITY     : contains
+    DOMAIN                ||--o{ STAKEHOLDER     : contains
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
@@ -1258,21 +1258,23 @@ erDiagram
 erDiagram
 
     ATTACK_PATH           }o--|| RO_TO                : derives
-    RO_TO                 }o--|{ FEARED_EVENT         : corresponds_to
+    RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
+    FEARED_EVENT          }o--o{ ASSET                : affects
     EBIOS_RM_STUDY        }o--o{ RO_TO                : contains
-    EBIOS_RM_STUDY        }o--o{ ECOSYSTEM_ENTITY     : contains
+    EBIOS_RM_STUDY        }o--o{ STAKEHOLDER          : contains
     EBIOS_RM_STUDY        }o--o{ OPERATIONAL_SCENARIO : contains
     EBIOS_RM_STUDY        }o--o{ FEARED_EVENT         : contains
     EBIOS_RM_STUDY        }o--o{ ATTACK_PATH          : contains
+    EBIOS_RM_STUDY        }o--o{ ASSET                : contains
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
     EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
-    OPERATIONAL_SCENARIO  }o--|| ATTACK_PATH          : derives
+    OPERATIONAL_SCENARIO  }o--|{ ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
-    ATTACK_PATH           }o--o{ ECOSYSTEM_ENTITY     : uses
-    ATTACK_PATH           }o--o{ APPLIED_CONTROL      : mitigated_by
-    ECOSYSTEM_ENTITY      }o--|| ENTITY               : qualifies
+    ATTACK_PATH           }o--o{ STAKEHOLDER          : leverages
+    STAKEHOLDER           }o--o{ APPLIED_CONTROL      : reinforces
+    STAKEHOLDER           }o--|| ENTITY               : qualifies
 
     EBIOS_RM_STUDY {
         string      ref_id
@@ -1295,7 +1297,7 @@ erDiagram
         json   qualifications
         int    gravity
         bool   selected
-        bool   justification
+        string justification
     }
 
     RO_TO {
@@ -1306,25 +1308,27 @@ erDiagram
         int    pertinence
         int    activity
         bool   selected
-        bool   justification
+        string justification
     }
 
-    ECOSYSTEM_ENTITY {
+    STAKEHOLDER {
         string category
         int    dependence
         int    penetration
         int    maturity
+        int    trust_residual
+        int    dependence_residual
+        int    penetration_residual
+        int    maturity_residual
         int    trust
         bool   selected
-        bool   justification
+        string justification
     }
 
     ATTACK_PATH {
         string description
-        int    intial_threat_level
-        int    residual_threat_level
         bool   selected
-        bool   justification
+        string justification
     }
 
     OPERATIONAL_SCENARIO {
