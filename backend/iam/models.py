@@ -537,7 +537,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @classmethod
     def get_editors(cls) -> List[Self]:
-        return [user for user in cls.objects.all() if user.is_editor]
+        return [
+            user
+            for user in cls.objects.all()
+            if user.is_editor and not user.is_third_party
+        ]
 
 
 class Role(NameDescriptionMixin, FolderMixin):
