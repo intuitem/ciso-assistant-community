@@ -1,15 +1,17 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	export let title = 'activity';
 	export let status = '';
 	export let meta = [];
+	export let href = '#';
 </script>
 
 <div class="rounded bg-white p-4 flex flex-col justify-between">
 	<div class="flex justify-between mb-2">
 		<div class="font-semibold">{title}</div>
-		<div class="text-xl">
+		<div class="text-xl" title={safeTranslate(status)}>
 			{#if status == 'to_do'}
 				<i class="fa-solid fa-exclamation"></i>
 			{:else if status == 'in_progress'}
@@ -23,6 +25,8 @@
 		<div class="mt-2">{kv}</div>
 	{/each}
 	<div class="justify-end flex">
-		<div class="text-xl text-zinc-700"><i class="fa-solid fa-play"></i></div>
+		<div class="text-xl text-zinc-700">
+			<a class="hover:text-purple-500" {href}><i class="fa-solid fa-play"></i></a>
+		</div>
 	</div>
 </div>
