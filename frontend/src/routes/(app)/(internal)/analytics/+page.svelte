@@ -145,7 +145,6 @@
 						count={metrics.controls.total}
 						label={m.sumpageTotal()}
 						href="/applied-controls/"
-						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 						emphasis={true}
@@ -154,7 +153,6 @@
 						count={metrics.controls.active}
 						label={m.sumpageActive()}
 						href="/applied-controls/?status=active"
-						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -162,7 +160,6 @@
 						count={metrics.controls.deprecated}
 						label={m.sumpageDeprecated()}
 						href="/applied-controls/?status=deprecated"
-						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -173,7 +170,6 @@
 						count={metrics.controls.to_do}
 						label={m.sumpageToDo()}
 						href="/applied-controls/?status=to_do"
-						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -181,7 +177,6 @@
 						count={metrics.controls.in_progress}
 						label={m.sumpageInProgress()}
 						href="/applied-controls/?status=in_progress"
-						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -189,7 +184,6 @@
 						count={metrics.controls.on_hold}
 						label={m.sumpageOnHold()}
 						href="/applied-controls/?status=on_hold"
-						help="this is interesting"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 					/>
@@ -205,7 +199,6 @@
 						count={metrics.compliance.used_frameworks}
 						label={m.usedFrameworks()}
 						href="/frameworks/"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 						emphasis={true}
@@ -215,7 +208,6 @@
 						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
 						label={m.sumpageActiveAudits()}
 						href="/compliance-assessments/"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 						emphasis={true}
@@ -225,7 +217,6 @@
 						count="{metrics.compliance.progress_avg}%"
 						label={m.sumpageAvgProgress()}
 						href="/compliance-assessments/"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 					/>
@@ -233,7 +224,6 @@
 						count={metrics.compliance.non_compliant_items}
 						label={m.sumpageNonCompliantItems()}
 						href="#"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 					/>
@@ -241,7 +231,6 @@
 						count={metrics.compliance.evidences}
 						label={m.sumpageEvidences()}
 						href="/evidences/"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 					/>
@@ -260,7 +249,6 @@
 						count={metrics.risk.assessments}
 						label={m.sumpageAssessments()}
 						href="/risk-assessments/"
-						help="this is interesting"
 						emphasis={true}
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
@@ -269,7 +257,6 @@
 						count={metrics.risk.scenarios}
 						label={m.sumpageScenarios()}
 						href="/risk-scenarios/"
-						help="this is interesting"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
 					/>
@@ -285,7 +272,6 @@
 						count={metrics.risk.threats}
 						label={m.sumpageMappedThreats()}
 						href="/analytics?tab=2"
-						help="this is interesting"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
 					/>
@@ -294,7 +280,6 @@
 						count={metrics.risk.acceptances}
 						label={m.sumpageRiskAccepted()}
 						href="/risk-acceptances"
-						help="this is interesting"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
 					/>
