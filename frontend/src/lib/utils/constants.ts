@@ -6,8 +6,6 @@ export const BASE_API_URL = `${
 		: 'http://localhost:8000/api'
 }`;
 
-export const CI_TEST: boolean = Object.hasOwn(env, 'CI_TEST');
-
 export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;
 
 export const BACKEND_API_EXPOSED_URL = `${

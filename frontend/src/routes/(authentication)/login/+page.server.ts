@@ -1,6 +1,7 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
-import { ALLAUTH_API_URL, BASE_API_URL, CI_TEST } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { CI_TEST } from '$lib/utils/env_constants';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -132,7 +133,6 @@ export const actions: Actions = {
 
 		const next = url.searchParams.get('next') || '/';
 		const redirectURL = getSecureRedirect(next) + (CI_TEST ? '' : '?refresh=1');
-		console.log(`[NEW_REDIRECT:3] ${redirectURL}`);
 		redirect(302, redirectURL);
 	},
 	mfaAuthenticate: async (event) => {
