@@ -249,6 +249,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'eta', type: 'date' },
@@ -369,14 +370,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
 			{ field: 'type' },
-			{ field: 'owner' }
+			{ field: 'owner' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	users: {

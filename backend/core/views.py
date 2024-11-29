@@ -153,12 +153,36 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 elif not request.data[field][0]:
                     request.data[field] = []
 
+    def _process_labels(self, labels):
+        """
+        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
+        """
+        new_labels = []
+        for label in labels:
+            try:
+                uuid.UUID(label, version=4)
+                new_labels.append(label)
+            except ValueError:
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
+                new_labels.append(str(new_label.id))
+        return new_labels
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        if request.data.get("filtering_labels"):
+            request.data["filtering_labels"] = self._process_labels(
+                request.data["filtering_labels"]
+            )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        if request.data.get("filtering_labels"):
+            request.data["filtering_labels"] = self._process_labels(
+                request.data["filtering_labels"]
+            )
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
@@ -189,7 +213,7 @@ class ProjectViewSet(BaseModelViewSet):
 
     model = Project
     filterset_fields = ["folder", "lc_status"]
-    search_fields = ["name", "internal_reference", "description"]
+    search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -449,34 +473,6 @@ class VulnerabilityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
-
-    def _process_labels(self, labels):
-        """
-        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
-        """
-        new_labels = []
-        for label in labels:
-            try:
-                uuid.UUID(label, version=4)
-                new_labels.append(label)
-            except ValueError:
-                new_label = FilteringLabel(label=label)
-                new_label.full_clean()
-                new_label.save()
-                new_labels.append(str(new_label.id))
-        return new_labels
-
-    def update(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
-        )
-        return super().update(request, *args, **kwargs)
-
-    def create(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
-        )
-        return super().create(request, *args, **kwargs)
 
 
 class FilteringLabelViewSet(BaseModelViewSet):
@@ -1420,6 +1416,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
+    search_fields = ["ref_id"]
 
     def perform_create(self, serializer):
         """
@@ -1850,7 +1847,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = ["framework", "project", "status"]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

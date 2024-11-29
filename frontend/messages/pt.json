@@ -856,5 +856,7 @@
 	"tags": "Etiquetas",
 	"addTag": "Adicionar etiqueta",
 	"tagsHelpText": "As tags são usadas para categorizar e filtrar os itens. Você pode adicionar tags na seção Extra",
-	"forgotPassword": "Esqueceu sua senha"
+	"forgotPassword": "Esqueceu sua senha",
+	"scoreSemiColon": "Pontuação:",
+	"mappingInferenceHelpText": "Essas variáveis são fixas e não mudarão dependendo da fonte."
 }
