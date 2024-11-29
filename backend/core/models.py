@@ -1364,6 +1364,13 @@ class Asset(
         If the asset is a supporting asset, the security objectives are the union of the security objectives of all the primary assets it supports.
         If multiple ancestors share the same security objective, its value in the result is its highest value among the ancestors.
         """
+        if self.security_objectives.get("objectives"):
+            self.security_objectives["objectives"] = {
+                key: self.security_objectives["objectives"][key]
+                for key in Asset.DEFAULT_SECURITY_OBJECTIVES
+                if key in self.security_objectives["objectives"]
+            }
+
         if self.is_primary:
             return self.security_objectives
 
