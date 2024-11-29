@@ -275,6 +275,11 @@ export const test = base.extend<Fixtures>({
 
 	populateDatabase: async ({ pages, loginPage, sideBar, data }, use) => {
 		test.slow();
+		const start = new Date();
+		await new Promise((resolve) => setTimeout(resolve, 3000));
+		const end = new Date();
+		const diff = end - start
+		console.log(`Sleep time = ${diff}`);
 		await loginPage.goto();
 		await loginPage.login();
 		for (const [page, pageData] of Object.entries(data)) {
