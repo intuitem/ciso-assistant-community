@@ -153,6 +153,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
+    "huey.contrib.djhuey",
 ]
 
 MIDDLEWARE = [
@@ -223,6 +224,7 @@ REST_KNOX = {
     "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
     "MIN_REFRESH_INTERVAL": 60,
 }
+
 
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
@@ -370,6 +372,16 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.7.0",
     "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
+}
+
+HUEY = {
+    "huey_class": "huey.SqliteHuey",  # Huey implementation to use.
+    "name": "huey-ciso-assistant",  # Use db name for huey.
+    "results": True,  # Store return values of tasks.
+    "store_none": False,  # If a task returns None, do not save to results.
+    "immediate": DEBUG,  # If DEBUG=True, run synchronously.
+    "utc": True,  # Use UTC for all times internally.
+    "filename": "db/huey.sqlite3",
 }
 
 # SSO with allauth

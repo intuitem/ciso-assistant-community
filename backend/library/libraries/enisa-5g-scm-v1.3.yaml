@@ -9,7 +9,7 @@ copyright: "The Matrix is provided on an \u2018as is\u2019 basis. ENISA is not r
   \ for the information contained in the Matrix, including the use that might be made\
   \ of this information, or the content of any external sources referenced in the\
   \ Matrix.\n"
-version: '2'
+version: 2
 provider: ENISA
 packager: intuitem
 objects:

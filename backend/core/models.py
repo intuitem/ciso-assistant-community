@@ -1203,8 +1203,9 @@ class Project(NameDescriptionMixin, FolderMixin):
         ("eol", _("EndOfLife")),
         ("dropped", _("Dropped")),
     ]
-    internal_reference = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
     lc_status = models.CharField(
         max_length=20,
@@ -1239,7 +1240,9 @@ class Project(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Asset(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -1575,6 +1578,9 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         blank=True,
         verbose_name=_("Reference Control"),
     )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
     evidences = models.ManyToManyField(
         Evidence,
         blank=True,
@@ -1693,9 +1699,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
             residual = risk_scenario.residual_level
             if current >= 0 and residual >= 0:
                 value += (1 + current - residual) * (current + 1)
-        return (
-            abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else None
-        )
+        return abs(round(value / self.MAP_EFFORT[self.effort], 4)) if self.effort else 0
 
     @property
     def get_html_url(self):
@@ -1777,6 +1781,34 @@ class Vulnerability(
     fields_to_check = ["name"]
 
 
+## historical data
+class HistoricalMetric(models.Model):
+    date = models.DateField(verbose_name=_("Date"), db_index=True)
+    data = models.JSONField(verbose_name=_("Historical Data"))
+    model = models.TextField(verbose_name=_("Model"), db_index=True)
+    object_id = models.UUIDField(verbose_name=_("Object ID"), db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+
+    class Meta:
+        unique_together = ("model", "object_id", "date")
+        indexes = [
+            models.Index(fields=["model", "object_id", "date"]),
+            models.Index(fields=["date", "model"]),
+        ]
+
+    @classmethod
+    def update_daily_metric(cls, model, object_id, data):
+        """
+        Upsert method to update or create a daily metric. Should be generic enough for other metrics.
+        """
+        return cls.objects.update_or_create(
+            model=model,
+            object_id=object_id,
+            date=now().date(),
+            defaults={"data": data},
+        )
+
+
 ########################### Secondary objects #########################
 
 
@@ -1839,13 +1871,45 @@ class RiskAssessment(Assessment):
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
     )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
 
     class Meta:
         verbose_name = _("Risk assessment")
         verbose_name_plural = _("Risk assessments")
 
+    def upsert_daily_metrics(self):
+        per_treatment = self.get_per_treatment()
+
+        total = RiskScenario.objects.filter(risk_assessment=self).count()
+        data = {
+            "scenarios": {
+                "total": total,
+                "per_treatment": per_treatment,
+            },
+        }
+
+        HistoricalMetric.update_daily_metric(
+            model=self.__class__.__name__, object_id=self.id, data=data
+        )
+
     def __str__(self) -> str:
         return f"{self.name} - {self.version}"
+
+    def get_per_treatment(self) -> dict:
+        output = dict()
+        for treatment in RiskScenario.TREATMENT_OPTIONS:
+            output[treatment[0]] = (
+                RiskScenario.objects.filter(risk_assessment=self)
+                .filter(treatment=treatment[0])
+                .count()
+            )
+        return output
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
 
     @property
     def path_display(self) -> str:
@@ -2271,6 +2335,8 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
+    ref_id = models.CharField(max_length=8, blank=True, verbose_name=_("Reference ID"))
+
     qualifications = models.JSONField(default=list, verbose_name=_("Qualifications"))
 
     strength_of_knowledge = models.IntegerField(
@@ -2291,6 +2357,14 @@ class RiskScenario(NameDescriptionMixin):
     # def get_rating_options(self, field: str) -> list[tuple]:
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
+
+    @classmethod
+    def get_default_ref_id(cls, risk_assessment: RiskAssessment):
+        """return associated risk assessment id"""
+        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
+        nb_scenarios = len(scenarios_ref_ids) + 1
+        candidates = [f"R.{i}" for i in range(1, nb_scenarios + 1)]
+        return next(x for x in candidates if x not in scenarios_ref_ids)
 
     def parent_project(self):
         return self.risk_assessment.project
@@ -2398,11 +2472,6 @@ class RiskScenario(NameDescriptionMixin):
     def __str__(self):
         return str(self.parent_project()) + _(": ") + str(self.name)
 
-    @property
-    def rid(self):
-        """return associated risk assessment id"""
-        return f"R.{self.scoped_id(scope=RiskScenario.objects.filter(risk_assessment=self.risk_assessment))}"
-
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:
             self.current_level = risk_scoring(
@@ -2421,6 +2490,7 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        self.risk_assessment.upsert_daily_metrics()
 
 
 class ComplianceAssessment(Assessment):
@@ -2429,6 +2499,9 @@ class ComplianceAssessment(Assessment):
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
     # score system is suggested by the framework, but can be changed at the start of the assessment
     min_score = models.IntegerField(null=True, verbose_name=_("Minimum score"))
@@ -2441,12 +2514,36 @@ class ComplianceAssessment(Assessment):
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
 
+    def upsert_daily_metrics(self):
+        per_status = dict()
+        per_result = dict()
+        for item in self.get_requirements_status_count():
+            per_status[item[1]] = item[0]
+
+        for item in self.get_requirements_result_count():
+            per_result[item[1]] = item[0]
+        total = RequirementAssessment.objects.filter(compliance_assessment=self).count()
+        data = {
+            "reqs": {
+                "total": total,
+                "per_status": per_status,
+                "per_result": per_result,
+                "progress_perc": self.progress(),
+                "score": self.get_global_score(),
+            },
+        }
+
+        HistoricalMetric.update_daily_metric(
+            model=self.__class__.__name__, object_id=self.id, data=data
+        )
+
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
             self.min_score = self.framework.min_score
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -2809,48 +2906,71 @@ class ComplianceAssessment(Assessment):
     ) -> list["RequirementAssessment"]:
         requirement_assessments: list[RequirementAssessment] = []
         result_order = (
+            RequirementAssessment.Result.NOT_ASSESSED,
+            RequirementAssessment.Result.NOT_APPLICABLE,
             RequirementAssessment.Result.NON_COMPLIANT,
             RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             RequirementAssessment.Result.COMPLIANT,
         )
+
+        def assign_attributes(target, attributes):
+            """
+            Helper function to assign attributes to a target object.
+            Only assigns if the attribute is not None.
+            """
+            keys = ["result", "status", "score", "is_scored", "observation"]
+            for key, value in zip(keys, attributes):
+                if value is not None:
+                    setattr(target, key, value)
+
         for requirement_assessment in self.requirement_assessments.all():
             mappings = mapping_set.mappings.filter(
                 target_requirement=requirement_assessment.requirement
             )
             inferences = []
             refs = []
+
+            # Filter for full coverage relationships if applicable
             if mappings.filter(
                 relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
             ).exists():
                 mappings = mappings.filter(
                     relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
                 )
+
             for mapping in mappings:
                 source_requirement_assessment = RequirementAssessment.objects.get(
                     compliance_assessment=source_assessment,
                     requirement=mapping.source_requirement,
                 )
-                inferred_result, inferred_status = requirement_assessment.infer_result(
+                inferred_result = requirement_assessment.infer_result(
                     mapping=mapping,
                     source_requirement_assessment=source_requirement_assessment,
                 )
-                if inferred_result in result_order:
-                    inferences.append((inferred_result, inferred_status))
+                if inferred_result.get("result") in result_order:
+                    inferences.append(
+                        (
+                            inferred_result.get("result"),
+                            inferred_result.get("status"),
+                            inferred_result.get("score"),
+                            inferred_result.get("is_scored"),
+                            inferred_result.get("observation"),
+                        )
+                    )
                     refs.append(source_requirement_assessment)
+
             if inferences:
                 if len(inferences) == 1:
-                    requirement_assessment.result = inferences[0][0]
-                    if inferences[0][1]:
-                        requirement_assessment.status = inferences[0][1]
+                    selected_inference = inferences[0]
                     ref = refs[0]
                 else:
-                    lowest_result = min(
+                    selected_inference = min(
                         inferences, key=lambda x: result_order.index(x[0])
                     )
-                    requirement_assessment.result = lowest_result[0]
-                    if lowest_result[1]:
-                        requirement_assessment.status = lowest_result[1]
-                    ref = refs[inferences.index(lowest_result)]
+                    ref = refs[inferences.index(selected_inference)]
+
+                assign_attributes(requirement_assessment, selected_inference)
+
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
                     "source_requirement_assessment": {
@@ -2860,7 +2980,9 @@ class ComplianceAssessment(Assessment):
                     },
                     # "mappings": [mapping.id for mapping in mappings],
                 }
+
                 requirement_assessments.append(requirement_assessment)
+
         return requirement_assessments
 
     def progress(self) -> int:
@@ -2958,24 +3080,39 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def infer_result(
         self, mapping: RequirementMapping, source_requirement_assessment: Self
-    ) -> str | None:
+    ) -> dict | None:
         if mapping.coverage == RequirementMapping.Coverage.FULL:
-            return (
-                source_requirement_assessment.result,
-                source_requirement_assessment.status,
-            )
+            if (
+                source_requirement_assessment.compliance_assessment.min_score
+                == self.compliance_assessment.min_score
+                and source_requirement_assessment.compliance_assessment.max_score
+                == self.compliance_assessment.max_score
+            ):
+                return {
+                    "result": source_requirement_assessment.result,
+                    "status": source_requirement_assessment.status,
+                    "score": source_requirement_assessment.score,
+                    "is_scored": source_requirement_assessment.is_scored,
+                    "observation": source_requirement_assessment.observation,
+                }
+            else:
+                return {
+                    "result": source_requirement_assessment.result,
+                    "status": source_requirement_assessment.status,
+                    "observation": source_requirement_assessment.observation,
+                }
         if mapping.coverage == RequirementMapping.Coverage.PARTIAL:
             if source_requirement_assessment.result in (
                 RequirementAssessment.Result.COMPLIANT,
                 RequirementAssessment.Result.PARTIALLY_COMPLIANT,
             ):
-                return (RequirementAssessment.Result.PARTIALLY_COMPLIANT, None)
+                return {"result": RequirementAssessment.Result.PARTIALLY_COMPLIANT}
             if (
                 source_requirement_assessment.result
                 == RequirementAssessment.Result.NON_COMPLIANT
             ):
-                return (RequirementAssessment.Result.NON_COMPLIANT, None)
-        return (None, None)
+                return {"result": RequirementAssessment.Result.NON_COMPLIANT}
+        return {}
 
     def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
@@ -3015,6 +3152,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class Meta:
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.compliance_assessment.upsert_daily_metrics()
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################

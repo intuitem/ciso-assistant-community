@@ -6,7 +6,7 @@ description: "Correspondance entre la norme internationale ISO/IEC 27001:2022 et
   \ r\xE9f\xE9rentiel d\u2019exigences de prestataires de services d\u2019informatique\
   \ en nuage (SecNumCloud 3.2)"
 copyright: https://www.iso.org/standard/27001 - ANSSI - ANS
-version: '1'
+version: 1
 provider: ISO/IEC - ANSSI - ANS (annexe 1 du document HDS 2.0)
 packager: protocolpaladin
 dependencies:

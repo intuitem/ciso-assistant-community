@@ -223,18 +223,6 @@ export const navData = {
 			name: 'extra',
 			items: [
 				{
-					name: 'inspect',
-					fa_icon: 'fa-brands fa-searchengin',
-					href: '/x-rays/inspect',
-					permissions: ['view_riskassessment', 'view_assessment']
-				},
-				{
-					name: 'backupRestore',
-					fa_icon: 'fa-solid fa-floppy-disk',
-					href: '/backup-restore',
-					permissions: ['backup']
-				},
-				{
 					name: 'labels',
 					fa_icon: 'fa-solid fa-tag',
 					href: '/filtering-labels',
@@ -245,6 +233,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
 					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'backupRestore',
+					fa_icon: 'fa-solid fa-floppy-disk',
+					href: '/backup-restore',
+					permissions: ['backup']
 				},
 				{
 					name: 'Experimental',
