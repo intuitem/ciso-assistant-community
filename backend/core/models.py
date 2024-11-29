@@ -2114,18 +2114,18 @@ class RiskScenario(NameDescriptionMixin):
     ]
 
     QUALIFICATIONS = [
-    ("Confidentiality", _("Confidentiality")),
-    ("Integrity", _("Integrity")),
-    ("Availability", _("Availability")),
-    ("Proof", _("Proof")),
-    ("Authenticity", _("Authenticity")),
-    ("Privacy", _("Privacy")),
-    ("Safety", _("Safety")),
-    ("Reputation", _("Reputation")),
-    ("Operational", _("Operational")),
-    ("Legal", _("Legal")),
-    ("Financial", _("Financial")),
-]
+        ("Confidentiality", _("Confidentiality")),
+        ("Integrity", _("Integrity")),
+        ("Availability", _("Availability")),
+        ("Proof", _("Proof")),
+        ("Authenticity", _("Authenticity")),
+        ("Privacy", _("Privacy")),
+        ("Safety", _("Safety")),
+        ("Reputation", _("Reputation")),
+        ("Operational", _("Operational")),
+        ("Legal", _("Legal")),
+        ("Financial", _("Financial")),
+    ]
 
     DEFAULT_SOK_OPTIONS = {
         -1: {
