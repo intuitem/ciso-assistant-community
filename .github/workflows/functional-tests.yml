@@ -71,6 +71,8 @@ jobs:
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
           echo CI_TEST=1 >> .env
+          echo "WOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOWOW"
+          cat .env
 
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
