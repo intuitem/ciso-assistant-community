@@ -1049,6 +1049,40 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     )
     question = models.JSONField(blank=True, null=True, verbose_name=_("Question"))
 
+    @property
+    def associated_reference_controls(self):
+        _reference_controls = self.reference_controls.all()
+        reference_controls = []
+        for control in _reference_controls:
+            reference_controls.append(
+                {"str": control.display_long, "urn": control.urn, "id": control.id}
+            )
+        return reference_controls
+
+    @property
+    def associated_threats(self):
+        _threats = self.threats.all()
+        threats = []
+        for control in _threats:
+            threats.append(
+                {"str": control.display_long, "urn": control.urn, "id": control.id}
+            )
+        return threats
+
+    @property
+    def parent_requirement(self):
+        parent_requirement = RequirementNode.objects.filter(urn=self.parent_urn).first()
+        if not parent_requirement:
+            return None
+        return {
+            "str": parent_requirement.display_long,
+            "urn": parent_requirement.urn,
+            "id": parent_requirement.id,
+            "ref_id": parent_requirement.ref_id,
+            "name": parent_requirement.name,
+            "description": parent_requirement.description,
+        }
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -1364,6 +1398,13 @@ class Asset(
         If the asset is a supporting asset, the security objectives are the union of the security objectives of all the primary assets it supports.
         If multiple ancestors share the same security objective, its value in the result is its highest value among the ancestors.
         """
+        if self.security_objectives.get("objectives"):
+            self.security_objectives["objectives"] = {
+                key: self.security_objectives["objectives"][key]
+                for key in Asset.DEFAULT_SECURITY_OBJECTIVES
+                if key in self.security_objectives["objectives"]
+            }
+
         if self.is_primary:
             return self.security_objectives
 

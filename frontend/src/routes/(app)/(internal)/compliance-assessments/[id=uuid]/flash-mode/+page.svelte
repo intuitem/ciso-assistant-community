@@ -26,7 +26,7 @@
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement) => [requirement.id, requirement])
 	);
-	$: requirement = requirementHashmap[currentRequirementAssessment.requirement];
+	$: requirement = requirementHashmap[currentRequirementAssessment.requirement.id];
 	$: parent = data.requirements.find((req) => req.urn === requirement.parent_urn);
 
 	$: title = requirement.display_short

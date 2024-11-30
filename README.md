@@ -43,13 +43,13 @@ Our vision is to provide a one stop shop for cyber security posture management a
 
 CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
 
-The vision of the tool is based on this model:
+The vision of the tool is based on these fundamental objects:
 
-![](posture.png)
+![](core_objects.png)
 
-The full details are available in the [data model](documentation/architecture/data-model.md).
+There are other concepts and models to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
 
-The decoupling allows you to save a considerable amount of time:
+The decoupling concept is a pillar of the app and allows you to save a considerable amount of time:
 
 - reuse previous assessments,
 - assess a scope against multiple frameworks at the same time,
@@ -534,6 +534,6 @@ All the files within the top-level "enterprise" directory are released under the
 
 All the files outside the top-level "enterprise" directory are released under the [AGPLv3](https://choosealicense.com/licenses/agpl-3.0/).
 
-See [LICENSE.txt](./LICENSE.txt) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
+See [LICENSE.md](./LICENSE.md) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
 
 Unless otherwise noted, all files are © intuitem.
