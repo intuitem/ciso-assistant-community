@@ -165,6 +165,34 @@ def get_matrices():
     print(json.dumps(ids_map("risk-matrices", folder="Global"), ensure_ascii=False))
 
 
+def get_unique_parsed_values(df, column_name):
+    unique_values = df[column_name].dropna().unique()
+    parsed_values = []
+
+    for value in unique_values:
+        value_str = str(value)
+        split_values = [v.strip() for v in value_str.split(",")]
+        parsed_values.extend(split_values)
+
+    return set(parsed_values)
+
+
+def batch_create(model, items, folder_id):
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+    url = f"{API_URL}/{model}/"
+    for item in items:
+        data = {
+            "folder": folder_id,
+            "name": item,
+        }
+        res = requests.post(url, json=data, headers=headers)
+        if res.status_code != 201:
+            print("something went wrong")
+            print(res.json())
+
+
 @click.command()
 @click.option("--file", required=True, help="")
 @click.option("--folder", required=True, help="")
@@ -209,11 +237,15 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
         print("something went wrong.")
         print(res.json())
 
-    # sequential post to create the threats if any
-    rprint(df["threats"])
-    rprint(df["assets"])
-    rprint(df["existing_controls"])
-    rprint(df["additional_controls"])
+    if create_all:
+        threats = get_unique_parsed_values(df, "threats")
+        batch_create("threats", threats, folder_id)
+        assets = get_unique_parsed_values(df, "assets")
+        batch_create("assets", assets, folder_id)
+        existing_controls = get_unique_parsed_values(df, "existing_controls")
+        batch_create("applied-controls", existing_controls, folder_id)
+        additional_controls = get_unique_parsed_values(df, "additional_controls")
+        batch_create("applied-controls", additional_controls, folder_id)
 
     # sequential post to create the assets if any
 
