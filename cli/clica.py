@@ -165,20 +165,44 @@ def get_loaded_matrix():
 
 @click.command()
 @click.option("--file", required=True, help="")
+@click.option("--folder", required=True, help="")
 @click.option("--project", required=True, help="")
 @click.option("--matrix", required=True, help="")
 @click.option("--name", required=True, help="")
-def import_risk_assessment(file, project, name, matrix):
+@click.option(
+    "--create-all",
+    required=False,
+    is_flag=True,
+    default=True,
+    help="Create all associated objects (threats, assets)",
+)
+def import_risk_assessment(file, folder, project, name, matrix):
     """this will parse the items of a risk assessment and create the assoicated objects"""
     df = pd.read_csv(file)
     url = f"{API_URL}/assets/"
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
+
     # post to create risk assessment
-    # get the id
-    # sequential post to create the assets if any
+    data = {
+        "name": name,
+        "folder": folder,
+        "project": project,
+        "risk_matrix": matrix,
+    }
+    res = requests.post(
+        f"{API_URL}/risk-assessments/",
+        json=data,
+        headers=headers,
+        verify=VERIFY_CERTIFICATE,
+    )
+    ra_id = None
+    if res.status_code == 200:
+        ra_id = res.json().get("id")
+
     # sequential post to create the threats if any
+    # sequential post to create the assets if any
     # sequential post over the scenarios
 
 
