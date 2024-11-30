@@ -18,7 +18,7 @@
 		</div>
 	</div>
 	<div class="flex items-center justify-center p-10 space-x-4 w-full">
-		<div class="w-1/4 p-6 shadow-lg rounded-lg bg-white">
+		<div class="lg:w-1/4 p-6 shadow-lg rounded-lg bg-white">
 			<div id="password_reset" class="flex flex-col items-center space-y-4">
 				<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 					<i class="fa-solid fa-lock" />
