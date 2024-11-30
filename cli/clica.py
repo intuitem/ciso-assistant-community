@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import yaml
 import json
-from rich import print as rprint
+from rich import print as rprint, print_json
 
 cli_cfg = dict()
 auth_data = dict()
@@ -123,6 +123,18 @@ def auth(email, password):
         print(res.json())
 
 
+def ids_map(model, folder=None):
+    my_map = dict()
+    url = f"{API_URL}/{model}/ids/"
+    headers = {"Authorization": f"Token {TOKEN}"}
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    if folder:
+        my_map = res.json().get(folder)
+    else:
+        my_map = res.json()
+    return my_map
+
+
 def _get_folders():
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
@@ -138,29 +150,19 @@ def _get_folders():
 @click.command()
 def get_folders():
     """Get folders."""
-    GLOBAL_FOLDER_ID, res = _get_folders()
-    print("GLOBAL_FOLDER_ID: ", GLOBAL_FOLDER_ID)
-    print(res)
+    print(json.dumps(ids_map("folders"), ensure_ascii=False))
 
 
 @click.command()
 def get_projects():
     """getting projects as a json"""
-    url = f"{API_URL}/projects/"
-    headers = {"Authorization": f"Token {TOKEN}"}
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
-    if res.status_code == 200:
-        print(json.dumps(res.json(), ensure_ascii=False))
+    print(json.dumps(ids_map("projects"), ensure_ascii=False))
 
 
 @click.command()
-def get_loaded_matrix():
+def get_matrices():
     """getting loaded matrix as a json"""
-    url = f"{API_URL}/risk-matrices/"
-    headers = {"Authorization": f"Token {TOKEN}"}
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
-    if res.status_code == 200:
-        print(json.dumps(res.json(), ensure_ascii=False))
+    print(json.dumps(ids_map("risk-matrices", folder="Global"), ensure_ascii=False))
 
 
 @click.command()
@@ -170,26 +172,28 @@ def get_loaded_matrix():
 @click.option("--matrix", required=True, help="")
 @click.option("--name", required=True, help="")
 @click.option(
-    "--create-all",
+    "--create_all",
     required=False,
     is_flag=True,
     default=True,
     help="Create all associated objects (threats, assets)",
 )
-def import_risk_assessment(file, folder, project, name, matrix):
-    """this will parse the items of a risk assessment and create the assoicated objects"""
-    df = pd.read_csv(file)
-    url = f"{API_URL}/assets/"
+def import_risk_assessment(file, folder, project, name, matrix, create_all):
+    """crawl a risk assessment (see template) and create the assoicated objects"""
+    df = pd.read_csv(file, delimiter=";")
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
+    folder_id = ids_map("folders").get(folder)
+    project_id = ids_map("projects", folder=folder).get(project)
+    matrix_id = ids_map("risk-matrices", folder="Global").get(matrix)
 
     # post to create risk assessment
     data = {
         "name": name,
-        "folder": folder,
-        "project": project,
-        "risk_matrix": matrix,
+        "folder": folder_id,
+        "project": project_id,
+        "risk_matrix": matrix_id,
     }
     res = requests.post(
         f"{API_URL}/risk-assessments/",
@@ -198,11 +202,23 @@ def import_risk_assessment(file, folder, project, name, matrix):
         verify=VERIFY_CERTIFICATE,
     )
     ra_id = None
-    if res.status_code == 200:
+    if res.status_code == 201:
         ra_id = res.json().get("id")
+        print("ok")
+    else:
+        print("something went wrong.")
+        print(res.json())
 
     # sequential post to create the threats if any
+    rprint(df["threats"])
+    rprint(df["assets"])
+    rprint(df["existing_controls"])
+    rprint(df["additional_controls"])
+
     # sequential post to create the assets if any
+
+    # sequential post to create the controls if any
+
     # sequential post over the scenarios
 
 
@@ -356,6 +372,6 @@ cli.add_command(import_evidences)
 cli.add_command(init_config)
 cli.add_command(upload_attachment)
 cli.add_command(import_risk_assessment)
-cli.add_command(get_loaded_matrix)
+cli.add_command(get_matrices)
 if __name__ == "__main__":
     cli()

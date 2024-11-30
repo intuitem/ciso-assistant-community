@@ -505,6 +505,22 @@ class RiskMatrixViewSet(BaseModelViewSet):
             )
         return Response({"results": used_matrices})
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RiskMatrix,
+        )
+        for item in RiskMatrix.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
+
 
 class VulnerabilityViewSet(BaseModelViewSet):
     """
@@ -703,7 +719,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "current_impact",
                 "current_proba",
                 "current_level",
-                "applied_controls",
+                "additional_controls",
                 "residual_impact",
                 "residual_proba",
                 "residual_level",
@@ -712,11 +728,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
-                extra_controls = ",".join(
-                    [m.csv_value for m in scenario.applied_controls.all()]
+                additional_controls = ",".join(
+                    [m.name for m in scenario.applied_controls.all()]
                 )
                 existing_controls = ",".join(
-                    [m.csv_value for m in scenario.existing_applied_controls.all()]
+                    [m.name for m in scenario.existing_applied_controls.all()]
                 )
 
                 threats = ",".join([t.name for t in scenario.threats.all()])
@@ -732,7 +748,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     scenario.get_current_impact()["name"],
                     scenario.get_current_proba()["name"],
                     scenario.get_current_risk()["name"],
-                    extra_controls,
+                    additional_controls,
                     scenario.get_residual_impact()["name"],
                     scenario.get_residual_proba()["name"],
                     scenario.get_residual_risk()["name"],
