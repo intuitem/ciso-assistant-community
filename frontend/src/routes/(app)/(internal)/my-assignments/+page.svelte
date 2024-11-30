@@ -21,7 +21,7 @@
 	>
 		{m.controls()}
 	</div>
-	<div class="text-left col-span-8">
+	<div class="text-left col-span-full lg:col-span-8">
 		<div class="relative overflow-x-auto shadow-lg rounded-lg">
 			<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 				<thead
@@ -61,7 +61,7 @@
 		</div>
 	</div>
 
-	<div class=" border-red-50 col-span-4 flex justify-center items-center">
+	<div class=" border-red-50 col-span-full lg:col-span-4 flex justify-center items-center">
 		<ActivityTracker metrics={data.data.metrics} />
 	</div>
 
@@ -77,7 +77,7 @@
 		{/each}
 	</div>
 
-	<div class="text-left col-span-6">
+	<div class="text-left col-span-full lg:col-span-6">
 		<div class="text-lg font-black underline underline-offset-4 decoration-4 decoration-orange-300">
 			{m.riskAssessments()}
 		</div>
@@ -112,7 +112,7 @@
 		</div>
 	</div>
 
-	<div class="text-left col-span-6">
+	<div class="text-left col-span-full lg:col-span-6">
 		<div class="text-lg font-black underline underline-offset-4 decoration-4 decoration-purple-300">
 			{m.assignedRisks()}
 		</div>
