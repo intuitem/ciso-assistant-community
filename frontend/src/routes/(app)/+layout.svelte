@@ -13,7 +13,7 @@
 
 	let sidebarOpen = true;
 
-	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
+	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-7 lg:ml-64' : 'ml-7');
 
 	$: if (browser) {
 		const fromLogin = getCookie('from_login');
