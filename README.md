@@ -534,6 +534,6 @@ All the files within the top-level "enterprise" directory are released under the
 
 All the files outside the top-level "enterprise" directory are released under the [AGPLv3](https://choosealicense.com/licenses/agpl-3.0/).
 
-See [LICENSE.txt](./LICENSE.txt) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
+See [LICENSE.md](./LICENSE.md) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
 
 Unless otherwise noted, all files are © intuitem.

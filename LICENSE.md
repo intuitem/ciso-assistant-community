@@ -1,4 +1,4 @@
-Source code in this repository is variously licensed under the GNU Affero General Public License (AGPL), or the intuitem Commercial License (https://intuitem.com/license/commercial/).
+Source code in this repository is variously licensed under the GNU Affero General Public License (AGPL), or the [intuitem Commercial License](enterprise/LICENSE.md).
 
 - All the files within the top-level "enterprise" directory are released under the intuitem Commercial Software License.
 
