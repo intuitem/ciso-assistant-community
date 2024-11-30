@@ -247,6 +247,26 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
         additional_controls = get_unique_parsed_values(df, "additional_controls")
         batch_create("applied-controls", additional_controls, folder_id)
 
+    res = requests.get(f"{API_URL}/risk-matrices/{matrix_id}", headers=headers)
+    if res.status_code == 200:
+        matrix_def = res.json().get("json_definition")
+        matrix_def = json.loads(matrix_def)
+        # rprint(matrix_def)
+        impact_map = dict()
+        probability_map = dict()
+        risk_map = dict()
+        # this can be factored as one map probably
+        for item in matrix_def["impact"]:
+            impact_map[item["name"]] = item["id"]
+        for item in matrix_def["probability"]:
+            probability_map[item["name"]] = item["id"]
+        for item in matrix_def["risk"]:
+            risk_map[item["name"]] = item["id"]
+
+        rprint(risk_map)
+        rprint(impact_map)
+        rprint(probability_map)
+
     df = df.fillna("")
     # sequential post over the scenarios
     for scenario in df.itertuples():
@@ -256,8 +276,10 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
             scenario.description,
             scenario.current_impact,
             scenario.current_proba,
+            scenario.current_risk,
             scenario.residual_impact,
             scenario.residual_proba,
+            scenario.residual_risk,
         )
 
 

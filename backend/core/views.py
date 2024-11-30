@@ -718,11 +718,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "existing_controls",
                 "current_impact",
                 "current_proba",
-                "current_level",
+                "current_risk",
                 "additional_controls",
                 "residual_impact",
                 "residual_proba",
-                "residual_level",
+                "residual_risk",
                 "treatment",
             ]
             writer.writerow(columns)
