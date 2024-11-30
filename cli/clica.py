@@ -247,11 +247,18 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
         additional_controls = get_unique_parsed_values(df, "additional_controls")
         batch_create("applied-controls", additional_controls, folder_id)
 
-    # sequential post to create the assets if any
-
-    # sequential post to create the controls if any
-
+    df = df.fillna("")
     # sequential post over the scenarios
+    for scenario in df.itertuples():
+        print(
+            scenario.ref_id,
+            scenario.name,
+            scenario.description,
+            scenario.current_impact,
+            scenario.current_proba,
+            scenario.residual_impact,
+            scenario.residual_proba,
+        )
 
 
 @click.command()
