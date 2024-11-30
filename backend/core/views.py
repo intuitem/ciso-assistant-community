@@ -1132,6 +1132,22 @@ class AppliedControlViewSet(BaseModelViewSet):
             colorMap[domain.name] = next(color_cycle)
         return Response({"entries": entries, "colorMap": colorMap})
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=AppliedControl,
+        )
+        for item in AppliedControl.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
