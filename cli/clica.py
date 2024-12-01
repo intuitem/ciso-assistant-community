@@ -9,7 +9,7 @@ import yaml
 import json
 from rich import print as rprint
 
-# from icecream import ic
+from icecream import ic
 
 cli_cfg = dict()
 auth_data = dict()
@@ -260,17 +260,25 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
     if res.status_code == 200:
         matrix_def = res.json().get("json_definition")
         matrix_def = json.loads(matrix_def)
-        # rprint(matrix_def)
+        ic(matrix_def)
         impact_map = dict()
         proba_map = dict()
-        risk_map = dict()
         # this can be factored as one map probably
         for item in matrix_def["impact"]:
             impact_map[item["name"]] = item["id"]
+            if item.get("translations"):
+                langs = item.get("translations")
+                for lang in langs:
+                    impact_map[langs[lang]["name"]] = item["id"]
         for item in matrix_def["probability"]:
             proba_map[item["name"]] = item["id"]
-        for item in matrix_def["risk"]:
-            risk_map[item["name"]] = item["id"]
+            if item.get("translations"):
+                langs = item.get("translations")
+                for lang in langs:
+                    proba_map[langs[lang]["name"]] = item["id"]
+
+        ic(impact_map)
+        ic(proba_map)
 
     df = df.fillna("--")
 
