@@ -260,7 +260,7 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
     if res.status_code == 200:
         matrix_def = res.json().get("json_definition")
         matrix_def = json.loads(matrix_def)
-        ic(matrix_def)
+        # ic(matrix_def)
         impact_map = dict()
         proba_map = dict()
         # this can be factored as one map probably
@@ -292,6 +292,14 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
             "name": scenario.name,
             "risk_assessment": ra_id,
         }
+        if None in [
+            impact_map.get(scenario.current_impact),
+            proba_map.get(scenario.current_proba),
+            impact_map.get(scenario.residual_impact),
+            proba_map.get(scenario.residual_proba),
+        ]:
+            print("Matrix doesn't match the labels used on your input file")
+            sys.exit(1)
         if scenario.current_impact != "--":
             data.update({"current_impact": impact_map.get(scenario.current_impact)})
         if scenario.current_proba != "--":
