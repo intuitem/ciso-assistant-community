@@ -299,7 +299,7 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
             proba_map.get(scenario.residual_proba),
         ]:
             print("Matrix doesn't match the labels used on your input file")
-            sys.exit(1)
+
         if scenario.current_impact != "--":
             data.update({"current_impact": impact_map.get(scenario.current_impact)})
         if scenario.current_proba != "--":
