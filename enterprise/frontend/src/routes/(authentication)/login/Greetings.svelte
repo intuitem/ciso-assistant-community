@@ -7,7 +7,10 @@
 	const clientSettings = $page.data.clientSettings;
 </script>
 
-<div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-gray-900">
+<div
+	id="hellothere"
+	class="flex flex-col justify-center items-center lg:w-3/5 text-gray-900 px-4 lg:px-0"
+>
 	{#if !clientSettings?.settings.name}
 		<Typewriter mode="loopOnce" cursor={false} interval={50}>
 			<div class="text-2xl unstyled text-center pb-4">

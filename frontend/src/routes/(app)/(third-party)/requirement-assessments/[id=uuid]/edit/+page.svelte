@@ -6,13 +6,14 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	const threats = data.requirement.threats;
-	const reference_controls = data.requirement.reference_controls;
+	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
+	const reference_controls =
+		data.requirementAssessment.requirement.associated_reference_controls ?? [];
 	const annotation = data.requirement.annotation;
 	const typical_evidence = data.requirement.typical_evidence;
 
-	const has_threats = threats && threats.length > 0;
-	const has_reference_controls = reference_controls && reference_controls.length > 0;
+	const has_threats = threats.length > 0;
+	const has_reference_controls = reference_controls.length > 0;
 
 	import { page } from '$app/stores';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
