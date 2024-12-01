@@ -512,12 +512,16 @@
 					{#each data.projects as project}
 						<div class="flex flex-col items-center">
 							{#if project.compliance_assessments && project.compliance_assessments.length > 0}
-								<div class="flex flex-row space-x-2 w-1/2 justify-between items-center">
+								<div
+									class="flex flex-col lg:flex-row lg:space-x-2 w-full mb-2 lg:mb-0 lg:w-1/2 justify-between items-center"
+								>
 									<a
 										class="text-xl font-bold mb-1 hover:underline text-primary-600"
 										href="/projects/{project.id}">{project.folder.str}/{project.name}</a
 									>
-									<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
+									<div
+										class="flex w-full flex-row lg:flex-1 bg-gray-200 rounded-full overflow-hidden h-4 grow lg:shrink"
+									>
 										{#each project.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 											<div
 												class="flex flex-col justify-center overflow-hidden text-black text-xs text-center"
@@ -531,8 +535,10 @@
 							{/if}
 
 							{#each project.compliance_assessments as compliance_assessment}
-								<div class="card w-full bg-white flex flex-row mx-8 p-4 relative">
-									<div class="w-1/5 flex flex-col space-y-2">
+								<div
+									class="card w-full bg-white flex flex-row mx-8 p-4 relative flex-wrap lg:flex-nowrap"
+								>
+									<div class="w-full lg:w-1/5 flex flex-col space-y-2">
 										<div>
 											<p class="text-sm font-semibold">{m.name()}</p>
 											<a class="anchor" href="compliance-assessments/{compliance_assessment.id}"
@@ -561,23 +567,23 @@
 											>
 										</div>
 									{/if}
-									<div class="w-3/5 h-32">
+									<div class="w-full lg:w-3/5 h-40 lg:h-32">
 										<DonutChart
 											s_label={m.complianceAssessments()}
 											name={compliance_assessment.name + '_donut'}
 											values={compliance_assessment.donut.result.values}
 										/>
 									</div>
-									<div class="absolute top-2 right-4 mt-2 space-x-1">
-										<div class="flex flex-col space-y-1">
+									<div class="lg:absolute lg:top-2 lg:right-4 mt-2 space-x-1">
+										<div class="flex flex-row lg:flex-col space-x-1 lg:space-x-0 lg:space-y-1">
 											<a
 												href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
-												class="btn variant-filled-primary"
+												class="btn variant-filled-primary w-1/2 lg:w-full"
 												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 											</a>
 											<a
 												href="/compliance-assessments/{compliance_assessment.id}/export"
-												class="btn variant-filled-primary"
+												class="btn variant-filled-primary w-1/2 lg:w-full"
 												><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
 											</a>
 										</div>
