@@ -22,8 +22,9 @@ class Command(BaseCommand):
         nb_risk_assessments = RiskAssessment.objects.all().count()
         nb_risk_scenarios = RiskScenario.objects.all().count()
         nb_risk_acceptances = RiskAcceptance.objects.all().count()
-        nb_seats_available = getattr(settings, "LICENSE_SEATS", 0)
-        nb_expiry_date = getattr(settings, "LICENSE_EXPIRATION", "")
+        nb_seats = getattr(settings, "LICENSE_SEATS", 0)
+        nb_editors = len(User.get_editors())
+        expiration = getattr(settings, "LICENSE_EXPIRATION", "")
 
         created_at = Folder.get_root_folder().created_at
         last_login = max(
@@ -41,5 +42,5 @@ class Command(BaseCommand):
             + f"threats={nb_threats} functions={nb_functions} measures={nb_measures} "
             + f"evidences={nb_evidences} compliance={nb_compliance_assessments} risk={nb_risk_assessments} "
             + f"scenarios={nb_risk_scenarios} acceptances={nb_risk_acceptances} "
-            + f"number_of_seats={nb_seats_available} expiry_date={nb_expiry_date}"
+            + f"seats={nb_seats} editors={nb_editors} expiration={expiration}"
         )
