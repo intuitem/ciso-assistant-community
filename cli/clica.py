@@ -9,6 +9,8 @@ import yaml
 import json
 from rich import print as rprint, print_json
 
+# from icecream import ic
+
 cli_cfg = dict()
 auth_data = dict()
 
@@ -128,6 +130,9 @@ def ids_map(model, folder=None):
     url = f"{API_URL}/{model}/ids/"
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    if res.status_code != 200:
+        print("something went wrong. check authentication.")
+        sys.exit(1)
     if folder:
         my_map = res.json().get(folder)
     else:
@@ -181,6 +186,7 @@ def batch_create(model, items, folder_id):
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
+    output = dict()
     url = f"{API_URL}/{model}/"
     for item in items:
         data = {
@@ -191,6 +197,9 @@ def batch_create(model, items, folder_id):
         if res.status_code != 201:
             print("something went wrong")
             print(res.json())
+        else:
+            output.update({item: res.json()["id"]})
+    return output
 
 
 @click.command()
@@ -253,34 +262,60 @@ def import_risk_assessment(file, folder, project, name, matrix, create_all):
         matrix_def = json.loads(matrix_def)
         # rprint(matrix_def)
         impact_map = dict()
-        probability_map = dict()
+        proba_map = dict()
         risk_map = dict()
         # this can be factored as one map probably
         for item in matrix_def["impact"]:
             impact_map[item["name"]] = item["id"]
         for item in matrix_def["probability"]:
-            probability_map[item["name"]] = item["id"]
+            proba_map[item["name"]] = item["id"]
         for item in matrix_def["risk"]:
             risk_map[item["name"]] = item["id"]
 
-        rprint(risk_map)
-        rprint(impact_map)
-        rprint(probability_map)
+    df = df.fillna("--")
 
-    df = df.fillna("")
-    # sequential post over the scenarios
+    threats = ids_map("threats", folder)
+    assets = ids_map("assets", folder)
+    controls = ids_map("applied-controls", folder)
+
     for scenario in df.itertuples():
-        print(
-            scenario.ref_id,
-            scenario.name,
-            scenario.description,
-            scenario.current_impact,
-            scenario.current_proba,
-            scenario.current_risk,
-            scenario.residual_impact,
-            scenario.residual_proba,
-            scenario.residual_risk,
-        )
+        data = {
+            "ref_id": scenario.ref_id,
+            "name": scenario.name,
+            "risk_assessment": ra_id,
+        }
+        if scenario.current_impact != "--":
+            data.update({"current_impact": impact_map.get(scenario.current_impact)})
+        if scenario.current_proba != "--":
+            data.update({"current_proba": proba_map.get(scenario.current_proba)})
+
+        if scenario.residual_impact != "--":
+            data.update({"residual_impact": impact_map.get(scenario.residual_impact)})
+        if scenario.residual_proba != "--":
+            data.update({"residual_proba": proba_map.get(scenario.residual_proba)})
+
+        if scenario.existing_controls != "--":
+            items = str(scenario.existing_controls).split(",")
+            data.update(
+                {"existing_applied_controls": [controls[item] for item in items]}
+            )
+
+        if scenario.additional_controls != "--":
+            items = str(scenario.additional_controls).split(",")
+            data.update({"applied_controls": [controls[item] for item in items]})
+
+        if scenario.assets != "--":
+            items = str(scenario.assets).split(",")
+            data.update({"assets": [assets[item] for item in items]})
+
+        if scenario.threats != "--":
+            items = str(scenario.threats).split(",")
+            data.update({"threats": [threats[item] for item in items]})
+
+        res = requests.post(f"{API_URL}/risk-scenarios/", json=data, headers=headers)
+        if res.status_code != 201:
+            rprint(res.json())
+            rprint(data)
 
 
 @click.command()
