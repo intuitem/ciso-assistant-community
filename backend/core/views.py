@@ -298,6 +298,22 @@ class ProjectViewSet(BaseModelViewSet):
         else:
             return Response(status=HTTP_403_FORBIDDEN)
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Project,
+        )
+        for item in Project.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
+
 
 class ThreatViewSet(BaseModelViewSet):
     """
@@ -317,6 +333,21 @@ class ThreatViewSet(BaseModelViewSet):
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Threat,
+        )
+        for item in Threat.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+        return Response(my_map)
 
 
 class AssetViewSet(BaseModelViewSet):
@@ -395,6 +426,21 @@ class AssetViewSet(BaseModelViewSet):
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Asset,
+        )
+        for item in Asset.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+        return Response(my_map)
+
     @action(detail=False, name="Get security objectives")
     def security_objectives(self, request):
         return Response({"results": Asset.DEFAULT_SECURITY_OBJECTIVES})
@@ -458,6 +504,22 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 .count()
             )
         return Response({"results": used_matrices})
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RiskMatrix,
+        )
+        for item in RiskMatrix.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
 
 
 class VulnerabilityViewSet(BaseModelViewSet):
@@ -649,30 +711,46 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             writer = csv.writer(response, delimiter=";")
             columns = [
                 "ref_id",
+                "assets",
                 "threats",
                 "name",
                 "description",
                 "existing_controls",
-                "current_level",
-                "applied_controls",
-                "residual_level",
+                "current_impact",
+                "current_proba",
+                "current_risk",
+                "additional_controls",
+                "residual_impact",
+                "residual_proba",
+                "residual_risk",
                 "treatment",
             ]
             writer.writerow(columns)
 
-            for scenario in risk_assessment.risk_scenarios.all().order_by("created_at"):
-                applied_controls = ",".join(
-                    [m.csv_value for m in scenario.applied_controls.all()]
+            for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
+                additional_controls = ",".join(
+                    [m.name for m in scenario.applied_controls.all()]
                 )
+                existing_controls = ",".join(
+                    [m.name for m in scenario.existing_applied_controls.all()]
+                )
+
                 threats = ",".join([t.name for t in scenario.threats.all()])
+                assets = ",".join([t.name for t in scenario.assets.all()])
+
                 row = [
                     scenario.ref_id,
+                    assets,
                     threats,
                     scenario.name,
                     scenario.description,
-                    scenario.existing_controls,
+                    existing_controls,
+                    scenario.get_current_impact()["name"],
+                    scenario.get_current_proba()["name"],
                     scenario.get_current_risk()["name"],
-                    applied_controls,
+                    additional_controls,
+                    scenario.get_residual_impact()["name"],
+                    scenario.get_residual_proba()["name"],
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
@@ -1069,6 +1147,22 @@ class AppliedControlViewSet(BaseModelViewSet):
         for domain in Folder.objects.all():
             colorMap[domain.name] = next(color_cycle)
         return Response({"entries": entries, "colorMap": colorMap})
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=AppliedControl,
+        )
+        for item in AppliedControl.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -1500,6 +1594,19 @@ class FolderViewSet(BaseModelViewSet):
         tree.update({"children": folders_list})
 
         return Response(tree)
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        for item in Folder.objects.filter(id__in=viewable_items):
+            my_map[item.name] = item.id
+        return Response(my_map)
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
