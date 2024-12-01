@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let value: string;
+	export let value: { label: string; value: string }[];
 
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -17,7 +17,8 @@
 	export let translateOptions = true;
 
 	export let options: string[];
-	options = [...new Set(options.flat())];
+	options = [...new Set(options ? options.flat() : [])];
+	options = options.filter((option) => option !== '');
 
 	const selectOptions = options
 		.map((option) => {
@@ -32,6 +33,7 @@
 	hide = hide || !(selectOptions && Object.entries(selectOptions).length > 1);
 
 	import * as m from '$paraglide/messages';
+	import { beforeUpdate, onMount } from 'svelte';
 
 	export let multiSelectOptions = {
 		maxSelect: multiple ? undefined : 1,
@@ -42,6 +44,29 @@
 	};
 
 	import MultiSelect from 'svelte-multiselect';
+
+	let initialValue: typeof value;
+	let isInitialized = false;
+
+	beforeUpdate(() => {
+		// Capture the initial value if we haven't already
+		if (!isInitialized && value) {
+			initialValue = Array.isArray(value) ? [...value] : value;
+			isInitialized = true;
+		}
+	});
+
+	onMount(() => {
+		// Restore the initial value if it was lost
+		if (initialValue && (!value || (Array.isArray(value) && value.length === 0))) {
+			value = initialValue;
+		}
+	});
+
+	$: value =
+		value && Array.isArray(value)
+			? value.map((v) => (v.label ? v : { label: v.value, value: v.value }))
+			: value;
 </script>
 
 {#if !hide}

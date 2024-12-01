@@ -11,7 +11,7 @@
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { localItems } from '$lib/utils/locales.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
 	import { ProgressRadial, Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
@@ -19,6 +19,7 @@
 	import CounterCard from './CounterCard.svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
+	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 
 	interface Counters {
 		domains: number;
@@ -39,7 +40,7 @@
 	const rsd_rsk_label = m.residualRisk();
 
 	function localizeChartLabels(labels: string[]): string[] {
-		return labels.map((label) => localItems()[label]);
+		return labels.map((label) => safeTranslate(label));
 	}
 
 	const appliedControlTodoTable: TableSource = {
@@ -139,96 +140,115 @@
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
-				<section id="summary" class=" grid grid-cols-6 gap-4">
+				<section id="summary" class=" grid grid-cols-6 gap-2">
 					<Card
 						count={metrics.controls.total}
-						label="total"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageTotal()}
+						href="/applied-controls/"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 						emphasis={true}
 					/>
 					<Card
 						count={metrics.controls.active}
-						label="active"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageActive()}
+						href="/applied-controls/?status=active"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.deprecated}
-						label="deprecated"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageDeprecated()}
+						href="/applied-controls/?status=deprecated"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
-					<div class="h-64 col-span-3 row-span-2 bg-white">
+					<Card
+						count={metrics.controls.to_do}
+						label={m.sumpageToDo()}
+						href="/applied-controls/?status=to_do"
+						icon="fa-solid fa-shield-halved"
+						section={m.sumpageSectionControls()}
+					/>
+					<div class="h-80 col-span-2 row-span-2 bg-white">
 						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 					</div>
 					<Card
-						count={metrics.controls.to_do}
-						label="to do"
-						href="#"
-						help="this is interesting"
-						icon="fa-solid fa-shield-halved"
-						section="controls"
-					/>
-					<Card
 						count={metrics.controls.in_progress}
-						label="in progress"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageInProgress()}
+						href="/applied-controls/?status=in_progress"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
 					<Card
 						count={metrics.controls.on_hold}
-						label="on hold"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageOnHold()}
+						href="/applied-controls/?status=on_hold"
 						icon="fa-solid fa-shield-halved"
-						section="controls"
+						section={m.sumpageSectionControls()}
 					/>
-					<div class="col-span-4 row-span-4 bg-white">
-						<TreemapChart title="Compliance overview" tree={metrics.audits_tree} name="sunburst" />
+					<Card
+						count={metrics.controls.p1}
+						label={m.sumpageP1()}
+						href="/applied-controls/?priority=p1"
+						icon="fa-solid fa-shield-halved"
+						section={m.sumpageSectionControls()}
+						emphasis={true}
+					/>
+					<Card
+						count={metrics.controls.eta_missed}
+						label={m.sumpageEtaMissed()}
+						href="/applied-controls/?status=on_hold"
+						icon="fa-solid fa-shield-halved"
+						section={m.sumpageSectionControls()}
+						emphasis={true}
+					/>
+					<div class="col-span-4 row-span-4 bg-white h-96">
+						<StackedBarsNormalized
+							names={metrics.audits_stats.names}
+							data={metrics.audits_stats.data}
+							uuids={metrics.audits_stats.uuids}
+						/>
 					</div>
 					<!---->
 					<Card
-						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
-						label="active audits"
-						href="#"
-						help="this is interesting"
+						count={metrics.compliance.used_frameworks}
+						label={m.usedFrameworks()}
+						href="/frameworks/"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 						emphasis={true}
 					/>
 					<div></div>
 					<Card
-						count={metrics.compliance.compliant_items}
-						label="compliant items"
-						href="#"
-						help="this is interesting"
+						count="{metrics.compliance.active_audits}/{metrics.compliance.audits}"
+						label={m.sumpageActiveAudits()}
+						href="/compliance-assessments/"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
+						emphasis={true}
+					/>
+
+					<Card
+						count="{metrics.compliance.progress_avg}%"
+						label={m.sumpageAvgProgress()}
+						href="/compliance-assessments/"
+						icon="fa-solid fa-list-check"
+						section={m.sumpageSectionCompliance()}
 					/>
 					<Card
 						count={metrics.compliance.non_compliant_items}
-						label="non compliant items"
+						label={m.sumpageNonCompliantItems()}
 						href="#"
-						help="this is interesting"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 					/>
 					<Card
 						count={metrics.compliance.evidences}
-						label="evidences"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageEvidences()}
+						href="/evidences/"
 						icon="fa-solid fa-list-check"
-						section="compliance"
+						section={m.sumpageSectionCompliance()}
 					/>
 					<div class=""></div>
 					<div class=""></div>
@@ -236,52 +256,48 @@
 					<div class=" col-span-2 row-span-2 h-80 bg-white">
 						<HalfDonutChart
 							name="current_h"
-							title="Current risks"
+							title={m.sumpageTitleCurrentRisks()}
 							values={data.risks_count_per_level.current}
 							colors={data.risks_count_per_level.current.map((object) => object.color)}
 						/>
 					</div>
 					<Card
 						count={metrics.risk.assessments}
-						label="assessments"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageAssessments()}
+						href="/risk-assessments/"
 						emphasis={true}
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<Card
 						count={metrics.risk.scenarios}
-						label="scenarios"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageScenarios()}
+						href="/risk-scenarios/"
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<div class=" col-span-2 row-span-2 bg-white">
 						<HalfDonutChart
 							name="residual_h"
-							title="Residual risks"
+							title={m.sumpageTitleResidualRisks()}
 							values={data.risks_count_per_level.residual}
 							colors={data.risks_count_per_level.residual.map((object) => object.color)}
 						/>
 					</div>
 					<Card
 						count={metrics.risk.threats}
-						label="mapped threats"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageMappedThreats()}
+						href="/analytics?tab=2"
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<!---->
 					<Card
 						count={metrics.risk.acceptances}
-						label="risks accepted"
-						href="#"
-						help="this is interesting"
+						label={m.sumpageRiskAccepted()}
+						href="/risk-acceptances"
 						icon="fa-solid fa-biohazard"
-						section="risk"
+						section={m.sumpageSectionRisk()}
 					/>
 					<div class=""></div>
 				</section>
@@ -532,7 +548,7 @@
 									<div class="absolute top-2 right-4 mt-2 space-x-1">
 										<div class="flex flex-col space-y-1">
 											<a
-												href="/compliance-assessments/{compliance_assessment.id}/edit"
+												href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
 												class="btn variant-filled-primary"
 												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 											</a>

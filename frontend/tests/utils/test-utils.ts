@@ -151,7 +151,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'internal_reference', type: type.TEXT },
+			{ name: 'ref_id', type: type.TEXT },
 			{ name: 'lc_status', type: type.SELECT }
 		]);
 		await use(pPage);
@@ -375,13 +375,13 @@ export class TestContent {
 					name: vars.projectName,
 					description: vars.description,
 					folder: vars.folderName,
-					internal_reference: 'Test internal reference',
+					ref_id: 'R.1234',
 					lc_status: 'Production'
 				},
 				editParams: {
 					name: '',
 					description: '',
-					internal_reference: '',
+					ref_id: '',
 					lc_status: 'End of life'
 				}
 			},
@@ -398,7 +398,7 @@ export class TestContent {
 					name: '',
 					description: '',
 					business_value: '',
-					type: 'Support'
+					type: 'Supporting'
 					//TODO add parent_assets
 				}
 			},
@@ -557,11 +557,11 @@ export class TestContent {
 					description: '',
 					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
-					assets: [vars.assetName],
+					assets: [vars.folderName + '/' + vars.assetName],
 					existing_controls: 'Test Existing Controls',
 					current_proba: 'High',
 					current_impact: 'Medium',
-					applied_controls: [vars.appliedControlName],
+					applied_controls: [vars.folderName + '/' + vars.appliedControlName],
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
 					justification: 'Test comments'

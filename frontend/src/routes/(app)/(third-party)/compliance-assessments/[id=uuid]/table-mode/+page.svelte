@@ -20,9 +20,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { capitalizeFirstLetter } from '$lib/utils/locales';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { page } from '$app/stores';
 
 	export let data: PageData;
 	export let form: Actions;
@@ -105,7 +103,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: safeTranslate('add' + capitalizeFirstLetter(data.evidenceModel.localName))
+			title: safeTranslate('add-' + data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -181,7 +179,7 @@
 				</div>
 			</div>
 		{/if}
-		{#each data.requirements as requirementAssessment}
+		{#each data.requirement_assessments as requirementAssessment}
 			<div
 				class="flex flex-col items-center justify-center border pb-2 px-2 shadow-lg rounded-md space-y-2"
 			>
@@ -214,8 +212,12 @@
 												value={option.id}
 												bind:group={requirementAssessment.status}
 												name="status"
-												on:change={() => update(requirementAssessment, 'status', option.id)}
-												>{option.label}</RadioItem
+												on:click={() => {
+													const newStatus =
+														requirementAssessment.status === option.id ? 'to_do' : option.id;
+													requirementAssessment.status = newStatus;
+													update(requirementAssessment, 'status', newStatus);
+												}}>{option.label}</RadioItem
 											>
 										{/each}
 									</RadioGroup>
@@ -234,9 +236,14 @@
 												value={option.id}
 												bind:group={requirementAssessment.result}
 												name="result"
-												on:change={() => update(requirementAssessment, 'result', option.id)}
-												>{option.label}</RadioItem
-											>
+												on:click={() => {
+													const newResult =
+														requirementAssessment.result === option.id ? 'not_assessed' : option.id;
+													requirementAssessment.result = newResult;
+													update(requirementAssessment, 'result', newResult); // Update result for both select and deselect
+												}}
+												>{option.label}
+											</RadioItem>
 										{/each}
 									</RadioGroup>
 								</div>
@@ -255,21 +262,23 @@
 											{/if}
 										{:else if question.type === 'unique_choice'}
 											<RadioGroup
-												class="w-fit"
+												class="flex-col"
 												active="variant-filled-primary"
 												hover="hover:variant-soft-primary"
-												flexDirection="flex-col"
 											>
 												{#each question.options as option}
 													<RadioItem
-														class="flex justify-start"
+														class="shadow-md"
 														bind:group={question.answer}
 														name="question"
 														value={option}
-														on:change={() =>
-															update(requirementAssessment, 'answer', option, question)}
-														>{option}</RadioItem
-													>
+														on:click={() => {
+															const newAnswer = question.answer === option ? null : option;
+															question.answer = newAnswer;
+															update(requirementAssessment, 'answer', newAnswer, question);
+														}}
+														>{option}
+													</RadioItem>
 												{/each}
 											</RadioGroup>
 										{:else if question.type === 'date'}
@@ -299,7 +308,7 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							<Accordion regionCaret="flex">
-								<AccordionItem>
+								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
 										><p class="flex">{m.observation()}</p></svelte:fragment
 									>
@@ -348,7 +357,7 @@
 										</div>
 									</svelte:fragment>
 								</AccordionItem>
-								<AccordionItem>
+								<AccordionItem caretOpen="rotate-0" caretClosed="-rotate-90">
 									<svelte:fragment slot="summary"
 										><p class="flex items-center space-x-2">
 											<span>{m.evidence()}</span>

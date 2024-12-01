@@ -21,6 +21,7 @@
 	export let onSubmit = (submit_data: any) => {};
 	export let taintedMessage: string | null = m.taintedFormMessage();
 	export let onUpdated = (_: any) => {};
+	export let validationMethod: 'auto' | 'oninput' | 'onblur' | 'onsubmit' | 'submit-only' = 'auto';
 
 	export let useFocusTrap = true;
 
@@ -41,7 +42,8 @@
 		validators: validators,
 		onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
 		onSubmit: onSubmit,
-		taintedMessage: taintedMessage
+		taintedMessage: taintedMessage,
+		validationMethod
 	});
 
 	const { form, message, tainted, delayed, errors, allErrors, enhance } = _form;

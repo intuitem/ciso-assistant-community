@@ -3,6 +3,7 @@ from collections.abc import MutableMapping
 from datetime import date, timedelta
 from typing import Optional
 
+# from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
 from django.db.models import Count
@@ -13,6 +14,9 @@ from rest_framework.views import exception_handler as drf_exception_handler
 
 from iam.models import Folder, Permission, RoleAssignment, User
 from library.helpers import get_referential_translation
+
+from statistics import mean
+import math
 
 from .models import *
 from .utils import camel_case
@@ -797,18 +801,17 @@ def build_audits_tree_metrics(user):
             block_prj = {"name": project.name, "domain": domain.name, "children": []}
             children = []
             for audit in ComplianceAssessment.objects.filter(project=project):
-                cnt_reqs = RequirementAssessment.objects.filter(
-                    compliance_assessment=audit
-                ).count()
                 cnt_res = {}
                 for result in RequirementAssessment.Result.choices:
-                    cnt_res[result[0]] = (
-                        RequirementAssessment.objects.filter(
-                            requirement__assessable=True
-                        )
-                        .filter(compliance_assessment=audit)
-                        .filter(result=result[0])
-                        .count()
+                    requirement_assessments = audit.get_requirement_assessments(
+                        include_non_assessable=False
+                    )
+                    cnt_res[result[0]] = len(
+                        [
+                            requirement
+                            for requirement in requirement_assessments
+                            if requirement.result == result[0]
+                        ]
                     )
                 blk_audit = {
                     "name": audit.name,
@@ -843,6 +846,20 @@ def build_audits_tree_metrics(user):
     return tree
 
 
+def build_audits_stats(user):
+    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, ComplianceAssessment
+    )
+    data = list()
+    names = list()
+    uuids = dict()
+    for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
+        data.append([rs[0] for rs in audit.get_requirements_result_count()])
+        names.append(audit.name)
+        uuids[audit.name] = audit.id
+    return {"data": data, "names": names, "uuids": uuids}
+
+
 def csf_functions(user):
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
@@ -875,6 +892,13 @@ def get_metrics(user: User):
 
     viewable_controls = viewable_items(AppliedControl)
     controls_count = viewable_controls.count()
+    progress_avg = math.ceil(
+        mean([x.progress() for x in viewable_items(ComplianceAssessment)] or [0])
+    )
+    missed_eta_count = viewable_controls.filter(
+        eta__lt=date.today(),
+    ).count()
+
     data = {
         "controls": {
             "total": controls_count,
@@ -883,6 +907,8 @@ def get_metrics(user: User):
             "on_hold": viewable_controls.filter(status="on_hold").count(),
             "active": viewable_controls.filter(status="active").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
+            "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
+            "eta_missed": missed_eta_count,
         },
         "risk": {
             "assessments": viewable_items(RiskAssessment).count(),
@@ -894,19 +920,21 @@ def get_metrics(user: User):
             "acceptances": viewable_items(RiskAcceptance).count(),
         },
         "compliance": {
+            "used_frameworks": viewable_items(ComplianceAssessment)
+            .values("framework_id")
+            .distinct()
+            .count(),
             "audits": viewable_items(ComplianceAssessment).count(),
             "active_audits": viewable_items(ComplianceAssessment)
             .filter(status__in=["in_progress", "in_review", "done"])
             .count(),
             "evidences": viewable_items(Evidence).count(),
-            "compliant_items": viewable_items(RequirementAssessment)
-            .filter(result="compliant")
-            .count(),
             "non_compliant_items": viewable_items(RequirementAssessment)
             .filter(result="non_compliant")
             .count(),
+            "progress_avg": progress_avg,
         },
-        "audits_tree": build_audits_tree_metrics(user),
+        "audits_stats": build_audits_stats(user),
         "csf_functions": csf_functions(user),
     }
     return data
@@ -1175,3 +1203,94 @@ def handle(exc, context):
         exc = DRFValidationError(detail=data)
 
     return drf_exception_handler(exc, context)
+
+
+def duplicate_related_objects(
+    source_object: models.Model,
+    duplicate_object: models.Model,
+    target_folder: Folder,
+    field_name: str,
+):
+    """
+    Duplicates related objects from a source object to a duplicate object, avoiding duplicates in the target folder.
+
+    Parameters:
+    - source_object (object): The source object containing related objects to duplicate.
+    - duplicate_object (object): The object where duplicated objects will be linked.
+    - target_folder (Folder): The folder where duplicated objects will be stored.
+    - field_name (str): The field name representing the related objects in the source
+    """
+
+    def process_related_object(
+        obj,
+        duplicate_object,
+        target_folder,
+        target_parent_folders,
+        sub_folders,
+        field_name,
+        model_class,
+    ):
+        """
+        Process a single related object: add, link, or duplicate it based on folder and existence checks.
+        """
+
+        # Check if the object already exists in the target folder
+        existing_obj = get_existing_object(obj, target_folder, model_class)
+
+        if existing_obj:
+            # If the object exists in the target folder, link it to the duplicate object
+            link_existing_object(duplicate_object, existing_obj, field_name)
+
+        elif obj.folder in target_parent_folders and obj.is_published:
+            # If the object's folder is a parent and it's published, link it
+            link_existing_object(duplicate_object, obj, field_name)
+
+        elif obj.folder in sub_folders:
+            # If the object's folder is a subfolder of the target folder, link it
+            link_existing_object(duplicate_object, obj, field_name)
+
+        else:
+            # Otherwise, duplicate the object and link it
+            duplicate_and_link_object(obj, duplicate_object, target_folder, field_name)
+
+    def get_existing_object(obj, target_folder, model_class):
+        """
+        Check if an object with the same name already exists in the target folder.
+        """
+        return model_class.objects.filter(name=obj.name, folder=target_folder).first()
+
+    def link_existing_object(duplicate_object, existing_obj, field_name):
+        """
+        Link an existing object to the duplicate object by adding it to the related field.
+        """
+        getattr(duplicate_object, field_name).add(existing_obj)
+
+    def duplicate_and_link_object(new_obj, duplicate_object, target_folder, field_name):
+        """
+        Duplicate an object and link it to the duplicate object.
+        """
+        new_obj.pk = None
+        new_obj.folder = target_folder
+        new_obj.save()
+        link_existing_object(duplicate_object, new_obj, field_name)
+
+    model_class = getattr(type(source_object), field_name).field.related_model
+
+    # Get parent and sub-folders of the target folder
+    target_parent_folders = target_folder.get_parent_folders()
+    sub_folders = target_folder.sub_folders()
+
+    # Get all related objects for the specified field
+    related_objects = getattr(source_object, field_name).all()
+
+    # Process each related object
+    for obj in related_objects:
+        process_related_object(
+            obj,
+            duplicate_object,
+            target_folder,
+            target_parent_folders,
+            sub_folders,
+            field_name,
+            model_class,
+        )

@@ -4,6 +4,7 @@ Inspired from Azure IAM model"""
 from collections import defaultdict
 from typing import Any, List, Self, Tuple
 import uuid
+from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -79,6 +80,7 @@ class Folder(NameDescriptionMixin):
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
@@ -274,6 +276,16 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)
+
+        # create an EmailAddress object for the newly created user
+        # this is required by allauth
+        EmailAddress.objects.create(
+            user=user,
+            email=user.email,
+            verified=True,
+            primary=True,
+        )
+
         logger.info("user created sucessfully", user=user)
 
         if mailing:
@@ -525,7 +537,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @classmethod
     def get_editors(cls) -> List[Self]:
-        return [user for user in cls.objects.all() if user.is_editor]
+        return [
+            user
+            for user in cls.objects.all()
+            if user.is_editor and not user.is_third_party
+        ]
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -580,7 +596,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
+        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
+            if (
+                (perm == add_tag_permission) and perm in ra.role.permissions.all()
+            ):  # Allow any user to add tags if he has the permission
+                return True
             f = folder
             while f is not None:
                 if (
@@ -705,18 +726,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if hasattr(object_type, "is_published"):
             for my_folder in folders_with_local_view:
-                target_folders = []
-                my_folder2 = my_folder
-                while my_folder2:
-                    if my_folder2 != my_folder:
-                        target_folders.append(my_folder2)
-                    my_folder2 = my_folder2.parent_folder
-                for object in [
-                    x
-                    for x in all_objects
-                    if folder_for_object[x] in target_folders and x.is_published
-                ]:
-                    permissions_per_object_id[object.id].add(permissions[0])
+                if my_folder.content_type != Folder.ContentType.ENCLAVE:
+                    target_folders = []
+                    my_folder2 = my_folder
+                    while my_folder2:
+                        if my_folder2 != my_folder:
+                            target_folders.append(my_folder2)
+                        my_folder2 = my_folder2.parent_folder
+                    for object in [
+                        x
+                        for x in all_objects
+                        if folder_for_object[x] in target_folders and x.is_published
+                    ]:
+                        permissions_per_object_id[object.id].add(permissions[0])
 
         return (
             [

@@ -6,13 +6,14 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	const threats = data.requirement.threats;
-	const reference_controls = data.requirement.reference_controls;
+	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
+	const reference_controls =
+		data.requirementAssessment.requirement.associated_reference_controls ?? [];
 	const annotation = data.requirement.annotation;
 	const typical_evidence = data.requirement.typical_evidence;
 
-	const has_threats = threats && threats.length > 0;
-	const has_reference_controls = reference_controls && reference_controls.length > 0;
+	const has_threats = threats.length > 0;
+	const has_reference_controls = reference_controls.length > 0;
 
 	import { page } from '$app/stores';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -40,7 +41,6 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { capitalizeFirstLetter, localItems } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import * as m from '$paraglide/messages';
 
@@ -87,7 +87,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.measureModel.localName)]
+			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -106,7 +106,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems()['add' + capitalizeFirstLetter(data.evidenceModel.localName)]
+			title: safeTranslate('add-' + data.evidenceModel.localName)
 		};
 		modalStore.trigger(modal);
 	}
@@ -328,6 +328,9 @@
 							<i class="fa-solid fa-link" />
 							{m.mappingInference()}
 						</p>
+						<span class="text-xs text-gray-500"
+							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
+						>
 						<ul class="list-disc ml-4">
 							<li>
 								<p>
@@ -341,7 +344,7 @@
 								</p>
 								<p class="whitespace-pre-line py-1">
 									<span class="italic">{m.coverageColon()}</span>
-									<span class="badge {classesText} h-fit">
+									<span class="badge h-fit">
 										{safeTranslate(mappingInference.sourceRequirementAssessment.coverage)}
 									</span>
 								</p>
@@ -431,7 +434,10 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({ objects: data.model.foreignKeys['applied_controls'] })}
+									options={getOptions({
+										objects: data.model.foreignKeys['applied_controls'],
+										extra_fields: [['folder', 'str']]
+									})}
 									field="applied_controls"
 								/>
 								<ModelTable
@@ -459,7 +465,10 @@
 								<AutocompleteSelect
 									multiple
 									{form}
-									options={getOptions({ objects: data.model.foreignKeys['evidences'] })}
+									options={getOptions({
+										objects: data.model.foreignKeys['evidences'],
+										extra_fields: [['folder', 'str']]
+									})}
 									field="evidences"
 								/>
 								<ModelTable

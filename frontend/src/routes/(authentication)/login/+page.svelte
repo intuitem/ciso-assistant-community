@@ -1,85 +1,33 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import Logo from '$lib/components/Logo/Logo.svelte';
-	import { loginSchema } from '$lib/utils/schemas';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-
-	import * as m from '$paraglide/messages.js';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { redirectToProvider } from '$lib/allauth.js';
 	import Greetings from './Greetings.svelte';
+	import FormCard from './FormCard.svelte';
 
 	export let data: PageData;
+	export let form: ActionData;
 </script>
 
-<div class="relative h-screen w-screen bg-slate-200">
-	<div class="absolute top-5 left-5">
-		<div class="flex flex-row max-w-48 space-x-4 pb-3">
+<div class="lg:relative h-screen w-screen bg-slate-200">
+	<div
+		class="invisible lg:visible absolute top-5 left-1/2 transform -translate-x-1/2 top-5 left-5 transform-none"
+	>
+		<div class="flex justify-center justify-start flex-row max-w-48 space-x-4 pb-3">
 			<Logo />
 		</div>
 	</div>
-	<div class="absolute top-1/2 left-1/2 w-full transform -translate-x-1/2 -translate-y-1/2">
-		<div class="flex flex-row w-full pr-8">
+	<div class="lg:invisible pt-5 flex justify-center">
+		<div class="flex justify-center flex-row max-w-48 space-x-4 pb-3">
+			<Logo />
+		</div>
+	</div>
+	<div
+		class="lg:absolute lg:top-1/2 lg:left-1/2 w-full transform lg:-translate-x-1/2 lg:-translate-y-1/2"
+	>
+		<div class="flex flex-col lg:flex-row w-full lg:pr-8 space-y-4 lg:space-y-0 lg:space-x-4">
 			<Greetings />
-			<div class="flex justify-center pr-5 items-center space-y-4 w-2/5">
-				<div class="flex flex-col w-3/4 p-10 rounded-lg shadow-lg bg-white bg-opacity-[.90]">
-					<div data-testid="login" class="flex flex-col w-full items-center space-y-4">
-						<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
-							<i class="fa-solid fa-right-to-bracket" />
-						</div>
-						<h3
-							class="font-bold leading-tight tracking-tight md:text-2xl bg-gradient-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-						>
-							{m.logIntoYourAccount()}
-						</h3>
-						<p class="text-center text-gray-600 text-sm">
-							{m.youNeedToLogIn()}
-						</p>
-						<div class="w-full">
-							<!-- SuperForm with dataType 'form' -->
-							<SuperForm
-								class="flex flex-col space-y-3"
-								data={data?.form}
-								dataType="form"
-								let:form
-								validators={zod(loginSchema)}
-							>
-								<TextField type="email" {form} field="username" label={m.email()} />
-								<TextField type="password" {form} field="password" label={m.password()} />
-								<div class="flex flex-row justify-end">
-									<a
-										href="/password-reset"
-										class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-										data-testid="forgot-password-btn"
-									>
-										<p class="">{m.forgtPassword()}?</p>
-									</a>
-								</div>
-								<p class="">
-									<button
-										class="btn variant-filled-primary font-semibold w-full"
-										data-testid="login-btn"
-										type="submit">{m.login()}</button
-									>
-								</p>
-							</SuperForm>
-						</div>
-						{#if data.SSOInfo.is_enabled}
-							<div class="flex items-center justify-center w-full space-x-2">
-								<hr class="w-64 items-center bg-gray-200 border-0" />
-								<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-								<hr class="w-64 items-center bg-gray-200 border-0" />
-							</div>
-							<button
-								class="btn bg-gradient-to-l from-violet-800 to-violet-400 text-white font-semibold w-1/2"
-								on:click={() =>
-									redirectToProvider(data.SSOInfo.sp_entity_id, data.SSOInfo.callback_url, 'login')}
-								>{m.loginSSO()}</button
-							>
-						{/if}
-					</div>
-				</div>
+			<div class="flex justify-center lg:pr-5 items-center w-full lg:w-2/5">
+				<FormCard {data} {form} />
 			</div>
 		</div>
 	</div>

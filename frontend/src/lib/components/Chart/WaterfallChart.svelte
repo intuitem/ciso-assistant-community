@@ -4,15 +4,15 @@
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
-	export let title = '';
+	// export let title = '';
 	export let name = '';
 
-	interface waterfallData {
-		placeholder: number[];
-		progress: number[];
-	}
+	// interface waterfallData {
+	// 	placeholder: number[];
+	// 	progress: number[];
+	// }
 
-	export let values: waterfallData; // Set the types for these variables later on
+	// export let values: waterfallData; // Set the types for these variables later on
 
 	const chart_id = `${name}_div`;
 	onMount(async () => {

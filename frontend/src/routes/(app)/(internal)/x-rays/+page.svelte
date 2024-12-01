@@ -2,8 +2,7 @@
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { localItems } from '$lib/utils/locales';
-
+	import { safeTranslate } from '$lib/utils/i18n';
 	export let data: PageData;
 
 	const aggregateQualityChecks = (item: any) => {
@@ -118,7 +117,7 @@
 														{#if error.object.name}<a class="anchor" href={error.link}
 																>{error.object.name}</a
 															>:{/if}
-														{localItems()[error.msgid]}
+														{safeTranslate(error.msgid)}
 													</li>
 												{/each}
 											</ul>
@@ -142,7 +141,7 @@
 														{#if warning.object.name}
 															<a class="anchor" href={warning.link}>{warning.object.name}</a>:
 														{/if}
-														{localItems()[warning.msgid]}
+														{safeTranslate(warning.msgid)}
 													</li>
 												{/each}
 											</ul>
@@ -166,7 +165,7 @@
 														{#if info.object.name}<a class="anchor" href={info.link}
 																>{info.object.name}</a
 															>:{/if}
-														{localItems()[info.msgid]}
+														{safeTranslate(info.msgid)}
 													</li>
 												{/each}
 											</ul>
@@ -208,7 +207,7 @@
 														{#if error.object.name}<a class="anchor" href={error.link}
 																>{error.object.name}</a
 															>:{/if}
-														{localItems()[error.msgid]}
+														{safeTranslate(error.msgid)}
 													</li>
 												{/each}
 											</ul>
@@ -232,7 +231,7 @@
 														{#if warning.object.name}<a class="anchor" href={warning.link}
 																>{warning.object.name}</a
 															>:{/if}
-														{localItems()[warning.msgid]}
+														{safeTranslate(warning.msgid)}
 													</li>
 												{/each}
 											</ul>
@@ -256,7 +255,7 @@
 														{#if info.object.name}<a class="anchor" href={info.link}
 																>{info.object.name}</a
 															>:{/if}
-														{localItems()[info.msgid]}
+														{safeTranslate(info.msgid)}
 													</li>
 												{/each}
 											</ul>

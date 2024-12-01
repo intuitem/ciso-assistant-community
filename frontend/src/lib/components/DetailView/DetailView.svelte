@@ -17,13 +17,14 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import { toCamelCase } from '$lib/utils/locales.js';
 	import { checkConstraints } from '$lib/utils/crud';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import List from '$lib/components/List/List.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -85,7 +86,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: safeTranslate('add' + capitalizeFirstLetter(model.info.localName))
+			title: safeTranslate('add-' + model.info.localName)
 		};
 		if (checkConstraints(model.createForm.constraints, model.foreignKeys).length > 0) {
 			modalComponent = {
@@ -95,7 +96,7 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: safeTranslate('add' + capitalizeFirstLetter(model.info.localName)).toLowerCase(),
+				body: safeTranslate('add-' + model.info.localName).toLowerCase(),
 				value: checkConstraints(model.createForm.constraints, model.foreignKeys)
 			};
 		}
@@ -150,20 +151,6 @@
 		modalStore.trigger(modal);
 	}
 
-	function getForms(model: Record<string, any>) {
-		let { form: createForm, message: createMessage } = superForm(model.createForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		});
-		let { form: deleteForm, message: deleteMessage } = superForm(model.deleteForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		});
-		return { createForm, createMessage, deleteForm, deleteMessage };
-	}
-
-	let forms: Record<string, any> = {};
-
 	const user = $page.data.user;
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${data.model.name}`);
 
@@ -175,9 +162,6 @@
 			!data.data.builtin
 		);
 	};
-	$: Object.entries(data.relatedModels).forEach(([key, value]) => {
-		forms[key] = getForms(value);
-	});
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -231,73 +215,98 @@
 			{/if}
 		</div>
 	{/if}
-	<div class="card px-6 py-4 bg-white flex flex-row space-y-2 justify-between shadow-lg">
-		<div class="flex flex-col space-y-2 whitespace-pre-line">
-			{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
-				<div class="flex flex-col">
-					<div
-						class="text-sm font-medium text-gray-800"
-						data-testid="{key.replace('_', '-')}-field-title"
-					>
-						{safeTranslate(key)}
-					</div>
-					<ul class="text-sm">
-						<li
-							class="text-gray-600 list-none"
-							data-testid={!(value instanceof Array)
-								? key.replace('_', '-') + '-field-value'
-								: null}
-						>
-							{#if value !== null && value !== undefined && value !== ''}
-								{#if key === 'library'}
-									{@const itemHref = `/libraries/${value.id}?loaded`}
-									<a href={itemHref} class="anchor">{value.name}</a>
-								{:else if Array.isArray(value)}
-									{#if Object.keys(value).length > 0}
-										<ul>
-											{#each value as val}
-												<li data-testid={key.replace('_', '-') + '-field-value'}>
-													{#if val.str && val.id}
-														{@const itemHref = `/${
-															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel
-														}/${val.id}`}
-														<a href={itemHref} class="anchor">{val.str}</a>
-													{:else}
-														{value}
-													{/if}
-												</li>
-											{/each}
-										</ul>
+	<div class="card shadow-lg bg-white flex flex-row p-4 justify-between">
+		<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-sm w-3/4">
+			<dl class="-my-3 divide-y divide-gray-100 text-sm">
+				{#each Object.entries(data.data).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					<div class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-gray-50 sm:grid-cols-3 sm:gap-4">
+						<dt class="font-medium text-gray-900" data-testid="{key.replace('_', '-')}-field-title">
+							{safeTranslate(key)}
+						</dt>
+						<dd class="text-gray-700 sm:col-span-2">
+							<ul class="">
+								<li
+									class="list-none"
+									data-testid={!(value instanceof Array)
+										? key.replace('_', '-') + '-field-value'
+										: null}
+								>
+									{#if value !== null && value !== undefined && value !== ''}
+										{#if key === 'library'}
+											{@const itemHref = `/libraries/${value.id}?loaded`}
+											<a href={itemHref} class="anchor">{value.name}</a>
+										{:else if key === 'severity'}
+											<!-- We must add translations for the following severity levels -->
+											<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
+											{@const stringifiedSeverity =
+												value < 0
+													? '--'
+													: (safeTranslate(['low', 'medium', 'high', 'critical'][value]) ??
+														m.undefined())}
+											{stringifiedSeverity}
+										{:else if Array.isArray(value)}
+											{#if Object.keys(value).length > 0}
+												<ul>
+													{#each value as val}
+														<li data-testid={key.replace('_', '-') + '-field-value'}>
+															{#if val.str && val.id}
+																{@const itemHref = `/${
+																	URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																		(item) => item.field === key
+																	)?.urlModel
+																}/${val.id}`}
+																<a href={itemHref} class="anchor">{val.str}</a>
+															{:else if val.str}
+																{val.str}
+															{:else}
+																{value}
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											{:else}
+												--
+											{/if}
+										{:else if value.id}
+											{@const itemHref = `/${
+												URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+													(item) => item.field === key
+												)?.urlModel
+											}/${value.id}`}
+											<a href={itemHref} class="anchor">{value.str}</a>
+											<!-- Shortcut before DetailView refactoring -->
+										{:else if value === 'P1'}
+											<li class="fa-solid fa-flag text-red-500"></li>
+											{m.p1()}
+										{:else if value === 'P2'}
+											<li class="fa-solid fa-flag text-orange-500"></li>
+											{m.p2()}
+										{:else if value === 'P3'}
+											<li class="fa-solid fa-flag text-blue-500"></li>
+											{m.p3()}
+										{:else if value === 'P4'}
+											<li class="fa-solid fa-flag text-gray-500"></li>
+											{m.p4()}
+										{:else if isURL(value) && !value.startsWith('urn')}
+											<a href={value} target="_blank" class="anchor">{value}</a>
+										{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta')}
+											{formatDateOrDateTime(value, languageTag())}
+										{:else if m[toCamelCase((value.str || value.name) ?? value)]}
+											{safeTranslate((value.str || value.name) ?? value)}
+										{:else}
+											{(value.str || value.name) ?? value}
+										{/if}
 									{:else}
 										--
 									{/if}
-								{:else if value.id}
-									{@const itemHref = `/${
-										URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-											(item) => item.field === key
-										)?.urlModel
-									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
-								{:else if isURL(value) && !value.startsWith('urn')}
-									<a href={value} target="_blank" class="anchor">{value}</a>
-								{:else if ISO_8601_REGEX.test(value)}
-									{formatDateOrDateTime(value, languageTag())}
-								{:else if m[toCamelCase((value.str || value.name) ?? value)]}
-									{safeTranslate((value.str || value.name) ?? value)}
-								{:else}
-									{(value.str || value.name) ?? value}
-								{/if}
-							{:else}
-								--
-							{/if}
-						</li>
-					</ul>
-				</div>
-			{/each}
+								</li>
+							</ul>
+						</dd>
+					</div>
+				{/each}
+			</dl>
 		</div>
-		<div class="">
+		<div class="flex flex-col space-y-2 ml-4">
 			{#if mailing}
 				<button
 					class="btn variant-filled-primary h-fit"
@@ -346,7 +355,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{safeTranslate('associated' + capitalizeFirstLetter(model.info.localNamePlural))}
+								{safeTranslate('associated-' + model.info.localNamePlural)}
 							</h4>
 						</div>
 						{#if model.table}
@@ -356,7 +365,7 @@
 									class="btn variant-filled-primary self-end my-auto"
 									on:click={(_) => modalCreateForm(model)}
 									><i class="fa-solid fa-plus mr-2 lowercase" />{safeTranslate(
-										'add' + capitalizeFirstLetter(model.info.localName)
+										'add-' + model.info.localName
 									)}</button
 								>
 							</ModelTable>

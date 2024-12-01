@@ -14,8 +14,19 @@
 	export let formDataCache: Record<string, any> = {};
 	export let schema: any = {};
 	export let initialData: Record<string, any> = {};
+
+	model.selectOptions['priority'].forEach((element) => {
+		element.value = parseInt(element.value);
+	});
 </script>
 
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 {#if schema.shape.category}
 	<Select
 		{form}
@@ -34,6 +45,16 @@
 	cacheLock={cacheLocks['csf_function']}
 	bind:cachedValue={formDataCache['csf_function']}
 />
+
+<Select
+	{form}
+	options={model.selectOptions['priority']}
+	field="priority"
+	label={m.priority()}
+	cacheLock={cacheLocks['priority']}
+	bind:cachedValue={formDataCache['priority']}
+/>
+
 <AutocompleteSelect
 	{form}
 	multiple
@@ -62,6 +83,15 @@
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}
 	label={m.evidences()}
+/>
+<TextField
+	type="date"
+	{form}
+	field="start_date"
+	label={m.startDate()}
+	helpText={m.startDateHelpText()}
+	cacheLock={cacheLocks['start_date']}
+	bind:cachedValue={formDataCache['start_date']}
 />
 <TextField
 	type="date"

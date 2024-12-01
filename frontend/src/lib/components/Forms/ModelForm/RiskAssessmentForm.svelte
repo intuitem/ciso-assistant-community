@@ -15,9 +15,17 @@
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
 	export let object: Record<string, any> = {};
-	export let context: string = 'default';
-	export let updated_fields: Set<string> = new Set();
+	// export let context: string = 'default';
+	// export let updated_fields: Set<string> = new Set();
 </script>
+
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 
 <AutocompleteSelect
 	{form}

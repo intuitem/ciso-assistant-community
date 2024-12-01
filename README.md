@@ -9,6 +9,8 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
+    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
     <a href="#supported-languages-">Languages</a>
@@ -41,18 +43,24 @@ Our vision is to provide a one stop shop for cyber security posture management a
 
 CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
 
-The vision of the tool is based on this model:
+The vision of the tool is based on these fundamental objects:
 
-![](posture.png)
+![](core_objects.png)
 
-The full details are available in the [data model](documentation/architecture/data-model.md).
+There are other concepts and models to provide other features. The full details are available in the [data model](documentation/architecture/data-model.md).
 
-The decoupling allows you to save a considerable amount of time:
+The decoupling concept is a pillar of the app and allows you to save a considerable amount of time:
 
 - reuse previous assessments,
 - assess a scope against multiple frameworks at the same time,
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
+
+Here is an illustration of the **decoupling** principle and its advantages:
+
+https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
+
+## Features
 
 Here is an overview of CISO Assistant features and capabilities:
 
@@ -79,15 +87,19 @@ and run the starter script
 ./docker-compose.sh
 ```
 
+If you are looking for other installation options, you might want to check the [docs](https://intuitem.gitbook.io/ciso-assistant).
+
 > [!NOTE]
 > The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
 > If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
 
 > [!WARNING]
 > If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 > [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images. 
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ## End-user Documentation
 
@@ -154,6 +166,11 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
+60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
+61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
+62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
+63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
+64. Annex to the Implementing Regulation of NIS 2 on Technical and methodological requirements 🇪🇺
 
 ### Community contributions
 
@@ -164,9 +181,12 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
 6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
 7. New Zealand Information Security Manual (NZISM) 🇳🇿
+8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
+9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
+10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
+11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
 
 <br/>
-
 
 > [!NOTE]
 > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
@@ -245,8 +265,10 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 
 - Python 3.11+
 - pip 20.3+
+- poetry 1.8+
 - node 18+
 - npm 10.2+
+- pnpm 9.0+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
 
 ### Running the backend
@@ -317,23 +339,14 @@ export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes)
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
-3. Choose the tool of your choice, either python-venv or virtualenv. For example:
+3. Install poetry
 
-```sh
-# Install python-venv
-sudo apt install python-venv # or python3-venv
-# Create the virtual environment venv
-python -m venv venv # or python3 -m venv venv
-# To enter inside the virtual environment
-source venv/bin/activate
-# If you want to exit the virtual environment once finished
-deactivate
-```
+Visit the poetry website for instructions: https://python-poetry.org/docs/#installation
 
 4. Install required dependencies.
 
 ```sh
-pip install -r requirements.txt
+poetry install
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -357,7 +370,7 @@ pre-commit install
 7. Apply migrations.
 
 ```sh
-python manage.py migrate
+poetry run python manage.py migrate
 ```
 
 8. Create a Django superuser, that will be CISO Assistant administrator.
@@ -365,13 +378,13 @@ python manage.py migrate
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-python manage.py createsuperuser
+poetry run python manage.py createsuperuser
 ```
 
 9. Run development server.
 
 ```sh
-python manage.py runserver
+poetry run python manage.py runserver
 ```
 
 10. Configure the git hooks for generating the build name.
@@ -393,13 +406,14 @@ cd frontend
 2. Install dependencies
 
 ```bash
-npm install
+npm install -g pnpm
+pnpm install
 ```
 
 3. Start a development server (make sure that the django app is running)
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 4. Reach the frontend on <http://localhost:5173>
@@ -413,7 +427,7 @@ All variables in the frontend have handy default values.
 
 If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is <http://localhost:8000/api>.
 
-When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
+When you launch "node server" instead of "pnpm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. <http://localhost:3000>).
 
 ### Managing migrations
 
@@ -431,8 +445,8 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-python manage.py makemigrations
-python manage.py migrate
+poetry run python manage.py makemigrations
+poetry run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
@@ -462,12 +476,12 @@ To interact with it:
 
 ## Setting CISO Assistant for production
 
-The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
+The docker-compose-prod.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
 
 Set DJANGO_DEBUG=False for security reason.
 
 > [!NOTE]
-> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "npm run dev", which should not be a worry for production.
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
@@ -486,6 +500,14 @@ Set DJANGO_DEBUG=False for security reason.
 - RO: Romanian
 - HI: Hindi
 - UR: Urdu
+- CZ: Czech
+- SV: Swedish
+
+## Contributors 🤝
+
+<a href="https://github.com/intuitem/ciso-assistant-community/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=intuitem/ciso-assistant-community" />
+</a>
 
 ## Built With 💜
 
@@ -512,6 +534,6 @@ All the files within the top-level "enterprise" directory are released under the
 
 All the files outside the top-level "enterprise" directory are released under the [AGPLv3](https://choosealicense.com/licenses/agpl-3.0/).
 
-See [LICENSE.txt](./LICENSE.txt) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
+See [LICENSE.md](./LICENSE.md) for details. For more details about the commercial editions, you can reach us on <contact@intuitem.com>.
 
 Unless otherwise noted, all files are © intuitem.
