@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import yaml
 import json
-from rich import print as rprint, print_json
+from rich import print as rprint
 
 # from icecream import ic
 
