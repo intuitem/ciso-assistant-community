@@ -18,22 +18,29 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         on_delete=models.PROTECT,
         verbose_name=_("Risk matrix"),
         related_name="ebios_rm_studies",
+        help_text=_(
+            "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
+        ),
     )
     assets = models.ManyToManyField(
         Asset,
         verbose_name=_("Assets"),
         related_name="ebios_rm_studies",
+        help_text=_("Assets that are pertinent to the study"),
     )
     compliance_assessments = models.ManyToManyField(
         ComplianceAssessment,
         verbose_name=_("Compliance assessments"),
         related_name="ebios_rm_studies",
+        help_text=_(
+            "Compliance assessments established as security baseline during workshop 1.4"
+        ),
     )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
         verbose_name=_("Risk assessments"),
-        help_text=_("Risk assessments generated at the end of workshop 4"),
         related_name="ebios_rm_studies",
+        help_text=_("Risk assessments generated at the end of workshop 4"),
     )
 
     ref_id = models.CharField(max_length=100, unique=True)
