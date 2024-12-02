@@ -27,4 +27,10 @@
 		link="assets/graph"
 		tags={['analysis', 'assets']}
 	/>
+	<Article
+		title="Ebios RM (dev)"
+		desc="Tiles to manage the workshop"
+		link="/ebios-rm/5de0c0c3-678c-43f0-bdb6-b2ed434e1843"
+		tags={['analysis', 'risk']}
+	/>
 </div>
