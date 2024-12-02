@@ -200,10 +200,11 @@ class Stakeholder(AbstractBaseModel):
         PARTNER = "partner", _("Partner")
         SUPPLIER = "supplier", _("Supplier")
 
-    ebios_rm_study = models.ForeignKey(
+    ebios_rm_studies = models.ManyToManyField(
         EbiosRMStudy,
-        verbose_name=_("EBIOS RM study"),
-        on_delete=models.CASCADE,
+        verbose_name=_("EBIOS RM studies"),
+        related_name="stakeholders",
+        help_text=_("EBIOS RM studies in which the stakeholder is involved"),
     )
     entity = models.ForeignKey(
         Entity,
