@@ -1,7 +1,7 @@
 import pytest
 
 from core.models import RiskMatrix, StoredLibrary, Asset
-from ebios_rm.models import EbiosRMStudy, FearedEvent
+from ebios_rm.models import ROTO, EbiosRMStudy, FearedEvent
 
 
 @pytest.fixture
@@ -47,3 +47,14 @@ def basic_feared_event_fixture(basic_ebios_rm_study_fixture):
     )
     asset = Asset.objects.get(name="Primary Asset 1")
     feared_event.assets.add(asset)
+
+
+@pytest.fixture
+def basic_roto_fixture(basic_ebios_rm_study_fixture, basic_feared_event_fixture):
+    roto = ROTO.objects.create(
+        risk_origin=ROTO.RiskOrigin.STATE,
+        target_objective="test target objectives",
+        ebios_rm_study=basic_ebios_rm_study_fixture,
+    )
+    roto.feared_events.set(FearedEvent.objects.filter(name="test feared event"))
+    return roto
