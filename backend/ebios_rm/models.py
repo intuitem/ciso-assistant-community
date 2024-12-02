@@ -42,3 +42,8 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="%(class)s_reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    class Meta:
+        verbose_name = _("Ebios RM Study")
+        verbose_name_plural = _("Ebios RM Studies")
+        ordering = ["created_at"]
