@@ -11,20 +11,20 @@ services:
     volumes:
       - ./db:/code/db
 
-  huey:
-    container_name: huey
-    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
-    restart: always
-    environment:
-      - ALLOWED_HOSTS=backend,localhost
-      - DJANGO_DEBUG=False
-    volumes:
-      - ./db:/code/db
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        poetry run python manage.py run_huey
+  # huey:
+  # container_name: huey
+  # image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+  # restart: always
+  # environment:
+  #   - ALLOWED_HOSTS=backend,localhost
+  #   - DJANGO_DEBUG=False
+  # volumes:
+  #   - ./db:/code/db
+  # entrypoint:
+  #   - /bin/sh
+  #   - -c
+  # - |
+  #   poetry run python manage.py run_huey
 
   frontend:
     container_name: frontend
