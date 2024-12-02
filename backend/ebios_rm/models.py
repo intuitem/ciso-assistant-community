@@ -235,6 +235,32 @@ class Stakeholder(AbstractBaseModel):
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
 
+    @staticmethod
+    def _compute_criticality(
+        dependency: int, penetration: int, maturity: int, trust: int
+    ):
+        if (maturity * trust) == 0:
+            return 0
+        return (dependency * penetration) / (maturity * trust)
+
+    @property
+    def current_criticality(self):
+        return self._compute_criticality(
+            self.current_dependency,
+            self.current_penetration,
+            self.current_maturity,
+            self.current_trust,
+        )
+
+    @property
+    def residual_criticality(self):
+        return self._compute_criticality(
+            self.residual_dependency,
+            self.residual_penetration,
+            self.residual_maturity,
+            self.residual_trust,
+        )
+
 
 class AttackPath(AbstractBaseModel):
     ebios_rm_study = models.ForeignKey(
