@@ -131,6 +131,27 @@ class ROTO(AbstractBaseModel):
         AVENGER = "avenger", _("Avenger")
         PATHOLOGICAL = "pathological", _("Pathological")
 
+    class Motivation(models.IntegerChoices):
+        UNDEFINED = 0, "undefined"
+        VERY_LOW = 1, "very_low"
+        LOW = 2, "low"
+        SIGNIFICANT = 3, "significant"
+        STRONG = 4, "strong"
+
+    class Resources(models.IntegerChoices):
+        UNDEFINED = 0, "undefined"
+        LIMITED = 1, "limited"
+        SIGNIFICANT = 2, "significant"
+        IMPORTANT = 3, "important"
+        UNLIMITED = 4, "unlimited"
+
+    class Pertinence(models.IntegerChoices):
+        UNDEFINED = 0, "undefined"
+        IRRELAVANT = 1, "irrelevant"
+        PARTIALLY_RELEVANT = 2, "partially_relevant"
+        FAIRLY_RELEVANT = 3, "fairly_relevant"
+        HIGHLY_RELEVANT = 4, "highly_relevant"
+
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -140,14 +161,30 @@ class ROTO(AbstractBaseModel):
         FearedEvent, verbose_name=_("Feared events"), related_name="ro_to_couples"
     )
 
-    risk_origin = models.CharField(max_length=200, verbose_name=_("Risk origin"))
+    risk_origin = models.CharField(
+        max_length=32, verbose_name=_("Risk origin"), choices=RiskOrigin.choices
+    )
     target_objective = models.CharField(
         max_length=200, verbose_name=_("Target objective")
     )
-    motivation = models.PositiveSmallIntegerField(verbose_name=_("Motivation"))
-    resources = models.PositiveSmallIntegerField(verbose_name=_("Resources"))
-    pertinence = models.PositiveSmallIntegerField(verbose_name=_("Pertinence"))
-    activity = models.PositiveSmallIntegerField(verbose_name=_("Activity"))
+    motivation = models.PositiveSmallIntegerField(
+        verbose_name=_("Motivation"),
+        choices=Motivation.choices,
+        default=Motivation.UNDEFINED,
+    )
+    resources = models.PositiveSmallIntegerField(
+        verbose_name=_("Resources"),
+        choices=Resources.choices,
+        default=Resources.UNDEFINED,
+    )
+    pertinence = models.PositiveSmallIntegerField(
+        verbose_name=_("Pertinence"),
+        choices=Pertinence.choices,
+        default=Pertinence.UNDEFINED,
+    )
+    activity = models.PositiveSmallIntegerField(
+        verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
+    )
     is_selected = models.BooleanField(verbose_name=_("Is selected"))
     justification = models.TextField(verbose_name=_("Justification"))
 
