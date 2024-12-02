@@ -157,6 +157,11 @@ class ROTO(AbstractBaseModel):
 
 
 class Stakeholder(AbstractBaseModel):
+    class Category(models.TextChoices):
+        CLIENT = "client", _("Client")
+        PARTNER = "partner", _("Partner")
+        SUPPLIER = "supplier", _("Supplier")
+
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -176,7 +181,9 @@ class Stakeholder(AbstractBaseModel):
         help_text=_("Controls applied to lower stakeholder criticality"),
     )
 
-    category = models.CharField(max_length=128, verbose_name=_("Category"))
+    category = models.CharField(
+        max_length=32, verbose_name=_("Category"), choices=Category.choices
+    )
 
     current_dependency = models.PositiveSmallIntegerField(
         verbose_name=_("Current dependency"),
