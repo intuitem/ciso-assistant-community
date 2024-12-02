@@ -2269,7 +2269,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """Returns the list of requirement assessments for the different audit modes"""
         assessable = self.request.query_params.get("assessable", False)
         requirement_assessments_objects = self.get_object().get_requirement_assessments(
-            include_non_assessable = not assessable
+            include_non_assessable=not assessable
         )
         requirements_objects = RequirementNode.objects.filter(
             framework=self.get_object().framework
