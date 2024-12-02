@@ -80,6 +80,30 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
 
+class FearedEvent(NameDescriptionMixin):
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name=_("Assets"),
+        related_name="feared_events",
+        help_text=_("Assets that are affected by the feared event"),
+    )
+
+    ref_id = models.CharField(max_length=100)
+    gravity = models.PositiveSmallIntegerField(verbose_name=_("Gravity"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"))
+    justification = models.TextField(verbose_name=_("Justification"))
+
+    class Meta:
+        verbose_name = _("Feared event")
+        verbose_name_plural = _("Feared events")
+        ordering = ["created_at"]
+
+
 class ROTO(AbstractBaseModel):
     class RiskOrigin(models.TextChoices):
         STATE = "state", _("State")
@@ -91,9 +115,15 @@ class ROTO(AbstractBaseModel):
         AVENGER = "avenger", _("Avenger")
         PATHOLOGICAL = "pathological", _("Pathological")
 
-    study = models.ForeignKey(
-        EbiosRMStudy, verbose_name=_("EBIOS RM study"), on_delete=models.CASCADE
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
     )
+    feared_events = models.ManyToManyField(
+        FearedEvent, verbose_name=_("Feared events"), related_name="ro_to_couples"
+    )
+
     risk_origin = models.CharField(max_length=200, verbose_name=_("Risk origin"))
     target_objective = models.CharField(
         max_length=200, verbose_name=_("Target objective")
