@@ -9,6 +9,7 @@ from core.models import (
     Qualification,
     RiskAssessment,
     RiskMatrix,
+    Threat,
 )
 from iam.models import FolderMixin, User
 from tprm.models import Entity
@@ -288,4 +289,36 @@ class AttackPath(AbstractBaseModel):
     class Meta:
         verbose_name = _("Attack path")
         verbose_name_plural = _("Attack paths")
+        ordering = ["created_at"]
+
+
+class OperationalScenario(AbstractBaseModel):
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        related_name="operational_scenarios",
+        on_delete=models.CASCADE,
+    )
+    attack_paths = models.ManyToManyField(
+        AttackPath,
+        verbose_name=_("Attack paths"),
+        related_name="operational_scenarios",
+        help_text=_("Attack paths that are pertinent to the operational scenario"),
+    )
+    threats = models.ManyToManyField(
+        Threat,
+        verbose_name=_("Threats"),
+        blank=True,
+        related_name="operational_scenarios",
+        help_text=_("Threats leveraged by the operational scenario"),
+    )
+
+    description = models.TextField(verbose_name=_("Description"))
+    likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"))
+    justification = models.TextField(verbose_name=_("Justification"))
+
+    class Meta:
+        verbose_name = _("Operational scenario")
+        verbose_name_plural = _("Operational scenarios")
         ordering = ["created_at"]
