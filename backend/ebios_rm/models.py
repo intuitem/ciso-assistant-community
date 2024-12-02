@@ -1,7 +1,9 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
 from core.models import (
+    AppliedControl,
     Asset,
     ComplianceAssessment,
     Qualification,
@@ -9,6 +11,7 @@ from core.models import (
     RiskMatrix,
 )
 from iam.models import FolderMixin, User
+from tprm.models import Entity
 
 
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
@@ -150,4 +153,77 @@ class ROTO(AbstractBaseModel):
     class Meta:
         verbose_name = _("RO/TO couple")
         verbose_name_plural = _("RO/TO couples")
+        ordering = ["created_at"]
+
+
+class Stakeholder(AbstractBaseModel):
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+    )
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        verbose_name=_("Entity"),
+        help_text=_("Entity qualified by the stakeholder"),
+    )
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name=_("Applied controls"),
+        blank=True,
+        related_name="stakeholders",
+        help_text=_("Controls applied to lower stakeholder criticality"),
+    )
+
+    category = models.CharField(max_length=128, verbose_name=_("Category"))
+
+    current_dependency = models.PositiveSmallIntegerField(
+        verbose_name=_("Current dependency"),
+        default=0,
+        validators=[MaxValueValidator(4)],
+    )
+    current_penetration = models.PositiveSmallIntegerField(
+        verbose_name=_("Current penetration"),
+        default=0,
+        validators=[MaxValueValidator(4)],
+    )
+    current_maturity = models.PositiveSmallIntegerField(
+        verbose_name=_("Current maturity"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
+    )
+    current_trust = models.PositiveSmallIntegerField(
+        verbose_name=_("Current trust"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
+    )
+
+    residual_dependency = models.PositiveSmallIntegerField(
+        verbose_name=_("Residual dependency"),
+        default=0,
+        validators=[MaxValueValidator(4)],
+    )
+    residual_penetration = models.PositiveSmallIntegerField(
+        verbose_name=_("Residual penetration"),
+        default=0,
+        validators=[MaxValueValidator(4)],
+    )
+    residual_maturity = models.PositiveSmallIntegerField(
+        verbose_name=_("Residual maturity"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
+    )
+    residual_trust = models.PositiveSmallIntegerField(
+        verbose_name=_("Residual trust"),
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
+    )
+
+    is_selected = models.BooleanField(verbose_name=_("Is selected"))
+    justification = models.TextField(verbose_name=_("Justification"))
+
+    class Meta:
+        verbose_name = _("Stakeholder")
+        verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
