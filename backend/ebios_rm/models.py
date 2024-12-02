@@ -1,7 +1,13 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
-from core.models import Asset, ComplianceAssessment, RiskAssessment, RiskMatrix
+from core.models import (
+    Asset,
+    ComplianceAssessment,
+    Qualification,
+    RiskAssessment,
+    RiskMatrix,
+)
 from iam.models import FolderMixin, User
 
 
@@ -91,6 +97,12 @@ class FearedEvent(NameDescriptionMixin):
         verbose_name=_("Assets"),
         related_name="feared_events",
         help_text=_("Assets that are affected by the feared event"),
+    )
+    qualifications = models.ManyToManyField(
+        Qualification,
+        verbose_name=_("Qualifications"),
+        related_name="feared_events",
+        help_text=_("Qualifications carried by the feared event"),
     )
 
     ref_id = models.CharField(max_length=100)
