@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import AbstractBaseModel, NameDescriptionMixin, ETADueDateMixin
+from core.models import Asset, ComplianceAssessment, RiskAssessment, RiskMatrix
 from iam.models import FolderMixin, User
 
 
@@ -11,6 +12,29 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         IN_REVIEW = "in_review", _("In review")
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
+
+    risk_matrix = models.ForeignKey(
+        RiskMatrix,
+        on_delete=models.PROTECT,
+        verbose_name=_("Risk matrix"),
+        related_name="ebios_rm_studies",
+    )
+    assets = models.ManyToManyField(
+        Asset,
+        verbose_name=_("Assets"),
+        related_name="ebios_rm_studies",
+    )
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        verbose_name=_("Compliance assessments"),
+        related_name="ebios_rm_studies",
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        verbose_name=_("Risk assessments"),
+        help_text=_("Risk assessments generated at the end of workshop 4"),
+        related_name="ebios_rm_studies",
+    )
 
     ref_id = models.CharField(max_length=100, unique=True)
     version = models.CharField(
@@ -33,13 +57,13 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         User,
         blank=True,
         verbose_name=_("Authors"),
-        related_name="%(class)s_authors",
+        related_name="authors",
     )
     reviewers = models.ManyToManyField(
         User,
         blank=True,
         verbose_name=_("Reviewers"),
-        related_name="%(class)s_reviewers",
+        related_name="reviewers",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
