@@ -234,3 +234,32 @@ class Stakeholder(AbstractBaseModel):
         verbose_name = _("Stakeholder")
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
+
+
+class AttackPath(AbstractBaseModel):
+    ebios_rm_study = models.ForeignKey(
+        EbiosRMStudy,
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+    )
+    ro_to_couple = models.ForeignKey(
+        ROTO,
+        verbose_name=_("RO/TO couple"),
+        on_delete=models.CASCADE,
+        help_text=_("RO/TO couple from which the attach path is derived"),
+    )
+    stakeholders = models.ManyToManyField(
+        Stakeholder,
+        verbose_name=_("Stakeholders"),
+        related_name="attack_paths",
+        help_text=_("Stakeholders leveraged by the attack path"),
+    )
+
+    description = models.TextField(verbose_name=_("Description"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"))
+    justification = models.TextField(verbose_name=_("Justification"))
+
+    class Meta:
+        verbose_name = _("Attack path")
+        verbose_name_plural = _("Attack paths")
+        ordering = ["created_at"]
