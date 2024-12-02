@@ -43,7 +43,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_("Risk assessments generated at the end of workshop 4"),
     )
 
-    ref_id = models.CharField(max_length=100, unique=True)
+    ref_id = models.CharField(max_length=100)
     version = models.CharField(
         max_length=100,
         blank=True,
