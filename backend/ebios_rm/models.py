@@ -110,9 +110,9 @@ class FearedEvent(NameDescriptionMixin):
     )
 
     ref_id = models.CharField(max_length=100)
-    gravity = models.PositiveSmallIntegerField(verbose_name=_("Gravity"))
-    is_selected = models.BooleanField(verbose_name=_("Is selected"))
-    justification = models.TextField(verbose_name=_("Justification"))
+    gravity = models.PositiveSmallIntegerField(verbose_name=_("Gravity"), default=0)
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Feared event")
@@ -185,8 +185,8 @@ class ROTO(AbstractBaseModel):
     activity = models.PositiveSmallIntegerField(
         verbose_name=_("Activity"), default=0, validators=[MaxValueValidator(4)]
     )
-    is_selected = models.BooleanField(verbose_name=_("Is selected"))
-    justification = models.TextField(verbose_name=_("Justification"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("RO/TO couple")
@@ -265,8 +265,8 @@ class Stakeholder(AbstractBaseModel):
         validators=[MinValueValidator(1), MaxValueValidator(4)],
     )
 
-    is_selected = models.BooleanField(verbose_name=_("Is selected"))
-    justification = models.TextField(verbose_name=_("Justification"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Stakeholder")
@@ -320,8 +320,8 @@ class AttackPath(AbstractBaseModel):
     )
 
     description = models.TextField(verbose_name=_("Description"))
-    is_selected = models.BooleanField(verbose_name=_("Is selected"))
-    justification = models.TextField(verbose_name=_("Justification"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Attack path")
@@ -352,8 +352,8 @@ class OperationalScenario(AbstractBaseModel):
 
     description = models.TextField(verbose_name=_("Description"))
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
-    is_selected = models.BooleanField(verbose_name=_("Is selected"))
-    justification = models.TextField(verbose_name=_("Justification"))
+    is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
+    justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
     class Meta:
         verbose_name = _("Operational scenario")
