@@ -17,14 +17,18 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         if not validated_data.get("risk_matrix"):
             try:
-                ebios_matrix_library = StoredLibrary.objects.get(
-                    urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
-                )
-                ebios_matrix_library.load()
-
-                validated_data["risk_matrix"] = RiskMatrix.objects.get(
+                ebios_matrix = RiskMatrix.objects.filter(
                     urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
-                )
+                ).first()
+                if not ebios_matrix:
+                    ebios_matrix_library = StoredLibrary.objects.get(
+                        urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
+                    )
+                    ebios_matrix_library.load()
+                    ebios_matrix = RiskMatrix.objects.get(
+                        urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
+                    )
+                validated_data["risk_matrix"] = ebios_matrix
             except (StoredLibrary.DoesNotExist, RiskMatrix.DoesNotExist) as e:
                 logging.error(f"Error loading risk matrix: {str(e)}")
                 raise serializers.ValidationError(
