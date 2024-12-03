@@ -73,29 +73,27 @@ export const actions: Actions = {
 				});
 				return fail(res.status, { form });
 			}
-			if (res.status === 401) {
+			if (res.status === 401 && res.data) {
 				// User is not authenticated
-				if (res.data) {
-					const flows: AuthenticationFlow[] = res.data.flows;
-					if (flows.length > 0) {
-						const mfaFlow = flows.find((flow) => flow.id === 'mfa_authenticate');
-						const sessionToken = res.meta.session_token;
-						if (sessionToken) {
-							cookies.set('allauth_session_token', sessionToken, {
-								httpOnly: true,
-								sameSite: 'lax',
-								path: '/',
-								secure: true
-							});
-						}
+				const flows: AuthenticationFlow[] = res.data.flows;
+				if (flows.length > 0) {
+					const mfaFlow = flows.find((flow) => flow.id === 'mfa_authenticate');
+					const sessionToken = res.meta.session_token;
+					if (sessionToken) {
+						cookies.set('allauth_session_token', sessionToken, {
+							httpOnly: true,
+							sameSite: 'lax',
+							path: '/',
+							secure: true
+						});
+					}
 
-						if (mfaFlow) {
-							return {
-								form,
-								mfa: true,
-								mfaFlow
-							};
-						}
+					if (mfaFlow) {
+						return {
+							form,
+							mfa: true,
+							mfaFlow
+						};
 					}
 				}
 			}
@@ -134,6 +132,7 @@ export const actions: Actions = {
 		const next = url.searchParams.get('next') || '/';
 		const secureNext = getSecureRedirect(next);
 		const refreshQueryParam = CI_TEST ? '' : '?refresh=1';
+		// The CI_TEST environment variable will have to be removed if the `currentLang == preferedLang` solution fix the enterprise function tests.
 		if (currentLang == preferedLang) {
 			redirect(302, secureNext);
 		}
