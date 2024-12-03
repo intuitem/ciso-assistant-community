@@ -48,7 +48,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_(
             "Compliance assessments established as security baseline during workshop 1.4"
         ),
-        blank=True,
     )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
@@ -56,7 +55,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Risk assessments"),
         related_name="ebios_rm_studies",
         help_text=_("Risk assessments generated at the end of workshop 4"),
-        blank=True,
     )
     reference_entity = models.ForeignKey(
         Entity,
