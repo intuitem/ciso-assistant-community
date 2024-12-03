@@ -42,6 +42,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     compliance_assessments = models.ManyToManyField(
         ComplianceAssessment,
+        blank=True,
         verbose_name=_("Compliance assessments"),
         related_name="ebios_rm_studies",
         help_text=_(
@@ -51,10 +52,19 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
+        blank=True,
         verbose_name=_("Risk assessments"),
         related_name="ebios_rm_studies",
         help_text=_("Risk assessments generated at the end of workshop 4"),
         blank=True,
+    )
+    reference_entity = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        verbose_name=_("Reference entity"),
+        related_name="ebios_rm_studies",
+        help_text=_("Entity that is the focus of the study"),
+        default=Entity.get_main_entity,
     )
 
     ref_id = models.CharField(max_length=100)
@@ -102,19 +112,21 @@ class FearedEvent(NameDescriptionMixin):
     )
     assets = models.ManyToManyField(
         Asset,
+        blank=True,
         verbose_name=_("Assets"),
         related_name="feared_events",
         help_text=_("Assets that are affected by the feared event"),
     )
     qualifications = models.ManyToManyField(
         Qualification,
+        blank=True,
         verbose_name=_("Qualifications"),
         related_name="feared_events",
         help_text=_("Qualifications carried by the feared event"),
     )
 
     ref_id = models.CharField(max_length=100)
-    gravity = models.PositiveSmallIntegerField(verbose_name=_("Gravity"), default=0)
+    gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
@@ -124,7 +136,7 @@ class FearedEvent(NameDescriptionMixin):
         ordering = ["created_at"]
 
 
-class ROTO(AbstractBaseModel):
+class RoTo(AbstractBaseModel):
     class RiskOrigin(models.TextChoices):
         STATE = "state", _("State")
         ORGANIZED_CRIME = "organized_crime", _("Organized crime")
@@ -204,16 +216,18 @@ class Stakeholder(AbstractBaseModel):
         PARTNER = "partner", _("Partner")
         SUPPLIER = "supplier", _("Supplier")
 
-    ebios_rm_studies = models.ManyToManyField(
+    ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
-        verbose_name=_("EBIOS RM studies"),
+        verbose_name=_("EBIOS RM study"),
+        help_text=_("EBIOS RM study that the stakeholder is part of"),
         related_name="stakeholders",
-        help_text=_("EBIOS RM studies in which the stakeholder is involved"),
+        on_delete=models.CASCADE,
     )
     entity = models.ForeignKey(
         Entity,
         on_delete=models.CASCADE,
         verbose_name=_("Entity"),
+        related_name="stakeholders",
         help_text=_("Entity qualified by the stakeholder"),
     )
     applied_controls = models.ManyToManyField(
@@ -312,7 +326,7 @@ class AttackPath(AbstractBaseModel):
         on_delete=models.CASCADE,
     )
     ro_to_couple = models.ForeignKey(
-        ROTO,
+        RoTo,
         verbose_name=_("RO/TO couple"),
         on_delete=models.CASCADE,
         help_text=_("RO/TO couple from which the attach path is derived"),

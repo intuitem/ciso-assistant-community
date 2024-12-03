@@ -1,5 +1,5 @@
 import pytest
-from ebios_rm.models import EbiosRMStudy, FearedEvent, ROTO, Stakeholder
+from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
 
 from tprm.models import Entity
 
@@ -17,8 +17,8 @@ class TestStakeholder:
         stakeholder = Stakeholder.objects.create(
             entity=entity,
             category=Stakeholder.Category.SUPPLIER,
+            ebios_rm_study=study,
         )
-        stakeholder.ebios_rm_studies.add(study)
 
         assert stakeholder in study.stakeholders.all()
         assert stakeholder.entity == entity
