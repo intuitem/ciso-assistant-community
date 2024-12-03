@@ -1,4 +1,5 @@
 // schema for the validation of forms
+import { risk } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -373,6 +374,7 @@ export const vulnerabilitySchema = baseNamedObject({
 export const ebiosRMStudySchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().default(''),
+	risk_matrix: z.string().optional(),
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {

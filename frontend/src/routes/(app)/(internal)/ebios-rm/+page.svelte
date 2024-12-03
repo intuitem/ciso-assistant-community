@@ -7,6 +7,7 @@
     import CreateModal from '$lib/components/Modals/CreateModal.svelte';
     import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
     import { checkConstraints } from '$lib/utils/crud';
+	import * as m from '$paraglide/messages.js';
 
     const modalStore: ModalStore = getModalStore();
 
@@ -27,7 +28,12 @@
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
 		};
-		if (checkConstraints(data.createForm.constraints, data.model.foreignKeys).length > 0) {
+		if (checkConstraints(
+			data.createForm.constraints, 
+			Object.fromEntries(
+				Object.entries(data.model.foreignKeys).filter(([key]) => key !== 'risk_matrix')
+			)
+			).length > 0) {
 			modalComponent = {
 				ref: MissingConstraintsModal
 			};

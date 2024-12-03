@@ -152,7 +152,6 @@ class Migration(migrations.Migration):
                         to="core.riskmatrix",
                         verbose_name="Risk matrix",
                         blank=True,
-                        null=True,
                     ),
                 ),
             ],

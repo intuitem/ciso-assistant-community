@@ -581,6 +581,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'ebiosRMStudies',
 		verboseName: 'Ebios RM Study',
 		verboseNamePlural: 'Ebios RM Studies',
+		foreignKeyFields: [
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
+		]
 	}
 };
 
