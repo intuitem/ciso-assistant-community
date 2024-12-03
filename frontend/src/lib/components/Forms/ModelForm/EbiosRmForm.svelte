@@ -2,8 +2,10 @@
     import type { SuperValidated } from 'sveltekit-superforms';
     import type { ModelInfo, CacheLock } from '$lib/utils/types';
     import TextField from '$lib/components/Forms/TextField.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
     import Select from '$lib/components/Forms/Select.svelte';
     import * as m from '$paraglide/messages.js';
+	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
 
     export let form: SuperValidated<any>;
@@ -27,6 +29,15 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+/>
+<AutocompleteSelect
+	{form}
+	options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
+	field="risk_matrix"
+	cacheLock={cacheLocks['risk_matrix']}
+	bind:cachedValue={formDataCache['risk_matrix']}
+	label={m.riskMatrix()}
+	helpText={m.ebiosRmMatrixHelpText()}
 />
 <!-- <TextArea
 	{form}
