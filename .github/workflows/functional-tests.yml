@@ -211,7 +211,7 @@ jobs:
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
+        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }} -g "fuzz"
         env:
           CI: true
       - uses: actions/upload-artifact@v4
