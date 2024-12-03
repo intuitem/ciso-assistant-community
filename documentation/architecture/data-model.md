@@ -1162,16 +1162,16 @@ Each of these objects will have its specific datamodel. Factoring will be done a
 
 EBIOS-RM (english)    | EBIOS-RM (french)       |  CISO Assistant
 ----------------------|-------------------------|----------------
-Study                 | Etude                   | Bundle
-Studied object        | Objet de l'étude        | Description of the bundle
-Mission               | Mission                 | Mission of the reference entity added to the bundle
+Study                 | Etude                   | Study
+Studied object        | Objet de l'étude        | Description of the Study
+Mission               | Mission                 | Mission of the reference entity added to the Study
 Business asset        | Valeurs métier          | Primary asset
 Supporting asset      | Bien support            | Supporting asset
 Feared event          | Evénement redouté       | Risk analysis at asset level
 Impact                | Impact                  | Impact in a risk analysis
 Security baseline     | Socle de sécurité       | Compliance frameworks and audits
-Risk origins          | Sources de risque       | TBD
-Target objectives     | Objectifs visés         | TBD
+Risk origins          | Sources de risque       | RoTo
+Target objectives     | Objectifs visés         | RoTo
 Ecosystem             | Ecosystème              | Third Party Risk Management
 Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)
 Security controls     | Mesures de sécurité     | Reference/applied controls
@@ -1280,11 +1280,11 @@ erDiagram
 
     FEARED_EVENT          }o--o{ ASSET                : affects
     STAKEHOLDER           }o--|| ENTITY               : qualifies
-    EBIOS_RM_STUDY        }o--o{ RO_TO                : contains
-    EBIOS_RM_STUDY        }o--o{ STAKEHOLDER          : contains
-    EBIOS_RM_STUDY        }o--o{ OPERATIONAL_SCENARIO : contains
-    EBIOS_RM_STUDY        }o--o{ FEARED_EVENT         : contains
-    EBIOS_RM_STUDY        }o--o{ ATTACK_PATH          : contains
+    EBIOS_RM_STUDY        ||--o{ RO_TO                : contains
+    EBIOS_RM_STUDY        ||--o{ STAKEHOLDER          : contains
+    EBIOS_RM_STUDY        ||--o{ OPERATIONAL_SCENARIO : contains
+    EBIOS_RM_STUDY        ||--o{ FEARED_EVENT         : contains
+    EBIOS_RM_STUDY        ||--o{ ATTACK_PATH          : contains
     EBIOS_RM_STUDY        }o--o{ ASSET                : contains
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
