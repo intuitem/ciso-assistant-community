@@ -26,7 +26,7 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
-	import EbiosRm from './ModelForm/EbiosRm.svelte';
+	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -256,7 +256,7 @@
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'ebios-rm'}
-		<EbiosRm {form} {model} {cacheLocks} {formDataCache} />
+		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

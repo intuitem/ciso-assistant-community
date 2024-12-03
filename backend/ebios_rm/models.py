@@ -32,7 +32,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
         ),
         blank=True,
-        null=True,
     )
     assets = models.ManyToManyField(
         Asset,

@@ -41,7 +41,7 @@
 	};
 </script>
 
-<div class="h-screen w-full p-8">
+<div class="h-full w-full p-8">
 	<div
 		class="card bg-white shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>

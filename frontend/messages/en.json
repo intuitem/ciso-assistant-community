@@ -919,5 +919,6 @@
 	"ebiosWs5_3": "Define security measures",
 	"ebiosWs5_4": "Assess and document residual risks",
 	"ebiosWs5_5": "Establish risk monitoring framework",
-	"activity": "Activity"
+	"activity": "Activity",
+	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
 }
