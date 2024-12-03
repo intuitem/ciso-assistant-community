@@ -28,9 +28,9 @@ interface AuthenticationFlow {
 }
 
 function makeRedirectURL(currentLang: string, preferedLang: string, url: URL): string {
-	const next = url.searchParams.get('next') || '/';
-	const secureNext = getSecureRedirect(next);
-	if (currentLang == preferedLang) {
+	const next = url.searchParams.get('next');
+	const secureNext = getSecureRedirect(next) || '/';
+	if (currentLang === preferedLang) {
 		return secureNext;
 	}
 	return secureNext ? `${secureNext}?refresh=1` : `/?refresh=1`;
