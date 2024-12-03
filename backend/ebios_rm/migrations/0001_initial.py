@@ -95,7 +95,6 @@ class Migration(migrations.Migration):
                         related_name="ebios_rm_studies",
                         to="core.asset",
                         verbose_name="Assets",
-                        blank=True,
                     ),
                 ),
                 (
@@ -115,7 +114,6 @@ class Migration(migrations.Migration):
                         related_name="ebios_rm_studies",
                         to="core.complianceassessment",
                         verbose_name="Compliance assessments",
-                        blank=True,
                     ),
                 ),
                 (
@@ -155,7 +153,6 @@ class Migration(migrations.Migration):
                         related_name="ebios_rm_studies",
                         to="core.riskassessment",
                         verbose_name="Risk assessments",
-                        blank=True,
                     ),
                 ),
                 (
