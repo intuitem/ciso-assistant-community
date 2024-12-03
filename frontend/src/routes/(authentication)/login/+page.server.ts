@@ -132,7 +132,9 @@ export const actions: Actions = {
 		}
 
 		const next = url.searchParams.get('next') || '/';
-		const redirectURL = getSecureRedirect(next) + (CI_TEST ? '' : '?refresh=1');
+		const secureNext = getSecureRedirect(next);
+		const refreshQueryParam = (CI_TEST ? '' : '?refresh=1');
+		const redirectURL = secureNext ? `${secureNext}${refreshQueryParam}` : `/${refreshQueryParam}`;
 		redirect(302, redirectURL);
 	},
 	mfaAuthenticate: async (event) => {
