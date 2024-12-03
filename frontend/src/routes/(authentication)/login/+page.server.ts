@@ -133,7 +133,7 @@ export const actions: Actions = {
 
 		const next = url.searchParams.get('next') || '/';
 		const secureNext = getSecureRedirect(next);
-		const refreshQueryParam = (CI_TEST ? '' : '?refresh=1');
+		const refreshQueryParam = CI_TEST ? '' : '?refresh=1';
 		const redirectURL = secureNext ? `${secureNext}${refreshQueryParam}` : `/${refreshQueryParam}`;
 		redirect(302, redirectURL);
 	},
