@@ -52,6 +52,14 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         related_name="ebios_rm_studies",
         help_text=_("Risk assessments generated at the end of workshop 4"),
     )
+    reference_entity = models.ForeignKey(
+        Entity,
+        on_delete=models.PROTECT,
+        verbose_name=_("Reference entity"),
+        related_name="ebios_rm_studies",
+        help_text=_("Entity that is the focus of the study"),
+        default=Entity.get_main_entity,
+    )
 
     ref_id = models.CharField(max_length=100)
     version = models.CharField(
@@ -120,7 +128,7 @@ class FearedEvent(NameDescriptionMixin):
         ordering = ["created_at"]
 
 
-class ROTO(AbstractBaseModel):
+class RoTo(AbstractBaseModel):
     class RiskOrigin(models.TextChoices):
         STATE = "state", _("State")
         ORGANIZED_CRIME = "organized_crime", _("Organized crime")
@@ -308,7 +316,7 @@ class AttackPath(AbstractBaseModel):
         on_delete=models.CASCADE,
     )
     ro_to_couple = models.ForeignKey(
-        ROTO,
+        RoTo,
         verbose_name=_("RO/TO couple"),
         on_delete=models.CASCADE,
         help_text=_("RO/TO couple from which the attach path is derived"),
