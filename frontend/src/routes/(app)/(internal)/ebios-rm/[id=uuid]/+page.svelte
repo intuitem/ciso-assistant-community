@@ -13,7 +13,7 @@
 	const dummydata = {
 		ws1: [
 			{ title: safeTranslate(m.ebiosWs1_1()), status: 'done', href: `${$page.url.pathname}/workshop-one/ebios-rm-study?next=${$page.url.pathname}` },
-			{ title: safeTranslate(m.ebiosWs1_2()), status: 'done', href: '#' },
+			{ title: safeTranslate(m.ebiosWs1_2()), status: 'done', href: `${$page.url.pathname}/workshop-one/ebios-rm-study?next=${$page.url.pathname}` },
 			{ title: safeTranslate(m.ebiosWs1_3()), status: 'to_do', href: '#' },
 			{ title: safeTranslate(m.ebiosWs1_4()), status: 'to_do', href: '#' }
 		],
