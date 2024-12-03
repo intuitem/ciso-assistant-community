@@ -31,12 +31,15 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_(
             "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
         ),
+        blank=True,
+        null=True,
     )
     assets = models.ManyToManyField(
         Asset,
         verbose_name=_("Assets"),
         related_name="ebios_rm_studies",
         help_text=_("Assets that are pertinent to the study"),
+        blank=True,
     )
     compliance_assessments = models.ManyToManyField(
         ComplianceAssessment,
@@ -45,12 +48,14 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_(
             "Compliance assessments established as security baseline during workshop 1.4"
         ),
+        blank=True,
     )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
         verbose_name=_("Risk assessments"),
         related_name="ebios_rm_studies",
         help_text=_("Risk assessments generated at the end of workshop 4"),
+        blank=True,
     )
 
     ref_id = models.CharField(max_length=100)
