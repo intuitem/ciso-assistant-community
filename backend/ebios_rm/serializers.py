@@ -41,14 +41,17 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
-class EbiosRMStudyReadSerializer(AssessmentReadSerializer):
+class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     project = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
+    reference_entity = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
+    authors = FieldsRelatedField(many=True)
+    reviewers = FieldsRelatedField(many=True)
 
     class Meta:
         model = EbiosRMStudy
