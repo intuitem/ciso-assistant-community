@@ -53,7 +53,7 @@ export const URL_MODEL = [
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
-	'ebios-rm-study',
+	// 'ebios-rm',
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

@@ -372,10 +372,7 @@ export const vulnerabilitySchema = baseNamedObject({
 
 export const ebiosRMStudySchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
-	status: z.string().optional().nullable(),
-	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional(),
-	observation: z.string().optional().nullable()
+	ref_id: z.string().default(''),
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -403,7 +400,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
-	'ebios-rm-study': ebiosRMStudySchema
+	'ebios-rm': ebiosRMStudySchema
 };
 
 export const modelSchema = (model: string) => {

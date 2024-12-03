@@ -20,13 +20,21 @@
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
 />
-<TextArea
+<TextField
+	{form}
+	required
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<!-- <TextArea
 	{form}
 	field="observation"
 	label={m.observation()}
 	cacheLock={cacheLocks['observation']}
 	bind:cachedValue={formDataCache['observation']}
-/>
+/> -->
 <!-- <Select
 	{form}
 	options={model.selectOptions['status']}
