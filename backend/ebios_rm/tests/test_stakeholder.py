@@ -1,5 +1,5 @@
 import pytest
-from ebios_rm.models import EbiosRMStudy, FearedEvent, ROTO, Stakeholder
+from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
 
 from tprm.models import Entity
 
