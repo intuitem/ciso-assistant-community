@@ -12,7 +12,7 @@ import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async (event) => {
-	const URLModel = 'ebios-rm-study';
+	const URLModel = 'ebios-rm';
 	const schema = modelSchema(URLModel);
 	// const objectEndpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/object/`;
 	const object = {
