@@ -575,7 +575,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'user', urlModel: 'users' }
 		]
 	},
-	'ebios-rm-study': {
+	'ebios-rm': {
 		name: 'ebiosrmstudy',
 		localName: 'ebiosRMStudy',
 		localNamePlural: 'ebiosRMStudies',
