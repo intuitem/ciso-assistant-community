@@ -101,8 +101,7 @@
 
 	$: if (browser && $page.url.searchParams.has('refresh')) {
 		$page.url.searchParams.delete('refresh');
-		console.error(`[DEBUG2] ${window.location.href}`); // Just to test if the playwright JS console stderr would actually be outputed in the logs
-		// window.location.href = $page.url.href;
+		window.location.href = $page.url.href;
 	}
 </script>
 

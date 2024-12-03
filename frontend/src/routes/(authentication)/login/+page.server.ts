@@ -30,7 +30,6 @@ interface AuthenticationFlow {
 function makeRedirectURL(currentLang: string, preferedLang: string, url: URL): string {
 	const next = url.searchParams.get('next');
 	const secureNext = getSecureRedirect(next) || '/';
-	console.error(`[DEBUG] '${currentLang}' === '${preferedLang}'`);
 	if (currentLang === preferedLang) {
 		return secureNext;
 	}
