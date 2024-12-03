@@ -10,6 +10,10 @@ import logging
 
 
 class EbiosRMStudyWriteSerializer(BaseModelSerializer):
+    risk_matrix = serializers.PrimaryKeyRelatedField(
+        queryset=RiskMatrix.objects.all(), required=False
+    )
+
     def create(self, validated_data):
         if not validated_data.get("risk_matrix"):
             try:
