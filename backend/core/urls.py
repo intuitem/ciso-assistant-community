@@ -5,6 +5,7 @@ from tprm.views import (
     SolutionViewSet,
     EntityAssessmentViewSet,
 )
+from ebios_rm.views import EbiosRMStudyViewSet
 from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
 import importlib
 
@@ -27,6 +28,7 @@ router.register(r"projects", ProjectViewSet, basename="projects")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
+router.register(r"ebios-rm", EbiosRMStudyViewSet, basename="ebios-rm")
 router.register(r"threats", ThreatViewSet, basename="threats")
 router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios")
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
