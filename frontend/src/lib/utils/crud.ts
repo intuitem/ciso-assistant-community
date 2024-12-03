@@ -577,14 +577,19 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'ebios-rm': {
 		name: 'ebiosrmstudy',
-		localName: 'ebiosRMStudy',
-		localNamePlural: 'ebiosRMStudies',
-		verboseName: 'Ebios RM Study',
-		verboseNamePlural: 'Ebios RM Studies',
+		localName: 'ebiosRMstudy',
+		localNamePlural: 'ebiosRMstudy',
+		verboseName: 'Ebios RMstudy',
+		verboseNamePlural: 'Ebios RMstudy',
 		foreignKeyFields: [
-			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
-	}
+	},
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

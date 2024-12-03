@@ -1,30 +1,22 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
-	getModelInfo,
-	urlParamModelForeignKeyFields,
-	urlParamModelSelectFields
+	getModelInfo
 } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
+import { defaultWriteFormAction } from '$lib/utils/actions';
 
-export const load: LayoutServerLoad = async (event) => {
+export const load: PageServerLoad = async (event) => {
 	const URLModel = 'ebios-rm';
 	const schema = modelSchema(URLModel);
-	// const objectEndpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/object/`;
-	const object = {
-        version: '1.0',
-        status: '',
-        authors: '',
-        reviewers: '',
-        observation: ''
-    };
+	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/object/`;
+	const objectResponse = await event.fetch(objectEndpoint);
+	const object = await objectResponse.json();
 
 	const form = await superValidate(object, zod(schema), { errors: false });
-	const model = getModelInfo(URLModel!);
+	const model = getModelInfo(URLModel);
 	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
 
@@ -66,4 +58,10 @@ export const load: LayoutServerLoad = async (event) => {
 	model.foreignKeys = foreignKeys;
 	model.selectOptions = selectOptions;
 	return { form, model, object, foreignKeys, selectOptions, URLModel };
+};
+
+export const actions: Actions = {
+	default: async (event) => {
+		return defaultWriteFormAction({ event, urlModel: 'ebios-rm', action: 'edit' });
+	}
 };

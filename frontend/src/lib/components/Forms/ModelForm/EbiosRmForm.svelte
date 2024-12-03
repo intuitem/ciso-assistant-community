@@ -13,44 +13,99 @@
     export let cacheLocks: Record<string, CacheLock> = {};
     export let formDataCache: Record<string, any> = {};
     export let initialData: Record<string, any> = {};
+	export let context: string;
 </script>
 
-<TextField
-	{form}
-	field="version"
-	label={m.version()}
-	cacheLock={cacheLocks['version']}
-	bind:cachedValue={formDataCache['version']}
-/>
-<TextField
-	{form}
-	required
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
-	options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
-	field="risk_matrix"
-	cacheLock={cacheLocks['risk_matrix']}
-	bind:cachedValue={formDataCache['risk_matrix']}
-	label={m.riskMatrix()}
-	helpText={m.ebiosRmMatrixHelpText()}
-/>
-<!-- <TextArea
-	{form}
-	field="observation"
-	label={m.observation()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/> -->
-<!-- <Select
-	{form}
-	options={model.selectOptions['status']}
-	field="status"
-	label={m.status()}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-/> -->
+{#if context !== 'ebiosRmStudy'}
+	<TextField
+		{form}
+		field="version"
+		label={m.version()}
+		cacheLock={cacheLocks['version']}
+		bind:cachedValue={formDataCache['version']}
+	/>
+	<TextField
+		{form}
+		required
+		field="ref_id"
+		label={m.refId()}
+		cacheLock={cacheLocks['ref_id']}
+		bind:cachedValue={formDataCache['ref_id']}
+	/>
+	<AutocompleteSelect
+		{form}
+		options={getOptions({ objects: model.foreignKeys['folder'] })}
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.domain()}
+		hidden={initialData.folder}
+	/>
+	<AutocompleteSelect
+		{form}
+		options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
+		field="risk_matrix"
+		cacheLock={cacheLocks['risk_matrix']}
+		bind:cachedValue={formDataCache['risk_matrix']}
+		label={m.riskMatrix()}
+		helpText={m.ebiosRmMatrixHelpText()}
+	/>
+{:else if context === 'ebiosRmStudy'}
+	<div class="relative p-2 space-y-2 border rounded-md">
+		<p class="absolute -top-3 bg-white font-bold">{m.activityOne()}</p>
+		<TextField
+			{form}
+			field="version"
+			label={m.version()}
+			cacheLock={cacheLocks['version']}
+			bind:cachedValue={formDataCache['version']}
+		/>
+		<TextField
+			{form}
+			required
+			field="ref_id"
+			label={m.refId()}
+			cacheLock={cacheLocks['ref_id']}
+			bind:cachedValue={formDataCache['ref_id']}
+		/>
+		<TextArea
+			{form}
+			field="observation"
+			label={m.observation()}
+			cacheLock={cacheLocks['observation']}
+			bind:cachedValue={formDataCache['observation']}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+			field="authors"
+			cacheLock={cacheLocks['authors']}
+			bind:cachedValue={formDataCache['authors']}
+			label={m.authors()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+			field="reviewers"
+			cacheLock={cacheLocks['reviewers']}
+			bind:cachedValue={formDataCache['reviewers']}
+			label={m.reviewers()}
+		/>
+	</div>
+	<div class="relative p-2 space-y-2 border rounded-md">
+		<p class="absolute -top-3 bg-white font-bold">{m.activityTwo()}</p>
+		<AutocompleteSelect
+			multiple
+			{form}
+			options={getOptions({
+				objects: model.foreignKeys['assets'],
+				extra_fields: [['folder', 'str']],
+				label: 'auto'
+			})}
+			field="assets"
+			label={m.assets()}
+		/>
+	</div>
+{/if}

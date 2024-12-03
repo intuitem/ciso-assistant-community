@@ -920,5 +920,7 @@
 	"ebiosWs5_4": "Assess and document residual risks",
 	"ebiosWs5_5": "Establish risk monitoring framework",
 	"activity": "Activity",
-	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
+	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`",
+	"activityOne": "Activity 1",
+	"activityTwo": "Activity 2"
 }
