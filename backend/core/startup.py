@@ -339,6 +339,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_filteringlabel",
     "change_filteringlabel",
     "delete_filteringlabel",
+    "add_ebiosrmstudy",
+    "view_ebiosrmstudy",
+    "change_ebiosrmstudy",
+    "delete_ebiosrmstudy",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
