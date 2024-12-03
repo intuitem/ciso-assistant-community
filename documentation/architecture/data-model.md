@@ -100,19 +100,20 @@ erDiagram
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
     PROJECT                      |o--o{ COMPLIANCE_ASSESSMENT : contains
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
+    APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
+    FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     REQUIREMENT_ASSESSMENT       }o--|| REQUIREMENT_NODE      : implements
     REQUIREMENT_ASSESSMENT       }o--o{ APPLIED_CONTROL       : is_answered_by
     REQUIREMENT_ASSESSMENT       }o--o{ EVIDENCE              : is_proved_by
     APPLIED_CONTROL              }o--o| REFERENCE_CONTROL     : implements
     REQUIREMENT_NODE             }o--o{ THREAT                : addresses
-    FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
-    APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
     PROJECT                      |o--o{ RISK_ASSESSMENT       : contains
     RISK_ASSESSMENT              ||--o{ RISK_SCENARIO         : contains
     RISK_SCENARIO                }o--o{ APPLIED_CONTROL       : is_mitigated_by
     RISK_SCENARIO                }o--o{ THREAT                : derives_from
     RISK_SCENARIO                }o--o{ ASSET                 : threatens
+    RISK_SCENARIO                }o--o{ QUALIFICATION         : bears
     RISK_ACCEPTANCE              }o--o{ RISK_SCENARIO         : covers
     RISK_ASSESSMENT_REVIEW       }o--|| RISK_ASSESSMENT       : reviews
     RISK_SCENARIO                }o--o{ VULNERABILITY         : exploits
@@ -120,6 +121,8 @@ erDiagram
     USER                         }o--o{ RISK_SCENARIO         : owns
     USER                         }o--o{ APPLIED_CONTROL       : owns
     USER                         }o--o{ ASSET                 : owns
+    ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
+    SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
 
     PROJECT {
         string ref_id
@@ -289,8 +292,9 @@ erDiagram
         string type
         asset  parent_asset
         url    reference_link
-        json   security_objectives
-        json   disaster_recovery_objectives
+        int    rto
+        int    rpo
+        int    mtd
     }
 
     RISK_SCENARIO {
@@ -307,7 +311,6 @@ erDiagram
         json   target_risk_vector
         string strength_of_knowledge
         string justification
-        json   qualifications
         string threat_actor
     }
 
@@ -335,6 +338,19 @@ erDiagram
 
         string state
         string reviewer
+    }
+
+    QUALIFICATION {
+        string ref_id
+        string name
+        string description
+        json   translations
+        int    order
+        bool   is_objective
+    }
+
+    SECURITY_OBJECTIVE {
+        int value
     }
 
 ```
@@ -407,37 +423,47 @@ Projects have the following fields:
 - Description
 - Status: --/Design/Development/Production/End of life/Dropped
 
+## Qualifications
+
+Qualifications are qualities/objectives that can be used to qualify risk scenarios or to set security objectives to primary assets. Some of them are hardcoded, but in the PRO version the administrator can define additional values and rename existing ones.
+
+The following values are preloaded:
+
+abbreviation | q_order | so_order | name             | description | translations | urn
+-------------|---------|----------|------------------|-------------|--------------|------------------------------------------------
+C            | 1       | 1        | confidentiality  |             |  ...         | urn:intuitem:risk:qualification:confidentiality
+I            | 2       | 2        | integrity        |             |  ...         | urn:intuitem:risk:qualification:integrity
+A            | 3       | 3        | availability     |             |  ...         | urn:intuitem:risk:qualification:availability
+P            | 4       | 4        | proof            |             |  ...         | urn:intuitem:risk:qualification:proof
+Aut          | 5       | 5        | authenticity     |             |  ...         | urn:intuitem:risk:qualification:authenticity
+Priv         | 6       | 6        | privacy          |             |  ...         | urn:intuitem:risk:qualification:privacy
+Safe         | 7       | 7        | safety           |             |  ...         | urn:intuitem:risk:qualification:safety
+Rep          | 8       |          | reputation       |             |  ...         | urn:intuitem:risk:qualification:safety
+Ope          | 9       |          | operational      |             |  ...         | urn:intuitem:risk:qualification:operational
+Leg          | 10      |          | legal            |             |  ...         | urn:intuitem:risk:qualification:legal
+Fin          | 11      |          | financial        |             |  ...         | urn:intuitem:risk:qualification:financial
+
+Qualifications that have so_order defined can be used to set security objectives to primary assets.
+
+The role of urn is to enable updates with a library, and to facilitate export/import between instances (not in MVP).
+
+Note: the order can be changed in a translation. This makes easy to transform CIAP (English) in DICP (French) (not in MVP).
+
 ## Assets, security and disaster recovery objectives
 
 Assets are context objects defined by the entity using CISO Assistant. They are optional, assessments can be done without using them.
 
 Assets are of type primary or supporting. A primary asset has no parent, a supporting asset can have parent assets (primary or supporting), but not itself.
 
-Primary assets have security objectives that are evolutive, so they are catched in a json field.
+The following disaster recovery objectives (measured in seconds) can be defined on assets:
 
-Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets.
+ Abbreviation | Name                       | Description
+--------------|----------------------------|------------
+ RTO          | Recovery Time Objective    | ...         
+ RPO          | Recovery Point Objetive    | ...         
+ MTD          | Maximum Tolerable Downtime | ...
 
-There is a global parameter that defines a list of security objectives with a corresponding scale and a corresponding boolean allowing to select or hide a security objective. The following security objectives are pre-defined: 
-
- ref_id | Name                       | Description | default scale | default select value
---------|----------------------------|-------------|---------------|---------------------
- C      | Confidentiality            | ...         | 1-4           | True
- I      | Integrity                  | ...         | 1-4           | True
- A      | Availability               | ...         | 1-4           | True
- P      | Proof                      | ...         | 1-4           | True
- Auth   | Authenticity               | ...         | 1-4           | False
- Priv   | Privacy                    | ...         | 1-4           | False
- Safe   | Safety                     | ...         | 1-4           | False
-
-The following disaster recovery objectives (measured in seconds) are pre-defined:
-
- ref_id | Name                       | Description
---------|----------------------------|------------
- RTO    | Recovery Time Objective    | ...         
- RPO    | Recovery Point Objetive    | ...         
- MTD    | Maximum Tolerable Downtime | ...
-
-In a future version, users will be able to define custom security objectives.
+Assets have security objectives. Security objectives are specific goals or requirements that an organization, system, or process aims to achieve in order to ensure its security and protect its primary assets. They are a subset of qualifications.
 
 Security objectives are measured using a specifc scale. For now, the following scales are defined:
 - 0-3: coded as 0-3
@@ -461,9 +487,7 @@ FIPS-199 | 1              | moderate
 FIPS-199 | 2              | moderate
 FIPS-199 | 3              | high
 
-Security objectives can be evaluated for each asset. The default value is Null. The corresponding json field is composed of a list of tuples {security_objective_ref_id, value}.
-
-When a security objective is hidden in the global parameters, it is simply not proposed for new edition. However, a security objective that is already used in an asset is kept and editable even if it is hidden globally. Thus, when selecting or hiding a security objective, no value is changed in asset.
+THe scale to use is a global parameter. It has no impact on the encoding in the database, which always uses the internal value.
 
 ## Frameworks
 
@@ -623,7 +647,6 @@ The following inference rules are used:
 
 A risk assessment is based on scenarios, covered by Applied controls. Gathering the risk scenarios constitutes the "risk identification" phase.
 
-
 The risk matrix cannot be changed once the risk assessment is created.
 
 A risk assessment has an _risk_assessment_method_ field that can take the following values: 0 (risk matrix)/1 (Open FAIR). This cannot be changed once the risk assessment is created. Similarly, the risk matrix cannot be changed once the risk assessment is created.
@@ -634,9 +657,7 @@ A risk scenario contains a treatment option with the values --/open/mitigate/acc
 
 A risk scenario also contains a "strength of knowledge", within the values --/0 (Low)/1 (Medium)/2 (High). This can be used to represent a third dimension of risk, as recommended by the Society for Risk Analysis. The field "justification" can be used to expose the knowledge.
 
-A risk scenario also contains a "qualification" field, containing an array with the following possible values: Confidentiality, Integrity, Availability, Proof, Authenticity, Privacy, Safety, Reputation, Operational, Legal, Financial. The qualification can cover none, one or several of the values.
-
-Note: the list of qualifications is a superset of security objectives.
+A risk scenario also contains qualifications.
 
 The risk evaluation is automatically done based on the selected risk matrix.
 
@@ -1141,16 +1162,16 @@ Each of these objects will have its specific datamodel. Factoring will be done a
 
 EBIOS-RM (english)    | EBIOS-RM (french)       |  CISO Assistant
 ----------------------|-------------------------|----------------
-Study                 | Etude                   | Bundle
-Studied object        | Objet de l'étude        | Description of the bundle
-Mission               | Mission                 | Mission of the reference entity added to the bundle
+Study                 | Etude                   | Study
+Studied object        | Objet de l'étude        | Description of the Study
+Mission               | Mission                 | Mission of the reference entity added to the Study
 Business asset        | Valeurs métier          | Primary asset
 Supporting asset      | Bien support            | Supporting asset
 Feared event          | Evénement redouté       | Risk analysis at asset level
 Impact                | Impact                  | Impact in a risk analysis
 Security baseline     | Socle de sécurité       | Compliance frameworks and audits
-Risk origins          | Sources de risque       | TBD
-Target objectives     | Objectifs visés         | TBD
+Risk origins          | Sources de risque       | RoTo
+Target objectives     | Objectifs visés         | RoTo
 Ecosystem             | Ecosystème              | Third Party Risk Management
 Strategic scenarios   | Scénarios stratégiques  | Risk analysis at strategic level (focus on impact)
 Security controls     | Mesures de sécurité     | Reference/applied controls
@@ -1169,7 +1190,7 @@ The type EBIOS-RM study is a sort of assessment. It contains the following speci
 - a list of audits for the security baseline (workshop 1)
 - a list of feared events (workshop 1)
 - a list of risk_origin_target_objective (workshop 2)
-- a list of ecosystem entities (workshop 3)
+- a list of stakeholders (workshop 3)
 - a list of strategic scenarios/attack paths (workshop 3)
 - a list of opeating scenarios (workshop 4)
 - a resulting risk assessment (workshop 5)
@@ -1207,7 +1228,7 @@ The object ecosystem entity (workshop 3) links to a TPRM entity, and contains th
 The object strategic attack path (workshop 3) contains the following fields:
 - risk_origin_target_objective
 - description
-- affected ecosystem entities
+- affected stakeholders
 - intial threat level
 - Controls
 - residual threat level
@@ -1233,12 +1254,12 @@ The frontend for risk study shall propose the following steps:
 - workshop 2: risk origin/target objectives (sources de risque)
   - define risk_origin_target_objective objects
 - workshop 3:
-  - list of ecosystem entities
+  - list of stakeholders
   - list of strategic scenarios/attack paths
 - workshop 4: operational scenarios
   - list of operational scenarios
+  - The risk assessment is generated automatically, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
 - workshop 5: risk treatment
-  - The risk assessment is generated from workshop 4, thanks to a dedicated button. When the risk assessment is generated again, automatic versioning is applied, and mitigations can be copied on demand (based on ref_id of operational scenarios). 
   - After generation, a risk assessment is fully editable, to allow customisation, and the risk assessment can be managed normally as any other risk assessment.
   - risk treatment is based on the risk assessment.
 
@@ -1246,7 +1267,7 @@ The frontend for risk study shall propose the following steps:
 ```mermaid
 erDiagram
     DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
-    DOMAIN                ||--o{ ECOSYSTEM_ENTITY     : contains
+    DOMAIN                ||--o{ STAKEHOLDER     : contains
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
@@ -1257,22 +1278,25 @@ erDiagram
 ```mermaid
 erDiagram
 
-    ATTACK_PATH           }o--|| RO_TO                : derives
-    RO_TO                 }o--|{ FEARED_EVENT         : corresponds_to
-    EBIOS_RM_STUDY        }o--o{ RO_TO                : contains
-    EBIOS_RM_STUDY        }o--o{ ECOSYSTEM_ENTITY     : contains
-    EBIOS_RM_STUDY        }o--o{ OPERATIONAL_SCENARIO : contains
-    EBIOS_RM_STUDY        }o--o{ FEARED_EVENT         : contains
-    EBIOS_RM_STUDY        }o--o{ ATTACK_PATH          : contains
+    FEARED_EVENT          }o--o{ ASSET                : affects
+    STAKEHOLDER           }o--|| ENTITY               : qualifies
+    EBIOS_RM_STUDY        ||--o{ RO_TO                : contains
+    EBIOS_RM_STUDY        ||--o{ STAKEHOLDER          : contains
+    EBIOS_RM_STUDY        ||--o{ OPERATIONAL_SCENARIO : contains
+    EBIOS_RM_STUDY        ||--o{ FEARED_EVENT         : contains
+    EBIOS_RM_STUDY        ||--o{ ATTACK_PATH          : contains
+    EBIOS_RM_STUDY        }o--o{ ASSET                : contains
     EBIOS_RM_STUDY        }o--o| ENTITY               : studies
     EBIOS_RM_STUDY        }o--o{ COMPLIANCE_ASSESSMENT: leverages
     EBIOS_RM_STUDY        }o--|| RISK_MATRIX          : leverages
     EBIOS_RM_STUDY        }o--o{ RISK_ASSESSMENT      : generates
-    OPERATIONAL_SCENARIO  }o--|| ATTACK_PATH          : derives
+    ATTACK_PATH           }o--|| RO_TO                : derives
+    RO_TO                 }o--o{ FEARED_EVENT         : corresponds_to
+    OPERATIONAL_SCENARIO  }o--|{ ATTACK_PATH          : derives
     OPERATIONAL_SCENARIO  }o--o{ THREAT               : leverages
-    ATTACK_PATH           }o--o{ ECOSYSTEM_ENTITY     : uses
-    ATTACK_PATH           }o--o{ APPLIED_CONTROL      : mitigated_by
-    ECOSYSTEM_ENTITY      }o--|| ENTITY               : qualifies
+    ATTACK_PATH           }o--o{ STAKEHOLDER          : leverages
+    STAKEHOLDER           }o--o{ APPLIED_CONTROL      : reinforces
+    FEARED_EVENT          }o--o{ QUALIFICATION        : bears
 
     EBIOS_RM_STUDY {
         string      ref_id
@@ -1292,10 +1316,9 @@ erDiagram
         string ref_id
         string name
         string description
-        json   qualifications
         int    gravity
         bool   selected
-        bool   justification
+        string justification
     }
 
     RO_TO {
@@ -1306,25 +1329,27 @@ erDiagram
         int    pertinence
         int    activity
         bool   selected
-        bool   justification
+        string justification
     }
 
-    ECOSYSTEM_ENTITY {
+    STAKEHOLDER {
         string category
-        int    dependence
-        int    penetration
-        int    maturity
-        int    trust
+        int    current_dependence
+        int    current_penetration
+        int    current_maturity
+        int    current_trust
+        int    residual_dependence
+        int    residual_penetration
+        int    residual_maturity
+        int    residual_trust
         bool   selected
-        bool   justification
+        string justification
     }
 
     ATTACK_PATH {
         string description
-        int    intial_threat_level
-        int    residual_threat_level
         bool   selected
-        bool   justification
+        string justification
     }
 
     OPERATIONAL_SCENARIO {
@@ -1338,5 +1363,7 @@ erDiagram
 
 ### Implementation
 
-EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
-
+- EBIOS-RM objects are defined within a dedicated Django "application" ebios_rm.
+- There is no object for "strategic scenarios", as they result directly from attack paths and corresponding feared event (which is the title of the strategic scenario).
+- the current and residual "criticity" are calculated on stakeholders, so they are not seen as fields.
+- 
