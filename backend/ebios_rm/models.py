@@ -64,7 +64,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         default=Entity.get_main_entity,
     )
 
-    ref_id = models.CharField(max_length=100)
+    ref_id = models.CharField(max_length=100, blank=True)
     version = models.CharField(
         max_length=100,
         blank=True,
@@ -122,7 +122,7 @@ class FearedEvent(NameDescriptionMixin):
         help_text=_("Qualifications carried by the feared event"),
     )
 
-    ref_id = models.CharField(max_length=100)
+    ref_id = models.CharField(max_length=100, blank=True)
     gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
