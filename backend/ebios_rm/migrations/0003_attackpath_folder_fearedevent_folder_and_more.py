@@ -6,36 +6,60 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ebios_rm', '0002_alter_ebiosrmstudy_ref_id_alter_fearedevent_ref_id'),
-        ('iam', '0009_create_allauth_emailaddress_objects'),
+        ("ebios_rm", "0002_alter_ebiosrmstudy_ref_id_alter_fearedevent_ref_id"),
+        ("iam", "0009_create_allauth_emailaddress_objects"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='attackpath',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="attackpath",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
         migrations.AddField(
-            model_name='fearedevent',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="fearedevent",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
         migrations.AddField(
-            model_name='operationalscenario',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="operationalscenario",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
         migrations.AddField(
-            model_name='roto',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="roto",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
         migrations.AddField(
-            model_name='stakeholder',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="stakeholder",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
     ]
