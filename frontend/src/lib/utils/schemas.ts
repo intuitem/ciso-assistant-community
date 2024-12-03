@@ -1,5 +1,4 @@
 // schema for the validation of forms
-import { risk } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -371,10 +370,15 @@ export const vulnerabilitySchema = baseNamedObject({
 	filtering_labels: z.string().optional().array().optional()
 });
 
-export const ebiosRMStudySchema = baseNamedObject({
+export const ebiosRMSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().default(''),
 	risk_matrix: z.string().optional(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	assets: z.string().uuid().optional().array().optional(),
+	folder: z.string()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -402,7 +406,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
-	'ebios-rm': ebiosRMStudySchema
+	'ebios-rm': ebiosRMSchema,
 };
 
 export const modelSchema = (model: string) => {

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
-
 	export let data: PageData;
 
 </script>
@@ -13,6 +12,6 @@
         selectOptions={data.selectOptions}
         foreignKeys={data.foreignKeys}
         model={data.model}
-        context="edit"
+        context="ebiosRmStudy"
     />
 </div>
