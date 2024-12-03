@@ -1,0 +1,443 @@
+urn: urn:intuitem:risk:library:sama-crfr-1.0
+locale: en
+ref_id: SAMA-CRFR-1.0
+name: 'SAMA Cyber Resilience Fundamental Requirements '
+description: 'SAMA Cyber Resilience Fundamental Requirements '
+copyright: All texts, layouts, designs and other elements of any nature in this document
+  are subject to copyright law.
+version: 1
+provider: SAMA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:sama-crfr-1.0
+    ref_id: SAMA-CRFR-1.0
+    name: 'SAMA Cyber Resilience Fundamental Requirements '
+    description: 'SAMA Cyber Resilience Fundamental Requirements '
+    min_score: 1
+    max_score: 5
+    scores_definition:
+    - score: 1
+      name: Initial
+      description: 'No Process documentation or not formally approved by management.
+
+        Standard process does not exist.'
+    - score: 2
+      name: Repeatable
+      description: 'Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
+
+        Ad-hoc process exists and is done informally.'
+    - score: 3
+      name: Defined
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for most activities.
+        Less than 10% process exceptions.'
+    - score: 4
+      name: Managed
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 3% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established. Less than 5% of process exceptions.'
+    - score: 5
+      name: Optimizing
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 0,5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established and continually improving.
+        Less than 1% of process exceptions.'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      assessable: false
+      depth: 1
+      name: 3.1 Cyber Security Leadership and Governance
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      ref_id: 3.1.1
+      description: Entities should develop a robust Cyber Security Governance structure
+        that is supported with appropriate resources to oversee and control overall
+        approach to cyber security
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      ref_id: 3.1.2
+      description: Entities should define, approve, implement and communicate cyber
+        security policies and procedures that is supported by detailed security standards
+        (e.g. password standard, firewall standard).
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      ref_id: 3.1.3
+      description: Entities should periodically review and update cyber security policies,
+        procedures and standards taking into consideration the evolving cyber threat
+        landscape
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      ref_id: 3.1.4
+      description: 'Entities should incorporate cyber security requirements in their
+        new and/or existing business operating model, including at least:
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.4---a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.4
+      ref_id: 3.1.4 - a
+      description: a. evaluation of cyber security and fraud risks that could target
+        business operating model; and
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.4---b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.4
+      ref_id: 3.1.4 - b
+      description: b. adoption and evaluation of cyber security measures for the protection
+        against adversarial attacks (e.g. model stealing, malicious inputs, and poisoning
+        attack).
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      ref_id: 3.1.5
+      description: "Entities should establish and implement strong password policy\
+        \ for users\u2019 access to its information assets, such as:"
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5---a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5
+      ref_id: 3.1.5 - a
+      description: a. change of password upon first logon, minimum password length
+        and history and password complexity;
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5---b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5
+      ref_id: 3.1.5 - b
+      description: b. revoking the access after the three successive incorrect passwords;
+        and
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5---c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.5
+      ref_id: 3.1.5 - c
+      description: c. use non-caching techniques
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node2
+      ref_id: 3.1.6
+      description: Entities should execute comprehensive IT and cyber security risk
+        assessments covering (infrastructure, network, applications, and systems)
+        and the controls implemented to address the identified risks. The identified
+        risks should be documented in a central register, and periodically monitored
+        and reviewed
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      assessable: false
+      depth: 1
+      name: 3.2 Cyber Security Operations and Technology
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.1
+      description: Entities should establish identity and access management process
+        to govern the logical accesses to the information assets according to need-to-have
+        and need-to-know principles
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.2
+      description: Entities should establish change management process to ensure that
+        changes to the entities information assets are classified, tested and approved
+        before their deployment into production environments. The change management
+        process should also include cyber security requirements for controlling changes
+        to information assets
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.3
+      description: 'Entities should establish and maintain a secure network architecture
+        that address taking into consideration the following:'
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.3---a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.3
+      ref_id: 3.2.3 - a
+      description: 'a. segmentation of networks, according to the functionality of
+        services and the adoption of network security systems (e.g. firewalls) to
+        control the network traffic between segments; and
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.3---b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.3
+      ref_id: 3.2.3 - b
+      description: b. availability.
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.4
+      description: Entities should adopt secure and robust cryptography algorithms
+        and ensure that the application and server communications are encrypted using
+        secure protocols
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.5
+      description: Entities should periodically conduct comprehensive vulnerability
+        assessment (VA) covering both the application and infrastructure layers of
+        the Entities technology landscape.
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.6
+      description: Entities should conduct penetration testing (PT) twice a year as
+        a minimum or after major/ critical change to comprehensively evaluate its
+        cyber security defense capability
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.7
+      description: Entities should ensure up-to-date and relevant patches are tested,
+        applied and installed in a timely manner to avoid security breaches due to
+        existing vulnerabilities in the applications and infrastructure.
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.8
+      description: "In addition to secure System Development Life Cycle (herein \u201C\
+        Secure SDLC\u201D) process entities should implement shielding techniques\
+        \ (such as but not limited to code obfuscation, white box cryptography and\
+        \ anti-tampering) in the application design"
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.9
+      description: Entities should implement effective brand protection controls to
+        detect and defend against targeted attacks by continuously monitoring the
+        online services such as apps, social media accounts and websites and proactively
+        takedown malicious activities
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.10
+      description: 'Entities should ensure that endpoints (both personal, if allowed,
+        and corporate) are secured through implementation of a minimum set of cyber
+        security requirements such as the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10---a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10
+      ref_id: 3.2.10 - a
+      description: 'a. the real time protection for the endpoints (e.g. antivirus
+        and antimalware);
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10---b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10
+      ref_id: 3.2.10 - b
+      description: 'b. implementation of behavioral-based and/or signature-based solutions;
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10---c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10
+      ref_id: 3.2.10 - c
+      description: 'c. ensuring anti-malware signatures are up-to-date and the systems
+        are regularly scanned for malicious files or anomalous activities; and
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10---d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.10
+      ref_id: 3.2.10 - d
+      description: 'd. in case of mobile devices:
+
+        i. separation and encryption of entities data; and
+
+        ii. secure wiping of stored entities data in cases of device loss, theft or
+        decommissioning in alignment with the Secure Information Asset Disposal process.'
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.11
+      description: Entities should establish and implement a process to collect, process,
+        review and retain security logs to facilitate continuous security monitoring.
+        These logs should provide sufficient details and should be retained securely
+        for a period of one year as a minimum.
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.12
+      description: Entities should ensure applications and infrastructure components
+        are integrated with a security information and event management (SIEM) solution
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.13
+      description: Entities should ensure continuous security monitoring and analysis
+        of cyber security events to promptly detect and respond to cyber security
+        incidents
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.14
+      description: Entities should develop Cyber Security Incident Management process
+        to timely identify, respond and contain cyber security incidents impacting
+        the Entities information assets
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.15
+      description: Entities should implement session timeout configurations with reasonable
+        timeframe; in-active sessions should not exceed 5 minutes for applications
+        and underlying infrastructure
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node14
+      ref_id: 3.2.16
+      description: 'Entities should immediately inform SAMA (F.S.Cybersecurity@SAMA.GOV.SA)
+        in case any of the following incidents classified as medium or above has occurred
+        and identified for:
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16---a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16
+      ref_id: 3.2.16 - a
+      description: 'a. Cyber security;
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16---b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16
+      ref_id: 3.2.16 - b
+      description: b. Fraud;
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16---c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.2.16
+      ref_id: 3.2.16 - c
+      description: c. All disruptive incidents
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node40
+      assessable: false
+      depth: 1
+      name: 3.3 Resilience
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node40
+      ref_id: 3.3.1
+      description: The Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP)
+        should be defined, approved, communicated, implemented and periodically reviewed
+        to enable the entities to continue delivering its critical services, at an
+        acceptable pre-defined level
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:node40
+      ref_id: 3.3.2
+      description: 'Entities should define and implement its backup and restoration
+        requirements considering the following, but not limited to:'
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - a
+      description: 'a. legal and regulatory requirements;
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - b
+      description: 'b. Critical and customer data;
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - c
+      description: 'c. business requirements;
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - d
+      description: 'd. schedule of the backup (daily, weekly, monthly, etc.);
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - e
+      description: 'e. protection of confidential data stored in back up media through
+        applying encryption techniques;
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - f
+      description: 'f. storage of backup media offline or at an offsite location;
+        and
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - g
+      description: 'g. secure destruction of backup data.
+
+        '
+    - urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2---h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:sama-crfr-1.0:3.3.2
+      ref_id: 3.3.2 - h
+      description: h. restoration tests.

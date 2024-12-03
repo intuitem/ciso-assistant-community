@@ -1,0 +1,4 @@
+ref_id;assets;threats;name;description;existing_controls;current_impact;current_proba;current_risk;additional_controls;residual_impact;residual_proba;residual_risk;treatment
+R.1;dsafa;Data Encrypted for Impact;Ransomware;;ISMS Scope document,Statement of Applicabilty document;Significant;Likely;Low;Risk management policy,Organization overview document,Main policy,Competency matrix;Critical;Very likely;High;open
+R.2;;System Shutdown/Reboot;Unavailability;;Information security awareness and traning policy;Significant;Very likely;Medium;Management review plan document,Main policy,ISMS Scope document,Responsibility matrix;Important;Unlikely;Medium;open
+R.3;dsasfad;Scheduled Task,Cloud Administration Command;Insider threats;;;Important;Likely;Medium;;--;--;--;open

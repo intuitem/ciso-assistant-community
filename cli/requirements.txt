@@ -3,3 +3,4 @@ rich
 requests
 click
 pyyaml
+icecream
