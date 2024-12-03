@@ -230,7 +230,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     disaster_recovery_objectives = serializers.JSONField(
         source="get_disaster_recovery_objectives_display"
     )
-
+    filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
 
 
@@ -619,6 +619,20 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     compliance_assessment = FieldsRelatedField()
     folder = FieldsRelatedField()
     assessable = serializers.BooleanField(source="requirement.assessable")
+    requirement = FieldsRelatedField(
+        [
+            "id",
+            "urn",
+            "annotation",
+            "name",
+            "description",
+            "typical_evidence",
+            "ref_id",
+            "associated_reference_controls",
+            "associated_threats",
+            "parent_requirement",
+        ]
+    )
 
     class Meta:
         model = RequirementAssessment

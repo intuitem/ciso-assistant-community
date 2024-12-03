@@ -786,6 +786,9 @@
 	"questionPlural": "Domande",
 	"fillMetadataURL": "Opzione 1: inserire l'URL dei metadati",
 	"fillSSOSLOURLx509cert": "Opzione 2: inserire l'URL SSO, l'URL SLO e il certificato x509cert",
+	"proof": "Prova",
+	"privacy": "Riservatezza",
+	"safety": "Sicurezza",
 	"noExpirationDateSet": "Nessuna data di scadenza impostata",
 	"sumpageTotal": "Totale",
 	"sumpageActive": "Attivo",
@@ -858,6 +861,8 @@
 	"addTag": "Aggiungi tag",
 	"tagsHelpText": "I tag vengono utilizzati per categorizzare e filtrare gli elementi. Puoi aggiungere tag nella sezione Extra",
 	"forgotPassword": "Ha dimenticato la password",
+	"scoreSemiColon": "Punto:",
+	"mappingInferenceHelpText": "Queste variabili sono fisse e non cambiano a seconda della fonte.",
 	"bringTheEvidences": "Portare le prove",
 	"bringTheEvidencesHelpText": "Se disabilitato, l'oggetto verrà duplicato senza le sue prove"
 }

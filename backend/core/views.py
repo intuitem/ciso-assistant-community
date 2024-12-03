@@ -17,6 +17,8 @@ import shutil
 from pathlib import Path
 import humanize
 
+# from icecream import ic
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -155,12 +157,36 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 elif not request.data[field][0]:
                     request.data[field] = []
 
+    def _process_labels(self, labels):
+        """
+        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
+        """
+        new_labels = []
+        for label in labels:
+            try:
+                uuid.UUID(label, version=4)
+                new_labels.append(label)
+            except ValueError:
+                new_label = FilteringLabel(label=label)
+                new_label.full_clean()
+                new_label.save()
+                new_labels.append(str(new_label.id))
+        return new_labels
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        if request.data.get("filtering_labels"):
+            request.data["filtering_labels"] = self._process_labels(
+                request.data["filtering_labels"]
+            )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        if request.data.get("filtering_labels"):
+            request.data["filtering_labels"] = self._process_labels(
+                request.data["filtering_labels"]
+            )
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
@@ -191,7 +217,7 @@ class ProjectViewSet(BaseModelViewSet):
 
     model = Project
     filterset_fields = ["folder", "lc_status"]
-    search_fields = ["name", "internal_reference", "description"]
+    search_fields = ["name", "ref_id", "description"]
 
     @action(detail=False, name="Get status choices")
     def lc_status(self, request):
@@ -276,6 +302,22 @@ class ProjectViewSet(BaseModelViewSet):
         else:
             return Response(status=HTTP_403_FORBIDDEN)
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Project,
+        )
+        for item in Project.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
+
 
 class ThreatViewSet(BaseModelViewSet):
     """
@@ -295,6 +337,21 @@ class ThreatViewSet(BaseModelViewSet):
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
         return Response({"results": threats_count_per_name(request.user)})
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Threat,
+        )
+        for item in Threat.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+        return Response(my_map)
 
 
 class AssetViewSet(BaseModelViewSet):
@@ -373,6 +430,21 @@ class AssetViewSet(BaseModelViewSet):
             {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
         )
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Asset,
+        )
+        for item in Asset.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+        return Response(my_map)
+
     @action(detail=False, name="Get security objectives")
     def security_objectives(self, request):
         return Response({"results": Asset.DEFAULT_SECURITY_OBJECTIVES})
@@ -437,6 +509,22 @@ class RiskMatrixViewSet(BaseModelViewSet):
             )
         return Response({"results": used_matrices})
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RiskMatrix,
+        )
+        for item in RiskMatrix.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
+
 
 class VulnerabilityViewSet(BaseModelViewSet):
     """
@@ -451,34 +539,6 @@ class VulnerabilityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Vulnerability.Status.choices))
-
-    def _process_labels(self, labels):
-        """
-        Creates a FilteringLabel and replaces the value with the ID of the newly created label.
-        """
-        new_labels = []
-        for label in labels:
-            try:
-                uuid.UUID(label, version=4)
-                new_labels.append(label)
-            except ValueError:
-                new_label = FilteringLabel(label=label)
-                new_label.full_clean()
-                new_label.save()
-                new_labels.append(str(new_label.id))
-        return new_labels
-
-    def update(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
-        )
-        return super().update(request, *args, **kwargs)
-
-    def create(self, request: Request, *args, **kwargs) -> Response:
-        request.data["filtering_labels"] = self._process_labels(
-            request.data["filtering_labels"]
-        )
-        return super().create(request, *args, **kwargs)
 
 
 class FilteringLabelViewSet(BaseModelViewSet):
@@ -655,30 +715,46 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             writer = csv.writer(response, delimiter=";")
             columns = [
                 "ref_id",
+                "assets",
                 "threats",
                 "name",
                 "description",
                 "existing_controls",
-                "current_level",
-                "applied_controls",
-                "residual_level",
+                "current_impact",
+                "current_proba",
+                "current_risk",
+                "additional_controls",
+                "residual_impact",
+                "residual_proba",
+                "residual_risk",
                 "treatment",
             ]
             writer.writerow(columns)
 
-            for scenario in risk_assessment.risk_scenarios.all().order_by("created_at"):
-                applied_controls = ",".join(
-                    [m.csv_value for m in scenario.applied_controls.all()]
+            for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
+                additional_controls = ",".join(
+                    [m.name for m in scenario.applied_controls.all()]
                 )
+                existing_controls = ",".join(
+                    [m.name for m in scenario.existing_applied_controls.all()]
+                )
+
                 threats = ",".join([t.name for t in scenario.threats.all()])
+                assets = ",".join([t.name for t in scenario.assets.all()])
+
                 row = [
                     scenario.ref_id,
+                    assets,
                     threats,
                     scenario.name,
                     scenario.description,
-                    scenario.existing_controls,
+                    existing_controls,
+                    scenario.get_current_impact()["name"],
+                    scenario.get_current_proba()["name"],
                     scenario.get_current_risk()["name"],
-                    applied_controls,
+                    additional_controls,
+                    scenario.get_residual_impact()["name"],
+                    scenario.get_residual_proba()["name"],
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
@@ -1120,6 +1196,22 @@ class AppliedControlViewSet(BaseModelViewSet):
             {"results": AppliedControlReadSerializer(duplicate_applied_control).data}
         )
 
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=AppliedControl,
+        )
+        for item in AppliedControl.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+
+        return Response(my_map)
+
 
 class PolicyViewSet(AppliedControlViewSet):
     model = Policy
@@ -1466,6 +1558,7 @@ class FolderViewSet(BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
+    search_fields = ["ref_id"]
 
     def perform_create(self, serializer):
         """
@@ -1549,6 +1642,19 @@ class FolderViewSet(BaseModelViewSet):
         tree.update({"children": folders_list})
 
         return Response(tree)
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Folder,
+        )
+        for item in Folder.objects.filter(id__in=viewable_items):
+            my_map[item.name] = item.id
+        return Response(my_map)
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
@@ -1896,7 +2002,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = ["framework", "project", "status"]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -2209,8 +2315,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk):
         """Returns the list of requirement assessments for the different audit modes"""
+        assessable = self.request.query_params.get("assessable", False)
         requirement_assessments_objects = self.get_object().get_requirement_assessments(
-            include_non_assessable=True
+            include_non_assessable=not assessable
         )
         requirements_objects = RequirementNode.objects.filter(
             framework=self.get_object().framework
@@ -2283,6 +2390,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         for requirement_assessment in requirement_assessments:
             requirement_assessment.create_applied_controls_from_suggestions()
         return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"], url_path="progress_ts")
+    def progress_ts(self, request, pk):
+        try:
+            raw = (
+                HistoricalMetric.objects.filter(
+                    model="ComplianceAssessment", object_id=pk
+                )
+                .annotate(progress=F("data__reqs__progress_perc"))
+                .values("date", "progress")
+                .order_by("date")
+            )
+
+            # Transform the data into the required format
+            formatted_data = [
+                [entry["date"].isoformat(), entry["progress"]] for entry in raw
+            ]
+
+            return Response({"data": formatted_data})
+
+        except HistoricalMetric.DoesNotExist:
+            return Response(
+                {"error": "No metrics found for this assessment"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class RequirementAssessmentViewSet(BaseModelViewSet):
