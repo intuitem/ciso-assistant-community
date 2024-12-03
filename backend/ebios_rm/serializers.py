@@ -23,7 +23,9 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
                 )
             except (StoredLibrary.DoesNotExist, RiskMatrix.DoesNotExist) as e:
                 logging.error(f"Error loading risk matrix: {str(e)}")
-                raise serializers.ValidationError("An error occurred while loading the risk matrix.")
+                raise serializers.ValidationError(
+                    "An error occurred while loading the risk matrix."
+                )
         return super().create(validated_data)
 
     class Meta:
