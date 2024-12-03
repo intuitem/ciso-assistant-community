@@ -120,9 +120,9 @@ export const actions: Actions = {
 		const preferences = await preferencesRes.json();
 
 		const currentLang = cookies.get('ciso_lang') || 'en';
-		const preferedLang = preferences.lang;
+		const preferedLang = preferences.lang || 'en';
 
-		if (preferedLang && currentLang !== preferedLang) {
+		if (currentLang !== preferedLang) {
 			cookies.set('ciso_lang', preferedLang, {
 				httpOnly: false,
 				sameSite: 'lax',
@@ -134,6 +134,10 @@ export const actions: Actions = {
 		const next = url.searchParams.get('next') || '/';
 		const secureNext = getSecureRedirect(next);
 		const refreshQueryParam = CI_TEST ? '' : '?refresh=1';
+		if (currentLang == preferedLang) {
+			redirect(302, secureNext);
+		}
+
 		const redirectURL = secureNext ? `${secureNext}${refreshQueryParam}` : `/${refreshQueryParam}`;
 		redirect(302, redirectURL);
 	},
