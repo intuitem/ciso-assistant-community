@@ -5,7 +5,7 @@ from ebios_rm.views import EbiosRMStudyViewSet
 
 router = routers.DefaultRouter()
 
-router.register(r"ebios-rm-studies", EbiosRMStudyViewSet, basename="ebios-rm-studies")
+router.register(r"studies", EbiosRMStudyViewSet, basename="studies")
 
 urlpatterns = [
     path("", include(router.urls)),
