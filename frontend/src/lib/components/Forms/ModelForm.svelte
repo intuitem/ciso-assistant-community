@@ -256,7 +256,7 @@
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
 	{:else if URLModel === 'ebios-rm'}
-		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context}/>
+		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
