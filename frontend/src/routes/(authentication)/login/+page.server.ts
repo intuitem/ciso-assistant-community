@@ -1,7 +1,8 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { CI_TEST } from '$lib/utils/env_constants';
+// The CI_TEST environment variable will have to be removed if the `currentLang == preferedLang` solution fix the enterprise function tests.
+// import { CI_TEST } from '$lib/utils/env_constants';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -24,6 +25,15 @@ interface AuthenticationFlow {
 	provider?: Record<string, string>;
 	is_pending: boolean;
 	types: 'totp' | 'recovery_codes';
+}
+
+function makeRedirectURL(currentLang: string, preferedLang: string, url: URL): string {
+	const next = url.searchParams.get('next') || '/';
+	const secureNext = getSecureRedirect(next);
+	if (currentLang == preferedLang) {
+		return secureNext;
+	}
+	return secureNext ? `${secureNext}?refresh=1` : `/?refresh=1`;
 }
 
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
@@ -129,16 +139,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const next = url.searchParams.get('next') || '/';
-		const secureNext = getSecureRedirect(next);
-		const refreshQueryParam = CI_TEST ? '' : '?refresh=1';
-		// The CI_TEST environment variable will have to be removed if the `currentLang == preferedLang` solution fix the enterprise function tests.
-		if (currentLang == preferedLang) {
-			redirect(302, secureNext);
-		}
-
-		const redirectURL = secureNext ? `${secureNext}${refreshQueryParam}` : `/${refreshQueryParam}`;
-		redirect(302, redirectURL);
+		redirect(302, makeRedirectURL(currentLang, preferedLang, url));
 	},
 	mfaAuthenticate: async (event) => {
 		const formData = await event.request.formData();
