@@ -164,18 +164,21 @@ jobs:
       - name: Install enterprise backend
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
-      - name: Build enterprise frontend
-        working-directory: ${{ env.enterprise-frontend-directory }}
-        run: make
-      - name: Install Playwright browser ${{ matrix.playwright-browser }}
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
+      - name: Create the frontend build directory before build
+        working-directory: ${{ env.enterprise-backend-directory }}
+        run: mkdir -p ./build/frontend
       - name: Create frontend environment variables file
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: |
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
           echo CI_TEST=1 >> .env
+      - name: Build enterprise frontend
+        working-directory: ${{ env.enterprise-frontend-directory }}
+        run: make
+      - name: Install Playwright browser ${{ matrix.playwright-browser }}
+        working-directory: ${{ env.enterprise-frontend-build-directory }}
+        run: pnpm exec playwright install --with-deps ${{ matrix.playwright-browser }}
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
