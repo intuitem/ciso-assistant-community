@@ -1,7 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import {
-	getModelInfo
-} from '$lib/utils/crud';
+import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
