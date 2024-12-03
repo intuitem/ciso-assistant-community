@@ -356,7 +356,13 @@ class AssetViewSet(BaseModelViewSet):
     """
 
     model = Asset
-    filterset_fields = ["folder", "parent_assets", "type", "risk_scenarios", "ebios_rm_studies"]
+    filterset_fields = [
+        "folder",
+        "parent_assets",
+        "type",
+        "risk_scenarios",
+        "ebios_rm_studies",
+    ]
     search_fields = ["name", "description", "business_value"]
 
     @action(detail=False, name="Get type choices")

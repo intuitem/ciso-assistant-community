@@ -589,7 +589,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
-	},
+	}
 };
 
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');

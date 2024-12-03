@@ -406,7 +406,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
-	'ebios-rm': ebiosRMSchema,
+	'ebios-rm': ebiosRMSchema
 };
 
 export const modelSchema = (model: string) => {

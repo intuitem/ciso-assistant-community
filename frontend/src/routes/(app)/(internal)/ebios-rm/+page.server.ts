@@ -18,7 +18,7 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
-	const URLModel = "ebios-rm";
+	const URLModel = 'ebios-rm';
 	const createSchema = modelSchema(URLModel);
 	const createForm = await superValidate(zod(createSchema));
 	const model: ModelInfo = getModelInfo(URLModel);
@@ -60,11 +60,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-    const endpoint = `${BASE_API_URL}/${URLModel}`;
-    const res = await fetch(endpoint);
-    const data = await res.json().then((res) => res.results);
+	const endpoint = `${BASE_API_URL}/${URLModel}`;
+	const res = await fetch(endpoint);
+	const data = await res.json().then((res) => res.results);
 
-    const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
+	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
 
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {
@@ -89,7 +89,7 @@ export const actions: Actions = {
 		return defaultWriteFormAction({
 			event,
 			urlModel: 'ebios-rm',
-			action: 'create',
+			action: 'create'
 			// redirectToWrittenObject: redirectToWrittenObject
 		});
 	},
