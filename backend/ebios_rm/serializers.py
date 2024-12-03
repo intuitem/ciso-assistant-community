@@ -6,6 +6,7 @@ from core.serializers import (
 from core.models import StoredLibrary, RiskMatrix
 from .models import EbiosRMStudy
 from rest_framework import serializers
+import logging
 
 
 class EbiosRMStudyWriteSerializer(BaseModelSerializer):
@@ -21,7 +22,8 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
                     urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
                 )
             except (StoredLibrary.DoesNotExist, RiskMatrix.DoesNotExist) as e:
-                raise serializers.ValidationError(f"Erreur : {str(e)}")
+                logging.error(f"Error loading risk matrix: {str(e)}")
+                raise serializers.ValidationError("An error occurred while loading the risk matrix.")
         return super().create(validated_data)
 
     class Meta:
