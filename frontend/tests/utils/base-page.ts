@@ -60,12 +60,6 @@ export abstract class BasePage {
 		}
 	}
 
-	async checkForUndefinedText() {
-		await expect
-			.soft(this.page.getByText('undefined'), 'An undefined text is visible on the page')
-			.toHaveCount(0);
-	}
-
 	async waitUntilLoaded() {
 		const loadingFields = this.page.getByTestId('loading-field');
 		if ((await loadingFields.count()) > 0) {

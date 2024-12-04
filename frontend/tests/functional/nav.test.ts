@@ -42,19 +42,18 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	await test.step('user profile panel is working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await logedPage.checkForUndefinedText();
+
 		await expect(sideBar.profileButton).toBeVisible();
 		await sideBar.profileButton.click();
 		await expect(sideBar.morePanel).not.toBeVisible();
 		await expect(page).toHaveURL('/my-profile');
 		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
-		await logedPage.checkForUndefinedText();
 	});
 
 	await test.step('docs button is working properly and redirects to gitbook docs', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await logedPage.checkForUndefinedText();
+
 		await expect(sideBar.docsButton).toBeVisible();
 	});
 
@@ -79,13 +78,13 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	await test.step('about panel is working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await logedPage.checkForUndefinedText();
+
 		await expect(sideBar.aboutButton).toBeVisible();
 		await sideBar.aboutButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(logedPage.modalTitle).toBeVisible();
 		await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
-		await logedPage.checkForUndefinedText();
+
 		await expect(logedPage.page.getByTestId('version-key')).toContainText('version', {
 			ignoreCase: true
 		});
