@@ -1988,26 +1988,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
             )
             applied_controls = [
-                {
-                    "id": applied_control.id,
-                    "name": applied_control.name,
-                    "description": applied_control.description,
-                    "status": applied_control.status,
-                    "category": applied_control.category,
-                    "csf_function": applied_control.csf_function,
-                    "eta": applied_control.eta,
-                    "expiry_date": applied_control.expiry_date,
-                    "link": applied_control.link,
-                    "effort": applied_control.effort,
-                    "cost": applied_control.cost,
-                    "owners": [
-                        {
-                            "id": owner.id,
-                            "email": owner.email,
-                        }
-                        for owner in applied_control.owner.all()
-                    ],
-                }
+                AppliedControlReadSerializer(applied_control).data
                 for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
                 ).distinct()
