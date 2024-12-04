@@ -399,7 +399,6 @@
 	"medium": "Mediu",
 	"large": "Mare",
 	"extraLarge": "Extra-mare",
-	"rid": "RID",
 	"scope": "Domeniu",
 	"reader": "Cititor",
 	"lastUpdate": "Ultima actualizare",
@@ -786,6 +785,9 @@
 	"questionPlural": "Întrebări",
 	"fillMetadataURL": "Opțiunea 1: completați adresa URL a metadatelor",
 	"fillSSOSLOURLx509cert": "Opțiunea 2: completați URL-ul SSO, URL-ul SLO și x509cert",
+	"proof": "Dovada",
+	"privacy": "Confidențialitate",
+	"safety": "Siguranţă",
 	"noExpirationDateSet": "Nu a fost stabilită o dată de expirare",
 	"sumpageTotal": "total",
 	"sumpageActive": "activ",
@@ -857,5 +859,7 @@
 	"tags": "Etichete",
 	"addTag": "Adăugați etichetă",
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
-	"forgotPassword": "Aţi uitat parola"
+	"forgotPassword": "Aţi uitat parola",
+	"scoreSemiColon": "Scor:",
+	"mappingInferenceHelpText": "Aceste variabile sunt fixe și nu se vor modifica în funcție de sursă."
 }

@@ -15,6 +15,9 @@ from rest_framework.views import exception_handler as drf_exception_handler
 from iam.models import Folder, Permission, RoleAssignment, User
 from library.helpers import get_referential_translation
 
+from statistics import mean
+import math
+
 from .models import *
 from .utils import camel_case
 
@@ -889,6 +892,13 @@ def get_metrics(user: User):
 
     viewable_controls = viewable_items(AppliedControl)
     controls_count = viewable_controls.count()
+    progress_avg = math.ceil(
+        mean([x.progress() for x in viewable_items(ComplianceAssessment)] or [0])
+    )
+    missed_eta_count = viewable_controls.filter(
+        eta__lt=date.today(),
+    ).count()
+
     data = {
         "controls": {
             "total": controls_count,
@@ -897,6 +907,8 @@ def get_metrics(user: User):
             "on_hold": viewable_controls.filter(status="on_hold").count(),
             "active": viewable_controls.filter(status="active").count(),
             "deprecated": viewable_controls.filter(status="deprecated").count(),
+            "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
+            "eta_missed": missed_eta_count,
         },
         "risk": {
             "assessments": viewable_items(RiskAssessment).count(),
@@ -908,17 +920,19 @@ def get_metrics(user: User):
             "acceptances": viewable_items(RiskAcceptance).count(),
         },
         "compliance": {
+            "used_frameworks": viewable_items(ComplianceAssessment)
+            .values("framework_id")
+            .distinct()
+            .count(),
             "audits": viewable_items(ComplianceAssessment).count(),
             "active_audits": viewable_items(ComplianceAssessment)
             .filter(status__in=["in_progress", "in_review", "done"])
             .count(),
             "evidences": viewable_items(Evidence).count(),
-            "compliant_items": viewable_items(RequirementAssessment)
-            .filter(result="compliant")
-            .count(),
             "non_compliant_items": viewable_items(RequirementAssessment)
             .filter(result="non_compliant")
             .count(),
+            "progress_avg": progress_avg,
         },
         "audits_stats": build_audits_stats(user),
         "csf_functions": csf_functions(user),

@@ -249,6 +249,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'eta', type: 'date' },
@@ -288,19 +289,26 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
-			{ field: 'reference_control', urlModel: 'reference-controls' },
+			{ field: 'reference_control', urlModel: 'reference-controls', urlParams: 'category=policy' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
 		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
-		selectFields: [{ field: 'csf_function' }, { field: 'status' }, { field: 'effort' }],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'csf_function' },
+			{ field: 'effort' },
+			{ field: 'priority' }
+		],
 		filters: [
 			{ field: 'reference_control' },
-			{ field: 'csf_function' },
 			{ field: 'status' },
+			{ field: 'csf_function' },
 			{ field: 'effort' },
-			{ field: 'folder' }
+			{ field: 'folder' },
+			{ field: 'owner' },
+			{ field: 'priority' }
 		]
 	},
 	vulnerabilities: {
@@ -362,14 +370,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'type' }],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
 			{ field: 'type' },
-			{ field: 'owner' }
+			{ field: 'owner' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	users: {
@@ -420,7 +430,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Evidences',
 		fileFields: ['attachment'],
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{
+				field: 'folder',
+				urlModel: 'folders',
+				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
+			},
 			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		]
 	},
@@ -613,6 +627,13 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
 					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+				},
+				priority: {
+					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
+					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
+					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					'--': { text: '', cssClasses: '' }
 				}
 			}
 		}

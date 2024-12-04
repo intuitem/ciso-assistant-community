@@ -400,7 +400,6 @@
 	"medium": "متوسط",
 	"large": "كبير",
 	"extraLarge": "كبير جدًا",
-	"rid": "معرف المخاطر",
 	"scope": "النطاق",
 	"reader": "القارئ",
 	"lastUpdate": "آخر تحديث",
@@ -787,6 +786,9 @@
 	"questionPlural": "أسئلة",
 	"fillMetadataURL": "الخيار 1: املأ عنوان URL الخاص بالبيانات الوصفية",
 	"fillSSOSLOURLx509cert": "الخيار 2: املأ عنوان URL الخاص بـ SSO وعنوان URL الخاص بـ SLO وx509cert",
+	"proof": "دليل",
+	"privacy": "خصوصية",
+	"safety": "أمان",
 	"noExpirationDateSet": "لم يتم تحديد تاريخ انتهاء الصلاحية",
 	"sumpageTotal": "المجموع",
 	"sumpageActive": "نشيط",
@@ -858,5 +860,7 @@
 	"tags": "العلامات",
 	"addTag": "إضافة علامة",
 	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
-	"forgotPassword": "هل نسيت كلمة السر"
+	"forgotPassword": "هل نسيت كلمة السر",
+	"scoreSemiColon": "نتيجة:",
+	"mappingInferenceHelpText": "هذه المتغيرات ثابتة ولن تتغير اعتمادًا على المصدر."
 }

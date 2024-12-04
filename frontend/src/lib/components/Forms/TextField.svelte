@@ -3,9 +3,11 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import type { CssClasses } from '@skeletonlabs/skeleton';
 
 	let _class = '';
 	export { _class as class };
+	export let classesContainer: CssClasses = '';
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -33,7 +35,7 @@
 	$: classesDisabled = (d: boolean) => (d ? 'opacity-50' : '');
 </script>
 
-<div>
+<div class={classesContainer}>
 	<div class={classesDisabled(disabled)}>
 		{#if label !== undefined && !hidden}
 			{#if $constraints?.required || required}

@@ -345,7 +345,6 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
-    "view_requirementnode",
     "view_evidence",
     "add_evidence",
     "change_evidence",
@@ -362,6 +361,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
+    from core.models import Qualification
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
 
@@ -491,7 +491,13 @@ def startup(sender: AppConfig, **kwargs):
                 email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
             )
         except Exception as e:
-            print(e)  # NOTE: Add this exception in the logger
+            logger.error("Error creating superuser", exc_info=e)
+
+    # Create default Qualifications
+    try:
+        Qualification.create_default_qualifications()
+    except Exception as e:
+        logger.error("Error creating default qualifications", exc_info=e)
 
     call_command("storelibraries")
 

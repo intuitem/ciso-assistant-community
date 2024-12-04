@@ -399,7 +399,6 @@
 	"medium": "Mittel",
 	"large": "Groß",
 	"extraLarge": "Extra groß",
-	"rid": "RID",
 	"scope": "Umfang",
 	"reader": "Leser",
 	"lastUpdate": "Letzte Aktualisierung",
@@ -786,6 +785,9 @@
 	"questionPlural": "Fragen",
 	"fillMetadataURL": "Option 1: Füllen Sie die Metadaten-URL aus",
 	"fillSSOSLOURLx509cert": "Option 2: Füllen Sie die SSO-URL, SLO-URL und x509cert aus",
+	"proof": "Nachweisen",
+	"privacy": "Privatsphäre",
+	"safety": "Sicherheit",
 	"noExpirationDateSet": "Kein Ablaufdatum festgelegt",
 	"sumpageTotal": "gesamt",
 	"sumpageActive": "aktiv",
@@ -857,5 +859,7 @@
 	"tags": "Schlagwörter",
 	"addTag": "Tag hinzufügen",
 	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen",
-	"forgotPassword": "Passwort vergessen"
+	"forgotPassword": "Passwort vergessen",
+	"scoreSemiColon": "Punktzahl:",
+	"mappingInferenceHelpText": "Diese Variablen sind fest und ändern sich je nach Quelle nicht."
 }

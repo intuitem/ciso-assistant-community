@@ -399,7 +399,6 @@
 	"medium": "Medium",
 	"large": "Groot",
 	"extraLarge": "Extra groot",
-	"rid": "RID",
 	"scope": "Reikwijdte",
 	"reader": "Lezer",
 	"lastUpdate": "Laatste update",
@@ -786,6 +785,9 @@
 	"questionPlural": "Vragen",
 	"fillMetadataURL": "Optie 1: Vul de metadata-url in",
 	"fillSSOSLOURLx509cert": "Optie 2: Vul de SSO-URL, SLO-URL en x509cert in",
+	"proof": "Bewijs",
+	"privacy": "Privacy",
+	"safety": "Veiligheid",
 	"noExpirationDateSet": "Geen vervaldatum ingesteld",
 	"sumpageTotal": "totaal",
 	"sumpageActive": "actief",
@@ -857,5 +859,7 @@
 	"tags": "Labels",
 	"addTag": "Tag toevoegen",
 	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra",
-	"forgotPassword": "Wachtwoord vergeten"
+	"forgotPassword": "Wachtwoord vergeten",
+	"scoreSemiColon": "Punt:",
+	"mappingInferenceHelpText": "Deze variabelen zijn vast en veranderen niet, afhankelijk van de bron."
 }
