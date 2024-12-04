@@ -70,7 +70,6 @@ jobs:
         run: |
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
