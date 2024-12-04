@@ -1015,6 +1015,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             "csf_function",
             "status",
             "eta",
+            "priority",
             "owner",
         ]
         writer.writerow(columns)
@@ -1028,6 +1029,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                 control.csf_function,
                 control.status,
                 control.eta,
+                control.priority,
             ]
             if len(control.owner.all()) > 0:
                 owners = ",".join([o.email for o in control.owner.all()])
