@@ -1,5 +1,5 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
+from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder, AttackPath
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -55,3 +55,7 @@ class StakeholderViewSet(BaseModelViewSet):
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(Stakeholder.Category.choices))
+
+
+class AttackPathViewSet(BaseModelViewSet):
+    model = AttackPath

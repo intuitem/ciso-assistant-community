@@ -3,7 +3,7 @@ from core.serializers import (
     FieldsRelatedField,
 )
 from core.models import StoredLibrary, RiskMatrix
-from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
+from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder, AttackPath
 from rest_framework import serializers
 import logging
 
@@ -111,4 +111,22 @@ class StakeholderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Stakeholder
+        fields = "__all__"
+
+
+class AttackPathWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = AttackPath
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class AttackPathReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    ro_to_couple = FieldsRelatedField()
+    stakeholders = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = AttackPath
         fields = "__all__"
