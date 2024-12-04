@@ -1,5 +1,5 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import EbiosRMStudy, FearedEvent, RoTo
+from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -47,3 +47,11 @@ class RoToViewSet(BaseModelViewSet):
     @action(detail=False, name="Get pertinence choices")
     def pertinence(self, request):
         return Response(dict(RoTo.Pertinence.choices))
+
+
+class StakeholderViewSet(BaseModelViewSet):
+    model = Stakeholder
+
+    @action(detail=False, name="Get category choices")
+    def category(self, request):
+        return Response(dict(Stakeholder.Category.choices))
