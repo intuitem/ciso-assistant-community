@@ -22,7 +22,11 @@
 				status: 'done',
 				href: `${$page.url.pathname}/workshop-one/ebios-rm-study?next=${$page.url.pathname}`
 			},
-			{ title: safeTranslate(m.ebiosWs1_3()), status: 'to_do', href: '#' },
+			{
+				title: safeTranslate(m.ebiosWs1_3()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-one/feared-events?next=${$page.url.pathname}`
+			},
 			{ title: safeTranslate(m.ebiosWs1_4()), status: 'to_do', href: '#' }
 		],
 		ws2: [

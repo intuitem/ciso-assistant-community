@@ -585,11 +585,23 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Ebios RMstudy',
 		foreignKeyFields: [
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+		]
+	},
+	'feared-events': {
+		endpointUrl: 'ebios-rm/feared-events',
+		name: 'fearedevent',
+		localName: 'fearedEvent',
+		localNamePlural: 'fearedEvents',
+		verboseName: 'Feared event',
+		verboseNamePlural: 'Feared events',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' }
+			// { field: 'qualifications', urlModel: 'qualifications' }
 		]
 	}
 };

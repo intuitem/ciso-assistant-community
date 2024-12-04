@@ -531,5 +531,9 @@ export const listViewFields: ListViewFieldsConfig = {
 	'ebios-rm': {
 		head: ['name', 'description'],
 		body: ['name', 'description']
+	},
+	'feared-events': {
+		head: ['selected', 'assets', 'fearedEvent', 'impacts', 'gravity'],
+		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
 	}
 };

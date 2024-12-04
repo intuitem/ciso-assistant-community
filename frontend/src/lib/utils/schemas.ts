@@ -381,6 +381,16 @@ export const ebiosRMSchema = baseNamedObject({
 	folder: z.string()
 });
 
+export const fearedEventsSchema = baseNamedObject({
+	ref_id: z.string().optional(),
+	gravity: z.number().optional(),
+	is_selected: z.boolean().optional(),
+	justification: z.string().optional(),
+	ebios_rm_study: z.string(),
+	assets: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -406,7 +416,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
-	'ebios-rm': ebiosRMSchema
+	'ebios-rm': ebiosRMSchema,
+	'feared-events': fearedEventsSchema
 };
 
 export const modelSchema = (model: string) => {
