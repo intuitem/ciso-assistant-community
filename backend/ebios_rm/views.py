@@ -1,5 +1,5 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import EbiosRMStudy
+from .models import EbiosRMStudy, FearedEvent
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -23,3 +23,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
+
+
+class FearedEventViewSet(BaseModelViewSet):
+    model = FearedEvent
