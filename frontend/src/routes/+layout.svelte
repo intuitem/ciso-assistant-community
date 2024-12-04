@@ -2,7 +2,7 @@
 	// Most of your app wide CSS should be put in this file
 	import '../app.postcss';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
-	import ParaglideSvelte from './ParaglideJsProvider.svelte';
+	import { browser } from '$app/environment';
 
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 
@@ -77,6 +77,11 @@
 		createModal: { ref: CreateModal },
 		deleteConfirmModal: { ref: DeleteConfirmModal }
 	};
+
+	$: if (browser && $page.url.searchParams.has('refresh')) {
+		$page.url.searchParams.delete('refresh');
+		window.location.href = $page.url.href;
+	}
 </script>
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>

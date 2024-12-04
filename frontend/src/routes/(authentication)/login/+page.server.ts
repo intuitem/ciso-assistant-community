@@ -1,7 +1,6 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
@@ -9,7 +8,6 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
-import { setFlash } from 'sveltekit-flash-message/server';
 
 interface AuthenticationFlow {
 	id:
@@ -25,6 +23,15 @@ interface AuthenticationFlow {
 	provider?: Record<string, string>;
 	is_pending: boolean;
 	types: 'totp' | 'recovery_codes';
+}
+
+function makeRedirectURL(currentLang: string, preferedLang: string, url: URL): string {
+	const next = url.searchParams.get('next');
+	const secureNext = getSecureRedirect(next) || '/';
+	if (currentLang === preferedLang) {
+		return secureNext;
+	}
+	return secureNext ? `${secureNext}?refresh=1` : `/?refresh=1`;
 }
 
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
@@ -74,29 +81,27 @@ export const actions: Actions = {
 				});
 				return fail(res.status, { form });
 			}
-			if (res.status === 401) {
+			if (res.status === 401 && res.data) {
 				// User is not authenticated
-				if (res.data) {
-					const flows: AuthenticationFlow[] = res.data.flows;
-					if (flows.length > 0) {
-						const mfaFlow = flows.find((flow) => flow.id === 'mfa_authenticate');
-						const sessionToken = res.meta.session_token;
-						if (sessionToken) {
-							cookies.set('allauth_session_token', sessionToken, {
-								httpOnly: true,
-								sameSite: 'lax',
-								path: '/',
-								secure: true
-							});
-						}
+				const flows: AuthenticationFlow[] = res.data.flows;
+				if (flows.length > 0) {
+					const mfaFlow = flows.find((flow) => flow.id === 'mfa_authenticate');
+					const sessionToken = res.meta.session_token;
+					if (sessionToken) {
+						cookies.set('allauth_session_token', sessionToken, {
+							httpOnly: true,
+							sameSite: 'lax',
+							path: '/',
+							secure: true
+						});
+					}
 
-						if (mfaFlow) {
-							return {
-								form,
-								mfa: true,
-								mfaFlow
-							};
-						}
+					if (mfaFlow) {
+						return {
+							form,
+							mfa: true,
+							mfaFlow
+						};
 					}
 				}
 			}
@@ -117,8 +122,22 @@ export const actions: Actions = {
 			secure: true
 		});
 
-		const next = url.searchParams.get('next') || '/';
-		redirect(302, getSecureRedirect(next));
+		const preferencesRes = await fetch(`${BASE_API_URL}/user-preferences/`);
+		const preferences = await preferencesRes.json();
+
+		const currentLang = cookies.get('ciso_lang') || 'en';
+		const preferedLang = preferences.lang || 'en';
+
+		if (currentLang !== preferedLang) {
+			cookies.set('ciso_lang', preferedLang, {
+				httpOnly: false,
+				sameSite: 'lax',
+				path: '/',
+				secure: true
+			});
+		}
+
+		redirect(302, makeRedirectURL(currentLang, preferedLang, url));
 	},
 	mfaAuthenticate: async (event) => {
 		const formData = await event.request.formData();
