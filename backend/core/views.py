@@ -1180,7 +1180,6 @@ class AppliedControlViewSet(BaseModelViewSet):
             folder=new_folder,
             ref_id=applied_control.ref_id,
             category=applied_control.category,
-            owner=applied_control.owner,
             csf_function=applied_control.csf_function,
             priority=applied_control.priority,
             status=applied_control.status,
@@ -1191,6 +1190,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             effort=applied_control.effort,
             cost=applied_control.cost,
         )
+        duplicate_applied_control.owner.set(applied_control.owner.all())
         if data["duplicate_evidences"]:
             duplicate_related_objects(
                 applied_control, duplicate_applied_control, new_folder, "evidences"
