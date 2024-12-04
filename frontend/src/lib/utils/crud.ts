@@ -577,7 +577,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	'ebios-rm': {
-		endpointUrl:'ebios-rm/studies', 
+		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
 		localName: 'ebiosRMstudy',
 		localNamePlural: 'ebiosRMstudy',

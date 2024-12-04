@@ -50,10 +50,14 @@ function getEndpoint({
 }) {
 	const model = getModelInfo(urlModel);
 	if (action === 'create') {
-		return model.endpointUrl ? `${BASE_API_URL}/${model.endpointUrl}/` : `${BASE_API_URL}/${urlModel}/`;
+		return model.endpointUrl
+			? `${BASE_API_URL}/${model.endpointUrl}/`
+			: `${BASE_API_URL}/${urlModel}/`;
 	}
 	const id = event.params.id;
-	return model.endpointUrl ? `${BASE_API_URL}/${model.endpointUrl}/${id}/` : `${BASE_API_URL}/${urlModel}/${id}/`;
+	return model.endpointUrl
+		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
+		: `${BASE_API_URL}/${urlModel}/${id}/`;
 }
 
 export async function handleErrorResponse({
@@ -203,7 +207,9 @@ export async function defaultDeleteFormAction({
 	const model = getModelInfo(urlModel);
 
 	const id = deleteForm.data.id;
-	const endpoint = model.endpointUrl ? `${BASE_API_URL}/${model.endpointUrl}/${id}/` : `${BASE_API_URL}/${model.urlModel}/${id}/`;
+	const endpoint = model.endpointUrl
+		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
+		: `${BASE_API_URL}/${model.urlModel}/${id}/`;
 
 	if (!deleteForm.valid) {
 		console.error(deleteForm.errors);
