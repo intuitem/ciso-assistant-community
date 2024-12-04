@@ -1,5 +1,12 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder, AttackPath
+from .models import (
+    EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    Stakeholder,
+    AttackPath,
+    OperationalScenario,
+)
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -59,3 +66,7 @@ class StakeholderViewSet(BaseModelViewSet):
 
 class AttackPathViewSet(BaseModelViewSet):
     model = AttackPath
+
+
+class OperationalScenarioViewSet(BaseModelViewSet):
+    model = OperationalScenario
