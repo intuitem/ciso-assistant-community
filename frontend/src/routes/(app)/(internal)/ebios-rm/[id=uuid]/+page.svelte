@@ -27,7 +27,11 @@
 				status: 'to_do',
 				href: `${$page.url.pathname}/workshop-one/feared-events?next=${$page.url.pathname}`
 			},
-			{ title: safeTranslate(m.ebiosWs1_4()), status: 'to_do', href: '#' }
+			{
+				title: safeTranslate(m.ebiosWs1_4()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-one/base?next=${$page.url.pathname}`
+			}
 		],
 		ws2: [
 			{ title: safeTranslate(m.ebiosWs2_1()), status: 'to_do', href: '#' },
