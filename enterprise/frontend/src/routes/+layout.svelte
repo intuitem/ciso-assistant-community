@@ -3,6 +3,7 @@
 	import '../app.postcss';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 	import ParaglideSvelte from './ParaglideJsProvider.svelte';
+	import { browser } from '$app/environment';
 
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 
@@ -97,6 +98,11 @@
 			? `data:${$faviconB64.mimeType};base64, ${$faviconB64.data}`
 			: favicon;
 	});
+
+	$: if (browser && $page.url.searchParams.has('refresh')) {
+		$page.url.searchParams.delete('refresh');
+		window.location.href = $page.url.href;
+	}
 </script>
 
 <svelte:head>

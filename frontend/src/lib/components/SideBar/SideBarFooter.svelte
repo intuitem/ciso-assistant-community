@@ -50,6 +50,12 @@
 		event.preventDefault();
 		value = event?.target?.value;
 		setLanguageTag(value);
+		fetch('/api/user-preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({
+				lang: value
+			})
+		});
 		// sessionStorage.setItem('lang', value);
 		setCookie('ciso_lang', value);
 		window.location.reload();

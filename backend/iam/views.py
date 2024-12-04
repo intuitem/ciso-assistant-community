@@ -61,6 +61,7 @@ class LogoutView(views.APIView):
 
 
 class CurrentUserView(views.APIView):
+    # Is this condition really necessary if we have permission_classes = [permissions.IsAuthenticated] ?
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
