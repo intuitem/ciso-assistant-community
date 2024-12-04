@@ -1971,7 +1971,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project", "status"]
+    filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
