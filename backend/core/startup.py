@@ -519,7 +519,8 @@ def startup(sender: AppConfig, **kwargs):
 
     # Create default Qualifications
     try:
-        Qualification.create_default_qualifications()
+        if Qualification.objects.count() == 0:
+            Qualification.create_default_qualifications()
     except Exception as e:
         logger.error("Error creating default qualifications", exc_info=e)
 
