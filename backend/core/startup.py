@@ -363,6 +363,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_operationalscenario",
     "change_operationalscenario",
     "delete_operationalscenario",
+    "view_qualification",
+    "add_qualification",
+    "change_qualification",
+    "delete_qualification",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

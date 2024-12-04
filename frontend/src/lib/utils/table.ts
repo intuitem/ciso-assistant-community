@@ -533,7 +533,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['name', 'description']
 	},
 	'feared-events': {
-		head: ['selected', 'assets', 'fearedEvent', 'impacts', 'gravity'],
+		head: ['selected', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
 		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
 	}
 };

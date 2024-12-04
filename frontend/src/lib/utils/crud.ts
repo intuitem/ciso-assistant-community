@@ -576,6 +576,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'user', urlModel: 'users' }
 		]
 	},
+	qualifications: {
+		name: 'qualification',
+		localName: 'qualification',
+		localNamePlural: 'qualifications',
+		verboseName: 'Qualification',
+		verboseNamePlural: 'Qualifications'
+	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
 		name: 'ebiosrmstudy',
@@ -600,8 +607,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Feared events',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
-			{ field: 'assets', urlModel: 'assets' }
-			// { field: 'qualifications', urlModel: 'qualifications' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'qualifications', urlModel: 'qualifications' }
 		]
 	}
 };
