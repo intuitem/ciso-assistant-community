@@ -101,7 +101,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return None
         object_ids_view = None
         if self.request.method == "GET":
-            if q := re.match("/api/[\w-]+/([0-9a-f-]+)", self.request.path):
+            if q := re.match(
+                "/api/[\w-]+/([\w-]+/)?([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})+)",
+                self.request.path,
+            ):
                 """"get_queryset is called by Django even for an individual object via get_object
                 https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
                 id = UUID(q.group(1))

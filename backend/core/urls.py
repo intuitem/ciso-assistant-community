@@ -84,6 +84,7 @@ urlpatterns = [
     path("serdes/", include("serdes.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
+    path("ebios-rm/", include("ebios_rm.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("build/", get_build, name="get_build"),
     path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
