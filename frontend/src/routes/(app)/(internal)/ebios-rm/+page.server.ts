@@ -60,7 +60,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const endpoint = `${BASE_API_URL}/${URLModel}`;
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}`;
 	const res = await fetch(endpoint);
 	const data = await res.json().then((res) => res.results);
 
