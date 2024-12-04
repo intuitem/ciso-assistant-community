@@ -88,3 +88,21 @@ class RoToReadSerializer(BaseModelSerializer):
     class Meta:
         model = RoTo
         fields = "__all__"
+
+
+class StakeholderWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Stakeholder
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class StakeholderReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    entity = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Stakeholder
+        fields = "__all__"
