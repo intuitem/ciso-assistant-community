@@ -705,3 +705,13 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
         exclude = ["folder", "is_published"]
+
+
+class QualificationReadSerializer(ReferentialSerializer):
+    class Meta:
+        model = Qualification
+        exclude = ["translations"]
+
+
+class QualificationWriteSerializer(QualificationReadSerializer):
+    pass
