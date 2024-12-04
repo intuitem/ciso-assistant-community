@@ -1,5 +1,5 @@
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from .models import EbiosRMStudy, FearedEvent
+from .models import EbiosRMStudy, FearedEvent, RoTo
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
@@ -27,3 +27,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
+
+
+class RoToViewSet(BaseModelViewSet):
+    model = RoTo
