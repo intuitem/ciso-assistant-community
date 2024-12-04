@@ -1,10 +1,9 @@
 from core.serializers import (
     BaseModelSerializer,
     FieldsRelatedField,
-    AssessmentReadSerializer,
 )
 from core.models import StoredLibrary, RiskMatrix
-from .models import EbiosRMStudy, FearedEvent
+from .models import EbiosRMStudy, FearedEvent, RoTo
 from rest_framework import serializers
 import logging
 
@@ -71,4 +70,21 @@ class FearedEventReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = FearedEvent
+        fields = "__all__"
+
+
+class RoToWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RoTo
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class RoToReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    fearead_events = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RoTo
         fields = "__all__"
