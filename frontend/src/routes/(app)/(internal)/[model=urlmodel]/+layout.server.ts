@@ -14,7 +14,9 @@ export const load = (async ({ fetch, params }) => {
 		const fetch_function = CUSTOM_MODEL_FETCH_MAP[params.model];
 		data = await fetch_function({ fetch, params }, languageTag());
 	} else {
-		const endpoint = `${BASE_API_URL}/${params.model}/${model.listViewUrlParams || ''}`;
+		const endpoint = model.endpointUrl
+			? `${BASE_API_URL}/${model.endpointUrl}/${model.listViewUrlParams || ''}`
+			: `${BASE_API_URL}/${params.model}/${model.listViewUrlParams || ''}`;
 		const res = await fetch(endpoint);
 		data = await res.json().then((res) => res.results);
 	}

@@ -27,3 +27,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
