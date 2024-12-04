@@ -64,7 +64,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         default=Entity.get_main_entity,
     )
 
-    ref_id = models.CharField(max_length=100)
+    ref_id = models.CharField(max_length=100, blank=True)
     version = models.CharField(
         max_length=100,
         blank=True,
@@ -101,7 +101,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
 
-class FearedEvent(NameDescriptionMixin):
+class FearedEvent(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -122,7 +122,7 @@ class FearedEvent(NameDescriptionMixin):
         help_text=_("Qualifications carried by the feared event"),
     )
 
-    ref_id = models.CharField(max_length=100)
+    ref_id = models.CharField(max_length=100, blank=True)
     gravity = models.SmallIntegerField(default=-1, verbose_name=_("Gravity"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
@@ -132,8 +132,12 @@ class FearedEvent(NameDescriptionMixin):
         verbose_name_plural = _("Feared events")
         ordering = ["created_at"]
 
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
 
-class RoTo(AbstractBaseModel):
+
+class RoTo(AbstractBaseModel, FolderMixin):
     class RiskOrigin(models.TextChoices):
         STATE = "state", _("State")
         ORGANIZED_CRIME = "organized_crime", _("Organized crime")
@@ -206,8 +210,12 @@ class RoTo(AbstractBaseModel):
         verbose_name_plural = _("RO/TO couples")
         ordering = ["created_at"]
 
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
 
-class Stakeholder(AbstractBaseModel):
+
+class Stakeholder(AbstractBaseModel, FolderMixin):
     class Category(models.TextChoices):
         CLIENT = "client", _("Client")
         PARTNER = "partner", _("Partner")
@@ -289,6 +297,10 @@ class Stakeholder(AbstractBaseModel):
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
 
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
+
     @staticmethod
     def _compute_criticality(
         dependency: int, penetration: int, maturity: int, trust: int
@@ -316,7 +328,7 @@ class Stakeholder(AbstractBaseModel):
         )
 
 
-class AttackPath(AbstractBaseModel):
+class AttackPath(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -344,8 +356,12 @@ class AttackPath(AbstractBaseModel):
         verbose_name_plural = _("Attack paths")
         ordering = ["created_at"]
 
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
 
-class OperationalScenario(AbstractBaseModel):
+
+class OperationalScenario(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -375,3 +391,7 @@ class OperationalScenario(AbstractBaseModel):
         verbose_name = _("Operational scenario")
         verbose_name_plural = _("Operational scenarios")
         ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.ebios_rm_study.folder
+        super().save(*args, **kwargs)
