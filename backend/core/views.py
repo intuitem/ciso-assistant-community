@@ -1956,6 +1956,15 @@ class UploadAttachmentView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class QualificationViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows qualifications to be viewed or edited.
+    """
+
+    model = Qualification
+    search_fields = ["name"]
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.

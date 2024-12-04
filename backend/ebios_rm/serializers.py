@@ -65,8 +65,8 @@ class FearedEventWriteSerializer(BaseModelSerializer):
 
 
 class FearedEventReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
+    qualifications = FieldsRelatedField(["name"], many=True)
     folder = FieldsRelatedField()
 
     class Meta:

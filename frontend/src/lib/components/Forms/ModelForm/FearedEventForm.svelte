@@ -50,3 +50,12 @@
 	field="assets"
 	label={m.assets()}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	options={getOptions({
+		objects: model.foreignKeys['qualifications']
+	})}
+	field="qualifications"
+	label={m.qualifications()}
+/>
