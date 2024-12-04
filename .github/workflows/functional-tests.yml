@@ -70,7 +70,6 @@ jobs:
         run: |
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-          echo CI_TEST=1 >> .env
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -175,7 +174,6 @@ jobs:
         run: |
           touch .env
           echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-          echo CI_TEST=1 >> .env
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -211,7 +209,7 @@ jobs:
           nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
       - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }} -g "user can set his password"
+        run: pnpm exec playwright test --project=${{ matrix.playwright-browser }}
         env:
           CI: true
       - uses: actions/upload-artifact@v4

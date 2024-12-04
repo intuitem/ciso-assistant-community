@@ -1,8 +1,6 @@
 import { getSecureRedirect } from '$lib/utils/helpers';
 
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-// The CI_TEST environment variable will have to be removed if the `currentLang == preferedLang` solution fix the enterprise function tests.
-// import { CI_TEST } from '$lib/utils/env_constants';
 import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
