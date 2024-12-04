@@ -3,7 +3,7 @@ from core.serializers import (
     FieldsRelatedField,
 )
 from core.models import StoredLibrary, RiskMatrix
-from .models import EbiosRMStudy, FearedEvent, RoTo
+from .models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
 from rest_framework import serializers
 import logging
 
@@ -91,6 +91,9 @@ class RoToReadSerializer(BaseModelSerializer):
 
 
 class StakeholderWriteSerializer(BaseModelSerializer):
+    current_criticality = serializers.IntegerField(read_only=True)
+    residual_criticality = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Stakeholder
         exclude = ["created_at", "updated_at", "folder"]
@@ -102,6 +105,9 @@ class StakeholderReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+
+    current_criticality = serializers.IntegerField()
+    residual_criticality = serializers.IntegerField()
 
     class Meta:
         model = Stakeholder
