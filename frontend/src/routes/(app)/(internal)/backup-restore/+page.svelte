@@ -22,7 +22,7 @@
 
 	$: uploadButtonStyles = file ? '' : 'chip-disabled';
 
-	const authorizedExtensions = ['.json', '.gz'];
+	const authorizedExtensions = ['.bak'];
 	const user = $page.data.user;
 	const canBackup: boolean = Object.hasOwn(user.permissions, 'backup');
 </script>
