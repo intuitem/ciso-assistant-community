@@ -678,6 +678,7 @@
 	"back": "Înapoi",
 	"duplicate": "Dublică",
 	"duplicateRiskAssessment": "Dublarea evaluării riscului",
+	"duplicateAppliedControl": "Duplicați control aplicat",
 	"size": "Mărime",
 	"favicon": "Favicon",
 	"logo": "Logo",
@@ -861,5 +862,7 @@
 	"tagsHelpText": "Etichetele sunt folosite pentru a clasifica și filtra articolele. Puteți adăuga etichete în secțiunea Extra",
 	"forgotPassword": "Aţi uitat parola",
 	"scoreSemiColon": "Scor:",
-	"mappingInferenceHelpText": "Aceste variabile sunt fixe și nu se vor modifica în funcție de sursă."
+	"mappingInferenceHelpText": "Aceste variabile sunt fixe și nu se vor modifica în funcție de sursă.",
+	"bringTheEvidences": "Aduceți dovezile",
+	"bringTheEvidencesHelpText": "Dacă este dezactivat, obiectul va fi duplicat fără dovezile sale"
 }

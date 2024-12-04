@@ -12,7 +12,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
-	export let riskAssessmentDuplication = false;
+	export let duplicate = false;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let formAction = '?/create';
 	export let context = 'create';
@@ -53,7 +53,7 @@
 			{model}
 			{closeModal}
 			{context}
-			{riskAssessmentDuplication}
+			{duplicate}
 			caching={true}
 			action={formAction}
 			{debug}

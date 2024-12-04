@@ -26,7 +26,6 @@ export const URL_MODEL = [
 	'projects',
 	'risk-matrices',
 	'risk-assessments',
-	'risk-assessment-duplicate',
 	'threats',
 	'risk-scenarios',
 	'applied-controls',
