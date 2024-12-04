@@ -1175,6 +1175,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             name=data["name"],
             description=data["description"],
             folder=new_folder,
+            ref_id=applied_control.ref_id,
             category=applied_control.category,
             csf_function=applied_control.csf_function,
             priority=applied_control.priority,
