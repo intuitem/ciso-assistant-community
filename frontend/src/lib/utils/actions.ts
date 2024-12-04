@@ -48,11 +48,12 @@ function getEndpoint({
 	urlModel: string;
 	event: RequestEvent;
 }) {
+	const model = getModelInfo(urlModel);
 	if (action === 'create') {
-		return `${BASE_API_URL}/${urlModel}/`;
+		return model.endpointUrl ? `${BASE_API_URL}/${model.endpointUrl}/` : `${BASE_API_URL}/${urlModel}/`;
 	}
 	const id = event.params.id;
-	return `${BASE_API_URL}/${urlModel}/${id}/`;
+	return model.endpointUrl ? `${BASE_API_URL}/${model.endpointUrl}/${id}/` : `${BASE_API_URL}/${urlModel}/${id}/`;
 }
 
 export async function handleErrorResponse({
@@ -199,9 +200,10 @@ export async function defaultDeleteFormAction({
 	const formData = await event.request.formData();
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(formData, zod(schema));
+	const model = getModelInfo(urlModel);
 
 	const id = deleteForm.data.id;
-	const endpoint = `${BASE_API_URL}/${urlModel}/${id}/`;
+	const endpoint = model.endpointUrl ? `${BASE_API_URL}/${model.endpointUrl}/${id}/` : `${BASE_API_URL}/${model.urlModel}/${id}/`;
 
 	if (!deleteForm.valid) {
 		console.error(deleteForm.errors);

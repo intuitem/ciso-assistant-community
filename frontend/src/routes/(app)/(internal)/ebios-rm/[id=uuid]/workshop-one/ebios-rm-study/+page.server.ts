@@ -8,13 +8,13 @@ import { defaultWriteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'ebios-rm';
+	const model = getModelInfo(URLModel);
 	const schema = modelSchema(URLModel);
-	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/object/`;
+	const objectEndpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/object/`;
 	const objectResponse = await event.fetch(objectEndpoint);
 	const object = await objectResponse.json();
 
 	const form = await superValidate(object, zod(schema), { errors: false });
-	const model = getModelInfo(URLModel);
 	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
 
