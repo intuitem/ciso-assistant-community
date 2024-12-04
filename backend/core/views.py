@@ -50,11 +50,6 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-)
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -106,7 +101,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return None
         object_ids_view = None
         if self.request.method == "GET":
-            if q := re.match("/api/[\w-]+/([0-9a-f-]+)", self.request.path):
+            if q := re.match(
+                "/api/[\w-]+/([\w-]+/)?([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})+)",
+                self.request.path,
+            ):
                 """"get_queryset is called by Django even for an individual object via get_object
                 https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
                 id = UUID(q.group(1))
@@ -300,7 +298,7 @@ class ProjectViewSet(BaseModelViewSet):
                 }
             return Response(res)
         else:
-            return Response(status=HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -607,7 +605,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
             return Response(risk_assessment.quality_check())
         else:
-            return Response(status=HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=True, methods=["get"], name="Get treatment plan data")
     def plan(self, request, pk):
@@ -640,7 +638,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(risk_assessment)
 
         else:
-            return Response(status=HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=True, name="Get treatment plan CSV")
     def treatment_plan_csv(self, request, pk):
@@ -700,7 +698,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             return response
         else:
-            return Response({"error": "Permission denied"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get risk assessment CSV")
     def risk_assessment_csv(self, request, pk):
@@ -762,7 +762,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             return response
         else:
-            return Response({"error": "Permission denied"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get risk assessment PDF")
     def risk_assessment_pdf(self, request, pk):
@@ -1164,7 +1166,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         )
         if UUID(pk) not in object_ids_view:
             return Response(
-                {"results": "applied control duplicated"}, status=HTTP_404_NOT_FOUND
+                {"results": "applied control duplicated"}, status=status.HTTP_404_NOT_FOUND
             )
 
         applied_control = self.get_object()
@@ -1370,7 +1372,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             _data = {
                 "non_field_errors": "The justification can only be edited by the approver"
             }
-            return Response(data=_data, status=HTTP_400_BAD_REQUEST)
+            return Response(data=_data, status=status.HTTP_400_BAD_REQUEST)
         else:
             return super().update(request, *args, **kwargs)
 
@@ -1482,7 +1484,7 @@ class UserViewSet(BaseModelViewSet):
                 if str(admin_group.pk) not in new_user_groups:
                     return Response(
                         {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                        status=HTTP_403_FORBIDDEN,
+                        status=status.HTTP_403_FORBIDDEN,
                     )
 
         return super().update(request, *args, **kwargs)
@@ -1494,7 +1496,7 @@ class UserViewSet(BaseModelViewSet):
             if number_of_admin_users == 1:
                 return Response(
                     {"error": "attemptToDeleteOnlyAdminAccountError"},
-                    status=HTTP_403_FORBIDDEN,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
         return super().destroy(request, *args, **kwargs)
@@ -1721,6 +1723,29 @@ class FolderViewSet(BaseModelViewSet):
                 },
             }
         )
+
+
+class UserPreferencesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request) -> Response:
+        return Response(request.user.preferences, status=status.HTTP_200_OK)
+
+    def patch(self, request) -> Response:
+        new_language = request.data.get("lang")
+        if new_language is None or new_language not in (
+            lang[0] for lang in settings.LANGUAGES
+        ):
+            logger.error(
+                f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
+            )
+            return Response(
+                {"error": "This language doesn't exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        request.user.preferences["lang"] = new_language
+        request.user.save()
+        return Response({}, status=status.HTTP_200_OK)
 
 
 @cache_page(60 * SHORT_CACHE_TTL)
