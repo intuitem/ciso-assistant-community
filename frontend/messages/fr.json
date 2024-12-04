@@ -682,6 +682,7 @@
 	"back": "Retour",
 	"duplicate": "Dupliquer",
 	"duplicateRiskAssessment": "Dupliquer l’évaluation de risque",
+	"duplicateAppliedControl": "Dupliquer la mesure appliquée",
 	"size": "Taille",
 	"favicon": "Icône de favori",
 	"logo": "Logo",
@@ -895,5 +896,7 @@
 	"ebiosWs5_3": "Définir les mesures de sécurité",
 	"ebiosWs5_4": "Évaluer et documenter les risques résiduels",
 	"ebiosWs5_5": "Mettre en place le cadre de suivi des risques",
-	"activity": "Activité"
+	"activity": "Activité",
+	"bringTheEvidences": "Apportez les preuves",
+	"bringTheEvidencesHelpText": "Si désactivé, l'objet sera dupliqué sans ses preuves"
 }

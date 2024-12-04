@@ -679,6 +679,7 @@
 	"back": "خلف",
 	"duplicate": "ينسخ",
 	"duplicateRiskAssessment": "تكرار تقييم المخاطر",
+	"duplicateAppliedControl": "تكرار عنصر التحكم المطبق",
 	"size": "الحجم",
 	"favicon": "الرمز المفضل",
 	"logo": "الشعار",
@@ -862,5 +863,7 @@
 	"tagsHelpText": "تُستخدم العلامات لتصنيف العناصر وتصفيتها. يمكنك إضافة علامات في قسم \"إضافي\"",
 	"forgotPassword": "هل نسيت كلمة السر",
 	"scoreSemiColon": "نتيجة:",
-	"mappingInferenceHelpText": "هذه المتغيرات ثابتة ولن تتغير اعتمادًا على المصدر."
+	"mappingInferenceHelpText": "هذه المتغيرات ثابتة ولن تتغير اعتمادًا على المصدر.",
+	"bringTheEvidences": "أحضر الأدلة",
+	"bringTheEvidencesHelpText": "في حالة التعطيل، سيتم تكرار الكائن بدون أدلته"
 }

@@ -678,6 +678,7 @@
 	"back": "Devolver",
 	"duplicate": "Duplicar",
 	"duplicateRiskAssessment": "Duplicar la evaluación de riesgo",
+	"duplicateAppliedControl": "Duplicar el control aplicado",
 	"size": "Tamaño",
 	"favicon": "Favicon",
 	"logo": "Logo",
@@ -861,5 +862,7 @@
 	"tagsHelpText": "Las etiquetas se utilizan para categorizar y filtrar los elementos. Puedes agregar etiquetas en la sección Extra",
 	"forgotPassword": "Has olvidado tu contraseña",
 	"scoreSemiColon": "Puntaje:",
-	"mappingInferenceHelpText": "Estas variables son fijas y no cambiarán dependiendo de la fuente."
+	"mappingInferenceHelpText": "Estas variables son fijas y no cambiarán dependiendo de la fuente.",
+	"bringTheEvidences": "Traer las evidencias",
+	"bringTheEvidencesHelpText": "Si está deshabilitado, el objeto se duplicará sin sus evidencias."
 }

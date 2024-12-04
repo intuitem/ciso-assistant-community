@@ -678,6 +678,7 @@
 	"back": "واپس",
 	"duplicate": "نقل کریں",
 	"duplicateRiskAssessment": "خطرے کی تشخیص کو نقل کریں",
+	"duplicateAppliedControl": "لاگو کنٹرول کی نقل تیار کریں۔",
 	"size": "سائز",
 	"favicon": "فیویکان",
 	"logo": "لوگو",
@@ -861,5 +862,7 @@
 	"tagsHelpText": "ٹیگز اشیاء کی درجہ بندی اور فلٹر کرنے کے لیے استعمال ہوتے ہیں۔ آپ اضافی سیکشن میں ٹیگ شامل کر سکتے ہیں۔",
 	"forgotPassword": "پاس ورڈ بھول گئے۔",
 	"scoreSemiColon": "سکور:",
-	"mappingInferenceHelpText": "یہ متغیرات طے شدہ ہیں اور ماخذ کے لحاظ سے تبدیل نہیں ہوں گے۔"
+	"mappingInferenceHelpText": "یہ متغیرات طے شدہ ہیں اور ماخذ کے لحاظ سے تبدیل نہیں ہوں گے۔",
+	"bringTheEvidences": "ثبوت لے کر آئیں",
+	"bringTheEvidencesHelpText": "اگر غیر فعال ہو تو، اعتراض کو اس کے ثبوت کے بغیر نقل کر دیا جائے گا۔"
 }

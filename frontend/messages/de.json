@@ -678,6 +678,7 @@
 	"back": "Zurückkehren",
 	"duplicate": "Duplikat",
 	"duplicateRiskAssessment": "Duplizieren Sie die Risikobewertung",
+	"duplicateAppliedControl": "Duplizieren Sie das angewendete kontrolle",
 	"size": "Größe",
 	"favicon": "Favicon",
 	"logo": "Logo",
@@ -861,5 +862,7 @@
 	"tagsHelpText": "Tags werden zum Kategorisieren und Filtern der Elemente verwendet. Sie können Tags im Abschnitt Extra hinzufügen",
 	"forgotPassword": "Passwort vergessen",
 	"scoreSemiColon": "Punktzahl:",
-	"mappingInferenceHelpText": "Diese Variablen sind fest und ändern sich je nach Quelle nicht."
+	"mappingInferenceHelpText": "Diese Variablen sind fest und ändern sich je nach Quelle nicht.",
+	"bringTheEvidences": "Bringen Sie die Beweise",
+	"bringTheEvidencesHelpText": "Wenn deaktiviert, wird das Objekt ohne seine Beweise dupliziert"
 }
