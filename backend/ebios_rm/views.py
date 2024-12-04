@@ -31,3 +31,19 @@ class FearedEventViewSet(BaseModelViewSet):
 
 class RoToViewSet(BaseModelViewSet):
     model = RoTo
+
+    @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
+    def risk_origin(self, request):
+        return Response(dict(RoTo.RiskOrigin.choices))
+
+    @action(detail=False, name="Get motivation choices")
+    def motivation(self, request):
+        return Response(dict(RoTo.Motivation.choices))
+
+    @action(detail=False, name="Get resources choices")
+    def resources(self, request):
+        return Response(dict(RoTo.Resources.choices))
+
+    @action(detail=False, name="Get pertinence choices")
+    def pertinence(self, request):
+        return Response(dict(RoTo.Pertinence.choices))
