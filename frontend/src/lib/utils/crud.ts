@@ -585,7 +585,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Ebios RMstudy',
 		foreignKeyFields: [
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
