@@ -1166,7 +1166,8 @@ class AppliedControlViewSet(BaseModelViewSet):
         )
         if UUID(pk) not in object_ids_view:
             return Response(
-                {"results": "applied control duplicated"}, status=status.HTTP_404_NOT_FOUND
+                {"results": "applied control duplicated"},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         applied_control = self.get_object()
