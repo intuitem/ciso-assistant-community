@@ -1,10 +1,16 @@
 from core.serializers import (
     BaseModelSerializer,
     FieldsRelatedField,
-    AssessmentReadSerializer,
 )
 from core.models import StoredLibrary, RiskMatrix
-from .models import EbiosRMStudy, FearedEvent
+from .models import (
+    EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    Stakeholder,
+    AttackPath,
+    OperationalScenario,
+)
 from rest_framework import serializers
 import logging
 
@@ -71,4 +77,81 @@ class FearedEventReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = FearedEvent
+        fields = "__all__"
+
+
+class RoToWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RoTo
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class RoToReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    feared_events = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RoTo
+        fields = "__all__"
+
+
+class StakeholderWriteSerializer(BaseModelSerializer):
+    current_criticality = serializers.IntegerField(read_only=True)
+    residual_criticality = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Stakeholder
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class StakeholderReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    entity = FieldsRelatedField()
+    applied_controls = FieldsRelatedField(many=True)
+
+    current_criticality = serializers.IntegerField()
+    residual_criticality = serializers.IntegerField()
+
+    class Meta:
+        model = Stakeholder
+        fields = "__all__"
+
+
+class AttackPathWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = AttackPath
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class AttackPathReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    ro_to_couple = FieldsRelatedField()
+    stakeholders = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = AttackPath
+        fields = "__all__"
+
+
+class OperationalScenarioWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = OperationalScenario
+        exclude = ["created_at", "updated_at", "folder"]
+
+
+class OperationalScenarioReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__")
+    ebios_rm_study = FieldsRelatedField()
+    folder = FieldsRelatedField()
+    attack_paths = FieldsRelatedField(many=True)
+    threats = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = OperationalScenario
         fields = "__all__"
