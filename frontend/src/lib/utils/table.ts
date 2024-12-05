@@ -556,6 +556,6 @@ export const listViewFields: ListViewFieldsConfig = {
 	},
 	'operational-scenarios': {
 		head: ['description', 'threats', 'likelihood'],
-		body: ['description', 'threats', 'likelihood'],
+		body: ['description', 'threats', 'likelihood']
 	}
 };

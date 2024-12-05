@@ -26,10 +26,11 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	options={getOptions({ objects: model.foreignKeys['threats'],
+	options={getOptions({
+		objects: model.foreignKeys['threats'],
 		extra_fields: [['folder', 'str']],
 		label: 'auto'
-	 })}
+	})}
 	field="threats"
 	cacheLock={cacheLocks['threats']}
 	bind:cachedValue={formDataCache['threats']}

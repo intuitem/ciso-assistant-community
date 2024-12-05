@@ -78,7 +78,7 @@ class AttackPathViewSet(BaseModelViewSet):
 
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
-    
+
     filterset_fields = [
         "ebios_rm_study",
     ]
