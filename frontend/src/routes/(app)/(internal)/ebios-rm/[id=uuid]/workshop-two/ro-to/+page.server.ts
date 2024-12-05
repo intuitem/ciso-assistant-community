@@ -6,31 +6,36 @@ import {
 	urlParamModelSelectFields
 } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+import type { ModelInfo, urlModel } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
+import { listViewFields } from '$lib/utils/table';
+import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
-	const URLModel = params.model!;
-	const createSchema = modelSchema(params.model!);
-	const createForm = await superValidate(zod(createSchema));
-	const model: ModelInfo = getModelInfo(params.model!);
-	const foreignKeyFields = urlParamModelForeignKeyFields(params.model);
-	const selectFields = urlParamModelSelectFields(params.model);
+	const URLModel = 'ro-to';
+	const createSchema = modelSchema(URLModel);
+	const initialData = {
+		ebios_rm_study: params.id
+	};
+	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
+	const model: ModelInfo = getModelInfo(URLModel);
+	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
+	const selectFields = urlParamModelSelectFields(URLModel);
 
 	const foreignKeys: Record<string, any> = {};
 
 	for (const keyField of foreignKeyFields) {
-		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
 		const keyModel = getModelInfo(keyField.urlModel);
+		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
 		const url = keyModel.endpointUrl
 			? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
 		const response = await fetch(url);
 		if (response.ok) {
 			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
@@ -47,13 +52,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		if (selectField.detail) continue;
 		const url = model.endpointUrl
 			? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
-			: `${BASE_API_URL}/${params.model}/${selectField.field}/`;
+			: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
 			selectOptions[selectField.field] = await response.json().then((data) =>
 				Object.entries(data).map(([key, value]) => ({
 					label: value,
-					value: selectField.valueType === 'number' ? parseInt(key) : key
+					value: key
 				}))
 			);
 		} else {
@@ -63,20 +68,40 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	return { createForm, deleteForm, model, URLModel };
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`;
+	const res = await fetch(endpoint);
+	const data = await res.json().then((res) => res.results);
+
+	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
+
+	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[URLModel as urlModel].head[index];
+			return obj;
+		},
+		{}
+	);
+
+	const table: TableSource = {
+		head: headData,
+		body: bodyData,
+		meta: data // metaData
+	};
+
+	return { createForm, deleteForm, model, URLModel, table };
 };
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
+		// const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
 		return defaultWriteFormAction({
 			event,
-			urlModel: event.params.model!,
-			action: 'create',
-			redirectToWrittenObject: redirectToWrittenObject
+			urlModel: 'ro-to',
+			action: 'create'
+			// redirectToWrittenObject: redirectToWrittenObject
 		});
 	},
 	delete: async (event) => {
-		return defaultDeleteFormAction({ event, urlModel: event.params.model! });
+		return defaultDeleteFormAction({ event, urlModel: 'ro-to' });
 	}
 };

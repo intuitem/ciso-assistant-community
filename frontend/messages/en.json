@@ -384,7 +384,7 @@
 	"exportDatabase": "Export database",
 	"upload": "Upload",
 	"add": "Add",
-	"undefined": "--",
+	"undefined": "undefined",
 	"production": "Production",
 	"design": "Design",
 	"development": "Development",
@@ -937,5 +937,10 @@
 	"fearedEvent": "Feared event",
 	"fearedEvents": "Feared events",
 	"isSelected": "Is selected",
-	"ebiosRM": "Ebios RM"
+	"ebiosRM": "Ebios RM",
+	"riskOrigin": "Risk origin",
+	"targetObjective": "Target objective",
+	"motivation": "Motivation",
+	"resources": "Resources",
+	"pertinence": "Pertinence"
 }
