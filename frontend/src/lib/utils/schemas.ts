@@ -426,6 +426,23 @@ export const roToSchema = z.object({
 	justification: z.string().optional()
 });
 
+export const StakeholderSchema = z.object({
+	ebios_rm_study: z.string(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	category: z.string().optional(),
+	entity: z.string().optional(),
+	current_dependency: z.number().min(0).max(4).optional(),
+	current_penetration: z.number().min(0).max(4).optional(),
+	current_maturity: z.number().min(1).max(4).optional(),
+	current_trust: z.number().min(1).max(4).optional(),
+	residual_dependency: z.number().min(0).max(4).optional(),
+	residual_penetration: z.number().min(0).max(4).optional(),
+	residual_maturity: z.number().min(1).max(4).optional(),
+	residual_trust: z.number().min(1).max(4).optional(),
+	is_selected: z.boolean().optional(),
+	justification: z.string().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -453,7 +470,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'filtering-labels': FilteringLabelSchema,
 	'ebios-rm': ebiosRMSchema,
 	'feared-events': fearedEventsSchema,
-	'ro-to': roToSchema
+	'ro-to': roToSchema,
+	stakeholders: StakeholderSchema
 };
 
 export const modelSchema = (model: string) => {
