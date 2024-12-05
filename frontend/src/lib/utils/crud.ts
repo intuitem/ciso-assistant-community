@@ -621,6 +621,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		]
+	},
+	stakeholders: {
+		endpointUrl: 'ebios-rm/stakeholders',
+		name: 'stakeholder',
+		localName: 'stakeholder',
+		localNamePlural: 'stakeholders',
+		verboseName: 'Stakeholder',
+		verboseNamePlural: 'Stakeholders',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
+		],
+		selectFields: [{ field: 'category' }]
 	}
 };
 
