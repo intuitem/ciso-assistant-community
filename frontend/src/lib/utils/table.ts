@@ -374,8 +374,28 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	policies: {
-		head: ['name', 'description', 'csfFunction', 'eta', 'owner', 'domain', 'referenceControl'],
-		body: ['name', 'description', 'csf_function', 'eta', 'owner', 'folder', 'reference_control'],
+		head: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'csfFunction',
+			'eta',
+			'owner',
+			'domain',
+			'referenceControl'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'csf_function',
+			'eta',
+			'owner',
+			'folder',
+			'reference_control'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: STATUS_FILTER,
