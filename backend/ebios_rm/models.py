@@ -137,6 +137,10 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
+    @property
+    def risk_matrix(self):
+        return self.ebios_rm_study.risk_matrix
+
 
 class RoTo(AbstractBaseModel, FolderMixin):
     class RiskOrigin(models.TextChoices):
