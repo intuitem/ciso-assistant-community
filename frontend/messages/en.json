@@ -384,7 +384,7 @@
 	"exportDatabase": "Export database",
 	"upload": "Upload",
 	"add": "Add",
-	"undefined": "--",
+	"undefined": "undefined",
 	"production": "Production",
 	"design": "Design",
 	"development": "Development",
@@ -929,5 +929,12 @@
 	"impacts": "Impacts",
 	"ebiosRmStudies": "Ebios RM studies",
 	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences"
+	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences",
+	"fearedEvents": "Feared events",
+	"riskOrigin": "Risk origin",
+	"targetObjective": "Target objective",
+	"motivation": "Motivation",
+	"resources": "Resources",
+	"pertinence": "Pertinence",
+	"isSelected": "Is selected"
 }
