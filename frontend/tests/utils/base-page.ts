@@ -1,5 +1,15 @@
 import { expect, type Locator, type Page } from './test-utils.js';
 
+/**
+ * Escape the characters of `string` to safely insert it in a regex.
+ *
+ * @param {string} string - The string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeRegex(string: string): string {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export abstract class BasePage {
 	readonly url: string;
 	readonly name: string | RegExp;
@@ -28,8 +38,17 @@ export abstract class BasePage {
 		await expect.soft(this.pageTitle).toHaveText(title);
 	}
 
-	async hasUrl() {
-		await expect(this.page).toHaveURL(this.url);
+	/**
+	 * Check whether the browser's URL match the `this.url` value.
+	 *
+	 * @param {boolean} [strict=true] - Determines the URL matching mode.
+	 * If `strict` is `true`, the function checks if `this.url` is strictly equal to the browser's URL.
+	 * Otherwise, it checks if the browser's URL starts with `this.url`.
+	 * @returns {void}
+	 */
+	async hasUrl(strict: boolean = true) {
+		const URLPattern = strict ? this.url : new RegExp(escapeRegex(this.url) + '.*');
+		await expect(this.page).toHaveURL(URLPattern);
 	}
 
 	async hasBreadcrumbPath(paths: (string | RegExp)[], fullPath = true, origin = 'Home') {
@@ -39,12 +58,6 @@ export abstract class BasePage {
 		} else {
 			await expect.soft(this.breadcrumbs.last()).toHaveText(paths[paths.length - 1]);
 		}
-	}
-
-	async checkForUndefinedText() {
-		await expect
-			.soft(this.page.getByText('undefined'), 'An undefined text is visible on the page')
-			.toHaveCount(0);
 	}
 
 	async waitUntilLoaded() {

@@ -678,6 +678,7 @@
 	"back": "Opbrengst",
 	"duplicate": "Duplicaat",
 	"duplicateRiskAssessment": "Dupliceer de risicobeoordeling",
+	"duplicateAppliedControl": "Dupliceer de toegepaste controle",
 	"size": "Grootte",
 	"favicon": "Favorieten",
 	"logo": "Logo",
@@ -861,5 +862,7 @@
 	"tagsHelpText": "Tags worden gebruikt om de items te categoriseren en te filteren. U kunt tags toevoegen in de sectie Extra",
 	"forgotPassword": "Wachtwoord vergeten",
 	"scoreSemiColon": "Punt:",
-	"mappingInferenceHelpText": "Deze variabelen zijn vast en veranderen niet, afhankelijk van de bron."
+	"mappingInferenceHelpText": "Deze variabelen zijn vast en veranderen niet, afhankelijk van de bron.",
+	"bringTheEvidences": "Breng de bewijzen",
+	"bringTheEvidencesHelpText": "Als dit is uitgeschakeld, wordt het object gedupliceerd zonder de bijbehorende bewijzen"
 }

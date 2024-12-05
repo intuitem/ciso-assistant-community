@@ -13,6 +13,7 @@
 
 	const appliedControlsHead = {
 		name: 'name',
+		priority: 'priority',
 		category: 'category',
 		csf_function: 'csfFunction',
 		eta: 'eta',
@@ -23,6 +24,7 @@
 	};
 	const appliedControlsColums = [
 		'name',
+		'priority',
 		'category',
 		'csf_function',
 		'eta',
