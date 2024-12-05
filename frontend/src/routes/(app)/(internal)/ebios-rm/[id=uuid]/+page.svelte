@@ -30,7 +30,7 @@
 			{
 				title: safeTranslate(m.ebiosWs1_4()),
 				status: 'to_do',
-				href: `${$page.url.pathname}/workshop-one/base?next=${$page.url.pathname}`
+				href: `${$page.url.pathname}/workshop-one/baseline?next=${$page.url.pathname}`
 			}
 		],
 		ws2: [
