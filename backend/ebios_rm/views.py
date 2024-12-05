@@ -1,3 +1,4 @@
+from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .models import (
     EbiosRMStudy,
@@ -38,6 +39,11 @@ class FearedEventViewSet(BaseModelViewSet):
     filterset_fields = [
         "ebios_rm_study",
     ]
+
+    @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
+    def risk_matrix(self, request, pk=None):
+        feared_event = self.get_object()
+        return Response(RiskMatrixReadSerializer(feared_event.risk_matrix).data)
 
 
 class RoToViewSet(BaseModelViewSet):
