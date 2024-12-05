@@ -929,5 +929,14 @@
 	"impacts": "Impacts",
 	"ebiosRmStudies": "Ebios RM studies",
 	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences"
+	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences",
+	"currentDependency": "Current dependency",
+	"currentPenetration": "Current penetration",
+	"currentMaturity": "Current maturity",
+	"currentTrust": "Current trust",
+	"residualDependency": "Residual dependency",
+	"residualPenetration": "Residual penetration",
+	"residualMaturity": "Residual maturity",
+	"residualTrust": "Residual trust",
+	"selected": "Selected"
 }
