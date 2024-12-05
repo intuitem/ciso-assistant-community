@@ -45,7 +45,7 @@ export const load: PageServerLoad = async (event) => {
 				selectOptions[selectField.field] = await response.json().then((data) =>
 					Object.entries(data).map(([key, value]) => ({
 						label: value,
-						value: key
+						value: selectField.valueType === 'number' ? parseInt(key) : key
 					}))
 				);
 			} else {

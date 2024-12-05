@@ -114,6 +114,7 @@ interface Field {
 interface SelectField {
 	field: string;
 	detail?: boolean;
+	valueType?: 'string' | 'number';
 }
 
 export interface ModelMapEntry {
@@ -620,7 +621,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
-		]
+		],
+		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]
 	}
 };
 
