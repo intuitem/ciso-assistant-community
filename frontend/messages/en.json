@@ -971,5 +971,6 @@
 	"residualPenetration": "Residual penetration",
 	"residualMaturity": "Residual maturity",
 	"residualTrust": "Residual trust",
-	"selected": "Selected"
+	"selected": "Selected",
+	"likelihood": "Likelihood"
 }
