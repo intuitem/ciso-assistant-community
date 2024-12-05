@@ -5,8 +5,8 @@ from django.db import migrations
 
 def create_emailaddress_objects(apps, schema_editor):
     try:
-        from allauth.account.models import EmailAddress
-        from iam.models import User
+        EmailAddress = apps.get_model("account", "EmailAddress")
+        User = apps.get_model("iam", "User")
 
         for user in User.objects.all():
             EmailAddress.objects.create(

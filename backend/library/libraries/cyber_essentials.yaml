@@ -1,7 +1,7 @@
 urn: urn:intuitem:risk:library:cyber_essentials_requirements_for_it_infrastructure
 locale: en
-ref_id: ' Cyber Essentials: Requirements for IT infrastructure '
-name: ' Cyber Essentials: Requirements for IT infrastructure v3.1'
+ref_id: 'Cyber Essentials: Requirements for IT infrastructure'
+name: 'Cyber Essentials: Requirements for IT infrastructure v3.1'
 description: "Cyber Essentials is a set of baseline technical controls produced by\
   \ the UK Government and security industry to help organisations \u2013 large and\
   \ small \u2013 improve their cyber security defences and demonstrate a public commitment\
@@ -9,14 +9,14 @@ description: "Cyber Essentials is a set of baseline technical controls produced 
 copyright: 'Information
 
   Licence : https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'
-version: 1
+version: 2
 provider: NCSC
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:cyber_essentials_requirements_for_it_infrastructure
-    ref_id: ' Cyber Essentials: Requirements for IT infrastructure '
-    name: ' Cyber Essentials: Requirements for IT infrastructure v3.1'
+    ref_id: 'Cyber Essentials: Requirements for IT infrastructure'
+    name: 'Cyber Essentials: Requirements for IT infrastructure v3.1'
     description: "Cyber Essentials is a set of baseline technical controls produced\
       \ by the UK Government and security industry to help organisations \u2013 large\
       \ and small \u2013 improve their cyber security defences and demonstrate a public\
