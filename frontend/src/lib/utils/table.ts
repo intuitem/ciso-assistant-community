@@ -577,5 +577,9 @@ export const listViewFields: ListViewFieldsConfig = {
 	stakeholders: {
 		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
 		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
+	},
+	'attack-paths': {
+		head: ['risk_origin', 'target_objective', 'description', 'threats', 'likelihood'],
+		body: ['risk_origin', 'target_objective', 'description', 'threats', 'likelihood']
 	}
 };
