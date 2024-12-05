@@ -470,7 +470,7 @@ export const operationalScenarioSchema = z.object({
 	description: z.string(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().optional().default(false),
-	justification: z.string().optional(),
+	justification: z.string().optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
