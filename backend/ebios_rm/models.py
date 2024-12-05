@@ -298,6 +298,9 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
 
+    def __str__(self):
+        return f"{self.entity.name} - {self.category}"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
