@@ -28,6 +28,7 @@
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
+	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -261,6 +262,8 @@
 		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{:else if URLModel === 'feared-events'}
 		<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+	{:else if URLModel === 'stakeholders'}
+		<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
