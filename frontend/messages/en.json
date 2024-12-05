@@ -977,5 +977,6 @@
 	"stakeholders": "Stakeholders",
 	"addAttackPath": "Add attack path",
 	"currentCriticality": "Current criticality",
-	"residualCriticality": "Residual criticality"
+	"residualCriticality": "Residual criticality",
+	"attackPaths": "Attack paths"
 }
