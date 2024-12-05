@@ -103,6 +103,7 @@ export const getOptions = ({
 interface ForeignKeyField {
 	field: string;
 	urlModel: urlModel;
+	endpointUrl?: string;
 	urlParams?: string;
 }
 
@@ -654,6 +655,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		],
 		selectFields: [{ field: 'category' }]
+	},
+	'attack-paths': {
+		endpointUrl: 'ebios-rm/attack-paths',
+		name: 'attackpath',
+		localName: 'attackPath',
+		localNamePlural: 'attackPaths',
+		verboseName: 'Attack path',
+		verboseNamePlural: 'Attack paths',
+		foreignKeyFields: [
+			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' }
+			// { field: 'ro_to_couples', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' }
+		]
 	}
 };
 
