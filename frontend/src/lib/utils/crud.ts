@@ -103,6 +103,7 @@ export const getOptions = ({
 interface ForeignKeyField {
 	field: string;
 	urlModel: urlModel;
+	endpointUrl?: string;
 	urlParams?: string;
 }
 
@@ -131,6 +132,7 @@ export interface ModelMapEntry {
 	fileFields?: string[];
 	filters?: SelectField[];
 	path?: string;
+	endpointUrl?: string;
 }
 
 type ModelMap = {
@@ -460,7 +462,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'baseline', urlModel: 'compliance-assessments' }
+			{ field: 'baseline', urlModel: 'compliance-assessments' },
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
@@ -583,6 +586,66 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'user', urlModel: 'users' }
+		]
+	},
+	qualifications: {
+		name: 'qualification',
+		localName: 'qualification',
+		localNamePlural: 'qualifications',
+		verboseName: 'Qualification',
+		verboseNamePlural: 'Qualifications'
+	},
+	'ebios-rm': {
+		endpointUrl: 'ebios-rm/studies',
+		name: 'ebiosrmstudy',
+		localName: 'ebiosRMstudy',
+		localNamePlural: 'ebiosRMstudy',
+		verboseName: 'Ebios RMstudy',
+		verboseNamePlural: 'Ebios RMstudy',
+		foreignKeyFields: [
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+		]
+	},
+	'feared-events': {
+		endpointUrl: 'ebios-rm/feared-events',
+		name: 'fearedevent',
+		localName: 'fearedEvent',
+		localNamePlural: 'fearedEvents',
+		verboseName: 'Feared event',
+		verboseNamePlural: 'Feared events',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'qualifications', urlModel: 'qualifications' }
+		]
+	},
+	stakeholders: {
+		endpointUrl: 'ebios-rm/stakeholders',
+		name: 'stakeholder',
+		localName: 'stakeholder',
+		localNamePlural: 'stakeholders',
+		verboseName: 'Stakeholder',
+		verboseNamePlural: 'Stakeholders',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
+		],
+		selectFields: [{ field: 'category' }]
+	},
+	'attack-paths': {
+		endpointUrl: 'ebios-rm/attack-paths',
+		name: 'attackpath',
+		localName: 'attackPath',
+		localNamePlural: 'attackPaths',
+		verboseName: 'Attack path',
+		verboseNamePlural: 'Attack paths',
+		foreignKeyFields: [
+			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' }
+			// { field: 'ro_to_couples', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' }
 		]
 	}
 };

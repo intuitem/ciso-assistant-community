@@ -71,8 +71,8 @@ class FearedEventWriteSerializer(BaseModelSerializer):
 
 
 class FearedEventReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
+    qualifications = FieldsRelatedField(["name"], many=True)
     folder = FieldsRelatedField()
 
     class Meta:
@@ -107,7 +107,7 @@ class StakeholderWriteSerializer(BaseModelSerializer):
 
 
 class StakeholderReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
+    name = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()

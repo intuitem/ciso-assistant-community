@@ -527,5 +527,21 @@ export const listViewFields: ListViewFieldsConfig = {
 	representatives: {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
+	},
+	'ebios-rm': {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
+	'feared-events': {
+		head: ['selected', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
+		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
+	},
+	stakeholders: {
+		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
+		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
+	},
+	'attack-paths': {
+		head: ['risk_origin', 'target_objective', 'description', 'threats', 'likelihood'],
+		body: ['risk_origin', 'target_objective', 'description', 'threats', 'likelihood']
 	}
 };

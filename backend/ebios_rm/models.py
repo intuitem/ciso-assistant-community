@@ -31,6 +31,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_(
             "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
         ),
+        blank=True,
     )
     assets = models.ManyToManyField(
         Asset,
@@ -297,6 +298,9 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Stakeholders")
         ordering = ["created_at"]
 
+    def __str__(self):
+        return f"{self.entity.name} - {self.category}"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
@@ -359,6 +363,14 @@ class AttackPath(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def risk_matrix(self):
+        return self.ebios_rm_study.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
 
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
