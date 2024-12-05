@@ -51,7 +51,11 @@ export const URL_MODEL = [
 	'solutions',
 	'representatives',
 	'vulnerabilities',
-	'filtering-labels'
+	'filtering-labels',
+	'feared-events',
+	'ro-to',
+	'operational-scenarios'
+	// 'ebios-rm',
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;

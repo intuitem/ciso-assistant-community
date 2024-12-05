@@ -35,9 +35,17 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
 
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
+
 
 class RoToViewSet(BaseModelViewSet):
     model = RoTo
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
 
     @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
     def risk_origin(self, request):
@@ -70,3 +78,7 @@ class AttackPathViewSet(BaseModelViewSet):
 
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]

@@ -1,4 +1,5 @@
 // schema for the validation of forms
+import { description, threats } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -268,7 +269,8 @@ export const ComplianceAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	baseline: z.string().optional().nullable(),
 	create_applied_controls_from_suggestions: z.boolean().optional().default(false),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	ebios_rm_studies: z.string().uuid().optional().array().optional()
 });
 
 export const EvidenceSchema = z.object({
@@ -389,6 +391,52 @@ export const vulnerabilitySchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
+export const ebiosRMSchema = z.object({
+	...NameDescriptionMixin,
+	version: z.string().optional().default('0.1'),
+	ref_id: z.string().default(''),
+	risk_matrix: z.string().optional(),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	assets: z.string().uuid().optional().array().optional(),
+	folder: z.string()
+});
+
+export const fearedEventsSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	gravity: z.number().optional(),
+	is_selected: z.boolean().optional(),
+	justification: z.string().optional(),
+	ebios_rm_study: z.string(),
+	assets: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().optional().array().optional()
+});
+
+export const roToSchema = z.object({
+	ebios_rm_study: z.string(),
+	feared_events: z.string().uuid().array(),
+	risk_origin: z.string(),
+	target_objective: z.string(),
+	motivation: z.string().optional(),
+	ressources: z.string().optional(),
+	pertinence: z.string().optional(),
+	activity: z.number().optional().default(0),
+	is_selected: z.boolean().optional().default(false),
+	justification: z.string().optional()
+});
+
+export const operationalScenarioSchema = z.object({
+	ebios_rm_study: z.string(),
+	attack_paths: z.string().uuid().array(),
+	threats: z.string().uuid().optional().array(),
+	description: z.string(),
+	likelihood: z.number().optional().default(-1),
+	is_selected: z.boolean().optional().default(false),
+	justification: z.string().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -413,7 +461,11 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	representatives: representativeSchema,
 	solutions: solutionSchema,
 	vulnerabilities: vulnerabilitySchema,
-	'filtering-labels': FilteringLabelSchema
+	'filtering-labels': FilteringLabelSchema,
+	'ebios-rm': ebiosRMSchema,
+	'feared-events': fearedEventsSchema,
+	'ro-to': roToSchema,
+	'operational-scenarios': operationalScenarioSchema
 };
 
 export const modelSchema = (model: string) => {

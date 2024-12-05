@@ -5,6 +5,7 @@ from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from core.models import *
 from iam.models import *
+from ebios_rm.models import EbiosRMStudy
 
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
@@ -600,6 +601,14 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         required=False,
         allow_null=True,
     )
+    ebios_rm_studies = serializers.SlugRelatedField(
+        many=True,
+        slug_field="id",
+        queryset=EbiosRMStudy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
     create_applied_controls_from_suggestions = serializers.BooleanField(
         write_only=True, required=False, default=False
     )
@@ -712,3 +721,13 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
         exclude = ["folder", "is_published"]
+
+
+class QualificationReadSerializer(ReferentialSerializer):
+    class Meta:
+        model = Qualification
+        exclude = ["translations"]
+
+
+class QualificationWriteSerializer(QualificationReadSerializer):
+    pass
