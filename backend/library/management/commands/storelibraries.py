@@ -20,9 +20,9 @@ class Command(BaseCommand):
         StoredLibrary.__init_class__()
         path = Path(options.get("path") or LIBRARIES_PATH)
         if path.is_dir():
-            library_files = [
+            library_files = sorted(
                 f for f in path.iterdir() if f.is_file and f.suffix == ".yaml"
-            ]
+            )
         else:
             library_files = [path]
         for fname in library_files:
