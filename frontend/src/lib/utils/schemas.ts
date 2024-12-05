@@ -390,7 +390,8 @@ export const vulnerabilitySchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
-export const ebiosRMSchema = baseNamedObject({
+export const ebiosRMSchema = z.object({
+	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().default(''),
 	risk_matrix: z.string().optional(),
@@ -401,7 +402,8 @@ export const ebiosRMSchema = baseNamedObject({
 	folder: z.string()
 });
 
-export const fearedEventsSchema = baseNamedObject({
+export const fearedEventsSchema = z.object({
+	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
 	gravity: z.number().optional(),
 	is_selected: z.boolean().optional(),

@@ -39,6 +39,7 @@ class FearedEventViewSet(BaseModelViewSet):
         "ebios_rm_study",
     ]
 
+
 class RoToViewSet(BaseModelViewSet):
     model = RoTo
 
