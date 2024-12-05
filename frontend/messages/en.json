@@ -936,5 +936,6 @@
 	"motivation": "Motivation",
 	"resources": "Resources",
 	"pertinence": "Pertinence",
-	"isSelected": "Is selected"
+	"isSelected": "Is selected",
+	"attackPaths": "Attack paths"
 }

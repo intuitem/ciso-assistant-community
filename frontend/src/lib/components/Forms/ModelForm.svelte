@@ -44,6 +44,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
+	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -264,6 +265,8 @@
 		<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'ro-to'}
 		<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
+	{:else if URLModel === 'operational-scenarios'}
+		<OperationalScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

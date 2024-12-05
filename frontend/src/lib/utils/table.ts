@@ -553,5 +553,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			'feared_events',
 			'pertinence'
 		]
+	},
+	'operational-scenarios': {
+		head: ['description', 'threats', 'likelihood'],
+		body: ['description', 'threats', 'likelihood'],
 	}
 };
