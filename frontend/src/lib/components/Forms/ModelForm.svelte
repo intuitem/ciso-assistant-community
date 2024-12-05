@@ -30,6 +30,7 @@
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
 	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
+	import AttackPathForm from './ModelForm/AttackPathForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -267,6 +268,8 @@
 		<RoToForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{:else if URLModel === 'stakeholders'}
 		<StakeholderForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'attack-paths'}
+		<AttackPathForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}
