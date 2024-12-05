@@ -92,7 +92,7 @@ class RoToReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    feared_events = FieldsRelatedField(many=True)
+    feared_events = FieldsRelatedField(["folder", "id"], many=True)
 
     class Meta:
         model = RoTo
