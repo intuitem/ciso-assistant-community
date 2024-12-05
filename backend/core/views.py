@@ -50,7 +50,6 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -299,7 +298,7 @@ class ProjectViewSet(BaseModelViewSet):
                 }
             return Response(res)
         else:
-            return Response(status=HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -612,7 +611,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
             return Response(risk_assessment.quality_check())
         else:
-            return Response(status=HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=True, methods=["get"], name="Get treatment plan data")
     def plan(self, request, pk):
@@ -645,7 +644,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(risk_assessment)
 
         else:
-            return Response(status=HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=True, name="Get treatment plan CSV")
     def treatment_plan_csv(self, request, pk):
@@ -705,7 +704,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             return response
         else:
-            return Response({"error": "Permission denied"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get risk assessment CSV")
     def risk_assessment_csv(self, request, pk):
@@ -767,7 +768,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
             return response
         else:
-            return Response({"error": "Permission denied"}, status=HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
 
     @action(detail=True, name="Get risk assessment PDF")
     def risk_assessment_pdf(self, request, pk):
@@ -1021,6 +1024,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             "csf_function",
             "status",
             "eta",
+            "priority",
             "owner",
         ]
         writer.writerow(columns)
@@ -1034,6 +1038,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                 control.csf_function,
                 control.status,
                 control.eta,
+                control.priority,
             ]
             if len(control.owner.all()) > 0:
                 owners = ",".join([o.email for o in control.owner.all()])
@@ -1156,6 +1161,53 @@ class AppliedControlViewSet(BaseModelViewSet):
         for domain in Folder.objects.all():
             colorMap[domain.name] = next(color_cycle)
         return Response({"entries": entries, "colorMap": colorMap})
+
+    @action(
+        detail=True,
+        name="Duplicate applied control",
+        methods=["post"],
+        serializer_class=AppliedControlDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"results": "applied control duplicated"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        applied_control = self.get_object()
+        data = request.data
+        new_folder = Folder.objects.get(id=data["folder"])
+        duplicate_applied_control = AppliedControl.objects.create(
+            reference_control=applied_control.reference_control,
+            name=data["name"],
+            description=data["description"],
+            folder=new_folder,
+            ref_id=applied_control.ref_id,
+            category=applied_control.category,
+            csf_function=applied_control.csf_function,
+            priority=applied_control.priority,
+            status=applied_control.status,
+            start_date=applied_control.start_date,
+            eta=applied_control.eta,
+            expiry_date=applied_control.expiry_date,
+            link=applied_control.link,
+            effort=applied_control.effort,
+            cost=applied_control.cost,
+        )
+        duplicate_applied_control.owner.set(applied_control.owner.all())
+        if data["duplicate_evidences"]:
+            duplicate_related_objects(
+                applied_control, duplicate_applied_control, new_folder, "evidences"
+            )
+            duplicate_applied_control.save()
+
+        return Response(
+            {"results": AppliedControlReadSerializer(duplicate_applied_control).data}
+        )
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -1330,7 +1382,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             _data = {
                 "non_field_errors": "The justification can only be edited by the approver"
             }
-            return Response(data=_data, status=HTTP_400_BAD_REQUEST)
+            return Response(data=_data, status=status.HTTP_400_BAD_REQUEST)
         else:
             return super().update(request, *args, **kwargs)
 
@@ -1442,7 +1494,7 @@ class UserViewSet(BaseModelViewSet):
                 if str(admin_group.pk) not in new_user_groups:
                     return Response(
                         {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                        status=HTTP_403_FORBIDDEN,
+                        status=status.HTTP_403_FORBIDDEN,
                     )
 
         return super().update(request, *args, **kwargs)
@@ -1454,7 +1506,7 @@ class UserViewSet(BaseModelViewSet):
             if number_of_admin_users == 1:
                 return Response(
                     {"error": "attemptToDeleteOnlyAdminAccountError"},
-                    status=HTTP_403_FORBIDDEN,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
         return super().destroy(request, *args, **kwargs)
@@ -1681,6 +1733,29 @@ class FolderViewSet(BaseModelViewSet):
                 },
             }
         )
+
+
+class UserPreferencesView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request) -> Response:
+        return Response(request.user.preferences, status=status.HTTP_200_OK)
+
+    def patch(self, request) -> Response:
+        new_language = request.data.get("lang")
+        if new_language is None or new_language not in (
+            lang[0] for lang in settings.LANGUAGES
+        ):
+            logger.error(
+                f"Error in UserPreferencesView: new_language={new_language} available languages={[lang[0] for lang in settings.LANGUAGES]}"
+            )
+            return Response(
+                {"error": "This language doesn't exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        request.user.preferences["lang"] = new_language
+        request.user.save()
+        return Response({}, status=status.HTTP_200_OK)
 
 
 @cache_page(60 * SHORT_CACHE_TTL)
@@ -2003,26 +2078,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
             )
             applied_controls = [
-                {
-                    "id": applied_control.id,
-                    "name": applied_control.name,
-                    "description": applied_control.description,
-                    "status": applied_control.status,
-                    "category": applied_control.category,
-                    "csf_function": applied_control.csf_function,
-                    "eta": applied_control.eta,
-                    "expiry_date": applied_control.expiry_date,
-                    "link": applied_control.link,
-                    "effort": applied_control.effort,
-                    "cost": applied_control.cost,
-                    "owners": [
-                        {
-                            "id": owner.id,
-                            "email": owner.email,
-                        }
-                        for owner in applied_control.owner.all()
-                    ],
-                }
+                AppliedControlReadSerializer(applied_control).data
                 for applied_control in AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
                 ).distinct()

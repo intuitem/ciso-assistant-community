@@ -101,22 +101,24 @@ export const loadDetail = async ({ event, model, id }) => {
 				const selectOptions: Record<string, any> = {};
 
 				if (info.selectFields) {
-					for (const selectField of info.selectFields) {
-						const url = `${BASE_API_URL}/${urlModel}/${selectField.field}/`;
-						const response = await event.fetch(url);
-						if (response.ok) {
-							selectOptions[selectField.field] = await response.json().then((data) =>
-								Object.entries(data).map(([key, value]) => ({
-									label: value,
-									value: key
-								}))
-							);
-						} else {
-							console.error(
-								`Failed to fetch data for ${selectField.field}: ${response.statusText}`
-							);
-						}
-					}
+					await Promise.all(
+						info.selectFields.map(async (selectField) => {
+							const url = `${BASE_API_URL}/${urlModel}/${selectField.field}/`;
+							const response = await event.fetch(url);
+							if (response.ok) {
+								selectOptions[selectField.field] = await response.json().then((data) =>
+									Object.entries(data).map(([key, value]) => ({
+										label: value,
+										value: key
+									}))
+								);
+							} else {
+								console.error(
+									`Failed to fetch data for ${selectField.field}: ${response.statusText}`
+								);
+							}
+						})
+					);
 				}
 				relatedModels[e.urlModel] = {
 					urlModel,

@@ -121,7 +121,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		}
 	);
 
-	const riskAssessmentModel = getModelInfo('risk-assessment-duplicate');
+	const riskAssessmentModel = getModelInfo('risk-assessments');
 
 	if (riskAssessmentModel.foreignKeyFields) {
 		for (const keyField of riskAssessmentModel.foreignKeyFields) {

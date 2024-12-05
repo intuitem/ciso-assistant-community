@@ -10,7 +10,7 @@
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
-	export let riskAssessmentDuplication: boolean = false;
+	export let duplicate: boolean = false;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
@@ -46,7 +46,7 @@
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
 />
-{#if !riskAssessmentDuplication}
+{#if !duplicate}
 	<Select
 		{form}
 		options={model.selectOptions['status']}

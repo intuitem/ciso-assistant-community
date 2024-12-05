@@ -339,8 +339,15 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
-    has_evidences = serializers.BooleanField()
-    eta_missed = serializers.BooleanField()
+    # These properties shouldn't be displayed in the frontend detail view as they are simple derivations from fields already displayed in the detail view.
+    # has_evidences = serializers.BooleanField()
+    # eta_missed = serializers.BooleanField()
+
+
+class AppliedControlDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = AppliedControl
+        fields = ["name", "description", "folder"]
 
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):

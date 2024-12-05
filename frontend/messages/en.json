@@ -682,6 +682,7 @@
 	"back": "Back",
 	"duplicate": "Duplicate",
 	"duplicateRiskAssessment": "Duplicate the risk assessment",
+	"duplicateAppliedControl": "Duplicate the applied control",
 	"size": "Size",
 	"favicon": "Favicon",
 	"logo": "Logo",
@@ -926,5 +927,7 @@
 	"ebiosRmStudy": "Ebios RM study",
 	"qualifications": "Qualifications",
 	"impacts": "Impacts",
-	"ebiosRmStudies": "Ebios RM studies"
+	"ebiosRmStudies": "Ebios RM studies",
+	"bringTheEvidences": "Bring the evidences",
+	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences"
 }

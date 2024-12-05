@@ -56,25 +56,26 @@ const nameSchema = z
 
 const descriptionSchema = z.string().optional().nullable();
 
-const baseNamedObject = (additionalFields: any) =>
-	z.object({
-		name: nameSchema,
-		description: descriptionSchema,
-		...additionalFields
-	});
+const NameDescriptionMixin = {
+	name: nameSchema,
+	description: descriptionSchema
+};
 
-export const FolderSchema = baseNamedObject({
+export const FolderSchema = z.object({
+	...NameDescriptionMixin,
 	ref_id: z.string().optional().nullable(),
 	parent_folder: z.string().optional()
 });
 
-export const ProjectSchema = baseNamedObject({
+export const ProjectSchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().nullable(),
 	lc_status: z.string().optional().default('in_design')
 });
 
-export const RiskMatrixSchema = baseNamedObject({
+export const RiskMatrixSchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	json_definition: z.string(),
 	is_enabled: z.boolean()
@@ -84,7 +85,8 @@ export const LibraryUploadSchema = z.object({
 	file: z.instanceof(File).optional()
 });
 
-export const RiskAssessmentSchema = baseNamedObject({
+export const RiskAssessmentSchema = z.object({
+	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional().nullable(),
@@ -97,14 +99,16 @@ export const RiskAssessmentSchema = baseNamedObject({
 	observation: z.string().optional().nullable()
 });
 
-export const ThreatSchema = baseNamedObject({
+export const ThreatSchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	provider: z.string().optional().nullable(),
 	ref_id: z.string().optional().nullable(),
 	annotation: z.string().optional().nullable()
 });
 
-export const RiskScenarioSchema = baseNamedObject({
+export const RiskScenarioSchema = z.object({
+	...NameDescriptionMixin,
 	existing_controls: z.string().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	existing_applied_controls: z.string().uuid().optional().array().optional(),
@@ -124,7 +128,8 @@ export const RiskScenarioSchema = baseNamedObject({
 	ref_id: z.string().max(8).optional().nullable()
 });
 
-export const AppliedControlSchema = baseNamedObject({
+export const AppliedControlSchema = z.object({
+	...NameDescriptionMixin,
 	ref_id: z.string().optional().nullable(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
@@ -142,9 +147,15 @@ export const AppliedControlSchema = baseNamedObject({
 	owner: z.string().uuid().optional().array().optional()
 });
 
+export const AppliedControlDuplicateSchema = z.object({
+	...AppliedControlSchema.shape,
+	duplicate_evidences: z.boolean()
+});
+
 export const PolicySchema = AppliedControlSchema.omit({ category: true });
 
-export const RiskAcceptanceSchema = baseNamedObject({
+export const RiskAcceptanceSchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	justification: z.string().optional().nullable(),
@@ -152,7 +163,8 @@ export const RiskAcceptanceSchema = baseNamedObject({
 	risk_scenarios: z.array(z.string())
 });
 
-export const ReferenceControlSchema = baseNamedObject({
+export const ReferenceControlSchema = z.object({
+	...NameDescriptionMixin,
 	provider: z.string().optional().nullable(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
@@ -161,7 +173,8 @@ export const ReferenceControlSchema = baseNamedObject({
 	annotation: z.string().optional().nullable()
 });
 
-export const AssetSchema = baseNamedObject({
+export const AssetSchema = z.object({
+	...NameDescriptionMixin,
 	business_value: z.string().optional(),
 	type: z.string().default('PR'),
 	folder: z.string(),
@@ -241,7 +254,8 @@ export const SetPasswordSchema = z.object({
 	confirm_new_password: z.string()
 });
 
-export const ComplianceAssessmentSchema = baseNamedObject({
+export const ComplianceAssessmentSchema = z.object({
+	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	ref_id: z.string().optional().nullable(),
 	project: z.string(),
@@ -258,7 +272,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	ebios_rm_studies: z.string().uuid().optional().array().optional()
 });
 
-export const EvidenceSchema = baseNamedObject({
+export const EvidenceSchema = z.object({
+	...NameDescriptionMixin,
 	attachment: z.any().optional().nullable(),
 	folder: z.string(),
 	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
@@ -314,13 +329,15 @@ export const SSOSettingsSchema = z.object({
 	want_name_id_encrypted: z.boolean().optional().nullable()
 });
 
-export const EntitiesSchema = baseNamedObject({
+export const EntitiesSchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	mission: z.string().optional(),
 	reference_link: z.string().url().optional().or(z.literal(''))
 });
 
-export const EntityAssessmentSchema = baseNamedObject({
+export const EntityAssessmentSchema = z.object({
+	...NameDescriptionMixin,
 	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
@@ -345,7 +362,8 @@ export const EntityAssessmentSchema = baseNamedObject({
 	observation: z.string().optional().nullable()
 });
 
-export const solutionSchema = baseNamedObject({
+export const solutionSchema = z.object({
+	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	criticality: z.number().optional()
@@ -362,7 +380,8 @@ export const representativeSchema = z.object({
 	description: z.string().optional()
 });
 
-export const vulnerabilitySchema = baseNamedObject({
+export const vulnerabilitySchema = z.object({
+	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional().default(''),
 	status: z.string().default('--'),
@@ -397,10 +416,10 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
-	'risk-assessment-duplicate': RiskAssessmentSchema,
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
+	'applied-controls_duplicate': AppliedControlDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'reference-controls': ReferenceControlSchema,
