@@ -45,6 +45,20 @@ class FearedEventViewSet(BaseModelViewSet):
         feared_event = self.get_object()
         return Response(RiskMatrixReadSerializer(feared_event.risk_matrix).data)
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=True, name="Get gravity choices")
+    def gravity(self, request, pk):
+        feared_event: FearedEvent = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [x["name"] for x in feared_event.parsed_matrix["impact"]],
+            )
+        )
+        choices = undefined | _choices
+        return Response(choices)
+
 
 class RoToViewSet(BaseModelViewSet):
     model = RoTo

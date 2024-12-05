@@ -141,6 +141,10 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     def risk_matrix(self):
         return self.ebios_rm_study.risk_matrix
 
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
 
 class RoTo(AbstractBaseModel, FolderMixin):
     class RiskOrigin(models.TextChoices):
