@@ -929,5 +929,6 @@
 	"impacts": "Impacts",
 	"ebiosRmStudies": "Ebios RM studies",
 	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences"
+	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences",
+	"gravity": "Gravity"
 }
