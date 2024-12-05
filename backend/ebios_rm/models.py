@@ -364,6 +364,14 @@ class AttackPath(AbstractBaseModel, FolderMixin):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
 
+    @property
+    def risk_matrix(self):
+        return self.ebios_rm_study.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
 
 class OperationalScenario(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
