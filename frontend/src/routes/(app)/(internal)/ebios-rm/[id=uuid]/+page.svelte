@@ -34,9 +34,21 @@
 			}
 		],
 		ws2: [
-			{ title: safeTranslate(m.ebiosWs2_1()), status: 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs2_2()), status: 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs2_3()), status: 'to_do', href: '#' }
+			{
+				title: safeTranslate(m.ebiosWs2_1()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-two/ro-to?next=${$page.url.pathname}`
+			},
+			{
+				title: safeTranslate(m.ebiosWs2_2()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-two/ro-to?next=${$page.url.pathname}`
+			},
+			{
+				title: safeTranslate(m.ebiosWs2_3()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-two/ro-to?next=${$page.url.pathname}`
+			}
 		],
 		ws3: [
 			{ title: safeTranslate(m.ebiosWs3_1()), status: 'to_do', href: '#' },

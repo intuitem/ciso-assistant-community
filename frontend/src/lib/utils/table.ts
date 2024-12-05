@@ -555,5 +555,23 @@ export const listViewFields: ListViewFieldsConfig = {
 	'feared-events': {
 		head: ['selected', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
 		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
+	},
+	'ro-to': {
+		head: [
+			'isSelected',
+			'riskOrigin',
+			'targetObjective',
+			'motivation',
+			'fearedEvents',
+			'pertinence'
+		],
+		body: [
+			'is_selected',
+			'risk_origin',
+			'target_objective',
+			'motivation',
+			'feared_events',
+			'pertinence'
+		]
 	}
 };

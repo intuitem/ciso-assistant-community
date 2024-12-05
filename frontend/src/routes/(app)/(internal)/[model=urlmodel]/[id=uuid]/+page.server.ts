@@ -26,8 +26,11 @@ export const load: PageServerLoad = async (event) => {
 	if (modelInfo.foreignKeyFields) {
 		await Promise.all(
 			modelInfo.foreignKeyFields.map(async (keyField) => {
+				const keyModel = getModelInfo(keyField.urlModel);
 				const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-				const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+				const url = keyModel.endpointUrl
+					? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
+					: `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
 				const response = await event.fetch(url);
 				if (response.ok) {
 					foreignKeys[keyField.field] = await response.json().then((data) => data.results);
