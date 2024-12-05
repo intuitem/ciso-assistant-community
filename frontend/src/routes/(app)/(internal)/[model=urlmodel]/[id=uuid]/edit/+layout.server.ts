@@ -65,7 +65,7 @@ export const load: LayoutServerLoad = async (event) => {
 
 	if (selectFields) {
 		for (const selectField of selectFields) {
-			const url = `${BASE_API_URL}/${event.params.model}/${
+			const url = `${BASE_API_URL}/${model.endpointUrl ?? event.params.model}/${
 				selectField.detail ? event.params.id + '/' : ''
 			}${selectField.field}/`;
 			const response = await event.fetch(url);
