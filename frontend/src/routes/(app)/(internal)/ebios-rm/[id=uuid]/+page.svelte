@@ -39,9 +39,17 @@
 			{ title: safeTranslate(m.ebiosWs2_3()), status: 'to_do', href: '#' }
 		],
 		ws3: [
-			{ title: safeTranslate(m.ebiosWs3_1()), status: 'to_do', href: '#' },
+			{
+				title: safeTranslate(m.ebiosWs3_1()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-three/ecosystem?next=${$page.url.pathname}`
+			},
 			{ title: safeTranslate(m.ebiosWs3_2()), status: 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs3_3()), status: 'done', href: '#' }
+			{
+				title: safeTranslate(m.ebiosWs3_3()),
+				status: 'done',
+				href: `${$page.url.pathname}/workshop-three/ecosystem?next=${$page.url.pathname}`
+			}
 		],
 		ws4: [
 			{ title: safeTranslate(m.ebiosWs4_1()), status: 'to_do', href: '#' },
