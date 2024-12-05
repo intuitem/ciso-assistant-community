@@ -537,7 +537,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
 	},
 	stakeholders: {
-		head: ['entity', 'current_criticality'],
-		body: ['entity', 'current_criticality']
+		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
+		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
 	}
 };
