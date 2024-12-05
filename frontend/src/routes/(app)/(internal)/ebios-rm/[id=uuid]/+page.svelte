@@ -56,7 +56,11 @@
 				status: 'to_do',
 				href: `${$page.url.pathname}/workshop-three/ecosystem?next=${$page.url.pathname}`
 			},
-			{ title: safeTranslate(m.ebiosWs3_2()), status: 'to_do', href: '#' },
+			{
+				title: safeTranslate(m.ebiosWs3_2()),
+				status: 'to_do',
+				href: `${$page.url.pathname}/workshop-three/strategic-scenarios?next=${$page.url.pathname}`
+			},
 			{
 				title: safeTranslate(m.ebiosWs3_3()),
 				status: 'done',
