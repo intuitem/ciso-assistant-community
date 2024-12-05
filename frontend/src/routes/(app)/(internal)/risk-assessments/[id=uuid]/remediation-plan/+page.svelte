@@ -23,6 +23,7 @@
 
 	const APPLIED_CONTROL_FIELDS = [
 		'name',
+		'priority',
 		'description',
 		'category',
 		'csf_function',
