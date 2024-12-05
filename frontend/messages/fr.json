@@ -898,5 +898,8 @@
 	"ebiosWs5_5": "Mettre en place le cadre de suivi des risques",
 	"activity": "Activité",
 	"bringTheEvidences": "Apportez les preuves",
-	"bringTheEvidencesHelpText": "Si désactivé, l'objet sera dupliqué sans ses preuves"
+	"bringTheEvidencesHelpText": "Si désactivé, l'objet sera dupliqué sans ses preuves",
+	"existingControlsHelper": "Que disposez-vous actuellement pour gérer ce risque",
+	"extraControlsHelper": "Que ferez-vous pour atténuer ce risque",
+	"existingContextHelper": "Description des mesures existantes (ce champ sera bientôt obsolète)"
 }

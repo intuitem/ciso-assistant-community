@@ -236,8 +236,8 @@
 									extra_fields: [['folder', 'str']]
 								})}
 								field="existing_applied_controls"
-								label="Existing controls"
-								helpText="Current measures to manage this risk"
+								label={m.existingControls()}
+								helpText={m.existingControlsHelper()}
 							/>
 						</div>
 						<div class="flex items-center justify-center">
@@ -254,7 +254,7 @@
 						{form}
 						field="existing_controls"
 						label="context"
-						helpText="Description of the existing mitigations ( ℹ️ this field will be deprecated soon)"
+						helpText={m.existingContextHelper()}
 						regionContainer="w-1/2"
 						rows={3}
 					/>
@@ -311,8 +311,8 @@
 									extra_fields: [['folder', 'str']]
 								})}
 								field="applied_controls"
-								label="Additional controls"
-								helpText="Extra measures needed to mitigate this risk"
+								label={m.extraAppliedControls()}
+								helpText={m.extraControlsHelper()}
 							/>
 						</div>
 						<div class="flex items-center justify-center">
