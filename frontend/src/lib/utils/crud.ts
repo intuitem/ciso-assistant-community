@@ -690,13 +690,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'pertinence' }
 		]
 	},
-	'attack_paths': {
+	attack_paths: {
 		endpointUrl: 'ebios-rm/attack-paths',
 		name: 'attackpath',
 		localName: 'attackPath',
 		localNamePlural: 'attackPaths',
 		verboseName: 'Attack path',
-		verboseNamePlural: 'Attack paths',
+		verboseNamePlural: 'Attack paths'
 	},
 	'operational-scenarios': {
 		endpointUrl: 'ebios-rm/operational-scenarios',
