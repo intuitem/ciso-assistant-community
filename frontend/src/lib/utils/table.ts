@@ -573,5 +573,9 @@ export const listViewFields: ListViewFieldsConfig = {
 			'feared_events',
 			'pertinence'
 		]
+	},
+	stakeholders: {
+		head: ['entity', 'current_criticality'],
+		body: ['entity', 'current_criticality']
 	}
 };
