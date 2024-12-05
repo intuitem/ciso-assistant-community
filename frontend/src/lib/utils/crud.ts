@@ -5,7 +5,7 @@ import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 import { BASE_API_URL } from './constants';
-import type { urlModel } from './types';
+import { URL_MODEL, type urlModel } from './types';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -280,6 +280,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'owner' },
 			{ field: 'priority' }
+		]
+	},
+	'applied-controls_duplicate': {
+		name: 'appliedcontrol',
+		localName: 'appliedControl',
+		localNamePlural: 'appliedControls',
+		verboseName: 'Applied control',
+		verboseNamePlural: 'Applied controls',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		]
 	},
 	policies: {
@@ -767,8 +777,10 @@ export const urlParamModelSelectFields = (model: string): SelectField[] => {
 };
 
 export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
-	const map = URL_MODEL_MAP[model] || {};
-	map['urlModel'] = model;
+	const baseModel = model.split('_')[0];
+	const map = URL_MODEL_MAP[model] || URL_MODEL_MAP[baseModel] || {};
+	// The urlmodel of {model}_duplicate must be {model}
+	map['urlModel'] = baseModel;
 	return map;
 };
 
