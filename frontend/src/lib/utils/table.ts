@@ -599,5 +599,9 @@ export const listViewFields: ListViewFieldsConfig = {
 	'attack-paths': {
 		head: ['risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
 		body: ['risk_origin', 'target_objective', 'stakeholders', 'description']
+	},
+	'operational-scenarios': {
+		head: ['description', 'threats', 'likelihood'],
+		body: ['description', 'threats', 'likelihood']
 	}
 };
