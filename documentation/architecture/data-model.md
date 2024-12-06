@@ -46,7 +46,7 @@ erDiagram
 erDiagram
 
     ROOT_FOLDER           ||--o{ DOMAIN                      : contains
-    DOMAIN                ||--o{ PROJECT                     : contains
+    DOMAIN                ||--o{ PROJECT_OBJECT              : contains
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
@@ -89,6 +89,25 @@ erDiagram
     LOADED_LIBRARY2     }o--o{ LOADED_LIBRARY           : depends_on
 
 ```
+### Project management model
+
+```mermaid
+erDiagram
+
+    PROJECT_OBJECT               |o--o{ COMPLIANCE_ASSESSMENT : contains
+    PROJECT_OBJECT               |o--o{ RISK_ASSESSMENT       : contains
+    PROJECT_OBJECT               |o--o{ PROJECT_OBJECT        : contains
+    USER                         |o--o{ PROJECT_OBJECT        : manages
+
+    PROJECT_OBJECT {
+        string ref_id
+        string name
+        string description
+        string ref_id
+        string status
+        string category
+    }
+```
 
 ### General data model
 
@@ -98,7 +117,6 @@ erDiagram
     COMPLIANCE_ASSESSMENT_REVIEW }o--|| COMPLIANCE_ASSESSMENT : reviews
     REQUIREMENT_NODE             }o--o{ REFERENCE_CONTROL     : leverages
     COMPLIANCE_ASSESSMENT        }o--|| FRAMEWORK             : is_based_on
-    PROJECT                      |o--o{ COMPLIANCE_ASSESSMENT : contains
     COMPLIANCE_ASSESSMENT        ||--o{ REQUIREMENT_ASSESSMENT: contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
@@ -108,7 +126,6 @@ erDiagram
     APPLIED_CONTROL              }o--o| REFERENCE_CONTROL     : implements
     REQUIREMENT_NODE             }o--o{ THREAT                : addresses
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
-    PROJECT                      |o--o{ RISK_ASSESSMENT       : contains
     RISK_ASSESSMENT              ||--o{ RISK_SCENARIO         : contains
     RISK_SCENARIO                }o--o{ APPLIED_CONTROL       : is_mitigated_by
     RISK_SCENARIO                }o--o{ THREAT                : derives_from
@@ -123,14 +140,6 @@ erDiagram
     USER                         }o--o{ ASSET                 : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
-
-    PROJECT {
-        string ref_id
-        string name
-        string description
-        string ref_id
-        string status
-    }
 
     FRAMEWORK {
         string  urn
@@ -375,7 +384,6 @@ erDiagram
         json    mapping_rules
     }
 
-
 ```
 
 ### Labels
@@ -404,11 +412,11 @@ All models have the following fields:
 - created_at: the date when the object has been created.
 - modified_at: the date when the object has been lastly modified.
 
-## Projects and domains
-
-Projects are fundamental context objects defined by the entity using CISO Assistant. They are grouped in domains.
+## Project management and domains
 
 The domain is the fundamental perimeter for access control. All objects, in particular domains, within a domain, have consistent access rights. If this granularity is not sufficient, the entity shall define new domains.
+
+Project objects are defined by the entity using CISO Assistant. Assessments can be attached to a project object, though this is optional. Project objects are organized hierarchically, each project object can have a parent, but loops are not allowed.
 
 Note: the IAM model is based on folders. A folder has a type among:
 
@@ -416,12 +424,45 @@ Note: the IAM model is based on folders. A folder has a type among:
 - DOMAIN: a user-defined domain.
 - ENCLAVE: a invisible folder used to confine the actions of a third party.
 
-Projects have the following fields:
+Projects objects have the following fields:
 
 - ref_id (ex internal reference)
 - Name
 - Description
-- Status: --/Design/Development/Production/End of life/Dropped
+- Phase: --/Initiation/Planning/Execution/Monitoring/Closure/Closed/Dropped
+- Category: --/Portfolio/Program/Project/Initiative/Activity
+
+Note: the old status field of projects is mapped to the phase following this mapping:
+
+status      | Phase
+------------|--------
+--          | --
+Design      | Initiation
+Development | Planning
+Production  | Execution
+End of life | Closed
+Dropped     | Dropped
+
+
+Here is an example of a project management structure:
+
+```mermaid
+flowchart TB
+
+PF1[portfolio 1] --> PF1A[portfolio 1A]
+PF1[portfolio 1] --> PF1B[portfolio 1B]
+PF1[portfolio 1] --> PJ4[Project 4]
+PF2[portfolio 2] --> IN2[Intiative 2]
+PF2[portfolio 2] --> PJ6[Project 6]
+PF1A --> PG1[Program 1]
+PF1A --> PG2[Program 2]
+PF1B --> PJ1[Project 1]
+PG1 --> PJ2[Project 2]
+PG2 --> PJ3[Project 3]
+PG2 --> IN1[Initiative 1]
+PJ4 --> PJ5[Project 5]
+PJ7[Project 7]
+```
 
 ## Qualifications
 
@@ -971,7 +1012,7 @@ erDiagram
     ENTITY_ASSESSMENT     }o--o| COMPLIANCE_ASSESSMENT : leverages
     ENTITY_ASSESSMENT     }o--o| EVIDENCE              : leverages
     COMPLIANCE_ASSESSMENT }o--|| FRAMEWORK             : uses
-    PROJECT               |o--o{ ENTITY_ASSESSMENT     : contains
+    PROJECT_OBJECT        |o--o{ ENTITY_ASSESSMENT     : contains
 
     ENTITY {
         string  name
@@ -1267,7 +1308,7 @@ The frontend for risk study shall propose the following steps:
 ```mermaid
 erDiagram
     DOMAIN                ||--o{ EBIOS_RM_STUDY       : contains
-    DOMAIN                ||--o{ STAKEHOLDER     : contains
+    DOMAIN                ||--o{ STAKEHOLDER          : contains
     DOMAIN                ||--o{ OPERATIONAL_SCENARIO : contains
     DOMAIN                ||--o{ FEARED_EVENT         : contains
     DOMAIN                ||--o{ RO_TO                : contains
@@ -1297,6 +1338,7 @@ erDiagram
     ATTACK_PATH           }o--o{ STAKEHOLDER          : leverages
     STAKEHOLDER           }o--o{ APPLIED_CONTROL      : reinforces
     FEARED_EVENT          }o--o{ QUALIFICATION        : bears
+    PROJECT_OBJECT        |o--o{ EBIOS_RM_STUDY       : contains
 
     EBIOS_RM_STUDY {
         string      ref_id
