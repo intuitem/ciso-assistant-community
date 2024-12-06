@@ -138,9 +138,9 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "ebios_rm",
     "tprm",
     "core",
-    "ebios_rm",
     "cal",
     "django_filters",
     "library",
@@ -154,7 +154,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.saml",
     "allauth.mfa",
-    "huey.contrib.djhuey",
+    # "huey.contrib.djhuey",
 ]
 
 MIDDLEWARE = [

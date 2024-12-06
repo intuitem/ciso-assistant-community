@@ -921,6 +921,21 @@
 	"ebiosWs5_4": "Assess and document residual risks",
 	"ebiosWs5_5": "Establish risk monitoring framework",
 	"activity": "Activity",
+	"ebiosRmMatrixHelpText": "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`",
+	"activityOne": "Activity 1",
+	"activityTwo": "Activity 2",
+	"ebiosRmStudy": "Ebios RM study",
+	"qualifications": "Qualifications",
+	"impacts": "Impacts",
+	"ebiosRmStudies": "Ebios RM studies",
 	"bringTheEvidences": "Bring the evidences",
-	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences"
+	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences",
+	"gravity": "Gravity",
+	"existingControlsHelper": "What do you currently have to manage this risk",
+	"extraControlsHelper": "What will you do to mitigate this risk",
+	"existingContextHelper": "Description of the existing mitigations (this field will be deprecated soon)",
+	"fearedEvent": "Feared event",
+	"fearedEvents": "Feared events",
+	"isSelected": "Is selected",
+	"ebiosRM": "Ebios RM"
 }

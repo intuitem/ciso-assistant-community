@@ -163,6 +163,7 @@ class Migration(migrations.Migration):
                         related_name="ebios_rm_studies",
                         to="core.riskmatrix",
                         verbose_name="Risk matrix",
+                        blank=True,
                     ),
                 ),
             ],

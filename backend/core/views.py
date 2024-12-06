@@ -366,7 +366,13 @@ class AssetViewSet(BaseModelViewSet):
     """
 
     model = Asset
-    filterset_fields = ["folder", "parent_assets", "type", "risk_scenarios"]
+    filterset_fields = [
+        "folder",
+        "parent_assets",
+        "type",
+        "risk_scenarios",
+        "ebios_rm_studies",
+    ]
     search_fields = ["name", "description", "business_value"]
 
     @action(detail=False, name="Get type choices")
@@ -858,21 +864,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     residual_impact=scenario.residual_impact,
                     strength_of_knowledge=scenario.strength_of_knowledge,
                     justification=scenario.justification,
+                    ref_id=scenario.ref_id,
                 )
 
                 for field in ["applied_controls", "threats", "assets"]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
-                        duplicate_risk_assessment.project.folder,
+                        duplicate_risk_assessment.folder,
                         field,
                     )
 
-                if (
-                    duplicate_risk_assessment.project.folder
-                    in [risk_assessment.project.folder]
-                    + risk_assessment.project.folder.sub_folders()
-                ):
+                if duplicate_risk_assessment.folder in [risk_assessment.folder] + [
+                    folder for folder in risk_assessment.folder.get_sub_folders()
+                ]:
                     duplicate_scenario.owner.set(scenario.owner.all())
 
                 duplicate_scenario.save()
@@ -2055,13 +2060,22 @@ class UploadAttachmentView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class QualificationViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows qualifications to be viewed or edited.
+    """
+
+    model = Qualification
+    search_fields = ["name"]
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project", "status"]
+    filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 
