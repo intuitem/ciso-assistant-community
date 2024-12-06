@@ -23,7 +23,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
     const data = await res.json();
 
     const initialData = {
-        risk_matrix: data.risk_matrix.id
+        risk_matrix: data.risk_matrix.id,
+		ebios_rm_studies: [params.id]
     }
 
     const createSchema = modelSchema('risk-assessments');
