@@ -94,6 +94,10 @@ class RoToReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     feared_events = FieldsRelatedField(["folder", "id"], many=True)
 
+    pertinence = serializers.CharField(source="get_pertinence_display")
+    motivation = serializers.CharField(source="get_motivation_display")
+    resources = serializers.CharField(source="get_resources_display")
+
     class Meta:
         model = RoTo
         fields = "__all__"
