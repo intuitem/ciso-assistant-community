@@ -942,5 +942,16 @@
 	"targetObjective": "Target objective",
 	"motivation": "Motivation",
 	"resources": "Resources",
-	"pertinence": "Pertinence"
+	"pertinence": "Pertinence",
+	"limited": "Limited",
+	"significant": "Significant",
+	"important": "Important",
+	"unlimited": "Unlimited",
+	"strong": "Strong",
+	"irrelevant": "Irrelevant",
+	"partiallyRelevant": "Partially relevant",
+	"fairlyRelevant": "Fairly relevant",
+	"highlyRelevant": "Highly relevant",
+	"roTo": "RO/TO",
+	"addRoto": "Add RO/TO couple"
 }
