@@ -780,6 +780,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin):
         ("process", _("Process")),
         ("technical", _("Technical")),
         ("physical", _("Physical")),
+        ("procedure", _("Procedure")),
     ]
 
     CSF_FUNCTION = [

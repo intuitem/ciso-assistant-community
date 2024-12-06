@@ -68,8 +68,8 @@ Conventions:
             - ref_id(*)
             - name
             - description
-            - category (policy/process/techncial/physical).
-            - csf_function (govern/identitfy/protect/detect/respond/recover).
+            - category (policy/process/technical/physical).
+            - csf_function (govern/identify/protect/detect/respond/recover).
             - annotation
     For risk matrices:
         The first line is a header, with the following mandatory fields:
@@ -526,7 +526,7 @@ for tab in dataframe:
                     for element in re.split(r"[\s,]+", req_reference_controls):
                         parts = re.split(r":", element)
                         prefix = parts.pop(0)
-                        part_name = ":".join(parts)
+                        part_name = ":".join(parts).lower()
                         urn_prefix = library_vars_dict_reverse[
                             "reference_control_base_urn"
                         ][prefix]
