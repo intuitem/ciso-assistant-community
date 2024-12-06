@@ -930,5 +930,8 @@
 	"ebiosRmStudies": "Ebios RM studies",
 	"bringTheEvidences": "Bring the evidences",
 	"bringTheEvidencesHelpText": "If disabled, the object will be duplicated without its evidences",
-	"gravity": "Gravity"
+	"gravity": "Gravity",
+	"existingControlsHelper": "What do you currently have to manage this risk",
+	"extraControlsHelper": "What will you do to mitigate this risk",
+	"existingContextHelper": "Description of the existing mitigations (this field will be deprecated soon)"
 }

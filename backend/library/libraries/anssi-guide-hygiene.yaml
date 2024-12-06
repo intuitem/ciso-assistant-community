@@ -5,9 +5,15 @@ name: "ANSSI - Guide d'hygi\xE8ne informatique"
 description: "Renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information en\
   \ 42 mesures\n https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf"
 copyright: Licence Ouverte/Open Licence (Etalab - V1)
-version: 1
+version: 2
 provider: ANSSI
 packager: intuitem
+translations:
+  en:
+    name: Guideline for a healthy information system
+    description: 'Strengthen Information System Security in 42 Measures
+
+      https://cyber.gouv.fr/sites/default/files/2013/01/guideline-for-a-healthy-information-system-in-42-measures_v2.pdf'
 objects:
   framework:
     urn: urn:intuitem:risk:framework:anssi-guide-hygiene
@@ -15,12 +21,37 @@ objects:
     name: "ANSSI - Guide d'hygi\xE8ne informatique"
     description: "Renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information\
       \ en 42 mesures"
+    translations:
+      en:
+        name: Guideline for a healthy information system
+        description: 'Strengthen Information System Security in 42 Measures
+
+          https://cyber.gouv.fr/sites/default/files/2013/01/guideline-for-a-healthy-information-system-in-42-measures_v2.pdf'
+    implementation_groups_definition:
+    - ref_id: S
+      name: standard
+      description: null
+      translations:
+        en:
+          name: standard
+          description: null
+    - ref_id: R
+      name: "renforc\xE9"
+      description: null
+      translations:
+        en:
+          name: strengthened
+          description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:i
       assessable: false
       depth: 1
       ref_id: I
       name: Sensibiliser et former
+      translations:
+        en:
+          name: Raise awareness and train
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
       assessable: true
       depth: 2
@@ -53,6 +84,31 @@ objects:
         cifiques dans les contrats de prestation pour garantir une formation r\xE9\
         guli\xE8re \xE0 la s\xE9curit\xE9 des syst\xE8mes d\u2019information du personnel\
         \ externe et notamment les infog\xE9rants."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Train the operational teams in information system security
+          description: "The operational teams (network, security and system administrators,\
+            \ project managers, developers, chief information security officer (CISO))\
+            \ have special access to the information system. They can, inadvertently\
+            \ or through not understanding the consequences of certain practices,\
+            \ carry out operations creating vulnerabilities.\nWe can cite for example,\
+            \ granting accounts with too many privileges in relation to the task to\
+            \ be carried out, the use of personal accounts to carry out services or\
+            \ periodical tasks, or even choosing passwords that are not sufficiently\
+            \ robust granting access to privileged accounts.\nThe operational teams,\
+            \ to comply with information system security accepted practice, must therefore\
+            \ undertake - upon taking on their role and, subsequently, at regular\
+            \ intervals - training on:\n> the legislation in effect;\n> the main risks\
+            \ and threats;\n> security maintenance;\n> authentication and access control;\n\
+            > the detailed configuration and hardening of systems;\n> network partitioning;\n\
+            > and logging.\nThis list must be specified according to the employee\u2019\
+            s job , considering aspects such as security integration for project managers,\
+            \ secure development for developers, the security reference documents\
+            \ for ISSMs, etc.\nMoreover, it is necessary to mention specific clauses\
+            \ in service agreements in order to guarantee regular training in information\
+            \ system security for external staff and especially outsourcers."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
       assessable: true
       depth: 2
@@ -80,10 +136,60 @@ objects:
         nements suspects, etc. ;\n> les moyens disponibles et participant \xE0 la\
         \ s\xE9curit\xE9 du syst\xE8me : verrouillage syst\xE9matique de la session\
         \ lorsque l\u2019utilisateur quitte son poste, outil de protection des mots\
-        \ de passe, etc. \nRenforc\xE9 - Pour renforcer ces mesures, l\u2019\xE9laboration\
-        \ et la signature d\u2019une charte des moyens informatiques pr\xE9cisant\
-        \ les r\xE8gles et consignes que doivent respecter les utilisateurs peut \xEA\
-        tre envisag\xE9e."
+        \ de passe, etc. "
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: "Raise users\u2019 awareness about basic information security"
+          description: 'Each user is a part of the information system chain. To this
+            end, as he enters the organization, he must be informed of the security
+            stakes, the rules to
+
+            respect and the proper behaviour to adopt in terms of information system
+            security by awareness raising and training actions.
+
+            These actions must be regular and adapted to the users targeted. It may
+            take different forms (emails, displays, meetings, dedicated intranet space,
+            etc.) and, as a minimum, deal with the following issues:
+
+            > the objectives and stakes that the organization encounters in terms
+            of information system security;
+
+            > the information considered as sensitive;
+
+            > the regulations and legal obligations;
+
+            > the rules and security instructions governing daily activity: adhering
+            to the security policy, not connecting personal devices to the network
+            of the
+
+            organization, not divulging passwords to a third party, not reusing professional
+            passwords in the private sphere or the other way round, reporting suspicious
+            events, etc.;
+
+            > the means available and involved in computer security: systematically
+            locking the session when the user leaves his device, password protection
+            tool, etc.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:i
+      ref_id: 2.R
+      name: "Sensibiliser les utilisateurs aux bonnes pratiques \xE9l\xE9mentaires\
+        \ de s\xE9curit\xE9 informatique (renforc\xE9)"
+      description: "Pour renforcer ces mesures, l\u2019\xE9laboration et la signature\
+        \ d\u2019une charte des moyens informatiques pr\xE9cisant les r\xE8gles et\
+        \ consignes que doivent respecter les utilisateurs peut \xEAtre envisag\xE9\
+        e."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: "Raise users\u2019 awareness about basic information security (strengthened)"
+          description: To strengthen these measures, the creation and signature of
+            an IT resource charter specifying the rules and instructions that must
+            be adhered to by users may be considered.
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
       assessable: true
       depth: 2
@@ -116,11 +222,42 @@ objects:
         \ pas ici consid\xE9r\xE9 comme \xE9tant du ressort de l\u2019infog\xE9rance\
         \ et par ailleurs d\xE9conseill\xE9 en cas de traitement d\u2019informations\
         \ sensibles."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Control outsourced services
+          description: "When an organization wants to outsource its information system\
+            \ or data, it must assess, in advance, the risks specific to outsourced\
+            \ services (controlling the information system, remote actions, shared\
+            \ hosting, etc.) in order to take into account the needs ans suitable\
+            \ security measures when creating the requirements applicable to the future\
+            \ service provider.\nThe information security system risks inherent in\
+            \ this type of approach may be linked to the context of the outsourcing\
+            \ operation, but also deficient or\nincomplete contractual specifications.\n\
+            Therefore, in order to run smoothly the operations, it is important to:\n\
+            > carefully study the offers\u2019 conditions, the option of adapting\
+            \ them to the specific needs and the limits of the service provider\u2019\
+            s responsibility;\n> impose a list of specific requirements on the service\
+            \ provider: contract reversibility, the carrying out of audits, backup\
+            \ and data recovery in a\n> standardised open format, security maintenance\
+            \ over time, etc.\nTo formalise these commitments, the service provider\
+            \ will provide the customer with a security insurance plan detailed in\
+            \ the bid. This is a contractual\ndocument describing all of the specific\
+            \ measures that the applicants commit to implementing in order to guarantee\
+            \ the security requirements specified\nby the organization are met.\n\
+            The use of digital solutions or tools (hosted in the Cloud for example)\
+            \ is not considered here as it comes under the area of managed services\
+            \ and, moreover, is not advisable when processing sensitive data."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ii
       assessable: false
       depth: 1
       ref_id: II
       name: "Conna\xEEtre le syst\xE8me d'information"
+      translations:
+        en:
+          name: Know the Information System
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
       assessable: true
       depth: 2
@@ -146,6 +283,27 @@ objects:
         \ avec l\u2019ext\xE9rieur (Internet, r\xE9seaux priv\xE9s, etc.) et les partenaires.\
         \ Ce sch\xE9ma doit \xE9galement permettre de localiser les serveurs d\xE9\
         tenteurs d\u2019informations sensibles de l\u2019entit\xE9."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Identify the most sensitive information and servers and maintain a
+            network diagram
+          description: "Each organization has sensitive data. This data can be on\
+            \ its own activity (intellectual property, expertise, etc.) or its customers,\
+            \ individuals or users\n(personal data, contracts, etc.). In order to\
+            \ effectively protect your data, identifying it is essential.\nFrom this\
+            \ list of sensitive data, it will be possible to determine in which areas\
+            \ of the information system it is located (databases, file sharing, workstations,\n\
+            etc.). These components correspond to the servers and critical devices\
+            \ of the organization. To this end, they must be subject to specific security\
+            \ measures that may concern backup, logging, access, etc.\nTherefore,\
+            \ this involves creating and maintaining a simplified network diagram\
+            \ (or mapping) representing the different IP areas and the associated\n\
+            addressing plan, the routing and security devices (firewall, application\
+            \ relays, etc.) and the networks with the outside (Internet, private networks,\
+            \ etc.) and\npartners. This diagram must also be able to locate the servers\
+            \ holding the entity\u2019s sensitive information."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
       assessable: true
       depth: 2
@@ -175,6 +333,37 @@ objects:
         \ souhaitable de d\xE9finir et d\u2019utiliser une nomenclature simple et\
         \ claire pour identifier les comptes de services et les comptes d\u2019administration.\
         \ \nCela facilitera notamment leur revue et la d\xE9tection d\u2019intrusion."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Have an exhaustive inventory of privileged accounts and keep it updated
+          description: 'Accounts benefiting from specific permissions are preferred
+            targets for the attackers who want to obtain as wide an access as possible
+            to the information system. They must therefore be subject to very specific
+            attention. This
+
+            involves carrying out an inventory of these accounts, updating it regularly
+            and entering the following informations into it:
+
+            > users with an administrator account or higher rights than those of a
+            standard user in the information system;
+
+            > users with rights enough to access the work folders of top managers
+            or all users;
+
+            > users using an unmanaged workstation which is not subject to the security
+            measures detailed in the general security policy of the organization.
+
+            Carrying out a periodical review of these accounts is strongly recommended
+            in order to ensure that the accesses to sensitive items (notably the work
+            folders and electronic mailboxes of top managers) are controlled. These
+            reviews will also be the opportunity to remove access rights that have
+            become obsolete following the departure of a user, for example.
+
+            Lastly, defining and using a simple, clear nomenclature to identify system
+            accounts and administration accounts is desirable. This will make review
+            and intrusion detection easier.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
       assessable: true
       depth: 2
@@ -198,8 +387,53 @@ objects:
         > l\u2019affectation des \xE9quipements mobiles (ordinateur portable, cl\xE9\
         \ USB, disque dur, ordiphone, etc.) ;\n> la gestion des documents et informations\
         \ sensibles (transfert de mots de passe, changement des mots de passe ou des\
-        \ codes sur les syst\xE8mes existants).\nRenforc\xE9 - Les proc\xE9dures doivent\
-        \ \xEAtre formalis\xE9es et mises \xE0 jour en fonction du contexte."
+        \ codes sur les syst\xE8mes existants)."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Organise the procedures relating to users joining, departing and changing
+            positions
+          description: 'The staff of an organization, whether public or private, is
+            constantly changing: arrivals, departures, internal mobility. Therefore
+            it is necessary to update
+
+            the rights and accesses to the information system in accordance with these
+            developments. It is essential that all of the rights granted to an individual
+            are revoked when he or she leaves or changes position. The arrival and
+            departure procedures must therefore be defined, in accordance with the
+            human resources department. They must, as a minimum, take into account:
+
+            > the creation and deletion of IT accounts and their corresponding mailboxes;
+
+            > the rights and accesses to grant to, or remove from, an individual whose
+            role changes;
+
+            > the management of physical accesses to premises (granting and return
+            of badges and keys, etc.);
+
+            > the allocation of mobile devices (laptops, USB sticks, hard drives,
+            smartphone, etc.);
+
+            > the management of sensitive documents and information (transferring
+            passwords, changing passwords or codes in existing systems).'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ii
+      ref_id: 6.R
+      name: " Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et de changement\
+        \ de fonction des utilisateurs (renforc\xE9)"
+      description: "Les proc\xE9dures doivent \xEAtre formalis\xE9es et mises \xE0\
+        \ jour en fonction du contexte."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Organise the procedures relating to users joining, departing and changing
+            positions (strengthened)
+          description: The procedures must be formalised and updated according to
+            the context.
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
       assessable: true
       depth: 2
@@ -224,15 +458,55 @@ objects:
         \ des utilisateurs doit donc s\u2019accompagner de solutions pragmatiques\
         \ r\xE9pondant \xE0 leurs besoins. Citons par exemple la mise \xE0 disposition\
         \ d\u2019un r\xE9seau Wi-Fi avec SSID d\xE9di\xE9 pour les terminaux personnels\
-        \ ou visiteurs.\nRenforc\xE9 - Ces am\xE9nagements peuvent \xEAtre compl\xE9\
-        t\xE9s par des mesures techniques telles que l\u2019authentification des postes\
-        \ sur le r\xE9seau (par exemple \xE0 l\u2019aide du standard 802.1X ou d\u2019\
-        un \xE9quivalent)."
+        \ ou visiteurs."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Only allow controlled devices to connect to the network of the organization
+          description: "To guarantee the security of the information system, the organization\
+            \ must control the devices which connect to it, each one being a potentially\
+            \ vulnerable entry point. Personal devices (laptops, tablets, smartphones,\
+            \ etc.) are, by definition, difficult to control since it is the users\
+            \ who decide on their level of security. In the same way, the security\
+            \ of visitors\u2019 devices is completely out of the organization\u2019\
+            s control.\nOnly the connection with terminals managed by the entity must\
+            \ be authorised over its different access networks, whether wired or wireless.\
+            \ This recommendation, above all of an organisational nature, is often\
+            \ perceived as unacceptable and even retrograde. However, unless this\
+            \ is adhered to, the task of a hacker is made very much easier by making\
+            \ an organization\u2019s network vulnerable.\nRaising users\u2019 awareness\
+            \ must therefore be accompanied by pragmatic solutions responding to their\
+            \ needs. For example, the provision of a Wi-Fi network with dedicated\
+            \ SSID for personal and visitor devices"
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ii
+      ref_id: 7.R
+      name: "Autoriser la connexion au r\xE9seau de l\u2019entit\xE9 aux seuls \xE9\
+        quipements ma\xEEtris\xE9s (renforc\xE9)"
+      description: "Ces am\xE9nagements peuvent \xEAtre compl\xE9t\xE9s par des mesures\
+        \ techniques telles que l\u2019authentification des postes sur le r\xE9seau\
+        \ (par exemple \xE0 l\u2019aide du standard 802.1X ou d\u2019un \xE9quivalent)."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Only allow controlled devices to connect to the network of the organization
+            (strengthened)
+          description: These developments can be supplemented by technical measures
+            such as the authentication of devices on the network (for example thanks
+            to 802.1X standard or an equivalent).
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iii
       assessable: false
       depth: 1
       ref_id: III
       name: "Authentifier et contr\xF4ler les acc\xE8s"
+      translations:
+        en:
+          name: Authenticate and control accesses
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
       assessable: true
       depth: 2
@@ -258,9 +532,50 @@ objects:
         \ \xEAtre d\xE9di\xE9 exclusivement aux actions d\u2019administration. De\
         \ plus, il doit \xEAtre utilis\xE9 sur des environnements d\xE9di\xE9s \xE0\
         \ l\u2019administration afin de ne pas laisser de traces de connexion ni de\
-        \ condensat de mot de passe sur un environnement plus expos\xE9.\nRenforc\xE9\
-        \ - D\xE8s que possible la journalisation li\xE9e aux comptes (ex : relev\xE9\
-        \ des connexions r\xE9ussies/\xE9chou\xE9es) doit \xEAtre activ\xE9e."
+        \ condensat de mot de passe sur un environnement plus expos\xE9."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Identify each individual accessing the system by name and distinguish
+            the user/administrator roles
+          description: 'In the event of an incident, in order to facilitate the attribution
+            of an action within the information system or the identification of possible
+            compromised accounts easier, access accounts must be nominative.
+
+            The use of generic accounts (e.g : admin, user) must be marginal and they
+            must be able to be associated with a limited number of individuals.
+
+            Of course, this rule does not stop you from retaining service accounts
+            attributed to an IT process (e.g : apache, mysqld).
+
+            In any event, generic and service accounts must be managed according to
+            a policy that is at least as stringent as the one for nominative accounts.
+            Moreover, a nominative administration account, different from the user
+            account, must be attributed to each administrator. The usernames and authentication
+            secrets must be different (e.g : pmartin as a username, adm-pmartin as
+            an admin username). This admin account, having more privileges, must be
+            exclusively dedicated to administration actions. Furthermore, it must
+            be used in environments dedicated to administration in order that no connection
+            traces or password hashes are left in a more exposed environment.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iii
+      ref_id: 8.R
+      name: "Identifier nomm\xE9ment chaque personne acc\xE9dant au syst\xE8me et\
+        \ distinguer les r\xF4les utilisateur/administrateur (renforc\xE9)"
+      description: "D\xE8s que possible la journalisation li\xE9e aux comptes (ex\
+        \ : relev\xE9 des connexions r\xE9ussies/\xE9chou\xE9es) doit \xEAtre activ\xE9\
+        e."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Identify each individual accessing the system by name and distinguish
+            the user/administrator roles (strengthened)
+          description: 'As soon as possible, the logging linked to accounts (e.g.:
+            list of successful/failed connections) must be activated.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
       assessable: true
       depth: 2
@@ -286,12 +601,32 @@ objects:
         \ etc. Une revue r\xE9guli\xE8re des droits d\u2019acc\xE8s doit par ailleurs\
         \ \xEAtre r\xE9alis\xE9e afin d\u2019identifier les acc\xE8s non autoris\xE9\
         s."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: "Allocate the appropriate rights to the information system\u2019s\
+            \ sensitive resources"
+          description: "Some of the system\u2019s resources can be a source of invaluable\
+            \ information from the hacher\u2019s point of view (folders containing\
+            \ sensitive data, databases, mailboxes, etc.). It is therefore essential\
+            \ to establish an accurate list of these resources and for each of them:\n\
+            > define which group can have access to them;\n> strictly control access,\
+            \ by ensuring that users are authenticated and are part of the target\
+            \ group;\n> avoid their circulation and duplication to uncontrolled areas\
+            \ or areas subject to a less strict access control.\nFor example, the\
+            \ folders of administrators bringing together various pieces of sensitive\
+            \ information must be subject to specific access control. The same goes\
+            \ for sensitive information present on network shares: exports of configuration\
+            \ files, information system technical documentation, business databases,\
+            \ etc.\nA regular review of the access rights must, moreover, be carried\
+            \ out, in order to identify any unauthorised access"
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iii
       ref_id: '10'
-      name: "\_ D\xE9finir et v\xE9rifier des r\xE8gles de choix et de dimensionnement\
+      name: "D\xE9finir et v\xE9rifier des r\xE8gles de choix et de dimensionnement\
         \ des mots de passe"
       description: "L\u2019ANSSI \xE9nonce un ensemble de r\xE8gles et de bonnes pratiques\
         \ en mati\xE8re de choix et de dimensionnement des mots de passe. Parmi les\
@@ -308,6 +643,28 @@ objects:
         \ de telles proc\xE9dures, un effort de communication visant \xE0 expliquer\
         \ le sens de ces r\xE8gles et \xE9veiller les consciences sur leur importance\
         \ est fondamental."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Set and verify rules for the choice and size of passwords
+          description: 'ANSSI sets out a collection of rules and best practices in
+            terms of the choice and size of passwords. The most critical one is to
+            make users aware of the risks involved in choosing a password that is
+            too easy to guess, and even the risks of reusing the same password from
+            one application to another, especially for personal and professional mailboxes.
+
+            To supervise and confirm that these choice and size rules are being applied,
+            the organization may use different measures, including:
+
+            > blocking accounts following several failed logins;
+
+            > deactivating anonymous login options;
+
+            > using a password robustness checking tool.
+
+            In advance of such procedures, communication aiming to explain the reason
+            for these rules and raise awareness of their importance is fundamental.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
       assessable: true
       depth: 2
@@ -329,6 +686,25 @@ objects:
         \ num\xE9rique doit respecter les r\xE8gles \xE9nonc\xE9es pr\xE9c\xE9demment\
         \ et \xEAtre m\xE9moris\xE9 par l\u2019utilisateur, qui n\u2019a plus que\
         \ celui-ci \xE0 retenir."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Protect passwords stored on systems
+          description: 'The complexity, the diversity and even the infrequent use
+            of some passwords may encourage their storage on a physical (memo or post-it)
+            or digital (password files, sending an email to yourself, recourse to
+            "Remember password" buttons) medium in the event a password is lost or
+            forgotten.
+
+            Yet passwords are a preferred target for hackers wanting to access the
+            system, whether it is following a theft or the possible sharing of a storage
+            medium. This is why they must be protected by secure solutions, the best
+            of which are using a digital safe and using encryption mechanisms.
+
+            Of course, the password chosen for this digital safe must respect the
+            rules set out previously and be memorised by the user, who only has to
+            remember this password.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
       assessable: true
       depth: 2
@@ -351,10 +727,48 @@ objects:
         \ par d\xE9faut se r\xE9v\xE8le impossible pour cause, par exemple, de mot\
         \ de passe ou certificat  \xAB en dur \xBB dans un \xE9quipement, ce probl\xE8\
         me critique doit \xEAtre signal\xE9 au distributeur du produit afin que cette\
-        \ vuln\xE9rabilit\xE9 soit corrig\xE9e au plus vite.\nRenforc\xE9 - Afin de\
-        \ limiter les cons\xE9quences d\u2019une compromission, il est par ailleurs\
-        \ essentiel, apr\xE8s changement des \xE9l\xE9ments d\u2019authentification\
-        \ par d\xE9faut, de proc\xE9der \xE0 leur renouvellement r\xE9gulier."
+        \ vuln\xE9rabilit\xE9 soit corrig\xE9e au plus vite."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Change the default authentication settings on devices and services
+          description: 'It is essential to consider that the default settings of the
+            information systems are known by the hackers, even if these are not known
+            to the general public. These settings are (too) often trivial (password
+            the same as the username, not long enough or common to all the devices
+            and services for example) and are often easy to obtain by hackers capable
+            of pretending to be a legitimate user.
+
+            The default authentication settings of the components of the system must
+            therefore be changed when they are set up and, in terms of passwords,
+            be in accordance with the previous recommendations in terms of choice,
+            size and storage.
+
+            If changing a default password is impossible due, for example, to a password
+            or certificate being "hardcoded" onto a device, this critical problem
+            must be raised with the product supplier so that it can correct this vulnerability
+            as fast as possible.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iii
+      ref_id: 12.R
+      name: "Changer les \xE9l\xE9ments d\u2019authentification par d\xE9faut sur\
+        \ les \xE9quipements et services (renforc\xE9)"
+      description: "Afin de limiter les cons\xE9quences d\u2019une compromission,\
+        \ il est par ailleurs essentiel, apr\xE8s changement des \xE9l\xE9ments d\u2019\
+        authentification par d\xE9faut, de proc\xE9der \xE0 leur renouvellement r\xE9\
+        gulier."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Change the default authentication settings on devices and services
+            (strengthened)
+          description: In order to limit the consequences of a compromise, it is,
+            moreover, essential, after changing the default authentication settings,
+            to renew them regularly.
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
       assessable: true
       depth: 2
@@ -367,21 +781,60 @@ objects:
         \ passe, trac\xE9 de d\xE9verrouillage, signature) ;\n> quelque chose que\
         \ je poss\xE8de (carte \xE0 puce, jeton USB, carte magn\xE9tique, RFID, un\
         \ t\xE9l\xE9phone pour recevoir un code SMS) ;\n> quelque chose que je suis\
-        \ (une empreinte biom\xE9trique).\nRenforc\xE9 -  Les cartes \xE0 puces doivent\
-        \ \xEAtre privil\xE9gi\xE9es ou, \xE0 d\xE9faut, les m\xE9canismes de mots\
-        \ de passe \xE0 usage unique (ou One Time Password) avec jeton physique. Les\
-        \ op\xE9rations cryptographiques mises en place dans ces deux facteurs offrent\
-        \ g\xE9n\xE9ralement de bonnes garanties de s\xE9curit\xE9.\nLes cartes \xE0\
-        \ puce peuvent \xEAtre plus complexes \xE0 mettre en place car n\xE9cessitant\
-        \ une infrastructure de gestion des cl\xE9s adapt\xE9e. Elles pr\xE9sentent\
-        \ cependant l\u2019avantage d\u2019\xEAtre r\xE9utilisables \xE0 plusieurs\
-        \ fins : chiffrement, authentification de messagerie, authentification sur\
-        \ le poste de travail, etc."
+        \ (une empreinte biom\xE9trique)."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Prefer a two-factor authentication when possible
+          description: 'The implementation of a two-factor authentication is strongly
+            recommended, requiring the use of two different authentication factors
+            from among the following:
+
+            > something I know (password, unlock pattern, signature);
+
+            > something I have (smart card, USB token, magnetic card, RFID, a phone
+            to receive an SMS);
+
+            > something I am (a digital fingerprint).'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iii
+      ref_id: 13.R
+      name: "Privil\xE9gier lorsque c\u2019est possible une authentification forte\
+        \ (renforc\xE9)"
+      description: "Les cartes \xE0 puces doivent \xEAtre privil\xE9gi\xE9es ou, \xE0\
+        \ d\xE9faut, les m\xE9canismes de mots de passe \xE0 usage unique (ou One\
+        \ Time Password) avec jeton physique. Les op\xE9rations cryptographiques mises\
+        \ en place dans ces deux facteurs offrent g\xE9n\xE9ralement de bonnes garanties\
+        \ de s\xE9curit\xE9.\nLes cartes \xE0 puce peuvent \xEAtre plus complexes\
+        \ \xE0 mettre en place car n\xE9cessitant une infrastructure de gestion des\
+        \ cl\xE9s adapt\xE9e. Elles pr\xE9sentent cependant l\u2019avantage d\u2019\
+        \xEAtre r\xE9utilisables \xE0 plusieurs fins : chiffrement, authentification\
+        \ de messagerie, authentification sur le poste de travail, etc."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Prefer a two-factor authentication when possible (strengthened)
+          description: 'Smart cards must be encouraged or, by default, one-time passwords
+            with a physical token. Encryption operations implemented with two-factor
+            authentication generally offer good security results.
+
+            Smart cards can be more complex to implement as they require an adapted
+            key management structure. However, they have the advantage of being re-usable
+            for various purposes: encryption, message authentication, authentication
+            on the workstation, etc.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iv
       assessable: false
       depth: 1
       ref_id: IV
       name: "S\xE9curiser les postes"
+      translations:
+        en:
+          name: Secure the devices
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
       assessable: true
       depth: 2
@@ -404,14 +857,53 @@ objects:
         \ d\xE9rogation n\xE9cessaire aux r\xE8gles de s\xE9curit\xE9 globales applicables\
         \ aux postes, ceux-ci doivent \xEAtre isol\xE9s du syst\xE8me (s\u2019il est\
         \ impossible de mettre \xE0 jour certaines applications pour des raisons de\
-        \ compatibilit\xE9 par exemple).\nRenforc\xE9 - Les donn\xE9es vitales au\
-        \ bon fonctionnement de l\u2019entit\xE9 que d\xE9tiennent les postes utilisateurs\
-        \ et les serveurs doivent faire l\u2019objet de sauvegardes r\xE9guli\xE8\
-        res et stock\xE9es sur des \xE9quipements d\xE9connect\xE9s, et leur restauration\
-        \ doit \xEAtre v\xE9rifi\xE9e de mani\xE8re p\xE9riodique. En effet, de plus\
-        \ en plus de petites structures font l\u2019objet d\u2019attaques rendant\
-        \ ces donn\xE9es indisponibles (par exemple pour exiger en contrepartie de\
-        \ leur restitution le versement d\u2019une somme cons\xE9quente (ran\xE7ongiciel))."
+        \ compatibilit\xE9 par exemple)."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Implement a minimum level of security across the whole IT stock
+          description: "Depending on his level of IT security practices, the user,\
+            \ a great deal of the time, is the first port of call for hackers trying\
+            \ to enter the system. It is therefore fundamental to implement a minimum\
+            \ level of security across the entire IT stock of the organization (user\
+            \ devices, servers, printers, phones, USB peripherals, etc.) by implementing\
+            \ the following measures:\n> limit the applications installed and optional\
+            \ modules in web browsers to just what is required;\n> equip users\u2019\
+            \ devices with an anti-virus and activate a local firewall (these are\
+            \ often included in the operating system);\n> encrypt the partitions where\
+            \ user data is stored;\n> deactivate automatic executions (autorun).\n\
+            In the event of a necessary exception from the general security rules\
+            \ applicable to devices, these devices must be isolated from the system\
+            \ (if it is impossible to update certain applications for interoperability\
+            \ reasons for example)."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iv
+      ref_id: 14.R
+      name: "Mettre en place un niveau de s\xE9curit\xE9 minimal sur l\u2019ensemble\
+        \ du parc informatique (renforc\xE9)"
+      description: "Les donn\xE9es vitales au bon fonctionnement de l\u2019entit\xE9\
+        \ que d\xE9tiennent les postes utilisateurs et les serveurs doivent faire\
+        \ l\u2019objet de sauvegardes r\xE9guli\xE8res et stock\xE9es sur des \xE9\
+        quipements d\xE9connect\xE9s, et leur restauration doit \xEAtre v\xE9rifi\xE9\
+        e de mani\xE8re p\xE9riodique. En effet, de plus en plus de petites structures\
+        \ font l\u2019objet d\u2019attaques rendant ces donn\xE9es indisponibles (par\
+        \ exemple pour exiger en contrepartie de leur restitution le versement d\u2019\
+        une somme cons\xE9quente (ran\xE7ongiciel))."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Implement a minimum level of security across the whole IT stock (strengthened)
+          description: "Data vital to the proper business of the organization that\
+            \ is held on users\u2019 devices and servers must be subject to regular\
+            \ backups and stored on disconnected devices, and its restoration must\
+            \ be tested periodically. An increasing number of small organisations\
+            \ are subject to attacks which make their data unavailable (for example\
+            \ demanding, in exchange for returning the data, the payment of a significant\
+            \ amount of money (ransomware))."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
       assessable: true
       depth: 2
@@ -432,14 +924,50 @@ objects:
         \ par exemple) et de limiter au maximum celui de cl\xE9s non ma\xEEtris\xE9\
         es (dont on connait la provenance mais pas l\u2019int\xE9grit\xE9) sur le\
         \ syst\xE8me d\u2019information \xE0 moins, dans ce dernier cas, de faire\
-        \ inspecter leur contenu par l\u2019antivirus du poste de travail.\nRenforc\xE9\
-        \ - Sur les postes utilisateur, il est recommand\xE9 d\u2019utiliser des solutions\
-        \ permettant d\u2019interdire l\u2019ex\xE9cution de programmes sur les p\xE9\
-        riph\xE9riques amovibles (par exemple Applocker sous Windows ou des options\
-        \ de montage noexec sous Unix). \nLors de la fin de vie des supports amovibles,\
-        \ il sera n\xE9cessaire d\u2019impl\xE9menter et de respecter une proc\xE9\
-        dure de mise au rebut stricte pouvant aller jusqu\u2019\xE0 leur destruction\
-        \ s\xE9curis\xE9e afin de limiter la fuite d\u2019informations sensibles."
+        \ inspecter leur contenu par l\u2019antivirus du poste de travail."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Protect against threats relating to the use of removable media
+          description: "Removable media can be used to spread viruses, steal sensitive\
+            \ and strategic information or even compromise the organization\u2019\
+            s network. Such attacks can have disastrous consequences for the activity\
+            \ of the organisation targeted.\nAlthough it is not a matter of completely\
+            \ prohibiting the use of removable media within the organization, it is\
+            \ nevertheless necessary to deal with these risks by identifying adequate\
+            \ measures and by raising users\u2019 awareness to the risks that these\
+            \ media can carry.\nIt is advisable to prohibit the connection of unknown\
+            \ USB sticks (collected in a public area for example) and to reduce, as\
+            \ much as possible, the use of uncontrolled sticks (the origin of which\
+            \ is known but not the integrity) on the information system, or at least\
+            \ have their content examined by the workstation\u2019s anti-virus."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iv
+      ref_id: 15.R
+      name: "Se prot\xE9ger des menaces relatives \xE0 l\u2019utilisation de supports\
+        \ amovibles (renforc\xE9)"
+      description: "Sur les postes utilisateur, il est recommand\xE9 d\u2019utiliser\
+        \ des solutions permettant d\u2019interdire l\u2019ex\xE9cution de programmes\
+        \ sur les p\xE9riph\xE9riques amovibles (par exemple Applocker sous Windows\
+        \ ou des options de montage noexec sous Unix). \nLors de la fin de vie des\
+        \ supports amovibles, il sera n\xE9cessaire d\u2019impl\xE9menter et de respecter\
+        \ une proc\xE9dure de mise au rebut stricte pouvant aller jusqu\u2019\xE0\
+        \ leur destruction s\xE9curis\xE9e afin de limiter la fuite d\u2019informations\
+        \ sensibles."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Protect against threats relating to the use of removable media (strengthened)
+          description: "On user devices, using solutions able to block the execution\
+            \ of programs on removable media (for example Applocker on Windows or\
+            \ noexec assembly options on Unix) is recommended.\nAt the end of the\
+            \ removable media\u2019s life span, it will be necessary to implement\
+            \ and respect a strict disposal procedure which may extend to their secure\
+            \ destruction, in order to limit the leaking of sensitive information."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
       assessable: true
       depth: 2
@@ -465,6 +993,26 @@ objects:
         me d\u2019exploitation ou d\u2019applications pourront facilement s\u2019\
         appliquer depuis un point central tout en favorisant la r\xE9activit\xE9 attendue\
         \ en cas de besoin de reconfiguration."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Use a centralised management tool to standardise security policies
+          description: "The information system\u2019s security relies on the security\
+            \ of the weakest link. It is therefore necessary to standardise the management\
+            \ of security policies applying across the entire IT stock of the organization.\n\
+            Applying these policies (managing passwords, restricting logins on certain\
+            \ sensitive devices, configuring web browsers, etc.) must be simple and\
+            \ quick for administrators, with a view to facilitate the implementation\
+            \ of counter measures in the event of an IT crisis.\nTo do this, the organization\
+            \ may deploy a centralised management tool (for example Active Directory\
+            \ in the Microsoft environment) into which it is possible to include as\
+            \ many IT devices as possible. Workstations and servers are concerned\
+            \ by this measure, which may require upstream harmonization work in matter\
+            \ of hardware and operating systems selection.\nTherefore, hardening policies\
+            \ for the operating system or applications may easily be applied from\
+            \ a central point while favouring the expected responsiveness in the event\
+            \ reconfiguration is required."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
       assessable: true
       depth: 2
@@ -481,21 +1029,59 @@ objects:
         gr\xE9s (pare-feu local Windows) ou sp\xE9cialis\xE9s.\nLes flux de poste\
         \ \xE0 poste sont en effet tr\xE8s rares dans un r\xE9seau bureautique classique\
         \ : les fichiers sont stock\xE9s dans des serveurs de fichiers, les applications\
-        \ accessibles sur des serveurs m\xE9tier, etc.\nRenforc\xE9 -  Le filtrage\
-        \ le plus simple consiste \xE0 bloquer l\u2019acc\xE8s aux ports d\u2019administration\
-        \ par d\xE9faut des postes de travail (ports TCP 135, 445 et 3389 sous Windows,\
-        \ port TCP 22 sous Unix), except\xE9 depuis les ressources explicitement identifi\xE9\
-        es (postes d\u2019administration et d\u2019assistance utilisateur, \xE9ventuels\
-        \ serveurs de gestion requ\xE9rant l\u2019acc\xE8s \xE0 des partages r\xE9\
-        seau sur les postes, etc.).\nUne analyse des flux entrants utiles (administration,\
-        \ logiciels d\u2019infrastructure, applications particuli\xE8res, etc.) doit\
-        \ \xEAtre men\xE9e pour d\xE9finir la liste des autorisations \xE0 configurer.\
-        \ Il est pr\xE9f\xE9rable de bloquer l\u2019ensemble des flux par d\xE9faut\
-        \ et de n\u2019autoriser que les services n\xE9cessaires depuis les \xE9quipements\
-        \ correspondants (\xAB liste blanche \xBB).\nLe pare-feu doit \xE9galement\
-        \ \xEAtre configur\xE9 pour journaliser les flux bloqu\xE9s, et ainsi identifier\
-        \ les erreurs de configuration d\u2019applications ou les tentatives d\u2019\
-        intrusion."
+        \ accessibles sur des serveurs m\xE9tier, etc."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Activate and configure the firewall on workstations
+          description: "After having succeeded in taking control of a workstation\
+            \ (due, for example, to a vulnerability of the web browser), a hacker\
+            \ will often seek to spread his intrusion to other workstations and, ultimately,\
+            \ access users\u2019 documents.\nIn order to make this sideways movement\
+            \ from the hacker more difficult, it is necessary to activate the local\
+            \ firewall of workstations thanks to built-in (local Windows firewall)\
+            \ or specialised software.\nFlows from device to device are very rare\
+            \ in a traditional office network: files are stored on file servers, applications\
+            \ are accessible on business servers, etc."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:iv
+      ref_id: 17.R
+      name: "Activer et configurer le pare-feu local des postes de travail (renforc\xE9\
+        )"
+      description: "Le filtrage le plus simple consiste \xE0 bloquer l\u2019acc\xE8\
+        s aux ports d\u2019administration par d\xE9faut des postes de travail (ports\
+        \ TCP 135, 445 et 3389 sous Windows, port TCP 22 sous Unix), except\xE9 depuis\
+        \ les ressources explicitement identifi\xE9es (postes d\u2019administration\
+        \ et d\u2019assistance utilisateur, \xE9ventuels serveurs de gestion requ\xE9\
+        rant l\u2019acc\xE8s \xE0 des partages r\xE9seau sur les postes, etc.).\n\
+        Une analyse des flux entrants utiles (administration, logiciels d\u2019infrastructure,\
+        \ applications particuli\xE8res, etc.) doit \xEAtre men\xE9e pour d\xE9finir\
+        \ la liste des autorisations \xE0 configurer. Il est pr\xE9f\xE9rable de bloquer\
+        \ l\u2019ensemble des flux par d\xE9faut et de n\u2019autoriser que les services\
+        \ n\xE9cessaires depuis les \xE9quipements correspondants (\xAB liste blanche\
+        \ \xBB).\nLe pare-feu doit \xE9galement \xEAtre configur\xE9 pour journaliser\
+        \ les flux bloqu\xE9s, et ainsi identifier les erreurs de configuration d\u2019\
+        applications ou les tentatives d\u2019intrusion."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Activate and configure the firewall on workstations (strengthened)
+          description: "The most simple filter consists of blocking access by default\
+            \ to administration ports from workstations (TCP 135, 445 and 3389 ports\
+            \ in Windows, TCP 22 port in Unix), except from explicitly identified\
+            \ resources (administration and user assistance devices, possible management\
+            \ servers requiring access to network shares on devices, etc.).\nAn analysis\
+            \ of useful incoming flows (administration, infrastructure software, particular\
+            \ applications, etc.) must be carried out to define the list of authorisations\
+            \ to configure. It is preferable to block all of the flows by default\
+            \ and only authorise the necessary services from the corresponding devices\
+            \ (\xABwhite list\xBB).\nThe firewall must also be configured to log the\
+            \ blocked flows and therefore identify the application configuration errors\
+            \ or intrusion attempts."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
       assessable: true
       depth: 2
@@ -516,11 +1102,36 @@ objects:
         \ de transmission des donn\xE9es. Ainsi, si les donn\xE9es chiffr\xE9es sont\
         \ transmises par courriel, une remise en main propre du mot de passe ou, \xE0\
         \ d\xE9faut, par t\xE9l\xE9phone doit \xEAtre privil\xE9gi\xE9e."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Encrypt sensitive data sent through the Internet
+          description: 'The Internet is a network from which it is almost impossible
+            to obtain guarantees as to the way that data will take when you send it
+            through this me-
+
+            dium. It is, therefore, entirely possible that a hacker will be on the
+            pathway of data travelling between two correspondents.
+
+            All the data sent by email or uploaded to online hosting tools (Cloud)
+            is therefore vulnerable. Therefore, its systematic encryption must be
+            undertaken before sending it to a correspondent or uploading it.
+
+            Passing on confidential information (password, key, etc.) that is therefore
+            able to decrypt data, if required, must be carried out by a trusted channel
+            or, failing that, a different channel from the data transmission channel.
+            Therefore, although the encrypted data is sent by mail, handing over the
+            password by hand or, failing that, over the phone must be favoured.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:v
       assessable: false
       depth: 1
       ref_id: V
       name: "S\xE9curiser le r\xE9seau"
+      translations:
+        en:
+          name: Secure the network
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
       assessable: true
       depth: 2
@@ -549,6 +1160,28 @@ objects:
         \ serait pas ais\xE9, il est recommand\xE9 d\u2019int\xE9grer cette d\xE9\
         marche dans toute nouvelle extension du r\xE9seau ou \xE0 l\u2019occasion\
         \ d\u2019un renouvellement d\u2019\xE9quipements."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Segment the network and implement a partitioning between these areas
+          description: "When the network is \"flat\", without any partitioning mechanism,\
+            \ each device in the network can access any other device. If one is compromised\
+            \ all of the connected devices are therefore in jeopardy. A hacker can\
+            \ therefore compromise a user\u2019s device and then, moving around from\
+            \ device to device, find a way to critical servers.\nTherefore it is important,\
+            \ from the network architecture\u2019s design, to work through segmentation\
+            \ into areas made up of systems with uniform security needs. You may,\
+            \ for example, separately group infrastructure servers, business servers,\
+            \ user workstations, administrator workstations, IP phones, etc.\nOne\
+            \ area is therefore characterised by dedicated VLANs and IP subnetworks\
+            \ or even by infrastructures dedicated according to their criticality.\
+            \ Therefore, partitioning measures such as an IP filter with the help\
+            \ of a firewall can be implemented between the different areas. Specifically,\
+            \ you will ensure that the devices and flows associated with administration\
+            \ tasks are segregated as far as possible.\nFor networks for which subsequent\
+            \ partitioning would not be easy, integrating this approach in any new\
+            \ network extension or when devices are changed is recommended."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
       assessable: true
       depth: 2
@@ -579,6 +1212,32 @@ objects:
         \ personnels ou visiteurs (ordinateurs portables, ordiphones) doit \xEAtre\
         \ s\xE9par\xE9e des connexions Wi-Fi des terminaux de l\u2019entit\xE9 (ex\
         \ : SSID et VLAN distincts, acc\xE8s Internet d\xE9di\xE9)."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Ensure the security of Wi-Fi access networks and that uses are separated
+          description: "The use of Wi-Fi in a professional environment is now widespread,\
+            \ yet it still presents very specific security risks: poor guarantees\
+            \ in terms of availability, no control over the coverage area which can\
+            \ lead to an attack out of the geographical scope of the organization,\
+            \ default configuration of access points that are not secure by design,\
+            \ etc.\nThe network architecture segmentation must be able to limit the\
+            \ consequences of intrusion by radio access up to a given perimeter of\
+            \ the information system.\nThe flows coming from devices connected to\
+            \ the Wi-Fi access network must therefore be filtered and restricted to\
+            \ just the necessary flows.\nFurthermore, it is important to give priority\
+            \ to the use of robust encryption (WPA2 mode, AES CCMP algorithm) and\
+            \ centralised authentication, if possible through client certificates\
+            \ for devices.\nProtecting the Wi-Fi network with a single and shared\
+            \ password is not advisable. However, if this is inevitable, it must be\
+            \ complex and its renewal must be planned, but under no circumstances\
+            \ must be transmitted to unauthorized third parties.\nMoreover, access\
+            \ points must be administrated in a secure way (e.g.: dedicated interface,\
+            \ changing the default administrator password).\nFinally, all Wi-Fi connection\
+            \ from staff or visitor terminals (laptops, smartphones) must be separate\
+            \ from Wi-Fi connections from the organization\u2019s devices (e.g.: distinct\
+            \ SSID and VLAN, dedicated internet access)."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
       assessable: true
       depth: 2
@@ -602,6 +1261,24 @@ objects:
         \ d\u2019anciens protocoles non s\xE9curis\xE9s. Citons par exemple SSh (Secure\
         \ SHell) venu remplacer les protocoles de communication historiques TELNET\
         \ et RLOGIN."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Use secure network protocols when they exist
+          description: "Although security is no longer optional today, this has not\
+            \ always been the case. This is why numerous network protocols had to\
+            \ evolve to integrate this component and respond to the confidentiality\
+            \ and integrity requirements that exchanging data requires. Secure network\
+            \ protocols must be used as soon as possible, whether on public networks\
+            \ (the Internet for example) or on the organization\u2019s internal network.\n\
+            Although it may be difficult to provide an exhaustive list, the most common\
+            \ protocols rely on the use of TLS and are often identifiable by the addition\
+            \ of the letter \"s\" (for secure) in the protocol acronym. As an example\
+            \ HTTPS for web browsing or IMAPS, SMTPS or POP3S for email.\nOther protocols\
+            \ were designed securely from their creation to replace prior, insecure\
+            \ protocols. As an example SSH (Secure SHell) which came to replace the\
+            \ TELNET and RLOGIN historic communication protocols.."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
       assessable: true
       depth: 2
@@ -619,20 +1296,56 @@ objects:
         \ au plus pr\xE8s de l\u2019acc\xE8s Internet pour filtrer les connexions\
         \ et un serveur mandataire (proxy) embarquant diff\xE9rents m\xE9canismes\
         \ de s\xE9curit\xE9. Celui-ci assure notamment l\u2019authentification des\
-        \ utilisateurs et la journalisation des requ\xEAtes.\nRenforc\xE9 - Des m\xE9\
-        canismes compl\xE9mentaires sur le serveur mandataire pourront \xEAtre activ\xE9\
-        s selon les besoins de l\u2019entit\xE9 : analyse antivirus du contenu, filtrage\
-        \ par cat\xE9gories d\u2019URLs, etc. Le maintien en condition de s\xE9curit\xE9\
-        \ des \xE9quipements de la passerelle est essentiel, il fera donc l\u2019\
-        objet de proc\xE9dures \xE0 respecter. Suivant le nombre de collaborateurs\
-        \ et le besoin de disponibilit\xE9,  ces \xE9quipements pourront \xEAtre redond\xE9\
-        s. \nPar ailleurs, pour les terminaux utilisateurs, les r\xE9solutions DNS\
-        \ en direct de noms de domaines publics seront par d\xE9faut d\xE9sactiv\xE9\
-        es, celles-ci \xE9tant d\xE9l\xE9gu\xE9es au serveur mandataire.\nEnfin, il\
-        \ est fortement recommand\xE9 que les postes nomades \xE9tablissent au pr\xE9\
-        alable une connexion s\xE9curis\xE9e au syst\xE8me d\u2019information de l\u2019\
-        entit\xE9 pour naviguer de mani\xE8re s\xE9curis\xE9e sur le Web \xE0 travers\
-        \ la passerelle."
+        \ utilisateurs et la journalisation des requ\xEAtes."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Implement a secure access gateway to the Internet
+          description: "Implement a secure access gateway to the Internet : websites\
+            \ hosting malware, the downloading of \"infected\" files and, consequently,\
+            \ the possibility of devices being compromised, leaking of sensitive data,\
+            \ etc. To secure this use, it is therefore essential that the users\u2019\
+            \ devices do not have direct network access to the Internet.\nThis is\
+            \ why it is advisable to implement a secure Internet access gateway, including,\
+            \ as a minimum, a firewall as close to the Internet access as possible\
+            \ to filter the connections and a proxy server with different security\
+            \ mechanisms. This ensures users are authenticated and requests are logged."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:v
+      ref_id: 22.R
+      name: "Mettre en place une passerelle d'acc\xE8s s\xE9curis\xE9 \xE0 Internet"
+      description: "Des m\xE9canismes compl\xE9mentaires sur le serveur mandataire\
+        \ pourront \xEAtre activ\xE9s selon les besoins de l\u2019entit\xE9 : analyse\
+        \ antivirus du contenu, filtrage par cat\xE9gories d\u2019URLs, etc. Le maintien\
+        \ en condition de s\xE9curit\xE9 des \xE9quipements de la passerelle est essentiel,\
+        \ il fera donc l\u2019objet de proc\xE9dures \xE0 respecter. Suivant le nombre\
+        \ de collaborateurs et le besoin de disponibilit\xE9,  ces \xE9quipements\
+        \ pourront \xEAtre redond\xE9s. \nPar ailleurs, pour les terminaux utilisateurs,\
+        \ les r\xE9solutions DNS en direct de noms de domaines publics seront par\
+        \ d\xE9faut d\xE9sactiv\xE9es, celles-ci \xE9tant d\xE9l\xE9gu\xE9es au serveur\
+        \ mandataire.\nEnfin, il est fortement recommand\xE9 que les postes nomades\
+        \ \xE9tablissent au pr\xE9alable une connexion s\xE9curis\xE9e au syst\xE8\
+        me d\u2019information de l\u2019entit\xE9 pour naviguer de mani\xE8re s\xE9\
+        curis\xE9e sur le Web \xE0 travers la passerelle."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Implement a secure access gateway to the Internet (strengthened)
+          description: "Additional mechanisms on the proxy server may be activated\
+            \ depending on the organization\u2019s needs: anti-virus analysis of the\
+            \ content, filtering by URL categories, etc. Security maintenance of the\
+            \ gateway\u2019s components is essential, it must therefore follow defined\
+            \ procedures. Depending on the number of employees and the availability\
+            \ requirement, these devices may be redundant.\nMoreover, for user devices,\
+            \ the direct DNS resolutions of public domain names will be, by default,\
+            \ deactivated, as they are delegated to the proxy server.\nLastly, it\
+            \ is strongly recommended that mobile devices establish a prior secure\
+            \ connection to the organization\u2019s information system to browse the\
+            \ web securely through the gateway."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
       assessable: true
       depth: 2
@@ -657,6 +1370,29 @@ objects:
         \ \xE9galement d\u2019imposer le passage des flux entrants par un serveur\
         \ mandataire inverse (reverse proxy) embarquant diff\xE9rents m\xE9canismes\
         \ de s\xE9curit\xE9."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Segregate the services visible from the Internet from the rest of
+            the information system
+          description: 'An organization can choose to host internally services visible
+            on the Internet (website, email server, etc.). In light of the development
+            and improvement of cyberattacks online, it is essential to guarantee a
+            high level of protection for this service with the competent administrators,
+            available and continuously trained (up to date in terms of technology).
+            Otherwise, recourse to outsourced hosting with professionals is to be
+            favoured.
+
+            Furthermore, the web hosting infrastructures must be physically segregated
+            from all the information system infrastructure, which is not designed
+            to be visible from the Internet.
+
+            Lastly, it is advisable to implement an interconnection infrastructure
+            for these services with the Internet, able to filter the flows linked
+            to services differently from the other flows of the organization. It also
+            concerns ensuring incoming flows go through a reverse proxy server with
+            different security mechanisms.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
       assessable: true
       depth: 2
@@ -685,17 +1421,71 @@ objects:
         venir la r\xE9ception de fichiers infect\xE9s ;\n> de l\u2019activation du\
         \ chiffrement TLS des \xE9changes entre serveurs de messagerie (de l\u2019\
         entit\xE9 ou publics) ainsi qu\u2019entre les postes utilisateur et les serveurs\
-        \ h\xE9bergeant les bo\xEEtes aux lettres.\nRenforc\xE9 -  Il est souhaitable\
-        \ de ne pas exposer directement les serveurs de bo\xEEte aux lettres sur Internet.\
-        \ Dans ce cas, un serveur relai d\xE9di\xE9 \xE0 l\u2019envoi et \xE0 la r\xE9\
-        ception des messages doit \xEAtre mis en place en coupure d\u2019Internet.\n\
-        Alors que le spam - malveillant ou non - constitue la majorit\xE9 des courriels\
-        \ \xE9chang\xE9s sur Internet, le d\xE9ploiement d\u2019un service anti-spam\
-        \ doit permettre d\u2019\xE9liminer cette source de risques.\nEnfin, l\u2019\
-        administrateur de messagerie s\u2019assurera de la mise en place des m\xE9\
-        canismes de v\xE9rification d\u2019authenticit\xE9 et de la bonne configuration\
-        \ des enregistrements DNS publics li\xE9s \xE0 son infrastructure de messagerie\
-        \ (MX, SPF, DKIM, DMARC)."
+        \ h\xE9bergeant les bo\xEEtes aux lettres."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Protect your professional email
+          description: 'Email is the main infection vector for a workstation, whether
+            it is opening attachments containing malware or a misguided click on a
+            link redirecting towards a site that is, itself, malicious.
+
+            Users must be especially aware of this issue: is the sender known? Is
+            information from him or her expected? Is the proposed link consistent
+            with the subject mentioned? If any doubt, checking the message authenticity
+            by another channel (telephone, SMS, etc.) is required.
+
+            To protect against scams (e.g.: a fraudulent transfer request seeming
+            to come from a manager), organisational measures must be strictly applied.
+
+            Moreover, the redirection of professional messages to a personal email
+            must be prohibited as it may constitute an irremediable information leak
+            from the organization. If necessary, controlled and secure methods for
+            remote access to professional email must be offered.
+
+            Whether the organization hosts or has their email system hosted, it must
+            ensure:
+
+            > that it has an anti-virus analysis system upstream of the mailboxes
+            of users to prevent the receipt of infected files;
+
+            > that it has activated TLS encryption for exchanges between email servers
+            (from the organization or public) as well as between the user devices
+            and servers hosting the mailboxes.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:v
+      ref_id: 24.R
+      name: "Prot\xE9ger sa messagerie professionnelle"
+      description: "Il est souhaitable de ne pas exposer directement les serveurs\
+        \ de bo\xEEte aux lettres sur Internet. Dans ce cas, un serveur relai d\xE9\
+        di\xE9 \xE0 l\u2019envoi et \xE0 la r\xE9ception des messages doit \xEAtre\
+        \ mis en place en coupure d\u2019Internet.\nAlors que le spam - malveillant\
+        \ ou non - constitue la majorit\xE9 des courriels \xE9chang\xE9s sur Internet,\
+        \ le d\xE9ploiement d\u2019un service anti-spam doit permettre d\u2019\xE9\
+        liminer cette source de risques.\nEnfin, l\u2019administrateur de messagerie\
+        \ s\u2019assurera de la mise en place des m\xE9canismes de v\xE9rification\
+        \ d\u2019authenticit\xE9 et de la bonne configuration des enregistrements\
+        \ DNS publics li\xE9s \xE0 son infrastructure de messagerie (MX, SPF, DKIM,\
+        \ DMARC)."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Protect your professional email (strengthened)
+          description: 'Not directly exposing the mailbox servers to the Internet
+            is preferable. In this case, a relay server dedicated to send and receive
+            messages must be implemented in case the Internet is cut off.
+
+            While spam - whether malicious or not - accounts for the majority of email
+            exchanges on the Internet, the deployment of an anti-spam service must
+            be able to remove this source of risks.
+
+            Finally, the email administrator will ensure the implementation of authenticity
+            verification mechanisms and the correct configuration of public DNS records
+            linked to its email infrastructure (MX, SPF, DKIM, DMARC).'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
       assessable: true
       depth: 2
@@ -715,14 +1505,49 @@ objects:
         entr\xE9e des flux sur le r\xE9seau de l\u2019entit\xE9. La matrice des flux\
         \ (entrants et sortants) devra \xEAtre r\xE9duite au juste besoin op\xE9rationnel,\
         \ maintenue dans le temps et la configuration des \xE9quipements devra y \xEA\
-        tre conforme.\nRenforc\xE9 - Pour des entit\xE9s ayant des besoins de s\xE9\
-        curit\xE9 plus exigeants, il conviendra de s\u2019assurer que l\u2019\xE9\
-        quipement de filtrage IP pour les connexions partenaires est d\xE9di\xE9 \xE0\
-        \ cet usage. L\u2019ajout d\u2019un \xE9quipement de d\xE9tection d\u2019\
-        intrusions peut \xE9galement constituer une bonne pratique. \nPar ailleurs\
-        \ la connaissance d\u2019un point de contact \xE0 jour chez le partenaire\
-        \ est n\xE9cessaire pour pouvoir r\xE9agir en cas d\u2019incident de s\xE9\
-        curit\xE9."
+        tre conforme."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Secure the dedicated network interconnections with partners
+          description: "For operational needs, an organization can be required to\
+            \ establish a dedicated network interconnection with a supplier or customer\
+            \ (e.g.: managed services, electronic data interchange, financial flows,\
+            \ etc.)\nThis interconnection can be done by a link to a private network\
+            \ of the organization or directly online. In the latter case, it is advisable\
+            \ to establish a site to site tunnel, ideally IPsec, adhering to ANSSI\u2019\
+            s recommendations.\nThe partner is, by default, considered as unsafe,\
+            \ so it is essential to carry out IP filtering with the assistance of\
+            \ a firewall as close as possible to the flows\u2019 entrance into the\
+            \ organization\u2019s network. The flow matrix (incoming and outgoing)\
+            \ must be strictly reduced to the operational need, maintained over time\
+            \ and the devices\u2019 configuration must be in accordance with it."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:v
+      ref_id: 25.R
+      name: "S\xE9curiser les interconnexions r\xE9seau d\xE9di\xE9es avec les partenaires"
+      description: "Pour des entit\xE9s ayant des besoins de s\xE9curit\xE9 plus exigeants,\
+        \ il conviendra de s\u2019assurer que l\u2019\xE9quipement de filtrage IP\
+        \ pour les connexions partenaires est d\xE9di\xE9 \xE0 cet usage. L\u2019\
+        ajout d\u2019un \xE9quipement de d\xE9tection d\u2019intrusions peut \xE9\
+        galement constituer une bonne pratique. \nPar ailleurs la connaissance d\u2019\
+        un point de contact \xE0 jour chez le partenaire est n\xE9cessaire pour pouvoir\
+        \ r\xE9agir en cas d\u2019incident de s\xE9curit\xE9."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Secure the dedicated network interconnections with partners (strengthened)
+          description: 'For organizations with more demanding security needs, it will
+            be advisable to ensure that the IP filtering device for partner connections
+            is dedicated to this use. The addition of an intrusion detection device
+            may also be considered as a good practice.
+
+            Moreover, knowing an up-to-date point of contact for the partner is necessary
+            to be able to react in the event of a security incident.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
       assessable: true
       depth: 2
@@ -751,11 +1576,36 @@ objects:
         \ d\u2019accueil, couloirs, placards, etc.) doivent \xEAtre restreintes ou\
         \ d\xE9sactiv\xE9es afin d\u2019emp\xEAcher un attaquant de gagner facilement\
         \ l\u2019acc\xE8s au r\xE9seau de l\u2019entreprise."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Control and protect access to the server rooms and technical areas
+          description: "Physical security mechanisms must be a key part of information\
+            \ systems security and be up to date to ensure that they cannot be bypassed\
+            \ easily by a hacker. It is, therefore, advisable to identify the suitable\
+            \ physical security measures and to raise users\u2019 awareness continuously\
+            \ of the risks caused by bypassing these rules.\nAccess to server rooms\
+            \ and technical areas must be controlled with the assistance of locks\
+            \ or access control mechanisms such as badges. The unaccompanied access\
+            \ of external service providers to sever rooms and technical areas must\
+            \ be prohibited, except if it is possible to strictly monitor the access\
+            \ and limit it to given time intervals. A regular review of the access\
+            \ rights must be carried out, in order to identify any unauthorised access.\n\
+            When an employee leaves or there is a change of service provider, the\
+            \ access rights must be withdrawn or the access codes changed.\nFinally,\
+            \ the network sockets in areas open to the public (meeting room, reception\
+            \ hall, corridors, etc.) must be restricted or deactivated in order to\
+            \ stop a hacker easily gaining access to the company\u2019s network."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vi
       assessable: false
       depth: 1
       ref_id: VI
       name: "S\xE9curiser l'administration"
+      translations:
+        en:
+          name: Secure administration
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
       assessable: true
       depth: 2
@@ -776,14 +1626,54 @@ objects:
         \ \xE0 fournir un acc\xE8s distant \xE0 une infrastructure d\u2019administration\
         \ depuis un poste bureautique est d\xE9conseill\xE9e car elle peut mener \xE0\
         \ une \xE9l\xE9vation de privil\xE8ges en cas de r\xE9cup\xE9ration des authentifiants\
-        \ d\u2019administration.\nRenforc\xE9 - Concernant les mises \xE0 jour logicielles\
-        \ des \xE9quipements administr\xE9s, elles doivent \xEAtre r\xE9cup\xE9r\xE9\
-        es depuis une source s\xFBre (le site de l\u2019\xE9diteur par exemple), contr\xF4\
-        l\xE9es puis transf\xE9r\xE9es sur le poste ou le serveur utilis\xE9 pour\
-        \ l\u2019administration et non connect\xE9 \xE0 Internet. Ce transfert peut\
-        \ \xEAtre r\xE9alis\xE9 sur un support amovible d\xE9di\xE9. \nPour des entit\xE9\
-        s voulant automatiser certaines t\xE2ches, la mise en place d\u2019une zone\
-        \ d\u2019\xE9changes est conseill\xE9e. "
+        \ d\u2019administration."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Prohibit Internet access from devices or servers used by the information
+            system administration
+          description: 'A workstation or a server used for administration actions
+            must, under no circumstances, have access to the Internet, due to the
+            risks that web browsing (websites containing malware) and email (potentially
+            infected attachments) bring to its integrity.
+
+            For other administrator uses requiring the Internet (viewing documentation
+            online, their email, etc.), it is advisable to provide them with a separate
+            workstation. Failing this, access to a remote virtual infrastructure for
+            office applications from an admin device is possible. The reverse, consisting
+            of providing remote access to an admin infrastructure from an office device,
+            is not advisable as it can lead to a privilege elevation in the event
+            admin authenticators are recuperated.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vi
+      ref_id: 27.R
+      name: "Interdire l\u2019acc\xE8s \xE0 Internet depuis les postes ou serveurs\
+        \ utilis\xE9s pour l\u2019administration du syst\xE8me d\u2019information"
+      description: "Concernant les mises \xE0 jour logicielles des \xE9quipements\
+        \ administr\xE9s, elles doivent \xEAtre r\xE9cup\xE9r\xE9es depuis une source\
+        \ s\xFBre (le site de l\u2019\xE9diteur par exemple), contr\xF4l\xE9es puis\
+        \ transf\xE9r\xE9es sur le poste ou le serveur utilis\xE9 pour l\u2019administration\
+        \ et non connect\xE9 \xE0 Internet. Ce transfert peut \xEAtre r\xE9alis\xE9\
+        \ sur un support amovible d\xE9di\xE9. \nPour des entit\xE9s voulant automatiser\
+        \ certaines t\xE2ches, la mise en place d\u2019une zone d\u2019\xE9changes\
+        \ est conseill\xE9e. "
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Prohibit Internet access from devices or servers used by the information
+            system administration (strengthened)
+          description: 'Concerning software updates for administrated devices, they
+            must be collected from a safe source (the site of the publisher for example),
+            tested then transferred to a device or server used for administration
+            and not connected to the Internet. This transfer can be carried out on
+            a dedicated removable medium.
+
+            For organizations wishing to automate certain tasks, the implementation
+            of secure interchange area is advisable.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
       assessable: true
       depth: 2
@@ -799,15 +1689,50 @@ objects:
         \ bureautique des utilisateurs, pour se pr\xE9munir de toute compromission\
         \ par rebond depuis un poste utilisateur vers une ressource d\u2019administration.\
         \ \nSelon les besoins de s\xE9curit\xE9 de l\u2019entit\xE9, il est recommand\xE9\
-        \ :\n> de privil\xE9gier en premier lieu un cloisonnement physique des r\xE9\
-        seaux d\xE8s que cela est possible, cette solution pouvant repr\xE9senter\
-        \ des co\xFBts et un temps de d\xE9ploiement importants\nRenforc\xE9 -\n>\
-        \ \xE0 d\xE9faut, de mettre en \u0153uvre un cloisonnement logique cryptographique\
-        \ reposant sur la mise en place de tunnels IPsec. Ceci permet d\u2019assurer\
-        \ l\u2019int\xE9grit\xE9 et la confidentialit\xE9 des informations v\xE9hicul\xE9\
-        es sur le r\xE9seau d\u2019administration vis-\xE0-vis du r\xE9seau bureautique\
-        \ des utilisateurs ;\n> au minimum, de mettre en \u0153uvre un cloisonnement\
-        \ logique par VLAN. "
+        \ :\n> (voir renforc\xE9)\n> \xE0 d\xE9faut, de mettre en \u0153uvre un cloisonnement\
+        \ logique cryptographique reposant sur la mise en place de tunnels IPsec.\
+        \ Ceci permet d\u2019assurer l\u2019int\xE9grit\xE9 et la confidentialit\xE9\
+        \ des informations v\xE9hicul\xE9es sur le r\xE9seau d\u2019administration\
+        \ vis-\xE0-vis du r\xE9seau bureautique des utilisateurs ;\n> au minimum,\
+        \ de mettre en \u0153uvre un cloisonnement logique par VLAN. "
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Use a dedicated and separated network for information system administration
+          description: "An administration network interconnects, among others, the\
+            \ administration devices or servers and the device administration interfaces.\
+            \ Within the logic of segmentation for the organization\u2019s global\
+            \ network, it is essential to specifically segregate the administration\
+            \ network from the user office network, to prevent any intrusion by redirection\
+            \ from a user device to an administration resource.\nDepending on the\
+            \ organization\u2019s security needs, it is advisable:\n> (see strengthened)\n\
+            > failing this, to implement a logical cryptographic partitioning relying\
+            \ on the implementation of IPsec tunnels. This allows for assurance over\
+            \ the integrity and confidentiality of data carried in the administration\
+            \ network over the user office network;\n> as a minimum, implement logical\
+            \ partitioning using VLAN."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vi
+      ref_id: 28.R
+      name: "Utiliser un r\xE9seau d\xE9di\xE9 et cloisonn\xE9 pour l\u2019administration\
+        \ du syst\xE8me d\u2019information"
+      description: "Selon les besoins de s\xE9curit\xE9 de l\u2019entit\xE9, il est\
+        \ recommand\xE9 :\n> de privil\xE9gier en premier lieu un cloisonnement physique\
+        \ des r\xE9seaux d\xE8s que cela est possible, cette solution pouvant repr\xE9\
+        senter des co\xFBts et un temps de d\xE9ploiement importants;"
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Use a dedicated and separated network for information system administration
+            (strengthened)
+          description: "Depending on the organization\u2019s security needs, it is\
+            \ advisable:\n> to firstly favour a physical partitioning of networks\
+            \ as soon as this is possible, as this solution can represent significant\
+            \ costs and deployment time;"
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
       assessable: true
       depth: 2
@@ -833,11 +1758,38 @@ objects:
         \ pour r\xE9pondre \xE0 un besoin ponctuel de l\u2019utilisateur, celle-ci\
         \ doit \xEAtre trac\xE9e, limit\xE9e dans le temps et retir\xE9e \xE0 \xE9\
         ch\xE9ance."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Reduce administration rights on workstations to strictly operational
+            needs
+          description: 'Numerous users, including at the top management level, are
+            tempted to ask their IT department to be able to provide them, in line
+            with their personal use, with higher privileges on their workstations:
+            installation of software, system configuration, etc. By default, it is
+            recommended that an information system user, whatever his responsibility
+            level and allocations, should not have administration privileges on his
+            workstation. This measure, which appears restrictive, aims to limit the
+            consequences of malicious executions from malware. The availability of
+            a well-rounded application store, validated by the organization from the
+            security point of view, will be able to respond to the majority of needs.
+
+            Consequently, only administrators responsible for the administration of
+            workstations must have these rights during their interventions.
+
+            If delegating privileges to a workstation is really necessary to respond
+            to a one-off need from the user, it must be monitored, for a limited time,
+            and be withdrawn afterwards.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
       assessable: false
       depth: 1
       ref_id: VII
       name: "G\xE9rer le nomadisme"
+      translations:
+        en:
+          name: Manage mobile working
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
       assessable: true
       depth: 2
@@ -862,11 +1814,47 @@ objects:
         \ autocollant aux couleurs de l\u2019entit\xE9 par exemple).\nPour \xE9viter\
         \ toute indiscr\xE9tion lors de d\xE9placements, notamment dans les transports\
         \ ou les lieux d\u2019attente, un filtre de confidentialit\xE9 doit \xEAtre\
-        \ positionn\xE9 sur chaque \xE9cran.\nRenforc\xE9 - Enfin, afin de rendre\
-        \ inutilisable le poste seul, l\u2019utilisation d\u2019un support externe\
-        \ compl\xE9mentaire (carte \xE0 puce ou jeton USB par exemple) pour conserver\
-        \ des secrets de d\xE9chiffrement ou d\u2019authentification peut \xEAtre\
-        \ envisag\xE9e. Dans ce cas il doit \xEAtre conserv\xE9 \xE0 part. "
+        \ positionn\xE9 sur chaque \xE9cran."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Take measures to physically secure mobile devices
+          description: "Mobile devices (laptops, tablets and smartphones) are, naturally,\
+            \ exposed to loss and theft. They may contain sensitive information for\
+            \ the organization, locally, and constitute an entry point to wider resources\
+            \ of the information system. Beyond the minimal application of the organization\u2019\
+            s security policies, specific security measures for these devices must\
+            \ therefore be provided.\nFirst and foremost, users\u2019 awareness must\
+            \ be raised to increase their level of vigilance during their trips and\
+            \ keep their devices within sight. Any organization, even a small sized\
+            \ one, may be the victim of a cyberattack. Consequently, when mobile,\
+            \ any device becomes a potential or even favoured target.\nIt is recommended\
+            \ that mobile devices are as ordinary as possible, avoiding any explicit\
+            \ mention of the organization they belong to (by displaying a sticker\
+            \ with the colours of the organization for example).\nTo avoid any indiscretion\
+            \ during journeys, especially on public transport or in waiting areas,\
+            \ a privacy filter must be placed on each screen."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
+      ref_id: 30.R
+      name: " Prendre des mesures de s\xE9curisation physique des terminaux nomades"
+      description: "Enfin, afin de rendre inutilisable le poste seul, l\u2019utilisation\
+        \ d\u2019un support externe compl\xE9mentaire (carte \xE0 puce ou jeton USB\
+        \ par exemple) pour conserver des secrets de d\xE9chiffrement ou d\u2019authentification\
+        \ peut \xEAtre envisag\xE9e. Dans ce cas il doit \xEAtre conserv\xE9 \xE0\
+        \ part. "
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Take measures to physically secure mobile devices (strengthened)
+          description: Finally, in order to make the device on its own unusable, the
+            use of an additional external media (smart card or USB token for example)
+            to hold decryption or authentication secrets may be considered. In this
+            case, it must be kept separate
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
       assessable: true
       depth: 2
@@ -892,6 +1880,31 @@ objects:
         pondent \xE0 des besoins diff\xE9rents et peuvent potentiellement laisser\
         \ sur le support de stockage des informations non chiffr\xE9es (fichiers de\
         \ restauration de suite bureautique, par exemple)."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Encrypt sensitive data, in particular on hardware that can potentially
+            be lost
+          description: 'Frequent journeys in a professional context and the miniaturisation
+            of IT hardware often lead to their loss or theft in a public space. This
+            may put the sensitive data of the organization which is stored on it at
+            risk.
+
+            Therefore, on all mobile hardware (laptops, smartphones, USB keys, external
+            hard drives, etc.), only data that has already been encrypted must be
+            stored, in order to maintain its confidentiality. Only confidential information
+            (password, smart card, PIN code, etc.) will allow the person who has it
+            to access this data.
+
+            A partition, archive or file encryption solution may be considered depending
+            on the needs. Here, once again, it is essential to ensure the uniqueness
+            and robustness of the decryption method used.
+
+            As far as possible, it is advisable to start by a complete disk encryption
+            before considering archive and file encryption. These last two respond
+            to different needs and can potentially leave the data storage medium unencrypted
+            (backup files from office suites for example).'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
       assessable: true
       depth: 2
@@ -914,12 +1927,50 @@ objects:
         \ choisir de d\xE9roger \xE0 la connexion automatique en autorisant une connexion\
         \ \xE0 la demande ou maintenir cette recommandation en encourageant l\u2019\
         utilisateur \xE0 utiliser un partage de connexion sur un t\xE9l\xE9phone mobile\
-        \ de confiance.\nRenforc\xE9 - Afin d\u2019\xE9viter toute r\xE9utilisation\
-        \ d\u2019authentifiants depuis un poste vol\xE9 ou perdu (identifiant et mot\
-        \ de passe enregistr\xE9s par exemple), il est pr\xE9f\xE9rable d\u2019avoir\
-        \ recours \xE0 une authentification forte, par exemple avec un mot de passe\
-        \ et un certificat stock\xE9 sur un support externe (carte \xE0 puce ou jeton\
-        \ USB) ou un m\xE9canisme de mot de passe \xE0 usage unique (One Time Password). "
+        \ de confiance."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Secure the network connection of devices used in a mobile working
+            situation
+          description: "In a mobile working situation, it is not uncommon for a user\
+            \ to need to connect to the organization\u2019s information system. Consequently,\
+            \ it is important to ensure this network connection is secure through\
+            \ the Internet.\nEven if the option of establishing VPN SSL/TLS tunnels\
+            \ is now common, the establishment of a VPN IPsec tunnel between the mobile\
+            \ workstation and a VPN IPsec gateway, provided by the organization, is\
+            \ strongly recommended.\nTo guarantee an optimal level of security, this\
+            \ VPN IPsec tunnel must be automatically established and not removable\
+            \ by the user, in other words no flow must be able to be sent outside\
+            \ of this tunnel.\nFor specific authentication needs on captive portals,\
+            \ the organization may choose to depart from automatic connection by authorising\
+            \ a connection upon request, or keep this recommendation by encouraging\
+            \ the user to use tethering on a trusted mobile phone."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
+      ref_id: 32.R
+      name: "S\xE9curiser la connexion r\xE9seau des postes utilis\xE9s en situation\
+        \ de nomadisme"
+      description: "Afin d\u2019\xE9viter toute r\xE9utilisation d\u2019authentifiants\
+        \ depuis un poste vol\xE9 ou perdu (identifiant et mot de passe enregistr\xE9\
+        s par exemple), il est pr\xE9f\xE9rable d\u2019avoir recours \xE0 une authentification\
+        \ forte, par exemple avec un mot de passe et un certificat stock\xE9 sur un\
+        \ support externe (carte \xE0 puce ou jeton USB) ou un m\xE9canisme de mot\
+        \ de passe \xE0 usage unique (One Time Password). "
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Secure the network connection of devices used in a mobile working
+            situation (strengthened)
+          description: In order to avoid any reuse of authenticators from a stolen
+            or lost device (saved username and password for example), it is preferable
+            to use two-factor authentication, with a password and a certificate stored
+            on an external medium (smart card or USB token) or a one-time password
+            mechanism, for example.
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
       assessable: true
       depth: 2
@@ -945,15 +1996,56 @@ objects:
         \ des applications valid\xE9es du point de vue de la s\xE9curit\xE9, etc.\
         \ \nDans le cas contraire, une configuration pr\xE9alable avant remise de\
         \ l\u2019\xE9quipement et une s\xE9ance de sensibilisation des utilisateurs\
-        \ est souhaitable.\nRenforc\xE9 - Entre autres usages potentiellement risqu\xE9\
-        s, celui d\u2019un assistant vocal int\xE9gr\xE9 augmente sensiblement la\
-        \ surface d\u2019attaque du terminal et des cas d\u2019attaque ont \xE9t\xE9\
-        \ d\xE9montr\xE9s. Pour ces raisons, il est donc d\xE9conseill\xE9."
+        \ est souhaitable."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Adopt security policies dedicated to mobile devices
+          description: "Smartphones and tablets are a part of our daily personal and\
+            \ professional lives. The first recommendation consists precisely of not\
+            \ sharing personal and professional uses on the single and same device,\
+            \ for example by not simultaneously synchronising professional and personal\
+            \ email, social networks and calendar accounts, etc.\nThe devices, provided\
+            \ by the organization and used in a professional context, must be subject\
+            \ to a separate securing, as soon as they are connected to the organization\u2019\
+            s information system or as soon as they contain potentially sensitive\
+            \ professional information (mails, shared files, contacts, etc.). Consequently,\
+            \ the use of a centralised management solution for mobile devices is to\
+            \ be favoured. It will be desirable to uniformly configure the inherent\
+            \ security policies: a method for unlocking the device, limiting the use\
+            \ of the application store to validated applications from a security point\
+            \ of view, etc.\nOtherwise, configuration prior to distribution of the\
+            \ device and an awareness raising session with users is desirable."
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
+      ref_id: 33.R
+      name: " Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
+        \ mobiles"
+      description: "Entre autres usages potentiellement risqu\xE9s, celui d\u2019\
+        un assistant vocal int\xE9gr\xE9 augmente sensiblement la surface d\u2019\
+        attaque du terminal et des cas d\u2019attaque ont \xE9t\xE9 d\xE9montr\xE9\
+        s. Pour ces raisons, il est donc d\xE9conseill\xE9."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Adopt security policies dedicated to mobile devices (strengthened)
+          description: "Among other potentially risks, using a built-in voice assistant\
+            \ markedly increases the terminal\u2019s vulnerabilities to hacking and\
+            \ incidents of hacks have been demonstrated. For these reasons, it is\
+            \ therefore not advisable."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:viii
       assessable: false
       depth: 1
       ref_id: VIII
       name: "Maintenir le syst\xE8me d'information \xE0 jour"
+      translations:
+        en:
+          name: Keep the Information System up to date
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
       assessable: true
       depth: 2
@@ -982,6 +2074,38 @@ objects:
         \ recommandation s\u2019applique aussi bien au niveau r\xE9seau par un filtrage\
         \ strict des flux, qu\u2019au niveau des secrets d\u2019authentification qui\
         \ doivent \xEAtre d\xE9di\xE9s \xE0 ces syst\xE8mes. "
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Define an update policy for the components of the information system
+          description: 'New flaws are regularly discovered at the heart of systems
+            and software. These are generally access doors that a hacker can exploit
+            for a successful intrusion into the information system. It is, therefore,
+            vital to stay informed of new vulnerabilities (follow CERT- FR alerts)
+            and to apply the corrective security actions over all of the components
+            of the system within the month following their publication. An update
+            policy must therefore be defined and be a part of operational procedures.
+
+            These must specify:
+
+            > the way in which the inventory of the information system components
+            is carried out;
+
+            > the sources of information relating to the publication of updates;
+
+            > the tools to deploy the corrective actions over the stock (for examples
+            WSUS for updates for Microsoft components, free or paid tools for third
+            party components and other operating systems);
+
+            > the possible qualification of corrective measure and their gradual deployement
+            over the stock.
+
+            The obsolete components which are no longer supported by their manufacturers
+            must be isolated from the rest of the system. This recommendation applies
+            as much on the network level, by strict filtering of flows, as it does
+            as regards the authentication secrets which must be dedicated to these
+            systems.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
       assessable: true
       depth: 2
@@ -1011,11 +2135,51 @@ objects:
         \ ressources n\xE9cessaires (mat\xE9rielles, humaines, budg\xE9taires) \xE0\
         \ la migration de chaque logiciel en fin de vie (tests de non-r\xE9gression,\
         \ proc\xE9dure de sauvegarde, proc\xE9dure de migration des donn\xE9es, etc.)."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Anticipate the software and system end of life/maintenance and limit
+            software reliance
+          description: 'The use of an obsolete system or software package significantly
+            increases the possibilities of a cyberattack. Systems become vulnerable
+            when corrective measures are no longer proposed. Malicious tools exploiting
+            these vulnerabilities can be spread quickly online while the publisher
+            is not offering a security corrective measure.
+
+            To anticipate obsolescence, a certain number of precautions exist:
+
+            > establish an inventory of the information system applications and systems
+            and keep it up to date;
+
+            > choose solutions with support that is ensured for a time period corresponding
+            to their use;
+
+            > ensure monitoring of updates and end of support dates for software;
+
+            > keep an homogeneous software stock (the co-existence of different versions
+            of the same product increases the risks and makes monitoring more complicated);
+
+            > reduce software reliance, in other words, dependency on the operating
+            of a software package compared to another, in particular when its support
+            comes to an end;
+
+            > include in contracts with service providers and suppliers clauses guaranteeing
+            the monitoring of corrective security measures and the management of obsolescence;
+
+            > identify the time periods and resources necessary (material, human,
+            budgetary) for the migration of each software package at the end of its
+            life (non-regression tests, backup procedure, data migration procedure,
+            etc.).'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ix
       assessable: false
       depth: 1
       ref_id: IX
       name: "Superviser, auditer, r\xE9agir"
+      translations:
+        en:
+          name: Supervise, audit, react
+          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
       assessable: true
       depth: 2
@@ -1044,13 +2208,64 @@ objects:
         \ (URL sur un relai hTTP, en-t\xEAtes des messages sur un relai SMTP, etc.)\
         \ ;\nAfin de pouvoir corr\xE9ler les \xE9v\xE8nements entre les diff\xE9rents\
         \ composants, leur source de synchronisation de temps (gr\xE2ce au protocole\
-        \ NTP) doit \xEAtre identique.\nRenforc\xE9 - Si toutes les actions pr\xE9\
-        c\xE9dentes ont \xE9t\xE9 mises en \u0153uvre, une centralisation des journaux\
-        \ sur un dispositif d\xE9di\xE9 pourra \xEAtre envisag\xE9e. Cela permet de\
-        \ faciliter la recherche automatis\xE9e d\u2019\xE9v\xE9nements suspects,\
-        \ d\u2019archiver les journaux sur une longue dur\xE9e et d\u2019emp\xEAcher\
-        \ un attaquant d\u2019effacer d\u2019\xE9ventuelles traces de son passage\
-        \ sur les \xE9quipements qu\u2019il a compromis. "
+        \ NTP) doit \xEAtre identique."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Activate and configure the most important component logs
+          description: 'Having relevant logs is required in order to be able to detect
+            possible malfunctions and illegal access attempts to the components of
+            the information system.
+
+            The first stage consists of determining what the critical components of
+            the information system are. These may be network and security devices,
+            critical servers, sensitive user workstations, etc.
+
+            For each of these, it is advisable to analyse the configuration of logged
+            elements (format, frequency of file rotation, maximum size of log files,
+            event categories recorded, etc.) and to adapt it as a consequence. The
+            critical events for security must be logged and saved for at least one
+            year (or more, depending on the legal requirements of the business area).
+
+            A contextual assessment of the information system must be carried out
+            and the following elements must be logged:
+
+            > firewall: packets blocked;
+
+            > systems and applications: authentications and authorisations (failures
+            and successes), unplanned downtime;
+
+            > services: protocol errors (for example the errors 403, 404 and 500 for
+            HTTP services), traceability of flows applicable to interconnections (URL
+            on a HTTP relay, headers of messages on a SMTP relay, etc).
+
+            In order to be able to correlate the events between the different components,
+            their time synchronisation source (thanks to NTP protocol) must be identical.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ix
+      ref_id: 36.R
+      name: "Activer et configurer les journaux des composants les plus importants\
+        \ (renforc\xE9)"
+      description: "Si toutes les actions pr\xE9c\xE9dentes ont \xE9t\xE9 mises en\
+        \ \u0153uvre, une centralisation des journaux sur un dispositif d\xE9di\xE9\
+        \ pourra \xEAtre envisag\xE9e. Cela permet de faciliter la recherche automatis\xE9\
+        e d\u2019\xE9v\xE9nements suspects, d\u2019archiver les journaux sur une longue\
+        \ dur\xE9e et d\u2019emp\xEAcher un attaquant d\u2019effacer d\u2019\xE9ventuelles\
+        \ traces de son passage sur les \xE9quipements qu\u2019il a compromis. "
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Activate and configure the most important component logs (strengthened)
+          description: If all the previous actions have been implemented, a centralisation
+            of the logs through a dedicated measure will be able to be considered.
+            This makes the automatic searching for suspect events easier, and allows
+            for the archiving of logs over the long term, as well as stopping a hacker
+            from deleting possible traces of their intrusion on the devices that he
+            or she has compromised.
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
       assessable: true
       depth: 2
@@ -1075,29 +2290,76 @@ objects:
         \ :\n> syst\xE9matique, par un ordonnanceur de t\xE2ches pour les applications\
         \ importantes ;\n>  ponctuelle, en cas d\u2019erreur sur les fichiers ;\n\
         > g\xE9n\xE9rale, pour une sauvegarde et restauration enti\xE8res du syst\xE8\
-        me d\u2019information.\nRenforc\xE9  - Un fois cette politique de sauvegarde\
-        \ \xE9tablie, il est souhaitable de planifier au moins une fois par an un\
-        \ exercice de restauration des donn\xE9es et de conserver une trace technique\
-        \ des r\xE9sultats."
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38
+        me d\u2019information."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Define and apply a backup policy for critical components
+          description: 'Following an exploitation incident or in the context of managing
+            an intrusion, the availability of backups, saved in a safe place, is essential
+            to continue the activity. Formalising a regularly updated backup policy
+            is therefore highly recommended. This aims to define the requirements
+            in terms of backing up information, software and systems.
+
+            This policy must, at least, integrate the following elements:
+
+            > the list of data judged vital for the organization and the servers concerned;
+
+            > the different types of backup (for example the offline mode);
+
+            > the frequency of backups;
+
+            > the administration and backup execution procedure;
+
+            > the storage information and the access restrictions to backups;
+
+            > the testing and restoration procedures;
+
+            > the destruction of media that contained backups.
+
+            The restoration tests may be carried out in several ways:
+
+            > systematic, through a task scheduler for important applications;
+
+            > one-off, in the event of an error in files;
+
+            > general, for complete backup and restoration of the information system.'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ix
-      ref_id: '38'
+      ref_id: 37.R
+      name: "D\xE9finir et appliquer une politique de sauvegarde des composants critiques\
+        \ (renforc\xE9)"
+      description: "Un fois cette politique de sauvegarde \xE9tablie, il est souhaitable\
+        \ de planifier au moins une fois par an un exercice de restauration des donn\xE9\
+        es et de conserver une trace technique des r\xE9sultats."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Define and apply a backup policy for critical components (strengthened)
+          description: null
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ix
+      ref_id: 38.R
       name: "Proc\xE9der \xE0 des contr\xF4les et audits de s\xE9curit\xE9 r\xE9guliers\
-        \ puis appliquer les actions correctives associ\xE9es"
-      description: "Renforc\xE9 - La r\xE9alisation d\u2019audits r\xE9guliers (au\
-        \ moins une fois par an) du syst\xE8me d\u2019information est essentielle\
-        \ car elle permet d\u2019\xE9valuer concr\xE8tement l\u2019efficacit\xE9 des\
-        \ mesures mises en \u0153uvre et leur maintien dans le temps. Ces contr\xF4\
-        les et audits permettent \xE9galement de mesurer les \xE9carts pouvant persister\
-        \ entre la r\xE8gle et la pratique. \nIls peuvent \xEAtre r\xE9alis\xE9s par\
-        \ d\u2019\xE9ventuelles \xE9quipes d\u2019audit internes ou par des soci\xE9\
-        t\xE9s externes sp\xE9cialis\xE9es. Selon le p\xE9rim\xE8tre \xE0 contr\xF4\
-        ler, des audits techniques et/ou organisationnels seront effectu\xE9s par\
-        \ les professionnels mobilis\xE9s. Ces audits sont d\u2019autant plus n\xE9\
-        cessaires que l\u2019entit\xE9 doit \xEAtre conforme \xE0 des r\xE9glementations\
-        \ et obligations l\xE9gales directement li\xE9es \xE0 ses activit\xE9s.\n\xC0\
+        \ puis appliquer les actions correctives associ\xE9es (renforc\xE9)"
+      description: "La r\xE9alisation d\u2019audits r\xE9guliers (au moins une fois\
+        \ par an) du syst\xE8me d\u2019information est essentielle car elle permet\
+        \ d\u2019\xE9valuer concr\xE8tement l\u2019efficacit\xE9 des mesures mises\
+        \ en \u0153uvre et leur maintien dans le temps. Ces contr\xF4les et audits\
+        \ permettent \xE9galement de mesurer les \xE9carts pouvant persister entre\
+        \ la r\xE8gle et la pratique. \nIls peuvent \xEAtre r\xE9alis\xE9s par d\u2019\
+        \xE9ventuelles \xE9quipes d\u2019audit internes ou par des soci\xE9t\xE9s\
+        \ externes sp\xE9cialis\xE9es. Selon le p\xE9rim\xE8tre \xE0 contr\xF4ler,\
+        \ des audits techniques et/ou organisationnels seront effectu\xE9s par les\
+        \ professionnels mobilis\xE9s. Ces audits sont d\u2019autant plus n\xE9cessaires\
+        \ que l\u2019entit\xE9 doit \xEAtre conforme \xE0 des r\xE9glementations et\
+        \ obligations l\xE9gales directement li\xE9es \xE0 ses activit\xE9s.\n\xC0\
         \ l\u2019issue de ces audits, des actions correctives doivent \xEAtre identifi\xE9\
         es, leur application planifi\xE9e et des points de suivi organis\xE9s \xE0\
         \ intervalles r\xE9guliers. Pour une plus grande efficacit\xE9, des indicateurs\
@@ -1108,6 +2370,33 @@ objects:
         \xE9ventuelles vuln\xE9rabilit\xE9s, ils ne constituent jamais une preuve\
         \ de leur absence et ne dispensent donc pas d\u2019autres mesures de contr\xF4\
         le. "
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Undertake regular controls and security audits then apply the associated
+            corrective actions (strengthened)
+          description: 'Carrying out regular audits (at least once per year) of the
+            information system is essential as this makes it possible to correctly
+            assess the effectiveness of measures implemented and their maintenance
+            over time. These controls and audits are also able to measure the gaps
+            that may remain between the theory and the practice.
+
+            They can be carried out by possible internal audit teams or by specialised
+            external companies. Depending on the scope to test, technical and/or organisational
+            audits will be carried out by the professionals called upon. These audits
+            are especially necessary as the organization must comply with the regulations
+            and legal obligations directly linked to its activities.
+
+            Following these audits, corrective actions must be identified, their application
+            planned and monitoring points organised at regular intervals. For higher
+            efficiency, indicators on the state of progress of the action plan may
+            be integrated into the overview for the management.
+
+            Although security audits participate in the security of the information
+            system by being able to show possible vulnerabilities, they are never
+            proof of their absence and therefore do not negate the need for other
+            control measures.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
       assessable: true
       depth: 2
@@ -1133,6 +2422,27 @@ objects:
         \ \xE0 aborder dans le cadre des sensibilisations, permettant ainsi d\u2019\
         \xE9lever le niveau de s\xE9curit\xE9 du syst\xE8me d\u2019information au\
         \ sein de l\u2019organisme."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Designate a point of contact in information system security and make
+            sure staff are aware of him or her
+          description: "All organizations must have a point of contact in information\
+            \ system security who will be supported by the management or an executive\
+            \ committee, depending on the maturity level of the organisation.\nThis\
+            \ point of contact must be known to all the users and will be the first\
+            \ person to call for all questions relating to information system security:\n\
+            > defining the rules to apply according to the context;\n> verifying the\
+            \ application of rules;\n> raising users\u2019 awareness and defining\
+            \ a training plan for IT stakeholders;\n> centralising and dealing with\
+            \ security incidents noticed or raised by users.\nThis point of contact\
+            \ must be trained in information system security and crisis management.\n\
+            In larger organizations, this correspondent can be designated to become\
+            \ the CISO representative. He or she may, for example, raise users\u2019\
+            \ grievances and identify the themes to deal with in the context of awareness\
+            \ raising, therefore allowing the security level of the information system\
+            \ to be raised within the organization."
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
       assessable: true
       depth: 2
@@ -1162,22 +2472,52 @@ objects:
         der au changement des mots de passe compromis. Tout incident doit \xEAtre\
         \ consign\xE9 dans un registre centralis\xE9. Une plainte pourra \xE9galement\
         \ \xEAtre d\xE9pos\xE9e aupr\xE8s du service judiciaire comp\xE9tent."
+      implementation_groups:
+      - S
+      translations:
+        en:
+          name: Define a security incident management procedure
+          description: 'Noticing unusual behaviour from a workstation or a server
+            (impossible connection, significant activity, unusual activity, unauthorised
+            open services, files created, modified or deleted without authorisation,
+            multiple anti-virus warnings, etc.) may be a warning of a possible intrusion.
+
+            A bad reaction in the event of a security incident can make the situation
+            worse and prevent the problem from being dealt properly. The right reaction
+            is to disconnect the device from the network, to stop the attack. However,
+            you must keep it powered and not restart it, so as to not lose useful
+            information for analysing the attack. You must then alert the management,
+            as well as the information system security point of contact.
+
+            He or she may get in contact with the security incident response service
+            providers (PRIS) in order to carry out the necessary technical operations
+            (physically copying the disk, analysing the memory, logs and possible
+            malware, etc.) and determine if other elements of the information system
+            have been compromised. This will also concern coming up with a response
+            to provide, in order to remove possible malware and the access that the
+            hacker may have and to change compromised passwords. Any incident must
+            be recorded in a centralised register. Charges may also be pressed with
+            the competent legal service.'
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:x
       assessable: false
       depth: 1
       ref_id: X
       name: Pour aller plus loin
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41
+      translations:
+        en:
+          name: To go even further
+          description: null
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:x
-      ref_id: '41'
-      name: Mener une analyse de risques formelle
-      description: "Renforc\xE9 - Chaque entit\xE9 \xE9volue dans un environnement\
-        \ informationnel complexe qui lui est propre. Aussi, toute prise de position\
-        \ ou plan d\u2019action impliquant la s\xE9curit\xE9 du syst\xE8me d\u2019\
-        information doit \xEAtre consid\xE9r\xE9 \xE0 la lumi\xE8re des risques pressentis\
-        \ par la direction. En effet, qu\u2019il s\u2019agisse de mesures organisationnelles\
+      ref_id: 41.R
+      name: "Mener une analyse de risques formelle (renforc\xE9)"
+      description: "Chaque entit\xE9 \xE9volue dans un environnement informationnel\
+        \ complexe qui lui est propre. Aussi, toute prise de position ou plan d\u2019\
+        action impliquant la s\xE9curit\xE9 du syst\xE8me d\u2019information doit\
+        \ \xEAtre consid\xE9r\xE9 \xE0 la lumi\xE8re des risques pressentis par la\
+        \ direction. En effet, qu\u2019il s\u2019agisse de mesures organisationnelles\
         \ ou techniques, leur mise en \u0153uvre repr\xE9sente un co\xFBt pour l\u2019\
         entit\xE9 qui n\xE9cessite de s\u2019assurer qu\u2019elles permettent de r\xE9\
         duire au bon niveau un risque identifi\xE9.\nDans les cas les plus sensibles,\
@@ -1196,31 +2536,94 @@ objects:
         \ :\n>  le recours aux bonnes pratiques de s\xE9curit\xE9 informatique ;\n\
         > une analyse de risques syst\xE9matique fond\xE9e sur les retours d\u2019\
         exp\xE9rience des utilisateurs ;\n>  une gestion structur\xE9e des risques\
-        \ formalis\xE9e par une m\xE9thodologie d\xE9di\xE9e."
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:42
+        \ formalis\xE9e par une m\xE9thodologie d\xE9di\xE9e.\nDans ce dernier cas,\
+        \ la m\xE9thode EBIOS r\xE9f\xE9renc\xE9e par l\u2019ANSSI est recommand\xE9\
+        e. Elle permet d\u2019exprimer les besoins de s\xE9curit\xE9, d\u2019identifier\
+        \ les objectifs de s\xE9curit\xE9 et de d\xE9terminer les exigences de s\xE9\
+        curit\xE9."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Carry out a formal risk assessment (strengthened)
+          description: 'Each organization develops within a complex computing environment
+            specific to itself. As such, any position taken or action plan involving
+            the information system security must be considered in light of the risks
+            foreseen by the management. Whether it is organisational or technical
+            measures, their implementation represents a cost for the organization,
+            which needs to ensure that they are able to reduce an identified risk
+            to an acceptable level.
+
+            In the most sensitive cases, the risk analysis may call into question
+            certain previous choices. This may be the case if the probability of an
+            event appearing and its potential consequences prove critical for the
+            organization and there is no preventive action to control it.
+
+            The recommended approach consists, in broad terms, of defining the context,
+            assessing the risks and dealing with them. The risk assessment generally
+            works by considering two areas: the likelihood and the impacts. This is
+            then followed by the creation of a risk treatment plan to be validated
+            by a designated authority at a higher level.
+
+            Three kinds of approach can be considered to control the risks associated
+            with the information system:
+
+            > the recourse to best IT security practices;
+
+            > a systematic risk analysis based on feedback from users;
+
+            > a structured risk management formalised by a dedicated methodology.
+
+            In this last case, the EBIOS method referenced by ANSSI is recommended.
+            It is able to write down security needs, identify the security objectives
+            and determine the security demands'
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:42.r
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:x
-      ref_id: '42'
+      ref_id: 42.R
       name: "Privil\xE9gier l\u2019usage de produits et de services qualifi\xE9s par\
-        \ l'ANSSI"
-      description: "Renforc\xE9 - La qualification prononc\xE9e par l\u2019ANSSI offre\
-        \ des garanties de s\xE9curit\xE9 et de confiance aux acheteurs de solutions\
-        \ list\xE9es dans les catalogues de produits et de prestataires de service\
-        \ qualifi\xE9s que publie l\u2019agence.\nAu-del\xE0 des entit\xE9s soumises\
-        \ \xE0 r\xE9glementation, l\u2019ANSSI encourage plus g\xE9n\xE9ralement l\u2019\
-        ensemble des entreprises et administrations fran\xE7aises \xE0 utiliser des\
-        \ produits qu\u2019elle qualifie, seul gage d\u2019une \xE9tude s\xE9rieuse\
-        \ et approfondie du fonctionnement technique de la solution et de son \xE9\
-        cosyst\xE8me.\nS\u2019agissant des prestataires de service qualifi\xE9s, ce\
-        \ label permet de r\xE9pondre aux enjeux et projets de cybers\xE9curit\xE9\
-        \ pour l\u2019ensemble du tissu \xE9conomique fran\xE7ais que l\u2019ANSSI\
-        \ ne saurait adresser seule. \xC9valu\xE9s sur des crit\xE8res techniques\
-        \ et organisationnels, les prestataires qualifi\xE9s couvrent l\u2019essentiel\
-        \ des m\xE9tiers de la s\xE9curit\xE9 des syst\xE8mes d\u2019information.\
-        \ Ainsi, en fonction de ses besoins et du maillage national, une entit\xE9\
-        \ pourra faire appel \xE0 un Prestataire d\u2019audit de la s\xE9curit\xE9\
-        \ des syst\xE8mes d\u2019information (PASSI), un Prestataire de r\xE9ponse\
-        \ aux incidents de s\xE9curit\xE9 (PRIS), un Prestataire de d\xE9tection des\
-        \ incidents de s\xE9curit\xE9 (PDIS) ou \xE0 un prestataire de service d\u2019\
-        informatique en nuage (SecNumCloud)."
+        \ l'ANSSI (renforc\xE9)"
+      description: "La qualification prononc\xE9e par l\u2019ANSSI offre des garanties\
+        \ de s\xE9curit\xE9 et de confiance aux acheteurs de solutions list\xE9es\
+        \ dans les catalogues de produits et de prestataires de service qualifi\xE9\
+        s que publie l\u2019agence.\nAu-del\xE0 des entit\xE9s soumises \xE0 r\xE9\
+        glementation, l\u2019ANSSI encourage plus g\xE9n\xE9ralement l\u2019ensemble\
+        \ des entreprises et administrations fran\xE7aises \xE0 utiliser des produits\
+        \ qu\u2019elle qualifie, seul gage d\u2019une \xE9tude s\xE9rieuse et approfondie\
+        \ du fonctionnement technique de la solution et de son \xE9cosyst\xE8me.\n\
+        S\u2019agissant des prestataires de service qualifi\xE9s, ce label permet\
+        \ de r\xE9pondre aux enjeux et projets de cybers\xE9curit\xE9 pour l\u2019\
+        ensemble du tissu \xE9conomique fran\xE7ais que l\u2019ANSSI ne saurait adresser\
+        \ seule. \xC9valu\xE9s sur des crit\xE8res techniques et organisationnels,\
+        \ les prestataires qualifi\xE9s couvrent l\u2019essentiel des m\xE9tiers de\
+        \ la s\xE9curit\xE9 des syst\xE8mes d\u2019information. Ainsi, en fonction\
+        \ de ses besoins et du maillage national, une entit\xE9 pourra faire appel\
+        \ \xE0 un Prestataire d\u2019audit de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information (PASSI), un Prestataire de r\xE9ponse aux incidents de s\xE9curit\xE9\
+        \ (PRIS), un Prestataire de d\xE9tection des incidents de s\xE9curit\xE9 (PDIS)\
+        \ ou \xE0 un prestataire de service d\u2019informatique en nuage (SecNumCloud)."
+      implementation_groups:
+      - R
+      translations:
+        en:
+          name: Favour the use of products and services qualified by ANSSI (strengthened)
+          description: 'The qualification delivered by ANSSI offers security and trust
+            guarantees to purchasers of solutions listed in the product catalogues
+            and qualified service providers that the agency publishes.
+
+            Beyond organizations subject to regulation, more generally ANSSI encourages
+            all companies and French administrations to use products that it qualifies;
+            the only proof of a serious and in depth study of the technical functioning
+            of the solution and its ecosystem.
+
+            In terms of qualified service providers, this certification is able to
+            respond to the cybersecurity stakes and projects for the entirety of the
+            French companies that ANSSI could not address on its own. Assessed on
+            technical and organisational criteria, the qualified service providers
+            cover the vast majority of the information system security jobs. Therefore,
+            depending on its needs and the geographical position an organization will
+            be able to call on an Information System Security Audit Service Provider
+            (PASSI), a Security Incident Response Service Provider (PRIS), a Security
+            Incident Detection Service Provider (PDIS) or a Cloud Computing Service
+            Provider (SecNumCloud).'

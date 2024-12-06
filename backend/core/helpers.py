@@ -1049,9 +1049,9 @@ def build_scenario_clusters(risk_assessment: RiskAssessment):
         "created_at"
     ):
         if ri.current_level >= 0:
-            risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.rid)
+            risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:
-            risk_matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid)
+            risk_matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.ref_id)
 
     return {"current": risk_matrix_current, "residual": risk_matrix_residual}
 
