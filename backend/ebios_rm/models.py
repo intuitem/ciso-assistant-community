@@ -208,9 +208,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     risk_origin = models.CharField(
         max_length=32, verbose_name=_("Risk origin"), choices=RiskOrigin.choices
     )
-    target_objective = models.CharField(
-        max_length=200, verbose_name=_("Target objective")
-    )
+    target_objective = models.TextField(verbose_name=_("Target objective"))
     motivation = models.PositiveSmallIntegerField(
         verbose_name=_("Motivation"),
         choices=Motivation.choices,
