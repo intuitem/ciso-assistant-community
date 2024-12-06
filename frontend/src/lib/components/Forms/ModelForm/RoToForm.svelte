@@ -45,7 +45,7 @@
 	cacheLock={cacheLocks['risk_origin']}
 	bind:cachedValue={formDataCache['risk_origin']}
 />
-<TextField
+<TextArea
 	{form}
 	field="target_objective"
 	label={m.targetObjective()}
