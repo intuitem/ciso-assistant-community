@@ -418,9 +418,9 @@ export const roToSchema = z.object({
 	feared_events: z.string().uuid().array(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
-	motivation: z.string().optional(),
-	resources: z.string().optional(),
-	pertinence: z.string().optional(),
+	motivation: z.number().default(0).optional(),
+	resources: z.number().default(0).optional(),
+	pertinence: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
 	is_selected: z.boolean().optional().default(false),
 	justification: z.string().optional()
