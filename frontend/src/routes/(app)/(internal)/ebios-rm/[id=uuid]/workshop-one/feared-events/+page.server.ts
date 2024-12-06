@@ -29,23 +29,18 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const selectOptions: Record<string, any> = {};
 
-	if (model.selectFields) {
-		for (const selectField of model.selectFields) {
-			const url = `${BASE_API_URL}/${model.endpointUrl ?? URLModel}/${
-				selectField.detail ? params.id + '/' : ''
-			}${selectField.field}/`;
-			const response = await fetch(url);
-			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
-			} else {
-				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
-			}
-		}
+	const gravityChoicesEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/gravity/`;
+	const gravityChoicesResponse = await fetch(gravityChoicesEndpoint);
+
+	if (gravityChoicesResponse.ok) {
+		selectOptions['gravity'] = await gravityChoicesResponse.json().then((data) =>
+			Object.entries(data).map(([key, value]) => ({
+				label: value,
+				value: parseInt(key)
+			}))
+		);
+	} else {
+		console.error(`Failed to fetch data for gravity: ${gravityChoicesResponse.statusText}`);
 	}
 
 	model['selectOptions'] = selectOptions;

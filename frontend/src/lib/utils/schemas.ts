@@ -405,7 +405,7 @@ export const ebiosRMSchema = z.object({
 export const fearedEventsSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
-	gravity: z.number().optional(),
+	gravity: z.number().optional().default(-1),
 	is_selected: z.boolean().optional(),
 	justification: z.string().optional(),
 	ebios_rm_study: z.string(),
