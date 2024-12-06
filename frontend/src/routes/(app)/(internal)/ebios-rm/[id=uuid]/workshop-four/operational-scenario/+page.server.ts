@@ -30,6 +30,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const foreignKeys: Record<string, any> = {};
 
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`;
+	const res = await fetch(endpoint);
+	const data = await res.json().then((res) => res.results);
+
 	for (const keyField of foreignKeyFields) {
 		const keyModel = getModelInfo(keyField.urlModel);
 		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
@@ -50,9 +54,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	for (const selectField of selectFields) {
 		if (selectField.detail) continue;
-		const url = model.endpointUrl
-			? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
-			: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
+		const url = `${BASE_API_URL}/ebios-rm/studies/${params.id}/${selectField.field}/`
 		const response = await fetch(url);
 		if (response.ok) {
 			selectOptions[selectField.field] = await response.json().then((data) =>
@@ -67,10 +69,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 
 	model['selectOptions'] = selectOptions;
-
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
 
 	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
 

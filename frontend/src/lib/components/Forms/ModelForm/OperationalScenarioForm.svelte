@@ -6,6 +6,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { getOptions } from '$lib/utils/crud';
 	import TextArea from '../TextArea.svelte';
+	import Select from '../Select.svelte';
 
 	export let form: SuperValidated<any>;
 	export let model: ModelInfo;
@@ -46,13 +47,14 @@
 	field="attack_paths"
 	label={m.attackPaths()}
 />
-<!-- <Select
-    {form}
-    options={data.impactChoices}
-    color_map={impactColorMap}
-    field="residual_impact"
-    label={m.residualImpact()}
-/> -->
+<Select
+	{form}
+	options={model.selectOptions['likelihood']}
+	field="likelihood"
+	label={m.likelihood()}
+	cacheLock={cacheLocks['likelihood']}
+	bind:cachedValue={formDataCache['likelihood']}
+/>
 <Checkbox {form} field="is_selected" label={m.isSelected()} />
 <TextArea
 	{form}
