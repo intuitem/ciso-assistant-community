@@ -710,9 +710,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'attack_paths', urlModel: 'attack_paths' }
 		],
-		selectFields: [
-			{ field: 'likelihood' }
-		]
+		selectFields: [{ field: 'likelihood' }]
 	}
 };
 
