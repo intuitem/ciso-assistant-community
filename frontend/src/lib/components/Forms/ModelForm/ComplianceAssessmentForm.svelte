@@ -38,6 +38,18 @@
 		options={getOptions({ objects: model.foreignKeys['baseline'] })}
 	/>
 {/if}
+{#if initialData.ebios_rm_studies}
+	<AutocompleteSelect
+		{form}
+		field="ebios_rm_studies"
+		multiple
+		cacheLock={cacheLocks['ebios_rm_studies']}
+		bind:cachedValue={formDataCache['ebios_rm_studies']}
+		label={m.ebiosRmStudies()}
+		options={getOptions({ objects: model.foreignKeys['ebios_rm_studies'] })}
+		hidden
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	options={getOptions({

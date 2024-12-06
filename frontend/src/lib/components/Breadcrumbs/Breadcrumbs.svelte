@@ -17,7 +17,7 @@
 		let tokenPath = '';
 		crumbs = tokens.map((t) => {
 			tokenPath += '/' + t;
-			if (t === $breadcrumbObject.id) {
+			if (t === $breadcrumbObject?.id) {
 				if ($breadcrumbObject.name) {
 					t = $breadcrumbObject.name;
 				} else if ($breadcrumbObject.first_name && $breadcrumbObject.last_name) {

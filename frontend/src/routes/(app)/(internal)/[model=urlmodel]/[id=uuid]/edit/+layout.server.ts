@@ -12,11 +12,13 @@ import { zod } from 'sveltekit-superforms/adapters';
 export const load: LayoutServerLoad = async (event) => {
 	const URLModel = event.params.model!;
 	const schema = modelSchema(event.params.model);
-	const objectEndpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
+	const model = getModelInfo(event.params.model!);
+	const objectEndpoint = model.endpointUrl
+		? `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/object/`
+		: `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
 	const object = await event.fetch(objectEndpoint).then((res) => res.json());
 
 	const form = await superValidate(object, zod(schema), { errors: false });
-	const model = getModelInfo(event.params.model!);
 	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
 
@@ -46,7 +48,10 @@ export const load: LayoutServerLoad = async (event) => {
 	if (foreignKeyFields) {
 		for (const keyField of foreignKeyFields) {
 			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			const keyModel = getModelInfo(keyField.urlModel);
+			const url = keyModel.endpointUrl
+				? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
+				: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
 			const response = await event.fetch(url);
 			if (response.ok) {
 				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
@@ -60,7 +65,7 @@ export const load: LayoutServerLoad = async (event) => {
 
 	if (selectFields) {
 		for (const selectField of selectFields) {
-			const url = `${BASE_API_URL}/${event.params.model}/${
+			const url = `${BASE_API_URL}/${model.endpointUrl ?? event.params.model}/${
 				selectField.detail ? event.params.id + '/' : ''
 			}${selectField.field}/`;
 			const response = await event.fetch(url);
@@ -68,7 +73,7 @@ export const load: LayoutServerLoad = async (event) => {
 				selectOptions[selectField.field] = await response.json().then((data) =>
 					Object.entries(data).map(([key, value]) => ({
 						label: value,
-						value: key
+						value: selectField.valueType === 'number' ? parseInt(key) : key
 					}))
 				);
 			} else {
