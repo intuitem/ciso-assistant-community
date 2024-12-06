@@ -393,7 +393,7 @@ export const vulnerabilitySchema = z.object({
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	ref_id: z.string().default(''),
+	ref_id: z.string().optional().default(''),
 	risk_matrix: z.string().optional(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
