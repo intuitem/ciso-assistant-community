@@ -24,7 +24,7 @@
             {% for scenario in context %}
             <tr class="bg-gray-100">
                 <td class="text-lg p-3" colspan="9">
-                    <p class="text-indigo-500 hover:text-indigo-700">{{ scenario.rid }}: {{ scenario.name }}</p>
+                    <p class="text-indigo-500 hover:text-indigo-700">{{ scenario.ref_id }}: {{ scenario.name }}</p>
                     <span class="text-xs text-center p-1 mx-1 rounded"
                     {% if scenario.treatment == 'open' %}
                     style="background-color: #fed7aa"
