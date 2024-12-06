@@ -32,6 +32,20 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(EbiosRMStudy.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=True, name="Get gravity choices")
+    def gravity(self, request, pk):
+        study: EbiosRMStudy = self.get_object()
+        undefined = dict([(-1, "--")])
+        _choices = dict(
+            zip(
+                list(range(0, 64)),
+                [x["name"] for x in study.parsed_matrix["impact"]],
+            )
+        )
+        choices = undefined | _choices
+        return Response(choices)
+
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent

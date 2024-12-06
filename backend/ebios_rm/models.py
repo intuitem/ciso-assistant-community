@@ -101,6 +101,10 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = _("Ebios RM Studies")
         ordering = ["created_at"]
 
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
 
 class FearedEvent(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
