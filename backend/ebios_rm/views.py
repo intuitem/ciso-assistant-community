@@ -138,7 +138,7 @@ class OperationalScenarioViewSet(BaseModelViewSet):
     filterset_fields = [
         "ebios_rm_study",
     ]
-
+    
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
         attack_path = self.get_object()
