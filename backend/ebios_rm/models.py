@@ -237,6 +237,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
         verbose_name = _("RO/TO couple")
         verbose_name_plural = _("RO/TO couples")
         ordering = ["created_at"]
+    
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
@@ -426,3 +427,11 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def risk_matrix(self):
+        return self.ebios_rm_study.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
