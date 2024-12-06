@@ -61,7 +61,6 @@
 		/>
 		<TextField
 			{form}
-			required
 			field="ref_id"
 			label={m.refId()}
 			cacheLock={cacheLocks['ref_id']}
