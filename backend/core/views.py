@@ -575,6 +575,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "authors",
         "risk_matrix",
         "status",
+        "ebios_rm_studies"
     ]
 
     @action(detail=False, name="Risk assessments per status")

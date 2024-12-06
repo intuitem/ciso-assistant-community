@@ -89,10 +89,10 @@
 		],
 		ws5: [
 			{ title: safeTranslate(m.ebiosWs5_1()), status: riskAnalysisCreated ? 'done' : 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs5_2()), status: 'done', href: '#' },
-			{ title: safeTranslate(m.ebiosWs5_3()), status: 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs5_4()), status: 'to_do', href: '#' },
-			{ title: safeTranslate(m.ebiosWs5_5()), status: 'done', href: '#' }
+			{ title: safeTranslate(m.ebiosWs5_2()), status: 'done', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` },
+			{ title: safeTranslate(m.ebiosWs5_3()), status: 'to_do', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` },
+			{ title: safeTranslate(m.ebiosWs5_4()), status: 'to_do', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` },
+			{ title: safeTranslate(m.ebiosWs5_5()), status: 'done', href: `${$page.url.pathname}/workshop-five/risk-analyses?next=${$page.url.pathname}` }
 		]
 	};
 
