@@ -149,6 +149,20 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
 
+    def get_gravity_display(self):
+        if self.gravity < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
+        risk_matrix = self.parsed_matrix
+        return {
+            **risk_matrix["impact"][self.gravity],
+            "value": self.gravity,
+        }
+
 
 class RoTo(AbstractBaseModel, FolderMixin):
     class RiskOrigin(models.TextChoices):
