@@ -850,21 +850,20 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     residual_impact=scenario.residual_impact,
                     strength_of_knowledge=scenario.strength_of_knowledge,
                     justification=scenario.justification,
+                    ref_id=scenario.ref_id,
                 )
 
                 for field in ["applied_controls", "threats", "assets"]:
                     duplicate_related_objects(
                         scenario,
                         duplicate_scenario,
-                        duplicate_risk_assessment.project.folder,
+                        duplicate_risk_assessment.folder,
                         field,
                     )
 
-                if (
-                    duplicate_risk_assessment.project.folder
-                    in [risk_assessment.project.folder]
-                    + risk_assessment.project.folder.sub_folders()
-                ):
+                if duplicate_risk_assessment.folder in [risk_assessment.folder] + [
+                    folder for folder in risk_assessment.folder.get_sub_folders()
+                ]:
                     duplicate_scenario.owner.set(scenario.owner.all())
 
                 duplicate_scenario.save()
