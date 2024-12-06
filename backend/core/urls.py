@@ -66,6 +66,11 @@ router.register(
     FilteringLabelViewSet,
     basename="filtering-labels",
 )
+router.register(
+    r"qualifications",
+    QualificationViewSet,
+    basename="qualifications",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

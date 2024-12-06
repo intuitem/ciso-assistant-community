@@ -114,6 +114,7 @@ interface Field {
 interface SelectField {
 	field: string;
 	detail?: boolean;
+	valueType?: 'string' | 'number';
 }
 
 export interface ModelMapEntry {
@@ -131,6 +132,7 @@ export interface ModelMapEntry {
 	fileFields?: string[];
 	filters?: SelectField[];
 	path?: string;
+	endpointUrl?: string;
 }
 
 type ModelMap = {
@@ -460,7 +462,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'baseline', urlModel: 'compliance-assessments' }
+			{ field: 'baseline', urlModel: 'compliance-assessments' },
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'status' }]
@@ -584,6 +587,42 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'user', urlModel: 'users' }
 		]
+	},
+	qualifications: {
+		name: 'qualification',
+		localName: 'qualification',
+		localNamePlural: 'qualifications',
+		verboseName: 'Qualification',
+		verboseNamePlural: 'Qualifications'
+	},
+	'ebios-rm': {
+		endpointUrl: 'ebios-rm/studies',
+		name: 'ebiosrmstudy',
+		localName: 'ebiosRMstudy',
+		localNamePlural: 'ebiosRMstudy',
+		verboseName: 'Ebios RMstudy',
+		verboseNamePlural: 'Ebios RMstudy',
+		foreignKeyFields: [
+			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+		]
+	},
+	'feared-events': {
+		endpointUrl: 'ebios-rm/feared-events',
+		name: 'fearedevent',
+		localName: 'fearedEvent',
+		localNamePlural: 'fearedEvents',
+		verboseName: 'Feared event',
+		verboseNamePlural: 'Feared events',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'qualifications', urlModel: 'qualifications' }
+		],
+		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]
 	}
 };
 

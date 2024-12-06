@@ -26,6 +26,8 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
+	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
+	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -255,6 +257,10 @@
 		<GeneralSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} />
 	{:else if URLModel === 'filtering-labels'}
 		<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} />
+	{:else if URLModel === 'ebios-rm'}
+		<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} />
+	{:else if URLModel === 'feared-events'}
+		<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		{#if closeModal}

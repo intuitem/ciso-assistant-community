@@ -1,30 +1,29 @@
+import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import {
 	getModelInfo,
 	urlParamModelForeignKeyFields,
-	urlParamModelSelectFields,
-	urlParamModelVerboseName
+	urlParamModelSelectFields
 } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
-import * as m from '$paraglide/messages';
-import { fail, type Actions } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms';
+import type { ModelInfo, urlModel } from '$lib/utils/types';
+import { type Actions } from '@sveltejs/kit';
+import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
+import { listViewFields } from '$lib/utils/table';
+import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
-	const URLModel = params.model!;
-	const createSchema = modelSchema(params.model!);
+	const URLModel = 'ebios-rm';
+	const createSchema = modelSchema(URLModel);
 	const createForm = await superValidate(zod(createSchema));
-	const model: ModelInfo = getModelInfo(params.model!);
-	const foreignKeyFields = urlParamModelForeignKeyFields(params.model);
-	const selectFields = urlParamModelSelectFields(params.model);
+	const model: ModelInfo = getModelInfo(URLModel);
+	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
+	const selectFields = urlParamModelSelectFields(URLModel);
 
 	const foreignKeys: Record<string, any> = {};
 
@@ -45,7 +44,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	for (const selectField of selectFields) {
 		if (selectField.detail) continue;
-		const url = `${BASE_API_URL}/${params.model}/${selectField.field}/`;
+		const url = `${BASE_API_URL}/${URLModel}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
 			selectOptions[selectField.field] = await response.json().then((data) =>
@@ -61,20 +60,40 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	return { createForm, deleteForm, model, URLModel };
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}`;
+	const res = await fetch(endpoint);
+	const data = await res.json().then((res) => res.results);
+
+	const bodyData = tableSourceMapper(data, listViewFields[URLModel as urlModel].body);
+
+	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
+		(obj, key, index) => {
+			obj[key] = listViewFields[URLModel as urlModel].head[index];
+			return obj;
+		},
+		{}
+	);
+
+	const table: TableSource = {
+		head: headData,
+		body: bodyData,
+		meta: data // metaData
+	};
+
+	return { createForm, deleteForm, model, URLModel, table };
 };
 
 export const actions: Actions = {
 	create: async (event) => {
-		const redirectToWrittenObject = Boolean(event.params.model === 'compliance-assessments');
+		// const redirectToWrittenObject = Boolean(event.params.model === 'entity-assessments');
 		return defaultWriteFormAction({
 			event,
-			urlModel: event.params.model as string,
-			action: 'create',
-			redirectToWrittenObject: redirectToWrittenObject
+			urlModel: 'ebios-rm',
+			action: 'create'
+			// redirectToWrittenObject: redirectToWrittenObject
 		});
 	},
 	delete: async (event) => {
-		return defaultDeleteFormAction({ event, urlModel: event.params.model as string });
+		return defaultDeleteFormAction({ event, urlModel: 'ebios-rm' });
 	}
 };

@@ -31,6 +31,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         help_text=_(
             "Risk matrix used as a reference for the study. Defaults to `urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm`"
         ),
+        blank=True,
     )
     assets = models.ManyToManyField(
         Asset,
@@ -100,6 +101,10 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name_plural = _("Ebios RM Studies")
         ordering = ["created_at"]
 
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
 
 class FearedEvent(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
@@ -135,6 +140,28 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def risk_matrix(self):
+        return self.ebios_rm_study.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
+    def get_gravity_display(self):
+        if self.gravity < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
+        risk_matrix = self.parsed_matrix
+        return {
+            **risk_matrix["impact"][self.gravity],
+            "value": self.gravity,
+        }
 
 
 class RoTo(AbstractBaseModel, FolderMixin):

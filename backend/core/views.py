@@ -358,7 +358,13 @@ class AssetViewSet(BaseModelViewSet):
     """
 
     model = Asset
-    filterset_fields = ["folder", "parent_assets", "type", "risk_scenarios"]
+    filterset_fields = [
+        "folder",
+        "parent_assets",
+        "type",
+        "risk_scenarios",
+        "ebios_rm_studies",
+    ]
     search_fields = ["name", "description", "business_value"]
 
     @action(detail=False, name="Get type choices")
@@ -2024,13 +2030,22 @@ class UploadAttachmentView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class QualificationViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows qualifications to be viewed or edited.
+    """
+
+    model = Qualification
+    search_fields = ["name"]
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project", "status"]
+    filterset_fields = ["framework", "project", "status", "ebios_rm_studies"]
     search_fields = ["name", "description", "ref_id"]
     ordering_fields = ["name", "description"]
 

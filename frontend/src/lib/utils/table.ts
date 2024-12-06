@@ -547,5 +547,13 @@ export const listViewFields: ListViewFieldsConfig = {
 	representatives: {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role']
+	},
+	'ebios-rm': {
+		head: ['name', 'description'],
+		body: ['name', 'description']
+	},
+	'feared-events': {
+		head: ['selected', 'assets', 'fearedEvent', 'qualifications', 'gravity'],
+		body: ['is_selected', 'assets', 'description', 'qualifications', 'gravity']
 	}
 };
