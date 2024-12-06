@@ -32,6 +32,14 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
+<Select
+	{form}
+	options={model.selectOptions['gravity']}
+	field="gravity"
+	label={m.gravity()}
+	cacheLock={cacheLocks['gravity']}
+	bind:cachedValue={formDataCache['gravity']}
+/>
 <TextArea
 	{form}
 	field="justification"

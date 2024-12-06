@@ -72,7 +72,7 @@ export const load = (async ({ fetch, params }) => {
 				if (data) {
 					selectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
 						label: value,
-						value: key
+						value: selectField.valueType === 'number' ? parseInt(key) : key
 					}));
 				}
 			})
@@ -98,7 +98,7 @@ export const load = (async ({ fetch, params }) => {
 				if (data) {
 					measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
 						label: value,
-						value: key
+						value: selectField.valueType === 'number' ? parseInt(key) : key
 					}));
 				} else {
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
@@ -169,7 +169,7 @@ export const load = (async ({ fetch, params }) => {
 				if (data) {
 					evidenceSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
 						label: value,
-						value: key
+						value: selectField.valueType === 'number' ? parseInt(key) : key
 					}));
 				}
 			})
