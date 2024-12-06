@@ -419,7 +419,7 @@ export const roToSchema = z.object({
 	risk_origin: z.string(),
 	target_objective: z.string(),
 	motivation: z.string().optional(),
-	ressources: z.string().optional(),
+	resources: z.string().optional(),
 	pertinence: z.string().optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
 	is_selected: z.boolean().optional().default(false),
