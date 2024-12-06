@@ -191,7 +191,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
+			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
+			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
 		selectFields: [{ field: 'status' }],
