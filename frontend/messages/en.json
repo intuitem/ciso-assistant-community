@@ -953,5 +953,12 @@
 	"fairlyRelevant": "Fairly relevant",
 	"highlyRelevant": "Highly relevant",
 	"roTo": "RO/TO",
-	"addRoto": "Add RO/TO couple"
+	"addRoto": "Add RO/TO couple",
+	"organizedCrime": "Organized crime",
+	"terrorist": "Terrorist",
+	"activist": "Activist",
+	"professional": "Professional",
+	"amateur": "Amateur",
+	"avenger": "Avenger",
+	"pathological": "Pathological"
 }
