@@ -21,3 +21,9 @@
 		>
 	</div>
 {/if}
+{#if data.model.name == 'folder'}
+	<div class="card w-full my-12 p-4 bg-white">
+		<div class="text-lg font-bold">Extra</div>
+		<a href={`${data.data.id}/exec-report`} class="text-lg">Generate exec report</a>
+	</div>
+{/if}

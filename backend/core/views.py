@@ -6,6 +6,7 @@ import uuid
 import zipfile
 from datetime import date, datetime, timedelta
 import time
+from django.views.generic import detail
 import pytz
 from typing import Any, Tuple
 from uuid import UUID
@@ -17,7 +18,14 @@ import shutil
 from pathlib import Path
 import humanize
 
-# from icecream import ic
+from icecream import ic
+
+from docx import Document
+from docx.shared import Inches
+import matplotlib.pyplot as plt
+import seaborn as sns
+import io
+import base64
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -1649,6 +1657,28 @@ class FolderViewSet(BaseModelViewSet):
         tree.update({"children": folders_list})
 
         return Response(tree)
+
+    @action(detail=True, methods=["get"])
+    def exec_report(self, request, pk):
+        document = Document()
+        document.add_heading("Sales Performance Report", 0)
+        document.add_heading(f"ID: {pk}", 1)
+
+        document.add_paragraph(
+            "Report generated on: {}".format(now().strftime("%Y-%m-%d %H:%M:%S"))
+        )
+
+        buffer_doc = io.BytesIO()
+        document.save(buffer_doc)
+        buffer_doc.seek(0)
+
+        response = HttpResponse(
+            buffer_doc.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
+        response["Content-Disposition"] = "attachment; filename=sales_report.docx"
+
+        return response
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
