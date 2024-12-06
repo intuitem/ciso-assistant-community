@@ -191,6 +191,14 @@ class ProjectReadSerializer(BaseModelSerializer):
 
 
 class RiskAssessmentWriteSerializer(BaseModelSerializer):
+    ebios_rm_studies = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=EbiosRMStudy.objects.all(),
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
+    
     class Meta:
         model = RiskAssessment
         exclude = ["created_at", "updated_at"]
