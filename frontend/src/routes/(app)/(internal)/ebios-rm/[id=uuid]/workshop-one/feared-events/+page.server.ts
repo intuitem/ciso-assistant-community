@@ -27,6 +27,29 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const model: ModelInfo = getModelInfo(URLModel);
 	const foreignKeyFields = urlParamModelForeignKeyFields(URLModel);
 
+	const selectOptions: Record<string, any> = {};
+
+	if (model.selectFields) {
+		for (const selectField of model.selectFields) {
+			const url = `${BASE_API_URL}/${model.endpointUrl ?? URLModel}/${
+				selectField.detail ? params.id + '/' : ''
+			}${selectField.field}/`;
+			const response = await fetch(url);
+			if (response.ok) {
+				selectOptions[selectField.field] = await response.json().then((data) =>
+					Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: selectField.valueType === 'number' ? parseInt(key) : key
+					}))
+				);
+			} else {
+				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	model['selectOptions'] = selectOptions;
+
 	const foreignKeys: Record<string, any> = {};
 
 	for (const keyField of foreignKeyFields) {
