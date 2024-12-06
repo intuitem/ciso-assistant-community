@@ -933,5 +933,9 @@
 	"gravity": "Gravity",
 	"existingControlsHelper": "What do you currently have to manage this risk",
 	"extraControlsHelper": "What will you do to mitigate this risk",
-	"existingContextHelper": "Description of the existing mitigations (this field will be deprecated soon)"
+	"existingContextHelper": "Description of the existing mitigations (this field will be deprecated soon)",
+	"fearedEvent": "Feared event",
+	"fearedEvents": "Feared events",
+	"isSelected": "Is selected",
+	"ebiosRM": "Ebios RM"
 }
