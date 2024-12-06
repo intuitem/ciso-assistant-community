@@ -31,15 +31,19 @@
 						{#each meta as step, i}
 							{#if step.status == 'done'}
 								<li class="mb-10 ms-6">
-									<a href={step.href} class="hover:text-purple-800">
-										<span
-											class="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white"
-										>
-											<i class="fa-solid fa-check"></i>
-										</span>
-										<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
-										<p class="text-sm">{step.title}</p>
-									</a>
+									{#if createRiskAnalysis && i == 0}
+										<slot name="addRiskAnalysis"></slot>
+									{:else}
+										<a href={step.href} class="hover:text-purple-800">
+											<span
+												class="absolute flex items-center justify-center w-8 h-8 bg-green-200 rounded-full -start-4 ring-4 ring-white"
+											>
+												<i class="fa-solid fa-check"></i>
+											</span>
+											<h3 class="font-medium leading-tight">{m.activity()} {i + 1}</h3>
+											<p class="text-sm">{step.title}</p>
+										</a>
+									{/if}
 								</li>
 							{:else}
 								<li class="mb-10 ms-6">
