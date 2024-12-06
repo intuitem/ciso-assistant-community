@@ -33,9 +33,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	for (const keyField of foreignKeyFields) {
 		const keyModel = getModelInfo(keyField.urlModel);
 		const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-		const url = keyModel.endpointUrl
-			? `${BASE_API_URL}/${keyModel.endpointUrl}/${queryParams}`
-			: `${BASE_API_URL}/${keyModel.urlModel}/${queryParams}`;
+		const url = `${BASE_API_URL}/${keyModel.endpointUrl ?? keyModel.urlModel}/${queryParams}`;
 		const response = await fetch(url);
 		if (response.ok) {
 			foreignKeys[keyField.field] = await response.json().then((data) => data.results);
@@ -50,15 +48,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	for (const selectField of selectFields) {
 		if (selectField.detail) continue;
-		const url = model.endpointUrl
-			? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
-			: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
+		const url = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
 			selectOptions[selectField.field] = await response.json().then((data) =>
 				Object.entries(data).map(([key, value]) => ({
 					label: value,
-					value: key
+					value: selectField.valueType === 'number' ? parseInt(key) : key
 				}))
 			);
 		} else {
