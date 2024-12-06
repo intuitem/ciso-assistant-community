@@ -637,9 +637,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [
 			{ field: 'risk-origin' },
-			{ field: 'motivation' },
-			{ field: 'resources' },
-			{ field: 'pertinence' }
+			{ field: 'motivation', valueType: 'number' },
+			{ field: 'resources', valueType: 'number' },
+			{ field: 'pertinence', valueType: 'number' }
 		]
 	}
 };
