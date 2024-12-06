@@ -11,7 +11,9 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 
 export const loadDetail = async ({ event, model, id }) => {
-	const endpoint = `${BASE_API_URL}/${model.urlModel}/${id}/`;
+	const endpoint = model.endpointUrl
+		? `${BASE_API_URL}/${model.endpointUrl}/${id}/`
+		: `${BASE_API_URL}/${model.urlModel}/${id}/`;
 
 	const res = await event.fetch(endpoint);
 	const data = await res.json();
@@ -107,7 +109,7 @@ export const loadDetail = async ({ event, model, id }) => {
 								selectOptions[selectField.field] = await response.json().then((data) =>
 									Object.entries(data).map(([key, value]) => ({
 										label: value,
-										value: key
+										value: selectField.valueType === 'number' ? parseInt(key) : key
 									}))
 								);
 							} else {
