@@ -709,6 +709,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'attack_paths', urlModel: 'attack_paths' }
+		],
+		selectFields: [
+			{ field: 'likelihood' }
 		]
 	}
 };
