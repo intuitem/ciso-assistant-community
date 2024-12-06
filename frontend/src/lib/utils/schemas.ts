@@ -421,7 +421,7 @@ export const roToSchema = z.object({
 	motivation: z.string().optional(),
 	ressources: z.string().optional(),
 	pertinence: z.string().optional(),
-	activity: z.number().optional().default(0),
+	activity: z.number().min(0).max(4).optional().default(0),
 	is_selected: z.boolean().optional().default(false),
 	justification: z.string().optional()
 });
