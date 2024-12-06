@@ -601,9 +601,8 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         required=False,
         allow_null=True,
     )
-    ebios_rm_studies = serializers.SlugRelatedField(
+    ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
-        slug_field="id",
         queryset=EbiosRMStudy.objects.all(),
         required=False,
         allow_null=True,
