@@ -237,7 +237,6 @@ class RoTo(AbstractBaseModel, FolderMixin):
         verbose_name = _("RO/TO couple")
         verbose_name_plural = _("RO/TO couples")
         ordering = ["created_at"]
-    
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
