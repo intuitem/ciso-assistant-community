@@ -65,6 +65,7 @@
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
 		helpText={m.riskAssessmentMatrixHelpText()}
+		hidden={initialData.risk_matrix}
 	/>
 	<AutocompleteSelect
 		{form}
