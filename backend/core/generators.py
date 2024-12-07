@@ -136,7 +136,7 @@ def plot_spider_chart(data, colors=None, title=None):
     angles += angles[:1]
 
     # Create the plot
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(12, 12))
     ax = plt.subplot(111, polar=True)
 
     plot_colors = colors if colors is not None else default_colors[: len(categories)]
@@ -261,8 +261,8 @@ def gen_audit_context(id, doc, tree):
         "compliance_radar": chart_spider,
         "chart_controls": chart_horizontal_bar,
         "p1_controls": [
-            {"name": "sample", "type": "govern"},
-            {"name": "another", "type": "user"},
+            {"name": "sample1", "description": "do this and that", "type": "process"},
+            {"name": "another2", "type": "technique"},
         ],
     }
 
