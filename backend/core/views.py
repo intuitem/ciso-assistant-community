@@ -2166,7 +2166,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             / "audit_report_template.docx"
         )
         doc = DocxTemplate(template_path)
-        context = gen_audit_context(pk)
+        context = gen_audit_context(pk, doc)
         doc.render(context)
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
