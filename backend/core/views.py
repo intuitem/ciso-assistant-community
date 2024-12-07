@@ -2160,7 +2160,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             / "audit_report_template.docx"
         )
         doc = DocxTemplate(template_path)
-        context = gen_audit_context(pk, doc)
+        _framework = self.get_object().framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+            _framework.max_score,
+        )
+        implementation_groups = self.get_object().selected_implementation_groups
+        filter_graph_by_implementation_groups(tree, implementation_groups)
+        context = gen_audit_context(pk, doc, tree)
         doc.render(context)
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)

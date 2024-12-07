@@ -7,6 +7,7 @@ from docxtpl import InlineImage
 from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
+from icecream import ic
 
 matplotlib.use("Agg")
 
@@ -23,11 +24,9 @@ def plot_horizontal_bar(data, colors=None, title=None):
     Returns:
         io.BytesIO: Buffer containing the horizontal bar chart image
     """
-    # Prepare data
     categories = [item["category"] for item in data]
     values = [item["value"] for item in data]
 
-    # Default color palette
     default_colors = [
         "#2196F3",  # Blue
         "#4CAF50",  # Green
@@ -36,31 +35,17 @@ def plot_horizontal_bar(data, colors=None, title=None):
         "#9C27B0",  # Purple
     ]
 
-    # Create the plot
     plt.figure(figsize=(10, 6))
-
-    # Choose colors
     plot_colors = colors if colors is not None else default_colors[: len(categories)]
-
-    # Create horizontal bar plot
     plt.barh(categories, values, color=plot_colors)
-
-    # Add value labels at the end of each bar
     for i, v in enumerate(values):
         plt.text(v, i, f" {v}", va="center")
 
-    # Customize the plot
-    plt.xlabel("Value")
-    plt.ylabel("Category")
-
-    # Add title if provided
     if title:
         plt.title(title)
 
-    # Adjust layout
     plt.tight_layout()
 
-    # Save the plot
     chart_buffer = io.BytesIO()
     plt.savefig(chart_buffer, format="png", dpi=300)
     chart_buffer.seek(0)
@@ -92,7 +77,6 @@ def plot_donut(data, colors=None):
         "#2196F3",  # Blue for Not Assessed
     ]
 
-    # Use provided colors or fall back to default
     plot_colors = colors if colors is not None else default_colors[: len(values)]
     plt.pie(
         values,
@@ -131,14 +115,11 @@ def plot_spider_chart(data, colors=None, title=None):
     Returns:
         io.BytesIO: Buffer containing the spider chart image
     """
-    # Prepare data
     categories = [item["category"] for item in data]
     values = [item["value"] for item in data]
 
-    # Number of variables
     N = len(categories)
 
-    # Default color palette
     default_colors = [
         "#2196F3",  # Blue
         "#4CAF50",  # Green
@@ -158,10 +139,8 @@ def plot_spider_chart(data, colors=None, title=None):
     plt.figure(figsize=(8, 8))
     ax = plt.subplot(111, polar=True)
 
-    # Choose colors
     plot_colors = colors if colors is not None else default_colors[: len(categories)]
 
-    # Plot data
     ax.plot(angles, values, "o-", linewidth=2, color=plot_colors[0])
     ax.fill(angles, values, alpha=0.25, color=plot_colors[0])
 
@@ -175,7 +154,6 @@ def plot_spider_chart(data, colors=None, title=None):
     # Set y-axis limits (optional, adjust as needed)
     ax.set_ylim(0, max(values) * 1.1)
 
-    # Save the plot
     plt.tight_layout()
     chart_buffer = io.BytesIO()
     plt.savefig(chart_buffer, format="png", dpi=300, bbox_inches="tight")
@@ -185,7 +163,28 @@ def plot_spider_chart(data, colors=None, title=None):
     return chart_buffer
 
 
-def gen_audit_context(id, doc):
+def gen_audit_context(id, doc, tree):
+    def count_category_results(data):
+        # Dictionary to store result counts for top-level nodes
+        category_result_counts = {}
+
+        for node_id, node_data in data.items():
+            # Check if this is a top-level node (no parent URN)
+            if node_data.get("parent_urn") is None:
+                # Initialize result count for this category
+                category_result_counts[node_data["ref_id"]] = {}
+
+                # Aggregate results from assessable children
+                for child_id, child_data in node_data.get("children", {}).items():
+                    if child_data.get("assessable", False):
+                        result = child_data.get("result", "unknown")
+                        category_result_counts[node_data["ref_id"]][result] = (
+                            category_result_counts[node_data["ref_id"]].get(result, 0)
+                            + 1
+                        )
+
+        return category_result_counts
+
     context = dict()
     audit = ComplianceAssessment.objects.get(id=id)
 
@@ -195,6 +194,13 @@ def gen_audit_context(id, doc):
     cnt_per_result = audit.get_requirements_result_count()
     total = sum([res[0] for res in cnt_per_result])
 
+    spider_data = list()
+    result_counts = count_category_results(tree)
+    ic(result_counts)
+    for key, content in tree.items():
+        ic(content["name"])
+        spider_data.append({"category": content["name"], "value": 78})
+
     donut_data = [
         {"category": "Conforme", "value": cnt_per_result[3][0]},
         {"category": "Partiellement conforme", "value": cnt_per_result[1][0]},
@@ -203,18 +209,6 @@ def gen_audit_context(id, doc):
         {"category": "Non évalué", "value": cnt_per_result[0][0]},
     ]
 
-    spider_data = [
-        {"category": "Compliance", "value": 85},
-        {"category": "Risk Management", "value": 70},
-        {"category": "Security Controls", "value": 90},
-        {"category": "Incident Response", "value": 75},
-        {"category": "Policy Adherence", "value": 80},
-        {"category": "Policy Adherence1", "value": 80},
-        {"category": "Policy Adherence2", "value": 80},
-        {"category": "Policy Adherence3", "value": 80},
-        {"category": "Policy Adherence4", "value": 80},
-        {"category": "Policy Adherence5", "value": 80},
-    ]
     custom_colors = ["#2196F3"]
     spider_chart_buffer = plot_spider_chart(
         spider_data,
