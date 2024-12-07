@@ -18,7 +18,6 @@ import shutil
 from pathlib import Path
 import humanize
 
-from icecream import ic
 
 from docx import Document
 from docx.shared import Inches
