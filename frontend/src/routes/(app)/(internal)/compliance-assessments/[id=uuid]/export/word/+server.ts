@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
     error(400, 'Error fetching the Word file');
   }
 
-  const fileName = `audit-${params.id}-${new Date().toISOString()}.docx`;
+  const fileName = `audit-report-${new Date().toISOString()}.docx`;
 
   return new Response(await res.blob(), {
     headers: {

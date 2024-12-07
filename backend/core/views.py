@@ -28,6 +28,7 @@ import io
 import base64
 
 from docxtpl import DocxTemplate
+from .generators import gen_audit_context
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -2157,20 +2158,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def word_report(self, request, pk):
-        document = Document()
-        document.add_heading("Sales Performance Report", 0)
-        document.add_heading(f"ID: {pk}", 1)
-
-        document.add_paragraph(
-            "Report generated on: {}".format(now().strftime("%Y-%m-%d %H:%M:%S"))
+        template_path = (
+            Path(settings.BASE_DIR)
+            / "core"
+            / "templates"
+            / "core"
+            / "audit_report_template.docx"
         )
-
-        document.add_page_break()
-
-        document.add_paragraph("ok then.")
-
+        doc = DocxTemplate(template_path)
+        context = gen_audit_context(pk)
+        doc.render(context)
         buffer_doc = io.BytesIO()
-        document.save(buffer_doc)
+        doc.save(buffer_doc)
         buffer_doc.seek(0)
 
         response = HttpResponse(
