@@ -1,6 +1,5 @@
 import io
 import matplotlib
-from icecream import ic
 from numpy import char
 from .models import *
 from math import ceil
