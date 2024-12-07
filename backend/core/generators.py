@@ -7,7 +7,7 @@ from docxtpl import InlineImage
 from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
-from icecream import ic
+#from icecream import ic
 
 matplotlib.use("Agg")
 
@@ -197,7 +197,7 @@ def gen_audit_context(id, doc, tree):
     result_counts = count_category_results(tree)
     ic(result_counts)
     for key, content in tree.items():
-        ic(content["node_content"])
+#        ic(content["node_content"])
         total = sum(result_counts[content["urn"]].values())
         ok_items = result_counts[content["urn"]].get("compliant", 0) + result_counts[
             content["urn"]
