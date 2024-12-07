@@ -136,7 +136,7 @@ def plot_spider_chart(data, colors=None, title=None):
     angles += angles[:1]
 
     # Create the plot
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(10, 10))
     ax = plt.subplot(111, polar=True)
 
     plot_colors = colors if colors is not None else default_colors[: len(categories)]
@@ -172,15 +172,14 @@ def gen_audit_context(id, doc, tree):
             # Check if this is a top-level node (no parent URN)
             if node_data.get("parent_urn") is None:
                 # Initialize result count for this category
-                category_result_counts[node_data["ref_id"]] = {}
+                category_result_counts[node_data["urn"]] = {}
 
                 # Aggregate results from assessable children
                 for child_id, child_data in node_data.get("children", {}).items():
                     if child_data.get("assessable", False):
                         result = child_data.get("result", "unknown")
-                        category_result_counts[node_data["ref_id"]][result] = (
-                            category_result_counts[node_data["ref_id"]].get(result, 0)
-                            + 1
+                        category_result_counts[node_data["urn"]][result] = (
+                            category_result_counts[node_data["urn"]].get(result, 0) + 1
                         )
 
         return category_result_counts
@@ -198,8 +197,13 @@ def gen_audit_context(id, doc, tree):
     result_counts = count_category_results(tree)
     ic(result_counts)
     for key, content in tree.items():
-        ic(content["name"])
-        spider_data.append({"category": content["name"], "value": 78})
+        ic(content["node_content"])
+        total = sum(result_counts[content["urn"]].values())
+        ok_items = result_counts[content["urn"]].get("compliant", 0) + result_counts[
+            content["urn"]
+        ].get("not_applicable", 0)
+        ok_perc = ceil(ok_items / total * 100) if total > 0 else 0
+        spider_data.append({"category": content["node_content"], "value": ok_perc})
 
     donut_data = [
         {"category": "Conforme", "value": cnt_per_result[3][0]},
