@@ -4,15 +4,15 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, params }) => {
-  const URLModel = 'folders';
-  const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/exec_report/`;
+  const URLModel = 'compliance-assessments';
+  const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/word_report/`;
 
   const res = await fetch(endpoint);
   if (!res.ok) {
-    error(400, 'Error fetching the report file');
+    error(400, 'Error fetching the Word file');
   }
 
-  const fileName = `report-${new Date().toISOString()}.docx`;
+  const fileName = `audit-${params.id}-${new Date().toISOString()}.docx`;
 
   return new Response(await res.blob(), {
     headers: {

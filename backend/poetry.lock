@@ -91,6 +91,20 @@ tests = ["cloudpickle", "hypothesis", "mypy (>=1.11.1)", "pympler", "pytest (>=4
 tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
 
 [[package]]
+name = "babel"
+version = "2.16.0"
+description = "Internationalization utilities"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "babel-2.16.0-py3-none-any.whl", hash = "sha256:368b5b98b37c06b7daf6696391c3240c938b37767d4584413e8438c5c435fa8b"},
+    {file = "babel-2.16.0.tar.gz", hash = "sha256:d1f3554ca26605fe173f3de0c65f750f5a42f924499bf134de6423582298e316"},
+]
+
+[package.extras]
+dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
+
+[[package]]
 name = "brotli"
 version = "1.1.0"
 description = "Python bindings for the Brotli compression library"
@@ -897,6 +911,47 @@ files = [
 
 [package.dependencies]
 django = ">=4.2"
+
+[[package]]
+name = "docxcompose"
+version = "1.4.0"
+description = "Compose .docx documents"
+optional = false
+python-versions = "*"
+files = [
+    {file = "docxcompose-1.4.0.tar.gz", hash = "sha256:bcf2799a0b63c29eb77a3d799a2f28443ae0f69f8691ff3d753f706be515c3e9"},
+]
+
+[package.dependencies]
+babel = "*"
+lxml = "*"
+python-docx = ">=0.8.8"
+setuptools = "*"
+six = "*"
+
+[package.extras]
+test = ["pytest"]
+tests = ["pytest"]
+
+[[package]]
+name = "docxtpl"
+version = "0.19.0"
+description = "Python docx template engine"
+optional = false
+python-versions = "*"
+files = [
+    {file = "docxtpl-0.19.0-py2.py3-none-any.whl", hash = "sha256:0daa8d587262a8de993aec5cef1e9a9f32a55d3dd4bd27333d8b7ad72884d536"},
+    {file = "docxtpl-0.19.0.tar.gz", hash = "sha256:9cbacfe58ecf9eb481f28f60043c200f3e02205c0f41d710328e2558acbefba9"},
+]
+
+[package.dependencies]
+docxcompose = "*"
+jinja2 = "*"
+lxml = "*"
+python-docx = ">=1.1.1"
+
+[package.extras]
+docs = ["Sphinx", "sphinxcontrib-napoleon"]
 
 [[package]]
 name = "drf-spectacular"
@@ -2551,6 +2606,26 @@ docs = ["ipykernel", "nbconvert", "numpydoc", "pydata_sphinx_theme (==0.10.0rc2)
 stats = ["scipy (>=1.7)", "statsmodels (>=0.12)"]
 
 [[package]]
+name = "setuptools"
+version = "75.6.0"
+description = "Easily download, build, install, upgrade, and uninstall Python packages"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "setuptools-75.6.0-py3-none-any.whl", hash = "sha256:ce74b49e8f7110f9bf04883b730f4765b774ef3ef28f722cce7c273d253aaf7d"},
+    {file = "setuptools-75.6.0.tar.gz", hash = "sha256:8199222558df7c86216af4f84c30e9b34a61d8ba19366cc914424cdbd28252f6"},
+]
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1)", "ruff (>=0.7.0)"]
+core = ["importlib_metadata (>=6)", "jaraco.collections", "jaraco.functools (>=4)", "jaraco.text (>=3.7)", "more_itertools", "more_itertools (>=8.8)", "packaging", "packaging (>=24.2)", "platformdirs (>=4.2.2)", "tomli (>=2.0.1)", "wheel (>=0.43.0)"]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier", "towncrier (<24.7)"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "jaraco.test (>=5.5)", "packaging (>=24.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-home (>=0.5)", "pytest-perf", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel (>=0.44.0)"]
+type = ["importlib_metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (>=1.12,<1.14)", "pytest-mypy"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -2898,4 +2973,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "5302e9fc356d4756a2701d866f964b177a80587878fcccd94e9bc4e28e8142d0"
+content-hash = "a332985836fd6a2bb50ab398adb8f266b57cd8ba27d2d1d0f62eca28d48896ba"
