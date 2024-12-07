@@ -19,12 +19,7 @@ from pathlib import Path
 import humanize
 
 
-from docx import Document
-from docx.shared import Inches
-import matplotlib.pyplot as plt
-import seaborn as sns
 import io
-import base64
 
 from docxtpl import DocxTemplate
 from .generators import gen_audit_context
