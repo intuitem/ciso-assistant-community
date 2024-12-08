@@ -7,7 +7,9 @@ from docxtpl import InlineImage
 from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
-#from icecream import ic
+
+# from icecream import ic
+from django.db.models import Count
 
 matplotlib.use("Agg")
 
@@ -24,6 +26,8 @@ def plot_horizontal_bar(data, colors=None, title=None):
     Returns:
         io.BytesIO: Buffer containing the horizontal bar chart image
     """
+    plt.close("all")
+
     categories = [item["category"] for item in data]
     values = [item["value"] for item in data]
 
@@ -64,6 +68,8 @@ def plot_donut(data, colors=None):
     Returns:
         io.BytesIO: Buffer containing the donut chart image
     """
+    plt.close("all")
+
     plt.figure(figsize=(10, 6))
 
     values = [item["value"] for item in data]
@@ -115,6 +121,8 @@ def plot_spider_chart(data, colors=None, title=None):
     Returns:
         io.BytesIO: Buffer containing the spider chart image
     """
+    plt.close("all")
+
     categories = [item["category"] for item in data]
     values = [item["value"] for item in data]
 
@@ -190,20 +198,19 @@ def gen_audit_context(id, doc, tree):
     authors = ", ".join([a.email for a in audit.authors.all()])
     reviewers = ", ".join([a.email for a in audit.reviewers.all()])
 
-    cnt_per_result = audit.get_requirements_result_count()
-    total = sum([res[0] for res in cnt_per_result])
-
     spider_data = list()
     result_counts = count_category_results(tree)
-    ic(result_counts)
+
     for key, content in tree.items():
-#        ic(content["node_content"])
         total = sum(result_counts[content["urn"]].values())
         ok_items = result_counts[content["urn"]].get("compliant", 0) + result_counts[
             content["urn"]
         ].get("not_applicable", 0)
         ok_perc = ceil(ok_items / total * 100) if total > 0 else 0
         spider_data.append({"category": content["node_content"], "value": ok_perc})
+
+    cnt_per_result = audit.get_requirements_result_count()
+    total = sum([res[0] for res in cnt_per_result])
 
     donut_data = [
         {"category": "Conforme", "value": cnt_per_result[3][0]},
@@ -218,32 +225,48 @@ def gen_audit_context(id, doc, tree):
         spider_data,
         colors=custom_colors,
     )
-    horizontal_bar_data = [
-        {"category": "--", "value": 85},
-        {"category": "A faire", "value": 70},
-        {"category": "En cours", "value": 90},
-        {"category": "Bloquées", "value": 90},
-        {"category": "Actives", "value": 75},
-        {"category": "Obsolètes", "value": 80},
-    ]
 
-    # Custom color (optional)
-    custom_colors = [
-        "#1976D2",  # Deep Blue
-        "#388E3C",  # Green
-        "#FFA000",  # Amber
-        "#D32F2F",  # Red
-        "#7B1FA2",  # Purple
-    ]
-
-    horizontal_bar_buffer = plot_horizontal_bar(
-        horizontal_bar_data, colors=custom_colors
+    requirement_assessments_objects = audit.get_requirement_assessments(
+        include_non_assessable=True
     )
+    applied_controls = AppliedControl.objects.filter(
+        requirement_assessments__in=requirement_assessments_objects
+    ).distinct()
+    ac_total = applied_controls.count()
+    status_cnt = applied_controls.values("status").annotate(count=Count("id"))
+    ac_chart_data = [
+        {"category": item["status"], "value": item["count"]} for item in status_cnt
+    ]
+    p1_controls = list()
+    for ac in applied_controls.filter(priority=1):
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        p1_controls.append(
+            {
+                "name": ac.name,
+                "description": ac.description,
+                "status": ac.status,
+                "category": ac.category,
+                "coverage": requirements_count,
+            }
+        )
 
-    # Create InlineImage for the document
+    custom_colors = [
+        "#CCC",
+        "#46D39A",
+        "#E55759",
+        "#392F5A",
+        "#F4D06F",
+        "#BFDBFE",
+    ]
+    hbar_buffer = plot_horizontal_bar(ac_chart_data, colors=custom_colors)
+
     res_donut = InlineImage(doc, plot_donut(donut_data), width=Cm(15))
     chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
-    chart_horizontal_bar = InlineImage(doc, horizontal_bar_buffer, width=Cm(15))
+    ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
 
     context = {
         "audit": audit,
@@ -259,11 +282,9 @@ def gen_audit_context(id, doc, tree):
         },
         "compliance_donut": res_donut,
         "compliance_radar": chart_spider,
-        "chart_controls": chart_horizontal_bar,
-        "p1_controls": [
-            {"name": "sample1", "description": "do this and that", "type": "process"},
-            {"name": "another2", "type": "technique"},
-        ],
+        "chart_controls": ac_chart,
+        "p1_controls": p1_controls,
+        "ac_count": ac_total,
     }
 
     return context
