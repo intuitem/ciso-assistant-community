@@ -18,6 +18,8 @@ import shutil
 from pathlib import Path
 import humanize
 
+from django.http import StreamingHttpResponse
+from wsgiref.util import FileWrapper
 
 import io
 
@@ -2176,8 +2178,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         doc.save(buffer_doc)
         buffer_doc.seek(0)
 
-        response = HttpResponse(
-            buffer_doc.getvalue(),
+        response = StreamingHttpResponse(
+            FileWrapper(buffer_doc),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
         response["Content-Disposition"] = "attachment; filename=sales_report.docx"
