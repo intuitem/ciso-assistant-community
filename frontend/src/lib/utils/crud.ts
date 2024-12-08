@@ -623,6 +623,24 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		selectFields: [{ field: 'gravity', valueType: 'number', detail: true }]
+	},
+	'ro-to': {
+		endpointUrl: 'ebios-rm/ro-to',
+		name: 'roto',
+		localName: 'roto',
+		localNamePlural: 'roto',
+		verboseName: 'Ro to',
+		verboseNamePlural: 'Ro to',
+		foreignKeyFields: [
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'feared_events', urlModel: 'feared-events' }
+		],
+		selectFields: [
+			{ field: 'risk-origin' },
+			{ field: 'motivation', valueType: 'number' },
+			{ field: 'resources', valueType: 'number' },
+			{ field: 'pertinence', valueType: 'number' }
+		]
 	}
 };
 

@@ -52,7 +52,8 @@ export const URL_MODEL = [
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
-	'feared-events'
+	'feared-events',
+	'ro-to'
 	// 'ebios-rm',
 ] as const;
 
