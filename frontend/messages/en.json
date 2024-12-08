@@ -260,6 +260,7 @@
 	"plan": "Plan",
 	"asPDF": "as PDF",
 	"asCSV": "as CSV",
+	"asWord": "as Word",
 	"draft": "Draft",
 	"riskMatrixView": "Risk matrix view",
 	"currentInMatrixView": "Current",

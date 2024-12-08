@@ -6,6 +6,7 @@ import uuid
 import zipfile
 from datetime import date, datetime, timedelta
 import time
+from django.views.generic import detail
 import pytz
 from typing import Any, Tuple
 from uuid import UUID
@@ -17,7 +18,13 @@ import shutil
 from pathlib import Path
 import humanize
 
-# from icecream import ic
+from django.http import StreamingHttpResponse
+from wsgiref.util import FileWrapper
+
+import io
+
+from docxtpl import DocxTemplate
+from .generators import gen_audit_context
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -2144,6 +2151,40 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
+    @action(detail=True, methods=["get"])
+    def word_report(self, request, pk):
+        template_path = (
+            Path(settings.BASE_DIR)
+            / "core"
+            / "templates"
+            / "core"
+            / "audit_report_template.docx"
+        )
+        doc = DocxTemplate(template_path)
+        _framework = self.get_object().framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+            _framework.max_score,
+        )
+        implementation_groups = self.get_object().selected_implementation_groups
+        filter_graph_by_implementation_groups(tree, implementation_groups)
+        context = gen_audit_context(pk, doc, tree)
+        doc.render(context)
+        buffer_doc = io.BytesIO()
+        doc.save(buffer_doc)
+        buffer_doc.seek(0)
+
+        response = StreamingHttpResponse(
+            FileWrapper(buffer_doc),
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
+        response["Content-Disposition"] = "attachment; filename=sales_report.docx"
+
+        return response
 
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
