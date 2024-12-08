@@ -273,7 +273,7 @@ def gen_audit_context(id, doc, tree):
     res_donut = InlineImage(doc, plot_donut(donut_data), width=Cm(15))
     chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
-
+    IGs = ", ".join(audit.get_selected_implementation_groups())
     context = {
         "audit": audit,
         "date": now().strftime("%d/%m/%Y"),
@@ -292,6 +292,7 @@ def gen_audit_context(id, doc, tree):
         "chart_controls": ac_chart,
         "p1_controls": p1_controls,
         "ac_count": ac_total,
+        "igs": IGs,
     }
 
     return context
