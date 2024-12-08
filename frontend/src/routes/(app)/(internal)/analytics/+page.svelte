@@ -148,6 +148,7 @@
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 						emphasis={true}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.controls.active}
@@ -155,6 +156,7 @@
 						href="/applied-controls/?status=active"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.controls.deprecated}
@@ -162,6 +164,7 @@
 						href="/applied-controls/?status=deprecated"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.controls.to_do}
@@ -169,8 +172,9 @@
 						href="/applied-controls/?status=to_do"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
-					<div class="h-80 col-span-2 row-span-2 bg-white">
+					<div class="h-80 col-span-6 lg:col-span-2 row-span-2 bg-white">
 						<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 					</div>
 					<Card
@@ -179,6 +183,7 @@
 						href="/applied-controls/?status=in_progress"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.controls.on_hold}
@@ -186,6 +191,7 @@
 						href="/applied-controls/?status=on_hold"
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.controls.p1}
@@ -194,6 +200,7 @@
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 						emphasis={true}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.controls.eta_missed}
@@ -202,8 +209,9 @@
 						icon="fa-solid fa-shield-halved"
 						section={m.sumpageSectionControls()}
 						emphasis={true}
+						customClass="col-span-3 lg:col-span-1"
 					/>
-					<div class="col-span-4 row-span-4 bg-white h-96">
+					<div class="col-span-6 lg:col-span-4 row-span-4 bg-white h-96">
 						<StackedBarsNormalized
 							names={metrics.audits_stats.names}
 							data={metrics.audits_stats.data}
@@ -218,6 +226,7 @@
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 						emphasis={true}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<div></div>
 					<Card
@@ -227,6 +236,7 @@
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
 						emphasis={true}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 
 					<Card
@@ -235,6 +245,7 @@
 						href="/compliance-assessments/"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.compliance.non_compliant_items}
@@ -242,6 +253,7 @@
 						href="#"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.compliance.evidences}
@@ -249,11 +261,12 @@
 						href="/evidences/"
 						icon="fa-solid fa-list-check"
 						section={m.sumpageSectionCompliance()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<div class=""></div>
 					<div class=""></div>
 					<!---->
-					<div class=" col-span-2 row-span-2 h-80 bg-white">
+					<div class="col-span-6 lg:col-span-2 row-span-2 h-80 bg-white">
 						<HalfDonutChart
 							name="current_h"
 							title={m.sumpageTitleCurrentRisks()}
@@ -268,6 +281,7 @@
 						emphasis={true}
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
 						count={metrics.risk.scenarios}
@@ -275,8 +289,9 @@
 						href="/risk-scenarios/"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
-					<div class=" col-span-2 row-span-2 bg-white">
+					<div class="col-span-6 lg:col-span-2 row-span-2 h-80 bg-white">
 						<HalfDonutChart
 							name="residual_h"
 							title={m.sumpageTitleResidualRisks()}
@@ -290,6 +305,7 @@
 						href="/analytics?tab=2"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<!---->
 					<Card
@@ -298,13 +314,16 @@
 						href="/risk-acceptances"
 						icon="fa-solid fa-biohazard"
 						section={m.sumpageSectionRisk()}
+						customClass="col-span-3 lg:col-span-1"
 					/>
 					<div class=""></div>
 				</section>
 			{:else if tabSet === 1}
 				<section id="stats">
 					<span class="text-xl font-extrabold">{m.statistics()}</span>
-					<div class="flex justify-between space-x-4">
+					<div
+						class="flex justify-between flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4"
+					>
 						<CounterCard
 							count={counters.domains}
 							label={m.domains()}
@@ -344,7 +363,9 @@
 					</div>
 				</section>
 				<section class="space-y-4">
-					<div class="flex flex-row space-x-4 h-48 text-sm whitespace-nowrap">
+					<div
+						class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 h-96 lg:h-48 text-sm whitespace-nowrap"
+					>
 						<BarChart
 							classesContainer="flex-1 card p-4 bg-white"
 							name="complianceAssessmentsPerStatus"
@@ -367,7 +388,9 @@
 							)}
 						/>
 					</div>
-					<div class="flex flex-row space-x-4 h-48 text-sm whitespace-nowrap">
+					<div
+						class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 h-96 lg:h-48 text-sm whitespace-nowrap"
+					>
 						<BarChart
 							classesContainer="flex-1 card p-4 bg-white"
 							name="riskAssessmentsPerStatus"
@@ -452,8 +475,8 @@
 							<p class="">{m.noThreatsMapped()}</p>
 						</div>
 					{/if}
-					<div class="flex">
-						<div class="h-96 flex-1">
+					<div class="flex flex-wrap lg:flex-nowrap">
+						<div class="h-96 flex-col grow lg:flex-1">
 							<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 							<DonutChart
@@ -463,7 +486,7 @@
 								colors={data.risks_count_per_level.current.map((object) => object.color)}
 							/>
 						</div>
-						<div class="h-96 flex-1">
+						<div class="h-96 flex-col grow lg:flex-1">
 							<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 							<DonutChart
@@ -489,12 +512,16 @@
 					{#each data.projects as project}
 						<div class="flex flex-col items-center">
 							{#if project.compliance_assessments && project.compliance_assessments.length > 0}
-								<div class="flex flex-row space-x-2 w-1/2 justify-between items-center">
+								<div
+									class="flex flex-col lg:flex-row lg:space-x-2 w-full mb-2 lg:mb-0 lg:w-1/2 justify-between items-center"
+								>
 									<a
 										class="text-xl font-bold mb-1 hover:underline text-primary-600"
 										href="/projects/{project.id}">{project.folder.str}/{project.name}</a
 									>
-									<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
+									<div
+										class="flex w-full flex-row lg:flex-1 bg-gray-200 rounded-full overflow-hidden h-4 grow lg:shrink"
+									>
 										{#each project.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 											<div
 												class="flex flex-col justify-center overflow-hidden text-black text-xs text-center"
@@ -508,8 +535,10 @@
 							{/if}
 
 							{#each project.compliance_assessments as compliance_assessment}
-								<div class="card w-full bg-white flex flex-row mx-8 p-4 relative">
-									<div class="w-1/5 flex flex-col space-y-2">
+								<div
+									class="card w-full bg-white flex flex-row mx-8 p-4 relative flex-wrap lg:flex-nowrap"
+								>
+									<div class="w-full lg:w-1/5 flex flex-col space-y-2">
 										<div>
 											<p class="text-sm font-semibold">{m.name()}</p>
 											<a class="anchor" href="compliance-assessments/{compliance_assessment.id}"
@@ -538,23 +567,23 @@
 											>
 										</div>
 									{/if}
-									<div class="w-3/5 h-32">
+									<div class="w-full lg:w-3/5 h-40 lg:h-32">
 										<DonutChart
 											s_label={m.complianceAssessments()}
 											name={compliance_assessment.name + '_donut'}
 											values={compliance_assessment.donut.result.values}
 										/>
 									</div>
-									<div class="absolute top-2 right-4 mt-2 space-x-1">
-										<div class="flex flex-col space-y-1">
+									<div class="lg:absolute lg:top-2 lg:right-4 mt-2 space-x-1">
+										<div class="flex flex-row lg:flex-col space-x-1 lg:space-x-0 lg:space-y-1">
 											<a
 												href="/compliance-assessments/{compliance_assessment.id}/edit?next=/analytics?tab=3"
-												class="btn variant-filled-primary"
+												class="btn variant-filled-primary w-1/2 lg:w-full"
 												><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 											</a>
 											<a
 												href="/compliance-assessments/{compliance_assessment.id}/export"
-												class="btn variant-filled-primary"
+												class="btn variant-filled-primary w-1/2 lg:w-full"
 												><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
 											</a>
 										</div>
