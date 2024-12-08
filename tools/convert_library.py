@@ -1,5 +1,11 @@
 """
 simple script to transform an Excel file to a yaml library for CISO assistant
+Usage: python convert_library [--compat] your_excel_file
+
+The compat flag is recommended only to maintain libraries that have been generated prior or up to release 1.9.20.
+Without the compat flag, URNs generated for nodes without ref_id are constructed using the parent_urn.
+This generated urns that are much simpler to understand and maintain if required.
+
 Conventions:
     | means a cell separation, <> means empty cell
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
