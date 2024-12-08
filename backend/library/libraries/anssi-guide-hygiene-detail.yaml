@@ -37,7 +37,7 @@ objects:
         mes d\u2019information"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1
@@ -60,70 +60,72 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.educ
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       - urn:intuitem:risk:function:doc-pol:doc.educ_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node5
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: "la l\xE9gislation en vigueur ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 la l\xE9gislation en vigueur ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.legal
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node6
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: les principaux risques et menaces ;
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 les principaux risques et menaces ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.threat
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node7
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: "le maintien en condition de s\xE9curit\xE9 ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 le maintien en condition de s\xE9curit\xE9 ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.mcs
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node8
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: "l\u2019authentification et le contr\xF4le d\u2019acc\xE8s ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 l\u2019authentification et le contr\xF4le d\u2019acc\xE8\
+        s ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.iam
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node9
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:5
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: "le param\xE9trage fin et le durcissement des syst\xE8mes ; "
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 le param\xE9trage fin et le durcissement des syst\xE8mes\
+        \ ; "
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.hardening
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node10
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:6
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: "le cloisonnement r\xE9seau ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 le cloisonnement r\xE9seau ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.network_security
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node11
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1:7
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node4
-      description: 'et la journalisation. '
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:1
+      description: "\u2022 et la journalisation. "
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:train.logging
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node12
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1
@@ -136,7 +138,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node13
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:1
@@ -158,7 +160,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node15
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
@@ -175,7 +177,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.educ
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       - urn:intuitem:risk:function:doc-pol:doc.educ_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node16
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
@@ -187,60 +189,60 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node17
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2:1
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
-      description: "les objectifs et enjeux que rencontre l\u2019entit\xE9 en mati\xE8\
-        re de s\xE9curit\xE9 des syst\xE8mes d\u2019information ;"
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2
+      description: "\u2022 les objectifs et enjeux que rencontre l\u2019entit\xE9\
+        \ en mati\xE8re de s\xE9curit\xE9 des syst\xE8mes d\u2019information ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node18
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2:2
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
-      description: "les informations consid\xE9r\xE9es comme sensibles ;\n"
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2
+      description: "\u2022 les informations consid\xE9r\xE9es comme sensibles ;\n"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node19
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2:3
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
-      description: "les r\xE9glementations et obligations l\xE9gales ;"
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2
+      description: "\u2022 les r\xE9glementations et obligations l\xE9gales ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node20
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2:4
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
-      description: "les r\xE8gles et consignes de s\xE9curit\xE9 r\xE9gissant l\u2019\
-        activit\xE9 quotidienne : respect de la politique de s\xE9curit\xE9, non-connexion\
-        \ d\u2019\xE9quipements personnels au r\xE9seau de l\u2019entit\xE9, non-divulgation\
-        \ de mots de passe \xE0 un tiers, non-r\xE9utilisation de mots de passe professionnels\
-        \ dans la sph\xE8re priv\xE9e et inversement, signalement d\u2019\xE9v\xE9\
-        nements suspects, etc. ;"
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2
+      description: "\u2022 les r\xE8gles et consignes de s\xE9curit\xE9 r\xE9gissant\
+        \ l\u2019activit\xE9 quotidienne : respect de la politique de s\xE9curit\xE9\
+        , non-connexion d\u2019\xE9quipements personnels au r\xE9seau de l\u2019entit\xE9\
+        , non-divulgation de mots de passe \xE0 un tiers, non-r\xE9utilisation de\
+        \ mots de passe professionnels dans la sph\xE8re priv\xE9e et inversement,\
+        \ signalement d\u2019\xE9v\xE9nements suspects, etc. ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node21
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2:5
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
-      description: "les moyens disponibles et participant \xE0 la s\xE9curit\xE9 du\
-        \ syst\xE8me : verrouillage syst\xE9matique de la session lorsque l\u2019\
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:2
+      description: "\u2022 les moyens disponibles et participant \xE0 la s\xE9curit\xE9\
+        \ du syst\xE8me : verrouillage syst\xE9matique de la session lorsque l\u2019\
         utilisateur quitte son poste, outil de protection des mots de passe, etc. "
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node22
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:2
@@ -262,7 +264,7 @@ objects:
       name: "Ma\xEEtriser les risques de l\u2019infog\xE9rance"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node24
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3
@@ -278,7 +280,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.supplier
       - urn:intuitem:risk:function:doc-pol:doc.risk_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node25
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3
@@ -289,30 +291,30 @@ objects:
         \ :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node26
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:2:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node25
-      description: "d\u2019\xE9tudier attentivement les conditions des offres, la\
-        \ possibilit\xE9 de les adapter \xE0 des besoins sp\xE9cifiques et les limites\
-        \ de responsabilit\xE9 du prestataire ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:2
+      description: "\u2022 d\u2019\xE9tudier attentivement les conditions des offres,\
+        \ la possibilit\xE9 de les adapter \xE0 des besoins sp\xE9cifiques et les\
+        \ limites de responsabilit\xE9 du prestataire ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.supplier
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node27
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:2:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node25
-      description: "d\u2019imposer une liste d\u2019exigences pr\xE9cises au prestataire\
-        \ : r\xE9versibilit\xE9 du contrat, r\xE9alisation d\u2019audits, sauvegarde\
-        \ et restitution des donn\xE9es dans un format ouvert normalis\xE9, maintien\
-        \ \xE0 niveau de la s\xE9curit\xE9 dans le temps, etc."
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:2
+      description: "\u2022 d\u2019imposer une liste d\u2019exigences pr\xE9cises au\
+        \ prestataire : r\xE9versibilit\xE9 du contrat, r\xE9alisation d\u2019audits,\
+        \ sauvegarde et restitution des donn\xE9es dans un format ouvert normalis\xE9\
+        , maintien \xE0 niveau de la s\xE9curit\xE9 dans le temps, etc."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.supplier
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node28
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3
@@ -326,7 +328,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.sap
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node29
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:3
@@ -354,7 +356,7 @@ objects:
         \ un sch\xE9ma du r\xE9seau"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node32
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4
@@ -369,7 +371,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.asset
       - urn:intuitem:risk:function:doc-pol:pol.classif
       - urn:intuitem:risk:function:doc-pol:doc.asset_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node33
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4
@@ -384,7 +386,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.proc_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node34
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4
@@ -398,7 +400,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.is_map
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node35
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:4
@@ -417,7 +419,7 @@ objects:
         s et le maintenir \xE0 jour"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node37
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5
@@ -433,44 +435,44 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node38
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node37
-      description: "les utilisateurs ayant un compte administrateur ou des droits\
-        \ sup\xE9rieurs \xE0 ceux d\u2019un utilisateur standard sur le syst\xE8me\
-        \ d\u2019information ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1
+      description: "\u2022 les utilisateurs ayant un compte administrateur ou des\
+        \ droits sup\xE9rieurs \xE0 ceux d\u2019un utilisateur standard sur le syst\xE8\
+        me d\u2019information ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node39
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node37
-      description: "les utilisateurs disposant de suffisamment de droits pour acc\xE9\
-        der aux r\xE9pertoires de travail des responsables ou de l\u2019ensemble des\
-        \ utilisateurs ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1
+      description: "\u2022 les utilisateurs disposant de suffisamment de droits pour\
+        \ acc\xE9der aux r\xE9pertoires de travail des responsables ou de l\u2019\
+        ensemble des utilisateurs ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node40
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node37
-      description: "les utilisateurs utilisant un poste non administr\xE9 par le service\
-        \ informatique et qui ne fait pas l\u2019objet de mesures de s\xE9curit\xE9\
-        \ \xE9dict\xE9es par la politique de s\xE9curit\xE9 g\xE9n\xE9rale de l\u2019\
-        entit\xE9. "
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:1
+      description: "\u2022 les utilisateurs utilisant un poste non administr\xE9 par\
+        \ le service informatique et qui ne fait pas l\u2019objet de mesures de s\xE9\
+        curit\xE9 \xE9dict\xE9es par la politique de s\xE9curit\xE9 g\xE9n\xE9rale\
+        \ de l\u2019entit\xE9. "
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node41
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5
@@ -484,7 +486,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.recertification
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node42
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:5
@@ -506,7 +508,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node44
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6
@@ -521,52 +523,52 @@ objects:
         \ ressources humaines. Elles doivent au minimum prendre en compte :"
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node45
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node44
-      description: "la cr\xE9ation et la suppression des comptes informatiques et\
-        \ bo\xEEtes aux lettres associ\xE9es ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1
+      description: "\u2022 la cr\xE9ation et la suppression des comptes informatiques\
+        \ et bo\xEEtes aux lettres associ\xE9es ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:proc.hr_security
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node46
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node44
-      description: " la gestion des acc\xE8s physiques aux locaux (attribution, restitution\
-        \ des badges et des cl\xE9s, etc.) ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1
+      description: "\u2022 la gestion des acc\xE8s physiques aux locaux (attribution,\
+        \ restitution des badges et des cl\xE9s, etc.) ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.physical_security
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node47
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node44
-      description: " l\u2019affectation des \xE9quipements mobiles (ordinateur portable,\
-        \ cl\xE9 USB, disque dur, ordiphone, etc.) ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1
+      description: "\u2022 l\u2019affectation des \xE9quipements mobiles (ordinateur\
+        \ portable, cl\xE9 USB, disque dur, ordiphone, etc.) ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node48
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1:4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node44
-      description: "la gestion des documents et informations sensibles (transfert\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:1
+      description: "\u2022 la gestion des documents et informations sensibles (transfert\
         \ de mots de passe, changement des mots de passe ou des codes sur les syst\xE8\
         mes existants)."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.classif
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node49
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6:2
       assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node44
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:6
       description: "Les proc\xE9dures doivent \xEAtre formalis\xE9es et mises \xE0\
         \ jour en fonction du contexte."
       implementation_groups:
@@ -583,7 +585,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node51
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7
@@ -600,7 +602,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node52
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7
@@ -614,7 +616,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.accept
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node53
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7
@@ -626,7 +628,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node54
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:7
@@ -655,7 +657,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node57
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8
@@ -667,7 +669,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node58
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8
@@ -684,7 +686,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node59
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8
@@ -703,7 +705,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node60
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:8
@@ -726,7 +728,7 @@ objects:
         \ d\u2019information"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node62
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9
@@ -740,39 +742,39 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.asset_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node63
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node62
-      description: "de d\xE9finir quelle population peut y avoir acc\xE8s ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1
+      description: "\u2022 de d\xE9finir quelle population peut y avoir acc\xE8s ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node64
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node62
-      description: "de contr\xF4ler strictement son acc\xE8s, en s\u2019assurant que\
-        \ les utilisateurs sont authentifi\xE9s et font partie de la population cibl\xE9\
-        e ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1
+      description: "\u2022 de contr\xF4ler strictement son acc\xE8s, en s\u2019assurant\
+        \ que les utilisateurs sont authentifi\xE9s et font partie de la population\
+        \ cibl\xE9e ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:proc.pam
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node65
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node62
-      description: "d\u2019\xE9viter sa dispersion et sa duplication \xE0 des endroits\
-        \ non ma\xEEtris\xE9s ou soumis \xE0 un contr\xF4le d\u2019acc\xE8s moins\
-        \ strict."
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:1
+      description: "\u2022 d\u2019\xE9viter sa dispersion et sa duplication \xE0 des\
+        \ endroits non ma\xEEtris\xE9s ou soumis \xE0 un contr\xF4le d\u2019acc\xE8\
+        s moins strict."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.accept
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node66
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9
@@ -783,7 +785,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node67
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9
@@ -795,7 +797,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node68
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:9
@@ -815,7 +817,7 @@ objects:
         \ des mots de passe"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node70
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10
@@ -833,7 +835,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node71
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10
@@ -844,36 +846,36 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node72
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node71
-      description: "le blocage des comptes \xE0 l\u2019issue de plusieurs \xE9checs\
-        \ de connexion ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2
+      description: "\u2022 le blocage des comptes \xE0 l\u2019issue de plusieurs \xE9\
+        checs de connexion ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node73
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node71
-      description: "la d\xE9sactivation des options de connexion anonyme ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2
+      description: "\u2022 la d\xE9sactivation des options de connexion anonyme ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node74
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node71
-      description: " l\u2019utilisation d\u2019un outil d\u2019audit de la robustesse\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:2
+      description: "\u2022 l\u2019utilisation d\u2019un outil d\u2019audit de la robustesse\
         \ des mots de passe."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node75
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:10
@@ -892,7 +894,7 @@ objects:
       name: "Prot\xE9ger les mots de passe stock\xE9s sur les syst\xE8mes"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node77
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:11:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:11
@@ -915,7 +917,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.password_manager
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node78
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:11:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:11
@@ -937,7 +939,7 @@ objects:
         \ les \xE9quipements et services"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node80
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12
@@ -957,7 +959,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node81
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12
@@ -969,7 +971,7 @@ objects:
       annotation: Inacceptable en 2025
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node82
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:12
@@ -989,23 +991,23 @@ objects:
       name: "Privil\xE9gier lorsque c\u2019est possible une authentification forte"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node84
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:13:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:13
       description: "Il est vivement recommand\xE9 de mettre en \u0153uvre une authentification\
         \ forte n\xE9cessitant l\u2019utilisation de deux facteurs d\u2019authentification\
-        \ diff\xE9rents parmi les suivants :\n> quelque chose que je sais (mot de\
-        \ passe, trac\xE9 de d\xE9verrouillage, signature) ;\n> quelque chose que\
-        \ je poss\xE8de (carte \xE0 puce, jeton USB, carte magn\xE9tique, RFID, un\
-        \ t\xE9l\xE9phone pour recevoir un code SMS) ;\n> quelque chose que je suis\
-        \ (une empreinte biom\xE9trique)."
+        \ diff\xE9rents parmi les suivants :\n\u2022 quelque chose que je sais (mot\
+        \ de passe, trac\xE9 de d\xE9verrouillage, signature) ;\n\u2022 quelque chose\
+        \ que je poss\xE8de (carte \xE0 puce, jeton USB, carte magn\xE9tique, RFID,\
+        \ un t\xE9l\xE9phone pour recevoir un code SMS) ;\n\u2022 quelque chose que\
+        \ je suis (une empreinte biom\xE9trique)."
       annotation: "En 2025 cette pr\xE9conisation s'impose partout."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node85
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:13:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:13
@@ -1040,7 +1042,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node88
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14
@@ -1055,10 +1057,10 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node89
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node88
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1
       description: "limiter les applications install\xE9es et modules optionnels des\
         \ navigateurs web aux seuls n\xE9cessaires ;"
       annotation: Par exemple SCCM
@@ -1066,10 +1068,10 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.uem
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node90
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node88
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1
       description: "doter les postes utilisateurs d\u2019un pare-feu local et d\u2019\
         un anti-virus (ceux-ci sont parfois inclus dans le syst\xE8me d\u2019exploitation)\
         \ ;"
@@ -1080,10 +1082,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.malware
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node91
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node88
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1
       description: "chiffrer les partitions o\xF9 sont stock\xE9es les donn\xE9es\
         \ des utilisateurs ;"
       annotation: "Par exemple Bitlocker, CRYHOD, MacOS\u2026"
@@ -1091,17 +1093,17 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node92
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1:4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node88
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:1
       description: "d\xE9sactiver les ex\xE9cutions automatiques (autorun)."
       annotation: "GPO de d\xE9sactivation de l'autorun"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.gpo
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node93
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14
@@ -1114,7 +1116,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node94
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:14
@@ -1147,7 +1149,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node96
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15
@@ -1166,7 +1168,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node97
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15
@@ -1181,7 +1183,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node98
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15
@@ -1194,7 +1196,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node99
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:15
@@ -1215,7 +1217,7 @@ objects:
         iser les politiques de s\xE9curit\xE9"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node101
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:16:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:16
@@ -1252,7 +1254,7 @@ objects:
       name: Activer et configurer le pare-feu local des postes de travail
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node103
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
@@ -1273,7 +1275,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node104
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
@@ -1287,7 +1289,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node105
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
@@ -1301,7 +1303,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node106
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:17
@@ -1323,7 +1325,7 @@ objects:
       name: "Chiffrer les donn\xE9es sensibles transmises par voie Internet"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node108
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:18:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:18
@@ -1344,7 +1346,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.transfer
       - urn:intuitem:risk:function:doc-pol:pol.crypto
       - urn:intuitem:risk:function:doc-pol:tech.file_encryption
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node109
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:18:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:18
@@ -1375,7 +1377,7 @@ objects:
         \ zones"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node112
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19
@@ -1395,7 +1397,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node113
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19
@@ -1411,7 +1413,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vlan
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node114
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:19
@@ -1434,7 +1436,7 @@ objects:
         \ la s\xE9paration des usages"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node116
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20
@@ -1456,7 +1458,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vlan
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node117
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20
@@ -1473,7 +1475,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.wifi_sec
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node118
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20
@@ -1485,7 +1487,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node119
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20
@@ -1498,7 +1500,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node120
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:20
@@ -1520,7 +1522,7 @@ objects:
       name: "Utiliser des protocoles r\xE9seaux s\xE9curis\xE9s d\xE8s qu'ils existent"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node122
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:21:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:21
@@ -1557,7 +1559,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node124
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1571,7 +1573,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node125
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1589,7 +1591,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       - urn:intuitem:risk:function:doc-pol:tech.web_proxy
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node126
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1598,7 +1600,7 @@ objects:
         \ antivirus du contenu, filtrage par cat\xE9gories d\u2019URLs, etc."
       implementation_groups:
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node127
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1609,7 +1611,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.maintenance
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node128
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1617,7 +1619,7 @@ objects:
         ,  ces \xE9quipements pourront \xEAtre redond\xE9s. "
       implementation_groups:
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node129
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1629,7 +1631,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       - urn:intuitem:risk:function:doc-pol:tech.web_proxy
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node130
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22:7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:22
@@ -1651,7 +1653,7 @@ objects:
         me d'information"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node132
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23
@@ -1668,7 +1670,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node133
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23
@@ -1682,7 +1684,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node134
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:23
@@ -1707,7 +1709,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node136
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1725,7 +1727,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node137
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1738,7 +1740,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.seg_duty
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node138
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1751,7 +1753,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.accept
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node139
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:4
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1759,30 +1761,31 @@ objects:
         me de messagerie, elle doit s\u2019assurer :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node140
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:4:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node139
-      description: "de disposer d\u2019un syst\xE8me d\u2019analyse antivirus en amont\
-        \ des bo\xEEtes aux lettres des utilisateurs pour pr\xE9venir la r\xE9ception\
-        \ de fichiers infect\xE9s ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:4
+      description: "\u2022 de disposer d\u2019un syst\xE8me d\u2019analyse antivirus\
+        \ en amont des bo\xEEtes aux lettres des utilisateurs pour pr\xE9venir la\
+        \ r\xE9ception de fichiers infect\xE9s ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_antivirus
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node141
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:4:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node139
-      description: "de l\u2019activation du chiffrement TLS des \xE9changes entre\
-        \ serveurs de messagerie (de l\u2019entit\xE9 ou publics) ainsi qu\u2019entre\
-        \ les postes utilisateur et les serveurs h\xE9bergeant les bo\xEEtes aux lettres."
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:4
+      description: "\u2022 de l\u2019activation du chiffrement TLS des \xE9changes\
+        \ entre serveurs de messagerie (de l\u2019entit\xE9 ou publics) ainsi qu\u2019\
+        entre les postes utilisateur et les serveurs h\xE9bergeant les bo\xEEtes aux\
+        \ lettres."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.transfer
       - urn:intuitem:risk:function:doc-pol:pol.crypto
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node142
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1797,7 +1800,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node143
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1810,7 +1813,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node144
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24:7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:24
@@ -1834,7 +1837,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node146
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
@@ -1851,7 +1854,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vpn
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node147
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
@@ -1865,7 +1868,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node148
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
@@ -1876,7 +1879,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node149
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
@@ -1886,7 +1889,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.ids
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node150
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:25
@@ -1906,7 +1909,7 @@ objects:
         \ techniques"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node152
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26
@@ -1921,7 +1924,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.physical
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node153
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26
@@ -1932,7 +1935,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.physical
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node154
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26
@@ -1944,7 +1947,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.physical_security
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node155
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26
@@ -1955,7 +1958,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.physical_security
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node156
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26
@@ -1966,7 +1969,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.hr_security
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node157
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26:6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:26
@@ -1994,7 +1997,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node160
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
@@ -2007,7 +2010,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node161
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
@@ -2027,7 +2030,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node162
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
@@ -2041,7 +2044,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node163
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
@@ -2052,7 +2055,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node164
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:27
@@ -2072,7 +2075,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node166
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28
@@ -2087,7 +2090,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node167
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28
@@ -2095,36 +2098,36 @@ objects:
         \ recommand\xE9 :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node168
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node167
-      description: "de privil\xE9gier en premier lieu un cloisonnement physique des\
-        \ r\xE9seaux d\xE8s que cela est possible, cette solution pouvant repr\xE9\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2
+      description: "\u2022 de privil\xE9gier en premier lieu un cloisonnement physique\
+        \ des r\xE9seaux d\xE8s que cela est possible, cette solution pouvant repr\xE9\
         senter des co\xFBts et un temps de d\xE9ploiement importants;"
       implementation_groups:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node169
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node167
-      description: "\xE0 d\xE9faut, de mettre en \u0153uvre un cloisonnement logique\
-        \ cryptographique reposant sur la mise en place de tunnels IPsec. Ceci permet\
-        \ d\u2019assurer l\u2019int\xE9grit\xE9 et la confidentialit\xE9 des informations\
-        \ v\xE9hicul\xE9es sur le r\xE9seau d\u2019administration vis-\xE0-vis du\
-        \ r\xE9seau bureautique des utilisateurs ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2
+      description: "\u2022 \xE0 d\xE9faut, de mettre en \u0153uvre un cloisonnement\
+        \ logique cryptographique reposant sur la mise en place de tunnels IPsec.\
+        \ Ceci permet d\u2019assurer l\u2019int\xE9grit\xE9 et la confidentialit\xE9\
+        \ des informations v\xE9hicul\xE9es sur le r\xE9seau d\u2019administration\
+        \ vis-\xE0-vis du r\xE9seau bureautique des utilisateurs ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node170
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node167
-      description: "au minimum, de mettre en \u0153uvre un cloisonnement logique par\
-        \ VLAN. "
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:28:2
+      description: "\u2022 au minimum, de mettre en \u0153uvre un cloisonnement logique\
+        \ par VLAN. "
       implementation_groups:
       - S
       reference_controls:
@@ -2138,7 +2141,7 @@ objects:
         \ sur les postes de travail"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node172
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:29:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:29
@@ -2160,7 +2163,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node173
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:29:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:29
@@ -2189,7 +2192,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node176
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30
@@ -2204,7 +2207,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node177
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30
@@ -2220,7 +2223,7 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.educ
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       - urn:intuitem:risk:function:doc-pol:doc.educ_register
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node178
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30
@@ -2232,7 +2235,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node179
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30
@@ -2243,7 +2246,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.screen_filter
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node180
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:30
@@ -2265,7 +2268,7 @@ objects:
         \ potentiellement perdable"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node182
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31
@@ -2282,7 +2285,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.crypto
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node183
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31
@@ -2295,7 +2298,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
       - urn:intuitem:risk:function:doc-pol:tech.file_encryption
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node184
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:31
@@ -2319,7 +2322,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node186
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32
@@ -2335,7 +2338,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vpn
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node187
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32
@@ -2348,7 +2351,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node188
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32
@@ -2363,7 +2366,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vpn
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node189
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:32
@@ -2373,7 +2376,8 @@ objects:
         \ forte, par exemple avec un mot de passe et un certificat stock\xE9 sur un\
         \ support externe (carte \xE0 puce ou jeton USB) ou un m\xE9canisme de mot\
         \ de passe \xE0 usage unique (One Time Password). "
-      annotation: Indispensable en 2025
+      annotation: L'authentification MFA est indispensable en 2025, compte-tenu de
+        la puissance d'attaque en force brute disponible pour les attaquants.
       implementation_groups:
       - R
       reference_controls:
@@ -2388,7 +2392,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node191
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33
@@ -2403,7 +2407,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
       - urn:intuitem:risk:function:doc-pol:pol.accept
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node192
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33
@@ -2422,7 +2426,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.uem
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node193
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33
@@ -2433,7 +2437,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.work
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node194
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:33
@@ -2460,7 +2464,7 @@ objects:
         me d\u2019information"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node197
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34
@@ -2477,57 +2481,57 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.maintenance
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node198
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34
       description: "Celles-ci doivent notamment pr\xE9ciser :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node199
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node198
-      description: "la mani\xE8re dont l\u2019inventaire des composants du syst\xE8\
-        me d\u2019information est r\xE9alis\xE9 ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2
+      description: "\u2022 la mani\xE8re dont l\u2019inventaire des composants du\
+        \ syst\xE8me d\u2019information est r\xE9alis\xE9 ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node200
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node198
-      description: "les sources d\u2019information relatives \xE0 la publication des\
-        \ mises \xE0 jour ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2
+      description: "\u2022 les sources d\u2019information relatives \xE0 la publication\
+        \ des mises \xE0 jour ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.threat_intel
       - urn:intuitem:risk:function:doc-pol:proc.update
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node201
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node198
-      description: "les outils pour d\xE9ployer les correctifs sur le parc (par exemple\
-        \ WSUS pour les mises \xE0 jour des composants Microsoft, des outils gratuits\
-        \ ou payants pour les composants tiers et autres syst\xE8mes d\u2019exploitation)\
-        \ ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2
+      description: "\u2022 les outils pour d\xE9ployer les correctifs sur le parc\
+        \ (par exemple WSUS pour les mises \xE0 jour des composants Microsoft, des\
+        \ outils gratuits ou payants pour les composants tiers et autres syst\xE8\
+        mes d\u2019exploitation) ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node202
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2:4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node198
-      description: "l\u2019\xE9ventuelle qualification des correctifs et leur d\xE9\
-        ploiement progressif sur le parc."
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:2
+      description: "\u2022 l\u2019\xE9ventuelle qualification des correctifs et leur\
+        \ d\xE9ploiement progressif sur le parc."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node203
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:34
@@ -2549,7 +2553,7 @@ objects:
         \ les adh\xE9rences logicielles"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35
@@ -2563,76 +2567,76 @@ objects:
         cautions existent :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node206
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "\xE9tablir et tenir \xE0 jour un inventaire des syst\xE8mes et\
-        \ applications du syst\xE8me d\u2019information ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 \xE9tablir et tenir \xE0 jour un inventaire des syst\xE8\
+        mes et applications du syst\xE8me d\u2019information ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.file_encryption
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node207
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "choisir des solutions dont le support est assur\xE9 pour une dur\xE9\
-        e correspondant \xE0 leur utilisation ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 choisir des solutions dont le support est assur\xE9 pour\
+        \ une dur\xE9e correspondant \xE0 leur utilisation ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.maintenance
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node208
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "assurer un suivi des mises \xE0 jour et des dates de fin de support\
-        \ des logiciels ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 assurer un suivi des mises \xE0 jour et des dates de fin\
+        \ de support des logiciels ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.file_encryption
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node209
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "maintenir un parc logiciel homog\xE8ne (la coexistence de versions\
-        \ diff\xE9rentes d\u2019un m\xEAme produit multiplie les risques et complique\
-        \ le suivi) ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 maintenir un parc logiciel homog\xE8ne (la coexistence\
+        \ de versions diff\xE9rentes d\u2019un m\xEAme produit multiplie les risques\
+        \ et complique le suivi) ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.maintenance
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node210
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:5
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "limiter les adh\xE9rences logicielles, c\u2019est-\xE0-dire les\
-        \ d\xE9pendances de fonctionnement d\u2019un logiciel par rapport \xE0 un\
-        \ autre, en particulier lorsque le support de ce dernier arrive \xE0 son terme\
-        \ ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 limiter les adh\xE9rences logicielles, c\u2019est-\xE0\
+        -dire les d\xE9pendances de fonctionnement d\u2019un logiciel par rapport\
+        \ \xE0 un autre, en particulier lorsque le support de ce dernier arrive \xE0\
+        \ son terme ;"
       annotation: "Principe de modularit\xE9 applicative"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.arc_principles
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node211
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:6
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "inclure dans les contrats avec les prestataires et fournisseurs\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 inclure dans les contrats avec les prestataires et fournisseurs\
         \ des clauses garantissant le suivi des correctifs de s\xE9curit\xE9 et la\
         \ gestion des obsolescences ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.supplier
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node212
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1:7
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node205
-      description: "identifier les d\xE9lais et ressources n\xE9cessaires (mat\xE9\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:35:1
+      description: "\u2022 identifier les d\xE9lais et ressources n\xE9cessaires (mat\xE9\
         rielles, humaines, budg\xE9taires) \xE0 la migration de chaque logiciel en\
         \ fin de vie (tests de non-r\xE9gression, proc\xE9dure de sauvegarde, proc\xE9\
         dure de migration des donn\xE9es, etc.)."
@@ -2654,7 +2658,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node215
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2665,7 +2669,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.monitor
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node216
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2678,7 +2682,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.asset_register
       - urn:intuitem:risk:function:doc-pol:doc.is_map
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node217
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2690,7 +2694,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node218
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2701,7 +2705,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.monitor
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node219
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2712,42 +2716,42 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node220
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node219
-      description: "pare-feu : paquets bloqu\xE9s ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5
+      description: "\u2022 pare-feu : paquets bloqu\xE9s ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       - urn:intuitem:risk:function:doc-pol:tech.edr
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node221
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node219
-      description: "syst\xE8mes et applications : authentifications et autorisations\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5
+      description: "\u2022 syst\xE8mes et applications : authentifications et autorisations\
         \ (\xE9checs et succ\xE8s), arr\xEAts inopin\xE9s ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
       - urn:intuitem:risk:function:doc-pol:tech.edr
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node222
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node219
-      description: "services : erreurs de protocoles (par exemples les erreurs 403,\
-        \ 404 et 500 pour les services hTTP), tra\xE7abilit\xE9 des flux applicatifs\
-        \ aux interconnexions (URL sur un relai hTTP, en-t\xEAtes des messages sur\
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:5
+      description: "\u2022 services : erreurs de protocoles (par exemples les erreurs\
+        \ 403, 404 et 500 pour les services hTTP), tra\xE7abilit\xE9 des flux applicatifs\
+        \ aux interconnexions (URL sur un relai HTTP, en-t\xEAtes des messages sur\
         \ un relai SMTP, etc.)."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
       - urn:intuitem:risk:function:doc-pol:tech.edr
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node223
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2758,7 +2762,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.ntp
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node224
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36:7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:36
@@ -2781,7 +2785,7 @@ objects:
       implementation_groups:
       - S
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node226
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37
@@ -2796,7 +2800,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37
@@ -2804,74 +2808,74 @@ objects:
         \ :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node228
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: "la liste des donn\xE9es jug\xE9es vitales pour l\u2019organisme\
-        \ et les serveurs concern\xE9s ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022 la liste des donn\xE9es jug\xE9es vitales pour l\u2019\
+        organisme et les serveurs concern\xE9s ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node229
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: "les diff\xE9rents types de sauvegarde (par exemple le mode hors\
-        \ ligne) ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022 les diff\xE9rents types de sauvegarde (par exemple le mode\
+        \ hors ligne) ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node230
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: "la fr\xE9quence des sauvegardes ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022 la fr\xE9quence des sauvegardes ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node231
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: "la proc\xE9dure d\u2019administration et d\u2019ex\xE9cution des\
-        \ sauvegardes ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022 la proc\xE9dure d\u2019administration et d\u2019ex\xE9\
+        cution des sauvegardes ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node232
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:5
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: "les informations de stockage et les restrictions d\u2019acc\xE8\
-        s aux sauvegardes ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022 les informations de stockage et les restrictions d\u2019\
+        acc\xE8s aux sauvegardes ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node233
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:6
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: "les proc\xE9dures de test de restauration ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022 les proc\xE9dures de test de restauration ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node234
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2:7
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node227
-      description: ' la destruction des supports ayant contenu les sauvegardes.'
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:2
+      description: "\u2022  la destruction des supports ayant contenu les sauvegardes."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.disposal
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node235
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37
@@ -2879,36 +2883,36 @@ objects:
         \ mani\xE8res :"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node236
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3:1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node235
-      description: "syst\xE9matique, par un ordonnanceur de t\xE2ches pour les applications\
-        \ importantes ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3
+      description: "\u2022 syst\xE9matique, par un ordonnanceur de t\xE2ches pour\
+        \ les applications importantes ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node237
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3:2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node235
-      description: "ponctuelle, en cas d\u2019erreur sur les fichiers ;"
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3
+      description: "\u2022 ponctuelle, en cas d\u2019erreur sur les fichiers ;"
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.backup
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node238
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3:3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node235
-      description: "g\xE9n\xE9rale, pour une sauvegarde et restauration enti\xE8res\
-        \ du syst\xE8me d\u2019information."
+      parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:3
+      description: "\u2022 g\xE9n\xE9rale, pour une sauvegarde et restauration enti\xE8\
+        res du syst\xE8me d\u2019information."
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.bcp
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node239
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:37
@@ -2930,7 +2934,7 @@ objects:
         \ puis appliquer les actions correctives associ\xE9es (renforc\xE9)"
       implementation_groups:
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node241
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
@@ -2944,7 +2948,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.audit
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node242
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
@@ -2959,7 +2963,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.audit_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node243
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
@@ -2973,7 +2977,7 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.nc_log
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node244
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:38
@@ -2995,7 +2999,7 @@ objects:
         information et le faire conna\xEEtre  aupr\xE8s du personnel"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node246
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39
@@ -3007,23 +3011,24 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.raci
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node247
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39
       description: "Ce r\xE9f\xE9rent devra \xEAtre connu de tous les utilisateurs\
         \ et sera le premier contact pour toutes les questions relatives \xE0 la s\xE9\
-        curit\xE9 des syst\xE8mes d\u2019information :\n>  d\xE9finition des r\xE8\
-        gles \xE0 appliquer selon le contexte ;\n>  v\xE9rification de l\u2019application\
-        \ des r\xE8gles ;\n> sensibilisation des utilisateurs et d\xE9finition d\u2019\
-        un plan de formation des acteurs informatiques ;\n> centralisation et traitement\
-        \ des incidents de s\xE9curit\xE9 constat\xE9s ou remont\xE9s par les utilisateurs."
+        curit\xE9 des syst\xE8mes d\u2019information :\n\u2022  d\xE9finition des\
+        \ r\xE8gles \xE0 appliquer selon le contexte ;\n\u2022  v\xE9rification de\
+        \ l\u2019application des r\xE8gles ;\n\u2022 sensibilisation des utilisateurs\
+        \ et d\xE9finition d\u2019un plan de formation des acteurs informatiques ;\n\
+        \u2022 centralisation et traitement des incidents de s\xE9curit\xE9 constat\xE9\
+        s ou remont\xE9s par les utilisateurs."
       annotation: 'n '
       implementation_groups:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node248
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39
@@ -3033,7 +3038,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node249
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:39
@@ -3055,7 +3060,7 @@ objects:
       name: "D\xE9finir une proc\xE9dure de gestion des incidents de s\xE9curit\xE9"
       implementation_groups:
       - S
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node251
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40
@@ -3068,7 +3073,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.incident
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node252
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40
@@ -3084,7 +3089,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.incident
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node253
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40:3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40
@@ -3101,7 +3106,7 @@ objects:
       - S
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.incident
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node254
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40:4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:40
@@ -3126,7 +3131,7 @@ objects:
       name: "Mener une analyse de risques formelle (renforc\xE9)"
       implementation_groups:
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node257
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41
@@ -3153,20 +3158,20 @@ objects:
       - R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.risk
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node258
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41:2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:41
       description: "Trois types d\u2019approches peuvent \xEAtre envisag\xE9s pour\
         \ ma\xEEtriser les risques associ\xE9s \xE0 son syst\xE8me d\u2019information\
-        \ :\n>  le recours aux bonnes pratiques de s\xE9curit\xE9 informatique ;\n\
-        > une analyse de risques syst\xE9matique fond\xE9e sur les retours d\u2019\
-        exp\xE9rience des utilisateurs ;\n>  une gestion structur\xE9e des risques\
-        \ formalis\xE9e par une m\xE9thodologie d\xE9di\xE9e.\nDans ce dernier cas,\
-        \ la m\xE9thode EBIOS r\xE9f\xE9renc\xE9e par l\u2019ANSSI est recommand\xE9\
-        e. Elle permet d\u2019exprimer les besoins de s\xE9curit\xE9, d\u2019identifier\
-        \ les objectifs de s\xE9curit\xE9 et de d\xE9terminer les exigences de s\xE9\
-        curit\xE9."
+        \ :\n\u2022  le recours aux bonnes pratiques de s\xE9curit\xE9 informatique\
+        \ ;\n\u2022 une analyse de risques syst\xE9matique fond\xE9e sur les retours\
+        \ d\u2019exp\xE9rience des utilisateurs ;\n\u2022  une gestion structur\xE9\
+        e des risques formalis\xE9e par une m\xE9thodologie d\xE9di\xE9e.\nDans ce\
+        \ dernier cas, la m\xE9thode EBIOS r\xE9f\xE9renc\xE9e par l\u2019ANSSI est\
+        \ recommand\xE9e. Elle permet d\u2019exprimer les besoins de s\xE9curit\xE9\
+        , d\u2019identifier les objectifs de s\xE9curit\xE9 et de d\xE9terminer les\
+        \ exigences de s\xE9curit\xE9."
       implementation_groups:
       - R
       reference_controls:
@@ -3180,7 +3185,7 @@ objects:
         \ l'ANSSI (renforc\xE9)"
       implementation_groups:
       - R
-    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:node260
+    - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:42:1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene-detail:42

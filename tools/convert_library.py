@@ -151,6 +151,7 @@ parser = argparse.ArgumentParser(
     description="convert an Excel file in a library for CISO Assistant",
 )
 parser.add_argument("input_file_name")
+parser.add_argument("--compat", action='store_true')
 args = parser.parse_args()
 
 ref_name = re.sub(r"\.\w+$", "", args.input_file_name).lower()
@@ -401,11 +402,13 @@ for tab in dataframe:
         current_depth = 0
         parent_urn = None
         parent_for_depth = {}
+        count_for_depth = {}
         section = library_vars_dict_arg["tab"][title]
         if section:
             section_id = section.lower().replace(" ", "-")
             current_node_urn = f"{root_nodes_urn}:{section_id}"
             parent_for_depth[1] = current_node_urn
+            count_for_depth[1] = 1
             requirement_nodes.append(
                 {"urn": current_node_urn, "name": section, "assessable": False}
             )
@@ -451,31 +454,41 @@ for tab in dataframe:
                     else None
                 )
                 translations = get_translations(header, row)
-                skip_count = "skip_count" in header and bool(
-                    row[header["skip_count"]].value
-                )
-                if skip_count:
-                    counter_fix += 1
-                    ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
-                else:
-                    ref_id_urn = (
-                        ref_id.lower().replace(" ", "-")
-                        if ref_id
-                        else f"node{counter-counter_fix}"
-                    )
-                urn = f"{root_nodes_urn}:{ref_id_urn}"
-                if urn in urn_unicity_checker:
-                    print("URN duplicate:", urn)
-                    exit(1)
-                urn_unicity_checker.add(urn)
-                assert isinstance(depth, int), f"incorrect depth for {row}"
                 if depth == current_depth + 1:
                     parent_for_depth[depth] = current_node_urn
+                    count_for_depth[depth] = 1
                     parent_urn = parent_for_depth[depth]
                 elif depth <= current_depth:
                     pass
                 else:
                     error(f"wrong depth in requirement (tab {title}) {urn}")
+                if args.compat:
+                    skip_count = "skip_count" in header and bool(
+                        row[header["skip_count"]].value
+                    )
+                    if skip_count:
+                        counter_fix += 1
+                        ref_id_urn = f"node{counter-counter_fix}-{counter_fix}"
+                    else:
+                        ref_id_urn = (
+                            ref_id.lower().replace(" ", "-")
+                            if ref_id
+                            else f"node{counter-counter_fix}"
+                        )
+                    urn = f"{root_nodes_urn}:{ref_id_urn}"
+                else:
+                    if ref_id:
+                        urn = f"{root_nodes_urn}:{ref_id.lower().replace(' ', '-')}" 
+                    else:
+                        p = parent_for_depth[depth]
+                        c = count_for_depth[depth]
+                        urn =f"{p}:{c}"
+                        count_for_depth[depth] += 1
+                if urn in urn_unicity_checker:
+                    print("URN duplicate:", urn)
+                    exit(1)
+                urn_unicity_checker.add(urn)
+                assert isinstance(depth, int), f"incorrect depth for {row}"
                 current_node_urn = urn
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth
