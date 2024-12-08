@@ -205,7 +205,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
 
-Take a look at the `tools` directory and its dedicated readme. The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
+Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
