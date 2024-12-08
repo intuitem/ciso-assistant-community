@@ -252,7 +252,7 @@ export default {
 		category: 'policy',
 		// csf_function: 'govern',
 		library: {
-			name: 'Documents and policies',
+			name: 'Usual reference controls',
 			ref: 'doc-pol',
 			urn: 'urn:intuitem:risk:library:doc-pol'
 		},
@@ -263,7 +263,7 @@ export default {
 		category: 'process',
 		// csf_function: 'protect',
 		library: {
-			name: 'Documents and policies',
+			name: 'Usual reference controls',
 			ref: 'doc-pol',
 			urn: 'urn:intuitem:risk:library:doc-pol'
 		},
