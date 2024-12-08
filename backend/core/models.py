@@ -2778,6 +2778,7 @@ class ComplianceAssessment(Assessment):
                 (
                     RequirementAssessment.objects.filter(result=rs)
                     .filter(compliance_assessment=self)
+                    .filter(requirement__assessable=True)
                     .count(),
                     rs,
                 )
