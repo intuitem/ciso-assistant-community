@@ -8,6 +8,8 @@ copyright: Licence Ouverte/Open Licence (Etalab - V1)
 version: 1
 provider: ANSSI
 packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
 objects:
   framework:
     urn: urn:intuitem:risk:framework:anssi-guide-hygiene-detail
