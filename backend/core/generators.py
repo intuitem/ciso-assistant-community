@@ -201,13 +201,19 @@ def gen_audit_context(id, doc, tree):
     spider_data = list()
     result_counts = count_category_results(tree)
 
+    agg_drifts = list()
+
     for key, content in tree.items():
         total = sum(result_counts[content["urn"]].values())
         ok_items = result_counts[content["urn"]].get("compliant", 0) + result_counts[
             content["urn"]
         ].get("not_applicable", 0)
         ok_perc = ceil(ok_items / total * 100) if total > 0 else 0
+        not_ok_count = total - ok_items
         spider_data.append({"category": content["node_content"], "value": ok_perc})
+        agg_drifts.append(
+            {"name": content["node_content"], "drift_count": not_ok_count}
+        )
 
     cnt_per_result = audit.get_requirements_result_count()
     total = sum([res[0] for res in cnt_per_result])
@@ -282,6 +288,7 @@ def gen_audit_context(id, doc, tree):
         },
         "compliance_donut": res_donut,
         "compliance_radar": chart_spider,
+        "drifts_per_domain": agg_drifts,
         "chart_controls": ac_chart,
         "p1_controls": p1_controls,
         "ac_count": ac_total,
