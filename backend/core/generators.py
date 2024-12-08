@@ -8,6 +8,8 @@ from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
 
+# from icecream import ic
+
 from django.db.models import Count
 
 matplotlib.use("Agg")
@@ -172,22 +174,34 @@ def plot_spider_chart(data, colors=None, title=None):
 
 def gen_audit_context(id, doc, tree):
     def count_category_results(data):
+        def recursive_result_count(node_data):
+            # Initialize result counts for this node
+            result_counts = {}
+
+            # Check if the current node is assessable
+            if node_data.get("assessable", False):
+                result = node_data.get("result", "unknown")
+                result_counts[result] = 1
+
+            # Recursively process children
+            for child_id, child_data in node_data.get("children", {}).items():
+                child_results = recursive_result_count(child_data)
+
+                # Merge child results into current results
+                for result, count in child_results.items():
+                    result_counts[result] = result_counts.get(result, 0) + count
+
+            return result_counts
+
         # Dictionary to store result counts for top-level nodes
         category_result_counts = {}
 
+        # Process only top-level nodes
         for node_id, node_data in data.items():
-            # Check if this is a top-level node (no parent URN)
             if node_data.get("parent_urn") is None:
-                # Initialize result count for this category
-                category_result_counts[node_data["urn"]] = {}
-
-                # Aggregate results from assessable children
-                for child_id, child_data in node_data.get("children", {}).items():
-                    if child_data.get("assessable", False):
-                        result = child_data.get("result", "unknown")
-                        category_result_counts[node_data["urn"]][result] = (
-                            category_result_counts[node_data["urn"]].get(result, 0) + 1
-                        )
+                category_result_counts[node_data["urn"]] = recursive_result_count(
+                    node_data
+                )
 
         return category_result_counts
 
@@ -228,6 +242,9 @@ def gen_audit_context(id, doc, tree):
                 aggregated[status] += count
 
     total = sum([v for v in aggregated.values()])
+    if total == 0:
+        print("Error:: No requirments found, something is wrong. aborting ..")
+
     aggregated["total"] = total
 
     donut_data = [
