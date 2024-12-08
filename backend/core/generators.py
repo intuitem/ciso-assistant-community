@@ -8,7 +8,6 @@ from docx.shared import Cm
 import matplotlib.pyplot as plt
 import numpy as np
 
-# from icecream import ic
 from django.db.models import Count
 
 matplotlib.use("Agg")
@@ -215,15 +214,31 @@ def gen_audit_context(id, doc, tree):
             {"name": content["node_content"], "drift_count": not_ok_count}
         )
 
-    cnt_per_result = audit.get_requirements_result_count()
-    total = sum([res[0] for res in cnt_per_result])
+    aggregated = {
+        "compliant": 0,
+        "non_compliant": 0,
+        "not_applicable": 0,
+        "not_assessed": 0,
+        "partially_compliant": 0,
+    }
+
+    for node in result_counts.values():
+        for status, count in node.items():
+            if status in aggregated:
+                aggregated[status] += count
+
+    total = sum([v for v in aggregated.values()])
+    aggregated["total"] = total
 
     donut_data = [
-        {"category": "Conforme", "value": cnt_per_result[3][0]},
-        {"category": "Partiellement conforme", "value": cnt_per_result[1][0]},
-        {"category": "Non conforme", "value": cnt_per_result[2][0]},
-        {"category": "Non applicable", "value": cnt_per_result[4][0]},
-        {"category": "Non évalué", "value": cnt_per_result[0][0]},
+        {"category": "Conforme", "value": aggregated["compliant"]},
+        {
+            "category": "Partiellement conforme",
+            "value": aggregated["partially_compliant"],
+        },
+        {"category": "Non conforme", "value": aggregated["non_compliant"]},
+        {"category": "Non applicable", "value": aggregated["not_applicable"]},
+        {"category": "Non évalué", "value": aggregated["not_assessed"]},
     ]
 
     custom_colors = ["#2196F3"]
@@ -278,14 +293,7 @@ def gen_audit_context(id, doc, tree):
         "audit": audit,
         "date": now().strftime("%d/%m/%Y"),
         "contributors": f"{authors}\n{reviewers}",
-        "req": {
-            "total": total,
-            "compliant": cnt_per_result[3][0],
-            "part_compliant": cnt_per_result[1][0],
-            "non_compliant": cnt_per_result[2][0],
-            "not_applicable": cnt_per_result[4][0],
-            "not_assessed": cnt_per_result[0][0],
-        },
+        "req": aggregated,
         "compliance_donut": res_donut,
         "compliance_radar": chart_spider,
         "drifts_per_domain": agg_drifts,
