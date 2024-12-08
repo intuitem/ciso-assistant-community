@@ -1,8 +1,7 @@
 urn: urn:intuitem:risk:library:annex-technical-and-methodological-requirements-nis2
 locale: en
 ref_id: 'Annex-to-the-Implementing-Regulation-of-NIS2-on-Technical-and-methodological-requirements '
-name: 'Annex to the Implementing Regulation of NIS 2 on Technical and methodological
-  requirements '
+name: NIS2 technical and methodological requirements 2024/2690
 description: ANNEX to the Commission Implementing Regulation laying down rules for
   the application of Directive (EU) 2022/2555 as regards technical and methodological
   requirements of cybersecurity risk-management measures and further specification
@@ -12,15 +11,14 @@ description: ANNEX to the Commission Implementing Regulation laying down rules f
   managed security service providers, providers of online market places, of online
   search engines and of social networking services platforms, and trust service providers
 copyright: EUROPEAN COMMISSION
-version: 1
+version: 2
 provider: EUROPEAN COMMISSION
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:annex-technical-and-methodological-requirements-nis2
     ref_id: 'Annex-to-the-Implementing-Regulation-of-NIS2-on-Technical-and-methodological-requirements '
-    name: 'Annex to the Implementing Regulation of NIS 2 on Technical and methodological
-      requirements '
+    name: NIS2 technical and methodological requirements 2024/2690
     description: ANNEX to the Commission Implementing Regulation laying down rules
       for the application of Directive (EU) 2022/2555 as regards technical and methodological
       requirements of cybersecurity risk-management measures and further specification
