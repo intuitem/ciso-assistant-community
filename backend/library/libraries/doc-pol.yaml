@@ -1,22 +1,25 @@
 urn: urn:intuitem:risk:library:doc-pol
 locale: en
-ref_id: doc-pol
-name: Documents and policies
-description: Typical documents and policies recommended by intuitem
+ref_id: usual-controls
+name: Usual reference controls
+description: Usual documents, policies, procedures, training and technical controls
+  recommended by intuitem
 copyright: "\xA9 intuitem - 2024"
-version: 2
+version: 3
 provider: intuitem
 packager: intuitem
 translations:
   fr:
-    name: Documents et politiques
-    description: "Documents et politiques typiques recommand\xE9s par intuitem"
+    name: "Mesures de r\xE9f\xE9rence courantes"
+    description: "Documents, politiques, proc\xE9dures, formations et mesures techniques\
+      \ recommand\xE9s par intuitem"
 objects:
   reference_controls:
   - urn: urn:intuitem:risk:function:doc-pol:doc.overview
     ref_id: DOC.OVERVIEW
     name: Organization overview document
     category: process
+    csf_function: govern
     description: 'Objectives of the organization
 
       Organigram
@@ -38,6 +41,7 @@ objects:
     ref_id: DOC.CONTEXT
     name: Context of organization document
     category: process
+    csf_function: govern
     description: 'Stakeholders
 
       Authorities
@@ -59,6 +63,7 @@ objects:
     ref_id: DOC.SCOPE
     name: ISMS Scope document
     category: process
+    csf_function: govern
     description: 'Products and services
 
       Products and services requiring certification
@@ -91,6 +96,7 @@ objects:
     ref_id: DOC.LEGAL
     name: legal register
     category: process
+    csf_function: govern
     description: "Legal requirements \nStatutory requirements \nRegulatory  requirements\
       \ \nContractual requirements \nIntellectual property rights\nEmployment contracts\n\
       NDAs"
@@ -111,6 +117,7 @@ objects:
     ref_id: DOC.SOA
     name: Statement of Applicabilty document
     category: process
+    csf_function: govern
     translations:
       fr:
         name: "D\xE9claration d'applicabilit\xE9"
@@ -119,6 +126,7 @@ objects:
     ref_id: DOC.CONTROLS
     name: Controls accountability matrix
     category: process
+    csf_function: govern
     annotation: 5.1.c
     translations:
       fr:
@@ -128,6 +136,7 @@ objects:
     ref_id: DOC.AUDIT_PLAN
     name: Audit plan document
     category: process
+    csf_function: govern
     description: 'Context of the organization
 
       Leadership
@@ -161,6 +170,7 @@ objects:
     ref_id: DOC.COMPETENCY
     name: Competency matrix
     category: process
+    csf_function: govern
     annotation: 5.1.f
     translations:
       fr:
@@ -170,6 +180,7 @@ objects:
     ref_id: DOC.RACI
     name: Responsibility matrix
     category: process
+    csf_function: govern
     description: RACI for ISMS
     translations:
       fr:
@@ -179,6 +190,7 @@ objects:
     ref_id: DOC.COM
     name: Communication plan document
     category: process
+    csf_function: govern
     annotation: '7.4'
     translations:
       fr:
@@ -188,6 +200,7 @@ objects:
     ref_id: DOC.RISK_REGISTER
     name: Risk register
     category: process
+    csf_function: govern
     description: 'Risk owner
 
       Impact
@@ -215,6 +228,7 @@ objects:
     ref_id: DOC.SO_REGISTER
     name: Security objectives register
     category: process
+    csf_function: govern
     annotation: '6.2'
     translations:
       fr:
@@ -224,6 +238,7 @@ objects:
     ref_id: DOC.MGMT_REVIEW
     name: Management review plan document
     category: process
+    csf_function: govern
     description: 'Review of risks
 
       Review of security objectives
@@ -244,7 +259,10 @@ objects:
     ref_id: DOC.EDUC_REGISTER
     name: Training and awareness register
     category: process
-    annotation: '7.2'
+    csf_function: govern
+    annotation: '7.2
+
+      A.6.3'
     translations:
       fr:
         name: Registre de formation et sensibilisation
@@ -253,6 +271,7 @@ objects:
     ref_id: DOC.DOC_REGISTER
     name: Document register
     category: process
+    csf_function: govern
     description: 'Rules for edition and maintenance
 
       Version control
@@ -270,46 +289,17 @@ objects:
     ref_id: DOC.PROC_REGISTER
     name: Operational procedures register
     category: process
-    description: 'Risk management procdure
-
-      Incident management procedure
-
-      Problem management procedure
-
-      Vulnerability management procedure
-
-      HR procedures
-
-      Change management procedure
-
-      Procedure for externalization
-
-      Physical security procedures
-
-      Privileged access procedure'
-    annotation: '8.1
-
-      A.6.1
-
-      8.1
-
-      8.1.
-
-      A.7.1
-
-      A.8.2'
+    csf_function: govern
+    annotation: A.5.37
     translations:
       fr:
         name: "Registre des proc\xE9dures op\xE9rationnelles"
-        description: "Processus de gestion des risques\nProc\xE9dure de gestion des\
-          \ incidents\nProc\xE9dure de gestion des probl\xE8mes\nProc\xE9dure de gestion\
-          \ des vuln\xE9rabilit\xE9s\nProc\xE9dures RH\nProc\xE9dure de gestion du\
-          \ changement\nProc\xE9dure d\u2019externalisation\nProc\xE9dures de s\xE9\
-          curit\xE9 physique\nProc\xE9dure d\u2019acc\xE8s privil\xE9gi\xE9"
+        description: null
   - urn: urn:intuitem:risk:function:doc-pol:doc.nc_log
     ref_id: DOC.NC_LOG
     name: Log of non-conformities
     category: process
+    csf_function: govern
     description: "List of non-conformities (incident, problems, \u2026)\nCorrective\
       \ action taken"
     annotation: '10.1'
@@ -322,6 +312,7 @@ objects:
     ref_id: DOC.INTERNAL_RULES
     name: Rules of procedure document
     category: process
+    csf_function: govern
     annotation: A.5.4, A.6.2
     translations:
       fr:
@@ -331,6 +322,7 @@ objects:
     ref_id: DOC.ASSET_REGISTER
     name: Registry of assets
     category: process
+    csf_function: identify
     annotation: A.5.9
     translations:
       fr:
@@ -340,15 +332,401 @@ objects:
     ref_id: DOC.SUPPLIER_REGISTER
     name: Registry of suppliers
     category: process
+    csf_function: identify
     description: Risk management
     translations:
       fr:
         name: Registre des fournisseurs
         description: Gestion des risques
+  - urn: urn:intuitem:risk:function:doc-pol:doc.educ_plan
+    ref_id: DOC.EDUC_PLAN
+    name: Information security awareness and traning plan
+    category: process
+    csf_function: govern
+    description: 'Objective: Raise awareness for all employees and provide targeted
+      training for relevant staff to promote secure behaviors, ensure compliance,
+      and reduce risks.
+
+      Scope: Awareness for all employees and contractors; targeted training for specific
+      teams (e.g., IT, security, access managers).
+
+      Roles and Responsibilities: Assign responsibilities to IT, HR, and security
+      teams.
+
+      Training Requirements: Define mandatory topics (e.g., access management, secure
+      configurations) and frequency (e.g., annual, onboarding).
+
+      Delivery Methods: Awareness through e-learning and campaigns; training through
+      hands-on workshops and simulations.
+
+      Evaluation: Track participation rates, quiz scores, and phishing test results.
+
+      Compliance: Align with regulations (e.g., GDPR, ISO 27001) and maintain audit-ready
+      records.
+
+      Continuous Improvement: Update based on feedback and emerging threats.'
+    annotation: '7.3.c
+
+      A.6.3'
+    translations:
+      fr:
+        name: Plan de sensibilisation et de formation
+        description: "Objectif : Sensibiliser l\u2019ensemble des employ\xE9s \xE0\
+          \ la s\xE9curit\xE9 de l\u2019information et former sp\xE9cifiquement les\
+          \ personnes concern\xE9es pour promouvoir des comportements s\xE9curis\xE9\
+          s, assurer la conformit\xE9 et r\xE9duire les risques.\nPort\xE9e : Sensibilisation\
+          \ pour tous les employ\xE9s et prestataires, formation cibl\xE9e pour les\
+          \ \xE9quipes concern\xE9es (ex. : IT, s\xE9curit\xE9, responsables d'acc\xE8\
+          s).\nR\xF4les et Responsabilit\xE9s : Attribution des responsabilit\xE9\
+          s aux \xE9quipes IT, RH et s\xE9curit\xE9.\nExigences de Formation : D\xE9\
+          finir les sujets obligatoires (ex. : gestion des acc\xE8s, configuration\
+          \ s\xE9curis\xE9e) et la fr\xE9quence (ex. : annuelle, \xE0 l\u2019int\xE9\
+          gration).\nM\xE9thodes de Diffusion : Sensibilisation via e-learning et\
+          \ campagnes, formation via ateliers pratiques et simulations.\n\xC9valuation\
+          \ : Suivre les taux de participation, les r\xE9sultats des quiz et les tests\
+          \ de phishing.\nConformit\xE9 : S\u2019aligner sur les r\xE9glementations\
+          \ (ex. : RGPD, ISO 27001) et conserver des dossiers pour audits.\nAm\xE9\
+          lioration Continue : Mettre \xE0 jour en fonction des retours et des menaces\
+          \ \xE9mergentes."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.sap
+    ref_id: DOC.SAP
+    name: Security Assurance Plan
+    category: process
+    csf_function: govern
+    description: 'A document provided by suppliers outlining security measures, compliance
+      with standards (e.g., ISO 27001), and testing procedures to ensure the security
+      of their products, services, or systems. It demonstrates their commitment to
+      maintaining a secure environment and provides evidence of compliance and security
+      practices.
+
+
+
+
+      '
+    annotation: A.5.19
+    translations:
+      fr:
+        name: "Plan d'Assurance S\xE9curit\xE9 (PAS)"
+        description: "Document fourni par les fournisseurs d\xE9crivant les mesures\
+          \ de s\xE9curit\xE9, la conformit\xE9 aux normes (ex. : ISO 27001) et les\
+          \ proc\xE9dures de test mises en \u0153uvre pour garantir la s\xE9curit\xE9\
+          \ de leurs produits, services ou syst\xE8mes. Il d\xE9montre leur engagement\
+          \ \xE0 maintenir un environnement s\xE9curis\xE9 et fournit des preuves\
+          \ de conformit\xE9 et de bonnes pratiques de s\xE9curit\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.is_map
+    ref_id: DOC.IS_MAP
+    name: Information System Mapping
+    category: process
+    csf_function: identify
+    description: A visual representation of an organization's information system components
+      and their interactions to enhance management and security.
+    annotation: A.5.9
+    translations:
+      fr:
+        name: Cartographie du SI
+        description: "Repr\xE9sentation visuelle des composants d\u2019un syst\xE8\
+          me d\u2019information et de leurs interactions pour am\xE9liorer la gestion\
+          \ et la s\xE9curit\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.pam_register
+    ref_id: DOC.PAM_REGISTER
+    name: Register of privileged access accounts
+    category: process
+    csf_function: identify
+    annotation: A.5.18
+    translations:
+      fr:
+        name: "Registre des acc\xE8s \xE0 privil\xE8ges"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:doc.incident_register
+    ref_id: DOC.INCIDENT_REGiSTER
+    name: Security Incident Register
+    category: process
+    csf_function: respond
+    annotation: A.5.34
+    translations:
+      fr:
+        name: "Registre des incidents de s\xE9curit\xE9"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+    ref_id: DOC.FLOW_MATRIX
+    name: Flow Matrix
+    category: process
+    csf_function: identify
+    description: A document mapping authorized data flows between systems, applications,
+      or network zones to ensure secure and compliant communication.
+    annotation: A.5.20
+    translations:
+      fr:
+        name: Matrice de flux
+        description: "Document cartographiant les flux de donn\xE9es autoris\xE9s\
+          \ entre syst\xE8mes, applications ou zones r\xE9seau pour garantir des communications\
+          \ s\xE9curis\xE9es et conformes."
+  - urn: urn:intuitem:risk:function:doc-pol:doc.arc_principles
+    ref_id: DOC.ARC_PRINCIPLES
+    name: Security Architecture Principles
+    category: process
+    csf_function: protect
+    annotation: A.8.27
+    translations:
+      fr:
+        name: "Principes d'architecture s\xE9curit\xE9"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:proc.pam
+    ref_id: PROC.PAM
+    name: Privileged Access Management Procedure
+    category: procedure
+    csf_function: protect
+    description: A document outlining the processes and controls for managing and
+      securing privileged accounts, ensuring only authorized users have access to
+      critical systems and data, with measures like monitoring, auditing, and time-limited
+      access to minimize risks.
+    annotation: 'A.5.18
+
+      A.8.2'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des acc\xE8s \xE0 privil\xE8ges"
+        description: "Document d\xE9crivant les processus et contr\xF4les pour g\xE9\
+          rer et s\xE9curiser les comptes \xE0 privil\xE8ges, en s'assurant que seuls\
+          \ les utilisateurs autoris\xE9s ont acc\xE8s aux syst\xE8mes et donn\xE9\
+          es critiques. Elle inclut des mesures telles que la surveillance, l'audit,\
+          \ et l'acc\xE8s limit\xE9 dans le temps pour r\xE9duire les risques."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.recertification
+    ref_id: PROC.RECERTIFICATION
+    name: Account recertification procedure
+    category: procedure
+    csf_function: govern
+    description: A document that defines the process for regularly reviewing and validating
+      user access rights, system certifications, or compliance with standards. It
+      ensures that only authorized users and systems retain access or certification,
+      and it helps identify and revoke outdated or unnecessary permissions.
+    annotation: A.5.22
+    translations:
+      fr:
+        name: "Proc\xE9dure de recertification des acc\xE8s"
+        description: "\nDocument d\xE9crivant le processus de r\xE9vision et de validation\
+          \ r\xE9guli\xE8res des droits d'acc\xE8s des utilisateurs, des certifications\
+          \ des syst\xE8mes ou de la conformit\xE9 aux normes. Il garantit que seuls\
+          \ les utilisateurs et syst\xE8mes autoris\xE9s conservent leurs acc\xE8\
+          s ou certifications, et aide \xE0 identifier et r\xE9voquer les autorisations\
+          \ obsol\xE8tes ou inutiles."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.hr_security
+    ref_id: PROC.HR_SECURITY
+    name: HR Security Procedure
+    category: procedure
+    csf_function: govern
+    description: "A document that outlines processes and controls related to managing\
+      \ human resources within an organization, ensuring compliance with legal, regulatory,\
+      \ and security standards. It includes recruitment, onboarding, role changes,\
+      \ training, and termination procedures to safeguard the organization\u2019s\
+      \ information and assets."
+    annotation: 'A.5.7
+
+      A.5.8
+
+      A.5.30
+
+      A.5.18'
+    translations:
+      fr:
+        name: "Proc\xE9dure de s\xE9curit\xE9 RH"
+        description: "Document d\xE9crivant les processus et contr\xF4les li\xE9s\
+          \ \xE0 la gestion des ressources humaines au sein d'une organisation, en\
+          \ garantissant la conformit\xE9 aux normes l\xE9gales, r\xE9glementaires\
+          \ et de s\xE9curit\xE9. Il inclut les proc\xE9dures de recrutement, d'int\xE9\
+          gration, de changement de r\xF4le, de formation et de d\xE9part afin de\
+          \ prot\xE9ger les informations et les actifs de l'organisation."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.physical_security
+    ref_id: PROC.PHYSICAL_SECURITY
+    name: Physical Security Procedure
+    category: procedure
+    csf_function: govern
+    description: 'Access Control: Procedures for granting, revoking, and monitoring
+      physical access to secure areas.
+
+      Asset Protection: Guidelines for safeguarding critical assets (e.g., servers,
+      storage devices).
+
+      Surveillance: Use of cameras, alarms, and monitoring systems to detect and prevent
+      breaches.
+
+      Visitor Management: Policies for registering and escorting visitors in secure
+      areas.
+
+      Incident Response: Steps to address physical security breaches or emergencies.'
+    annotation: 'A.5.14
+
+      A.5.20
+
+      A.5.21'
+    translations:
+      fr:
+        name: "Proc\xE9dure de s\xE9curit\xE9 physique"
+        description: "Contr\xF4le des acc\xE8s : Proc\xE9dures pour accorder, r\xE9\
+          voquer et surveiller l'acc\xE8s physique aux zones s\xE9curis\xE9es.\nProtection\
+          \ des actifs : Lignes directrices pour prot\xE9ger les actifs critiques\
+          \ (ex. : serveurs, dispositifs de stockage).\nSurveillance : Utilisation\
+          \ de cam\xE9ras, d'alarmes et de syst\xE8mes de monitoring pour d\xE9tecter\
+          \ et pr\xE9venir les violations.\nGestion des visiteurs : Politiques pour\
+          \ l'enregistrement et l'accompagnement des visiteurs dans les zones s\xE9\
+          curis\xE9es.\nR\xE9ponse aux incidents : \xC9tapes pour traiter les violations\
+          \ de s\xE9curit\xE9 physique ou les situations d'urgence."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.gpo
+    ref_id: PROC.GPO
+    name: Group Policy Objects Procedure
+    category: procedure
+    csf_function: protect
+    description: defines how to create, configure, and manage GPOs to enforce security
+      settings, system configurations, and user policies across a Windows environment.
+      It ensures consistent implementation of organizational policies for secure and
+      compliant IT operations.
+    annotation: A.5.23
+    translations:
+      fr:
+        name: "Proc\xE9dure GPO"
+        description: "D\xE9finit comment cr\xE9er, configurer et g\xE9rer les GPO\
+          \ pour appliquer les param\xE8tres de s\xE9curit\xE9, les configurations\
+          \ syst\xE8me et les politiques utilisateur dans un environnement Windows.\
+          \ Cela garantit une mise en \u0153uvre coh\xE9rente des politiques organisationnelles\
+          \ pour des op\xE9rations informatiques s\xE9curis\xE9es et conformes."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.update
+    ref_id: PROC.UPDATE
+    name: Update management procedure
+    category: procedure
+    csf_function: protect
+    description: 'Roles and Responsibilities
+
+      Update Classification
+
+      Update Planning
+
+      Testing and Validation
+
+      Deployment Process
+
+      Monitoring and Verification
+
+      Documentation and Reporting'
+    annotation: A.8.8
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des mises \xE0 jour"
+        description: "R\xF4les et responsabilit\xE9s\nClassification des mises \xE0\
+          \ jour\nPlanification des mises \xE0 jour\nTests et validation\nProcessus\
+          \ de d\xE9ploiement\nSuivi et v\xE9rification\nDocumentation et rapports"
+  - urn: urn:intuitem:risk:function:doc-pol:proc.incident
+    ref_id: PROC.INCIDENT
+    name: Incident Management Procedure
+    category: procedure
+    csf_function: protect
+    description: Practical implementation of the incident management policy
+    annotation: 'A.5.24
+
+      A.5.25
+
+      A.5.26
+
+      A.5.27
+
+      A.5.28'
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion des incidents"
+        description: "Impl\xE9mentation pratique de la politique de gestion des incidents"
+  - urn: urn:intuitem:risk:function:doc-pol:proc.disposal
+    ref_id: PROC.DISPOSAL
+    name: Secure Disposal Procedure
+    category: procedure
+    csf_function: protect
+    description: 'Roles and Responsibilities
+
+      Asset Identification for Disposal
+
+      Secure Disposal Methods
+
+      Data Sanitization
+
+      Compliance with Legal and Regulatory Requirements
+
+      Documentation and Record Keeping
+
+      Verification and Audit'
+    annotation: A.7.14
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion de la mise au rebut"
+        description: "R\xF4les et responsabilit\xE9s\nIdentification des actifs \xE0\
+          \ mettre au rebut\nM\xE9thodes de mise au rebut s\xE9curis\xE9e\nEffacement\
+          \ des donn\xE9es\nConformit\xE9 aux exigences l\xE9gales et r\xE9glementaires\n\
+          Documentation et tenue des registres\nV\xE9rification et audit"
+  - urn: urn:intuitem:risk:function:doc-pol:proc.ntp
+    ref_id: PROC.NTP
+    name: Time Synchronization Procedure
+    category: procedure
+    csf_function: protect
+    description: '
+
+      Time Source: Use reliable external sources (e.g., NTP servers).
+
+      Configuration: Define synchronization intervals and fallback mechanisms.
+
+      Monitoring: Regularly verify time synchronization status.'
+    annotation: A.8.17
+    translations:
+      fr:
+        name: "Proc\xE9dure de synchronisation des horloges"
+        description: "Source temporelle : Utiliser des sources fiables (ex. : serveurs\
+          \ NTP).\nConfiguration : D\xE9finir les intervalles de synchronisation et\
+          \ les m\xE9canismes de secours.\nSurveillance : V\xE9rifier r\xE9guli\xE8\
+          rement l\u2019\xE9tat de la synchronisation temporelle."
+  - urn: urn:intuitem:risk:function:doc-pol:proc.email_security
+    ref_id: PROC.EMAIL_SECURITY
+    name: Email Security Configuration Procedure
+    category: procedure
+    csf_function: protect
+    description: 'Email Server Configuration
+
+      Domain-Based Email Protection
+
+      Anti-Malware and Anti-Spam Controls
+
+      Encryption and Secure Communication
+
+      Access Control and Monitoring
+
+      Backup and Recovery
+
+      User Awareness and Training'
+    annotation: A.8.21
+    translations:
+      fr:
+        name: "Proc\xE9dure de s\xE9curisation des emails"
+        description: "Configuration du serveur de messagerie\nProtection des emails\
+          \ bas\xE9e sur le domaine\nContr\xF4les anti-malware et anti-spam\nChiffrement\
+          \ et communication s\xE9curis\xE9e\nContr\xF4le d\u2019acc\xE8s et surveillance\n\
+          Sauvegarde et r\xE9cup\xE9ration\nSensibilisation et formation des utilisateurs"
+  - urn: urn:intuitem:risk:function:doc-pol:proc.logging
+    ref_id: PROC.LOGGING
+    name: Logging procedure
+    category: procedure
+    csf_function: detect
+    description: 'Log collection and categorization
+
+      Secure storage and retention policies
+
+      Analysis for anomaly detection and incident response'
+    annotation: A.8.15
+    translations:
+      fr:
+        name: "Proc\xE9dure de gestion de la journalisation"
+        description: "Collecte et cat\xE9gorisation des journaux\nStockage s\xE9curis\xE9\
+          \ et politiques de r\xE9tention\nAnalyse pour la d\xE9tection d'anomalies\
+          \ et la r\xE9ponse aux incidents"
   - urn: urn:intuitem:risk:function:doc-pol:pol.main
     ref_id: POL.MAIN
     name: Main policy
     category: policy
+    csf_function: govern
     description: 'information security objectives
 
       commitment
@@ -377,6 +755,7 @@ objects:
     ref_id: POL.EDUC
     name: Information security awareness and traning policy
     category: policy
+    csf_function: govern
     description: 'implications of not respecting
 
       Security event reporting
@@ -397,6 +776,7 @@ objects:
     ref_id: POL.WORK
     name: Workstations and teleworking policy
     category: policy
+    csf_function: govern
     description: 'Workstations
 
       Mobile devices
@@ -424,6 +804,7 @@ objects:
     ref_id: POL.CRYPTO
     name: Cryptographic policy
     category: policy
+    csf_function: govern
     description: 'Key management
 
       Encryption
@@ -438,6 +819,7 @@ objects:
     ref_id: POL.CLASSIF
     name: Information classification and handling policy
     category: policy
+    csf_function: govern
     description: 'classification
 
       protection and handling of information
@@ -475,6 +857,7 @@ objects:
     ref_id: POL.AUDIT
     name: Internal and external audit policy
     category: policy
+    csf_function: govern
     description: Protection of audit information
     annotation: A.8.34
     translations:
@@ -485,6 +868,7 @@ objects:
     ref_id: POL.BCP
     name: Business continuity policy
     category: policy
+    csf_function: govern
     translations:
       fr:
         name: "Politique de continuit\xE9 d\u2019activit\xE9"
@@ -493,6 +877,8 @@ objects:
     ref_id: POL.SEG_DUTY
     name: Segregation of duties policy
     category: policy
+    csf_function: govern
+    annotation: A.5.3
     translations:
       fr:
         name: "Politique sur la s\xE9paration des t\xE2ches"
@@ -501,6 +887,7 @@ objects:
     ref_id: POL.ACCESS
     name: Access control policy
     category: policy
+    csf_function: govern
     description: 'Identification
 
       authentication
@@ -538,6 +925,7 @@ objects:
     ref_id: POL.MALWARE
     name: Malware protection policy
     category: policy
+    csf_function: govern
     description: 'antivirus
 
       EDR'
@@ -551,6 +939,7 @@ objects:
     ref_id: POL.RISK
     name: Risk management policy
     category: policy
+    csf_function: govern
     description: 'Risk management definition
 
       Risk appetite
@@ -594,6 +983,7 @@ objects:
     ref_id: POL.ASSET
     name: Asset management policy
     category: policy
+    csf_function: govern
     translations:
       fr:
         name: "Politique de gestion d\u2019actifs"
@@ -602,6 +992,7 @@ objects:
     ref_id: POL.BACKUP
     name: Backup and restore policy
     category: policy
+    csf_function: govern
     translations:
       fr:
         name: Politique de sauvegarde et de restauration
@@ -610,6 +1001,7 @@ objects:
     ref_id: POL.SUPPLIER
     name: Third party supplier security policy
     category: policy
+    csf_function: govern
     annotation: A.5.19, A.5.20, A.5.21, A.5.22, A.5.23
     translations:
       fr:
@@ -619,6 +1011,7 @@ objects:
     ref_id: POL.MONITOR
     name: Logging and monitoring policy
     category: policy
+    csf_function: govern
     description: Logging
     annotation: A.8.15
     translations:
@@ -629,6 +1022,7 @@ objects:
     ref_id: POL.TRANSFER
     name: Information transfer policy
     category: policy
+    csf_function: govern
     annotation: A.5.14
     translations:
       fr:
@@ -638,6 +1032,7 @@ objects:
     ref_id: POL.SECDEV
     name: Secure development policy
     category: policy
+    csf_function: govern
     translations:
       fr:
         name: "Politique de d\xE9veloppement s\xE9curis\xE9"
@@ -646,6 +1041,7 @@ objects:
     ref_id: POL.PHYSICAL
     name: Physical security policy
     category: policy
+    csf_function: govern
     description: 'Physical security perimeter
 
       Secure areas
@@ -671,6 +1067,7 @@ objects:
     ref_id: POL.NETWORK
     name: Network security management policy
     category: policy
+    csf_function: govern
     translations:
       fr:
         name: "Politique de gestion de la s\xE9curit\xE9 du r\xE9seau"
@@ -679,23 +1076,42 @@ objects:
     ref_id: POL.ACCEPT
     name: Acceptable use policy
     category: policy
+    csf_function: govern
+    description: 'Objective: To define the permitted and prohibited uses of resources.
+
+      Scope: All IS users.
+
+      Rules: Permitted and prohibited activities, safety obligations.
+
+      Confidentiality: Protection of sensitive data.
+
+      Compliance: Monitoring, penalties for non-compliance.'
     annotation: A.5.10
     translations:
       fr:
         name: "Politique d\u2019utilisation acceptable"
-        description: null
+        description: "Objectif : D\xE9finir les usages autoris\xE9s et interdits des\
+          \ ressources.\nPort\xE9e : Tous les utilisateurs du SI.\nR\xE8gles : Activit\xE9\
+          s permises et proscrites, obligations de s\xE9curit\xE9.\nConfidentialit\xE9\
+          \ : Protection des donn\xE9es sensibles.\nConformit\xE9 : Surveillance,\
+          \ sanctions en cas de non-respect."
   - urn: urn:intuitem:risk:function:doc-pol:pol.project
     ref_id: POL.PROJECT
     name: IS project integration policy
     category: policy
+    csf_function: govern
+    description: Rules for the integration of security in IS projects
+    annotation: A.5.8
     translations:
       fr:
         name: "Politique d\u2019int\xE9gration de projets SI"
-        description: null
+        description: "R\xE8gles d'int\xE9gration de la s\xE9curit\xE9 dans les projets\
+          \ SI"
   - urn: urn:intuitem:risk:function:doc-pol:pol.threat_intel
     ref_id: POL.THREAT_INTEL
     name: Threat intelligence policy
     category: policy
+    csf_function: govern
     description: 'Known Exploited Vulnerabilities
 
       Threat actors activity
@@ -711,27 +1127,697 @@ objects:
     ref_id: POL.INCIDENT
     name: IS incident management policy
     category: policy
-    description: 'Security incident management
+    csf_function: govern
+    description: 'Incident Classification
 
-      Vulnerability management'
-    annotation: A.5.24, A.5.25, A.5.26, A.5.27
+      Incident Reporting
+
+      Incident Response Process
+
+      Root Cause Analysis and Lessons Learned
+
+      Documentation and Communication
+
+      Roles and Responsibilities
+
+      Review and Updates'
+    annotation: 'A.5.24
+
+      A.5.25
+
+      A.5.26
+
+      A.5.27
+
+      A.5.28'
     translations:
       fr:
         name: Politique de gestion des incidents du SI
-        description: "Gestion des incidents de s\xE9curit\xE9\nGestion des vuln\xE9\
-          rabilit\xE9s"
+        description: "Classification des incidents\nSignalement des incidents\nProcessus\
+          \ de r\xE9ponse aux incidents\nAnalyse des causes et retours d'exp\xE9rience\n\
+          Documentation et communication\nR\xF4les et responsabilit\xE9s\nRevue et\
+          \ mises \xE0 jour"
   - urn: urn:intuitem:risk:function:doc-pol:pol.maintenance
     ref_id: POL.MAINTENANCE
     name: Maintenance policy
     category: policy
+    csf_function: govern
     description: 'Obsolescence management
 
       Maintenance contracts
 
       Change management'
-    annotation: A.7.13
+    annotation: 'A.7.13
+
+      A.8.32'
     translations:
       fr:
         name: Politique de maintenance
         description: "Gestion de l\u2019obsolescence\nContrats de maintenance\nGestion\
           \ du changement"
+  - urn: urn:intuitem:risk:function:doc-pol:pol.vulnerability
+    ref_id: POL.VULNERABILITY
+    name: Vulnerability management policy
+    category: policy
+    csf_function: govern
+    description: 'Vulnerability detection and management
+
+      Patch management'
+    annotation: 'A.8.8
+
+      A.5.35'
+    translations:
+      fr:
+        name: "Politique de gestion des vuln\xE9rabilit\xE9s"
+        description: "D\xE9tection et gestion des vuln\xE9rabilit\xE9s\nGestion des\
+          \ mises \xE0 jour"
+  - urn: urn:intuitem:risk:function:doc-pol:train.legal
+    ref_id: TRAIN.LEGAL
+    name: Legal and regulatory training
+    category: process
+    csf_function: govern
+    description: 'Objective: Ensure awareness of legal and regulatory compliance.
+
+      Audience: All employees; tailored for specific roles.
+
+      Topics: Key laws (e.g., GDPR), data handling, non-compliance risks.
+
+      Methods: E-learning, workshops, case studies.
+
+      Assessment: Quizzes and scenario-based tests.'
+    annotation: '7.2
+
+      7.3'
+    translations:
+      fr:
+        name: "Formation conformit\xE9 l\xE9gal et r\xE9glementaire"
+        description: "Objectif : Assurer une sensibilisation aux obligations l\xE9\
+          gales et r\xE9glementaires.\nPublic : Tous les employ\xE9s, avec des contenus\
+          \ adapt\xE9s aux r\xF4les sp\xE9cifiques.\nSujets : Lois cl\xE9s (ex. :\
+          \ RGPD), gestion des donn\xE9es, risques de non-conformit\xE9.\nM\xE9thodes\
+          \ : E-learning, ateliers, \xE9tudes de cas.\n\xC9valuation : Quiz et tests\
+          \ bas\xE9s sur des sc\xE9narios."
+  - urn: urn:intuitem:risk:function:doc-pol:train.threat
+    ref_id: TRAIN.THREAT
+    name: Threat landscape training
+    category: process
+    csf_function: govern
+    description: 'Objective: Understand current cyber threats and mitigation strategies.
+
+      Audience: IT staff, security teams, and decision-makers.
+
+      Topics: Emerging threats, attack techniques, defense mechanisms.
+
+      Methods: Presentations, case studies, scenario-based discussions.
+
+      Outcome: Improved awareness and readiness to address evolving threats.'
+    annotation: '7.2
+
+      7.3'
+    translations:
+      fr:
+        name: "Formation sur l'\xE9tat de la menace"
+        description: "Objectif : Comprendre les menaces cyber actuelles et les strat\xE9\
+          gies d\u2019att\xE9nuation.\nPublic : \xC9quipes IT, \xE9quipes de s\xE9\
+          curit\xE9, et d\xE9cideurs.\nSujets : Menaces \xE9mergentes, techniques\
+          \ d'attaque, m\xE9canismes de d\xE9fense.\nM\xE9thodes : Pr\xE9sentations,\
+          \ \xE9tudes de cas, discussions bas\xE9es sur des sc\xE9narios.\nR\xE9sultat\
+          \ : Sensibilisation accrue et meilleure pr\xE9paration face aux menaces\
+          \ \xE9volutives."
+  - urn: urn:intuitem:risk:function:doc-pol:train.iam
+    ref_id: TRAIN.IAM
+    name: IAM (Identity and Access Management) training
+    category: process
+    csf_function: govern
+    description: 'Objective: Understand and master identity and access management.
+
+      Audience: IT administrators, security teams, access managers.
+
+      Topics:
+
+      - Key concepts (identity, authentication, authorization, RBAC/ABAC models).
+
+      - IAM best practices (rights management, provisioning, audits).
+
+      - Standards and tools (SAML, OAuth, Active Directory, etc.).
+
+      Methods: Practical workshops, use cases, demonstrations.
+
+      Outcome: Enhanced skills to secure and efficiently manage access.'
+    annotation: '7.2'
+    translations:
+      fr:
+        name: "Formation IAM (Gestion des Identit\xE9s et des Acc\xE8s)"
+        description: "Objectif : Comprendre et ma\xEEtriser la gestion des identit\xE9\
+          s et des acc\xE8s.\nPublic : Administrateurs IT, \xE9quipes de s\xE9curit\xE9\
+          , responsables d\u2019acc\xE8s.\nSujets :\nConcepts cl\xE9s (identit\xE9\
+          , authentification, autorisation, mod\xE8les RBAC/ABAC).\nBonnes pratiques\
+          \ IAM (gestion des droits, provisionnement, audits).\nNormes et outils (SAML,\
+          \ OAuth, Active Directory, etc.).\nM\xE9thodes : Ateliers pratiques, cas\
+          \ d\u2019usage, d\xE9monstrations.\nR\xE9sultat : Capacit\xE9s renforc\xE9\
+          es pour s\xE9curiser et g\xE9rer les acc\xE8s efficacement."
+  - urn: urn:intuitem:risk:function:doc-pol:train.network_security
+    ref_id: TRAIN.NETWORK_SECURITY
+    name: Network security training
+    category: process
+    csf_function: govern
+    description: 'Objective: Teach best practices for securing network infrastructures
+      and preventing cyber threats.
+
+      Audience: IT administrators, network engineers, security professionals.
+
+      Topics:
+
+      - Network segregation principles.
+
+      - Firewall configuration and monitoring.
+
+      - Intrusion detection/prevention systems (IDS/IPS/NDR).
+
+      - Network segmentation and access control.
+
+      - Secure protocols (e.g., HTTPS, VPN, SSH).
+
+      - Threat mitigation (e.g., DDoS, malware).
+
+      Methods: Interactive labs, simulations, and hands-on exercises.
+
+      Outcome: Enhanced ability to protect and monitor network environments.'
+    annotation: '7.2'
+    translations:
+      fr:
+        name: "Formation s\xE9curit\xE9 r\xE9seau"
+        description: "Objectif : Enseigner les meilleures pratiques pour s\xE9curiser\
+          \ les infrastructures r\xE9seau et pr\xE9venir les cybermenaces.\nPublic\
+          \ : Administrateurs IT, ing\xE9nieurs r\xE9seau, professionnels de la s\xE9\
+          curit\xE9.\nSujets :\n\nPrincipes de cloisonnement r\xE9seau.\nConfiguration\
+          \ et surveillance des pare-feu.\nSyst\xE8mes de d\xE9tection/pr\xE9vention\
+          \ d'intrusion (IDS/IPS/NDR).\nSegmentation r\xE9seau et contr\xF4le des\
+          \ acc\xE8s.\nProtocoles s\xE9curis\xE9s (ex. : HTTPS, VPN, SSH).\nAtt\xE9\
+          nuation des menaces (ex. : DDoS, malwares).\nM\xE9thodes : Laboratoires\
+          \ interactifs, simulations et exercices pratiques.\nR\xE9sultat : Capacit\xE9\
+          s renforc\xE9es pour prot\xE9ger et surveiller les environnements r\xE9\
+          seau."
+  - urn: urn:intuitem:risk:function:doc-pol:train.mcs
+    ref_id: TRAIN.MCS
+    category: process
+    csf_function: govern
+    description: 'Objective: Build expertise in maintaining secure IT systems through
+      monitoring, patching, compliance, and incident response.
+
+      Audience: IT security professionals, system administrators, compliance officers,
+      and incident response teams.
+
+      Topics:
+
+      - Principles of maintaining security and its importance in cybersecurity.
+
+      - Security monitoring tools and techniques (e.g., SIEM, IDS).
+
+      - Patch management and secure system configurations.
+
+      - Incident detection, response planning, and execution.
+
+      - Compliance with security policies and regulatory standards.
+
+      Methods: Practical labs, simulated scenarios, and case studies on maintaining
+      security conditions.
+
+      Outcome: Enhanced capability to continuously secure IT environments, mitigate
+      risks, and ensure compliance.'
+    annotation: 'A.7.13
+
+      A.8.32'
+    translations:
+      fr:
+        name: "Formation Maintien en Condition de S\xE9curit\xE9 (MCS)"
+        description: "Objectif : D\xE9velopper une expertise dans le maintien en condition\
+          \ de s\xE9curit\xE9 (MCS)\nPublic : Professionnels de la s\xE9curit\xE9\
+          \ IT, administrateurs syst\xE8mes, responsables conformit\xE9 et \xE9quipes\
+          \ de r\xE9ponse aux incidents.\nSujets :\n- Principes du MCS et son importance\
+          \ en cybers\xE9curit\xE9.\n- Outils et techniques de surveillance de la\
+          \ s\xE9curit\xE9 (ex. : SIEM, IDS).\n- Gestion des correctifs et configurations\
+          \ s\xE9curis\xE9es des syst\xE8mes.\n- D\xE9tection des incidents, planification\
+          \ et ex\xE9cution des r\xE9ponses.\n- Conformit\xE9 aux politiques de s\xE9\
+          curit\xE9 et aux r\xE9glementations.\nM\xE9thodes : Exercices pratiques,\
+          \ sc\xE9narios simul\xE9s et \xE9tudes de cas sur le maintien des conditions\
+          \ de s\xE9curit\xE9.\nR\xE9sultat attendu : Capacit\xE9 renforc\xE9e \xE0\
+          \ s\xE9curiser en continu les environnements IT, \xE0 att\xE9nuer les risques\
+          \ et \xE0 garantir la conformit\xE9."
+  - urn: urn:intuitem:risk:function:doc-pol:train.logging
+    ref_id: TRAIN.LOGGING
+    name: Logging and Monitoring Training
+    category: process
+    csf_function: govern
+    description: "1. Objective: Teach effective logging practices and monitoring techniques\
+      \ to enhance security and incident response.  \n2. Audience: IT administrators,\
+      \ security teams, and SOC analysts.  \n3. Topics:  \n   - Importance of logging\
+      \ and compliance requirements.  \n   - Configuring and managing log sources\
+      \ (e.g., servers, firewalls, applications).  \n   - Centralized logging systems\
+      \ (e.g., SIEM, ELK stack).  \n   - Detecting anomalies and analyzing logs. \
+      \ \n   - Incident response based on log insights.  \n4. Methods: Hands-on labs,\
+      \ real-world scenarios, and log analysis exercises.  \n5. Outcome: Improved\
+      \ ability to collect, analyze, and act on log data to prevent and respond to\
+      \ incidents.  "
+    annotation: '7.2
+
+      7.12
+
+      7.13
+
+      7.14
+
+      A.5.12
+
+      A.5.13
+
+      A.5.14
+
+      A.5.15'
+    translations:
+      fr:
+        name: Formation sur la Journalisation et la Surveillance
+        description: "Objectif : Enseigner les pratiques efficaces de journalisation\
+          \ et les techniques de surveillance pour renforcer la s\xE9curit\xE9 et\
+          \ la r\xE9ponse aux incidents.\nPublic : Administrateurs IT, \xE9quipes\
+          \ de s\xE9curit\xE9, analystes SOC.\nSujets :\nImportance de la journalisation\
+          \ et exigences de conformit\xE9.\nConfiguration et gestion des sources de\
+          \ journaux (ex. : serveurs, pare-feu, applications).\nSyst\xE8mes de journalisation\
+          \ centralis\xE9e (ex. : SIEM, ELK stack).\nD\xE9tection d'anomalies et analyse\
+          \ des journaux.\nR\xE9ponse aux incidents bas\xE9e sur les informations\
+          \ des journaux.\nM\xE9thodes : Ateliers pratiques, sc\xE9narios r\xE9els\
+          \ et exercices d'analyse des journaux.\nR\xE9sultat : Capacit\xE9 renforc\xE9\
+          e \xE0 collecter, analyser et exploiter les donn\xE9es de journaux pour\
+          \ pr\xE9venir et g\xE9rer les incidents."
+  - urn: urn:intuitem:risk:function:doc-pol:train.hardening
+    ref_id: TRAIN.HARDENING
+    name: Hardening and Secure Configuration Training
+    category: process
+    csf_function: govern
+    description: 'Objective: Equip participants with the knowledge to implement secure
+      configurations and harden systems to reduce vulnerabilities.
+
+      Audience: IT administrators, system engineers, security professionals.
+
+      Topics:
+
+      - Principles of system hardening.
+
+      - Hardening operating systems (Windows, Linux).
+
+      - Securing databases (e.g., MySQL, PostgreSQL).
+
+      - Network device hardening (firewalls, routers, switches).
+
+      - Applying CIS Benchmarks and ANSSI guidelines.
+
+      - Tools for automation (e.g., Ansible, Puppet, Chef).
+
+      Methods:
+
+      - Hands-on labs for OS and application hardening.
+
+      - Case studies on hardening failures and solutions.
+
+      Outcome: Participants will gain the ability to implement secure configurations
+      and improve overall system resilience.'
+    annotation: '7.2
+
+      A.5.23
+
+      A.5.12
+
+      A.5.16
+
+      A.5.35'
+    translations:
+      fr:
+        name: "Formation sur le Durcissement des Syst\xE8mes"
+        description: "Objectif : Former les participants \xE0 appliquer des configurations\
+          \ s\xE9curis\xE9es et \xE0 durcir les syst\xE8mes pour r\xE9duire les vuln\xE9\
+          rabilit\xE9s.\nPublic : Administrateurs IT, ing\xE9nieurs syst\xE8mes, professionnels\
+          \ de la s\xE9curit\xE9.\nSujets :\n- Principes fondamentaux du durcissement\
+          \ des syst\xE8mes.\n- Durcissement des syst\xE8mes d\u2019exploitation (Windows,\
+          \ Linux).\n- S\xE9curisation des bases de donn\xE9es (ex. : MySQL, PostgreSQL).\n\
+          - Durcissement des \xE9quipements r\xE9seau (pare-feu, routeurs, switchs).\n\
+          - Application des benchmarks CIS et recommandations ANSSI.\n- Automatisation\
+          \ des configurations (ex. : Ansible, Puppet, Chef).\nM\xE9thodes :\n- Ateliers\
+          \ pratiques pour le durcissement des syst\xE8mes et applications.\n- \xC9\
+          tudes de cas sur les \xE9checs de durcissement et leurs solutions.\nR\xE9\
+          sultat : Les participants ma\xEEtriseront la mise en \u0153uvre de configurations\
+          \ s\xE9curis\xE9es et l'am\xE9lioration de la r\xE9silience des syst\xE8\
+          mes."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.nac
+    ref_id: TECH.NAC
+    name: Network Access Control (802.1X)
+    category: technical
+    csf_function: protect
+    description: A capacity that enforces authentication and authorization of devices
+      or users before granting network access. It ensures secure access to wired and
+      wireless networks by leveraging protocols like 82.1X and RADIUS to validate
+      credentials and apply access policies.
+    annotation: A.5.20
+    translations:
+      fr:
+        name: "Contr\xF4le d'Acc\xE8s R\xE9seau (802.1X)"
+        description: "Une capacit\xE9 permettant d'assurer l'authentification et l'autorisation\
+          \ des appareils ou des utilisateurs avant de leur accorder l'acc\xE8s au\
+          \ r\xE9seau. Elle garantit un acc\xE8s s\xE9curis\xE9 aux r\xE9seaux filaires\
+          \ et sans fil en utilisant des protocoles comme 802.1X et RADIUS pour valider\
+          \ les identifiants et appliquer les politiques d'acc\xE8s."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.access_log
+    ref_id: TECH.ACCESS_LOG
+    name: Access Logging
+    category: technical
+    csf_function: detect
+    annotation: 'A.5.12
+
+      A.5.15'
+    translations:
+      fr:
+        name: "Journalisation des acc\xE8s"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:tech.edr
+    ref_id: TECH.EDR
+    name: Event Detection and Response (EDR) Capacity
+    category: technical
+    csf_function: detect
+    annotation: 'A.5.12
+
+      A.5.15'
+    translations:
+      fr:
+        name: "Capacit\xE9 de d\xE9tection et de traitement des \xE9v\xE9nements (EDR)"
+        description: null
+  - urn: urn:intuitem:risk:function:doc-pol:tech.password_manager
+    ref_id: TECH.PASSWORD_MANAGER
+    name: Password Management Capacity
+    category: technical
+    csf_function: protect
+    description: A capacity that enables secure creation, storage, management, and
+      usage of passwords for systems, applications, and accounts. It reduces the risk
+      of unauthorized access by enforcing strong password policies and ensuring secure
+      handling of credentials.
+    annotation: A.5.18
+    translations:
+      fr:
+        name: "Syst\xE8me de gestion des mots de passe"
+        description: "Capacit\xE9 permettant la cr\xE9ation, le stockage, la gestion\
+          \ et l'utilisation s\xE9curis\xE9s des mots de passe pour les syst\xE8mes,\
+          \ les applications et les comptes. Elle r\xE9duit le risque d'acc\xE8s non\
+          \ autoris\xE9 en appliquant des politiques de mots de passe robustes et\
+          \ en garantissant une gestion s\xE9curis\xE9e des identifiants."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.uem
+    ref_id: TECH.UEM
+    name: Unified Endpoint Management Capacity
+    category: technical
+    csf_function: protect
+    description: A capacity that provides centralized control and management of all
+      endpoints, including desktops, laptops, mobile devices, and IoT devices, through
+      a single platform. It ensures secure configuration, policy enforcement, application
+      management, and monitoring across an organization's endpoint ecosystem.
+    annotation: A.5.23
+    translations:
+      fr:
+        name: "Syst\xE8me unifi\xE9 de gestion des terminaux"
+        description: "Capacit\xE9 permettant le contr\xF4le et la gestion centralis\xE9\
+          s de tous les terminaux, y compris les ordinateurs de bureau, les ordinateurs\
+          \ portables, les appareils mobiles et les dispositifs IoT, via une plateforme\
+          \ unique. Elle garantit une configuration s\xE9curis\xE9e, l'application\
+          \ des politiques, la gestion des applications et la surveillance de l'\xE9\
+          cosyst\xE8me des terminaux de l'organisation."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+    ref_id: TECH.ENDPOINT_PROTECTION
+    name: Host antivirus, firewall and USB control
+    category: technical
+    csf_function: detect
+    description: "Integrated solutions for securing endpoints, including antivirus,\
+      \ firewall, and USB port control\_"
+    annotation: A.8.7
+    translations:
+      fr:
+        name: Antivirus et pare-feu pour poste de travail
+        description: "Solutions int\xE9gr\xE9es pour s\xE9curiser les terminaux, incluant\
+          \ antivirus, pare-feu et gestion des ports USB"
+  - urn: urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+    ref_id: TECH.DISK_ENCRYPTION
+    name: Disk Encryption Capacity
+    category: technical
+    csf_function: protect
+    description: Full-disk encryption for workstations
+    annotation: A.8.24
+    translations:
+      fr:
+        name: "Capacit\xE9 de chiffrement de disque"
+        description: Chiffrement de disque complet pour les postes de travail
+  - urn: urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+    ref_id: TECH.IMMUTABLE_BACKUP
+    name: Immutable backup capacity
+    category: technical
+    csf_function: recover
+    description: A capability that ensures backups cannot be altered, deleted, or
+      overwritten, protecting data integrity against ransomware and unauthorized access.
+    annotation: A.5.30
+    translations:
+      fr:
+        name: "Capacit\xE9 de sauvegarde immuable"
+        description: "Capacit\xE9 qui garantit que les sauvegardes ne peuvent pas\
+          \ \xEAtre modifi\xE9es, supprim\xE9es ou \xE9cras\xE9es, assurant l\u2019\
+          int\xE9grit\xE9 des donn\xE9es contre les ransomwares et les acc\xE8s non\
+          \ autoris\xE9s."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.file_encryption
+    ref_id: TECH.FILE_ENCRYPTION
+    name: File encryption capacity
+    category: technical
+    csf_function: protect
+    description: File encryption utilities like 7zip
+    annotation: A.8.24
+    translations:
+      fr:
+        name: "Capacit\xE9 de chiffrement de fichiers"
+        description: Utilitaire de chiffrement de fichier comme 7zip.
+  - urn: urn:intuitem:risk:function:doc-pol:tech.cmdb
+    ref_id: TECH.CMDB
+    name: Configuration Management DataBase (CMDB)
+    category: technical
+    csf_function: identify
+    description: A centralized repository that stores and manages information about
+      IT assets, their configurations, and relationships to support effective IT management.
+    annotation: A.5.23
+    translations:
+      fr:
+        name: "Base de donn\xE9es de gestion des configurations (CMDB)"
+        description: "R\xE9f\xE9rentiel centralis\xE9 qui stocke et g\xE8re les informations\
+          \ sur les actifs IT, leurs configurations et leurs relations pour une gestion\
+          \ IT efficace."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.siem
+    ref_id: TECH.SIEM
+    name: Security Information and Event Management (SIEM)
+    category: technical
+    csf_function: detect
+    description: 'A system that collects, analyzes, and correlates security data from
+      multiple sources to detect and respond to threats.
+
+      '
+    annotation: A.5.12
+    translations:
+      fr:
+        name: "Gestion des informations et des \xE9v\xE9nements de s\xE9curit\xE9\
+          \ (SIEM) "
+        description: "Syst\xE8me qui collecte, analyse et corr\xE8le les donn\xE9\
+          es de s\xE9curit\xE9 provenant de multiples sources pour d\xE9tecter et\
+          \ r\xE9pondre aux menaces."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.screen_filter
+    ref_id: TECH.SCREEN_FILTER
+    name: Screen Filter
+    category: technical
+    csf_function: protect
+    description: A physical or digital filter that limits screen visibility to authorized
+      users, reducing the risk of visual data breaches.
+    annotation: A.7.9
+    translations:
+      fr:
+        name: "Filtre d'\xE9cran"
+        description: "Filtre physique ou num\xE9rique qui limite la visibilit\xE9\
+          \ de l'\xE9cran aux utilisateurs autoris\xE9s, r\xE9duisant le risque de\
+          \ divulgation visuelle de donn\xE9es."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.network_firewall
+    ref_id: TECH.NETWORK_FIREWALL
+    name: Network Firewall
+    category: technical
+    csf_function: protect
+    description: ecurity system that monitors and controls incoming and outgoing network
+      traffic based on predefined rules.
+    annotation: A.8.22
+    translations:
+      fr:
+        name: "Pare-feu r\xE9seau"
+        description: "Syst\xE8me de s\xE9curit\xE9 qui surveille et contr\xF4le le\
+          \ trafic r\xE9seau entrant et sortant selon des r\xE8gles pr\xE9d\xE9finies"
+  - urn: urn:intuitem:risk:function:doc-pol:tech.mail_gateway
+    ref_id: TECH.MAIL_GATEWAY
+    name: Secure Mail Gateway
+    category: technical
+    csf_function: protect
+    description: system that filters, monitors, and protects email communications
+      against spam, malware, and unauthorized access
+    annotation: A.5.23
+    translations:
+      fr:
+        name: "Passerelle mail s\xE9curis\xE9e"
+        description: "Syst\xE8me qui filtre, surveille et prot\xE8ge les communications\
+          \ par email contre le spam, les logiciels malveillants et les acc\xE8s non\
+          \ autoris\xE9s."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.network_antivirus
+    ref_id: TECH.NETWORK_ANTIVIRUS
+    name: Network Antivirus
+    category: technical
+    csf_function: detect
+    description: Protects email and web traffic at the network edge against malware
+    annotation: A.8.7
+    translations:
+      fr:
+        name: "Antivirus r\xE9seau"
+        description: "Prot\xE8ge les emails et le trafic web \xE0 la p\xE9riph\xE9\
+          rie du r\xE9seau contre les malwares"
+  - urn: urn:intuitem:risk:function:doc-pol:tech.vlan
+    ref_id: TECH.VLAN
+    name: VLAN
+    category: technical
+    csf_function: protect
+    description: VLANs isolate and segment network traffic to enhance security and
+      optimize performance.
+    annotation: A.8.22
+    translations:
+      fr:
+        name: VLAN
+        description: "Les VLAN isolent et segmentent le trafic r\xE9seau pour renforcer\
+          \ la s\xE9curit\xE9 et optimiser les performances."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+    ref_id: TECH.MICROSEGMENTATION
+    name: Microsegmentation
+    category: technical
+    csf_function: protect
+    description: Microsegmentation is a security strategy that creates fine-grained,
+      context-aware policies to isolate individual workloads or applications within
+      a network, limiting lateral movement and containing breaches.
+    annotation: A.8.22
+    translations:
+      fr:
+        name: Micro-segmentation
+        description: "La microsegmentation est une strat\xE9gie de s\xE9curit\xE9\
+          \ qui cr\xE9e des politiques granulaires et contextuelles pour isoler des\
+          \ charges de travail ou des applications sp\xE9cifiques dans un r\xE9seau,\
+          \ limitant les mouvements lat\xE9raux et contenant les violations"
+  - urn: urn:intuitem:risk:function:doc-pol:tech.wifi_sec
+    ref_id: TECH.WIFI_SEC
+    name: Wi-Fi Security
+    category: technical
+    csf_function: protect
+    description: Wi-Fi security ensures secure wireless communications through WPA3
+      Enterprise encryption, robust authentication, and advanced access control mechanisms.
+      While WPA2 Enterprise remains acceptable, transitioning to WPA3 is strongly
+      recommended for enhanced security.
+    annotation: 'A.8.20
+
+      A.8.24'
+    translations:
+      fr:
+        name: "S\xE9curit\xE9 Wi-Fi"
+        description: "La s\xE9curit\xE9 Wi-Fi garantit des communications sans fil\
+          \ s\xE9curis\xE9es gr\xE2ce au chiffrement WPA3 Enterprise, \xE0 une authentification\
+          \ robuste et \xE0 des m\xE9canismes de contr\xF4le d'acc\xE8s avanc\xE9\
+          s. Bien que WPA2 Enterprise soit acceptable, il est fortement recommand\xE9\
+          \ de passer \xE0 WPA3 pour une s\xE9curit\xE9 renforc\xE9e."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.reverse_proxy
+    ref_id: TECH.REVERSE_PROXY
+    name: Reverse Proxy
+    category: technical
+    csf_function: protect
+    description: A reverse proxy forwards client requests to backend servers, enhancing
+      security, load balancing, and performance.
+    annotation: A.8.23
+    translations:
+      fr:
+        name: Proxy inverse
+        description: "Un proxy inverse transf\xE8re les requ\xEAtes des clients vers\
+          \ les serveurs backend, am\xE9liorant la s\xE9curit\xE9, l'\xE9quilibrage\
+          \ de charge et les performances"
+  - urn: urn:intuitem:risk:function:doc-pol:tech.waf
+    ref_id: TECH.WAF
+    name: Web Application Firewall (WAF)
+    category: technical
+    csf_function: detect
+    description: A Web Application Firewall (WAF) protects web applications by filtering
+      and monitoring HTTP traffic to block malicious activity.
+    annotation: A.8.23
+    translations:
+      fr:
+        name: Firewall applicatif web
+        description: "Un pare-feu pour applications web (WAF) prot\xE8ge les applications\
+          \ web en filtrant et surveillant le trafic HTTP pour bloquer les activit\xE9\
+          s malveillantes."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.ids
+    ref_id: TECH.IDS
+    name: Intrusion Detection System (IDS)
+    category: technical
+    csf_function: detect
+    description: An Intrusion Detection System (IDS) monitors network traffic to detect
+      and alert on potential security threats or unauthorized activities
+    annotation: A.8.20
+    translations:
+      fr:
+        name: "Syst\xE8me de d\xE9tection d'intrusion (IDS)"
+        description: "Un syst\xE8me de d\xE9tection d'intrusion (IDS) surveille le\
+          \ trafic r\xE9seau pour d\xE9tecter et alerter sur les menaces de s\xE9\
+          curit\xE9 potentielles ou les activit\xE9s non autoris\xE9es."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.web_proxy
+    ref_id: TECH.WEB_PROXY
+    name: Web Proxy
+    category: technical
+    csf_function: protect
+    description: A web proxy filters and monitors web traffic, enforces security policies,
+      and supports user authentication to control and secure internet access
+    annotation: A.8.23
+    translations:
+      fr:
+        name: Proxy web
+        description: "Un proxy web filtre et surveille le trafic web, applique des\
+          \ politiques de s\xE9curit\xE9 et prend en charge l'authentification des\
+          \ utilisateurs pour contr\xF4ler et s\xE9curiser l'acc\xE8s \xE0 Internet."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.vpn
+    ref_id: TECH.VPN
+    name: VPN
+    category: technical
+    csf_function: protect
+    description: A Virtual Private Network (VPN) secures data transmission by encrypting
+      traffic using protocols like IPSec, ensuring privacy and protection against
+      interception."
+    annotation: 'A.8.20
+
+      A.8.24'
+    translations:
+      fr:
+        name: VPN
+        description: "Un r\xE9seau priv\xE9 virtuel (VPN) s\xE9curise la transmission\
+          \ des donn\xE9es en chiffrant le trafic gr\xE2ce \xE0 des protocoles comme\
+          \ IPSec, garantissant la confidentialit\xE9 et la protection contre les\
+          \ interceptions."
+  - urn: urn:intuitem:risk:function:doc-pol:tech.mfa
+    ref_id: TECH.MFA
+    name: Multi-Factor Authentication (MFA)
+    category: technical
+    csf_function: protect
+    description: 'Multi-Factor Authentication (MFA) enhances security by requiring
+      two verification factors from different categories: something you know (e.g.,
+      a password), something you have (e.g., a token or smartphone), and something
+      you are (e.g., a fingerprint or facial recognition).'
+    annotation: A.8.5
+    translations:
+      fr:
+        name: Authentification Multi-Facteur (MFA)
+        description: "L'authentification multifacteur (MFA) am\xE9liore la s\xE9curit\xE9\
+          \ en exigeant deux facteurs de v\xE9rification issus de cat\xE9gories diff\xE9\
+          rentes : ce que vous savez (ex. : un mot de passe), ce que vous poss\xE9\
+          dez (ex. : un jeton ou un smartphone) et ce que vous \xEAtes (ex. : une\
+          \ empreinte digitale ou une reconnaissance faciale)"
