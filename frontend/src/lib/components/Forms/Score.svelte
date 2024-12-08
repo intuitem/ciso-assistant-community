@@ -30,30 +30,15 @@
 
 	export let scores_definition: ScoresDefinition[] = [];
 
-	const tables = {};
-
 	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	let isScoredField = formFieldProxy(form, `is_scored`)['value'];
-	let isScored: boolean;
-	if ($isScoredField === undefined) {
-		isScored = $value !== null;
-	} else {
-		isScored = $isScoredField;
-		$value = $value ?? min_score;
-	}
+	const isScored = formFieldProxy(form, `is_scored`)['value'];
 
-	function handleIsScoredChange() {
-		if ($isScoredField === undefined) {
-			$value = isScored ? $value || min_score : null;
-		} else {
-			$isScoredField = isScored;
-		}
-	}
+	$: $value = $isScored ? ($value ?? min_score) : $value;
 
 	if (always_enabled) {
-		isScored = true;
+		$isScored = true;
 	}
 
 	$: if (max_score === 100) score_step = 5;
@@ -93,13 +78,12 @@
 					max={max_score}
 					step={score_step}
 					ticked
-					disabled={!isScored}
+					disabled={!$isScored}
 				>
 					<div class="flex justify-between space-x-8 items-center">
 						{#if !always_enabled}
 							<SlideToggle
-								bind:checked={isScored}
-								on:change={handleIsScoredChange}
+								bind:checked={$isScored}
 								class="shrink-0"
 								active="bg-primary-500"
 								name="score-slider"
@@ -107,7 +91,7 @@
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 							>
 						{/if}
-						{#if isScored && scores_definition && $value !== null}
+						{#if $isScored && scores_definition && $value !== null}
 							{#each scores_definition as definition}
 								{#if definition.score === $value}
 									<p class="w-full max-w-[80ch]">
@@ -120,20 +104,20 @@
 							<ProgressRadial
 								stroke={100}
 								meter={displayScoreColor($value, max_score, inversedColors)}
-								value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
+								value={$isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
 								font={115}
 								class="shrink-0"
 								width={'w-12'}
-								>{securityObjectiveDisplay($value) ?? (isScored ? $value : '--')}</ProgressRadial
+								>{securityObjectiveDisplay($value) ?? ($isScored ? $value : '--')}</ProgressRadial
 							>
 						{:else}
 							<ProgressRadial
 								stroke={100}
 								meter={displayScoreColor($value, max_score, inversedColors)}
-								value={isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
+								value={$isScored ? formatScoreValue($value, max_score, fullDonut) : min_score}
 								font={150}
 								class="shrink-0"
-								width={'w-12'}>{isScored ? $value : '--'}</ProgressRadial
+								width={'w-12'}>{$isScored ? $value : '--'}</ProgressRadial
 							>
 						{/if}
 					</div>
