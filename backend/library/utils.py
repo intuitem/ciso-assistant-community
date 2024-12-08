@@ -594,12 +594,9 @@ class LibraryImporter:
                     return error_msg
             else:
                 # try to update the dependency, because we might need the last version for the main library
-                dependency = LoadedLibrary.objects.get(
-                    urn=dependency_urn
-                )
+                dependency = LoadedLibrary.objects.get(urn=dependency_urn)
                 if (err_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
                     return err_msg
-                
 
     def create_or_update_library(self):
         """Create or update the library object."""
