@@ -291,8 +291,6 @@ export const listViewFields: ListViewFieldsConfig = {
 			'severity',
 			'applied_controls',
 			'folder',
-			'status',
-			'severity',
 			'filtering_labels'
 		],
 		filters: {
