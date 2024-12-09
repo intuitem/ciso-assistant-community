@@ -4,7 +4,6 @@
 	export let value: string;
 	export let codes: string[];
 	export let inputs: (null | HTMLInputElement)[];
-	export let nostyle: boolean;
 	export let className: string;
 	export let num: boolean;
 	export let style: string;
