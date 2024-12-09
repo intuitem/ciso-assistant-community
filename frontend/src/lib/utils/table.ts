@@ -273,8 +273,28 @@ export const listViewFields: ListViewFieldsConfig = {
 		}
 	},
 	vulnerabilities: {
-		head: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'labels'],
-		body: ['ref_id', 'name', 'description', 'applied_controls', 'folder', 'filtering_labels'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'severity',
+			'applied_controls',
+			'folder',
+			'labels'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'severity',
+			'applied_controls',
+			'folder',
+			'status',
+			'severity',
+			'filtering_labels'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
