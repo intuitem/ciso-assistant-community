@@ -443,6 +443,15 @@ export const StakeholderSchema = z.object({
 	justification: z.string().optional()
 });
 
+export const AttackPathSchema = z.object({
+	ebios_rm_study: z.string(),
+	ro_to_couple: z.string().uuid(),
+	stakeholders: z.string().uuid().array(),
+	description: z.string(),
+	is_selected: z.boolean().optional(),
+	justification: z.string().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -471,7 +480,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'ebios-rm': ebiosRMSchema,
 	'feared-events': fearedEventsSchema,
 	'ro-to': roToSchema,
-	stakeholders: StakeholderSchema
+	stakeholders: StakeholderSchema,
+	'attack-paths': AttackPathSchema
 };
 
 export const modelSchema = (model: string) => {
