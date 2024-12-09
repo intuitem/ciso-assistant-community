@@ -52,7 +52,7 @@ msgstr ""
 
 #: iam/models.py:279
 msgid "Welcome to Ciso Assistant!"
-msgstr ""
+msgstr "Bienvenue sur CISO Assistant !"
 
 #: iam/models.py:326
 msgid "last name"
