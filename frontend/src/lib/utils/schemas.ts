@@ -413,6 +413,19 @@ export const fearedEventsSchema = z.object({
 	qualifications: z.string().optional().array().optional()
 });
 
+export const roToSchema = z.object({
+	ebios_rm_study: z.string(),
+	feared_events: z.string().uuid().array(),
+	risk_origin: z.string(),
+	target_objective: z.string(),
+	motivation: z.number().default(0).optional(),
+	resources: z.number().default(0).optional(),
+	pertinence: z.number().default(0).optional(),
+	activity: z.number().min(0).max(4).optional().default(0),
+	is_selected: z.boolean().optional().default(false),
+	justification: z.string().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
@@ -439,7 +452,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
 	'ebios-rm': ebiosRMSchema,
-	'feared-events': fearedEventsSchema
+	'feared-events': fearedEventsSchema,
+	'ro-to': roToSchema
 };
 
 export const modelSchema = (model: string) => {
