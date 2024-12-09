@@ -110,15 +110,14 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	{#if initialData.ebios_rm_studies}
+	{#if initialData.ebios_rm_study}
 		<AutocompleteSelect
 			{form}
-			field="ebios_rm_studies"
-			multiple
-			cacheLock={cacheLocks['ebios_rm_studies']}
-			bind:cachedValue={formDataCache['ebios_rm_studies']}
-			label={m.ebiosRmStudies()}
-			options={getOptions({ objects: model.foreignKeys['ebios_rm_studies'] })}
+			field="ebios_rm_study"
+			cacheLock={cacheLocks['ebios_rm_study']}
+			bind:cachedValue={formDataCache['ebios_rm_study']}
+			label={m.ebiosRmStudy()}
+			options={getOptions({ objects: model.foreignKeys['ebios_rm_study'] })}
 			hidden
 		/>
 	{/if}
