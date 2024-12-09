@@ -109,7 +109,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         object_ids_view = None
         if self.request.method == "GET":
             if q := re.match(
-                "/api/[\w-]+/([\w-]+/)?([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})+)",
+                r"/api/[\w-]+/([\w-]+/)?([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})+)",
                 self.request.path,
             ):
                 """"get_queryset is called by Django even for an individual object via get_object
