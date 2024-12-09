@@ -11,7 +11,6 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	export let totp;
 	export let _form;
 	export let formAction: string;
 
