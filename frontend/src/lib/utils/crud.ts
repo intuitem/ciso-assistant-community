@@ -664,8 +664,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Attack path',
 		verboseNamePlural: 'Attack paths',
 		foreignKeyFields: [
-			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' }
-			// { field: 'ro_to_couples', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' }
+			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
+			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' }
 		]
 	}
 };
