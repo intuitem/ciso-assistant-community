@@ -652,7 +652,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Stakeholders',
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
-			{ field: 'applied_controls', urlModel: 'applied-controls' }
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
 		],
 		selectFields: [{ field: 'category' }]
 	},
@@ -665,7 +666,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Attack paths',
 		foreignKeyFields: [
 			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
-			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' }
+			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
 		]
 	}
 };
