@@ -8,7 +8,6 @@
 	export let form: SuperForm<Record<string, string>>;
 	export let numOfInputs: number = 6;
 	export let separator = '';
-	export let disableDefaultStyle = false;
 	export let inputClass = '';
 	export let wrapperClass = '';
 	export let separatorClass = '';
@@ -81,7 +80,6 @@
 			index={i}
 			bind:codes
 			{inputs}
-			nostyle={disableDefaultStyle}
 			className={inputClass}
 			style={inputStyle}
 			placeholder={placeholders[i]}
