@@ -77,6 +77,10 @@ class FearedEventViewSet(BaseModelViewSet):
 class RoToViewSet(BaseModelViewSet):
     model = RoTo
 
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
+
     @action(detail=False, name="Get risk origin choices", url_path="risk-origin")
     def risk_origin(self, request):
         return Response(dict(RoTo.RiskOrigin.choices))
