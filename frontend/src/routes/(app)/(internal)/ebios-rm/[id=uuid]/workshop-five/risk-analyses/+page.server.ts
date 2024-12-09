@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const ebiosMatrixRes = await fetch(`${BASE_API_URL}/ebios-rm/studies/${params.id}/risk-matrix/`);
 	const risk_matrix_id = await ebiosMatrixRes.json().then((res) => res.id);
 	const initialData = {
-		ebios_rm_studies: [params.id],
+		ebios_rm_study: params.id,
 		risk_matrix: risk_matrix_id
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
@@ -73,8 +73,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	model['selectOptions'] = selectOptions;
 
 	const endpoint = model.endpointUrl
-		? `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_studies=${params.id}`
-		: `${BASE_API_URL}/${model.urlModel}?ebios_rm_studies=${params.id}`;
+		? `${BASE_API_URL}/${model.endpointUrl}?ebios_rm_study=${params.id}`
+		: `${BASE_API_URL}/${model.urlModel}?ebios_rm_study=${params.id}`;
 	const res = await fetch(endpoint);
 	const data = await res.json().then((res) => res.results);
 
