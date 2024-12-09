@@ -20,7 +20,7 @@
 
 <AutocompleteSelect
 	{form}
-	options={getOptions({ objects: model.foreignKeys['ro_to_couple'] })}
+	options={getOptions({ objects: model.foreignKeys['ro_to_couple'], label: 'str' })}
 	field="ro_to_couple"
 	cacheLock={cacheLocks['ro_to_couple']}
 	bind:cachedValue={formDataCache['ro_to_couple']}
@@ -38,6 +38,7 @@
 	bind:cachedValue={formDataCache['stakeholders']}
 	label={m.stakeholders()}
 />
+
 <Checkbox {form} field="is_selected" label={m.selected()} />
 <TextArea
 	{form}
