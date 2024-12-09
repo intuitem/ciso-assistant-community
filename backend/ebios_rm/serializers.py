@@ -113,7 +113,7 @@ class StakeholderWriteSerializer(BaseModelSerializer):
 
 
 class StakeholderReadSerializer(BaseModelSerializer):
-    name = serializers.CharField(source="__str__")
+    str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()

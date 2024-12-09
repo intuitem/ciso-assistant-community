@@ -31,7 +31,8 @@
 	{form}
 	multiple
 	options={getOptions({
-		objects: model.foreignKeys['stakeholders']
+		objects: model.foreignKeys['stakeholders'],
+		label: 'str'
 	})}
 	field="stakeholders"
 	cacheLock={cacheLocks['stakeholders']}
