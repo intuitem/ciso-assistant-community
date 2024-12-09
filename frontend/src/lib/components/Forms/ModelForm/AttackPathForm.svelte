@@ -31,20 +31,18 @@
 	{form}
 	multiple
 	options={getOptions({
-		objects: model.foreignKeys['threats'],
-		extra_fields: [['folder', 'str']],
-		label: 'auto'
+		objects: model.foreignKeys['stakeholders']
 	})}
-	field="threats"
-	cacheLock={cacheLocks['threats']}
-	bind:cachedValue={formDataCache['threats']}
-	label={m.threats()}
+	field="stakeholders"
+	cacheLock={cacheLocks['stakeholders']}
+	bind:cachedValue={formDataCache['stakeholders']}
+	label={m.stakeholders()}
 />
-<Select
+<Checkbox {form} field="is_selected" label={m.selected()} />
+<TextArea
 	{form}
-	options={model.selectOptions['likelihood']}
-	field="likelihood"
-	label={m.likelihood()}
-	cacheLock={cacheLocks['likelihood']}
-	bind:cachedValue={formDataCache['likelihood']}
+	field="justification"
+	label={m.justification()}
+	cacheLock={cacheLocks['justification']}
+	bind:cachedValue={formDataCache['justification']}
 />
