@@ -653,7 +653,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		],
 		selectFields: [{ field: 'category' }]
 	},
@@ -667,7 +668,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
 			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' },
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
 	}
 };
