@@ -975,5 +975,7 @@
 	"selected": "Selected",
 	"likelihood": "Likelihood",
 	"stakeholders": "Stakeholders",
-	"addAttackPath": "Add attack path"
+	"addAttackPath": "Add attack path",
+	"currentCriticality": "Current criticality",
+	"residualCriticality": "Residual criticality"
 }
