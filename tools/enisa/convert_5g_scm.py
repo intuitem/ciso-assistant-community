@@ -63,7 +63,7 @@ for tab in dataframe:
             (ref_id, description, evidence, _, _, _, domain_id) = (
                 r.value for r in row[0:7]
             )
-            if ref_id and re.match("SO\d+-\d+", ref_id):
+            if ref_id and re.match(r"SO\d+-\d+", ref_id):
                 if domain_id != current_domain_id:
                     current_domain_id = domain_id
                     output_table.append(
