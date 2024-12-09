@@ -579,7 +579,7 @@ export const listViewFields: ListViewFieldsConfig = {
 		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
 	},
 	'attack-paths': {
-		head: ['risk_origin', 'target_objective', 'description', 'threats', 'likelihood'],
-		body: ['risk_origin', 'target_objective', 'description', 'threats', 'likelihood']
+		head: ['risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
+		body: ['risk_origin', 'target_objective', 'stakeholders', 'description']
 	}
 };
