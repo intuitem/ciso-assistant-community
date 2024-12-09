@@ -230,6 +230,9 @@ class RoTo(AbstractBaseModel, FolderMixin):
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
     justification = models.TextField(verbose_name=_("Justification"), blank=True)
 
+    def __str__(self) -> str:
+        return f"{self.get_risk_origin_display()} - {self.target_objective}"
+
     class Meta:
         verbose_name = _("RO/TO couple")
         verbose_name_plural = _("RO/TO couples")
@@ -323,7 +326,7 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         ordering = ["created_at"]
 
     def __str__(self):
-        return f"{self.entity.name} - {self.category}"
+        return f"{self.entity.name} - {self.get_category_display()}"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
