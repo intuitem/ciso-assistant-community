@@ -101,6 +101,10 @@ class RoToViewSet(BaseModelViewSet):
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
 
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
+
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(Stakeholder.Category.choices))
@@ -108,6 +112,10 @@ class StakeholderViewSet(BaseModelViewSet):
 
 class AttackPathViewSet(BaseModelViewSet):
     model = AttackPath
+
+    filterset_fields = [
+        "ebios_rm_study",
+    ]
 
 
 class OperationalScenarioViewSet(BaseModelViewSet):

@@ -103,6 +103,7 @@ export const getOptions = ({
 interface ForeignKeyField {
 	field: string;
 	urlModel: urlModel;
+	endpointUrl?: string;
 	urlParams?: string;
 }
 
@@ -640,6 +641,35 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'motivation', valueType: 'number' },
 			{ field: 'resources', valueType: 'number' },
 			{ field: 'pertinence', valueType: 'number' }
+		]
+	},
+	stakeholders: {
+		endpointUrl: 'ebios-rm/stakeholders',
+		name: 'stakeholder',
+		localName: 'stakeholder',
+		localNamePlural: 'stakeholders',
+		verboseName: 'Stakeholder',
+		verboseNamePlural: 'Stakeholders',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
+		],
+		selectFields: [{ field: 'category' }]
+	},
+	'attack-paths': {
+		endpointUrl: 'ebios-rm/attack-paths',
+		name: 'attackpath',
+		localName: 'attackPath',
+		localNamePlural: 'attackPaths',
+		verboseName: 'Attack path',
+		verboseNamePlural: 'Attack paths',
+		foreignKeyFields: [
+			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
+			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
 	}
 };
