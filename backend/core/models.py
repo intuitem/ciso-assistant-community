@@ -1981,6 +1981,14 @@ class RiskAssessment(Assessment):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
+    ebios_rm_study = models.ForeignKey(
+        "ebios_rm.EbiosRMStudy",
+        verbose_name=_("EBIOS RM study"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="risk_assessments",
+    )
 
     class Meta:
         verbose_name = _("Risk assessment")
