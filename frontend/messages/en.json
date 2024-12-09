@@ -955,6 +955,7 @@
 	"fairlyRelevant": "Fairly relevant",
 	"highlyRelevant": "Highly relevant",
 	"roTo": "RO/TO",
+	"roToCouple": "RO/TO couple",
 	"addRoto": "Add RO/TO couple",
 	"organizedCrime": "Organized crime",
 	"terrorist": "Terrorist",
@@ -973,5 +974,6 @@
 	"residualTrust": "Residual trust",
 	"selected": "Selected",
 	"likelihood": "Likelihood",
-	"stakeholders": "Stakeholders"
+	"stakeholders": "Stakeholders",
+	"addAttackPath": "Add attack path"
 }
