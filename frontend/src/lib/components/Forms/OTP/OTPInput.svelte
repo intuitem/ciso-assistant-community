@@ -8,7 +8,6 @@
 	export let form: SuperForm<Record<string, string>>;
 	export let numOfInputs: number = 6;
 	export let separator = '';
-	export let disableDefaultStyle = false;
 	export let inputClass = '';
 	export let wrapperClass = '';
 	export let separatorClass = '';
@@ -68,11 +67,7 @@
 		{/each}
 	</div>
 {/if}
-<div
-	class={`${disableDefaultStyle ? '' : 'wrapper'} ${wrapperClass}`}
-	style={wrapperStyle}
-	on:keyup={keyUpHandler}
->
+<div class={`wrapper ${wrapperClass}`} style={wrapperStyle} on:keyup={keyUpHandler}>
 	{#each codes as value, i (i)}
 		<OTPItem
 			num={numberOnly}
@@ -81,7 +76,6 @@
 			index={i}
 			bind:codes
 			{inputs}
-			nostyle={disableDefaultStyle}
 			className={inputClass}
 			style={inputStyle}
 			placeholder={placeholders[i]}

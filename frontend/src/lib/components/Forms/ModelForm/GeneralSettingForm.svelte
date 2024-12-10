@@ -1,12 +1,13 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import * as m from '$paraglide/messages';
+	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { SuperForm } from 'sveltekit-superforms';
 
-	export let form: SuperValidated<any>;
+	export let form: SuperForm<any>;
 	export let model: ModelInfo;
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
-	export let data: any = {};
 </script>
 
 <Select
