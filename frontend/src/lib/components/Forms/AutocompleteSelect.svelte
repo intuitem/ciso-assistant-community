@@ -29,7 +29,6 @@
 		resolve: (x) => x
 	};
 	export let cachedValue: any[] | undefined = undefined;
-	export let createFromSelection = false;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 

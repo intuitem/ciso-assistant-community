@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	export let data: PageData;
 	import TimeSeriesChart from '$lib/components/Chart/TimeSeriesChart.svelte';
 </script>
 
