@@ -619,7 +619,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Feared event',
 		verboseNamePlural: 'Feared events',
 		foreignKeyFields: [
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
@@ -633,8 +633,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Ro to',
 		verboseNamePlural: 'Ro to',
 		foreignKeyFields: [
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
-			{ field: 'feared_events', urlModel: 'feared-events' }
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
+			{ field: 'feared_events', urlModel: 'feared-events', endpointUrl: 'ebios-rm/feared-events' }
 		],
 		selectFields: [
 			{ field: 'risk-origin' },
@@ -653,7 +653,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		],
 		selectFields: [{ field: 'category' }]
@@ -668,7 +668,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'stakeholders', urlModel: 'stakeholders', endpointUrl: 'ebios-rm/stakeholders' },
 			{ field: 'ro_to_couple', urlModel: 'ro-to', endpointUrl: 'ebios-rm/ro-to' },
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
+			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' }
 		]
 	}
