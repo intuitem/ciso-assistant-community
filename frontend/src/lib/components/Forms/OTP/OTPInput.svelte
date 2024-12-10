@@ -67,11 +67,7 @@
 		{/each}
 	</div>
 {/if}
-<div
-	class={`${disableDefaultStyle ? '' : 'wrapper'} ${wrapperClass}`}
-	style={wrapperStyle}
-	on:keyup={keyUpHandler}
->
+<div class={`wrapper ${wrapperClass}`} style={wrapperStyle} on:keyup={keyUpHandler}>
 	{#each codes as value, i (i)}
 		<OTPItem
 			num={numberOnly}
