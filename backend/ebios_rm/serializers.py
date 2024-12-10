@@ -159,6 +159,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     attack_paths = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
+    likelihood = serializers.JSONField(source="get_likelihood_display")
 
     class Meta:
         model = OperationalScenario
