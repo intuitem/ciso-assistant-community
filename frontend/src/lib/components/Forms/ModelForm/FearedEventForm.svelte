@@ -13,7 +13,6 @@
 	export let cacheLocks: Record<string, CacheLock> = {};
 	export let formDataCache: Record<string, any> = {};
 	export let initialData: Record<string, any> = {};
-	export let context: string;
 </script>
 
 <AutocompleteSelect
