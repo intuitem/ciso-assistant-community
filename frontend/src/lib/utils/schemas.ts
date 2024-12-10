@@ -464,16 +464,6 @@ export const operationalScenarioSchema = z.object({
 	justification: z.string().optional()
 });
 
-export const operationalScenarioSchema = z.object({
-	ebios_rm_study: z.string(),
-	attack_paths: z.string().uuid().array(),
-	threats: z.string().uuid().optional().array(),
-	description: z.string(),
-	likelihood: z.number().optional().default(-1),
-	is_selected: z.boolean().optional().default(false),
-	justification: z.string().optional()
-});
-
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
