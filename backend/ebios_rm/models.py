@@ -387,6 +387,9 @@ class AttackPath(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Attack paths")
         ordering = ["created_at"]
 
+    def __str__(self):
+        return f"{self.ro_to_couple} - {self.description}"
+
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
@@ -426,3 +429,25 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+
+    @property
+    def risk_matrix(self):
+        return self.ebios_rm_study.risk_matrix
+
+    @property
+    def parsed_matrix(self):
+        return self.risk_matrix.parse_json_translated()
+
+    def get_likelihood_display(self):
+        if self.likelihood < 0:
+            return {
+                "abbreviation": "--",
+                "name": "--",
+                "description": "not rated",
+                "value": -1,
+            }
+        risk_matrix = self.parsed_matrix
+        return {
+            **risk_matrix["probability"][self.likelihood],
+            "value": self.likelihood,
+        }
