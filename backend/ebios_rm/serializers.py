@@ -139,6 +139,8 @@ class AttackPathReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
     stakeholders = FieldsRelatedField(many=True)
+    risk_origin = serializers.CharField(source="ro_to_couple.get_risk_origin_display")
+    target_objective = serializers.CharField(source="ro_to_couple.target_objective")
 
     class Meta:
         model = AttackPath

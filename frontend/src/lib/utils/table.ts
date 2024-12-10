@@ -591,5 +591,13 @@ export const listViewFields: ListViewFieldsConfig = {
 			'feared_events',
 			'pertinence'
 		]
+	},
+	stakeholders: {
+		head: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality'],
+		body: ['entity', 'category', 'current_criticality', 'applied_controls', 'residual_criticality']
+	},
+	'attack-paths': {
+		head: ['risk_origin', 'target_objective', 'stakeholders', 'attackPath'],
+		body: ['risk_origin', 'target_objective', 'stakeholders', 'description']
 	}
 };
