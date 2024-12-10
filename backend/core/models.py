@@ -1587,10 +1587,9 @@ class Asset(
 
             parts = []
             if hours > 0:
-                parts.append(f"{hours:02d}h")
-                if minutes > 0:
-                    parts.append(f"{minutes:02d}m")
-
+                parts.append(f"{hours}h")
+            if minutes > 0:
+                parts.append(f"{minutes:02d}m")
             if secs > 0 or (
                 not parts
             ):  # Always show seconds if no other parts, or if > 0
