@@ -4,9 +4,7 @@
 	export let width = 'w-auto';
 	export let height = 'h-full';
 	export let classesContainer = '';
-	export let title = '';
 	export let name = '';
-	export let timeseries = [];
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
